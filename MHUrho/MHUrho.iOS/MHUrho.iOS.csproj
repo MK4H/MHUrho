@@ -145,9 +145,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MHUrhoStandard">
-      <HintPath>..\MHUrhoStandard\bin\Debug\netstandard2.0\MHUrhoStandard.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -155,6 +152,12 @@
       <HintPath>..\..\packages\UrhoSharp.1.5.22\lib\Xamarin.iOS10\Urho.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.iOS" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MHUrho\MHUrho.csproj">
+      <Project>{054fd144-14a7-4596-b205-8fbca2d83cbb}</Project>
+      <Name>MHUrho</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

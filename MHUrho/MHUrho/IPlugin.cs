@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MHUrhoStandard
+namespace MHUrho
 {
     public interface IPlugin
     {

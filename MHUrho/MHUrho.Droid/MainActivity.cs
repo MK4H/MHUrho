@@ -6,12 +6,12 @@ using Android.OS;
 using Org.Libsdl.App;
 using Urho;
 using Urho.Droid;
-using Urho.IO;
-using MHUrhoStandard;
+using MHUrho;
 using Android.Runtime;
 using System;
 using System.Collections.Generic;
-using Java.IO;
+using System.Diagnostics;
+using System.IO;
 
 namespace MHUrho.Droid
 {
@@ -43,10 +43,9 @@ namespace MHUrho.Droid
             layout.AddView(surface);
             SetContentView(layout);
 
-            MyGame.Config = ConfigManager.LoadConfig(Assets);
-            MyGame.StartupData = new StartupDataProvider(Assets);
+            MyGame.Config = ConfigManagerDroid.LoadConfig(Assets);
 
-            var files = Assets.List("Data");
+            MyGame.Config.CopyStaticToDynamic("Data/Test");
 
             myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));
             //to stop the game use await surface.Stop().

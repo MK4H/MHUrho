@@ -13,7 +13,7 @@ using Urho.IO;
 using Urho.Resources;
 using FileMode = System.IO.FileMode;
 
-namespace MHUrhoStandard
+namespace MHUrho
 {
     /// <summary>
     /// ResourceCache wrapper providing loading, unloading and downloading of ResourcePacks
@@ -29,7 +29,7 @@ namespace MHUrhoStandard
 
         private readonly List<ResourcePack> availablePacks = new List<ResourcePack>();
 
-        public AssetManager(ResourceCache cache, IStartupDataProvider startupData, IEnumerable<string> resourcePackPaths)
+        public AssetManager(ResourceCache cache, ConfigManager config)
         {
             this.cache = cache;
 
@@ -37,7 +37,7 @@ namespace MHUrhoStandard
             try
             {
 
-                schema.Add("http://www.MobileHold.cz/ResourcePack.xsd", XmlReader.Create(startupData.GetFile(ResPacDirSchemaPath)));
+                schema.Add("http://www.MobileHold.cz/ResourcePack.xsd", XmlReader.Create(config.GetStaticFileRO(ResPacDirSchemaPath)));
             }
             catch (IOException e)
             {
@@ -47,7 +47,7 @@ namespace MHUrhoStandard
                 //TODO: Error reading static data of app
             }
            
-            foreach (var path in resourcePackPaths)
+            foreach (var path in config.PackagePaths)
             {
                 ParseResourcePackDir(path, schema);
             }

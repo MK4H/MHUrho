@@ -11,12 +11,11 @@ using Urho.IO;
 using System.IO;
 using System.Reflection;
 
-namespace MHUrhoStandard
+namespace MHUrho
 {
     public class MyGame : Application
     {
-        public static IStartupDataProvider StartupData;
-        public static IConfigManager Config;
+        public static ConfigManager Config;
 
         [Preserve]
         public MyGame(ApplicationOptions opts) : base(opts) { }
@@ -34,8 +33,6 @@ namespace MHUrhoStandard
 
         protected override void Start()
         {
-            StartupData.Init(FileSystem);
-
             CreateScene();
 
             // Subscribe to Esc key:
@@ -53,7 +50,7 @@ namespace MHUrhoStandard
             helloText.SetFont(font: ResourceCache.GetFont("Fonts/Font.ttf"), size: 30);
             UI.Root.AddChild(helloText);
 
-            var assetManager = new AssetManager(ResourceCache, StartupData, Config.PackagePaths);
+            var assetManager = new AssetManager(ResourceCache, Config);
             
 
             // 3D scene with Octree

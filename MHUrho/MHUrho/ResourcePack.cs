@@ -4,7 +4,7 @@ using System.Text;
 using Urho;
 using Urho.Resources;
 
-namespace MHUrhoStandard
+namespace MHUrho
 {
     internal class ResourcePack
     {
