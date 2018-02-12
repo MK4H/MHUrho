@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ResourcePackDirectory"
+    targetNamespace="http://www.MobileHold.cz/ResourcePack.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://www.MobileHold.cz/ResourcePack.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="resourcePackDirectory">
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="resourcePack" type="resourcePackBase"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="resourcePack" type="resourcePackFull"/>
+    
+  
+  <xs:complexType name="resourcePackBase">
+    <xs:all>
+      <xs:element name="pathToXml" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
+    </xs:all>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="resourcePackFull">
+    <xs:complexContent>
+      <xs:extension base="resourcePackBase">
+        <!--TODO: resource pack full-->
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

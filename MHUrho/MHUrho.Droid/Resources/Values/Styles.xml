@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+  <style name="MyTheme" parent="@android:Theme.NoTitleBar.Fullscreen">
+    <item name="android:windowActionBar">false</item>
+  </style>
+</resources>
