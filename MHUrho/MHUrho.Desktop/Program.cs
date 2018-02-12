@@ -8,12 +8,10 @@ namespace MHUrho.Desktop
 {
     class Program
     {
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
 
-
+            MyGame.Config = ConfigManagerDesktop.LoadConfig();
         
-
             new MyGame(new ApplicationOptions("Data")).Run();
         }
     }

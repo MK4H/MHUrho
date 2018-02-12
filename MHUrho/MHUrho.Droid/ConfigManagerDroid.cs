@@ -27,13 +27,21 @@ namespace MHUrho.Droid {
         public override Stream GetDynamicFile(string relativePath) {
             Java.IO.File file = new Java.IO.File(Path.Combine(DynamicFilePath, relativePath));
             if (file.Exists()) {
-                return new FileStream(file.AbsolutePath, FileMode.Open, FileAccess.ReadWrite);
+                if (file.IsFile) {
+                    return new FileStream(file.AbsolutePath, FileMode.Open, FileAccess.ReadWrite);
+                }
+              
+                throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}"); 
             }
 
             file = new Java.IO.File(Path.Combine(StaticFilePath, relativePath));
             if (file.Exists()) {
-                CopyStaticToDynamic(relativePath);
-                return new FileStream(Path.Combine(DynamicFilePath, relativePath), FileMode.Open, FileAccess.ReadWrite);
+                if (file.IsFile) {
+                    CopyStaticToDynamic(relativePath);
+                    return new FileStream(Path.Combine(DynamicFilePath, relativePath), FileMode.Open, FileAccess.ReadWrite);
+                }
+
+                throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}");
             }
 
             throw new System.IO.FileNotFoundException("File was not found in dynamic nor in static files",
@@ -69,10 +77,12 @@ namespace MHUrho.Droid {
 
         public static ConfigManagerDroid LoadConfig(AssetManager assetManager) {
             //TODO: Load config files
-            return new ConfigManagerDroid(new List<string>()
+            return new ConfigManagerDroid(
+                new List<string>()
                 {
-                    Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Packages")
-                },assetManager);
+                    Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
+                },
+                assetManager);
         }
 
         protected ConfigManagerDroid(List<string> packagePaths, AssetManager assetManager)

@@ -27,11 +27,14 @@ namespace MHUrho
 
         private readonly ResourceCache cache;
 
+        private readonly ConfigManager configManager;
+
         private readonly List<ResourcePack> availablePacks = new List<ResourcePack>();
 
         public AssetManager(ResourceCache cache, ConfigManager config)
         {
             this.cache = cache;
+            this.configManager = config;
 
             var schema = new XmlSchemaSet();
             try
@@ -66,7 +69,7 @@ namespace MHUrho
 
             try
             {
-                XDocument doc = XDocument.Load(new FileStream(path, FileMode.Open, FileAccess.Read));
+                XDocument doc = XDocument.Load(configManager.GetDynamicFile(path));
                 doc.Validate(schema, null);
 
                 loadedPacks = from packages in doc.Root.Elements("resourcePack")

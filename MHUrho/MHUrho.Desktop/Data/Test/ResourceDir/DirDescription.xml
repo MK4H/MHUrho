@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resourcePackDirectory xmlns="http://www.MobileHold.cz/ResourcePack.xsd">
+  <resourcePack name="Test1ResourcePack">
+    <description>Test description of resoure pack TEST1</description>
+    <pathToXml>TEST1RP/rpdescription.xml</pathToXml>
+  </resourcePack>
+  <resourcePack name="Test2ResourcePack">
+    <pathToXml>TEST2RP/rpdescription.xml</pathToXml>
+  </resourcePack>
+
+</resourcePackDirectory>
