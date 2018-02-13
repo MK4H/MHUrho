@@ -1,0 +1,276 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+
+
+namespace MHUrho
+{
+    public class Unit : ISelectable
+    {
+        #region Public members
+
+        /// <summary>
+        /// For message identification
+        /// </summary>
+        public int ID { get; private set; }
+
+        public UnitType Type { get; private set;}
+
+        /// <summary>
+        /// Position in the level
+        /// </summary>
+        public Vector2 Position { get; private set; }
+
+        /// <summary>
+        /// Tile this unit is standing on
+        /// TODO: Maybe include all the tiles this unit touches, which may be up to 4 tiles
+        /// </summary>
+        public Tile Tile { get; private set; }
+
+        /// <summary>
+        /// Level this unit is in
+        /// </summary>
+        public LogicManager Level { get; private set; }
+
+        /// <summary>
+        /// Player owning this unit
+        /// </summary>
+        public Player Player { get; private set; }
+
+        #endregion
+
+        #region Private members
+        
+        /// <summary>
+        /// Flag to prevent double selection
+        /// </summary>
+        bool Selected;
+
+        //TEMPORARY
+        public bool IsSelected { get { return Selected; } }
+
+
+        /// <summary>
+        /// Current path this unit is following
+        /// </summary>
+        Path Path;
+
+        /// <summary>
+        /// Current target this unit is trying to attack
+        /// </summary>
+        Unit Target;
+
+        #endregion
+
+        #region Public methods
+        /// <summary>
+        /// Updates the unit, moves it according to the time since the last tick
+        /// </summary>
+        /// <param name="gameTime">The real time since the last update</param>
+        public void Update(TimeSpan gameTime)
+        {
+            if (Path != null)
+            {
+                if (Target != null && Target.Tile != Path.Target)
+                {
+                    Order(Target);
+                }
+                MoveAlongThePath((float)gameTime.TotalSeconds);
+            }
+            // if no path, then stay in the middle of the tile
+            else if (!AmInTheMiddle())
+            {
+                MoveToMiddle((float)gameTime.TotalSeconds);
+            }
+        }
+
+        /// <summary>
+        /// Tries to select the unit, if not selected sets selected, if selected does nothing
+        /// </summary>
+        /// <returns>true if unit was not selected, false if unit was selected</returns>
+        public bool Select()
+        {
+            //TODO: More processing
+            if (!Selected)
+            {
+                Selected = true;
+                return true;
+            }
+            return false;
+        }
+
+        public bool Order(Tile tile)
+        {
+            Path = Level.GetPath(this,tile);
+            if (Path == null)
+            {
+                return false;
+            }
+            Path.MoveNext();
+            Tile.RemoveUnit(this);
+            Tile.AddPassingUnit(this);
+            return true;
+        }
+
+        // TODO: differentiate between Meele and range units
+        public bool Order(Unit unit)
+        {
+            // JUST MEELE UNITS FOR NOW
+            if (unit.Player == Player)
+            {
+                throw new ArgumentException("Attacking my own units");
+            }
+
+            Target = unit;
+            // TODO: Maybe calculate where they will meet and pathfind there
+            Path NewPath = Level.GetPath(this, unit.Tile);
+            if (NewPath == null)
+            {
+                return false;
+            }
+
+            Path.MoveNext();
+            Tile.RemoveUnit(this);
+            Tile.AddPassingUnit(this);
+            return true;
+        }
+
+        public void Deselect()
+        {
+            Selected = false;
+        }
+        //TODO: Link CanPass to TileType loaded from XML description
+        //TODO: Load Passable terrain types from XML unit description
+        public bool CanPass(Tile tile)
+        {
+            //TODO: This
+            return true;
+        }
+
+        /// <summary>
+        /// Gets units movements speed while moving through the tile
+        /// </summary>
+        /// <param name="tile">the tile on which the returned movementspeed applies</param>
+        /// <returns>movement in tiles per second</returns>
+        public float MovementSpeed(Tile tile) {
+            //TODO: Route this through UnitType
+            return tile.MovementSpeedModifier;
+        }
+
+        #endregion
+
+        #region Constructors
+        public Unit(Tile tile, LogicManager level, Player player)
+        {
+            this.Level = level;
+            this.Tile = tile;
+            this.Position = tile.Center;
+            this.Player = player;
+            MovementSpeed = 2;
+            Selected = false;
+        }
+
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Moves unit to the middle of the Tile in Tile property
+        /// </summary>
+        /// <param name="elapsedSeconds"></param>
+        void MoveToMiddle(float elapsedSeconds)
+        {
+            Vector2 NewPosition = Position + GetMoveVector(Tile.Center, elapsedSeconds);
+            if (Vector2.DistanceSquared(Position,Tile.Center) < Vector2.DistanceSquared(Position, NewPosition))
+            {
+                Position = Tile.Center;
+            }
+            else
+            {
+                Position = NewPosition;
+            }
+        }
+
+        /// <summary>
+        /// Moves unit towars the Tile that is next on the path
+        /// </summary>
+        /// <param name="elapsedSeconds"></param>
+        void MoveAlongThePath(float elapsedSeconds)
+        {
+            if (Path.Current == Tile.Location && AmInTheMiddle())
+            {
+                if (!Path.MoveNext())
+                {
+                    Path = null;
+                }
+                else
+                {
+                    //TODO: Make the path return the exact points which the unit should pass
+                    MoveTowards(new Vector2(Path.Current.X + 0.5f, Path.Current.Y + 0.5f), elapsedSeconds);
+                }
+            }
+            else if (Path.Current == Tile.Location)
+            {
+                MoveToMiddle(elapsedSeconds);
+            }
+            else
+            {
+                MoveTowards(new Vector2(Path.Current.X + 0.5f, Path.Current.Y + 0.5f), elapsedSeconds);
+            }
+        }
+
+        /// <summary>
+        /// Moves unit towards the destination vector
+        /// </summary>
+        /// <param name="destination"></param>
+        /// <param name="elapsedSeconds"></param>
+        void MoveTowards(Vector2 destination, float elapsedSeconds)
+        {
+            Position += GetMoveVector(destination, elapsedSeconds);
+            Point TileIndex = new Point((int)Position.X, (int)Position.Y);
+            if (TileIndex == Path.Current)
+            {
+                Tile NewTile = Level.TryMoveUnitThroughTileAt(this, TileIndex);
+                if (NewTile == null)
+                {
+                    Order(Path.Target);
+                }
+                else
+                {
+                    Tile = NewTile;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calculates by how much should the unit move
+        /// </summary>
+        /// <param name="destination">The point in space that the unit is trying to get to</param>
+        /// <param name="elapsedSeconds"> How many seconds passed since the last update</param>
+        /// <returns></returns>
+        Vector2 GetMoveVector(Vector2 destination, float elapsedSeconds)
+        {
+            Vector2 MovementDirection = destination - Position;
+            MovementDirection.Normalize();
+            return MovementDirection * MovementSpeed * Level.GameSpeed * elapsedSeconds;
+        }
+
+        /// <summary>
+        /// Radius of the circle around the middle that counts as the middle
+        /// For float rounding errors
+        /// </summary>
+        const float Tolerance = 0.1f;
+        /// <summary>
+        /// Checks if the unit is in the middle of the current tile
+        /// </summary>
+        /// <returns></returns>
+        bool AmInTheMiddle()
+        {
+            return Vector2.Distance(Tile.Center, Position) < Tolerance;
+        }
+
+        
+        #endregion
+    }
+}

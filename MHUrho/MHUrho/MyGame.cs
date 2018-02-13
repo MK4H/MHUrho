@@ -39,8 +39,8 @@ namespace MHUrho
             Input.SubscribeToKeyDown(args => { if (args.Key == Key.Esc) Exit(); });
         }
 
-        async void CreateScene()
-        {
+        async void CreateScene() {
+
             // UI text 
             var helloText = new Text(Context);
             helloText.Value = "Hello World from UrhoSharp";
