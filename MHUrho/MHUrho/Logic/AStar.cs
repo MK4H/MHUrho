@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 
 using Urho;
-using MHUrho.Helpers;
 using MHUrho.Logic;
 using Priority_Queue;
 
@@ -14,18 +13,18 @@ namespace MHUrho
 {
     class AStar : IPathFindAlg
     {
-        private Map map;
+        private readonly Map map;
         
 
-        enum NodeState { Opened, Closed };
+        private enum NodeState { Opened, Closed };
 
-        class Node : FastPriorityQueueNode
+        private class Node : FastPriorityQueueNode
         {
-            private Point position;
+            private IntVector2 position;
 
             public NodeState State { get; set; }
 
-            public Point Position => position;
+            public IntVector2 Position => position;
             
             /// <summary>
             /// COPIES Position with new X coordinate
@@ -37,7 +36,7 @@ namespace MHUrho
                 }
                 set
                 {
-                    position = new Point(value, position.Y);
+                    position = new IntVector2(value, position.Y);
                 }
             }
            
@@ -51,7 +50,7 @@ namespace MHUrho
                 }
                 set
                 {
-                    position = new Point(position.X, value);
+                    position = new IntVector2(position.X, value);
                 }
             }
 
@@ -76,6 +75,7 @@ namespace MHUrho
 
             private static readonly float half = 1f / 2;
 
+
             /// <summary>
             /// Tests if the distance through the new Previous Node is less than
             /// the old distance, if true, then sets Distance and PreviousNode
@@ -84,6 +84,9 @@ namespace MHUrho
             /// <param name="unit">Unit for which the path is calculated, for speed calculation</param>
             /// <returns>true if the new distance is lower and was set, false if not and was not</returns>
             public bool TestAndSetDistance(Node newPreviousNode) {
+                
+                //Little optimization, because there are only two possible distances, either 1 or sqrt(2), 
+                // and i always need only half of this distance, i just have two constants from which i choose
                 float halfRawDistance =
                     (position.X == newPreviousNode.position.X || position.Y == newPreviousNode.position.Y) ? half : fsqrt2d2;
                 float newDistance =
@@ -98,14 +101,14 @@ namespace MHUrho
                 return true;
             }
 
-#if DEBUG
+
             public override string ToString()
             {
                 return string.Format("X={0}, Y={1}, Dist={2}, Heur={3}", X, Y, Distance,Heuristic);
             }
-#endif
+
             public Node(
-                Point position,
+                IntVector2 position,
                 Node previousNode,
                 Tile tile,
                 float heuristic,
@@ -132,18 +135,19 @@ namespace MHUrho
             }
 
         }
+        
         /// <summary>
         /// Finds the fastest path through the map from units current possition to target
         /// </summary>
         /// <param name="unit">The unit to find the path for, used for checking speed through tile types</param>
         /// <param name="target">Target coordinates</param>
-        /// <returns>List of points the unit should pass through</returns>
-        public List<Point> FindPath( Unit unit, Point target)
+        /// <returns>List of IntVector2s the unit should pass through</returns>
+        public List<IntVector2> FindPath( Unit unit, IntVector2 target)
         {
             
             FastPriorityQueue<Node> PQueue = new FastPriorityQueue<Node>(32);
-            Dictionary<Point, Node> TouchedNodes = new Dictionary<Point, Node>();
-            Point Start = unit.Tile.Location;
+            Dictionary<IntVector2, Node> TouchedNodes = new Dictionary<IntVector2, Node>();
+            IntVector2 Start = unit.Tile.Location;
 
             // Enque the starting node
             PQueue.Enqueue(
@@ -188,11 +192,11 @@ namespace MHUrho
         /// <param name="sourceNode">center of the square from which tiles are taken</param>
         /// <param name="target">Coordinates of the target</param>
         /// <param name="unit">The unit going through the path, needed for speed calculation through different tile types</param>
-        void AddNeighbours(
+        private void AddNeighbours(
             FastPriorityQueue<Node> queue, 
-            Dictionary<Point, Node> touchedNodes,
+            Dictionary<IntVector2, Node> touchedNodes,
             Node sourceNode,
-            Point target,
+            IntVector2 target,
             Unit unit)
         {
             for (int dx = -1; dx < 2; dx++)
@@ -203,7 +207,7 @@ namespace MHUrho
                     if (dx == 0 && dy == 0)
                         continue;
 
-                    Point newPosition = new Point(sourceNode.X + dx, sourceNode.Y + dy);
+                    IntVector2 newPosition = new IntVector2(sourceNode.X + dx, sourceNode.Y + dy);
                     
                     //Check map boundaries
                     if (!map.IsInside(newPosition)) {
@@ -247,6 +251,9 @@ namespace MHUrho
                         {
                             //Unit can pass through this tile, enqueue it
                             Node newNode = new Node(newPosition, sourceNode, newTile, heuristic,unit);
+                            if (queue.Count == queue.MaxSize) {
+                                queue.Resize(queue.MaxSize * 2);
+                            }
                             queue.Enqueue(newNode, newNode.Distance + newNode.Heuristic);
                             touchedNodes.Add(newNode.Position, newNode);
                         }
@@ -255,9 +262,9 @@ namespace MHUrho
             }
         }
        
-        float Heuristic(Point srcPoint, Point target)
+        float Heuristic(IntVector2 srcPoint, IntVector2 target)
         {
-            return Point.Distance(ref srcPoint, ref target);
+            return IntVector2.Distance(srcPoint,target);
         }
 
         /// <summary>
@@ -265,9 +272,9 @@ namespace MHUrho
         /// </summary>
         /// <param name="target">Last Node of the path</param>
         /// <returns>Path in correct order, from first point to the last point</returns>
-        List<Point> MakePath(Node target)
+        List<IntVector2> MakePath(Node target)
         {
-            List<Point> reversePath = new List<Point>();
+            List<IntVector2> reversePath = new List<IntVector2>();
             while (target.PreviousNode != null)
             {
                 reversePath.Add(target.Position);
@@ -278,10 +285,7 @@ namespace MHUrho
             return reversePath;
         }
 
-        public List<Point> FindPath(Unit unit, List<Point> targets )
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public AStar(Map map)
         {

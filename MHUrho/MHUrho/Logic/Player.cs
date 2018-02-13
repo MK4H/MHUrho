@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Urho;
 
 
 namespace MHUrho
@@ -10,7 +11,7 @@ namespace MHUrho
     {
         class LineOrder
         {
-            Point MovePoint, End1, End2, Delta;
+            IntVector2 MovePoint, End1, End2, Delta;
             bool Finished,OneEndHit;
             Player Player;
             public bool OrderNext(ref int toOrder)
@@ -36,7 +37,7 @@ namespace MHUrho
 
                     if (!Player.Level.IsInsideMap(MovePoint))
                     {
-                        PointHelper.Add(MovePoint, Delta, out MovePoint);
+                        IntVector2.Add(ref MovePoint,ref Delta, out MovePoint);
                         Delta.X = -(Delta.X + 1);
                         Delta.Y = -(Delta.Y + 1);
                         continue;
@@ -48,7 +49,7 @@ namespace MHUrho
                     }
 
                     
-                    PointHelper.Add(MovePoint,Delta,out MovePoint);
+                    IntVector2.Add(ref MovePoint,ref Delta,out MovePoint);
                     if (Delta.X != 0)
                     {
                         Delta.X = -(Delta.X + 1);
@@ -63,25 +64,25 @@ namespace MHUrho
                 return false;
             }
 
-            public LineOrder(Point end1, Point end2, Player player)
+            public LineOrder(IntVector2 end1, IntVector2 end2, Player player)
             {
                 End1 = end1;
                 End2 = end2;
                 Player = player;
                 if (end1.X == end2.X)
                 {
-                    Delta = new Point(0, 1);
+                    Delta = new IntVector2(0, 1);
                 }
                 else if (end1.Y == end2.Y)
                 {
-                    Delta = new Point(1, 0);
+                    Delta = new IntVector2(1, 0);
                 }
                 else
                 {
                     throw new ArgumentException("Directions other than horizontal and vertical not supported");
                 }
                 // Center of the line
-                MovePoint = new Point(
+                MovePoint = new IntVector2(
                         Math.Min(end2.X, end1.X) + Math.Abs(end2.X - end1.X) / 2,
                         Math.Min(end2.Y, end1.Y) + Math.Abs(end2.Y - end1.Y) / 2);
             }
@@ -208,23 +209,23 @@ namespace MHUrho
                 return false;
             }
 
-            Point TopLeft = tile.Location;
-            Point BottomRight = tile.Location;
-            Point MoveBy = new Point(1, 1);
+            IntVector2 TopLeft = tile.Location;
+            IntVector2 BottomRight = tile.Location;
+            IntVector2 MoveBy = new IntVector2(1, 1);
             List <LineOrder> LineOrders = new List<LineOrder>(4);
             while (ToOrder < Selected.Count)
             {
                 // New Rectangle
-                PointHelper.Sub(TopLeft,MoveBy,out TopLeft);
-                PointHelper.Add(BottomRight,MoveBy, out BottomRight);
+                IntVector2.Subtract(ref TopLeft,ref MoveBy,out TopLeft);
+                IntVector2.Add(ref BottomRight,ref MoveBy, out BottomRight);
                 // Top
-                LineOrders.Add(new LineOrder(TopLeft, new Point(BottomRight.X,TopLeft.Y),this));
+                LineOrders.Add(new LineOrder(TopLeft, new IntVector2(BottomRight.X,TopLeft.Y),this));
                 // Right without the two corners 
-                LineOrders.Add(new LineOrder(new Point(BottomRight.X, TopLeft.Y + 1), new Point(BottomRight.X,BottomRight.Y - 1), this));
+                LineOrders.Add(new LineOrder(new IntVector2(BottomRight.X, TopLeft.Y + 1), new IntVector2(BottomRight.X,BottomRight.Y - 1), this));
                 // Bottom
-                LineOrders.Add(new LineOrder(BottomRight, new Point(TopLeft.X,BottomRight.Y), this));
+                LineOrders.Add(new LineOrder(BottomRight, new IntVector2(TopLeft.X,BottomRight.Y), this));
                 // Left without the two corners
-                LineOrders.Add(new LineOrder(new Point(TopLeft.X, BottomRight.Y - 1), new Point(TopLeft.X,TopLeft.Y + 1), this));
+                LineOrders.Add(new LineOrder(new IntVector2(TopLeft.X, BottomRight.Y - 1), new IntVector2(TopLeft.X,TopLeft.Y + 1), this));
 
                 // Spawn all the lines
                 int i = 0;

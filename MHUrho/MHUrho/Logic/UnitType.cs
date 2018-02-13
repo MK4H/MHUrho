@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-
+using Urho;
 
 namespace MHUrho
 {
@@ -14,7 +14,7 @@ namespace MHUrho
 
 
         //TODO: More loaded properties
-        MeshComponent model;
+        Model model;
 
         public bool CanPass(string tileType)
         {

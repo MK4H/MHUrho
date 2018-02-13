@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MHUrho.Helpers;
 using Urho;
 
 namespace MHUrho
@@ -46,7 +45,7 @@ namespace MHUrho
         /// <summary>
         /// The area in the map this tile represents
         /// </summary>
-        public Rectangle MapArea { get; private set; }
+        public IntRect MapArea { get; private set; }
 
         /// <summary>
         /// X index in the Map array
@@ -60,7 +59,7 @@ namespace MHUrho
         /// <summary>
         /// Location in the Map matrix
         /// </summary>
-        public Point Location { get { return MapArea.Location; } }
+        public IntVector2 Location { get { return new IntVector2(MapArea.Left,MapArea.Top); } }
 
         public Vector2 Center { get { return new Vector2(Location.X + 0.5f, Location.Y + 0.5f); } }
 
@@ -132,7 +131,7 @@ namespace MHUrho
         public Tile(LogicManager level, int x, int y)
         {
             this.Level = level;
-            MapArea = new Rectangle(x, y, 1, 1);
+            MapArea = new IntRect(x, y, 1, 1);
             MovementSpeedModifier = 2;
             PassingUnits = new List<Unit>();
         }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Urho;
 
 
 namespace MHUrho
@@ -182,7 +182,7 @@ namespace MHUrho
         void MoveToMiddle(float elapsedSeconds)
         {
             Vector2 NewPosition = Position + GetMoveVector(Tile.Center, elapsedSeconds);
-            if (Vector2.DistanceSquared(Position,Tile.Center) < Vector2.DistanceSquared(Position, NewPosition))
+            if (Vector2.Subtract(Position,Tile.Center).LengthSquared < Vector2.Subtract(Position, NewPosition).LengthSquared)
             {
                 Position = Tile.Center;
             }
@@ -228,7 +228,7 @@ namespace MHUrho
         void MoveTowards(Vector2 destination, float elapsedSeconds)
         {
             Position += GetMoveVector(destination, elapsedSeconds);
-            Point TileIndex = new Point((int)Position.X, (int)Position.Y);
+            IntVector2 TileIndex = new IntVector2((int)Position.X, (int)Position.Y);
             if (TileIndex == Path.Current)
             {
                 Tile NewTile = Level.TryMoveUnitThroughTileAt(this, TileIndex);

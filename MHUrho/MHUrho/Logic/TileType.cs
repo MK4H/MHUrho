@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Urho;
 
 namespace MHUrho
 {
@@ -20,7 +21,7 @@ namespace MHUrho
 
         public float MovementSpeedModifier { get; private set; }
 
-        public Texture2D Texture { get; private set; }
+        public Texture3D Texture { get; private set; }
 
         public string Name { get; set; }
 

@@ -51,7 +51,6 @@ namespace MHUrho
             UI.Root.AddChild(helloText);
 
             var assetManager = new AssetManager(ResourceCache, Config);
-            
 
             // 3D scene with Octree
             var scene = new Scene(Context);

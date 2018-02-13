@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MHUrho.Helpers;
+using Urho;
 
 namespace MHUrho.Logic
 {
@@ -34,7 +34,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="point">the point to check</param>
         /// <returns>True if it is inside, False if not</returns>
-        public bool IsInside(Point point) {
+        public bool IsInside(IntVector2 point) {
             return point.X >= Left && point.X <= Right && point.Y >= Top && point.Y <= Bottom;
         }
 
@@ -53,7 +53,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="coordinates"></param>
         /// <returns>the tile at [X,Y]</returns>
-        public Tile GetTile(Point coordinates) {
+        public Tile GetTile(IntVector2 coordinates) {
             return contents[coordinates.X][coordinates.Y];
         }
 
