@@ -35,7 +35,7 @@ namespace MHUrho
                         }
                     }
 
-                    if (!Player.Level.IsInsideMap(MovePoint))
+                    if (!Player.Logic.IsInsideMap(MovePoint))
                     {
                         IntVector2.Add(ref MovePoint,ref Delta, out MovePoint);
                         Delta.X = -(Delta.X + 1);
@@ -43,7 +43,7 @@ namespace MHUrho
                         continue;
                     }
 
-                    if (Player.Selected[toOrder].Order(Player.Level.TileAt(MovePoint)))
+                    if (Player.Selected[toOrder].Order(Player.Logic.TileAt(MovePoint)))
                     {
                         toOrder++;
                     }
@@ -100,7 +100,7 @@ namespace MHUrho
 
 
 
-        public readonly LogicManager Level;
+        public readonly LogicManager Logic;
 
         List<Player> Friends;
 
@@ -264,7 +264,7 @@ namespace MHUrho
                 TargetPoint.X = TargetPoint.X + pdx - mdx;
                 TargetPoint.Y = TargetPoint.Y + pdy - mdy;
 
-                if (Selected[toOrder].Order(Level.TileAt(TargetPoint)))
+                if (Selected[toOrder].Order(Logic.TileAt(TargetPoint)))
                 {
                     toOrder++;
                 }
@@ -303,9 +303,9 @@ namespace MHUrho
         }
 
 
-        public Player(LogicManager level)
+        public Player(LogicManager logic)
         {
-            this.Level = level;
+            this.Logic = logic;
             Units = new List<Unit>();
             Selected = new List<ISelectable>();
             TypeOfSelected = SelectedType.None;

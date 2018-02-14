@@ -30,7 +30,7 @@ namespace MHUrho
         public Tile Tile { get; private set; }
 
         /// <summary>
-        /// Level this unit is in
+        /// Logic this unit is in
         /// </summary>
         public LogicManager Level { get; private set; }
 

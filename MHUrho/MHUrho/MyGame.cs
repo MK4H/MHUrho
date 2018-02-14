@@ -10,6 +10,7 @@ using Urho.Shapes;
 using Urho.IO;
 using System.IO;
 using System.Reflection;
+using MHUrho.Logic;
 
 namespace MHUrho
 {
@@ -56,6 +57,13 @@ namespace MHUrho
             var scene = new Scene(Context);
             scene.CreateComponent<Octree>();
 
+            Node mapNode = scene.CreateChild("Map");
+            mapNode.Position = new Vector3(-5, 0, -5);
+            mapNode.SetScale(0f);
+
+            Map map = Map.CreateDefaultMap(10, 10);
+            mapNode.AddComponent(map.Model);
+
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
             boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
@@ -65,6 +73,7 @@ namespace MHUrho
             StaticModel boxModel = boxNode.CreateComponent<StaticModel>();
             boxModel.Model = ResourceCache.GetModel("Models/Box.mdl");
             boxModel.SetMaterial(ResourceCache.GetMaterial("Materials/BoxMaterial.xml"));
+
 
             // Light
             Node lightNode = scene.CreateChild(name: "light");

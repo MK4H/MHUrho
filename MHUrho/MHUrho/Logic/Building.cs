@@ -12,7 +12,7 @@ namespace MHUrho
     {
         Tile[] Tiles;
         List<Tile> Damaged;
-        LogicManager Level;
+        LogicManager Logic;
         Unit[] Workers;
         public IntRect Rectangle { get; private set; }
 
