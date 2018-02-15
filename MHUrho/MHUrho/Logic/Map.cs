@@ -6,31 +6,44 @@ using Urho;
 namespace MHUrho.Logic
 {
     public class Map {
-        private Tile[] contents;
-
-
+        private readonly Tile[] contents;
+       
         public StaticModel Model { get; private set; }
 
-        public int Width { get; private set; }
+        /// <summary>
+        /// Coordinates of the top left corner of the map
+        /// </summary>
+        public IntVector2 TopLeft { get; private set; }
 
-        public int Height { get; private set; }
+        /// <summary>
+        /// Coordinates of the bottom right corner of the map
+        /// </summary>
+        public IntVector2 BottomRight { get; private set; }
+
+        public int Width => Right + 1;
+
+        public int Height => Bottom + 1;
 
         /// <summary>
         /// X coordinate of the left row of the map
         /// </summary>
-        public int Left => 0;
+        public int Left => TopLeft.X;
         /// <summary>
         /// X coordinate of the right row of the map
         /// </summary>
-        public int Right => Width - 1;
+        public int Right => BottomRight.X;
+
         /// <summary>
         /// Y coordinate of the top row of the map
         /// </summary>
-        public int Top => 0;
+        public int Top => TopLeft.Y;
         /// <summary>
         /// Y coordinate of the bottom row of the map
         /// </summary>
-        public int Bottom => Height - 1;
+        public int Bottom => BottomRight.Y;
+
+
+
 
         public static Map CreateDefaultMap(int width, int height) {
             //TODO: Split map into chunks, that will be separately in memory
@@ -110,9 +123,9 @@ namespace MHUrho.Logic
         }
 
         protected Map(int width, int height, StaticModel model) {
-            Width = width;
-            Height = height;
             this.Model = model;
+            TopLeft = new IntVector2(0, 0);
+            BottomRight = new IntVector2(width - 1, height - 1);
             contents = new Tile[width * height];
         }
 
@@ -124,6 +137,75 @@ namespace MHUrho.Logic
         /// <returns>True if it is inside, False if not</returns>
         public bool IsInside(IntVector2 point) {
             return point.X >= Left && point.X <= Right && point.Y >= Top && point.Y <= Bottom;
+        }
+
+        public bool IsXInside(int x) {
+            return Left <= x && x <= Right;
+        }
+
+        public bool IsXInside(IntVector2 vector) {
+            return IsXInside(vector.X);
+        }
+
+        public bool IsYInside(int y) {
+            return Top <= y && y <= Bottom;
+        }
+
+        public bool IsYInside(IntVector2 vector) {
+            return IsYInside(vector.Y);
+        }
+
+        /// <summary>
+        /// Compares x with the coords of Left and Right side, returns where the x is
+        /// </summary>
+        /// <param name="x">x coord to copare with the map boundaries</param>
+        /// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
+        public int WhereIsX(int x) {
+            if (x < Left) {
+                return -1;
+            }
+
+            if (x > Right) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Compares x with the coords of Left and Right side, returns where the x is
+        /// </summary>
+        /// <param name="vector">compares x coord of this vector</param>
+        /// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
+        public int WhereIsX(IntVector2 vector) {
+            return WhereIsX(vector.X);
+        }
+
+
+        /// <summary>
+        /// Compares y with the coords of Top and Bottom side, returns where the y is
+        /// </summary>
+        /// <param name="y">y coord to copare with the map boundaries</param>
+        /// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
+        public int WhereIsY(int y) {
+            if (y < Top) {
+                return -1;
+            }
+
+            if (y > Bottom) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Compares y with the coords of Top and Bottom side, returns where the y is
+        /// </summary>
+        /// <param name="vector">compares y of this vector</param>
+        /// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
+        public int WhereIsY(IntVector2 vector) {
+            return WhereIsY(vector.Y);
         }
 
         /// <summary>
@@ -153,14 +235,110 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="topLeft">top left corner of the rectangle</param>
         /// <param name="bottomRight">bottom right corner of the rectangle</param>
-        public void SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
+        /// <returns>True if it is possible to snap to map, false if it is not possible</returns>
+        public bool SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
 
-            //TODO:this
+            if ( IsInside(topLeft) && IsInside(bottomRight)) {
+                return true;
+            }
+            int recWidth = bottomRight.X - topLeft.X;
+            int recHeight = bottomRight.Y - topLeft.Y;
+
+            bool fits = true;
+            int where;
+
+            if (recWidth > Width) {
+                //Rectangle is wider than the map, center it on the map
+                int diff = recWidth - Width;
+                topLeft.X = diff / 2;
+                bottomRight.X = topLeft.X + recWidth;
+
+                fits = false;
+            }
+            else if ((where = WhereIsX(topLeft.X)) != 0) {
+                int dist = (where == -1) ? this.TopLeft.X - topLeft.X : this.BottomRight.X - bottomRight.X;
+                topLeft.X += dist;
+                bottomRight.X += dist;
+            }
+
+            if (recHeight > Height) {
+                //Rectangle is wider than the map, center it on the map
+                int diff = recHeight - Height;
+                topLeft.Y = diff / 2;
+                bottomRight.Y = topLeft.Y + recHeight;
+
+                fits = false;
+            }
+            else if ((where = WhereIsY(topLeft.Y)) != 0) {
+                int dist = (where == -1) ? this.TopLeft.Y - topLeft.Y : this.BottomRight.Y - bottomRight.Y;
+                topLeft.Y += dist;
+                bottomRight.Y += dist;
+            }
+
+            return fits;
         }
 
 
         public void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
-            //TODO: this
+            if (IsInside(topLeft) && IsInside(bottomRight)) {
+                return;
+            }
+
+            switch (WhereIsX(topLeft.X)) {
+                case 0: // NOTHING
+                    break;
+                case -1:
+                    topLeft.X = Left;
+                    break;
+                case 1:
+                    topLeft.X = Right;
+                    break;
+                default:
+                    //TODO: Exceptions
+                    throw new Exception("Switch not updated for the current implementation of WhereIsX");
+            }
+
+            switch (WhereIsX(bottomRight.X)) {
+                case 0: // NOTHING
+                    break;
+                case -1:
+                    bottomRight.X = Left;
+                    break;
+                case 1:
+                    bottomRight.X = Right;
+                    break;
+                default:
+                    //TODO: Exceptions
+                    throw new Exception("Switch not updated for the current implementation of WhereIsX");
+            }
+
+            switch (WhereIsY(topLeft.Y)) {
+                case 0:
+                    break;
+                case -1:
+                    topLeft.Y = Top;
+                    break;
+                case 1:
+                    topLeft.Y = Bottom;
+                    break;
+                default:
+                    //TODO: Exceptions
+                    throw new Exception("Switch not updated for the current implementation of WhereIsY");
+            }
+
+            switch (WhereIsY(bottomRight.Y)) {
+                case 0:
+                    break;
+                case -1:
+                    bottomRight.Y = Top;
+                    break;
+                case 1:
+                    bottomRight.Y = Bottom;
+                    break;
+                default:
+                    //TODO: Exceptions
+                    throw new Exception("Switch not updated for the current implementation of WhereIsY");
+            }
         }
 
         public Tile FindClosestEmptyTile(Tile closestTo) {
