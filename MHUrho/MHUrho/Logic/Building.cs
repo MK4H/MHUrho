@@ -6,7 +6,7 @@ using System.Text;
 using Urho;
 using MHUrho.Helpers;
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
     class Building
     {

@@ -5,7 +5,7 @@ using System.Text;
 using Urho;
 
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
     public class Player
     {
@@ -14,6 +14,7 @@ namespace MHUrho
             IntVector2 MovePoint, End1, End2, Delta;
             bool Finished,OneEndHit;
             Player Player;
+
             public bool OrderNext(ref int toOrder)
             {
                 if (Finished)
@@ -35,7 +36,7 @@ namespace MHUrho
                         }
                     }
 
-                    if (!Player.Logic.IsInsideMap(MovePoint))
+                    if (!Player.Logic.Map.IsInside(MovePoint))
                     {
                         IntVector2.Add(ref MovePoint,ref Delta, out MovePoint);
                         Delta.X = -(Delta.X + 1);
@@ -43,7 +44,7 @@ namespace MHUrho
                         continue;
                     }
 
-                    if (Player.Selected[toOrder].Order(Player.Logic.TileAt(MovePoint)))
+                    if (Player.Selected[toOrder].Order(Player.Logic.Map.GetTile(MovePoint)))
                     {
                         toOrder++;
                     }

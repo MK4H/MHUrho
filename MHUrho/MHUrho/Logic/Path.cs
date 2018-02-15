@@ -6,7 +6,7 @@ using System.Text;
 using Urho;
 
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
     /// <summary>
     /// Provides efficient storage of a path

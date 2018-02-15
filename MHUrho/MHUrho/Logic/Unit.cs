@@ -5,7 +5,7 @@ using System.Text;
 using Urho;
 
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
     public class Unit : ISelectable
     {
@@ -168,7 +168,6 @@ namespace MHUrho
             this.Tile = tile;
             this.Position = tile.Center;
             this.Player = player;
-            MovementSpeed = 2;
             Selected = false;
         }
 
@@ -253,7 +252,7 @@ namespace MHUrho
         {
             Vector2 MovementDirection = destination - Position;
             MovementDirection.Normalize();
-            return MovementDirection * MovementSpeed * Level.GameSpeed * elapsedSeconds;
+            return MovementDirection * Level.GameSpeed * elapsedSeconds;
         }
 
         /// <summary>
@@ -267,7 +266,7 @@ namespace MHUrho
         /// <returns></returns>
         bool AmInTheMiddle()
         {
-            return Vector2.Distance(Tile.Center, Position) < Tolerance;
+            return Vector2.Subtract(Tile.Center, Position).LengthFast < Tolerance;
         }
 
         

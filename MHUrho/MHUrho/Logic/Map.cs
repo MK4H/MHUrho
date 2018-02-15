@@ -5,7 +5,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    class Map {
+    public class Map {
         private Tile[] contents;
 
 
@@ -143,6 +143,46 @@ namespace MHUrho.Logic
         /// <returns>the tile at [X,Y]</returns>
         public Tile GetTile(IntVector2 coordinates) {
             return GetTile(coordinates.X, coordinates.Y);
+        }
+
+
+
+        /// <summary>
+        /// Moves the rectangle defined by topLeft and bottomRight corners so that
+        /// the whole rectangle is inside the map
+        /// </summary>
+        /// <param name="topLeft">top left corner of the rectangle</param>
+        /// <param name="bottomRight">bottom right corner of the rectangle</param>
+        public void SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
+
+            //TODO:this
+        }
+
+
+        public void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
+            //TODO: this
+        }
+
+        public Tile FindClosestEmptyTile(Tile closestTo) {
+            int dist = 1;
+            while (true) {
+                for (int dx = -dist; dx < dist + 1; dx++) {
+                    for (int dy = -dist; dy < dist + 1; dy++) {
+                        IntVector2 pos = closestTo.Location;
+                        pos.X += dx;
+                        pos.Y += dy;
+                        if (!IsInside(pos)) {
+                            continue;
+                        }
+
+                        if (GetTile(pos).Unit == null) {
+                            return GetTile(pos);
+                        }
+                    }
+                }
+                dist++;
+                //TODO: Cutoff
+            }
         }
 
     }
