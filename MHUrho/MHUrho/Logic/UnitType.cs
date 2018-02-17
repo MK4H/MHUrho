@@ -4,7 +4,7 @@ using System.Text;
 
 using Urho;
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
     public class UnitType
     {

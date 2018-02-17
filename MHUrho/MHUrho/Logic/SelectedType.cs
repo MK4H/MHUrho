@@ -5,7 +5,7 @@ using System.Text;
 
 
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
     enum SelectedType { None, Building, Unit }
 }

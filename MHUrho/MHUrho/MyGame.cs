@@ -12,6 +12,8 @@ using System.IO;
 using System.Reflection;
 using MHUrho.Logic;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NUnit.Tests.Droid")]
+
 namespace MHUrho
 {
     public class MyGame : Application

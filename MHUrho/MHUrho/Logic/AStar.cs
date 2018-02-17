@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 
 using Urho;
-using MHUrho.Logic;
 using C5;
 
 
 
 
-namespace MHUrho
+namespace MHUrho.Logic
 {
-    class AStar : IPathFindAlg
+    internal class AStar : IPathFindAlg
     {
-        private readonly Map map;
+        private readonly IMap map;
         
 
         private enum NodeState { Opened, Closed };
@@ -68,8 +67,8 @@ namespace MHUrho
             public IPriorityQueueHandle<Node> Handle;
 
             //Tile at the map[X][Y] coordinates
-            private readonly Tile tile;
-            private readonly Unit unit;
+            private readonly ITile tile;
+            private readonly IUnit unit;
 
             private static readonly float fsqrt2 = (float)Math.Sqrt(2);
             private static readonly double dsqrt2 = Math.Sqrt(2);
@@ -117,9 +116,9 @@ namespace MHUrho
             public Node(
                 IntVector2 position,
                 Node previousNode,
-                Tile tile,
+                ITile tile,
                 float heuristic,
-                Unit unit,
+                IUnit unit,
                 NodeState state = NodeState.Opened
                 )
             {
@@ -150,7 +149,7 @@ namespace MHUrho
         /// <param name="unit">The unit to find the path for, used for checking speed through tile types</param>
         /// <param name="target">Target coordinates</param>
         /// <returns>List of IntVector2s the unit should pass through</returns>
-        public List<IntVector2> FindPath( Unit unit, IntVector2 target) {
+        public List<IntVector2> FindPath( IUnit unit, IntVector2 target) {
             //TODO: Comparer
             IPriorityQueue<Node> priorityQueue = new IntervalHeap<Node>();
             Dictionary<IntVector2, Node> touchedNodes = new Dictionary<IntVector2, Node>();
@@ -204,7 +203,7 @@ namespace MHUrho
             Dictionary<IntVector2, Node> touchedNodes,
             Node sourceNode,
             IntVector2 target,
-            Unit unit)
+            IUnit unit)
         {
             for (int dx = -1; dx < 2; dx++)
             {
@@ -235,7 +234,7 @@ namespace MHUrho
                     else
                     {
                         // Get the next tile from the map
-                        Tile newTile = map.GetTile(newPosition);
+                        var newTile = map.GetTile(newPosition);
                         // Compute the heuristic for the new tile
                         float heuristic = Heuristic(newPosition, target);
                         
@@ -291,7 +290,7 @@ namespace MHUrho
 
         
 
-        public AStar(Map map)
+        public AStar(IMap map)
         {
             this.map = map;
         }
