@@ -31,7 +31,7 @@ namespace MHUrho.Logic
             units.Add(unit);
         }
 
-        public Path GetPath(Unit unit, Tile target)
+        public Path GetPath(Unit unit, ITile target)
         {
             if (target.Unit != null)
             {
@@ -54,9 +54,9 @@ namespace MHUrho.Logic
             }
         }
 
-        public Tile TryMoveUnitThroughTileAt(Unit unit, IntVector2 tileIndex)
+        public ITile TryMoveUnitThroughTileAt(Unit unit, IntVector2 tileIndex)
         {
-            Tile TargetTile = Map.GetTile(tileIndex);
+            ITile TargetTile = Map.GetTile(tileIndex);
             //TODO: Out of range Exception
             if (unit.CanPass(TargetTile))
             {

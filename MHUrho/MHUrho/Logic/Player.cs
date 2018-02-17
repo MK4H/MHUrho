@@ -7,8 +7,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class Player
-    {
+    public class Player : IPlayer {
         class LineOrder
         {
             IntVector2 MovePoint, End1, End2, Delta;
@@ -114,7 +113,7 @@ namespace MHUrho.Logic
         /// Processes a player click on a unit
         /// </summary>
         /// <param name="unit">The unit that was clicked</param>
-        public void ClickUnit(Unit unit)
+        public void ClickUnit(IUnit unit)
         {
             // My unit
             if (unit.Player == this)
@@ -134,7 +133,7 @@ namespace MHUrho.Logic
         }
 
 
-        private void MyUnitClick(Unit unit)
+        private void MyUnitClick(IUnit unit)
         {
             if (TypeOfSelected == SelectedType.Unit)
             {
@@ -165,12 +164,12 @@ namespace MHUrho.Logic
             }
         }
 
-        private void FriednlyUnitClick(Unit unit)
+        private void FriednlyUnitClick(IUnit unit)
         {
 
         }
 
-        private void EnemyUnitClick(Unit unit)
+        private void EnemyUnitClick(IUnit unit)
         {
             if (TypeOfSelected == SelectedType.Unit)
             {
@@ -185,7 +184,7 @@ namespace MHUrho.Logic
         /// Processes user click on a tile
         /// </summary>
         /// <param name="tile">The tile clicked</param>
-        public void ClickTile(Tile tile)
+        public void ClickTile(ITile tile)
         {
             if (TypeOfSelected == SelectedType.None)
             {
@@ -200,7 +199,7 @@ namespace MHUrho.Logic
         }
 
 
-        private bool OrderUnits(Tile tile)
+        private bool OrderUnits(ITile tile)
         {
             int ToOrder = 0;
 

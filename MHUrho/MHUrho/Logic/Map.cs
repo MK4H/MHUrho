@@ -5,7 +5,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class Map {
+    public class Map : IMap {
         private readonly Tile[] contents;
        
         public StaticModel Model { get; private set; }
@@ -214,7 +214,7 @@ namespace MHUrho.Logic
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>the tile at [x,y]</returns>
-        public Tile GetTile(int x, int y) {
+        public ITile GetTile(int x, int y) {
             return contents[x + y * Width];
         }
 
@@ -223,7 +223,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="coordinates"></param>
         /// <returns>the tile at [X,Y]</returns>
-        public Tile GetTile(IntVector2 coordinates) {
+        public ITile GetTile(IntVector2 coordinates) {
             return GetTile(coordinates.X, coordinates.Y);
         }
 
@@ -341,7 +341,7 @@ namespace MHUrho.Logic
             }
         }
 
-        public Tile FindClosestEmptyTile(Tile closestTo) {
+        public ITile FindClosestEmptyTile(ITile closestTo) {
             int dist = 1;
             while (true) {
                 for (int dx = -dist; dx < dist + 1; dx++) {

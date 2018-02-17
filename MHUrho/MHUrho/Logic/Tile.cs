@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class Tile
+    public class Tile : ITile
     {
         /// <summary>
         /// Unit that owns the tile, there can only be one
@@ -18,7 +18,7 @@ namespace MHUrho.Logic
         /// Other units that are passing through the tile
         /// Units cannot stop in this tile if Unit is not null
         /// </summary>
-        public List<Unit> PassingUnits { get; set; }
+        public List<Unit> PassingUnits { get; private set; }
 
         /// <summary>
         /// Modifier of the movement speed of units passing through this tile
@@ -65,7 +65,7 @@ namespace MHUrho.Logic
 
         public float Height { get; private set; }
 
-        public LogicManager Level { get; set; }
+        public LogicManager Logic { get; set; }
 
 
         /// <summary>
@@ -74,8 +74,8 @@ namespace MHUrho.Logic
         /// <returns></returns>
         public bool SpawnUnit(Player player)
         {
-            Unit unit = new Unit(this, Level, player);
-            Level.RegisterUnit(unit);
+            Unit unit = new Unit(this, Logic, player);
+            Logic.RegisterUnit(unit);
 
             if (this.Unit != null)
             {
@@ -128,9 +128,9 @@ namespace MHUrho.Logic
             }
         }
 
-        public Tile(LogicManager level, int x, int y)
+        public Tile(LogicManager logic, int x, int y)
         {
-            this.Level = level;
+            this.Logic = logic;
             MapArea = new IntRect(x, y, 1, 1);
             MovementSpeedModifier = 2;
             PassingUnits = new List<Unit>();

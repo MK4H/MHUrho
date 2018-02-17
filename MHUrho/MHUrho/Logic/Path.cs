@@ -18,7 +18,7 @@ namespace MHUrho.Logic
         int CurrentIndex;
 
         //TODO: Range check
-        public Tile Target { get; private set; }
+        public ITile Target { get; private set; }
 
         public IntVector2 Current { get { return pathPoints[CurrentIndex]; } }
 
@@ -40,7 +40,7 @@ namespace MHUrho.Logic
             CurrentIndex = -1;
         }
 
-        public Path(List<IntVector2> allPathPoints, Tile target)
+        public Path(List<IntVector2> allPathPoints, ITile target)
         {
             pathPoints = allPathPoints;
             CurrentIndex = -1;

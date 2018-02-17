@@ -5,14 +5,14 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
-    interface ISelectable
+    public interface ISelectable
     {
         bool Select();
         
         //TODO: Other overloads, for clicking buttons etc.
-        bool Order(Tile tile);
+        bool Order(ITile tile);
 
-        bool Order(Unit unit);
+        bool Order(IUnit unit);
         void Deselect();
     }
 }

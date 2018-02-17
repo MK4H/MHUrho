@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class Unit : ISelectable
+    public class Unit : IUnit
     {
         #region Public members
 
@@ -27,7 +27,7 @@ namespace MHUrho.Logic
         /// Tile this unit is standing on
         /// TODO: Maybe include all the tiles this unit touches, which may be up to 4 tiles
         /// </summary>
-        public Tile Tile { get; private set; }
+        public ITile Tile { get; private set; }
 
         /// <summary>
         /// Logic this unit is in
@@ -37,7 +37,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Player owning this unit
         /// </summary>
-        public Player Player { get; private set; }
+        public IPlayer Player { get; private set; }
 
         #endregion
 
@@ -60,7 +60,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Current target this unit is trying to attack
         /// </summary>
-        Unit Target;
+        IUnit Target;
 
         #endregion
 
@@ -101,7 +101,7 @@ namespace MHUrho.Logic
             return false;
         }
 
-        public bool Order(Tile tile)
+        public bool Order(ITile tile)
         {
             Path = Level.GetPath(this,tile);
             if (Path == null)
@@ -115,7 +115,7 @@ namespace MHUrho.Logic
         }
 
         // TODO: differentiate between Meele and range units
-        public bool Order(Unit unit)
+        public bool Order(IUnit unit)
         {
             // JUST MEELE UNITS FOR NOW
             if (unit.Player == Player)
@@ -143,7 +143,7 @@ namespace MHUrho.Logic
         }
         //TODO: Link CanPass to TileType loaded from XML description
         //TODO: Load Passable terrain types from XML unit description
-        public bool CanPass(Tile tile)
+        public bool CanPass(ITile tile)
         {
             //TODO: This
             return true;
@@ -154,7 +154,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="tile">the tile on which the returned movementspeed applies</param>
         /// <returns>movement in tiles per second</returns>
-        public float MovementSpeed(Tile tile) {
+        public float MovementSpeed(ITile tile) {
             //TODO: Route this through UnitType
             return tile.MovementSpeedModifier;
         }
@@ -230,7 +230,7 @@ namespace MHUrho.Logic
             IntVector2 TileIndex = new IntVector2((int)Position.X, (int)Position.Y);
             if (TileIndex == Path.Current)
             {
-                Tile NewTile = Level.TryMoveUnitThroughTileAt(this, TileIndex);
+                ITile NewTile = Level.TryMoveUnitThroughTileAt(this, TileIndex);
                 if (NewTile == null)
                 {
                     Order(Path.Target);
