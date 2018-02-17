@@ -84,7 +84,7 @@ namespace NUnit.Tests.Droid {
 
                 public int YIndex => throw new NotImplementedException();
 
-                public IntVector2 Location => throw new NotImplementedException();
+                
 
                 public Vector2 Center => throw new NotImplementedException();
 
@@ -109,10 +109,13 @@ namespace NUnit.Tests.Droid {
                 }
                 #endregion
 
+                public IntVector2 Location { get; private set; }
+
                 public float MovementSpeedModifier { get; private set; }
 
-                public PassableTestTile(float speedModifier) {
+                public PassableTestTile(float speedModifier, int x, int y) {
                     this.MovementSpeedModifier = speedModifier;
+                    Location = new IntVector2(x, y);
                 }
             }
 
@@ -132,8 +135,6 @@ namespace NUnit.Tests.Droid {
 
                 public int YIndex => throw new NotImplementedException();
 
-                public IntVector2 Location => throw new NotImplementedException();
-
                 public Vector2 Center => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
@@ -157,10 +158,14 @@ namespace NUnit.Tests.Droid {
                 }
                 #endregion
 
+                public IntVector2 Location { get; private set; }
+
                 //Should not call this if it is not passable
                 public float MovementSpeedModifier => throw new NotImplementedException();
 
-                public NotPassableTestTile() { }
+                public NotPassableTestTile(int x, int y) {
+                    Location = new IntVector2(x, y);
+                }
             }
 
             ITile[][] map;
@@ -168,10 +173,6 @@ namespace NUnit.Tests.Droid {
             #region NOT USED IN TEST
 
             public StaticModel Model => throw new NotImplementedException();
-
-            public bool IsInside(IntVector2 point) {
-                throw new NotImplementedException();
-            }
 
             public bool IsXInside(int x) {
                 throw new NotImplementedException();
@@ -236,6 +237,10 @@ namespace NUnit.Tests.Droid {
 
             public int Bottom => BottomRight.Y;
 
+            public bool IsInside(IntVector2 point) {
+                return point.X >= Left && point.X <= Right && point.Y >= Top && point.Y <= Bottom;
+            }
+
             public ITile GetTile(int x, int y) {
                 return map[x][y];
             }
@@ -249,7 +254,7 @@ namespace NUnit.Tests.Droid {
                 for (int x = 0; x < width; x++) {
                     map[x] = new ITile[height];
                     for (int y = 0; y < height; y++) {
-                        map[x][y] = new PassableTestTile((float)rnd.NextDouble());
+                        map[x][y] = new PassableTestTile((float) rnd.NextDouble(), x, y);
                     }
                 }
 
@@ -261,7 +266,7 @@ namespace NUnit.Tests.Droid {
                 for (int x = 0; x < width; x++) {
                     map[x] = new ITile[height];
                     for (int y = 0; y < height; y++) {
-                        map[x][y] = new PassableTestTile(speed);
+                        map[x][y] = new PassableTestTile(speed, x, y);
                     }
                 }
 
@@ -274,10 +279,10 @@ namespace NUnit.Tests.Droid {
                     map[x] = new ITile[height];
                     for (int y = 0; y < height; y++) {
                         if ((x == width / 2) || (y == height / 2)) {
-                            map[x][y] = new NotPassableTestTile();
+                            map[x][y] = new NotPassableTestTile(x, y);
                         }
                         else {
-                            map[x][y] = new PassableTestTile(speed);
+                            map[x][y] = new PassableTestTile(speed, x, y);
                         }
 
                     }
@@ -292,10 +297,10 @@ namespace NUnit.Tests.Droid {
                     map[x] = new ITile[height];
                     for (int y = 0; y < height; y++) {
                         if ((x == width / 2) || (y == height / 2)) {
-                            map[x][y] = new NotPassableTestTile();
+                            map[x][y] = new NotPassableTestTile(x, y);
                         }
                         else {
-                            map[x][y] = new PassableTestTile((float)rnd.NextDouble());
+                            map[x][y] = new PassableTestTile((float)rnd.NextDouble(), x, y);
                         }
 
                     }
@@ -310,10 +315,10 @@ namespace NUnit.Tests.Droid {
                     map[x] = new ITile[height];
                     for (int y = 0; y < height; y++) {
                         if (impassableTiles.Contains(new IntVector2(x, y))) {
-                            map[x][y] = new NotPassableTestTile();
+                            map[x][y] = new NotPassableTestTile(x, y);
                         }
                         else {
-                            map[x][y] = new PassableTestTile((float)rnd.NextDouble());
+                            map[x][y] = new PassableTestTile((float)rnd.NextDouble(), x, y);
                         }
 
                     }
@@ -328,10 +333,10 @@ namespace NUnit.Tests.Droid {
                     map[x] = new ITile[height];
                     for (int y = 0; y < height; y++) {
                         if (impassableTiles.Contains(new IntVector2(x, y))) {
-                            map[x][y] = new NotPassableTestTile();
+                            map[x][y] = new NotPassableTestTile(x,y);
                         }
                         else {
-                            map[x][y] = new PassableTestTile(speed);
+                            map[x][y] = new PassableTestTile(speed, x, y);
                         }
 
                     }
@@ -365,14 +370,14 @@ namespace NUnit.Tests.Droid {
 
             List<IntVector2> path = aStar.FindPath(unit, new IntVector2(allOneSpeed.Right, allOneSpeed.Top));
             List<IntVector2> expected = new List<IntVector2>();
-            for (int i = 0; i < allOneSpeed.Right; i++) {
+            for (int i = 0; i <= allOneSpeed.Right; i++) {
                 expected.Add(new IntVector2(i, 0));
             }
             CollectionAssert.AreEqual(expected, path,"Fail going from topLeft to the topRight");
 
             path = aStar.FindPath(unit, new IntVector2(allOneSpeed.Left, allOneSpeed.Bottom));
             expected.Clear();
-            for (int i = 0; i < allOneSpeed.Bottom; i++) {
+            for (int i = 0; i <= allOneSpeed.Bottom; i++) {
                 expected.Add(new IntVector2(0, i));
             }
             CollectionAssert.AreEqual(expected, path, "Fail going from topLeft to the bottomLeft");
@@ -382,16 +387,17 @@ namespace NUnit.Tests.Droid {
             path = aStar.FindPath(unit, new IntVector2(allOneSpeed.Left, allOneSpeed.Bottom));
             expected.Clear();
             for (int i = allOneSpeed.Right; i >= allOneSpeed.Left; i--) {
-                expected.Add(new IntVector2(i, 0));
+                expected.Add(new IntVector2(i, allOneSpeed.Bottom));
             }
             CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the bottomLeft");
 
             path = aStar.FindPath(unit, new IntVector2(allOneSpeed.Right, allOneSpeed.Top));
             expected.Clear();
             for (int i = allOneSpeed.Bottom; i >= allOneSpeed.Top; i--) {
-                expected.Add(new IntVector2(0, i));
+                expected.Add(new IntVector2(allOneSpeed.Right, i));
             }
             CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the topRight");
+            Assert.Pass();
         }
 
         //[Test]
@@ -423,7 +429,8 @@ namespace NUnit.Tests.Droid {
             List<IntVector2> path = aStar.FindPath(unit, new IntVector2(10, 10));
 
             Assert.IsNotNull(path);
-            CollectionAssert.IsEmpty(path);
+            CollectionAssert.AreEqual(new List<IntVector2>(){new IntVector2(10,10)}, path);
+            Assert.Pass();
         }
     }
 }
