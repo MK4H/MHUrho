@@ -4,7 +4,7 @@ using System.Text;
 
 using Urho;
 using MHUrho.Logic;
-using Priority_Queue;
+using C5;
 
 
 
@@ -18,7 +18,7 @@ namespace MHUrho
 
         private enum NodeState { Opened, Closed };
 
-        private class Node : FastPriorityQueueNode
+        private class Node : IComparable<Node>
         {
             private IntVector2 position;
 
@@ -61,8 +61,12 @@ namespace MHUrho
 
             public float Heuristic { get; private set; }
 
+            public float Value => Distance + Heuristic;
+
             public Node PreviousNode { get; private set; }
-            
+
+            public IPriorityQueueHandle<Node> Handle;
+
             //Tile at the map[X][Y] coordinates
             private readonly Tile tile;
             private readonly Unit unit;
@@ -101,6 +105,9 @@ namespace MHUrho
                 return true;
             }
 
+            public int CompareTo(Node other) {
+                return Value.CompareTo(other.Value);
+            }
 
             public override string ToString()
             {
@@ -122,6 +129,7 @@ namespace MHUrho
                 this.unit = unit;
                 Heuristic = heuristic;
                 State = state;
+                Handle = null;
                 if (previousNode != null)
                 {
                     Distance = float.MaxValue;
@@ -142,30 +150,29 @@ namespace MHUrho
         /// <param name="unit">The unit to find the path for, used for checking speed through tile types</param>
         /// <param name="target">Target coordinates</param>
         /// <returns>List of IntVector2s the unit should pass through</returns>
-        public List<IntVector2> FindPath( Unit unit, IntVector2 target)
-        {
-            
-            FastPriorityQueue<Node> PQueue = new FastPriorityQueue<Node>(32);
-            Dictionary<IntVector2, Node> TouchedNodes = new Dictionary<IntVector2, Node>();
-            IntVector2 Start = unit.Tile.Location;
+        public List<IntVector2> FindPath( Unit unit, IntVector2 target) {
+            //TODO: Comparer
+            IPriorityQueue<Node> priorityQueue = new IntervalHeap<Node>();
+            Dictionary<IntVector2, Node> touchedNodes = new Dictionary<IntVector2, Node>();
+            IntVector2 startPos = unit.Tile.Location;
+
+            Node startNode = new Node(
+                position: startPos,
+                previousNode: null,
+                tile: unit.Tile,
+                heuristic: Heuristic(startPos, target),
+                unit: unit
+            );
 
             // Enque the starting node
-            PQueue.Enqueue(
-                new Node(
-                    position: Start,
-                    previousNode: null,
-                    tile: unit.Tile,
-                    heuristic: Heuristic(Start,target), //I know this is not right but it does not matter
-                    unit: unit
-                    ), 
-                0);
+            priorityQueue.Add(ref startNode.Handle, startNode);
             // Add the starting node to touched nodes, so it does not get enqued again
-            TouchedNodes.Add(Start, PQueue.First);
+            touchedNodes.Add(startPos, startNode);
 
             //Main loop
-            while (PQueue.Count != 0)
+            while (priorityQueue.Count != 0)
             {
-                Node sourceNode = PQueue.Dequeue();
+                Node sourceNode = priorityQueue.DeleteMin();
 
                 //If we hit the target, finish and return path
                 if (sourceNode.Position == target)
@@ -174,7 +181,7 @@ namespace MHUrho
                 }
 
                 //If not finished, add untouched neighbours to the queue and touched nodes
-                AddNeighbours(PQueue, TouchedNodes, sourceNode, target, unit);
+                AddNeighbours(priorityQueue, touchedNodes, sourceNode, target, unit);
                 
                 sourceNode.State = NodeState.Closed;
             }
@@ -193,7 +200,7 @@ namespace MHUrho
         /// <param name="target">Coordinates of the target</param>
         /// <param name="unit">The unit going through the path, needed for speed calculation through different tile types</param>
         private void AddNeighbours(
-            FastPriorityQueue<Node> queue, 
+            IPriorityQueue<Node> queue, 
             Dictionary<IntVector2, Node> touchedNodes,
             Node sourceNode,
             IntVector2 target,
@@ -222,7 +229,7 @@ namespace MHUrho
                             continue;
                         //if it is closer through the current sourceNode
                         if (nextNode.TestAndSetDistance(sourceNode)) {
-                            queue.UpdatePriority(nextNode, nextNode.Distance + nextNode.Heuristic);
+                            queue.Replace(nextNode.Handle, nextNode);
                         }
                     }
                     else
@@ -251,10 +258,7 @@ namespace MHUrho
                         {
                             //Unit can pass through this tile, enqueue it
                             Node newNode = new Node(newPosition, sourceNode, newTile, heuristic,unit);
-                            if (queue.Count == queue.MaxSize) {
-                                queue.Resize(queue.MaxSize * 2);
-                            }
-                            queue.Enqueue(newNode, newNode.Distance + newNode.Heuristic);
+                            queue.Add(ref newNode.Handle, newNode);
                             touchedNodes.Add(newNode.Position, newNode);
                         }
                     }

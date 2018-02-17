@@ -53,6 +53,7 @@ namespace MHUrho
 
             var assetManager = new AssetManager(ResourceCache, Config);
 
+
             // 3D scene with Octree
             var scene = new Scene(Context);
             scene.CreateComponent<Octree>();
@@ -63,6 +64,8 @@ namespace MHUrho
 
             Map map = Map.CreateDefaultMap(10, 10);
             mapNode.AddComponent(map.Model);
+
+            AStar pathfind = new AStar(map);
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
