@@ -12,7 +12,7 @@ using System.IO;
 using System.Reflection;
 using MHUrho.Logic;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NUnit.Tests.Droid")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NUnit.Tests")]
 
 namespace MHUrho
 {
