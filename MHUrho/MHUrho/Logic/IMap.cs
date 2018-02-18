@@ -2,7 +2,9 @@
 
 namespace MHUrho.Logic {
     public interface IMap {
-        StaticModel Model { get; }
+        Model Model { get; }
+
+        Material Material { get; }
 
         /// <summary>
         /// Coordinates of the top left corner of the map

@@ -172,7 +172,9 @@ namespace NUnit.Tests {
 
             #region NOT USED IN TEST
 
-            public StaticModel Model => throw new NotImplementedException();
+            public Model Model => throw new NotImplementedException();
+
+            public Material Material => throw new NotImplementedException();
 
             public bool IsXInside(int x) {
                 throw new NotImplementedException();

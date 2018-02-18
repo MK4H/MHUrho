@@ -8,7 +8,9 @@ namespace MHUrho.Logic
     public class Map : IMap {
         private readonly Tile[] contents;
        
-        public StaticModel Model { get; private set; }
+        public Model Model { get; private set; }
+
+        public Material Material { get; private set; }
 
         /// <summary>
         /// Coordinates of the top left corner of the map
@@ -113,17 +115,16 @@ namespace MHUrho.Logic
             geom.SetDrawRange(PrimitiveType.TriangleList, 0, (uint)numIndicies, true);
 
             model.NumGeometries = 1;
+            model.SetNumGeometryLodLevels(0, 1);
             model.SetGeometry(0, 0, geom);
             model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 1, height));
 
-            StaticModel sm = new StaticModel();
-            sm.Model = model;
-            sm.Material = CoreAssets.Materials.DefaultGrey;
-            return new Map(width, height, sm);
+            return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
         }
 
-        protected Map(int width, int height, StaticModel model) {
+        protected Map(int width, int height, Model model, Material material) {
             this.Model = model;
+            this.Material = material;
             TopLeft = new IntVector2(0, 0);
             BottomRight = new IntVector2(width - 1, height - 1);
             contents = new Tile[width * height];

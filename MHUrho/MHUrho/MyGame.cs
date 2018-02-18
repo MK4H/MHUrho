@@ -61,40 +61,62 @@ namespace MHUrho
             scene.CreateComponent<Octree>();
 
             Node mapNode = scene.CreateChild("Map");
-            mapNode.Position = new Vector3(-5, 0, -5);
-            mapNode.SetScale(0f);
+            mapNode.Position = new Vector3(-5 , 0, -5);
+            //mapNode.SetScale(1000f);
+            mapNode.Rotation = new Quaternion(0, 0, 0);
 
             Map map = Map.CreateDefaultMap(10, 10);
-            mapNode.AddComponent(map.Model);
+            StaticModel model = mapNode.CreateComponent<StaticModel>();
+            model.Model = map.Model;
+            model.SetMaterial(map.Material);
 
             AStar pathfind = new AStar(map);
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
-            boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
+            boxNode.Position = new Vector3(x: 0, y: 1, z: -3);
             boxNode.SetScale(0f);
             boxNode.Rotation = new Quaternion(x: 60, y: 0, z: 30);
 
             StaticModel boxModel = boxNode.CreateComponent<StaticModel>();
             boxModel.Model = ResourceCache.GetModel("Models/Box.mdl");
             boxModel.SetMaterial(ResourceCache.GetMaterial("Materials/BoxMaterial.xml"));
+            boxModel.CastShadows = true;
 
+            //Plane
+            Node planeNode = scene.CreateChild(name: "Plane node");
+            planeNode.Position = new Vector3(0, 1, 0);
+
+            StaticModel planeModel = planeNode.CreateComponent<StaticModel>();
+            planeModel.Model = CoreAssets.Models.Plane;
+            planeModel.Material = CoreAssets.Materials.DefaultGrey;
+            planeModel.CastShadows = true;
 
             // Light
             Node lightNode = scene.CreateChild(name: "light");
+            //lightNode.Position = new Vector3(0, 5, 0);
+            lightNode.Rotation = new Quaternion(45, 0, 0);
             var light = lightNode.CreateComponent<Light>();
-            light.Range = 10;
-            light.Brightness = 1.5f;
+            light.LightType = LightType.Directional;
+            //light.Range = 10;
+            light.Brightness = 1f;
+            light.CastShadows = true;
+            light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
+            light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
 
             // Camera
             Node cameraNode = scene.CreateChild(name: "camera");
+            cameraNode.Position = new Vector3(0, 10, 0);
+            cameraNode.LookAt(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
             Camera camera = cameraNode.CreateComponent<Camera>();
 
             // Viewport
-            Renderer.SetViewport(0, new Viewport(Context, scene, camera, null));
+            var viewport = new Viewport(Context, scene, camera, null);
+            viewport.SetClearColor(Color.White);
+            Renderer.SetViewport(0, viewport );
 
             // Do actions
-          
+            //cameraNode.RunActionsAsync(new RepeatForever(new RotateAroundBy(5, new Vector3(0, 0, 0), 45, 0, 45)));
             await boxNode.RunActionsAsync(new EaseBounceOut(new ScaleTo(duration: 1f, scale: 1)));
             await boxNode.RunActionsAsync(new RepeatForever(
                 new RotateBy(duration: 1, deltaAngleX: 90, deltaAngleY: 0, deltaAngleZ: 0)));
