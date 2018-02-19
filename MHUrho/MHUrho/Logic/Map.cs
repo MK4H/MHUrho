@@ -52,71 +52,78 @@ namespace MHUrho.Logic
 
             //4 verticies for every tile, so that we can map every tile to different texture
             // and the same tile types to the same textures
-            int numVerticies = width * height * 4;
+            uint numVerticies = (uint)(width * height * 4);
             //TODO: maybe connect the neighbouring verticies
             //two triangles per tile, 3 indicies per triangle
-            int numIndicies = width * height * 6;
-            // 3 floats for position, 3 floats for normal vector, 2 floats for texture position
-            float[] vertexData = new float[numVerticies * 8];
-            short[] indexData = new short[numIndicies];
+            uint numIndicies = (uint) (width * height * 6);
 
-            int vertexDataPos = 0;
-            int indexDataPos = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    //Create verticies
-                    for (int verY = 0; verY < 2; verY++) {
-                        for (int verX = 0; verX < 2; verX++) {
-                            //Position
-                            vertexData[vertexDataPos] = x + verX;
-                            vertexData[vertexDataPos + 1] = 0;
-                            vertexData[vertexDataPos + 2] = y + verY;
-                            //Normal vector
-                            vertexData[vertexDataPos + 3] = 0;
-                            vertexData[vertexDataPos + 4] = 1;
-                            vertexData[vertexDataPos + 5] = 0;
-                            //Texture
-                            vertexData[vertexDataPos + 6] = verX;
-                            vertexData[vertexDataPos + 7] = verY;
-                            vertexDataPos += 8;
-                        }
-                    }
-
-                    int firstVertex = x * 4 + y * width * 4;
-
-                    //Connect verticies to triangles
-                    indexData[indexDataPos + 0] = (short)(firstVertex + 0);
-                    indexData[indexDataPos + 1] = (short)(firstVertex + 2);
-                    indexData[indexDataPos + 2] = (short)(firstVertex + 3);
-
-                    indexData[indexDataPos + 3] = (short)(firstVertex + 0);
-                    indexData[indexDataPos + 4] = (short)(firstVertex + 3);
-                    indexData[indexDataPos + 5] = (short)(firstVertex + 1);
-
-                    indexDataPos += 6;
-                }
-            }
-
+       
             Model model = new Model();
             VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
             IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
-            Geometry geom = new Geometry();
-
+            
             vb.Shadowed = true;
             vb.SetSize((uint)numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
-            vb.SetData(vertexData);
-
+            
             ib.Shadowed = true;
             ib.SetSize((uint)numIndicies, false, false);
-            ib.SetData(indexData);
 
+            IntPtr vbPointer = vb.Lock(0, numVerticies);
+            IntPtr ibPointer = ib.Lock(0, numIndicies);
+
+            if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
+                //TODO: Error, could not lock buffers into memory, cannot create map
+                throw new Exception("Could not lock buffer into memory for map model creation");
+            }
+
+            unsafe {
+                float* verBuff = (float *)vbPointer.ToPointer();
+                short* inBuff = (short*) ibPointer.ToPointer();
+
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        //Create verticies
+                        for (int verY = 0; verY < 2; verY++) {
+                            for (int verX = 0; verX < 2; verX++) {
+                                //Position
+                                *(verBuff++) = x + verX;
+                                *(verBuff++) = 0;
+                                *(verBuff++) = y + verY;
+                                //Normal vector
+                                *(verBuff++) = 0;
+                                *(verBuff++) = 1;
+                                *(verBuff++) = 0;
+                                //Texture
+                                *(verBuff++) = verX;
+                                *(verBuff++) = verY;
+                            }
+                        }
+
+                        int firstVertex = x * 4 + y * width * 4;
+
+                        //Connect verticies to triangles
+                        *(inBuff++) = (short)(firstVertex + 0);
+                        *(inBuff++) = (short)(firstVertex + 2);
+                        *(inBuff++) = (short)(firstVertex + 3);
+
+                        *(inBuff++) = (short)(firstVertex + 0);
+                        *(inBuff++) = (short)(firstVertex + 3);
+                        *(inBuff++) = (short)(firstVertex + 1);
+                    }
+                }
+            }
+
+            vb.Unlock();
+            ib.Unlock();
+            
+            Geometry geom = new Geometry();
             geom.SetVertexBuffer(0, vb);
             geom.IndexBuffer = ib;
             geom.SetDrawRange(PrimitiveType.TriangleList, 0, (uint)numIndicies, true);
 
             model.NumGeometries = 1;
+            var ret = model.SetGeometry(0, 0, geom);
             model.SetNumGeometryLodLevels(0, 1);
-            model.SetGeometry(0, 0, geom);
             model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 1, height));
 
             return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
