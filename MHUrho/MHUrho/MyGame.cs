@@ -61,13 +61,14 @@ namespace MHUrho
             scene.CreateComponent<Octree>();
 
             Node mapNode = scene.CreateChild("Map");
-            mapNode.Position = new Vector3(0, 5, 0);
+            mapNode.Position = new Vector3(-5 , 0, -5);
             //mapNode.SetScale(1000f);
             mapNode.Rotation = new Quaternion(0, 0, 0);
 
-            Map map = Map.CreateDefaultMap(10, 10, Context);
+            Map map = Map.CreateDefaultMap(10, 10);
             StaticModel model = mapNode.CreateComponent<StaticModel>();
             model.Model = map.Model;
+            model.SetMaterial(map.Material);
 
             AStar pathfind = new AStar(map);
 
@@ -84,7 +85,7 @@ namespace MHUrho
 
             //Plane
             Node planeNode = scene.CreateChild(name: "Plane node");
-            planeNode.Position = new Vector3(3, 1, 0);
+            planeNode.Position = new Vector3(0, 1, 0);
 
             StaticModel planeModel = planeNode.CreateComponent<StaticModel>();
             planeModel.Model = CoreAssets.Models.Plane;

@@ -47,72 +47,86 @@ namespace MHUrho.Logic
 
 
 
-        public static Map CreateDefaultMap(int width, int height, Context context) {
+        public static Map CreateDefaultMap(int width, int height) {
+            //TODO: Split map into chunks, that will be separately in memory
+
+            //4 verticies for every tile, so that we can map every tile to different texture
+            // and the same tile types to the same textures
+            uint numVerticies = (uint)(width * height * 4);
+            //TODO: maybe connect the neighbouring verticies
+            //two triangles per tile, 3 indicies per triangle
+            uint numIndicies = (uint) (width * height * 6);
+
+       
+            Model model = new Model();
+            VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
+            IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
             
-            const uint numVertices = 18;
-            float[] vertexData =
-            {
-					// Position             Normal
-					0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 0.0f,
-                    0.5f, -0.5f, 0.5f,      0.0f, 0.0f, 0.0f,
-                    0.5f, -0.5f, -0.5f,     0.0f, 0.0f, 0.0f,
-
-                    0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 0.0f,
-                    0.5f, -0.5f, 0.5f,      0.0f, 0.0f, 0.0f,
-
-                    0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 0.0f,
-
-                    0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 0.0f,
-                    0.5f, -0.5f, -0.5f,     0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 0.0f,
-
-                    0.5f, -0.5f, -0.5f,     0.0f, 0.0f, 0.0f,
-                    0.5f, -0.5f, 0.5f,      0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 0.0f,
-
-                    0.5f, -0.5f, -0.5f,     0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, 0.5f,     0.0f, 0.0f, 0.0f,
-                    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 0.0f
-                };
-
-            short[] indexData =
-            {
-                    0, 1, 2,
-                    3, 4, 5,
-                    6, 7, 8,
-                    9, 10, 11,
-                    12, 13, 14,
-                    15, 16, 17
-                };
-
-            Model fromScratchModel = new Model();
-            VertexBuffer vb = new VertexBuffer(context, false);
-            IndexBuffer ib = new IndexBuffer(context, false);
-            Geometry geom = new Geometry();
-
-            // Shadowed buffer needed for raycasts to work, and so that data can be automatically restored on device loss
             vb.Shadowed = true;
-            vb.SetSize(numVertices, ElementMask.Position | ElementMask.Normal, false);
-            vb.SetData(vertexData);
-
+            vb.SetSize((uint)numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
+            
             ib.Shadowed = true;
-            ib.SetSize(numVertices, false, false);
-            ib.SetData(indexData);
+            ib.SetSize((uint)numIndicies, false, false);
 
+            IntPtr vbPointer = vb.Lock(0, numVerticies);
+            IntPtr ibPointer = ib.Lock(0, numIndicies);
+
+            if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
+                //TODO: Error, could not lock buffers into memory, cannot create map
+                throw new Exception("Could not lock buffer into memory for map model creation");
+            }
+
+            unsafe {
+                float* verBuff = (float *)vbPointer.ToPointer();
+                short* inBuff = (short*) ibPointer.ToPointer();
+
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        //Create verticies
+                        for (int verY = 0; verY < 2; verY++) {
+                            for (int verX = 0; verX < 2; verX++) {
+                                //Position
+                                *(verBuff++) = x + verX;
+                                *(verBuff++) = 0;
+                                *(verBuff++) = y + verY;
+                                //Normal vector
+                                *(verBuff++) = 0;
+                                *(verBuff++) = 1;
+                                *(verBuff++) = 0;
+                                //Texture
+                                *(verBuff++) = verX;
+                                *(verBuff++) = verY;
+                            }
+                        }
+
+                        int firstVertex = x * 4 + y * width * 4;
+
+                        //Connect verticies to triangles
+                        *(inBuff++) = (short)(firstVertex + 0);
+                        *(inBuff++) = (short)(firstVertex + 2);
+                        *(inBuff++) = (short)(firstVertex + 3);
+
+                        *(inBuff++) = (short)(firstVertex + 0);
+                        *(inBuff++) = (short)(firstVertex + 3);
+                        *(inBuff++) = (short)(firstVertex + 1);
+                    }
+                }
+            }
+
+            vb.Unlock();
+            ib.Unlock();
+            
+            Geometry geom = new Geometry();
             geom.SetVertexBuffer(0, vb);
             geom.IndexBuffer = ib;
-            geom.SetDrawRange(PrimitiveType.TriangleList, 0, numVertices, true);
+            geom.SetDrawRange(PrimitiveType.TriangleList, 0, (uint)numIndicies, true);
 
-            fromScratchModel.NumGeometries = 1;
-            fromScratchModel.SetGeometry(0, 0, geom);
-            fromScratchModel.BoundingBox = new BoundingBox(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0.5f, 0.5f, 0.5f));
+            model.NumGeometries = 1;
+            var ret = model.SetGeometry(0, 0, geom);
+            model.SetNumGeometryLodLevels(0, 1);
+            model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 1, height));
 
-            
-
-            return new Map(width, height, fromScratchModel, null);
+            return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
         }
 
         protected Map(int width, int height, Model model, Material material) {
