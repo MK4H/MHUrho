@@ -65,7 +65,7 @@ namespace MHUrho
             //mapNode.SetScale(1000f);
             mapNode.Rotation = new Quaternion(0, 0, 0);
 
-            Map map = Map.CreateDefaultMap(10, 10);
+            Map map = Map.CreateDefaultMap(10, 10, Context);
             StaticModel model = mapNode.CreateComponent<StaticModel>();
             model.Model = map.Model;
             model.SetMaterial(map.Material);

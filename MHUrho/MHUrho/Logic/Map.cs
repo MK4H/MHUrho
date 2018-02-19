@@ -47,7 +47,7 @@ namespace MHUrho.Logic
 
 
 
-        public static Map CreateDefaultMap(int width, int height) {
+        public static Map CreateDefaultMap(int width, int height, Context context) {
             //TODO: Split map into chunks, that will be separately in memory
 
             //4 verticies for every tile, so that we can map every tile to different texture
@@ -59,14 +59,14 @@ namespace MHUrho.Logic
 
        
             Model model = new Model();
-            VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
-            IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
+            VertexBuffer vb = new VertexBuffer(context, false);
+            IndexBuffer ib = new IndexBuffer(context, false);
             
             vb.Shadowed = true;
-            vb.SetSize((uint)numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
+            vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
             
             ib.Shadowed = true;
-            ib.SetSize((uint)numIndicies, false, false);
+            ib.SetSize(numIndicies, false, false);
 
             IntPtr vbPointer = vb.Lock(0, numVerticies);
             IntPtr ibPointer = ib.Lock(0, numIndicies);
@@ -119,7 +119,7 @@ namespace MHUrho.Logic
             Geometry geom = new Geometry();
             geom.SetVertexBuffer(0, vb);
             geom.IndexBuffer = ib;
-            geom.SetDrawRange(PrimitiveType.TriangleList, 0, (uint)numIndicies, true);
+            geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
 
             model.NumGeometries = 1;
             var ret = model.SetGeometry(0, 0, geom);
