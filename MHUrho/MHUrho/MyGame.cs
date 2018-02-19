@@ -85,7 +85,7 @@ namespace MHUrho
 
             //Plane
             Node planeNode = scene.CreateChild(name: "Plane node");
-            planeNode.Position = new Vector3(0, 1, 0);
+            planeNode.Position = new Vector3(0, -1, 0);
 
             StaticModel planeModel = planeNode.CreateComponent<StaticModel>();
             planeModel.Model = CoreAssets.Models.Plane;
@@ -106,7 +106,7 @@ namespace MHUrho
 
             // Camera
             Node cameraNode = scene.CreateChild(name: "camera");
-            cameraNode.Position = new Vector3(0, 10, 0);
+            cameraNode.Position = new Vector3(0, 2, 0);
             cameraNode.LookAt(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
             Camera camera = cameraNode.CreateComponent<Camera>();
 

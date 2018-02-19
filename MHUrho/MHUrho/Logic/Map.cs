@@ -122,8 +122,7 @@ namespace MHUrho.Logic
             geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
 
             model.NumGeometries = 1;
-            var ret = model.SetGeometry(0, 0, geom);
-            model.SetNumGeometryLodLevels(0, 1);
+            model.SetGeometry(0, 0, geom);
             model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 1, height));
 
             return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
