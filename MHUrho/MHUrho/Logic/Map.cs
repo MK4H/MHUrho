@@ -118,7 +118,7 @@ namespace MHUrho.Logic
             Geometry geom = new Geometry();
             geom.SetVertexBuffer(0, vb);
             geom.IndexBuffer = ib;
-            geom.SetDrawRange(PrimitiveType.TriangleList, 0, 60, true);
+            geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
 
             model.NumGeometries = 1;
             model.SetGeometry(0, 0, geom);
