@@ -55,9 +55,8 @@ namespace MHUrho.Logic
             uint numVerticies = (uint)(width * height * 4);
             //TODO: maybe connect the neighbouring verticies
             //two triangles per tile, 3 indicies per triangle
-            uint numIndicies = (uint) (width * height * 6);
+            uint numIndicies = (uint)(width * height * 6);
 
-       
             Model model = new Model();
             VertexBuffer vb = new VertexBuffer(context, false);
             IndexBuffer ib = new IndexBuffer(context, false);
@@ -86,16 +85,16 @@ namespace MHUrho.Logic
                         for (int verY = 0; verY < 2; verY++) {
                             for (int verX = 0; verX < 2; verX++) {
                                 //Position
-                                *(verBuff++) = x + verX;
-                                *(verBuff++) = 0;
-                                *(verBuff++) = y + verY;
+                                *(verBuff++) = (float)(x + verX);
+                                *(verBuff++) = 0.0f;
+                                *(verBuff++) = (float)(y + verY);
                                 //Normal vector
-                                *(verBuff++) = 0;
-                                *(verBuff++) = 1;
-                                *(verBuff++) = 0;
+                                *(verBuff++) = 0.0f;
+                                *(verBuff++) = 1.0f;
+                                *(verBuff++) = 0.0f;
                                 //Texture
-                                *(verBuff++) = verX;
-                                *(verBuff++) = verY;
+                                *(verBuff++) = (float)verX;
+                                *(verBuff++) = (float)verY;
                             }
                         }
 
@@ -106,9 +105,9 @@ namespace MHUrho.Logic
                         *(inBuff++) = (short)(firstVertex + 2);
                         *(inBuff++) = (short)(firstVertex + 3);
 
-                        *(inBuff++) = (short)(firstVertex + 0);
                         *(inBuff++) = (short)(firstVertex + 3);
                         *(inBuff++) = (short)(firstVertex + 1);
+                        *(inBuff++) = (short)(firstVertex + 0);
                     }
                 }
             }
@@ -119,11 +118,11 @@ namespace MHUrho.Logic
             Geometry geom = new Geometry();
             geom.SetVertexBuffer(0, vb);
             geom.IndexBuffer = ib;
-            geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
+            geom.SetDrawRange(PrimitiveType.TriangleList, 0, 60, true);
 
             model.NumGeometries = 1;
             model.SetGeometry(0, 0, geom);
-            model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 1, height));
+            model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 0, height));
 
             return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
         }

@@ -106,7 +106,7 @@ namespace MHUrho
 
             // Camera
             Node cameraNode = scene.CreateChild(name: "camera");
-            cameraNode.Position = new Vector3(0, 2, 0);
+            cameraNode.Position = new Vector3(0, 20, 0);
             cameraNode.LookAt(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
             Camera camera = cameraNode.CreateComponent<Camera>();
 
