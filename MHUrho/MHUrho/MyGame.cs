@@ -10,6 +10,7 @@ using Urho.Shapes;
 using Urho.IO;
 using System.IO;
 using System.Reflection;
+using MHUrho.Control;
 using MHUrho.Logic;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NUnit.Tests")]
@@ -22,7 +23,9 @@ namespace MHUrho
 
         [Preserve]
         public MyGame(ApplicationOptions opts) : base(opts) { }
-        
+
+        private CameraControler cameraControler;
+
 
         static MyGame()
         {
@@ -74,7 +77,7 @@ namespace MHUrho
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
-            boxNode.Position = new Vector3(x: 0, y: 1, z: -3);
+            boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
             boxNode.SetScale(0f);
             boxNode.Rotation = new Quaternion(x: 60, y: 0, z: 30);
 
@@ -82,15 +85,6 @@ namespace MHUrho
             boxModel.Model = ResourceCache.GetModel("Models/Box.mdl");
             boxModel.SetMaterial(ResourceCache.GetMaterial("Materials/BoxMaterial.xml"));
             boxModel.CastShadows = true;
-
-            //Plane
-            Node planeNode = scene.CreateChild(name: "Plane node");
-            planeNode.Position = new Vector3(0, -1, 0);
-
-            StaticModel planeModel = planeNode.CreateComponent<StaticModel>();
-            planeModel.Model = CoreAssets.Models.Plane;
-            planeModel.Material = CoreAssets.Materials.DefaultGrey;
-            planeModel.CastShadows = true;
 
             // Light
             Node lightNode = scene.CreateChild(name: "light");
@@ -106,9 +100,11 @@ namespace MHUrho
 
             // Camera
             Node cameraNode = scene.CreateChild(name: "camera");
-            cameraNode.Position = new Vector3(0, 20, 0);
-            cameraNode.LookAt(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
             Camera camera = cameraNode.CreateComponent<Camera>();
+
+            cameraControler = new CameraControler(camera);
+            TouchControler touchControler = new TouchControler(cameraControler, Input);
+            cameraNode.AddComponent(touchControler);
 
             // Viewport
             var viewport = new Viewport(Context, scene, camera, null);
