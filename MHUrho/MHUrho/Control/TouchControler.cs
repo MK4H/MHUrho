@@ -5,64 +5,80 @@ using Urho;
 
 namespace MHUrho.Control
 {
-    public class TouchControler : Component
+    public class TouchControler
     {
+
+        public float Sensitivity { get; set; }
+        public bool ContinuousMovement { get; private set; } = true;
+
         private CameraControler cameraControler;
         private readonly Input input;
 
         private readonly Dictionary<int, Vector2> activeTouches = new Dictionary<int, Vector2>();
 
-        private Vector2 movement;
+        
 
-        private const float NearZero = 0.001f;
+        public TouchControler(CameraControler cameraControler, Input input, float sensitivity = 0.1f) {
+            this.cameraControler = cameraControler;
+            this.input = input;
+            this.Sensitivity = sensitivity;
 
-        public float Sensitivity { get; set; }
+            SwitchToContinuousMovement();
+            cameraControler.MovementType = CameraMovementType.Horizontal;
 
+            RegisterHandlers();
+        }
+
+        public void SwitchToContinuousMovement() {
+            ContinuousMovement = true;
+
+            cameraControler.ApplyDrag = false;
+            cameraControler.SmoothMovement = true;
+        }
+
+        public void SwitchToDiscontinuousMovement() {
+            ContinuousMovement = false;
+
+            cameraControler.ApplyDrag = true;
+            cameraControler.SmoothMovement = true;
+            
+        }
 
         private void TouchBegin(TouchBeginEventArgs e) {
             activeTouches.Add(e.TouchID, new Vector2(e.X, e.Y));
+
+            if (ContinuousMovement) {
+                cameraControler.ApplyDrag = false;
+            }
         }
 
         private void TouchEnd(TouchEndEventArgs e) {
             activeTouches.Remove(e.TouchID);
+
+            if (ContinuousMovement) {
+                cameraControler.ApplyDrag = true;
+            }
         }
 
         private void TouchMove(TouchMoveEventArgs e) {
             try {
-                var prevPosition = activeTouches[e.TouchID];
+                
+                if (ContinuousMovement) {
+                    var movement = new Vector2(e.DX, -e.DY) * Sensitivity;
+                    cameraControler.AddHorizontalMovement(movement);
+                }
+                else {
+                    var movement = (new Vector2(e.X, e.Y) - activeTouches[e.TouchID]) * Sensitivity;
+                    cameraControler.SetHorizontalMovement(movement);
+                }
 
-                //TODO: Modes
-                var delta = (new Vector2(e.X, e.Y) - prevPosition) * Sensitivity;
-                movement += delta;
             }
             catch (KeyNotFoundException) {
                 Urho.IO.Log.Write(LogLevel.Warning, "TouchID was not valid in TouchMove");
             }
         }
 
-        //TODO: This
-        public override void OnSetEnabled() {
-            base.OnSetEnabled();
-        }
-
-        protected override void OnUpdate(float timeStep) {
-            if (timeStep > 0 && movement.LengthFast > NearZero) {
-                //I want up on the screen to mean forward
-                //TODO: Setting to invert axis
-                var moveBy = new Vector2(movement.X, -movement.Y);
-                cameraControler.MoveHorizontal(moveBy * timeStep);
-                movement /= (1 + 2 * timeStep);
-            }
-        }
-
-        public TouchControler(CameraControler cameraControler, Input input, float sensitivity = 0.001f) {
-            this.cameraControler = cameraControler;
-            this.input = input;
-            this.Sensitivity = sensitivity;
-            this.ReceiveSceneUpdates = true;
-
-            RegisterHandlers();
-        }
+       
 
         private void RegisterHandlers() {
             input.TouchBegin += TouchBegin;

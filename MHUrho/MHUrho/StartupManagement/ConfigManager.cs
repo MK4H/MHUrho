@@ -11,6 +11,8 @@ namespace MHUrho
         //TODO: Load from config file
         public List<string> PackagePaths { get; protected set; }
 
+        public string LogPath { get; private set; }
+
         protected string ConfigFilePath;
         protected string DefaultConfigFilePath;
 
@@ -45,13 +47,15 @@ namespace MHUrho
             string configFilePath,
             string defaultConfigFilePath,
             string staticFilePath,
-            string dynamicFilePath) {
+            string dynamicFilePath,
+            string logPath) {
 
             this.PackagePaths = packagePaths;
             this.ConfigFilePath = configFilePath;
             this.DefaultConfigFilePath = defaultConfigFilePath;
             this.StaticFilePath = staticFilePath;
             this.DynamicFilePath = dynamicFilePath;
+            this.LogPath = logPath;
         }
 
     }

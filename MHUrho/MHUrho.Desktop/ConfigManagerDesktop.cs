@@ -18,12 +18,13 @@ namespace MHUrho.Desktop {
                 "TODO",
                 "TODO",
                 Directory.GetCurrentDirectory(),
-                Path.Combine(Directory.GetCurrentDirectory(),"DynData"));
+                Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
+                Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"));
         }
 
         protected ConfigManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
-            string staticFilePath, string dynamicFilePath)
-            : base(packagePaths, configFilePath, defaultConfigFilePath, staticFilePath, dynamicFilePath) {
+            string staticFilePath, string dynamicFilePath, string logFilePath)
+            : base(packagePaths, configFilePath, defaultConfigFilePath, staticFilePath, dynamicFilePath, logFilePath) {
 
         }
 

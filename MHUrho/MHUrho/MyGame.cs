@@ -26,6 +26,8 @@ namespace MHUrho
 
         private CameraControler cameraControler;
 
+        private TouchControler touchControler;
+        private MouseController mouseController;
 
         static MyGame()
         {
@@ -37,12 +39,13 @@ namespace MHUrho
             };
         }
 
-        protected override void Start()
-        {
+        protected override void Start() {
+            Log.Open(Config.LogPath);
+
+            Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
+
             CreateScene();
 
-            // Subscribe to Esc key:
-            Input.SubscribeToKeyDown(args => { if (args.Key == Key.Esc) Exit(); });
         }
 
         async void CreateScene() {
@@ -58,6 +61,7 @@ namespace MHUrho
 
             var assetManager = new AssetManager(ResourceCache, Config);
 
+            
 
             // 3D scene with Octree
             var scene = new Scene(Context);
@@ -103,8 +107,10 @@ namespace MHUrho
             Camera camera = cameraNode.CreateComponent<Camera>();
 
             cameraControler = new CameraControler(camera);
-            TouchControler touchControler = new TouchControler(cameraControler, Input);
-            cameraNode.AddComponent(touchControler);
+            cameraNode.AddComponent(cameraControler);
+
+            touchControler = new TouchControler(cameraControler, Input);
+            mouseController = new MouseController(cameraControler, Input);
 
             // Viewport
             var viewport = new Viewport(Context, scene, camera, null);

@@ -86,7 +86,12 @@ namespace MHUrho.Droid {
         }
 
         protected ConfigManagerDroid(List<string> packagePaths, AssetManager assetManager)
-            : base(packagePaths,"TODO","TODO","/apk",System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal)){
+            : base( packagePaths,
+                    "TODO",
+                    "TODO",
+                    "/apk",
+                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),
+                    System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log")){
             PackagePaths = packagePaths;
             this.assetManager = assetManager;
         }
