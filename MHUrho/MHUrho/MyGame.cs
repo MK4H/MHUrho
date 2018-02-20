@@ -103,7 +103,10 @@ namespace MHUrho
             light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
 
             // Camera
-            Node cameraNode = scene.CreateChild(name: "camera");
+#error THIS
+            //TODO: Rebase all operations on camera to cameraHolder, set constant offset of camera from holder
+            Node cameraHolder = scene.CreateChild(name: "CameraHolder");
+            Node cameraNode = cameraHolder.CreateChild(name: "camera");
             Camera camera = cameraNode.CreateComponent<Camera>();
 
             cameraControler = new CameraControler(camera);

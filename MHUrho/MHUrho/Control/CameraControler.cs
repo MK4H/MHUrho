@@ -19,9 +19,9 @@ namespace MHUrho.Control
 
         public Vector3 Movement => movement;
 
-        public float Yaw => rotation.X;
+        public float Yaw => rotation.Y;
 
-        public float Pitch => rotation.Y;
+        public float Pitch => rotation.X;
 
         
         private readonly Node cameraNode;
