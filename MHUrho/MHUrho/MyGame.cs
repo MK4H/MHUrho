@@ -24,7 +24,7 @@ namespace MHUrho
         [Preserve]
         public MyGame(ApplicationOptions opts) : base(opts) { }
 
-        private CameraControler cameraControler;
+        private CameraController cameraController;
 
         private TouchControler touchControler;
         private MouseController mouseController;
@@ -103,20 +103,18 @@ namespace MHUrho
             light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
 
             // Camera
-#error THIS
+
             //TODO: Rebase all operations on camera to cameraHolder, set constant offset of camera from holder
-            Node cameraHolder = scene.CreateChild(name: "CameraHolder");
-            Node cameraNode = cameraHolder.CreateChild(name: "camera");
-            Camera camera = cameraNode.CreateComponent<Camera>();
 
-            cameraControler = new CameraControler(camera);
-            cameraNode.AddComponent(cameraControler);
 
-            touchControler = new TouchControler(cameraControler, Input);
-            mouseController = new MouseController(cameraControler, Input);
+            cameraController = CameraController.GetCameraController(scene);
+
+
+            touchControler = new TouchControler(cameraController, Input);
+            mouseController = new MouseController(cameraController, Input);
 
             // Viewport
-            var viewport = new Viewport(Context, scene, camera, null);
+            var viewport = new Viewport(Context, scene, cameraController.Camera, null);
             viewport.SetClearColor(Color.White);
             Renderer.SetViewport(0, viewport );
 

@@ -39,7 +39,7 @@ namespace MHUrho.Control
         
         public bool MouseCameraMovement { get; set; }
 
-        private CameraControler cameraControler;
+        private CameraController cameraController;
         private readonly Input input;
 
 
@@ -48,8 +48,8 @@ namespace MHUrho.Control
 
         private float KeyRotationSensitivity => KeyCameraSensitivity * 3;
 
-        public MouseController(CameraControler cameraControler, Input input, float mouseSensitivity = 0.1f, float keySensitivity = 3f) {
-            this.cameraControler = cameraControler;
+        public MouseController(CameraController cameraController, Input input, float mouseSensitivity = 0.1f, float keySensitivity = 3f) {
+            this.cameraController = cameraController;
             this.input = input;
             this.MouseCameraSensitivity = mouseSensitivity;
             this.KeyCameraSensitivity = keySensitivity;
@@ -137,98 +137,98 @@ namespace MHUrho.Control
         }
 
         private void StartCameraMoveLeft(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             movement.X = -KeyCameraSensitivity;
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveLeft(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             if (movement.X == -KeyCameraSensitivity) {
                 movement.X = 0;
             }
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StartCameraMoveRight(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             movement.X = KeyCameraSensitivity;
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveRight(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             if (movement.X == KeyCameraSensitivity) {
                 movement.X = 0;
             }
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StartCameraMoveForward(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             movement.Z = KeyCameraSensitivity;
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveForward(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             if (movement.Z == KeyCameraSensitivity) {
                 movement.Z = 0;
             }
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StartCameraMoveBackward(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             movement.Z = -KeyCameraSensitivity;
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveBackward(int qualifiers) {
-            var movement = cameraControler.Movement;
+            var movement = cameraController.Movement;
             if (movement.Z == -KeyCameraSensitivity) {
                 movement.Z = 0;
             }
-            cameraControler.SetMovement(movement);
+            cameraController.SetMovement(movement);
         }
 
         private void StartCameraRotationRight(int qualifiers) {
-            cameraControler.SetYaw(KeyRotationSensitivity);
+            cameraController.SetYaw(-KeyRotationSensitivity);
         }
 
         private void StopCameraRotationRight(int qualifiers) {
-            if (cameraControler.Yaw == KeyRotationSensitivity) {
-                cameraControler.SetYaw(0);
+            if (cameraController.Yaw == -KeyRotationSensitivity) {
+                cameraController.SetYaw(0);
             }
         }
 
         private void StartCameraRotationLeft(int qualifiers) {
-            cameraControler.SetYaw(-KeyRotationSensitivity);
+            cameraController.SetYaw(KeyRotationSensitivity);
         }
 
         private void StopCameraRotationLeft(int qualifiers) {
-            if (cameraControler.Yaw == -KeyRotationSensitivity) {
-                cameraControler.SetYaw(0);
+            if (cameraController.Yaw == KeyRotationSensitivity) {
+                cameraController.SetYaw(0);
             }
         }
 
         private void StartCameraRotationUp(int qualifiers) {
-            cameraControler.SetPitch(KeyRotationSensitivity);
+            cameraController.SetPitch(-KeyRotationSensitivity);
         }
 
         private void StopCameraRotationUp(int qualifiers) {
-            if (cameraControler.Pitch == KeyRotationSensitivity) {
-                cameraControler.SetPitch(0);
+            if (cameraController.Pitch == -KeyRotationSensitivity) {
+                cameraController.SetPitch(0);
             }
         }
 
         private void StartCameraRotationDown(int qualifiers) {
-            cameraControler.SetPitch(-KeyRotationSensitivity);
+            cameraController.SetPitch(KeyRotationSensitivity);
         }
 
         private void StopCameraRotationDown(int qualifiers) {
-            if (cameraControler.Pitch == -KeyRotationSensitivity) {
-                cameraControler.SetPitch(0);
+            if (cameraController.Pitch == KeyRotationSensitivity) {
+                cameraController.SetPitch(0);
             }
         }
 
