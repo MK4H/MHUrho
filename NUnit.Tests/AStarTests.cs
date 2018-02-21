@@ -360,6 +360,7 @@ namespace NUnit.Tests {
             randomSpeed = TestMap.GetTestMapRandomSpeeds(50, 50, new Random());
             oneWithCross = TestMap.GetTestMapWithImpassableCrossAndStaticSpeed(50, 50, 1);
             randomWithCross = TestMap.GetTestMapWithImpassableCrossAndRandomSpeed(50, 50, new Random());
+
         }
 
         [Test]

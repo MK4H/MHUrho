@@ -8,6 +8,8 @@ namespace MHUrho.Control
 {
     public class MouseController
     {
+        private enum CameraMovementType { Fixed, FreeFloat}
+
         private enum Actions {  CameraMoveForward = 0,
                                 CameraMoveBackward,
                                 CameraMoveLeft,
@@ -31,28 +33,29 @@ namespace MHUrho.Control
             }
         }
 
-        
-
+       
         public float MouseCameraSensitivity { get; set; }
 
         public float KeyCameraSensitivity { get; set; }
         
-        public bool MouseCameraMovement { get; set; }
+        public bool MouseBorderCameraMovement { get; set; }
 
         private CameraController cameraController;
         private readonly Input input;
 
+        private CameraMovementType cameraType;
 
         private List<KeyAction> actions;
         private Dictionary<Key, Actions> keyActions;
 
         private float KeyRotationSensitivity => KeyCameraSensitivity * 3;
 
-        public MouseController(CameraController cameraController, Input input, float mouseSensitivity = 0.1f, float keySensitivity = 3f) {
+        public MouseController(CameraController cameraController, Input input, float mouseSensitivity = 0.1f, float keySensitivity = 5f) {
             this.cameraController = cameraController;
             this.input = input;
             this.MouseCameraSensitivity = mouseSensitivity;
             this.KeyCameraSensitivity = keySensitivity;
+            this.cameraType = CameraMovementType.Fixed;
 
             FillActionList();
 
@@ -86,7 +89,8 @@ namespace MHUrho.Control
                 {Key.E, Actions.CameraRotationRight},
                 {Key.Q, Actions.CameraRotationLeft},
                 {Key.R, Actions.CameraRotationUp },
-                {Key.F, Actions.CameraRotationDown }
+                {Key.F, Actions.CameraRotationDown },
+                {Key.LeftShift, Actions.CameraSwitchMode }
             };
         }
 
@@ -129,7 +133,9 @@ namespace MHUrho.Control
         }
 
         private void MouseMoved(MouseMovedEventArgs e) {
+            if (cameraType == CameraMovementType.FreeFloat) {
 
+            }
         }
 
         private void MouseWheel(MouseWheelEventArgs e) {
@@ -233,7 +239,14 @@ namespace MHUrho.Control
         }
 
         private void CameraSwitchMode(int qualifiers) {
-
+            if (cameraType == CameraMovementType.FreeFloat) {
+                cameraController.SwitchToFixed();
+                cameraType = CameraMovementType.Fixed;
+            }
+            else {
+                cameraController.SwitchToFree();
+                cameraType = CameraMovementType.FreeFloat;
+            }
         }
     }
 }

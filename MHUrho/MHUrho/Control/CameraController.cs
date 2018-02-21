@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 
 using Urho;
+using Urho.IO;
+
+using MHUrho.Helpers;
 
 namespace MHUrho.Control
 {
@@ -27,6 +30,13 @@ namespace MHUrho.Control
 
         public Camera Camera { get; private set; }
 
+        /// <summary>
+        /// For storing the default camera holder while following unit or other things
+        /// </summary>
+        private Node defaultCameraHolder;
+
+        private Vector3 storedFixedOffset;
+        
         /// <summary>
         /// Point on the ground
         /// Camera follows this point at constant offset while not in FreeFloat mode
@@ -59,6 +69,7 @@ namespace MHUrho.Control
             controller.cameraHolder = cameraHolder;
             controller.cameraNode = cameraNode;
             controller.Camera = camera;
+            controller.defaultCameraHolder = cameraHolder;
             
 
             cameraNode.Position = new Vector3(0, 10, -5);
@@ -130,8 +141,8 @@ namespace MHUrho.Control
                 fixedPosition = cameraNode.Position;
                 fixedRotation = cameraNode.Rotation;
 
-                //Set it right above the holder
-                cameraNode.Position = new Vector3(0, cameraNode.Position.Y, 0);
+                cameraHolder.Position = cameraNode.WorldPosition.XZ();
+                cameraNode.Position = new Vector3(0,cameraNode.Position.Y, 0);
             }
         }
 
@@ -204,23 +215,25 @@ namespace MHUrho.Control
         }
 
         private void MoveRelativeToLookingDirection(Vector3 delta) {
-
-            /*delta = Quaternion.FromAxisAngle(cameraNode.Direction, cameraNode.Rotation.RollAngle) * 
-                    Quaternion.FromAxisAngle(cameraNode.Up, cameraNode.Rotation.YawAngle) * 
-                    Quaternion.FromAxisAngle(cameraNode.Right, cameraNode.Rotation.PitchAngle) * 
-                    delta;*/
-
-            cameraNode.Translate(delta);
+            if (delta != Vector3.Zero) {
+                delta = cameraNode.WorldRotation * delta;
+                cameraNode.Translate(new Vector3(0, delta.Y, 0), TransformSpace.Parent);
+                cameraHolder.Translate(new Vector3(delta.X, 0, delta.Z), TransformSpace.Parent);
+            }
         }
 
         private void RotateCameraFixed(Vector2 rot) {
             cameraHolder.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y));
-            cameraNode.Rotate(Quaternion.FromAxisAngle(Vector3.UnitX, rot.X),TransformSpace.Parent);
+
+            if ((5 < cameraNode.Rotation.PitchAngle && rot.X < 0) || (cameraNode.Rotation.PitchAngle < 85 && rot.X > 0)) {
+                cameraNode.RotateAround(cameraHolder.Position, Quaternion.FromAxisAngle(Vector3.UnitX, rot.X), TransformSpace.Parent);
+            }
+            
         }
 
         private void RotateCameraFree(Vector2 rot) {
-            cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Right, rot.X));
-            cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Up, rot.Y));
+            cameraNode.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, -rot.Y),TransformSpace.Parent);
+            cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Right, rot.X),TransformSpace.Parent);
         }
         
     }
