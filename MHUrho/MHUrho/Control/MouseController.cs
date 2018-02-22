@@ -63,6 +63,7 @@ namespace MHUrho.Control
             SetKeyBindings();
 
             RegisterCallbacks();
+
         }
 
         void FillActionList() {
@@ -134,7 +135,7 @@ namespace MHUrho.Control
 
         private void MouseMoved(MouseMovedEventArgs e) {
             if (cameraType == CameraMovementType.FreeFloat) {
-
+                cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseCameraSensitivity);
             }
         }
 
@@ -143,13 +144,13 @@ namespace MHUrho.Control
         }
 
         private void StartCameraMoveLeft(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             movement.X = -KeyCameraSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveLeft(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             if (movement.X == -KeyCameraSensitivity) {
                 movement.X = 0;
             }
@@ -157,13 +158,13 @@ namespace MHUrho.Control
         }
 
         private void StartCameraMoveRight(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             movement.X = KeyCameraSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveRight(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             if (movement.X == KeyCameraSensitivity) {
                 movement.X = 0;
             }
@@ -171,13 +172,13 @@ namespace MHUrho.Control
         }
 
         private void StartCameraMoveForward(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             movement.Z = KeyCameraSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveForward(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             if (movement.Z == KeyCameraSensitivity) {
                 movement.Z = 0;
             }
@@ -185,13 +186,13 @@ namespace MHUrho.Control
         }
 
         private void StartCameraMoveBackward(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             movement.Z = -KeyCameraSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveBackward(int qualifiers) {
-            var movement = cameraController.Movement;
+            var movement = cameraController.StaticMovement;
             if (movement.Z == -KeyCameraSensitivity) {
                 movement.Z = 0;
             }
@@ -203,7 +204,7 @@ namespace MHUrho.Control
         }
 
         private void StopCameraRotationRight(int qualifiers) {
-            if (cameraController.Yaw == -KeyRotationSensitivity) {
+            if (cameraController.StaticYaw == -KeyRotationSensitivity) {
                 cameraController.SetYaw(0);
             }
         }
@@ -213,7 +214,7 @@ namespace MHUrho.Control
         }
 
         private void StopCameraRotationLeft(int qualifiers) {
-            if (cameraController.Yaw == KeyRotationSensitivity) {
+            if (cameraController.StaticYaw == KeyRotationSensitivity) {
                 cameraController.SetYaw(0);
             }
         }
@@ -223,7 +224,7 @@ namespace MHUrho.Control
         }
 
         private void StopCameraRotationUp(int qualifiers) {
-            if (cameraController.Pitch == -KeyRotationSensitivity) {
+            if (cameraController.StaticPitch == -KeyRotationSensitivity) {
                 cameraController.SetPitch(0);
             }
         }
@@ -233,7 +234,7 @@ namespace MHUrho.Control
         }
 
         private void StopCameraRotationDown(int qualifiers) {
-            if (cameraController.Pitch == KeyRotationSensitivity) {
+            if (cameraController.StaticPitch == KeyRotationSensitivity) {
                 cameraController.SetPitch(0);
             }
         }

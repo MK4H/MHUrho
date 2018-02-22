@@ -13,7 +13,6 @@ namespace MHUrho.Control
 
         public bool SmoothMovement { get; set; } = true;
 
-        public bool ApplyDrag { get; set; } = true;
 
         public bool FreeFloat { get; private set; } = false;
 
@@ -22,11 +21,15 @@ namespace MHUrho.Control
         /// </summary>
         public float Drag { get; set; } = 2;
 
-        public Vector3 Movement => movement;
+        public Vector3 StaticMovement => staticMovement;
 
-        public float Yaw => rotation.Y;
+        public Vector2 StaticHorizontalMovement => new Vector2(staticMovement.X, staticMovement.Z);
 
-        public float Pitch => rotation.X;
+        public float StaticVerticalMovement => staticMovement.Y;
+
+        public float StaticYaw => staticRotation.Y;
+
+        public float StaticPitch => staticRotation.X;
 
         public Camera Camera { get; private set; }
 
@@ -48,12 +51,14 @@ namespace MHUrho.Control
         private Node cameraNode;
         
 
-        private Vector3 movement;
+        private Vector3 decayingMovement;
+        private Vector3 staticMovement;
 
         /// <summary>
         /// Only yaw and pitch, no roll
         /// </summary>
-        private Vector2 rotation;
+        private Vector2 decayingRotation;
+        private Vector2 staticRotation;
 
         private Vector3 fixedPosition;
         private Quaternion fixedRotation;
@@ -84,54 +89,115 @@ namespace MHUrho.Control
 
 
         public void AddVerticalMovement(float movement) {
-            this.movement.Y += movement;
+            decayingMovement.Y += movement;
         }
 
         public void SetVerticalSpeed(float movement) {
-            this.movement.Y = movement;
+            staticMovement.Y = movement;
+        }
+
+        public void SoftResetVerticalSpeed(float movement) {
+            if (staticMovement.Y == movement) {
+                staticMovement.Y = 0;
+            }
+        }
+
+        public void HardResetVerticalSpeed() {
+            staticMovement.Y = 0;
         }
 
         public void AddHorizontalMovement(Vector2 movement) {
-            this.movement.X += movement.X;
-            this.movement.Z += movement.Y;
+            decayingMovement.X += movement.X;
+            decayingMovement.Z += movement.Y;
         }
 
         public void SetHorizontalMovement(Vector2 movement) {
-            this.movement.X = movement.X;
-            this.movement.Z = movement.Y;
+            staticMovement.X = movement.X;
+            staticMovement.Z = movement.Y;
+        }
+
+        public void SoftResetHorizontalMovement(Vector2 movement) {
+            if (staticMovement.X == movement.X && staticMovement.Z == movement.Y) {
+                staticMovement.X = 0;
+                staticMovement.Z = 0;
+            }
+        }
+
+        public void HardResetHorizontalMovement() {
+            staticMovement.X = 0;
+            staticMovement.Z = 0;
         }
 
         public void AddMovement(Vector3 movement) {
-            this.movement += movement;
+            decayingMovement += movement;
         }
 
         public void SetMovement(Vector3 movement) {
-            this.movement = movement;
+            staticMovement = movement;
         }
 
-        
+        public void SoftResetMovement(Vector3 movement) {
+            if (staticMovement == movement) {
+                staticMovement = Vector3.Zero;
+            }
+        }
+
+        public void HardResetMovement() {
+            staticMovement = Vector3.Zero;
+        }
+
         public void AddYaw(float yaw) {
-            rotation.Y += yaw;
+            decayingRotation.Y += yaw;
         }
 
         public void SetYaw(float yaw) {
-            rotation.Y = yaw;
+            staticRotation.Y = yaw;
+        }
+
+        public void SoftResetYaw(float yaw) {
+            if (staticRotation.Y == yaw) {
+                staticRotation.Y = 0;
+            }
+        }
+
+        public void HardResetYaw() {
+            staticRotation.Y = 0;
         }
 
         public void AddPitch(float pitch) {
-            rotation.X += pitch;
+            decayingRotation.X += pitch;
         }
 
         public void SetPitch(float pitch) {
-            rotation.X = pitch;
+            staticRotation.X = pitch;
+        }
+
+        public void SoftResetPitch(float pitch) {
+            if (staticRotation.X == pitch) {
+                staticRotation.X = 0;
+            }
+        }
+
+        public void HardResetPitch(float pitch) {
+            staticRotation.X = 0;
         }
 
         public void AddRotation(Vector2 rotation) {
-            this.rotation += rotation;
+            decayingRotation += rotation;
         }
 
         public void SetRotation(Vector2 rotation) {
-            this.rotation = rotation;
+            staticRotation = rotation;
+        }
+
+        public void SoftResetRotation(Vector2 rotation) {
+            if (staticRotation == rotation) {
+                staticRotation = Vector2.Zero;
+            }
+        }
+
+        public void HardResetRotation() {
+            staticRotation = Vector2.Zero;
         }
 
         public void SwitchToFree() {
@@ -156,20 +222,13 @@ namespace MHUrho.Control
         }
 
         protected override void OnUpdate(float timeStep) {
-            if (timeStep > 0 && (movement.LengthFast > NearZero || rotation.LengthFast > NearZero)) {
+            if (timeStep > 0 && (staticMovement.LengthSquared > NearZero || 
+                                 decayingMovement.LengthSquared > NearZero || 
+                                 staticRotation.LengthSquared > NearZero ||
+                                 decayingRotation.LengthSquared > NearZero)) {
 
-                Vector3 tickMovement;
-                Vector2 tickRotation;
-                if (SmoothMovement) {
-                    tickMovement = movement * timeStep;
-                    tickRotation = rotation * timeStep;
-                }
-                else {
-                    tickMovement = movement;
-                    tickRotation = rotation;
-                    movement = Vector3.Zero;
-                    rotation = Vector2.Zero;
-                }
+                Vector3 tickMovement = (staticMovement + decayingMovement) * timeStep ;
+                Vector2 tickRotation = (staticRotation + decayingRotation) * timeStep ;
 
                 if (FreeFloat) {
                     MoveRelativeToLookingDirection(tickMovement);
@@ -181,9 +240,13 @@ namespace MHUrho.Control
                     RotateCameraFixed(tickRotation);
                 }
 
-                if (ApplyDrag) {
-                    movement /= (1 + Drag * timeStep);
-                    rotation /= (1 + Drag * timeStep);
+                if (SmoothMovement) {
+                    decayingMovement /= (1 + Drag * timeStep);
+                    decayingRotation /= (1 + Drag * timeStep);
+                }
+                else {
+                    decayingMovement = Vector3.Zero;
+                    decayingRotation = Vector2.Zero;
                 }
             }
         }

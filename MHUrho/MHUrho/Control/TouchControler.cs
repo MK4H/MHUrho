@@ -27,8 +27,8 @@ namespace MHUrho.Control
             this.input = input;
             this.Sensitivity = sensitivity;
 
-            SwitchToContinuousMovement();
-            //SwitchToDiscontinuousMovement();
+            //SwitchToContinuousMovement();
+            SwitchToDiscontinuousMovement();
             movementType = CameraMovementType.Horizontal;
 
             RegisterHandlers();
@@ -37,32 +37,25 @@ namespace MHUrho.Control
         public void SwitchToContinuousMovement() {
             ContinuousMovement = true;
 
-            cameraController.ApplyDrag = false;
             cameraController.SmoothMovement = true;
         }
 
         public void SwitchToDiscontinuousMovement() {
             ContinuousMovement = false;
 
-            cameraController.ApplyDrag = true;
             cameraController.SmoothMovement = true;
             
         }
 
         private void TouchBegin(TouchBeginEventArgs e) {
             activeTouches.Add(e.TouchID, new Vector2(e.X, e.Y));
-
-            if (ContinuousMovement) {
-                cameraController.ApplyDrag = false;
-            }
         }
 
         private void TouchEnd(TouchEndEventArgs e) {
             activeTouches.Remove(e.TouchID);
 
-            if (ContinuousMovement) {
-                cameraController.ApplyDrag = true;
-            }
+            cameraController.AddHorizontalMovement(cameraController.StaticHorizontalMovement);
+            cameraController.HardResetHorizontalMovement();
         }
 
         private void TouchMove(TouchMoveEventArgs e) {
