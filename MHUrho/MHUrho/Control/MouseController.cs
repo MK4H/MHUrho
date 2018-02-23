@@ -4,6 +4,8 @@ using System.Text;
 using Urho;
 using Urho.IO;
 
+using MHUrho.Helpers;
+
 namespace MHUrho.Control
 {
     public class MouseController
@@ -33,29 +35,43 @@ namespace MHUrho.Control
             }
         }
 
-       
-        public float MouseCameraSensitivity { get; set; }
 
-        public float KeyCameraSensitivity { get; set; }
-        
+        public float CameraScrollSensitivity { get; set; }
+
+        public float CameraRotationSensitivity { get; set; }
+
+        public float MouseSensitivity { get; set; }
+
         public bool MouseBorderCameraMovement { get; set; }
 
         private CameraController cameraController;
         private readonly Input input;
+        private readonly Graphics graphics;
+
 
         private CameraMovementType cameraType;
 
         private List<KeyAction> actions;
         private Dictionary<Key, Actions> keyActions;
 
-        private float KeyRotationSensitivity => KeyCameraSensitivity * 3;
+        //private float KeyRotationSensitivity => KeyCameraSensitivity * 3;
 
-        public MouseController(CameraController cameraController, Input input, float mouseSensitivity = 0.1f, float keySensitivity = 5f) {
+        private const float CloseToBorder = 1/20f;
+
+        private bool mouseInLeftRight;
+        private bool mouseInTopBottom;
+
+        public MouseController( CameraController cameraController, 
+                                Input input, Graphics graphics) {
             this.cameraController = cameraController;
             this.input = input;
-            this.MouseCameraSensitivity = mouseSensitivity;
-            this.KeyCameraSensitivity = keySensitivity;
+            this.MouseSensitivity = 0.2f;
+            this.CameraScrollSensitivity = 5f;
+            this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
+            this.graphics = graphics;
+
+            cameraController.Drag = 10;
 
             FillActionList();
 
@@ -135,7 +151,11 @@ namespace MHUrho.Control
 
         private void MouseMoved(MouseMovedEventArgs e) {
             if (cameraType == CameraMovementType.FreeFloat) {
-                cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseCameraSensitivity);
+                cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseSensitivity);
+            }
+            else if (cameraType == CameraMovementType.Fixed) {
+                Log.Write(LogLevel.Debug, $"Mouse position: X={e.X}, Y={e.Y}");
+                MouseBorderMovement(e);
             }
         }
 
@@ -143,15 +163,57 @@ namespace MHUrho.Control
 
         }
 
+        private void MouseBorderMovement(MouseMovedEventArgs e) {
+
+
+            Vector2 cameraMovement = new Vector2(cameraController.StaticMovement.X,cameraController.StaticMovement.Z);
+
+            if (!mouseInLeftRight ) {
+                //Mouse was not in the border area before, check if it is now 
+                // and if it is, set the movement
+                if (e.X < graphics.Width * CloseToBorder) {
+                    cameraMovement.X = -CameraScrollSensitivity;
+                    mouseInLeftRight = true;
+                }
+                else if (e.X > graphics.Width * (1 - CloseToBorder)) {
+                    cameraMovement.X = CameraScrollSensitivity;
+                    mouseInLeftRight = true;
+                }
+                
+            }
+            else if (graphics.Width * CloseToBorder <= e.X && e.X <= graphics.Width * (1 - CloseToBorder)) {
+                //Mouse was in the area, and now it is not, reset the movement
+                cameraMovement.X = 0;
+                mouseInLeftRight = false;
+            }
+
+            if (!mouseInTopBottom) {
+                if (e.Y < graphics.Height * CloseToBorder) {
+                    cameraMovement.Y = CameraScrollSensitivity;
+                    mouseInTopBottom = true;
+                }
+                else if (e.Y > graphics.Height * (1 - CloseToBorder)) {
+                    cameraMovement.Y = -CameraScrollSensitivity;
+                    mouseInTopBottom = true;
+                }
+            }
+            else if (graphics.Height * CloseToBorder <= e.Y && e.Y <= graphics.Height * (1 - CloseToBorder)) {
+                cameraMovement.Y = 0;
+                mouseInTopBottom = false;
+            }
+           
+            cameraController.SetHorizontalMovement(cameraMovement);
+        }
+
         private void StartCameraMoveLeft(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            movement.X = -KeyCameraSensitivity;
+            movement.X = -CameraScrollSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveLeft(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            if (movement.X == -KeyCameraSensitivity) {
+            if (movement.X == -CameraScrollSensitivity) {
                 movement.X = 0;
             }
             cameraController.SetMovement(movement);
@@ -159,13 +221,13 @@ namespace MHUrho.Control
 
         private void StartCameraMoveRight(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            movement.X = KeyCameraSensitivity;
+            movement.X = CameraScrollSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveRight(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            if (movement.X == KeyCameraSensitivity) {
+            if (movement.X == CameraScrollSensitivity) {
                 movement.X = 0;
             }
             cameraController.SetMovement(movement);
@@ -173,13 +235,13 @@ namespace MHUrho.Control
 
         private void StartCameraMoveForward(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            movement.Z = KeyCameraSensitivity;
+            movement.Z = CameraScrollSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveForward(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            if (movement.Z == KeyCameraSensitivity) {
+            if (movement.Z == CameraScrollSensitivity) {
                 movement.Z = 0;
             }
             cameraController.SetMovement(movement);
@@ -187,54 +249,54 @@ namespace MHUrho.Control
 
         private void StartCameraMoveBackward(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            movement.Z = -KeyCameraSensitivity;
+            movement.Z = -CameraScrollSensitivity;
             cameraController.SetMovement(movement);
         }
 
         private void StopCameraMoveBackward(int qualifiers) {
             var movement = cameraController.StaticMovement;
-            if (movement.Z == -KeyCameraSensitivity) {
+            if (movement.Z == -CameraScrollSensitivity) {
                 movement.Z = 0;
             }
             cameraController.SetMovement(movement);
         }
 
         private void StartCameraRotationRight(int qualifiers) {
-            cameraController.SetYaw(-KeyRotationSensitivity);
+            cameraController.SetYaw(-CameraRotationSensitivity);
         }
 
         private void StopCameraRotationRight(int qualifiers) {
-            if (cameraController.StaticYaw == -KeyRotationSensitivity) {
+            if (cameraController.StaticYaw == -CameraRotationSensitivity) {
                 cameraController.SetYaw(0);
             }
         }
 
         private void StartCameraRotationLeft(int qualifiers) {
-            cameraController.SetYaw(KeyRotationSensitivity);
+            cameraController.SetYaw(CameraRotationSensitivity);
         }
 
         private void StopCameraRotationLeft(int qualifiers) {
-            if (cameraController.StaticYaw == KeyRotationSensitivity) {
+            if (cameraController.StaticYaw == CameraRotationSensitivity) {
                 cameraController.SetYaw(0);
             }
         }
 
         private void StartCameraRotationUp(int qualifiers) {
-            cameraController.SetPitch(-KeyRotationSensitivity);
+            cameraController.SetPitch(-CameraRotationSensitivity);
         }
 
         private void StopCameraRotationUp(int qualifiers) {
-            if (cameraController.StaticPitch == -KeyRotationSensitivity) {
+            if (cameraController.StaticPitch == -CameraRotationSensitivity) {
                 cameraController.SetPitch(0);
             }
         }
 
         private void StartCameraRotationDown(int qualifiers) {
-            cameraController.SetPitch(KeyRotationSensitivity);
+            cameraController.SetPitch(CameraRotationSensitivity);
         }
 
         private void StopCameraRotationDown(int qualifiers) {
-            if (cameraController.StaticPitch == KeyRotationSensitivity) {
+            if (cameraController.StaticPitch == CameraRotationSensitivity) {
                 cameraController.SetPitch(0);
             }
         }

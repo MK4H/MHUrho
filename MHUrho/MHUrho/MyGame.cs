@@ -59,6 +59,11 @@ namespace MHUrho
             helloText.SetFont(font: ResourceCache.GetFont("Fonts/Font.ttf"), size: 30);
             UI.Root.AddChild(helloText);
 
+            UI.Cursor = new Cursor();
+            UI.Cursor.SetShape(CursorShape.Normal);
+            UI.Cursor.Enabled = true;
+            UI.Cursor.UseSystemShapes = true;
+
             var assetManager = new AssetManager(ResourceCache, Config);
 
             
@@ -111,7 +116,7 @@ namespace MHUrho
 
 
             touchControler = new TouchControler(cameraController, Input);
-            mouseController = new MouseController(cameraController, Input);
+            mouseController = new MouseController(cameraController, Input, Graphics);
 
             // Viewport
             var viewport = new Viewport(Context, scene, cameraController.Camera, null);
