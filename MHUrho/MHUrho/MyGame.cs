@@ -63,7 +63,7 @@ namespace MHUrho
 
 
 
-            var assetManager = new AssetManager(ResourceCache, Config);
+            var assetManager = new PackageManager(ResourceCache, Config);
 
             
 

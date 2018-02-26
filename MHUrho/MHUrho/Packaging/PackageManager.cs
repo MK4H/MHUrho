@@ -11,14 +11,13 @@ using System.Xml.Schema;
 using Urho;
 using Urho.IO;
 using Urho.Resources;
-using FileMode = System.IO.FileMode;
 
 namespace MHUrho
 {
     /// <summary>
     /// ResourceCache wrapper providing loading, unloading and downloading of ResourcePacks
     /// </summary>
-    internal class AssetManager
+    internal class PackageManager
     {
         /// <summary>
         /// Path to the schema for Resource Pack Directory xml files
@@ -31,7 +30,7 @@ namespace MHUrho
 
         private readonly List<ResourcePack> availablePacks = new List<ResourcePack>();
 
-        public AssetManager(ResourceCache cache, ConfigManager config)
+        public PackageManager(ResourceCache cache, ConfigManager config)
         {
             this.cache = cache;
             this.configManager = config;
