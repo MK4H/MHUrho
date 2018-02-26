@@ -8,7 +8,7 @@ namespace MHUrho.Logic
 {
     public class UnitType
     {
-        public static Dictionary<string, UnitType> Types = new Dictionary<string, UnitType>();
+
 
         HashSet<string> PassableTileTypes;
 

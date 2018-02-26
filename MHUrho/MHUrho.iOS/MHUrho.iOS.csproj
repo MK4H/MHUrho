@@ -132,7 +132,6 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Content Include="UrhoSharpReadme.txt" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <InterfaceDefinition Include="Resources\LaunchScreen.xib" />
@@ -148,11 +147,14 @@
     <Reference Include="Priority Queue, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\OptimizedPriorityQueue.4.1.1\lib\netstandard1.0\Priority Queue.dll</HintPath>
     </Reference>
+    <Reference Include="protobuf-net, Version=2.3.7.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.3.7\lib\netstandard2.0\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Urho, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\UrhoSharp.1.5.22\lib\Xamarin.iOS10\Urho.dll</HintPath>
+      <HintPath>..\..\packages\UrhoSharp.1.8.65\lib\Xamarin.iOS10\Urho.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>

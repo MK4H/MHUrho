@@ -16,7 +16,6 @@ namespace NUnit.Tests {
 
         class TestUnit : IUnit {
             #region NOT USED IN TEST
-            public int ID => throw new NotImplementedException();
 
             public UnitType Type => throw new NotImplementedException();
 

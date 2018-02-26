@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 
 using Urho;
+using ProtoBuf;
 
 namespace MHUrho.Logic
 {
+    [ProtoContract]
     public class Tile : ITile
     {
         /// <summary>
@@ -40,11 +42,13 @@ namespace MHUrho.Logic
         /// <summary>
         /// Tile type of this tile
         /// </summary>
+        [ProtoMember(1,AsReference = true)]
         public TileType Type { get; set; }
         
         /// <summary>
         /// The area in the map this tile represents
         /// </summary>
+        [ProtoMember(2)]
         public IntRect MapArea { get; private set; }
 
         /// <summary>
@@ -63,8 +67,10 @@ namespace MHUrho.Logic
 
         public Vector2 Center { get { return new Vector2(Location.X + 0.5f, Location.Y + 0.5f); } }
 
+        [ProtoMember(3)]
         public float Height { get; private set; }
 
+        [ProtoMember(4,AsReference = true)]
         public LogicManager Logic { get; set; }
 
 

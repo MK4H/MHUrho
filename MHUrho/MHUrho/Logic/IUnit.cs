@@ -6,7 +6,6 @@ using Urho;
 namespace MHUrho.Logic
 {
     public interface IUnit : ISelectable {
-        int ID { get; }
 
         UnitType Type { get; }
 

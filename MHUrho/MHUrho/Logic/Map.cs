@@ -2,24 +2,33 @@
 using System.Collections.Generic;
 using System.Text;
 using Urho;
+using ProtoBuf;
+using System.IO;
 
 namespace MHUrho.Logic
 {
+    [ProtoContract]
     public class Map : IMap {
+
+        [ProtoMember(1)]
         private readonly Tile[] contents;
        
         public Model Model { get; private set; }
 
         public Material Material { get; private set; }
 
+
         /// <summary>
         /// Coordinates of the top left corner of the map
         /// </summary>
+        [ProtoMember(2)]
         public IntVector2 TopLeft { get; private set; }
+
 
         /// <summary>
         /// Coordinates of the bottom right corner of the map
         /// </summary>
+        [ProtoMember(3)]
         public IntVector2 BottomRight { get; private set; }
 
         public int Width => Right + 1;
@@ -43,9 +52,6 @@ namespace MHUrho.Logic
         /// Y coordinate of the bottom row of the map
         /// </summary>
         public int Bottom => BottomRight.Y;
-
-
-
 
         public static Map CreateDefaultMap(int width, int height, Context context) {
             //TODO: Split map into chunks, that will be separately in memory
@@ -369,5 +375,9 @@ namespace MHUrho.Logic
             }
         }
 
+        [ProtoAfterDeserialization]
+        internal void AfterDeserialization() {
+
+        }
     }
 }

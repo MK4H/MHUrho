@@ -5,6 +5,8 @@ using Urho;
 using Urho.IO;
 
 using MHUrho.Helpers;
+using Urho.Gui;
+using Urho.Resources;
 
 namespace MHUrho.Control
 {
@@ -46,7 +48,7 @@ namespace MHUrho.Control
 
         private CameraController cameraController;
         private readonly Input input;
-        private readonly Graphics graphics;
+        private readonly UI ui;
 
 
         private CameraMovementType cameraType;
@@ -62,16 +64,45 @@ namespace MHUrho.Control
         private bool mouseInTopBottom;
 
         public MouseController( CameraController cameraController, 
-                                Input input, Graphics graphics) {
+                                Input input, 
+                                UI ui, 
+                                Context context, 
+                                ResourceCache resourceCache) {
             this.cameraController = cameraController;
             this.input = input;
             this.MouseSensitivity = 0.2f;
             this.CameraScrollSensitivity = 5f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
-            this.graphics = graphics;
+            this.ui = ui;
 
             cameraController.Drag = 10;
+
+            var style = resourceCache.GetXmlFile("UI/DefaultStyle.xml");
+            ui.Root.SetDefaultStyle(style);
+
+            var cursor = ui.Root.CreateCursor("UICursor");
+            ui.Cursor = cursor;
+            ui.Cursor.SetStyleAuto(style);
+            ui.Cursor.Position = new IntVector2(ui.Root.Width / 2, ui.Root.Height / 2);
+
+            var cursorImage = resourceCache.GetImage("Textures/xamarin.png");
+            ui.Cursor.DefineShape("MyShape",
+                cursorImage,
+                new IntRect(0, 0, cursorImage.Width - 1, cursorImage.Height - 1),
+                new IntVector2(cursorImage.Width / 2, cursorImage.Height / 2));
+            //TODO: Shape keeps reseting to NORMAL, even though i set it here
+            ui.Cursor.Shape = "MyShape";
+            ui.Cursor.UseSystemShapes = false;
+            ui.Cursor.Visible = true;
+            
+
+
+
+            input.SetMouseMode(MouseMode.Absolute);
+            input.SetMouseVisible(false);
+
+            
 
             FillActionList();
 
@@ -154,8 +185,8 @@ namespace MHUrho.Control
                 cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseSensitivity);
             }
             else if (cameraType == CameraMovementType.Fixed) {
-                Log.Write(LogLevel.Debug, $"Mouse position: X={e.X}, Y={e.Y}");
-                MouseBorderMovement(e);
+                Log.Write(LogLevel.Debug, $"Mouse position: X={ui.Cursor.Position.X}, Y={ui.Cursor.Position.Y}");
+                MouseBorderMovement(ui.Cursor.Position);
             }
         }
 
@@ -163,45 +194,44 @@ namespace MHUrho.Control
 
         }
 
-        private void MouseBorderMovement(MouseMovedEventArgs e) {
+        private void MouseBorderMovement(IntVector2 mousePos) {
 
+            Vector2 cameraMovement = new Vector2(cameraController.StaticMovement.X, cameraController.StaticMovement.Z);
 
-            Vector2 cameraMovement = new Vector2(cameraController.StaticMovement.X,cameraController.StaticMovement.Z);
-
-            if (!mouseInLeftRight ) {
+            if (!mouseInLeftRight) {
                 //Mouse was not in the border area before, check if it is now 
                 // and if it is, set the movement
-                if (e.X < graphics.Width * CloseToBorder) {
+                if (mousePos.X < ui.Root.Width * CloseToBorder) {
                     cameraMovement.X = -CameraScrollSensitivity;
                     mouseInLeftRight = true;
                 }
-                else if (e.X > graphics.Width * (1 - CloseToBorder)) {
+                else if (mousePos.X > ui.Root.Width * (1 - CloseToBorder)) {
                     cameraMovement.X = CameraScrollSensitivity;
                     mouseInLeftRight = true;
                 }
-                
+
             }
-            else if (graphics.Width * CloseToBorder <= e.X && e.X <= graphics.Width * (1 - CloseToBorder)) {
+            else if (ui.Root.Width * CloseToBorder <= mousePos.X && mousePos.X <= ui.Root.Width * (1 - CloseToBorder)) {
                 //Mouse was in the area, and now it is not, reset the movement
                 cameraMovement.X = 0;
                 mouseInLeftRight = false;
             }
 
             if (!mouseInTopBottom) {
-                if (e.Y < graphics.Height * CloseToBorder) {
+                if (mousePos.Y < ui.Root.Height * CloseToBorder) {
                     cameraMovement.Y = CameraScrollSensitivity;
                     mouseInTopBottom = true;
                 }
-                else if (e.Y > graphics.Height * (1 - CloseToBorder)) {
+                else if (mousePos.Y > ui.Root.Height * (1 - CloseToBorder)) {
                     cameraMovement.Y = -CameraScrollSensitivity;
                     mouseInTopBottom = true;
                 }
             }
-            else if (graphics.Height * CloseToBorder <= e.Y && e.Y <= graphics.Height * (1 - CloseToBorder)) {
+            else if (ui.Root.Height * CloseToBorder <= mousePos.Y && mousePos.Y <= ui.Root.Height * (1 - CloseToBorder)) {
                 cameraMovement.Y = 0;
                 mouseInTopBottom = false;
             }
-           
+
             cameraController.SetHorizontalMovement(cameraMovement);
         }
 
@@ -305,10 +335,13 @@ namespace MHUrho.Control
             if (cameraType == CameraMovementType.FreeFloat) {
                 cameraController.SwitchToFixed();
                 cameraType = CameraMovementType.Fixed;
+                ui.Cursor.Visible = true;
+                
             }
             else {
                 cameraController.SwitchToFree();
                 cameraType = CameraMovementType.FreeFloat;
+                ui.Cursor.Visible = false;
             }
         }
     }
