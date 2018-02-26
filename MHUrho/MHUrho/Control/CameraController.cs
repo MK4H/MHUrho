@@ -260,7 +260,7 @@ namespace MHUrho.Control
         /// <param name="deltaZ">Movement of the camera in forward/backward direction</param>
         private void MoveHorizontal(float deltaX, float deltaZ) {
             var delta3D = new Vector3(deltaX, 0, deltaZ);
-            var rotation = Quaternion.FromAxisAngle(cameraHolder.Up,-cameraHolder.Rotation.YawAngle);
+            var rotation = Quaternion.FromAxisAngle(cameraHolder.Up, cameraHolder.Rotation.YawAngle);
 
             var worldDelta = rotation * delta3D;
             cameraHolder.Translate(worldDelta,TransformSpace.World);
