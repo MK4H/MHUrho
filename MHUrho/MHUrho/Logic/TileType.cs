@@ -8,7 +8,7 @@ using MHUrho.Packaging;
 
 namespace MHUrho.Logic
 {
-    public class TileType
+    public class TileType : IIDNameAndPackage
     {
         public int ID { get; private set; }
 

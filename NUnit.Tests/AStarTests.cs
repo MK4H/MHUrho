@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 using MHUrho.Logic;
+using MHUrho.Storage;
 using Urho;
 
 namespace NUnit.Tests {
@@ -44,6 +45,9 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public StUnit Save() {
+                throw new NotImplementedException();
+            }
             #endregion
             public Vector2 Position { get; private set; }
 
@@ -74,8 +78,6 @@ namespace NUnit.Tests {
 
                 public List<Unit> PassingUnits => throw new NotImplementedException();
 
-
-
                 public TileType Type => throw new NotImplementedException();
 
                 public IntRect MapArea => throw new NotImplementedException();
@@ -105,6 +107,10 @@ namespace NUnit.Tests {
                 }
 
                 public void RemoveUnit(Unit unit) {
+                    throw new NotImplementedException();
+                }
+
+                public StTile Save() {
                     throw new NotImplementedException();
                 }
                 #endregion
@@ -154,6 +160,10 @@ namespace NUnit.Tests {
                 }
 
                 public void RemoveUnit(Unit unit) {
+                    throw new NotImplementedException();
+                }
+
+                public StTile Save() {
                     throw new NotImplementedException();
                 }
                 #endregion
@@ -220,6 +230,9 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public StMap Save() {
+                throw new NotImplementedException();
+            }
             #endregion
 
             public IntVector2 TopLeft { get; private set; }

@@ -53,25 +53,37 @@ namespace MHUrho.Logic
         /// <summary>
         /// Current path this unit is following
         /// </summary>
-        Path Path;
+        Path path;
 
         /// <summary>
         /// Current target this unit is trying to attack
         /// </summary>
-        IUnit Target;
+        IUnit target;
+
+        /// <summary>
+        /// Holds the image of this unit between the steps of loading
+        /// After the last step, is set to null to free the resources
+        /// In game is null
+        /// </summary>
+        StUnit storage;
 
         #endregion
 
         #region Public methods
+
+        public static Unit Load(LevelManager levelManager, StUnit storedUnit) {
+            return new Unit(levelManager, storedUnit);
+        }
 
         public StUnit Save() {
             var storedUnit = new StUnit();
             storedUnit.Id = ID;
             storedUnit.Position = new StVector2 {X = Position.X, Y = Position.Y};
             storedUnit.PlayerID = Player.ID;
-            storedUnit.Path = Path.Save();
-            storedUnit.TargetUnitID = Target.ID;
+            storedUnit.Path = path.Save();
+            storedUnit.TargetUnitID = target.ID;
             storedUnit.TypeID = Type.ID;
+            return storedUnit;
         }
         
         /// <summary>
@@ -80,11 +92,11 @@ namespace MHUrho.Logic
         /// <param name="gameTime">The real time since the last update</param>
         public void Update(TimeSpan gameTime)
         {
-            if (Path != null)
+            if (path != null)
             {
-                if (Target != null && Target.Tile != Path.Target)
+                if (target != null && target.Tile != path.Target)
                 {
-                    Order(Target);
+                    Order(target);
                 }
                 MoveAlongThePath((float)gameTime.TotalSeconds);
             }
@@ -112,12 +124,12 @@ namespace MHUrho.Logic
 
         public bool Order(ITile tile)
         {
-            Path = Level.GetPath(this,tile);
-            if (Path == null)
+            path = Level.GetPath(this,tile);
+            if (path == null)
             {
                 return false;
             }
-            Path.MoveNext();
+            path.MoveNext();
             Tile.RemoveUnit(this);
             Tile.AddPassingUnit(this);
             return true;
@@ -132,7 +144,7 @@ namespace MHUrho.Logic
                 throw new ArgumentException("Attacking my own units");
             }
 
-            Target = unit;
+            target = unit;
             // TODO: Maybe calculate where they will meet and pathfind there
             Path NewPath = Level.GetPath(this, unit.Tile);
             if (NewPath == null)
@@ -140,7 +152,7 @@ namespace MHUrho.Logic
                 return false;
             }
 
-            Path.MoveNext();
+            path.MoveNext();
             Tile.RemoveUnit(this);
             Tile.AddPassingUnit(this);
             return true;
@@ -171,6 +183,21 @@ namespace MHUrho.Logic
         #endregion
 
         #region Constructors
+
+        /// <summary>
+        /// Initializes everything apart from the things referenced by their ID or position
+        /// </summary>
+        /// <param name="levelManager">Manager of the loaded level</param>
+        /// <param name="storedUnit">Image of the unit</param>
+        protected Unit(LevelManager levelManager, StUnit storedUnit) {
+            this.Level = levelManager;
+            this.Selected = false;
+            this.storage = storedUnit;
+            this.ID = storedUnit.Id;
+            this.path = Path.Load(storedUnit.Path);
+            this.Position = new Vector2(storedUnit.Position.X, storedUnit.Position.Y);
+        }
+        
         public Unit(Tile tile, LevelManager level, Player player)
         {
             this.Level = level;
@@ -206,25 +233,25 @@ namespace MHUrho.Logic
         /// <param name="elapsedSeconds"></param>
         void MoveAlongThePath(float elapsedSeconds)
         {
-            if (Path.Current == Tile.Location && AmInTheMiddle())
+            if (path.Current == Tile.Location && AmInTheMiddle())
             {
-                if (!Path.MoveNext())
+                if (!path.MoveNext())
                 {
-                    Path = null;
+                    path = null;
                 }
                 else
                 {
                     //TODO: Make the path return the exact points which the unit should pass
-                    MoveTowards(new Vector2(Path.Current.X + 0.5f, Path.Current.Y + 0.5f), elapsedSeconds);
+                    MoveTowards(new Vector2(path.Current.X + 0.5f, path.Current.Y + 0.5f), elapsedSeconds);
                 }
             }
-            else if (Path.Current == Tile.Location)
+            else if (path.Current == Tile.Location)
             {
                 MoveToMiddle(elapsedSeconds);
             }
             else
             {
-                MoveTowards(new Vector2(Path.Current.X + 0.5f, Path.Current.Y + 0.5f), elapsedSeconds);
+                MoveTowards(new Vector2(path.Current.X + 0.5f, path.Current.Y + 0.5f), elapsedSeconds);
             }
         }
 
@@ -237,12 +264,12 @@ namespace MHUrho.Logic
         {
             Position += GetMoveVector(destination, elapsedSeconds);
             IntVector2 TileIndex = new IntVector2((int)Position.X, (int)Position.Y);
-            if (TileIndex == Path.Current)
+            if (TileIndex == path.Current)
             {
                 ITile NewTile = Level.TryMoveUnitThroughTileAt(this, TileIndex);
                 if (NewTile == null)
                 {
-                    Order(Path.Target);
+                    Order(path.Target);
                 }
                 else
                 {

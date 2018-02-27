@@ -140,7 +140,27 @@ namespace MHUrho.Logic
         /// <param name="storedMap">Protocol Buffers class containing stored map</param>
         /// <returns>Map with loaded data, but without connected references and without geometry</returns>
         public static Map Load(StMap storedMap) {
+            var newMap = new Map(storedMap);
+            try {
+                int i = 0;
+                foreach (var tile in storedMap.Tiles) {
+                    newMap.contents[i++] = Tile.Load(tile);
+                }
 
+                if (i < newMap.contents.Length) {
+                    throw new ArgumentException();
+                }
+            }
+            catch (IndexOutOfRangeException e) {
+                //TODO: Logging
+                throw;
+            }
+            catch (NullReferenceException e) {
+                //TODO: Logging
+                throw;
+            }
+
+            return newMap;
         }
 
         public StMap Save() {
@@ -157,6 +177,12 @@ namespace MHUrho.Logic
             }
 
             return storedMap;
+        }
+
+        protected Map(StMap storedMap) {
+            this.TopLeft = new IntVector2(0, 0);
+            this.BottomRight = new IntVector2(storedMap.Size.X - 1, storedMap.Size.Y - 1);
+            this.contents = new Tile[Width * Height];
         }
 
         protected Map(int width, int height, Model model, Material material) {

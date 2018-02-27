@@ -67,6 +67,11 @@ namespace MHUrho.Logic
 
         public LevelManager Level { get; set; }
 
+        /// <summary>
+        /// Stores tile image between the steps of loading
+        /// After loading is set to null to reclaim resources
+        /// </summary>
+        private StTile storage;
 
         public StTile Save() {
             var storedTile = new StTile();
@@ -81,6 +86,29 @@ namespace MHUrho.Logic
 
             return storedTile;
         }
+        
+        /// <summary>
+        /// Loads everything apart from thigs referenced by ID
+        /// </summary>
+        /// <param name="storedTile">Image of the tile</param>
+        /// <returns>Partially initialized tile</returns>
+        public static Tile Load(StTile storedTile) {
+            return new Tile(storedTile);
+        }
+
+        protected Tile(StTile storedTile) {
+            this.storage = storedTile;
+            this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, 1, 1);
+            this.Height = storedTile.Height;
+        }
+
+        protected Tile(LevelManager level, int x, int y) {
+            this.Level = level;
+            MapArea = new IntRect(x, y, 1, 1);
+            MovementSpeedModifier = 2;
+            PassingUnits = new List<Unit>();
+        }
+
 
         /// <summary>
         /// TEMPORARY
@@ -142,13 +170,6 @@ namespace MHUrho.Logic
             }
         }
 
-        public Tile(LevelManager level, int x, int y)
-        {
-            this.Level = level;
-            MapArea = new IntRect(x, y, 1, 1);
-            MovementSpeedModifier = 2;
-            PassingUnits = new List<Unit>();
-        }
-
+        
     }
 }

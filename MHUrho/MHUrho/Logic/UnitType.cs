@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class UnitType
+    public class UnitType : IIDNameAndPackage
     {
 
         public int ID { get; private set; }
@@ -35,12 +35,5 @@ namespace MHUrho.Logic
             return PassableTileTypes.Contains(tileType);
         }
 
-        /// <summary>
-        /// Loads unit types from predefined directory
-        /// </summary>
-        public static void LoadUnitTypes()
-        {
-
-        }
     }
 }

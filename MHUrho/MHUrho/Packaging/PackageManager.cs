@@ -31,7 +31,7 @@ namespace MHUrho.Packaging
 
         private readonly ConfigManager configManager;
 
-        private readonly List<ResourcePack> availablePacks = new List<ResourcePack>();
+        private readonly Dictionary<string, ResourcePack> availablePacks = new Dictionary<string, ResourcePack>();
 
         private Dictionary<int, ResourcePack> activePackages;
 
@@ -40,6 +40,8 @@ namespace MHUrho.Packaging
         private Dictionary<int, UnitType> activeUnitTypes;
 
         //private Dictionary<int, BuildingType> activeTileTypes;
+
+        private readonly Random rng;
 
         public StPackages Save() {
             var storedPackages = new StPackages();
@@ -61,10 +63,39 @@ namespace MHUrho.Packaging
             return storedPackages;
         }
 
+        public void LoadForLevel(StPackages storedPackages) {
+            //Remap everything from LevelLocal IDs to Global names so we can check if there are already things loaded
+            Dictionary<string, TileType> loadedTileTypes = RemapToFullName(activeTileTypes);
+            Dictionary<string, UnitType> loadedUnitTypes = RemapToFullName(activeUnitTypes);
+
+            GetNewActiveDictionaries();
+
+            foreach (var package in storedPackages.Packages) {
+                if (!availablePacks.ContainsKey(package.Name)) {
+                    throw new Exception($"Package {package.Name} not available");
+                }
+
+                activePackages.Add(
+                    package.ID,
+                    loadedPackages.TryGetValue(package.Name, out ResourcePack loadedPackage)
+                        ? loadedPackage
+                        : availablePacks[package.Name]);
+            }
+
+            foreach (var tileType in storedPackages.TileTypes) {
+                
+                activeTileTypes.Add(
+                    tileType.TileTypeID,
+                    loadedTileTypes.TryGetValue(tileType.))
+            }
+
+        }
+
         public PackageManager(ResourceCache cache, ConfigManager config)
         {
             this.cache = cache;
             this.configManager = config;
+            this.rng = new Random();
 
             var schema = new XmlSchemaSet();
             try
@@ -135,8 +166,49 @@ namespace MHUrho.Packaging
             if (loadedPacks == null) return;
 
             //Adds all the discovered packs into the availablePacks list
-            availablePacks.AddRange(loadedPacks);
+            foreach (var loadedPack in loadedPacks) {
+                availablePacks.Add(loadedPack.Name, loadedPack);
+            }
 
+        }
+
+        /// <summary>
+        /// Creates a map with key being full name of the T parameter
+        /// Full name means package-name/item-name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="mappedByID">Dictionary of items mapped by their ID</param>
+        /// <returns>Dictionary of all items from <paramref name="mappedByID"/> mapped by their full name</returns>
+        private static Dictionary<string, T> RemapToFullName<T>(IDictionary<int, T> mappedByID) 
+            where T : IIDNameAndPackage
+        {
+            Dictionary<string, T> byName = new Dictionary<string, T>();
+            foreach (var byID in mappedByID) {
+                byName.Add(string.Concat(byID.Value.Package.Name,"/",byID.Value.Name), byID.Value);
+            }
+
+            return byName;
+        }
+
+        private void GetNewActiveDictionaries() {
+            activePackages = new Dictionary<int, ResourcePack>();
+            activeTileTypes = new Dictionary<int, TileType>();
+            activeUnitTypes = new Dictionary<int, UnitType>();
+        }
+
+        private const int MaxTries = 10000;
+
+        private int GetID<T>(IDictionary<int, T> dictionary) {
+            int id, i = 0;
+            while (dictionary.ContainsKey(id = rng.Next())) {
+                i++;
+                if (i > MaxTries) {
+                    //TODO: Exception
+                    throw new Exception("Could not find free ID");
+                }
+            }
+
+            return id;
         }
     }
 }

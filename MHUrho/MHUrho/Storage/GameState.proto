@@ -48,6 +48,7 @@ message StPlayer {
 
 message StPath {
 	repeated StIntVector2 pathPoints = 1;
+	int32 currentIndex = 2;
 }
 
 message StMap {

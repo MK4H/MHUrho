@@ -77,7 +77,7 @@ namespace MHUrho.Logic
             Map map = Map.Load(storedLevel.Map);
             LevelManager level = new LevelManager(packageManager, map);
             foreach (var unit in storedLevel.Units) {
-                level.units.Add(Unit.Load(unit));
+                level.units.Add(Unit.Load(level, unit));
             }
 
             foreach (var player in storedLevel.Players) {

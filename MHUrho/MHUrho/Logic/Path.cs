@@ -27,6 +27,7 @@ namespace MHUrho.Logic
 
         public StPath Save() {
             var storedPath = new StPath();
+            storedPath.CurrentIndex = CurrentIndex;
             var storedPathPoints = storedPath.PathPoints;
 
             foreach (var point in pathPoints) {
@@ -34,6 +35,25 @@ namespace MHUrho.Logic
             }
 
             return storedPath;
+        }
+
+        public static Path Load(StPath storedPath) {
+            var newPath = new Path(storedPath);
+            foreach (var pathPoint in storedPath.PathPoints) {
+                newPath.pathPoints.Add(new IntVector2(pathPoint.X, pathPoint.Y));
+            }
+            return newPath;
+        }
+
+        public Path(StPath storedPath) {
+            this.CurrentIndex = storedPath.CurrentIndex;
+            this.pathPoints = new List<IntVector2>();
+        }
+
+        public Path(List<IntVector2> allPathPoints, ITile target) {
+            pathPoints = allPathPoints;
+            CurrentIndex = -1;
+            this.Target = target;
         }
 
         public void Dispose()
@@ -52,12 +72,7 @@ namespace MHUrho.Logic
             CurrentIndex = -1;
         }
 
-        public Path(List<IntVector2> allPathPoints, ITile target)
-        {
-            pathPoints = allPathPoints;
-            CurrentIndex = -1;
-            this.Target = target;
-        }
+        
 
         
     }
