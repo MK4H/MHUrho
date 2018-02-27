@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Urho;
-using ProtoBuf;
 
 
 namespace MHUrho.Logic
@@ -12,13 +11,13 @@ namespace MHUrho.Logic
     {
         #region Public members
 
-        [ProtoMember(1,AsReference = true)]
+        public int ID { get; private set; }
+
         public UnitType Type { get; private set;}
 
         /// <summary>
         /// Position in the level
         /// </summary>
-        [ProtoMember(2)]
         public Vector2 Position { get; private set; }
 
         /// <summary>
@@ -30,13 +29,11 @@ namespace MHUrho.Logic
         /// <summary>
         /// Logic this unit is in
         /// </summary>
-        [ProtoMember(3,AsReference = true)]
         public LogicManager Level { get; private set; }
 
         /// <summary>
         /// Player owning this unit
         /// </summary>
-        [ProtoMember(4,AsReference = true)]
         public IPlayer Player { get; private set; }
 
         #endregion
@@ -55,7 +52,6 @@ namespace MHUrho.Logic
         /// <summary>
         /// Current path this unit is following
         /// </summary>
-        [ProtoMember(5)]
         Path Path;
 
         /// <summary>

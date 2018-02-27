@@ -1,0 +1,68 @@
+﻿syntax = "proto3";
+package MHUrho.Storage;
+
+
+message Level {
+	
+}
+
+message Tile {
+	int32 unitID = 1;
+	repeated int32 passingUnitIDs = 2;
+	int32 tileTypeID = 3;
+	IntVector2 position = 4;
+	float height = 5;
+}
+
+message Unit {
+	int32 id = 1;
+	int32 typeID = 2;
+	Vector2 position = 3;
+	int32 playerID = 4;
+	Path path = 5;
+	//TODO: maybe add if it is selected, but probably just start with nothing selected
+	int32 targetUnitID = 6;
+}
+
+message Building {
+
+}
+
+message Player {
+
+}
+
+message Path {
+	repeated IntVector2 pathPoints = 1;
+}
+
+message Map {
+	IntVector2 size = 1;
+	repeated Tile tiles = 2;
+}
+
+message TileType {
+	int32 packageID = 1;
+	string name = 2;
+}
+
+message UnitType {
+	int32 packageID = 1;
+	string name = 2;
+}
+
+message BuildingType {
+	int32 packageID = 1;
+	string name = 2;
+
+}
+
+message IntVector2 {
+	int32 X = 1;
+	int32 Y = 2;
+}
+
+message Vector2 {
+	float X = 1;
+	float Y = 2;
+}

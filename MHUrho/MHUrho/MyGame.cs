@@ -12,6 +12,7 @@ using System.IO;
 using System.Reflection;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NUnit.Tests")]
 

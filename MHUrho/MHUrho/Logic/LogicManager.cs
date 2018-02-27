@@ -4,7 +4,6 @@ using System.Text;
 
 
 using Urho;
-using ProtoBuf;
 
 namespace MHUrho.Logic
 {
@@ -14,17 +13,14 @@ namespace MHUrho.Logic
 
         public float GameSpeed { get; set; } = 1f;
 
-        [ProtoMember(1)]
         List<Unit> units;
 
         IPathFindAlg pathFind;
 
-        [ProtoMember(2)]
         public Map Map { get; private set; }
 
 
         //TODO: Probably not public
-        [ProtoMember(3)]
         public Player[] Players;
 
         /// <summary>
@@ -99,11 +95,6 @@ namespace MHUrho.Logic
         {
             units = new List<Unit>();
 
-        }
-
-        [ProtoAfterDeserialization]
-        public void AfterDeserialization() {
-            pathFind = new AStar(Map);
         }
         
     }

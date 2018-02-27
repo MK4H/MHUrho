@@ -12,7 +12,7 @@ using Urho;
 using Urho.IO;
 using Urho.Resources;
 
-namespace MHUrho
+namespace MHUrho.Packaging
 {
     /// <summary>
     /// ResourceCache wrapper providing loading, unloading and downloading of ResourcePacks
