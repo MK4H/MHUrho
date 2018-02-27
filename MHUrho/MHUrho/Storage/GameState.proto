@@ -2,67 +2,85 @@
 package MHUrho.Storage;
 
 
-message Level {
-	
+message StLevel {
+	StMap map = 1;
+	repeated StUnit units = 2;
+	repeated StPlayer players = 3;
+	float gameSpeed = 4;
 }
 
-message Tile {
+message StPackages {
+	repeated StPackage packages = 1;
+	repeated StTileType tileTypes = 2;
+	repeated StUnitType unitTypes = 3;
+	repeated StBuildingType buildingTypes = 4;
+}
+
+message StPackage {
+	int32 ID = 1;
+	string name = 2;
+}
+
+message StTile {
 	int32 unitID = 1;
 	repeated int32 passingUnitIDs = 2;
 	int32 tileTypeID = 3;
-	IntVector2 position = 4;
+	StIntVector2 position = 4;
 	float height = 5;
 }
 
-message Unit {
+message StUnit {
 	int32 id = 1;
 	int32 typeID = 2;
-	Vector2 position = 3;
+	StVector2 position = 3;
 	int32 playerID = 4;
-	Path path = 5;
-	//TODO: maybe add if it is selected, but probably just start with nothing selected
+	StPath path = 5;
 	int32 targetUnitID = 6;
 }
 
-message Building {
+message StBuilding {
 
 }
 
-message Player {
+message StPlayer {
 
 }
 
-message Path {
-	repeated IntVector2 pathPoints = 1;
+message StPath {
+	repeated StIntVector2 pathPoints = 1;
 }
 
-message Map {
-	IntVector2 size = 1;
-	repeated Tile tiles = 2;
+message StMap {
+	StIntVector2 size = 1;
+	repeated StTile tiles = 2;
 }
 
-message TileType {
+message StTileType {
+	int32 packageID = 1;
+	//Global across all tileTypes in this level
+	int32 tileTypeID = 2;
+	string name = 3;
+}
+
+message StUnitType {
+	//Global across all packages in this level
+	int32 packageID = 1;
+	int32 unitTypeID = 2;
+	string name = 3;
+}
+
+message StBuildingType {
 	int32 packageID = 1;
 	string name = 2;
-}
-
-message UnitType {
-	int32 packageID = 1;
-	string name = 2;
-}
-
-message BuildingType {
-	int32 packageID = 1;
-	string name = 2;
 
 }
 
-message IntVector2 {
+message StIntVector2 {
 	int32 X = 1;
 	int32 Y = 2;
 }
 
-message Vector2 {
+message StVector2 {
 	float X = 1;
 	float Y = 2;
 }

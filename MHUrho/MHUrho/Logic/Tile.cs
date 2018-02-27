@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.Logic
@@ -65,8 +65,22 @@ namespace MHUrho.Logic
 
         public float Height { get; private set; }
 
-        public LogicManager Logic { get; set; }
+        public LevelManager Level { get; set; }
 
+
+        public StTile Save() {
+            var storedTile = new StTile();
+            storedTile.UnitID = Unit.ID;
+            storedTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y};
+            storedTile.Height = Height;
+
+            var storedPassingUnits = storedTile.PassingUnitIDs;
+            foreach (var passingUnit in PassingUnits) {
+                storedPassingUnits.Add(passingUnit.ID);
+            }
+
+            return storedTile;
+        }
 
         /// <summary>
         /// TEMPORARY
@@ -74,8 +88,8 @@ namespace MHUrho.Logic
         /// <returns></returns>
         public bool SpawnUnit(Player player)
         {
-            Unit unit = new Unit(this, Logic, player);
-            Logic.RegisterUnit(unit);
+            Unit unit = new Unit(this, Level, player);
+            Level.RegisterUnit(unit);
 
             if (this.Unit != null)
             {
@@ -128,9 +142,9 @@ namespace MHUrho.Logic
             }
         }
 
-        public Tile(LogicManager logic, int x, int y)
+        public Tile(LevelManager level, int x, int y)
         {
-            this.Logic = logic;
+            this.Level = level;
             MapArea = new IntRect(x, y, 1, 1);
             MovementSpeedModifier = 2;
             PassingUnits = new List<Unit>();

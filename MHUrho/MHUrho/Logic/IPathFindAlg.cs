@@ -5,7 +5,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    interface IPathFindAlg {
+    public interface IPathFindAlg {
         List<IntVector2> FindPath(IUnit unit, IntVector2 target);
     }
 }

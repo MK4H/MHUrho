@@ -20,7 +20,7 @@ namespace NUnit.Tests {
             public int ID => throw new NotImplementedException();
             public UnitType Type => throw new NotImplementedException();
 
-            public LogicManager Level => throw new NotImplementedException();
+            public LevelManager Level => throw new NotImplementedException();
 
             public IPlayer Player => throw new NotImplementedException();
 
@@ -90,7 +90,7 @@ namespace NUnit.Tests {
 
                 public float Height => throw new NotImplementedException();
 
-                public LogicManager Logic => throw new NotImplementedException();
+                public LevelManager Level => throw new NotImplementedException();
 
                 public bool SpawnUnit(Player player) {
                     throw new NotImplementedException();
@@ -139,7 +139,7 @@ namespace NUnit.Tests {
 
                 public float Height => throw new NotImplementedException();
 
-                public LogicManager Logic => throw new NotImplementedException();
+                public LevelManager Level => throw new NotImplementedException();
 
                 public bool SpawnUnit(Player player) {
                     throw new NotImplementedException();

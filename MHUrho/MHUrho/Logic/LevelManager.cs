@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
-
-
+using MHUrho.Packaging;
 using Urho;
+using MHUrho.Storage;
 
 namespace MHUrho.Logic
 {
 
-    public class LogicManager
+    public class LevelManager
     {
-
         public float GameSpeed { get; set; } = 1f;
 
-        List<Unit> units;
+        readonly List<Unit> units;
 
-        IPathFindAlg pathFind;
+        readonly IPathFindAlg pathFind;
 
         public Map Map { get; private set; }
 
-
         //TODO: Probably not public
         public Player[] Players;
+
+        public PackageManager PackageManager { get; private set; }
 
         /// <summary>
         /// Registers unit after it is spawned by a Tile or a Building
@@ -72,29 +73,47 @@ namespace MHUrho.Logic
         }
 
 
+        public static LevelManager Load(StLevel storedLevel, PackageManager packageManager) {
+            Map map = Map.Load(storedLevel.Map);
+            LevelManager level = new LevelManager(packageManager, map);
+            foreach (var unit in storedLevel.Units) {
+                level.units.Add(Unit.Load(unit));
+            }
 
+            foreach (var player in storedLevel.Players) {
+                
+            }
 
-
-        //TODO: From XML
-        /// <summary>
-        /// Loads level logic
-        /// </summary>
-        /// <returns></returns>
-        public static LogicManager Load()
-        {
-            LogicManager newLevel = new LogicManager();
-            //TODO: Load from XML or something
-
-            newLevel.pathFind = new AStar(newLevel.Map);
-            //TODO: Load AI players
-            newLevel.Players = new Player[4];
-            newLevel.Players[0] = new Player(newLevel);
-            return newLevel;
+            return level;
         }
-        public LogicManager()
+
+        public StLevel Save() {
+            StLevel level = new StLevel() {
+                GameSpeed = this.GameSpeed,
+                Map = this.Map.Save()
+            };
+
+            var stUnits = level.Units;
+            foreach (var unit in units) {
+                stUnits.Add(unit.Save());
+            }
+
+            var stPlayers = level.Players;
+            foreach (var player in Players) {
+                stPlayers.Add(player.Save());
+            }
+
+            return level;
+        }
+
+        
+
+        protected LevelManager(PackageManager packageManager, Map map)
         {
             units = new List<Unit>();
-
+            this.PackageManager = packageManager;
+            this.Map = map;
+            this.pathFind = new AStar(map);
         }
         
     }

@@ -1,4 +1,5 @@
-﻿using Urho;
+﻿using MHUrho.Storage;
+using Urho;
 
 namespace MHUrho.Logic {
     public interface IMap {
@@ -105,5 +106,7 @@ namespace MHUrho.Logic {
 
         void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight);
         ITile FindClosestEmptyTile(ITile closestTo);
+
+        StMap Save();
     }
 }

@@ -1,5 +1,10 @@
-﻿namespace MHUrho.Logic {
+﻿using MHUrho.Storage;
+
+namespace MHUrho.Logic {
     public interface IPlayer {
+        
+        int ID { get; }
+        
         /// <summary>
         /// Processes a player click on a unit
         /// </summary>
@@ -16,5 +21,7 @@
         /// Clears list of currently selected 
         /// </summary>
         void ClearSelected();
+
+        StPlayer Save();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.Logic
@@ -60,7 +61,7 @@ namespace MHUrho.Logic
         /// </summary>
         float Height { get; }
 
-        LogicManager Logic { get; }
+        LevelManager Level { get; }
 
         bool SpawnUnit(Player player);
 
@@ -78,5 +79,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="unit">the unit to remove</param>
         void RemoveUnit(Unit unit);
+
+        StTile Save();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Storage;
 using Urho;
 
 
@@ -35,7 +36,7 @@ namespace MHUrho.Logic
                         }
                     }
 
-                    if (!Player.Logic.Map.IsInside(MovePoint))
+                    if (!Player.level.Map.IsInside(MovePoint))
                     {
                         IntVector2.Add(ref MovePoint,ref Delta, out MovePoint);
                         Delta.X = -(Delta.X + 1);
@@ -43,7 +44,7 @@ namespace MHUrho.Logic
                         continue;
                     }
 
-                    if (Player.Selected[toOrder].Order(Player.Logic.Map.GetTile(MovePoint)))
+                    if (Player.selected[toOrder].Order(Player.level.Map.GetTile(MovePoint)))
                     {
                         toOrder++;
                     }
@@ -98,16 +99,22 @@ namespace MHUrho.Logic
 
         }
 
+        public int ID { get; private set; }
 
+        readonly LevelManager level;
 
-        public readonly LogicManager Logic;
+        List<Player> friends;
 
-        List<Player> Friends;
+        List<Unit> units;
 
-        List<Unit> Units;
+        SelectedType typeOfSelected;
+        List<ISelectable> selected;
 
-        SelectedType TypeOfSelected;
-        List<ISelectable> Selected;
+        public StPlayer Save() {
+            var storedPlayer = new StPlayer();
+            //TODO: THIS
+            return storedPlayer;
+        }
 
         /// <summary>
         /// Processes a player click on a unit
@@ -121,7 +128,7 @@ namespace MHUrho.Logic
                 MyUnitClick(unit);
             }
             // Friendly unit
-            else if (Friends.Contains(unit.Player))
+            else if (friends.Contains(unit.Player))
             {
                 FriednlyUnitClick(unit);
             }
@@ -135,21 +142,21 @@ namespace MHUrho.Logic
 
         private void MyUnitClick(IUnit unit)
         {
-            if (TypeOfSelected == SelectedType.Unit)
+            if (typeOfSelected == SelectedType.Unit)
             {
                 if (unit.Select())
                 {
-                    Selected.Add(unit);
-                    TypeOfSelected = SelectedType.Unit;
+                    selected.Add(unit);
+                    typeOfSelected = SelectedType.Unit;
                 }
                 // Clicked on already selected unit
                 else
                 {
-                    Selected.Remove(unit);
+                    selected.Remove(unit);
                     // Deselected last unit
-                    if (Selected.Count == 0)
+                    if (selected.Count == 0)
                     {
-                        TypeOfSelected = SelectedType.None;
+                        typeOfSelected = SelectedType.None;
                     }
                     unit.Deselect();
                 }
@@ -159,8 +166,8 @@ namespace MHUrho.Logic
                 //TODO: Deselect all currently selected
                 ClearSelected();
                 unit.Select();
-                Selected.Add(unit);
-                TypeOfSelected = SelectedType.Unit;
+                selected.Add(unit);
+                typeOfSelected = SelectedType.Unit;
             }
         }
 
@@ -171,9 +178,9 @@ namespace MHUrho.Logic
 
         private void EnemyUnitClick(IUnit unit)
         {
-            if (TypeOfSelected == SelectedType.Unit)
+            if (typeOfSelected == SelectedType.Unit)
             {
-                foreach (var item in Selected)
+                foreach (var item in selected)
                 {
                     item.Order(unit);
                 }
@@ -186,12 +193,12 @@ namespace MHUrho.Logic
         /// <param name="tile">The tile clicked</param>
         public void ClickTile(ITile tile)
         {
-            if (TypeOfSelected == SelectedType.None)
+            if (typeOfSelected == SelectedType.None)
             {
                 //TODO:TEMP
                 tile.SpawnUnit(this);
             }
-            else if (TypeOfSelected == SelectedType.Unit)
+            else if (typeOfSelected == SelectedType.Unit)
             {
                 //TODO: return value
                 OrderUnits(tile);
@@ -204,7 +211,7 @@ namespace MHUrho.Logic
             int ToOrder = 0;
 
             // If i cant order to the clicked tile, imposible order
-            if (!Selected[ToOrder++].Order(tile))
+            if (!selected[ToOrder++].Order(tile))
             {
                 return false;
             }
@@ -213,7 +220,7 @@ namespace MHUrho.Logic
             IntVector2 BottomRight = tile.Location;
             IntVector2 MoveBy = new IntVector2(1, 1);
             List <LineOrder> LineOrders = new List<LineOrder>(4);
-            while (ToOrder < Selected.Count)
+            while (ToOrder < selected.Count)
             {
                 // New Rectangle
                 IntVector2.Subtract(ref TopLeft,ref MoveBy,out TopLeft);
@@ -229,7 +236,7 @@ namespace MHUrho.Logic
 
                 // Spawn all the lines
                 int i = 0;
-                while (ToOrder < Selected.Count)
+                while (ToOrder < selected.Count)
                 {
                     if (!LineOrders[i].OrderNext(ref ToOrder))
                     {
@@ -259,12 +266,12 @@ namespace MHUrho.Logic
             Point TargetPoint = topLeft;
             // Plus delta x, minus delta x;
             int pdx = 1, mdx = 0, pdy = 0, mdy = 0; 
-            while (toOrder < Selected.Count)
+            while (toOrder < selected.Count)
             {
                 TargetPoint.X = TargetPoint.X + pdx - mdx;
                 TargetPoint.Y = TargetPoint.Y + pdy - mdy;
 
-                if (Selected[toOrder].Order(Logic.TileAt(TargetPoint)))
+                if (selected[toOrder].Order(Level.TileAt(TargetPoint)))
                 {
                     toOrder++;
                 }
@@ -295,20 +302,20 @@ namespace MHUrho.Logic
         /// </summary>
         public void ClearSelected()
         {
-            foreach (var item in Selected)
+            foreach (var item in selected)
             {
                 item.Deselect();
             }
-            Selected = new List<ISelectable>();
+            selected = new List<ISelectable>();
         }
 
 
-        public Player(LogicManager logic)
+        public Player(LevelManager level)
         {
-            this.Logic = logic;
-            Units = new List<Unit>();
-            Selected = new List<ISelectable>();
-            TypeOfSelected = SelectedType.None;
+            this.level = level;
+            units = new List<Unit>();
+            selected = new List<ISelectable>();
+            typeOfSelected = SelectedType.None;
         }
     }
 }

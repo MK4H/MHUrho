@@ -2,32 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using MHUrho.Storage;
 using Urho;
+using MHUrho.Packaging;
 
 namespace MHUrho.Logic
 {
     public class TileType
     {
-        static Dictionary<string, TileType> Types = new Dictionary<string, TileType>();
-
-        /// <summary>
-        /// Loads tile types from predefined directory
-        /// </summary>
-        public static void LoadTileTypes()
-        {
-
-        }
+        public int ID { get; private set; }
 
         public float MovementSpeedModifier { get; private set; }
 
         public Texture3D Texture { get; private set; }
 
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
-        //TODO: TileType properties
+        public ResourcePack Package { get; private set; }
 
-        private TileType()
+        public StTileType Save() {
+            var storedTileType = new StTileType();
+            storedTileType.Name = Name;
+            storedTileType.TileTypeID = ID;
+            storedTileType.PackageID = Package.ID;
+
+            return storedTileType;
+        }
+
+        protected TileType()
         {
 
         }

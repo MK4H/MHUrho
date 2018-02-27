@@ -8,16 +8,19 @@ using System.Xml;
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.Schema;
+using MHUrho.Logic;
+using MHUrho.Storage;
 using Urho;
 using Urho.IO;
 using Urho.Resources;
+using Path = System.IO.Path;
 
 namespace MHUrho.Packaging
 {
     /// <summary>
     /// ResourceCache wrapper providing loading, unloading and downloading of ResourcePacks
     /// </summary>
-    internal class PackageManager
+    public class PackageManager
     {
         /// <summary>
         /// Path to the schema for Resource Pack Directory xml files
@@ -29,6 +32,34 @@ namespace MHUrho.Packaging
         private readonly ConfigManager configManager;
 
         private readonly List<ResourcePack> availablePacks = new List<ResourcePack>();
+
+        private Dictionary<int, ResourcePack> activePackages;
+
+        private Dictionary<int, TileType> activeTileTypes;
+
+        private Dictionary<int, UnitType> activeUnitTypes;
+
+        //private Dictionary<int, BuildingType> activeTileTypes;
+
+        public StPackages Save() {
+            var storedPackages = new StPackages();
+            var storedActivePackages = storedPackages.Packages;
+            foreach (var activePackage in activePackages) {
+                storedActivePackages.Add(new StPackage {ID = activePackage.Key, Name = activePackage.Value.Name});
+            }
+
+            var storedActiveTileTypes = storedPackages.TileTypes;
+            foreach (var activeTileType in activeTileTypes) {
+                storedActiveTileTypes.Add(activeTileType.Value.Save());
+            }
+
+            var storedActiveUnitTypes = storedPackages.UnitTypes;
+            foreach (var activeUnitType in activeUnitTypes) {
+                storedActiveUnitTypes.Add(activeUnitType.Value.Save());
+            }
+
+            return storedPackages;
+        }
 
         public PackageManager(ResourceCache cache, ConfigManager config)
         {
@@ -54,6 +85,7 @@ namespace MHUrho.Packaging
                 ParseResourcePackDir(path, schema);
             }
         }
+
 
         /// <summary>
         /// Pulls data about the resource packs contained in this directory from XML file

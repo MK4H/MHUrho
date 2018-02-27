@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Storage;
 using Urho;
 
 
@@ -27,9 +28,9 @@ namespace MHUrho.Logic
         public ITile Tile { get; private set; }
 
         /// <summary>
-        /// Logic this unit is in
+        /// Level this unit is in
         /// </summary>
-        public LogicManager Level { get; private set; }
+        public LevelManager Level { get; private set; }
 
         /// <summary>
         /// Player owning this unit
@@ -62,6 +63,17 @@ namespace MHUrho.Logic
         #endregion
 
         #region Public methods
+
+        public StUnit Save() {
+            var storedUnit = new StUnit();
+            storedUnit.Id = ID;
+            storedUnit.Position = new StVector2 {X = Position.X, Y = Position.Y};
+            storedUnit.PlayerID = Player.ID;
+            storedUnit.Path = Path.Save();
+            storedUnit.TargetUnitID = Target.ID;
+            storedUnit.TypeID = Type.ID;
+        }
+        
         /// <summary>
         /// Updates the unit, moves it according to the time since the last tick
         /// </summary>
@@ -159,7 +171,7 @@ namespace MHUrho.Logic
         #endregion
 
         #region Constructors
-        public Unit(Tile tile, LogicManager level, Player player)
+        public Unit(Tile tile, LevelManager level, Player player)
         {
             this.Level = level;
             this.Tile = tile;

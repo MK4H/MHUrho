@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Storage;
 using Urho;
 
 
@@ -23,6 +24,17 @@ namespace MHUrho.Logic
         public IntVector2 Current { get { return pathPoints[CurrentIndex]; } }
 
         object IEnumerator.Current { get { return pathPoints[CurrentIndex]; } }
+
+        public StPath Save() {
+            var storedPath = new StPath();
+            var storedPathPoints = storedPath.PathPoints;
+
+            foreach (var point in pathPoints) {
+                storedPathPoints.Add(new StIntVector2 {X = point.X, Y = point.Y});
+            }
+
+            return storedPath;
+        }
 
         public void Dispose()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 using System.IO;
+using MHUrho.Storage;
 
 namespace MHUrho.Logic
 {
@@ -126,6 +127,36 @@ namespace MHUrho.Logic
             model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 0, height));
 
             return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
+        }
+
+        /// <summary>
+        /// Loads map data from storedMap
+        /// 
+        /// Next step is to call ConnectReferences() to connect
+        /// references in the loaded level
+        /// 
+        /// Last step is to BuildGeometry, after all references are connected
+        /// </summary>
+        /// <param name="storedMap">Protocol Buffers class containing stored map</param>
+        /// <returns>Map with loaded data, but without connected references and without geometry</returns>
+        public static Map Load(StMap storedMap) {
+
+        }
+
+        public StMap Save() {
+            var storedMap = new StMap();
+            var StSize = new StIntVector2();
+            StSize.X = Width;
+            StSize.Y = Height;
+            storedMap.Size = StSize;
+
+            var storedTiles = storedMap.Tiles;
+
+            foreach (var tile in contents) {
+                storedTiles.Add(tile.Save());
+            }
+
+            return storedMap;
         }
 
         protected Map(int width, int height, Model model, Material material) {
@@ -370,8 +401,6 @@ namespace MHUrho.Logic
             }
         }
 
-        internal void AfterDeserialization() {
-
-        }
+        
     }
 }
