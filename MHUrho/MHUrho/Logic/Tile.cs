@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.Logic
 {
-    public class Tile : ITile
-    {
+    public class Tile : ITile {
+        public const int ImageWidth = 100;
+        public const int ImageHeight = 100;
+
+
         /// <summary>
         /// Unit that owns the tile, there can only be one
         /// </summary>
@@ -89,11 +93,26 @@ namespace MHUrho.Logic
         
         /// <summary>
         /// Loads everything apart from thigs referenced by ID
+        /// 
+        /// After everything had it StartLoading called, call ConnectReferences on everything
         /// </summary>
         /// <param name="storedTile">Image of the tile</param>
         /// <returns>Partially initialized tile</returns>
-        public static Tile Load(StTile storedTile) {
+        public static Tile StartLoading(StTile storedTile) {
             return new Tile(storedTile);
+        }
+
+        /// <summary>
+        /// Continues loading by connecting references
+        /// </summary>
+        public void ConnectReferences() {
+            Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
+
+            //TODO: Connect units
+        }
+
+        public void FinishLoading() {
+            storage = null;
         }
 
         protected Tile(StTile storedTile) {
@@ -108,7 +127,6 @@ namespace MHUrho.Logic
             MovementSpeedModifier = 2;
             PassingUnits = new List<Unit>();
         }
-
 
         /// <summary>
         /// TEMPORARY

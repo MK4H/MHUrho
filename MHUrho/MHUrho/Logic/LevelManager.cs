@@ -76,7 +76,7 @@ namespace MHUrho.Logic
         public static LevelManager Load(StLevel storedLevel, PackageManager packageManager) {
 
             //Load data
-            Map map = Map.Load(storedLevel.Map);
+            Map map = Map.StartLoading(storedLevel.Map);
 
             LevelManager level = new LevelManager(packageManager, map);
 
@@ -91,9 +91,17 @@ namespace MHUrho.Logic
             }
 
             //Connect references
-            Map.ConnectReferences();
+            map.ConnectReferences();
+
+            //level.units.ForEach((unit) => { unit.ConnectReferences(); });
+
+
 
             //Build geometry and other things
+
+            map.FinishLoading();
+
+            //level.units.ForEach((unit) => { unit.FinishLoading(); });
 
             return level;
         }
@@ -116,8 +124,6 @@ namespace MHUrho.Logic
 
             return level;
         }
-
-        
 
         protected LevelManager(PackageManager packageManager, Map map)
         {

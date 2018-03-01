@@ -46,7 +46,7 @@ namespace MHUrho.Packaging {
                                                 string pathToXml, 
                                                 string description, 
                                                 string pathToThumbnail) {
-            var thumbnail = PackageManager.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
+            var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
 
             return new ResourcePack(name, pathToXml, description ?? "No description", thumbnail);
         }

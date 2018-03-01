@@ -22,12 +22,18 @@ namespace MHUrho.Packaging
     /// </summary>
     public class PackageManager
     {
-        public static ResourceCache ResourceCache;
+        public static PackageManager Instance { get; private set; }
+
+        public ResourceCache ResourceCache { get; private set; }
 
         /// <summary>
         /// Path to the schema for Resource Pack Directory xml files
         /// </summary>
         private static readonly string ResPacDirSchemaPath = Path.Combine("Data","Schemas","ResourcePack.xsd");
+
+        public int TileTypeCount => activeTileTypes.Count;
+
+        public IEnumerable<TileType> TileTypes => activeTileTypes.Values;
 
         private readonly XmlSchemaSet schemas;
 
@@ -42,6 +48,10 @@ namespace MHUrho.Packaging
         //private Dictionary<int, BuildingType> activeTileTypes;
 
         private readonly Random rng;
+
+        public static void CreateInstance(ResourceCache resourceCache) {
+            Instance = new PackageManager(resourceCache);
+        }
 
         public StPackages Save() {
             var storedPackages = new StPackages();
@@ -97,9 +107,11 @@ namespace MHUrho.Packaging
             
         }
 
-        public PackageManager()
+
+        protected PackageManager(ResourceCache resourceCache)
         {
             this.rng = new Random();
+            this.ResourceCache = resourceCache;
 
             schemas = new XmlSchemaSet();
             try
@@ -133,6 +145,7 @@ namespace MHUrho.Packaging
         }
 
         public ResourcePack GetResourcePack(int ID) {
+            //TODO: React if it does not exist
             return activePackages[ID];
         }
 

@@ -22,7 +22,8 @@ namespace MHUrho.Logic
 
         public ResourcePack Package { get; private set; }
 
-        private Rect textureCoords;
+        //TODO: Check that texture is null
+        public Rect TextureCoords { get; private set; }
 
         public static TileType Load(XElement xml, string pathToPackageXML, ResourcePack package) {
             //TODO: Check for errors
@@ -30,7 +31,7 @@ namespace MHUrho.Logic
             string texturePath = xml.Element("texture")?.Value;
             float movementSpeed = float.Parse(xml.Element("movementSpeed").Value);
 
-            Image image = PackageManager.ResourceCache.GetImage(System.IO.Path.Combine(pathToPackageXML, texturePath));
+            Image image = PackageManager.Instance.ResourceCache.GetImage(System.IO.Path.Combine(pathToPackageXML, texturePath));
 
             TileType newTileType = new TileType(name, movementSpeed, image, package);
 
@@ -64,7 +65,7 @@ namespace MHUrho.Logic
             Texture.Dispose();
             Texture = null;
 
-            textureCoords = coords;
+            TextureCoords = coords;
         }
 
         public void Dispose() {

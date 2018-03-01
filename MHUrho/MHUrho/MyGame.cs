@@ -45,7 +45,7 @@ namespace MHUrho
 
             Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
-            PackageManager.ResourceCache = ResourceCache;
+            PackageManager.CreateInstance(ResourceCache);
 
             CreateScene();
 
@@ -66,7 +66,7 @@ namespace MHUrho
 
 
 
-            var assetManager = new PackageManager();
+            
 
             
 
