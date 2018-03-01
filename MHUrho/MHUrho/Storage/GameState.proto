@@ -7,6 +7,7 @@ message StLevel {
 	repeated StUnit units = 2;
 	repeated StPlayer players = 3;
 	float gameSpeed = 4;
+	StPackages packages = 5;
 }
 
 message StPackages {

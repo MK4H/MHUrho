@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Xml.Linq;
+using System.Xml.Schema;
 using MHUrho.Logic;
 using Urho;
 using Urho.Resources;
@@ -17,10 +20,14 @@ namespace MHUrho.Packaging {
 
         public Image Thumbnail { get; private set; }
 
-        private string pathToXml;
+        public bool FullyLoaded { get; private set; }
 
-        List<TileType> tileTypes;
-        List<UnitType> unitTypes;
+        private readonly string pathToXml;
+
+        private Dictionary<string, TileType> tileTypes;
+        private Dictionary<string, UnitType> unitTypes;
+
+        private XDocument data;
 
         /// <summary>
         /// Loads data for initial resource pack managment, so the user can choose which resource packs to 
@@ -35,12 +42,11 @@ namespace MHUrho.Packaging {
         /// <param name="description">Human readable description of the resource pack contents for the user</param>
         /// <param name="pathToThumbnail">Path to thumbnail to display</param>
         /// <returns>Initialized resource pack</returns>
-        public static ResourcePack InitialLoad( ResourceCache cache, 
-                                                string name,
+        public static ResourcePack InitialLoad( string name,
                                                 string pathToXml, 
                                                 string description, 
                                                 string pathToThumbnail) {
-            var thumbnail = cache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
+            var thumbnail = PackageManager.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
 
             return new ResourcePack(name, pathToXml, description ?? "No description", thumbnail);
         }
@@ -50,14 +56,113 @@ namespace MHUrho.Packaging {
             this.pathToXml = pathToXml;
             this.Description = description;
             this.Thumbnail = thumbnail;
+            this.FullyLoaded = false;
+        }
+
+        public void StartLoading(XmlSchemaSet schemas) {
+            ResetIDs(tileTypes.Values);
+            ResetIDs(unitTypes.Values);
+
+            data = XDocument.Load(MyGame.Config.GetDynamicFile(pathToXml));
+            //TODO: Handler and signal that resource pack is in invalid state
+            data.Validate(schemas, null);
+        }
+
+        public void FinishLoading() {
+            bool deleted = RemoveUnused(tileTypes);
+            deleted = RemoveUnused(unitTypes) || deleted;
+            data = null;
+
+            FullyLoaded = !deleted;
+        }
+
+        public TileType GetTileType(string name, int newID) {
+            if (data == null) {
+                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+            }
+
+            if (name == null) {
+                throw new ArgumentNullException("Name of the tileType cannot be null");
+            }
+
+            TileType tileType;
+            if (!tileTypes.TryGetValue(name, out tileType)) {
+                //Load from file
+                var tileTypeElements = (from element in data.Root.Elements("tiletype")
+                    where element.Attribute("name").Value == name
+                    select element).ToArray();
+
+                if (tileTypeElements.Length > 1) {
+                    //TODO: Exception
+                    throw new Exception("Duplicate tileType names");
+                }
+
+                if (tileTypeElements.Length == 0) {
+                    throw new ArgumentException("TileType of that name does not exist in this package");
+                }
+
+                tileType = TileType.Load(tileTypeElements[0], pathToXml, this);
+                tileTypes.Add(name, tileType);
+            }
+
+            tileType.ID = newID;
+
+            return tileType;
         }
 
         /// <summary>
-        /// Loads all resources contained in this resource pack
+        /// Provides "atomic" change of ID and addition to dictionary with this ID
         /// </summary>
-        /// <param name="cache"></param>
-        public void LoadAll(ResourceCache cache) {
+        /// <param name="newID"></param>
+        /// <param name="dictionary"></param>
+        public void AddToByID(int newID, Dictionary<int, ResourcePack> dictionary) {
+            this.ID = newID;
+            dictionary.Add(newID, this);
+        }
 
+        public void UnLoad(Dictionary<int, TileType> activeTileTypes, Dictionary<int, UnitType> activeUnitTypes) {
+            foreach (var tileType in tileTypes) {
+                tileType.Value.Dispose();
+            }
+
+            foreach (var unitType in unitTypes) {
+                unitType.Value.Dispose();
+            }
+
+            tileTypes = null;
+            unitTypes = null;
+        }
+
+        private void ResetIDs<T>(IEnumerable<T> enumerable)
+            where T: IIDNameAndPackage {
+
+            foreach (var item in enumerable) {
+                item.ID = 0;
+            }
+        }
+
+        /// <summary>
+        /// Removes all keys whose value has ID 0, returns true if it deleted something, false if not
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dictionary">removes items with Value.ID 0 from this dictionary</param>
+        /// <returns>true if deleted something, false if didnt delete anything</returns>
+        private bool RemoveUnused<T>(IDictionary<string,T> dictionary)
+            where T : IIDNameAndPackage {
+
+            bool deleted = false;
+            var toRemove = new List<string>();
+            foreach (var item in dictionary) {
+                if (item.Value.ID == 0) {
+                    toRemove.Add(item.Key);
+                }
+            }
+
+            foreach (var key in toRemove) {
+                dictionary.Remove(key);
+                deleted = true;
+            }
+            return deleted;
         }
     }
 }

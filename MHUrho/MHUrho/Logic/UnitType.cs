@@ -7,10 +7,10 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class UnitType : IIDNameAndPackage
+    public class UnitType : IIDNameAndPackage, IDisposable
     {
 
-        public int ID { get; private set; }
+        public int ID { get; set; }
 
         public string Name { get; private set; }
 
@@ -33,6 +33,11 @@ namespace MHUrho.Logic
         public bool CanPass(string tileType)
         {
             return PassableTileTypes.Contains(tileType);
+        }
+
+        public void Dispose() {
+            //TODO: Release all disposable resources
+            model.Dispose();
         }
 
     }

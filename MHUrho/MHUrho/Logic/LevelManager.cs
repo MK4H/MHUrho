@@ -74,15 +74,26 @@ namespace MHUrho.Logic
 
 
         public static LevelManager Load(StLevel storedLevel, PackageManager packageManager) {
+
+            //Load data
             Map map = Map.Load(storedLevel.Map);
+
             LevelManager level = new LevelManager(packageManager, map);
+
+            packageManager.LoadPackages(storedLevel.Packages);
+
             foreach (var unit in storedLevel.Units) {
                 level.units.Add(Unit.Load(level, unit));
             }
 
             foreach (var player in storedLevel.Players) {
-                
+                //TODO: Load players
             }
+
+            //Connect references
+            Map.ConnectReferences();
+
+            //Build geometry and other things
 
             return level;
         }

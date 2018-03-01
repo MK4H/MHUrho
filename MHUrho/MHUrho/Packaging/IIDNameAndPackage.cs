@@ -6,7 +6,7 @@ namespace MHUrho.Packaging
 {
     interface IIDNameAndPackage
     {
-        int ID { get; }
+        int ID { get; set; }
         string Name { get; }
 
         ResourcePack Package { get; }
