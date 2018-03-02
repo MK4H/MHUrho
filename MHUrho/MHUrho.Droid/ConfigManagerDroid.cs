@@ -14,6 +14,7 @@ using System.IO;
 using Java.IO;
 using Android.Content.Res;
 using System.Diagnostics;
+using Urho;
 
 namespace MHUrho.Droid {
     public class ConfigManagerDroid : ConfigManager {
@@ -21,7 +22,13 @@ namespace MHUrho.Droid {
         private readonly AssetManager assetManager;
 
         public override Stream GetStaticFileRO(string relativePath) {
-            return assetManager.Open(relativePath);
+            try {
+                return assetManager.Open(relativePath);
+            }
+            catch (Exception e) {
+                Urho.IO.Log.Write(LogLevel.Error, $"Could not open file {relativePath}, error: {e}");
+                return null;
+            }
         }
 
         public override Stream GetDynamicFile(string relativePath) {
@@ -34,18 +41,10 @@ namespace MHUrho.Droid {
                 throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}"); 
             }
 
-            file = new Java.IO.File(Path.Combine(StaticFilePath, relativePath));
-            if (file.Exists()) {
-                if (file.IsFile) {
-                    CopyStaticToDynamic(relativePath);
-                    return new FileStream(Path.Combine(DynamicDirPath, relativePath), FileMode.Open, FileAccess.ReadWrite);
-                }
+            Stream stream = assetManager.Open(relativePath);
+            CopyStaticToDynamic(relativePath);
 
-                throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}");
-            }
-
-            throw new System.IO.FileNotFoundException("File was not found in dynamic nor in static files",
-                relativePath);
+            return stream;
         }
 
         public override void CopyStaticToDynamic(string srcRelativePath) {
@@ -98,9 +97,11 @@ namespace MHUrho.Droid {
 
         private void CopyFile(string srcRelativePath) {
             //TODO: Exceptions
+            string path = Path.Combine(DynamicDirPath, srcRelativePath);
 
             using (var srcFile = assetManager.Open(srcRelativePath)) {
-                using (var dstFile = System.IO.File.Create(Path.Combine(DynamicDirPath, srcRelativePath))){
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                using (var dstFile = System.IO.File.Create(path)){
                     srcFile.CopyTo(dstFile);
                 }
             }

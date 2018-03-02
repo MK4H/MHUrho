@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resourcePack xmlns="http://www.MobileHold.cz/ResourcePack.xsd" name="Default">
+  <description>Default package present in every copy of the game</description>
+  <tileTypes>
+    <tileType name="Default">
+      <texturePath>xamarin.png</texturePath>
+      <movementSpeed>1</movementSpeed>
+    </tileType>
+  </tileTypes>
+</resourcePack>

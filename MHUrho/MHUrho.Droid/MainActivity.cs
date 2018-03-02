@@ -43,14 +43,8 @@ namespace MHUrho.Droid
             layout.AddView(surface);
             SetContentView(layout);
 
-            Java.IO.File intern =
-                new Java.IO.File(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal));
-
-            var files = intern.List();
 
             MyGame.Config = ConfigManagerDroid.LoadConfig(Assets);
-
-            MyGame.Config.CopyStaticToDynamic("Data/Test");
 
             myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));
             //to stop the game use await surface.Stop().

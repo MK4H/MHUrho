@@ -91,16 +91,9 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="Assets\Data\Test\Assemblies\TestPlugin.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </AndroidAsset>
     <AndroidResource Include="Resources\Values\Styles.xml" />
-    <AndroidAsset Include="Assets\Data\Test\ResourceDir\DirDescription.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </AndroidAsset>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Assets\Data\Test\ResourceDir\TEST1RP\" />
     <Folder Include="Assets\Data\Test\ResourceDir\TEST2RP\" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +101,20 @@
       <Project>{054fd144-14a7-4596-b205-8fbca2d83cbb}</Project>
       <Name>MHUrho</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Data\Test\Assemblies\TestPlugin.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <AndroidAsset Include="Assets\Data\Test\ResourceDir\default\default.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Data\Test\ResourceDir\default\xamarin.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Data\Test\ResourceDir\DirDescription.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\packages\UrhoSharp.1.8.65\build\MonoAndroid\UrhoSharp.targets" Condition="Exists('..\..\packages\UrhoSharp.1.8.65\build\MonoAndroid\UrhoSharp.targets')" />

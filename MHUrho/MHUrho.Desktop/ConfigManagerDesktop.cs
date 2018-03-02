@@ -17,7 +17,7 @@ namespace MHUrho.Desktop {
                 },
                 "TODO",
                 "TODO",
-                Path.Combine(Directory.GetCurrentDirectory(),"Data"),
+                Directory.GetCurrentDirectory(),
                 Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
                 Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"));
 
@@ -31,13 +31,13 @@ namespace MHUrho.Desktop {
         }
 
         protected ConfigManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
-            string staticFilePath, string dynamicDirPath, string logFilePath)
-            : base(packagePaths, configFilePath, defaultConfigFilePath, staticFilePath, dynamicDirPath, logFilePath) {
+            string staticDirPath, string dynamicDirPath, string logFilePath)
+            : base(packagePaths, configFilePath, defaultConfigFilePath, staticDirPath, dynamicDirPath, logFilePath) {
 
         }
 
         public override Stream GetStaticFileRO(string relativePath) {
-            return new FileStream(Path.Combine(StaticFilePath, relativePath), FileMode.Open, FileAccess.Read);
+            return new FileStream(Path.Combine(StaticDirPath, relativePath), FileMode.Open, FileAccess.Read);
         }
 
         public override Stream GetDynamicFile(string relativePath) {
@@ -49,7 +49,7 @@ namespace MHUrho.Desktop {
 
         public override void CopyStaticToDynamic(string srcRelativePath) {
 
-            string filePath = Path.Combine(StaticFilePath, srcRelativePath);
+            string filePath = Path.Combine(StaticDirPath, srcRelativePath);
 
             var attr = File.GetAttributes(filePath);
 
@@ -57,11 +57,11 @@ namespace MHUrho.Desktop {
 
 
                 foreach (string dirPath in Directory.GetDirectories(filePath, "*", SearchOption.AllDirectories))
-                    Directory.CreateDirectory(dirPath.Replace(StaticFilePath, DynamicDirPath));
+                    Directory.CreateDirectory(dirPath.Replace(StaticDirPath, DynamicDirPath));
 
                 //Copy all the files and Replaces any files with the same name
                 foreach (string subfilePath in Directory.GetFiles(filePath, "*.*", SearchOption.AllDirectories))
-                    File.Copy(subfilePath, subfilePath.Replace(StaticFilePath, DynamicDirPath), true);
+                    File.Copy(subfilePath, subfilePath.Replace(StaticDirPath, DynamicDirPath), true);
             }
             else {
                 string newFilePath = Path.Combine(DynamicDirPath, srcRelativePath);

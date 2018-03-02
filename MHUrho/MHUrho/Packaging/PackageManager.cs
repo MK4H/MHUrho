@@ -30,7 +30,7 @@ namespace MHUrho.Packaging
         /// <summary>
         /// Path to the schema for Resource Pack Directory xml files
         /// </summary>
-        private static readonly string ResPacDirSchemaPath = Path.Combine("Schemas","ResourcePack.xsd");
+        private static readonly string ResPacDirSchemaPath = Path.Combine("Data","Schemas","ResourcePack.xsd");
 
         public int TileTypeCount => activeTileTypes.Count;
 

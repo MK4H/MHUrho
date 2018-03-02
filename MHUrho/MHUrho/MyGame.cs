@@ -110,9 +110,6 @@ namespace MHUrho
 
             // Camera
 
-            //TODO: Rebase all operations on camera to cameraHolder, set constant offset of camera from holder
-
-
             cameraController = CameraController.GetCameraController(scene);
 
 

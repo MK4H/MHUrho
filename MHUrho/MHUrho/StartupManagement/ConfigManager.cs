@@ -16,7 +16,7 @@ namespace MHUrho
         protected string ConfigFilePath;
         protected string DefaultConfigFilePath;
 
-        protected string StaticFilePath;
+        protected string StaticDirPath;
         protected string DynamicDirPath;
 
         public static string CorrectRelativePath(string relativePath) {
@@ -53,14 +53,14 @@ namespace MHUrho
             List<string> packagePaths,
             string configFilePath,
             string defaultConfigFilePath,
-            string staticFilePath,
+            string staticDirPath,
             string dynamicDirPath,
             string logPath) {
 
             this.PackagePaths = packagePaths;
             this.ConfigFilePath = configFilePath;
             this.DefaultConfigFilePath = defaultConfigFilePath;
-            this.StaticFilePath = staticFilePath;
+            this.StaticDirPath = staticDirPath;
             this.DynamicDirPath = dynamicDirPath;
             this.LogPath = logPath;
         }
