@@ -54,22 +54,21 @@ namespace MHUrho.Logic
         /// <summary>
         /// X index in the Map array
         /// </summary>
-        public int XIndex { get { return MapArea.Left; } }
+        public int XIndex => MapArea.Left;
         /// <summary>
         /// Y index in the Map array
         /// </summary>
-        public int YIndex { get { return MapArea.Top; } }
+        public int YIndex => MapArea.Top;
 
         /// <summary>
         /// Location in the Map matrix
         /// </summary>
-        public IntVector2 Location { get { return new IntVector2(MapArea.Left,MapArea.Top); } }
+        public IntVector2 Location => new IntVector2(MapArea.Left,MapArea.Top); 
 
-        public Vector2 Center { get { return new Vector2(Location.X + 0.5f, Location.Y + 0.5f); } }
+        public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
         public float Height { get; private set; }
 
-        public LevelManager Level { get; set; }
 
         /// <summary>
         /// Stores tile image between the steps of loading
@@ -117,15 +116,16 @@ namespace MHUrho.Logic
 
         protected Tile(StTile storedTile) {
             this.storage = storedTile;
-            this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, 1, 1);
+            this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
         }
 
-        protected Tile(LevelManager level, int x, int y) {
-            this.Level = level;
-            MapArea = new IntRect(x, y, 1, 1);
-            MovementSpeedModifier = 2;
+        public Tile(int x, int y, TileType tileType) {
+            MapArea = new IntRect(x, y, x + 1, y + 1);
             PassingUnits = new List<Unit>();
+            Unit = null;
+            this.Type = tileType;
+            this.Height = 0;
         }
 
         /// <summary>
@@ -134,8 +134,8 @@ namespace MHUrho.Logic
         /// <returns></returns>
         public bool SpawnUnit(Player player)
         {
-            Unit unit = new Unit(this, Level, player);
-            Level.RegisterUnit(unit);
+            Unit unit = new Unit(this, player);
+            LevelManager.CurrentLevel.RegisterUnit(unit);
 
             if (this.Unit != null)
             {

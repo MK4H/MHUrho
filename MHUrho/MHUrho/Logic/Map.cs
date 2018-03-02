@@ -51,84 +51,21 @@ namespace MHUrho.Logic
         /// </summary>
         public int Bottom => BottomRight.Y;
 
-        public static Map CreateDefaultMap(int width, int height, Context context) {
-            //TODO: Split map into chunks, that will be separately in memory
+        //TODO: Split map into chunks, that will be separately in memory
 
-            //4 verticies for every tile, so that we can map every tile to different texture
-            // and the same tile types to the same textures
-            uint numVerticies = (uint)(width * height * 4);
-            //TODO: maybe connect the neighbouring verticies
-            //two triangles per tile, 3 indicies per triangle
-            uint numIndicies = (uint)(width * height * 6);
+        public static Map CreateDefaultMap(IntVector2 size) {
 
-            Model model = new Model();
-            VertexBuffer vb = new VertexBuffer(context, false);
-            IndexBuffer ib = new IndexBuffer(context, false);
-            
-            vb.Shadowed = true;
-            vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
-            
-            ib.Shadowed = true;
-            ib.SetSize(numIndicies, false, false);
+            int tileCount = size.X * size.Y;
+            Tile[] tiles = new Tile[tileCount];
+            TileType defaultTileType = PackageManager.Instance.DefaultTileType;
 
-            IntPtr vbPointer = vb.Lock(0, numVerticies);
-            IntPtr ibPointer = ib.Lock(0, numIndicies);
-
-            if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
-                //TODO: Error, could not lock buffers into memory, cannot create map
-                throw new Exception("Could not lock buffer into memory for map model creation");
+            for (int i = 0; i < tileCount; i++) {
+                tiles[i] = new Tile(i % size.X, i / size.X, defaultTileType);
             }
 
-            unsafe {
-                float* verBuff = (float *)vbPointer.ToPointer();
-                short* inBuff = (short*) ibPointer.ToPointer();
-
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
-                        //Create verticies
-                        for (int verY = 0; verY < 2; verY++) {
-                            for (int verX = 0; verX < 2; verX++) {
-                                //Position
-                                *(verBuff++) = (float)(x + verX);
-                                *(verBuff++) = 0.0f;
-                                *(verBuff++) = (float)(y + verY);
-                                //Normal vector
-                                *(verBuff++) = 0.0f;
-                                *(verBuff++) = 1.0f;
-                                *(verBuff++) = 0.0f;
-                                //Texture
-                                *(verBuff++) = (float)verX;
-                                *(verBuff++) = (float)verY;
-                            }
-                        }
-
-                        int firstVertex = x * 4 + y * width * 4;
-
-                        //Connect verticies to triangles
-                        *(inBuff++) = (short)(firstVertex + 0);
-                        *(inBuff++) = (short)(firstVertex + 2);
-                        *(inBuff++) = (short)(firstVertex + 3);
-
-                        *(inBuff++) = (short)(firstVertex + 3);
-                        *(inBuff++) = (short)(firstVertex + 1);
-                        *(inBuff++) = (short)(firstVertex + 0);
-                    }
-                }
-            }
-
-            vb.Unlock();
-            ib.Unlock();
-            
-            Geometry geom = new Geometry();
-            geom.SetVertexBuffer(0, vb);
-            geom.IndexBuffer = ib;
-            geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
-
-            model.NumGeometries = 1;
-            model.SetGeometry(0, 0, geom);
-            model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(width, 0, height));
-
-            return new Map(width, height, model, CoreAssets.Materials.DefaultGrey);
+            Map newMap = new Map(size.X, size.Y, tiles);
+            newMap.BuildGeometry();
+            return newMap;
         }
 
         /// <summary>
@@ -204,12 +141,10 @@ namespace MHUrho.Logic
             this.contents = new Tile[Width * Height];
         }
 
-        protected Map(int width, int height, Model model, Material material) {
-            this.Model = model;
-            this.Material = material;
+        protected Map(int width, int height, Tile[] contents) {
             TopLeft = new IntVector2(0, 0);
             BottomRight = new IntVector2(width - 1, height - 1);
-            contents = new Tile[width * height];
+            this.contents = contents;
         }
 
 
@@ -461,7 +396,7 @@ namespace MHUrho.Logic
             //TODO: Context
             Image mapImage = new Image();
 
-            if (!mapImage.SetSize(Tile.ImageWidth * tileTypeCount, Tile.ImageHeight, 3)) {
+            if (!mapImage.SetSize(Tile.ImageWidth * tileTypeCount, Tile.ImageHeight, 4)) {
                 //TODO: Error;
                 throw new Exception("Could not set size of the map texture image");
             }
@@ -476,6 +411,7 @@ namespace MHUrho.Logic
                     throw new Exception("Could not copy tileType image to the map texture image");
                 }
 
+                //TODO: CHange mapImageHeight to mapImageHeight -1, because otherwise it will not work
                 Rect uvRect = new Rect(
                     new Vector2(subimageRect.Left / mapImageWidth, subimageRect.Top / mapImageHeight),
                     new Vector2(subimageRect.Right / mapImageWidth, subimageRect.Bottom / mapImageHeight));

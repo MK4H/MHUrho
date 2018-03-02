@@ -18,8 +18,6 @@ namespace MHUrho.Logic
 
         ITile Tile { get; }
 
-        LevelManager Level { get; }
-
         IPlayer Player { get; }
 
         bool CanPass(ITile tile);

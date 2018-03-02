@@ -25,7 +25,7 @@ namespace MHUrho.Droid {
         }
 
         public override Stream GetDynamicFile(string relativePath) {
-            Java.IO.File file = new Java.IO.File(Path.Combine(DynamicFilePath, relativePath));
+            Java.IO.File file = new Java.IO.File(Path.Combine(DynamicDirPath, relativePath));
             if (file.Exists()) {
                 if (file.IsFile) {
                     return new FileStream(file.AbsolutePath, FileMode.Open, FileAccess.ReadWrite);
@@ -38,7 +38,7 @@ namespace MHUrho.Droid {
             if (file.Exists()) {
                 if (file.IsFile) {
                     CopyStaticToDynamic(relativePath);
-                    return new FileStream(Path.Combine(DynamicFilePath, relativePath), FileMode.Open, FileAccess.ReadWrite);
+                    return new FileStream(Path.Combine(DynamicDirPath, relativePath), FileMode.Open, FileAccess.ReadWrite);
                 }
 
                 throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}");
@@ -55,7 +55,7 @@ namespace MHUrho.Droid {
                     CopyFile(srcRelativePath);
                 }
                 else {
-                    var dir = new Java.IO.File(Path.Combine(DynamicFilePath, srcRelativePath));
+                    var dir = new Java.IO.File(Path.Combine(DynamicDirPath, srcRelativePath));
                     if (!dir.Exists()) {
                         dir.Mkdirs();
                     }
@@ -100,7 +100,7 @@ namespace MHUrho.Droid {
             //TODO: Exceptions
 
             using (var srcFile = assetManager.Open(srcRelativePath)) {
-                using (var dstFile = System.IO.File.Create(Path.Combine(DynamicFilePath, srcRelativePath))){
+                using (var dstFile = System.IO.File.Create(Path.Combine(DynamicDirPath, srcRelativePath))){
                     srcFile.CopyTo(dstFile);
                 }
             }

@@ -20,8 +20,9 @@ namespace MHUrho.Packaging
     /// <summary>
     /// ResourceCache wrapper providing loading, unloading and downloading of ResourcePacks
     /// </summary>
-    public class PackageManager
-    {
+    public class PackageManager {
+        public static XNamespace XMLNamespace = "http://www.MobileHold.cz/ResourcePack.xsd";
+
         public static PackageManager Instance { get; private set; }
 
         public ResourceCache ResourceCache { get; private set; }
@@ -29,11 +30,13 @@ namespace MHUrho.Packaging
         /// <summary>
         /// Path to the schema for Resource Pack Directory xml files
         /// </summary>
-        private static readonly string ResPacDirSchemaPath = Path.Combine("Data","Schemas","ResourcePack.xsd");
+        private static readonly string ResPacDirSchemaPath = Path.Combine("Schemas","ResourcePack.xsd");
 
         public int TileTypeCount => activeTileTypes.Count;
 
         public IEnumerable<TileType> TileTypes => activeTileTypes.Values;
+
+        public TileType DefaultTileType { get; private set; }
 
         private readonly XmlSchemaSet schemas;
 
@@ -51,6 +54,20 @@ namespace MHUrho.Packaging
 
         public static void CreateInstance(ResourceCache resourceCache) {
             Instance = new PackageManager(resourceCache);
+            try {
+
+                Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Config.GetStaticFileRO(ResPacDirSchemaPath)));
+            }
+            catch (IOException e) {
+                Log.Write(LogLevel.Error, string.Format("Error loading ResroucePack schema: {0}", e));
+                if (Debugger.IsAttached) Debugger.Break();
+                //Reading of static file of this app failed, something is horribly wrong, die
+                //TODO: Error reading static data of app
+            }
+
+            foreach (var path in MyGame.Config.PackagePaths) {
+                Instance.ParseResourcePackDir(path);
+            }
         }
 
         public StPackages Save() {
@@ -96,7 +113,7 @@ namespace MHUrho.Packaging
                     if (!loadedTileTypes.TryGetValue(GetFullName(storedTileType.PackageID, storedTileType.Name),
                                                     out tileType)) {
                         //Was not loaded, load it from package
-                        tileType = activePackages[storedTileType.PackageID].GetTileType(storedTileType.Name, storedTileType.TileTypeID);
+                        tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TileTypeID);
                     }
                     activeTileTypes.Add( storedTileType.TileTypeID, tileType);
                 }
@@ -107,6 +124,36 @@ namespace MHUrho.Packaging
             
         }
 
+        /// <summary>
+        /// Loads the packages and the default package and gives them new IDs
+        /// </summary>
+        /// <param name="packages"></param>
+        public void LoadWholePackages(IEnumerable<string> packages) {
+            Dictionary<int, ResourcePack> newLoadedPackages = new Dictionary<int, ResourcePack>();
+            //Get default pack
+            int defaultPackageID = GetID(newLoadedPackages);
+            GetPackage("Default", defaultPackageID, activePackages, newLoadedPackages);
+
+            foreach (var package in packages) {
+                GetPackage(package, GetID(newLoadedPackages), activePackages, newLoadedPackages);
+            }
+
+            //Unloads the packages that were left in previously loaded packages and not moved
+            // to new loaded packages
+            UnloadUnusedPackages(activePackages);
+
+            StartLoadingPackages(newLoadedPackages.Values);
+
+            //If it was not loaded, load it with new ID, else just leave it with old ID
+            DefaultTileType = newLoadedPackages[defaultPackageID].GetTileType("Default") ?? newLoadedPackages[defaultPackageID].LoadTileType("Default", GetID(activeTileTypes));
+            
+
+            foreach (var package in newLoadedPackages.Values) {
+                IEnumerable<TileType> tileTypes = package.LoadAllTileTypes(() =>  GetID(activeTileTypes));
+
+                AddToActive(tileTypes);
+            }
+        }
 
         protected PackageManager(ResourceCache resourceCache)
         {
@@ -114,25 +161,10 @@ namespace MHUrho.Packaging
             this.ResourceCache = resourceCache;
 
             schemas = new XmlSchemaSet();
-            try
-            {
-
-                schemas.Add("http://www.MobileHold.cz/ResourcePack.xsd", XmlReader.Create(MyGame.Config.GetStaticFileRO(ResPacDirSchemaPath)));
-            }
-            catch (IOException e)
-            {
-                Log.Write(LogLevel.Error,string.Format("Error loading ResroucePack schema: {0}",e));
-                if (Debugger.IsAttached) Debugger.Break();
-                //Reading of static file of this app failed, something is horribly wrong, die
-                //TODO: Error reading static data of app
-            }
-           
-            foreach (var path in MyGame.Config.PackagePaths)
-            {
-                ParseResourcePackDir(path);
-            }
+            activePackages = new Dictionary<int, ResourcePack>();
+            activeTileTypes = new Dictionary<int, TileType>();
+            activeUnitTypes = new Dictionary<int, UnitType>();
         }
-
 
         public TileType GetTileType(int ID) {
             //TODO: React if it does not exist
@@ -150,6 +182,22 @@ namespace MHUrho.Packaging
         }
 
         /// <summary>
+        /// Returns resource pack of the given name 
+        /// </summary>
+        /// <param name="name">Name of the resourcepack to return</param>
+        /// <param name="onlyActive">Search only the packages loaded for the current level</param>
+        /// <returns>Resource pack of the given name or null if none exists</returns>
+        public ResourcePack GetResourcePack(string name, bool onlyActive = true) {
+            if (!availablePacks.TryGetValue(name, out ResourcePack value)) {
+                return null;
+            }
+            if (onlyActive) {
+                return value.IsActive ? value : null;
+            }
+            return value;
+        }
+        
+        /// <summary>
         /// Pulls data about the resource packs contained in this directory from XML file
         /// </summary>
         /// <param name="path">Path to the XML file of Resource pack directory</param>
@@ -165,12 +213,15 @@ namespace MHUrho.Packaging
                 XDocument doc = XDocument.Load(MyGame.Config.GetDynamicFile(path));
                 doc.Validate(schemas, null);
 
-                loadedPacks = from packages in doc.Root.Elements("resourcePack")
+                string directoryPath = Path.GetDirectoryName(path);
+
+                loadedPacks = from packages in doc.Root.Elements(XMLNamespace + "resourcePack")
                     select ResourcePack.InitialLoad(
-                        packages.Attribute("name")?.Value,
-                        packages.Element("path")?.Value,
-                        packages.Element("description")?.Value,
-                        packages.Element("thumbnailPath")?.Value);
+                        packages.Attribute("name").Value,
+                        //PathtoXml is relative to ResourcePackDir.xml directory path
+                        Path.Combine(directoryPath,packages.Element(XMLNamespace + "pathToXml").Value), 
+                        packages.Element(XMLNamespace + "description")?.Value,
+                        packages.Element(XMLNamespace + "thumbnailPath")?.Value);
             }
             catch (IOException e)
             {
@@ -259,20 +310,34 @@ namespace MHUrho.Packaging
 
             Dictionary<int, ResourcePack> newActivePackages = new Dictionary<int, ResourcePack>();
             foreach (var storedPackage in neededPackages) {
-                if (!availablePacks.ContainsKey(storedPackage.Name)) {
-                    throw new Exception($"Package {storedPackage.Name} not available");
-                }
-
-
-                ResourcePack package = availablePacks[storedPackage.Name];
-                //Delete package from previously active
-                loadedPackages.Remove(package.ID);
-                package.AddToByID(storedPackage.ID, newActivePackages);
-
+                GetPackage(storedPackage.Name, storedPackage.ID, loadedPackages, newActivePackages);
             }
 
             return newActivePackages;
         }
+
+        /// <summary>
+        /// Gets package with <paramref name="name"/>, removes it from <paramref name="currentlyLoaded"/> if it was loaded
+        /// and adds it to <paramref name="newLoaded"/>
+        /// </summary>
+        /// <param name="name">Name of the package to get</param>
+        /// <param name="ID">New ID of the package</param>
+        /// <param name="currentlyLoaded">packages loaded for previous levels that are loaded</param>
+        /// <param name="newLoaded">New loaded packages for current level</param>
+        private void GetPackage(    string name, 
+                                    int ID, 
+                                    Dictionary<int,ResourcePack> currentlyLoaded, 
+                                    Dictionary<int, ResourcePack> newLoaded) {
+            if (!availablePacks.ContainsKey(name)) {
+                throw new Exception($"Package {name} not available");
+            }
+
+            ResourcePack package = availablePacks[name];
+            //Delete package from previously active
+            currentlyLoaded.Remove(package.ID);
+            package.AddToByID(ID, newLoaded);
+        }
+
 
         private void UnloadUnusedPackages(Dictionary<int, ResourcePack> toUnload) {
             foreach (var package in toUnload) {
@@ -292,5 +357,10 @@ namespace MHUrho.Packaging
             }
         }
 
+        private void AddToActive(IEnumerable<TileType> tileTypes) {
+            foreach (var tileType in tileTypes) {
+                activeTileTypes.Add(tileType.ID, tileType);
+            }
+        }
     }
 }

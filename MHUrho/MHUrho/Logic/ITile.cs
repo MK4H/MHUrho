@@ -61,8 +61,6 @@ namespace MHUrho.Logic
         /// </summary>
         float Height { get; }
 
-        LevelManager Level { get; }
-
         bool SpawnUnit(Player player);
 
         void AddPassingUnit(Unit unit);

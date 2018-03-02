@@ -66,9 +66,9 @@ namespace MHUrho
 
 
 
-            
+            var defaultLevel = LevelManager.LoadDefaultLevel(new IntVector2(100, 100), new List<string>());
+            var map = defaultLevel.Map;
 
-            
 
             // 3D scene with Octree
             var scene = new Scene(Context);
@@ -79,12 +79,11 @@ namespace MHUrho
             //mapNode.SetScale(1000f);
             mapNode.Rotation = new Quaternion(0, 0, 0);
 
-            Map map = Map.CreateDefaultMap(10, 10, Context);
+ 
             StaticModel model = mapNode.CreateComponent<StaticModel>();
             model.Model = map.Model;
             model.SetMaterial(map.Material);
 
-            AStar pathfind = new AStar(map);
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");

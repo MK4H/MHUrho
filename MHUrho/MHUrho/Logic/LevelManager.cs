@@ -11,6 +11,8 @@ namespace MHUrho.Logic
 
     public class LevelManager
     {
+        public static LevelManager CurrentLevel { get; private set; }
+
         public float GameSpeed { get; set; } = 1f;
 
         readonly List<Unit> units;
@@ -21,8 +23,6 @@ namespace MHUrho.Logic
 
         //TODO: Probably not public
         public Player[] Players;
-
-        public PackageManager PackageManager { get; private set; }
 
         /// <summary>
         /// Registers unit after it is spawned by a Tile or a Building
@@ -73,17 +73,17 @@ namespace MHUrho.Logic
         }
 
 
-        public static LevelManager Load(StLevel storedLevel, PackageManager packageManager) {
+        public static LevelManager Load(StLevel storedLevel) {
 
             //Load data
             Map map = Map.StartLoading(storedLevel.Map);
 
-            LevelManager level = new LevelManager(packageManager, map);
+            LevelManager level = new LevelManager(map);
 
-            packageManager.LoadPackages(storedLevel.Packages);
+            PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
             foreach (var unit in storedLevel.Units) {
-                level.units.Add(Unit.Load(level, unit));
+                level.units.Add(Unit.Load(unit));
             }
 
             foreach (var player in storedLevel.Players) {
@@ -103,7 +103,21 @@ namespace MHUrho.Logic
 
             //level.units.ForEach((unit) => { unit.FinishLoading(); });
 
+            CurrentLevel = level;
             return level;
+        }
+
+        /// <summary>
+        /// Loads default level to use in level builder as basis, loads specified packages plus default package
+        /// </summary>
+        /// <param name="mapSize">Size of the map to create</param>
+        /// <param name="packages">packages to load</param>
+        /// <returns>Loaded default level</returns>
+        public static LevelManager LoadDefaultLevel(IntVector2 mapSize, IEnumerable<string> packages) {
+            PackageManager.Instance.LoadWholePackages(packages);
+            Map map = Map.CreateDefaultMap(mapSize);
+
+            return new LevelManager(map);
         }
 
         public StLevel Save() {
@@ -125,10 +139,9 @@ namespace MHUrho.Logic
             return level;
         }
 
-        protected LevelManager(PackageManager packageManager, Map map)
+        protected LevelManager(Map map)
         {
             units = new List<Unit>();
-            this.PackageManager = packageManager;
             this.Map = map;
             this.pathFind = new AStar(map);
         }

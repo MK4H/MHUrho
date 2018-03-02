@@ -25,15 +25,19 @@ namespace MHUrho.Logic
         //TODO: Check that texture is null
         public Rect TextureCoords { get; private set; }
 
-        public static TileType Load(XElement xml, string pathToPackageXML, ResourcePack package) {
+        public static TileType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
             //TODO: Check for errors
-            string name = xml.Attribute("name")?.Value;
-            string texturePath = xml.Element("texture")?.Value;
-            float movementSpeed = float.Parse(xml.Element("movementSpeed").Value);
+            string name = xml.Attribute("name").Value;
+            string texturePath = xml.Element(PackageManager.XMLNamespace + "texturePath").Value.Trim();
+            float movementSpeed = float.Parse(xml.Element(PackageManager.XMLNamespace + "movementSpeed").Value);
 
-            Image image = PackageManager.Instance.ResourceCache.GetImage(System.IO.Path.Combine(pathToPackageXML, texturePath));
+            texturePath = ConfigManager.CorrectRelativePath(texturePath);
 
-            TileType newTileType = new TileType(name, movementSpeed, image, package);
+            Image image = PackageManager.Instance.ResourceCache.GetImage(System.IO.Path.Combine(pathToPackageXMLDirname, texturePath));
+
+            TileType newTileType = new TileType(name, movementSpeed, image, package) {
+                ID = newID
+            };
 
             return newTileType;
         }

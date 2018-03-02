@@ -28,11 +28,6 @@ namespace MHUrho.Logic
         public ITile Tile { get; private set; }
 
         /// <summary>
-        /// Level this unit is in
-        /// </summary>
-        public LevelManager Level { get; private set; }
-
-        /// <summary>
         /// Player owning this unit
         /// </summary>
         public IPlayer Player { get; private set; }
@@ -71,8 +66,8 @@ namespace MHUrho.Logic
 
         #region Public methods
 
-        public static Unit Load(LevelManager levelManager, StUnit storedUnit) {
-            return new Unit(levelManager, storedUnit);
+        public static Unit Load(StUnit storedUnit) {
+            return new Unit(storedUnit);
         }
 
         public StUnit Save() {
@@ -124,7 +119,7 @@ namespace MHUrho.Logic
 
         public bool Order(ITile tile)
         {
-            path = Level.GetPath(this,tile);
+            path = LevelManager.CurrentLevel.GetPath(this,tile);
             if (path == null)
             {
                 return false;
@@ -146,7 +141,7 @@ namespace MHUrho.Logic
 
             target = unit;
             // TODO: Maybe calculate where they will meet and pathfind there
-            Path NewPath = Level.GetPath(this, unit.Tile);
+            Path NewPath = LevelManager.CurrentLevel.GetPath(this, unit.Tile);
             if (NewPath == null)
             {
                 return false;
@@ -187,10 +182,8 @@ namespace MHUrho.Logic
         /// <summary>
         /// Initializes everything apart from the things referenced by their ID or position
         /// </summary>
-        /// <param name="levelManager">Manager of the loaded level</param>
         /// <param name="storedUnit">Image of the unit</param>
-        protected Unit(LevelManager levelManager, StUnit storedUnit) {
-            this.Level = levelManager;
+        protected Unit(StUnit storedUnit) {
             this.Selected = false;
             this.storage = storedUnit;
             this.ID = storedUnit.Id;
@@ -198,9 +191,8 @@ namespace MHUrho.Logic
             this.Position = new Vector2(storedUnit.Position.X, storedUnit.Position.Y);
         }
         
-        public Unit(Tile tile, LevelManager level, Player player)
+        public Unit(Tile tile, Player player)
         {
-            this.Level = level;
             this.Tile = tile;
             this.Position = tile.Center;
             this.Player = player;
@@ -266,7 +258,7 @@ namespace MHUrho.Logic
             IntVector2 TileIndex = new IntVector2((int)Position.X, (int)Position.Y);
             if (TileIndex == path.Current)
             {
-                ITile NewTile = Level.TryMoveUnitThroughTileAt(this, TileIndex);
+                ITile NewTile = LevelManager.CurrentLevel.TryMoveUnitThroughTileAt(this, TileIndex);
                 if (NewTile == null)
                 {
                     Order(path.Target);
@@ -288,7 +280,7 @@ namespace MHUrho.Logic
         {
             Vector2 MovementDirection = destination - Position;
             MovementDirection.Normalize();
-            return MovementDirection * Level.GameSpeed * elapsedSeconds;
+            return MovementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
         }
 
         /// <summary>

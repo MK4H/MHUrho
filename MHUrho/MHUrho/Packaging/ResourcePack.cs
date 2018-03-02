@@ -12,6 +12,8 @@ namespace MHUrho.Packaging {
     public class ResourcePack {
         private const string defaultThumbnailPath = "Textures/xamarin.png";
 
+        public delegate int GenerateID();
+
         public string Name { get; private set; }
         
         public int ID { get; private set; }
@@ -21,6 +23,8 @@ namespace MHUrho.Packaging {
         public Image Thumbnail { get; private set; }
 
         public bool FullyLoaded { get; private set; }
+
+        public bool IsActive => ID != 0;
 
         private readonly string pathToXml;
 
@@ -46,6 +50,8 @@ namespace MHUrho.Packaging {
                                                 string pathToXml, 
                                                 string description, 
                                                 string pathToThumbnail) {
+            pathToXml = ConfigManager.CorrectRelativePath(pathToXml);
+            pathToThumbnail = ConfigManager.CorrectRelativePath(pathToThumbnail);
             var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
 
             return new ResourcePack(name, pathToXml, description ?? "No description", thumbnail);
@@ -57,6 +63,9 @@ namespace MHUrho.Packaging {
             this.Description = description;
             this.Thumbnail = thumbnail;
             this.FullyLoaded = false;
+
+            tileTypes = new Dictionary<string, TileType>();
+            unitTypes = new Dictionary<string, UnitType>();
         }
 
         public void StartLoading(XmlSchemaSet schemas) {
@@ -76,7 +85,15 @@ namespace MHUrho.Packaging {
             FullyLoaded = !deleted;
         }
 
-        public TileType GetTileType(string name, int newID) {
+        public TileType GetTileType(string name) {
+            if (name == null) {
+                throw new ArgumentNullException("Name of the tileType cannot be null");
+            }
+
+            return tileTypes.TryGetValue(name,out TileType value) ? value : null;
+        }
+
+        public TileType LoadTileType(string name, int newID) {
             if (data == null) {
                 throw new InvalidOperationException("Before loading things, you need to call StartLoading");
             }
@@ -88,7 +105,7 @@ namespace MHUrho.Packaging {
             TileType tileType;
             if (!tileTypes.TryGetValue(name, out tileType)) {
                 //Load from file
-                var tileTypeElements = (from element in data.Root.Elements("tiletype")
+                var tileTypeElements = (from element in data.Root.Element(PackageManager.XMLNamespace + "tileTypes").Elements(PackageManager.XMLNamespace + "tileType")
                     where element.Attribute("name").Value == name
                     select element).ToArray();
 
@@ -101,13 +118,43 @@ namespace MHUrho.Packaging {
                     throw new ArgumentException("TileType of that name does not exist in this package");
                 }
 
-                tileType = TileType.Load(tileTypeElements[0], pathToXml, this);
+                tileType = TileType.Load(tileTypeElements[0], newID, System.IO.Path.GetDirectoryName(pathToXml), this);
                 tileTypes.Add(name, tileType);
             }
-
-            tileType.ID = newID;
+            else {
+                //Just change ID
+                tileType.ID = newID;
+            }
 
             return tileType;
+        }
+
+        public IEnumerable<TileType> LoadAllTileTypes(GenerateID generateId) {
+            if (data == null) {
+                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+            }
+
+            List<TileType> loadedTileTypes = new List<TileType>();
+
+            var tileTypeElements = from elements in data.Root.Element(PackageManager.XMLNamespace + "tileTypes").Elements(PackageManager.XMLNamespace + "tileType") select elements;
+
+            foreach (var tileTypeElement in tileTypeElements) {
+                string name = tileTypeElement.Attribute("name").Value;
+
+                TileType loadedTileType;
+                if (tileTypes.TryGetValue(name, out loadedTileType)) {
+                    loadedTileType.ID = generateId();
+                    loadedTileTypes.Add(loadedTileType);
+                    continue;
+                }
+
+                loadedTileType = TileType.Load(tileTypeElement, generateId(), System.IO.Path.GetDirectoryName(pathToXml), this);
+
+                tileTypes.Add(loadedTileType.Name, loadedTileType);
+                loadedTileTypes.Add(loadedTileType);
+            }
+
+            return loadedTileTypes;
         }
 
         /// <summary>

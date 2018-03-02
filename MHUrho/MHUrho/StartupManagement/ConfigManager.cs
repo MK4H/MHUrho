@@ -17,7 +17,14 @@ namespace MHUrho
         protected string DefaultConfigFilePath;
 
         protected string StaticFilePath;
-        protected string DynamicFilePath;
+        protected string DynamicDirPath;
+
+        public static string CorrectRelativePath(string relativePath) {
+            if (relativePath == null) {
+                return null;
+            }
+            return Path.DirectorySeparatorChar != '/' ? relativePath.Replace('/', Path.DirectorySeparatorChar) : relativePath;
+        } 
 
         /// <summary>
         /// Gets stream allowing reading from static file, for writing call GetDynamicFile
@@ -47,14 +54,14 @@ namespace MHUrho
             string configFilePath,
             string defaultConfigFilePath,
             string staticFilePath,
-            string dynamicFilePath,
+            string dynamicDirPath,
             string logPath) {
 
             this.PackagePaths = packagePaths;
             this.ConfigFilePath = configFilePath;
             this.DefaultConfigFilePath = defaultConfigFilePath;
             this.StaticFilePath = staticFilePath;
-            this.DynamicFilePath = dynamicFilePath;
+            this.DynamicDirPath = dynamicDirPath;
             this.LogPath = logPath;
         }
 

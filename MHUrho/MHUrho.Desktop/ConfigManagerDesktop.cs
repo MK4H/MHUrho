@@ -10,21 +10,29 @@ namespace MHUrho.Desktop {
 
         public static ConfigManagerDesktop LoadConfig() {
             //TODO: Load config files
-            return new ConfigManagerDesktop(
+            var configManager = new ConfigManagerDesktop(
                 new List<string>()
                 {
-                    Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
+                    Path.Combine("Test","ResourceDir","DirDescription.xml")
                 },
                 "TODO",
                 "TODO",
-                Directory.GetCurrentDirectory(),
+                Path.Combine(Directory.GetCurrentDirectory(),"Data"),
                 Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
                 Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"));
+
+            if (!Directory.Exists(configManager.DynamicDirPath)) {
+                Directory.CreateDirectory(configManager.DynamicDirPath);
+            }
+
+            File.Create(configManager.LogPath).Dispose();
+            
+            return configManager;
         }
 
         protected ConfigManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
-            string staticFilePath, string dynamicFilePath, string logFilePath)
-            : base(packagePaths, configFilePath, defaultConfigFilePath, staticFilePath, dynamicFilePath, logFilePath) {
+            string staticFilePath, string dynamicDirPath, string logFilePath)
+            : base(packagePaths, configFilePath, defaultConfigFilePath, staticFilePath, dynamicDirPath, logFilePath) {
 
         }
 
@@ -33,10 +41,10 @@ namespace MHUrho.Desktop {
         }
 
         public override Stream GetDynamicFile(string relativePath) {
-            if (!File.Exists(Path.Combine(DynamicFilePath, relativePath))) {
+            if (!File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
                 CopyStaticToDynamic(relativePath);
             }
-            return new FileStream(Path.Combine(DynamicFilePath, relativePath), FileMode.Open, FileAccess.ReadWrite);
+            return new FileStream(Path.Combine(DynamicDirPath, relativePath), FileMode.Open, FileAccess.ReadWrite);
         }
 
         public override void CopyStaticToDynamic(string srcRelativePath) {
@@ -49,18 +57,20 @@ namespace MHUrho.Desktop {
 
 
                 foreach (string dirPath in Directory.GetDirectories(filePath, "*", SearchOption.AllDirectories))
-                    Directory.CreateDirectory(dirPath.Replace(StaticFilePath, DynamicFilePath));
+                    Directory.CreateDirectory(dirPath.Replace(StaticFilePath, DynamicDirPath));
 
                 //Copy all the files and Replaces any files with the same name
                 foreach (string subfilePath in Directory.GetFiles(filePath, "*.*", SearchOption.AllDirectories))
-                    File.Copy(subfilePath, subfilePath.Replace(StaticFilePath, DynamicFilePath), true);
+                    File.Copy(subfilePath, subfilePath.Replace(StaticFilePath, DynamicDirPath), true);
             }
             else {
-                string newFilePath = Path.Combine(DynamicFilePath, srcRelativePath);
+                string newFilePath = Path.Combine(DynamicDirPath, srcRelativePath);
                 Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
                 File.Copy(filePath, newFilePath);
             }
            
         }
+
+
     }
 }
