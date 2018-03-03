@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Graphics;
 using Urho;
-using Urho.Resources;
 using MHUrho.Packaging;
 using MHUrho.Storage;
-using Urho.Urho2D;
+
 
 namespace MHUrho.Logic
 {
@@ -13,10 +13,7 @@ namespace MHUrho.Logic
 
         private readonly Tile[] contents;
        
-        public Model Model { get; private set; }
-
-        public Material Material { get; private set; }
-
+        public MapGraphics Graphics { get; private set; }
 
         /// <summary>
         /// Coordinates of the top left corner of the map
@@ -51,9 +48,11 @@ namespace MHUrho.Logic
         /// </summary>
         public int Bottom => BottomRight.Y;
 
+        private readonly Node node;
+
         //TODO: Split map into chunks, that will be separately in memory
 
-        public static Map CreateDefaultMap(IntVector2 size) {
+        public static Map CreateDefaultMap(Node mapNode, IntVector2 size) {
 
             int tileCount = size.X * size.Y;
             Tile[] tiles = new Tile[tileCount];
@@ -63,7 +62,7 @@ namespace MHUrho.Logic
                 tiles[i] = new Tile(i % size.X, i / size.X, defaultTileType);
             }
 
-            Map newMap = new Map(size.X, size.Y, tiles);
+            Map newMap = new Map(mapNode, size.X, size.Y, tiles);
             newMap.BuildGeometry();
             return newMap;
         }
@@ -76,10 +75,11 @@ namespace MHUrho.Logic
         /// 
         /// Last step is to FinishLoading, after all references are connected
         /// </summary>
+        /// <param name="mapNode">Scene node of the map</param>
         /// <param name="storedMap">Protocol Buffers class containing stored map</param>
         /// <returns>Map with loaded data, but without connected references and without geometry</returns>
-        public static Map StartLoading(StMap storedMap) {
-            var newMap = new Map(storedMap);
+        public static Map StartLoading(Node mapNode, StMap storedMap) {
+            var newMap = new Map(mapNode, storedMap);
             try {
                 int i = 0;
                 foreach (var tile in storedMap.Tiles) {
@@ -135,13 +135,15 @@ namespace MHUrho.Logic
             return storedMap;
         }
 
-        protected Map(StMap storedMap) {
+        protected Map(Node mapNode, StMap storedMap) {
+            this.node = mapNode;
             this.TopLeft = new IntVector2(0, 0);
             this.BottomRight = new IntVector2(storedMap.Size.X - 1, storedMap.Size.Y - 1);
             this.contents = new Tile[Width * Height];
         }
 
-        protected Map(int width, int height, Tile[] contents) {
+        protected Map(Node mapNode, int width, int height, Tile[] contents) {
+            this.node = mapNode;
             TopLeft = new IntVector2(0, 0);
             BottomRight = new IntVector2(width - 1, height - 1);
             this.contents = contents;
@@ -383,149 +385,8 @@ namespace MHUrho.Logic
 
 
         private void BuildGeometry() {
-
-            CreateMaterial();
-
-            CreateModel();
+            Graphics = MapGraphics.Build(node, contents, new IntVector2(Width, Height));
         }
 
-        private void CreateMaterial() {
-            //Count for output image size
-            int tileTypeCount = PackageManager.Instance.TileTypeCount;
-
-            //TODO: Context
-            Image mapImage = new Image();
-
-            if (!mapImage.SetSize(Tile.ImageWidth * tileTypeCount, Tile.ImageHeight, 4)) {
-                //TODO: Error;
-                throw new Exception("Could not set size of the map texture image");
-            }
-
-            float mapImageWidth = Tile.ImageWidth * tileTypeCount;
-            float mapImageHeight = Tile.ImageHeight;
-
-            IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
-            foreach (var tileType in PackageManager.Instance.TileTypes) {
-                if (!mapImage.SetSubimage(tileType.Texture, subimageRect)) {
-                    //TODO: Error;
-                    throw new Exception("Could not copy tileType image to the map texture image");
-                }
-
-                //TODO: CHange mapImageHeight to mapImageHeight -1, because otherwise it will not work
-                Rect uvRect = new Rect(
-                    new Vector2(subimageRect.Left / mapImageWidth, subimageRect.Top / mapImageHeight),
-                    new Vector2(subimageRect.Right / mapImageWidth, subimageRect.Bottom / mapImageHeight));
-                tileType.SwitchImageToTextureCoords(uvRect);
-
-                //Increment subImageRect
-                subimageRect.Left += Tile.ImageWidth;
-                subimageRect.Right += Tile.ImageWidth;
-            }
-
-            Material = Material.FromImage(mapImage);
-        }
-
-        private void CreateModel() {
-            
-            //4 verticies for every tile, so that we can map every tile to different texture
-            // and the same tile types to the same textures
-            uint numVerticies = (uint)(Width * Height * 4);
-            //TODO: maybe connect the neighbouring verticies
-            //two triangles per tile, 3 indicies per triangle
-            uint numIndicies = (uint)(Width * Height * 6);
-
-            Model = new Model();
-
-            //TODO: Context
-            VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
-            IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
-
-            vb.Shadowed = true;
-            vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
-
-            ib.Shadowed = true;
-            ib.SetSize(numIndicies, false, false);
-
-            IntPtr vbPointer = vb.Lock(0, numVerticies);
-            IntPtr ibPointer = ib.Lock(0, numIndicies);
-
-            if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
-                //TODO: Error, could not lock buffers into memory, cannot create map
-                throw new Exception("Could not lock buffer into memory for map model creation");
-            }
-
-            unsafe {
-                float* verBuff = (float*)vbPointer.ToPointer();
-                short* inBuff = (short*)ibPointer.ToPointer();
-
-                int vertexIndex = 0;
-                foreach (var tile in contents) {
-                    //Create verticies
-                    verBuff = FillVertex(   
-                        verBuff,
-                        new Vector3(tile.MapArea.Left, 0, tile.MapArea.Top),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
-
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Right, 0, tile.MapArea.Top),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
-
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Left, 0, tile.MapArea.Bottom),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
-
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Right, 0, tile.MapArea.Bottom),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
-
-                    //Connect verticies to triangles
-                    *(inBuff++) = (short)(vertexIndex + 0);
-                    *(inBuff++) = (short)(vertexIndex + 2);
-                    *(inBuff++) = (short)(vertexIndex + 3);
-
-                    *(inBuff++) = (short)(vertexIndex + 3);
-                    *(inBuff++) = (short)(vertexIndex + 1);
-                    *(inBuff++) = (short)(vertexIndex + 0);
-
-                    vertexIndex += 4;
-                }
-                        
-            }
-
-            vb.Unlock();
-            ib.Unlock();
-
-            Geometry geom = new Geometry();
-            geom.SetVertexBuffer(0, vb);
-            geom.IndexBuffer = ib;
-            geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
-
-            Model.NumGeometries = 1;
-            Model.SetGeometry(0, 0, geom);
-            Model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(Width, 0, Height));
-        }
-
-        private unsafe float* FillVertex(float* vertexBuffer, Vector3 position, Vector3 normal, Vector2 texCoords) {
-            //Position
-            *(vertexBuffer++) = position.X;
-            *(vertexBuffer++) = position.Y;
-            *(vertexBuffer++) = position.Z;
-            //Normal
-            *(vertexBuffer++) = normal.X;
-            *(vertexBuffer++) = normal.Y;
-            *(vertexBuffer++) = normal.Z;
-            //Texture
-            *(vertexBuffer++) = texCoords.X;
-            *(vertexBuffer++) = texCoords.Y;
-
-            return vertexBuffer;
-        }
     }
 }

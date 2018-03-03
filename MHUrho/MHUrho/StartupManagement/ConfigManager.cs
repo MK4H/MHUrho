@@ -27,11 +27,11 @@ namespace MHUrho
         } 
 
         /// <summary>
-        /// Gets stream allowing reading from static file, for writing call GetDynamicFile
+        /// Gets stream allowing reading from static file, for writing call OpenDynamicFile
         /// </summary>
         /// <param name="relativePath"></param>
         /// <returns>Read only stream allowing reading from static file</returns>
-        public abstract Stream GetStaticFileRO(string relativePath);
+        public abstract Stream OpenStaticFileRO(string relativePath);
 
         /// <summary>
         /// Gets stream allowing reading and writing from file,
@@ -39,8 +39,10 @@ namespace MHUrho
         /// tries to make a copy of the file from static data
         /// </summary>
         /// <param name="relativePath"></param>
+        /// <param name="fileMode"></param>
+        /// <param name="fileAccess"></param>
         /// <returns></returns>
-        public abstract Stream GetDynamicFile(string relativePath);
+        public abstract Stream OpenDynamicFile(string relativePath, System.IO.FileMode fileMode, FileAccess fileAccess);
 
         /// <summary>
         /// Copies static file or directory to dynamic data directory, 

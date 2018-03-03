@@ -47,8 +47,6 @@ namespace MHUrho
 
             PackageManager.CreateInstance(ResourceCache);
 
-            CreateScene();
-
         }
 
         async void CreateScene() {
@@ -62,28 +60,12 @@ namespace MHUrho
             helloText.SetFont(font: ResourceCache.GetFont("Fonts/Font.ttf"), size: 30);
             UI.Root.AddChild(helloText);
 
-
-
-
-
-            var defaultLevel = LevelManager.LoadDefaultLevel(new IntVector2(100, 100), new List<string>());
-            var map = defaultLevel.Map;
-
-
             // 3D scene with Octree
             var scene = new Scene(Context);
             scene.CreateComponent<Octree>();
 
-            Node mapNode = scene.CreateChild("Map");
-            mapNode.Position = new Vector3(-5 , 0, -5);
-            //mapNode.SetScale(1000f);
-            mapNode.Rotation = new Quaternion(0, 0, 0);
-
- 
-            StaticModel model = mapNode.CreateComponent<StaticModel>();
-            model.Model = map.Model;
-            model.SetMaterial(map.Material);
-
+            var levelNode = scene.CreateChild("Level Node");
+            var defaultLevel = LevelManager.LoadDefaultLevel(levelNode, new IntVector2(100, 100), new List<string>());
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
@@ -128,5 +110,58 @@ namespace MHUrho
                 new RotateBy(duration: 1, deltaAngleX: 90, deltaAngleY: 0, deltaAngleZ: 0)));
             
         }
+
+        public void StartDefaultLevel() {
+            // 3D scene with Octree
+            var scene = new Scene(Context);
+            scene.CreateComponent<Octree>();
+
+            var levelNode = scene.CreateChild("Level Node");
+            var defaultLevel = LevelManager.LoadDefaultLevel(levelNode, new IntVector2(100, 100), new List<string>());
+
+            // Box	
+            Node boxNode = scene.CreateChild(name: "Box node");
+            boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
+            boxNode.SetScale(0f);
+            boxNode.Rotation = new Quaternion(x: 60, y: 0, z: 30);
+
+            StaticModel boxModel = boxNode.CreateComponent<StaticModel>();
+            boxModel.Model = ResourceCache.GetModel("Models/Box.mdl");
+            boxModel.SetMaterial(ResourceCache.GetMaterial("Materials/BoxMaterial.xml"));
+            boxModel.CastShadows = true;
+
+            // Light
+            Node lightNode = scene.CreateChild(name: "light");
+            //lightNode.Position = new Vector3(0, 5, 0);
+            lightNode.Rotation = new Quaternion(45, 0, 0);
+            var light = lightNode.CreateComponent<Light>();
+            light.LightType = LightType.Directional;
+            //light.Range = 10;
+            light.Brightness = 1f;
+            light.CastShadows = true;
+            light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
+            light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
+
+            // Camera
+
+            cameraController = CameraController.GetCameraController(scene);
+
+
+            touchControler = new TouchControler(cameraController, Input);
+            mouseController = new MouseController(cameraController, Input, UI, Context, ResourceCache);
+
+            // Viewport
+            var viewport = new Viewport(Context, scene, cameraController.Camera, null);
+            viewport.SetClearColor(Color.White);
+            Renderer.SetViewport(0, viewport);
+
+            // Do actions
+            //cameraNode.RunActionsAsync(new RepeatForever(new RotateAroundBy(5, new Vector3(0, 0, 0), 45, 0, 45)));
+            boxNode.RunActionsAsync(new EaseBounceOut(new ScaleTo(duration: 1f, scale: 1)));
+            boxNode.RunActionsAsync(new RepeatForever(
+                new RotateBy(duration: 1, deltaAngleX: 90, deltaAngleY: 0, deltaAngleZ: 0)));
+
+        }
+
     }
 }

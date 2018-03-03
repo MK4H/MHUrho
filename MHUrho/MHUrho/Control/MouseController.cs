@@ -95,9 +95,43 @@ namespace MHUrho.Control
             ui.Cursor.Shape = "MyShape";
             ui.Cursor.UseSystemShapes = false;
             ui.Cursor.Visible = true;
-            
 
+            //TODO: TEMPORARY, probably move to UIManager or something
+            var button = ui.Root.CreateButton("StartButton");
+            button.SetStyleAuto(style);
+            button.Size = new IntVector2(50, 50);
+            button.Position = new IntVector2(100, 100);
+            button.Pressed += Button_Pressed;
+            button.HoverBegin += Button_HoverBegin;
+            button.HoverEnd += Button_HoverEnd;
+            button.SetColor(Color.Yellow);
 
+            button = ui.Root.CreateButton("SaveButton");
+            button.SetStyleAuto(style);
+            button.Size = new IntVector2(50, 50);
+            button.Position = new IntVector2(100, 100);
+            button.Pressed += Button_Pressed;
+            button.HoverBegin += Button_HoverBegin;
+            button.HoverEnd += Button_HoverEnd;
+            button.SetColor(Color.Green);
+
+            button = ui.Root.CreateButton("LoadButton");
+            button.SetStyleAuto(style);
+            button.Size = new IntVector2(50, 50);
+            button.Position = new IntVector2(200, 100);
+            button.Pressed += Button_Pressed;
+            button.HoverBegin += Button_HoverBegin;
+            button.HoverEnd += Button_HoverEnd;
+            button.SetColor(Color.Blue);
+
+            button = ui.Root.CreateButton("EndButton");
+            button.SetStyleAuto(style);
+            button.Size = new IntVector2(50, 50);
+            button.Position = new IntVector2(250, 100);
+            button.Pressed += Button_Pressed;
+            button.HoverBegin += Button_HoverBegin;
+            button.HoverEnd += Button_HoverEnd;
+            button.SetColor(Color.Red);
 
             input.SetMouseMode(MouseMode.Absolute);
             input.SetMouseVisible(false);
@@ -111,6 +145,32 @@ namespace MHUrho.Control
 
             RegisterCallbacks();
 
+        }
+
+        //TODO: TEMPORARY, probably move to UIManager or something
+        private void Button_HoverEnd(HoverEndEventArgs obj) {
+            Log.Write(LogLevel.Debug, "Hover end");
+        }
+
+        //TODO: TEMPORARY, probably move to UIManager or something
+        private void Button_HoverBegin(HoverBeginEventArgs obj) {
+            Log.Write(LogLevel.Debug, "Hover begin");
+        }
+
+        //TODO: TEMPORARY, probably move to UIManager or something
+        private void Button_Pressed(PressedEventArgs obj) {
+            Log.Write(LogLevel.Debug, "Button pressed");
+
+            switch (obj.Element.Name) {
+                case "StartButton":
+                    break;
+                case "SaveButton":
+                    break;
+                case "LoadButton":
+                    break;
+                case "EndButton":
+                    break;
+            }
         }
 
         void FillActionList() {
@@ -173,11 +233,11 @@ namespace MHUrho.Control
         }
 
         private void MouseButtonDown(MouseButtonDownEventArgs e) {
-
+            Log.Write(LogLevel.Debug, $"Mouse button down at: X={ui.Cursor.Position.X}, Y={ui.Cursor.Position.Y}");
         }
 
         private void MouseButtonUp(MouseButtonUpEventArgs e) {
-
+            Log.Write(LogLevel.Debug, $"Mouse button up at: X={ui.Cursor.Position.X}, Y={ui.Cursor.Position.Y}");
         }
 
         private void MouseMoved(MouseMovedEventArgs e) {
@@ -185,7 +245,6 @@ namespace MHUrho.Control
                 cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseSensitivity);
             }
             else if (cameraType == CameraMovementType.Fixed) {
-                Log.Write(LogLevel.Debug, $"Mouse position: X={ui.Cursor.Position.X}, Y={ui.Cursor.Position.Y}");
                 MouseBorderMovement(ui.Cursor.Position);
             }
         }

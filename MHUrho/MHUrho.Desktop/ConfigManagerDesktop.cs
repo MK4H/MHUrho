@@ -36,15 +36,15 @@ namespace MHUrho.Desktop {
 
         }
 
-        public override Stream GetStaticFileRO(string relativePath) {
+        public override Stream OpenStaticFileRO(string relativePath) {
             return new FileStream(Path.Combine(StaticDirPath, relativePath), FileMode.Open, FileAccess.Read);
         }
 
-        public override Stream GetDynamicFile(string relativePath) {
+        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
             if (!File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
                 CopyStaticToDynamic(relativePath);
             }
-            return new FileStream(Path.Combine(DynamicDirPath, relativePath), FileMode.Open, FileAccess.ReadWrite);
+            return new FileStream(Path.Combine(DynamicDirPath, relativePath), fileMode, fileAccess);
         }
 
         public override void CopyStaticToDynamic(string srcRelativePath) {

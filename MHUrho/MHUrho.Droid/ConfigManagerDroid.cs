@@ -21,7 +21,7 @@ namespace MHUrho.Droid {
 
         private readonly AssetManager assetManager;
 
-        public override Stream GetStaticFileRO(string relativePath) {
+        public override Stream OpenStaticFileRO(string relativePath) {
             try {
                 return assetManager.Open(relativePath);
             }
@@ -31,20 +31,19 @@ namespace MHUrho.Droid {
             }
         }
 
-        public override Stream GetDynamicFile(string relativePath) {
+        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
             Java.IO.File file = new Java.IO.File(Path.Combine(DynamicDirPath, relativePath));
             if (file.Exists()) {
                 if (file.IsFile) {
-                    return new FileStream(file.AbsolutePath, FileMode.Open, FileAccess.ReadWrite);
+                    return new FileStream(file.AbsolutePath, fileMode, fileAccess);
                 }
               
                 throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}"); 
             }
 
-            Stream stream = assetManager.Open(relativePath);
             CopyStaticToDynamic(relativePath);
 
-            return stream;
+            return new FileStream(file.AbsolutePath, fileMode, fileAccess);
         }
 
         public override void CopyStaticToDynamic(string srcRelativePath) {

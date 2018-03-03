@@ -72,7 +72,7 @@ namespace MHUrho.Packaging {
             ResetIDs(tileTypes.Values);
             ResetIDs(unitTypes.Values);
 
-            data = XDocument.Load(MyGame.Config.GetDynamicFile(pathToXml));
+            data = XDocument.Load(MyGame.Config.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
             //TODO: Handler and signal that resource pack is in invalid state
             data.Validate(schemas, null);
         }

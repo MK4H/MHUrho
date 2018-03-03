@@ -285,6 +285,7 @@ namespace MHUrho.Control
             }
         }
 
+        //TODO: WEIRD vertical rotation, changes with distance from [0,0]
         private void RotateCameraFixed(Vector2 rot) {
             cameraHolder.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y));
 

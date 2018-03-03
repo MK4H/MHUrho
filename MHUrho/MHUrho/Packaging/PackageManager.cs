@@ -42,11 +42,11 @@ namespace MHUrho.Packaging
 
         private readonly Dictionary<string, ResourcePack> availablePacks = new Dictionary<string, ResourcePack>();
 
-        private Dictionary<int, ResourcePack> activePackages;
+        private readonly Dictionary<int, ResourcePack> activePackages;
 
-        private Dictionary<int, TileType> activeTileTypes;
+        private readonly Dictionary<int, TileType> activeTileTypes;
 
-        private Dictionary<int, UnitType> activeUnitTypes;
+        private readonly Dictionary<int, UnitType> activeUnitTypes;
 
         //private Dictionary<int, BuildingType> activeTileTypes;
 
@@ -56,7 +56,7 @@ namespace MHUrho.Packaging
             Instance = new PackageManager(resourceCache);
             try {
 
-                Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Config.GetStaticFileRO(ResPacDirSchemaPath)));
+                Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Config.OpenStaticFileRO(ResPacDirSchemaPath)));
             }
             catch (IOException e) {
                 Log.Write(LogLevel.Error, string.Format("Error loading ResroucePack schema: {0}", e));
@@ -121,7 +121,7 @@ namespace MHUrho.Packaging
 
                 FinishLoadingPackages(newActivePackages.Values);
             }
-            
+
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace MHUrho.Packaging
 
             try
             {
-                XDocument doc = XDocument.Load(MyGame.Config.GetDynamicFile(path));
+                XDocument doc = XDocument.Load(MyGame.Config.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read));
                 doc.Validate(schemas, null);
 
                 string directoryPath = Path.GetDirectoryName(path);

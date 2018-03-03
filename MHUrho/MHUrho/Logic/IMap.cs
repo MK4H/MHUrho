@@ -1,12 +1,12 @@
-﻿using MHUrho.Storage;
+﻿using MHUrho.Graphics;
+using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.Logic {
     public interface IMap {
-        Model Model { get; }
-
-        Material Material { get; }
-
+        
+        MapGraphics Graphics { get; }
+        
         /// <summary>
         /// Coordinates of the top left corner of the map
         /// </summary>

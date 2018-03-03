@@ -15,15 +15,16 @@ namespace MHUrho.Logic
 
         public float GameSpeed { get; set; } = 1f;
 
-        readonly List<Unit> units;
-
-        readonly IPathFindAlg pathFind;
-
         public Map Map { get; private set; }
 
         //TODO: Probably not public
         public Player[] Players;
 
+        private readonly Node node;
+
+        readonly List<Unit> units;
+
+        readonly IPathFindAlg pathFind;
         /// <summary>
         /// Registers unit after it is spawned by a Tile or a Building
         /// </summary>
@@ -73,12 +74,13 @@ namespace MHUrho.Logic
         }
 
 
-        public static LevelManager Load(StLevel storedLevel) {
+        public static LevelManager Load(Node levelNode, StLevel storedLevel) {
 
+            Node mapNode = levelNode.CreateChild("MapNode");
             //Load data
-            Map map = Map.StartLoading(storedLevel.Map);
+            Map map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(map);
+            LevelManager level = new LevelManager(map, levelNode);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
@@ -110,14 +112,18 @@ namespace MHUrho.Logic
         /// <summary>
         /// Loads default level to use in level builder as basis, loads specified packages plus default package
         /// </summary>
+        /// <param name="levelNode">Scene node of the level</param>
         /// <param name="mapSize">Size of the map to create</param>
         /// <param name="packages">packages to load</param>
         /// <returns>Loaded default level</returns>
-        public static LevelManager LoadDefaultLevel(IntVector2 mapSize, IEnumerable<string> packages) {
+        public static LevelManager LoadDefaultLevel(Node levelNode, IntVector2 mapSize, IEnumerable<string> packages) {
             PackageManager.Instance.LoadWholePackages(packages);
-            Map map = Map.CreateDefaultMap(mapSize);
 
-            return new LevelManager(map);
+            Node mapNode = levelNode.CreateChild("MapNode");
+
+            Map map = Map.CreateDefaultMap(mapNode, mapSize);
+
+            return new LevelManager(map, levelNode);
         }
 
         public StLevel Save() {
@@ -139,11 +145,12 @@ namespace MHUrho.Logic
             return level;
         }
 
-        protected LevelManager(Map map)
+        protected LevelManager(Map map, Node node)
         {
             units = new List<Unit>();
             this.Map = map;
             this.pathFind = new AStar(map);
+            this.node = node;
         }
         
     }
