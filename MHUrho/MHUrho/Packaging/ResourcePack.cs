@@ -50,8 +50,8 @@ namespace MHUrho.Packaging {
                                                 string pathToXml, 
                                                 string description, 
                                                 string pathToThumbnail) {
-            pathToXml = ConfigManager.CorrectRelativePath(pathToXml);
-            pathToThumbnail = ConfigManager.CorrectRelativePath(pathToThumbnail);
+            pathToXml = FileManager.CorrectRelativePath(pathToXml);
+            pathToThumbnail = FileManager.CorrectRelativePath(pathToThumbnail);
             var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
 
             return new ResourcePack(name, pathToXml, description ?? "No description", thumbnail);
@@ -168,9 +168,6 @@ namespace MHUrho.Packaging {
         }
 
         public void UnLoad(Dictionary<int, TileType> activeTileTypes, Dictionary<int, UnitType> activeUnitTypes) {
-            foreach (var tileType in tileTypes) {
-                tileType.Value.Dispose();
-            }
 
             foreach (var unitType in unitTypes) {
                 unitType.Value.Dispose();

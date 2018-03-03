@@ -20,7 +20,7 @@ namespace MHUrho
 {
     public class MyGame : Application
     {
-        public static ConfigManager Config;
+        public static FileManager Config;
 
         [Preserve]
         public MyGame(ApplicationOptions opts) : base(opts) { }
@@ -28,7 +28,7 @@ namespace MHUrho
         private CameraController cameraController;
 
         private TouchControler touchControler;
-        private MouseController mouseController;
+        private MouseAndKeyboardController mouseController;
 
         static MyGame()
         {
@@ -46,6 +46,8 @@ namespace MHUrho
             Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
             PackageManager.CreateInstance(ResourceCache);
+
+            mouseController = new MouseAndKeyboardController(this, Input, UI, Context, ResourceCache);
 
         }
 
@@ -65,7 +67,7 @@ namespace MHUrho
             scene.CreateComponent<Octree>();
 
             var levelNode = scene.CreateChild("Level Node");
-            var defaultLevel = LevelManager.LoadDefaultLevel(levelNode, new IntVector2(100, 100), new List<string>());
+            var defaultLevel = LevelManager.LoadDefaultLevel(scene, new IntVector2(100, 100), new List<string>());
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
@@ -96,7 +98,7 @@ namespace MHUrho
 
 
             touchControler = new TouchControler(cameraController, Input);
-            mouseController = new MouseController(cameraController, Input, UI, Context, ResourceCache);
+            mouseController = new MouseAndKeyboardController(this, Input, UI, Context, ResourceCache);
 
             // Viewport
             var viewport = new Viewport(Context, scene, cameraController.Camera, null);
@@ -116,8 +118,8 @@ namespace MHUrho
             var scene = new Scene(Context);
             scene.CreateComponent<Octree>();
 
-            var levelNode = scene.CreateChild("Level Node");
-            var defaultLevel = LevelManager.LoadDefaultLevel(levelNode, new IntVector2(100, 100), new List<string>());
+
+            var defaultLevel = LevelManager.LoadDefaultLevel(scene, new IntVector2(100, 100), new List<string>());
 
             // Box	
             Node boxNode = scene.CreateChild(name: "Box node");
@@ -145,10 +147,10 @@ namespace MHUrho
             // Camera
 
             cameraController = CameraController.GetCameraController(scene);
+            mouseController.ConnectCamera(cameraController);
 
-
-            touchControler = new TouchControler(cameraController, Input);
-            mouseController = new MouseController(cameraController, Input, UI, Context, ResourceCache);
+            //touchControler = new TouchControler(cameraController, Input);
+            
 
             // Viewport
             var viewport = new Viewport(Context, scene, cameraController.Camera, null);
@@ -160,6 +162,10 @@ namespace MHUrho
             boxNode.RunActionsAsync(new EaseBounceOut(new ScaleTo(duration: 1f, scale: 1)));
             boxNode.RunActionsAsync(new RepeatForever(
                 new RotateBy(duration: 1, deltaAngleX: 90, deltaAngleY: 0, deltaAngleZ: 0)));
+
+        }
+
+        public void EndCurrentLevel() {
 
         }
 

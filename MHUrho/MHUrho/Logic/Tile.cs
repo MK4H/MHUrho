@@ -78,9 +78,10 @@ namespace MHUrho.Logic
 
         public StTile Save() {
             var storedTile = new StTile();
-            storedTile.UnitID = Unit.ID;
+            storedTile.UnitID = Unit?.ID ?? 0;
             storedTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y};
             storedTile.Height = Height;
+            storedTile.TileTypeID = Type.ID;
 
             var storedPassingUnits = storedTile.PassingUnitIDs;
             foreach (var passingUnit in PassingUnits) {

@@ -17,7 +17,7 @@ using System.Diagnostics;
 using Urho;
 
 namespace MHUrho.Droid {
-    public class ConfigManagerDroid : ConfigManager {
+    public class FileManagerDroid : FileManager {
 
         private readonly AssetManager assetManager;
 
@@ -29,6 +29,10 @@ namespace MHUrho.Droid {
                 Urho.IO.Log.Write(LogLevel.Error, $"Could not open file {relativePath}, error: {e}");
                 return null;
             }
+        }
+
+        public override Stream OpenStaticFileRW(string relativePath) {
+            throw new NotImplementedException();
         }
 
         public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
@@ -73,9 +77,9 @@ namespace MHUrho.Droid {
             }
         }
 
-        public static ConfigManagerDroid LoadConfig(AssetManager assetManager) {
+        public static FileManagerDroid LoadConfig(AssetManager assetManager) {
             //TODO: Load config files
-            return new ConfigManagerDroid(
+            return new FileManagerDroid(
                 new List<string>()
                 {
                     Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
@@ -83,7 +87,7 @@ namespace MHUrho.Droid {
                 assetManager);
         }
 
-        protected ConfigManagerDroid(List<string> packagePaths, AssetManager assetManager)
+        protected FileManagerDroid(List<string> packagePaths, AssetManager assetManager)
             : base( packagePaths,
                     "TODO",
                     "TODO",

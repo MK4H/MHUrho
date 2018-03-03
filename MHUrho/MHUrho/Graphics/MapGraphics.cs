@@ -46,15 +46,18 @@ namespace MHUrho.Graphics
 
             IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
             foreach (var tileType in PackageManager.Instance.TileTypes) {
-                if (!mapImage.SetSubimage(tileType.Texture, subimageRect)) {
+                var tileTypeImage = tileType.GetImage();
+                if (!mapImage.SetSubimage(tileTypeImage, subimageRect)) {
                     //TODO: Error;
                     throw new Exception("Could not copy tileType image to the map texture image");
                 }
 
+                tileTypeImage.Dispose();
+
                 Rect uvRect = new Rect(
                     new Vector2(subimageRect.Left / (float)mapImageWidth, subimageRect.Top / (float)mapImageHeight),
                     new Vector2(subimageRect.Right / (float)mapImageWidth, subimageRect.Bottom / (float)mapImageHeight));
-                tileType.SwitchImageToTextureCoords(uvRect);
+                tileType.SetTextureCoords(uvRect);
 
                 //Increment subImageRect
                 subimageRect.Left += Tile.ImageWidth;

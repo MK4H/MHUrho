@@ -6,7 +6,7 @@ using Urho.IO;
 
 namespace MHUrho
 {
-    public abstract class ConfigManager
+    public abstract class FileManager
     {
         //TODO: Load from config file
         public List<string> PackagePaths { get; protected set; }
@@ -27,11 +27,20 @@ namespace MHUrho
         } 
 
         /// <summary>
-        /// Gets stream allowing reading from static file, for writing call OpenDynamicFile
+        /// Gets stream allowing reading from static file, either directy from static file
+        /// or if there exists changed copy in dynamic files, from this changed copy
         /// </summary>
         /// <param name="relativePath"></param>
         /// <returns>Read only stream allowing reading from static file</returns>
         public abstract Stream OpenStaticFileRO(string relativePath);
+
+        /// <summary>
+        /// Checks if there is changed copy in dynamic files, if there is, 
+        /// opens it, otherwise creates new copy and opens this new copy
+        /// </summary>
+        /// <param name="relativePath"></param>
+        /// <returns>ReadWrite stream</returns>
+        public abstract Stream OpenStaticFileRW(string relativePath);
 
         /// <summary>
         /// Gets stream allowing reading and writing from file,
@@ -51,7 +60,7 @@ namespace MHUrho
         /// <param name="srcRelativePath">Source relative path in static data</param>
         public abstract void CopyStaticToDynamic(string srcRelativePath);
 
-        protected ConfigManager(
+        protected FileManager(
             List<string> packagePaths,
             string configFilePath,
             string defaultConfigFilePath,

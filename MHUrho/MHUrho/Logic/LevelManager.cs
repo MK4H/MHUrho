@@ -20,6 +20,8 @@ namespace MHUrho.Logic
         //TODO: Probably not public
         public Player[] Players;
 
+        private readonly Scene scene;
+
         private readonly Node node;
 
         readonly List<Unit> units;
@@ -74,13 +76,13 @@ namespace MHUrho.Logic
         }
 
 
-        public static LevelManager Load(Node levelNode, StLevel storedLevel) {
+        public static LevelManager Load(Context context, Node levelNode, StLevel storedLevel) {
 
             Node mapNode = levelNode.CreateChild("MapNode");
             //Load data
             Map map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(map, levelNode);
+            LevelManager level = new LevelManager(map, levelNode, scene);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
@@ -109,6 +111,16 @@ namespace MHUrho.Logic
             return level;
         }
 
+        public static LevelManager LoadFrom(Context context, Stream stream, bool leaveOpen = false) {
+            var storedLevel = StLevel.Parser.ParseFrom(stream);
+            var levelNode = scene.CreateChild("Level Node");
+            var level = Load(scene, levelNode, storedLevel);
+            if (!leaveOpen) {
+                stream.Close();
+            }
+            return level;
+        }
+
         /// <summary>
         /// Loads default level to use in level builder as basis, loads specified packages plus default package
         /// </summary>
@@ -116,21 +128,24 @@ namespace MHUrho.Logic
         /// <param name="mapSize">Size of the map to create</param>
         /// <param name="packages">packages to load</param>
         /// <returns>Loaded default level</returns>
-        public static LevelManager LoadDefaultLevel(Node levelNode, IntVector2 mapSize, IEnumerable<string> packages) {
+        public static LevelManager LoadDefaultLevel(Scene scene, IntVector2 mapSize, IEnumerable<string> packages) {
             PackageManager.Instance.LoadWholePackages(packages);
-
+            var levelNode = scene.CreateChild("Level Node");
             Node mapNode = levelNode.CreateChild("MapNode");
 
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
 
-            return new LevelManager(map, levelNode);
+            CurrentLevel = new LevelManager(map, levelNode, scene);
+            return CurrentLevel;
         }
 
         public StLevel Save() {
             StLevel level = new StLevel() {
                 GameSpeed = this.GameSpeed,
-                Map = this.Map.Save()
+                Map = this.Map.Save(),
+                Packages = PackageManager.Instance.Save()
             };
+
 
             var stUnits = level.Units;
             foreach (var unit in units) {
@@ -145,12 +160,22 @@ namespace MHUrho.Logic
             return level;
         }
 
-        protected LevelManager(Map map, Node node)
+        public void SaveTo(Stream stream, bool leaveOpen = false) {
+            var storedLevel = Save();
+            storedLevel.WriteTo(new Google.Protobuf.CodedOutputStream(stream, leaveOpen));
+        }
+
+        public void End() {
+            scene.Dispose();
+        }
+
+        protected LevelManager(Map map, Node node, Scene scene)
         {
             units = new List<Unit>();
             this.Map = map;
             this.pathFind = new AStar(map);
             this.node = node;
+            this.Players = new Player[0];
         }
         
     }

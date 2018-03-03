@@ -10,13 +10,11 @@ using MHUrho.Packaging;
 
 namespace MHUrho.Logic
 {
-    public class TileType : IIDNameAndPackage, IDisposable
+    public class TileType : IIDNameAndPackage
     {
         public int ID { get; set; }
 
         public float MovementSpeedModifier { get; private set; }
-
-        public Image Texture { get; private set; }
 
         public string Name { get; private set; }
 
@@ -25,17 +23,19 @@ namespace MHUrho.Logic
         //TODO: Check that texture is null
         public Rect TextureCoords { get; private set; }
 
+        private readonly string imagePath;
+
         public static TileType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
             //TODO: Check for errors
             string name = xml.Attribute("name").Value;
-            string texturePath = xml.Element(PackageManager.XMLNamespace + "texturePath").Value.Trim();
+            string relativeImagePath = xml.Element(PackageManager.XMLNamespace + "texturePath").Value.Trim();
             float movementSpeed = float.Parse(xml.Element(PackageManager.XMLNamespace + "movementSpeed").Value);
 
-            texturePath = ConfigManager.CorrectRelativePath(texturePath);
+            relativeImagePath = FileManager.CorrectRelativePath(relativeImagePath);
 
-            Image image = PackageManager.Instance.ResourceCache.GetImage(System.IO.Path.Combine(pathToPackageXMLDirname, texturePath));
+            string imagePath = System.IO.Path.Combine(pathToPackageXMLDirname, relativeImagePath);
 
-            TileType newTileType = new TileType(name, movementSpeed, image, package) {
+            TileType newTileType = new TileType(name, movementSpeed, imagePath, package) {
                 ID = newID
             };
 
@@ -52,29 +52,25 @@ namespace MHUrho.Logic
             return storedTileType;
         }
 
-        protected TileType(string name, float movementSpeedModifier, Image image, ResourcePack package) {
+        protected TileType(string name, float movementSpeedModifier, string imagePath, ResourcePack package) {
             ID = 0;
             this.Name = name;
             this.MovementSpeedModifier = movementSpeedModifier;
-            this.Texture = image;
+            this.imagePath = imagePath;
             this.Package = package;
         }
 
         /// <summary>
-        /// Called by map, after constructiong the one big texture out of all the tileType images, 
-        /// switches tileType from holding the image itself to just holding the position in the big texture
+        /// Called by map, after constructiong the one big texture out of all the tileType images
         /// </summary>
         /// <param name="coords">Coords of the image in the map texture</param>
-        public void SwitchImageToTextureCoords(Rect coords) {
-            Texture.Dispose();
-            Texture = null;
-
+        public void SetTextureCoords(Rect coords) {
             TextureCoords = coords;
         }
 
-        public void Dispose() {
-            //TODO: Dispose all disposable resources
-            Texture?.Dispose();
+        public Image GetImage() {
+            return PackageManager.Instance.ResourceCache.GetImage(imagePath);
         }
+
     }
 }

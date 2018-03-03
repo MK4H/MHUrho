@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MHUrho.Desktop {
-    class ConfigManagerDesktop : ConfigManager {
+    class FileManagerDesktop : FileManager {
 
-        public static ConfigManagerDesktop LoadConfig() {
+        public static FileManagerDesktop LoadConfig() {
             //TODO: Load config files
-            var configManager = new ConfigManagerDesktop(
+            var configManager = new FileManagerDesktop(
                 new List<string>()
                 {
                     Path.Combine("Test","ResourceDir","DirDescription.xml")
@@ -30,20 +30,27 @@ namespace MHUrho.Desktop {
             return configManager;
         }
 
-        protected ConfigManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
+        protected FileManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
             string staticDirPath, string dynamicDirPath, string logFilePath)
             : base(packagePaths, configFilePath, defaultConfigFilePath, staticDirPath, dynamicDirPath, logFilePath) {
 
         }
 
         public override Stream OpenStaticFileRO(string relativePath) {
-            return new FileStream(Path.Combine(StaticDirPath, relativePath), FileMode.Open, FileAccess.Read);
+            if (!File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
+                return new FileStream(Path.Combine(StaticDirPath, relativePath), FileMode.Open, FileAccess.Read);
+            }
+            return new FileStream(Path.Combine(DynamicDirPath, relativePath), FileMode.Open, FileAccess.Read);
         }
 
-        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
+        public override Stream OpenStaticFileRW(string relativePath) {
             if (!File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
                 CopyStaticToDynamic(relativePath);
             }
+            return new FileStream(Path.Combine(DynamicDirPath, relativePath), FileMode.Open, FileAccess.Read);
+        }
+
+        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
             return new FileStream(Path.Combine(DynamicDirPath, relativePath), fileMode, fileAccess);
         }
 

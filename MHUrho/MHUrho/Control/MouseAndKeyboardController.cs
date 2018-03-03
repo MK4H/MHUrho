@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Urho;
 using Urho.IO;
 
 using MHUrho.Helpers;
+using MHUrho.Logic;
+using MHUrho.Storage;
 using Urho.Gui;
 using Urho.Resources;
 
 namespace MHUrho.Control
 {
-    public class MouseController
+    public class MouseAndKeyboardController
     {
         private enum CameraMovementType { Fixed, FreeFloat}
 
@@ -49,6 +52,7 @@ namespace MHUrho.Control
         private CameraController cameraController;
         private readonly Input input;
         private readonly UI ui;
+        private readonly MyGame game;
 
 
         private CameraMovementType cameraType;
@@ -63,20 +67,19 @@ namespace MHUrho.Control
         private bool mouseInLeftRight;
         private bool mouseInTopBottom;
 
-        public MouseController( CameraController cameraController, 
+        public MouseAndKeyboardController(
+                                MyGame game,
                                 Input input, 
                                 UI ui, 
                                 Context context, 
                                 ResourceCache resourceCache) {
-            this.cameraController = cameraController;
+            this.game = game;
             this.input = input;
             this.MouseSensitivity = 0.2f;
             this.CameraScrollSensitivity = 5f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
             this.ui = ui;
-
-            cameraController.Drag = 10;
 
             var style = resourceCache.GetXmlFile("UI/DefaultStyle.xml");
             ui.Root.SetDefaultStyle(style);
@@ -104,16 +107,16 @@ namespace MHUrho.Control
             button.Pressed += Button_Pressed;
             button.HoverBegin += Button_HoverBegin;
             button.HoverEnd += Button_HoverEnd;
-            button.SetColor(Color.Yellow);
+            button.SetColor(Color.Green);
 
             button = ui.Root.CreateButton("SaveButton");
             button.SetStyleAuto(style);
             button.Size = new IntVector2(50, 50);
-            button.Position = new IntVector2(100, 100);
+            button.Position = new IntVector2(150, 100);
             button.Pressed += Button_Pressed;
             button.HoverBegin += Button_HoverBegin;
             button.HoverEnd += Button_HoverEnd;
-            button.SetColor(Color.Green);
+            button.SetColor(Color.Yellow);
 
             button = ui.Root.CreateButton("LoadButton");
             button.SetStyleAuto(style);
@@ -147,6 +150,12 @@ namespace MHUrho.Control
 
         }
 
+        public void ConnectCamera(CameraController cameraController) {
+            this.cameraController = cameraController;
+
+            cameraController.Drag = 10;
+        }
+
         //TODO: TEMPORARY, probably move to UIManager or something
         private void Button_HoverEnd(HoverEndEventArgs obj) {
             Log.Write(LogLevel.Debug, "Hover end");
@@ -163,12 +172,29 @@ namespace MHUrho.Control
 
             switch (obj.Element.Name) {
                 case "StartButton":
+                    game.StartDefaultLevel();
                     break;
                 case "SaveButton":
+                    //TODO: Move this elsewhere
+                    using (var saveFile =
+                        new Google.Protobuf.CodedOutputStream(MyGame.Config.OpenDynamicFile("savedGame.save", System.IO.FileMode.Create,
+                                                      System.IO.FileAccess.Write))) {
+                        LevelManager.CurrentLevel.Save().WriteTo(saveFile);
+                    }
+                        
                     break;
                 case "LoadButton":
+                    using (Stream saveFile = MyGame.Config.OpenDynamicFile("savedGame.save",
+                                                                           System.IO.FileMode.Open,
+                                                                           FileAccess.Read)) {
+                        LevelManager.Load(new Node(),
+                                          StLevel.Parser.ParseFrom(saveFile));
+                    }
+                    
                     break;
                 case "EndButton":
+                    break;
+                default:
                     break;
             }
         }
@@ -216,6 +242,11 @@ namespace MHUrho.Control
         }
 
         private void KeyDown(KeyDownEventArgs e) {
+            //TODO: Just switch keyActions dictionary
+            if (cameraController == null) {
+                return;
+            }
+
             if (keyActions.TryGetValue(e.Key, out Actions action)) {
                 if (!e.Repeat) {
                     GetAction(action).KeyDown?.Invoke(e.Qualifiers);
@@ -227,6 +258,11 @@ namespace MHUrho.Control
         }
 
         private void KeyUp(KeyUpEventArgs e) {
+            //TODO: Just switch keyActions dictionary
+            if (cameraController == null) {
+                return;
+            }
+
             if (keyActions.TryGetValue(e.Key, out Actions action)) {
                 GetAction(action).KeyUp?.Invoke(e.Qualifiers);
             }
@@ -241,12 +277,17 @@ namespace MHUrho.Control
         }
 
         private void MouseMoved(MouseMovedEventArgs e) {
+            if (cameraController == null) {
+                return;
+            }
+
             if (cameraType == CameraMovementType.FreeFloat) {
                 cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseSensitivity);
             }
             else if (cameraType == CameraMovementType.Fixed) {
                 MouseBorderMovement(ui.Cursor.Position);
             }
+
         }
 
         private void MouseWheel(MouseWheelEventArgs e) {

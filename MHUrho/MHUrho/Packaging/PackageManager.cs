@@ -42,11 +42,11 @@ namespace MHUrho.Packaging
 
         private readonly Dictionary<string, ResourcePack> availablePacks = new Dictionary<string, ResourcePack>();
 
-        private readonly Dictionary<int, ResourcePack> activePackages;
+        private Dictionary<int, ResourcePack> activePackages;
 
-        private readonly Dictionary<int, TileType> activeTileTypes;
+        private Dictionary<int, TileType> activeTileTypes;
 
-        private readonly Dictionary<int, UnitType> activeUnitTypes;
+        private Dictionary<int, UnitType> activeUnitTypes;
 
         //private Dictionary<int, BuildingType> activeTileTypes;
 
@@ -93,14 +93,16 @@ namespace MHUrho.Packaging
         public void LoadPackages(StPackages storedPackages) {
             //Remap everything from LevelLocal IDs to Global names so we can check if there are already things loaded
             Dictionary<string, TileType> loadedTileTypes = RemapToFullName(activeTileTypes);
+            activeTileTypes = new Dictionary<int, TileType>();
             Dictionary<string, UnitType> loadedUnitTypes = RemapToFullName(activeUnitTypes);
+            activeUnitTypes = new Dictionary<int, UnitType>();
 
             //Load the packages for this level, if already loaded just remap the ID
             Dictionary<int, ResourcePack>
                 newActivePackages = GetActivePackages(storedPackages.Packages, activePackages);
 
             //Unload the packages that were not remapped for this leve
-            UnloadUnusedPackages(activePackages);
+            UnloadOldActivePackages(newActivePackages);
 
             //Load the items from packages
             {
@@ -115,7 +117,9 @@ namespace MHUrho.Packaging
                         //Was not loaded, load it from package
                         tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TileTypeID);
                     }
-                    activeTileTypes.Add( storedTileType.TileTypeID, tileType);
+
+                    tileType.ID = storedTileType.TileTypeID;
+                    activeTileTypes.Add( tileType.ID, tileType);
                 }
 
 
@@ -140,7 +144,8 @@ namespace MHUrho.Packaging
 
             //Unloads the packages that were left in previously loaded packages and not moved
             // to new loaded packages
-            UnloadUnusedPackages(activePackages);
+            UnloadOldActivePackages(newLoadedPackages);
+            
 
             StartLoadingPackages(newLoadedPackages.Values);
 
@@ -339,10 +344,12 @@ namespace MHUrho.Packaging
         }
 
 
-        private void UnloadUnusedPackages(Dictionary<int, ResourcePack> toUnload) {
-            foreach (var package in toUnload) {
+        private void UnloadOldActivePackages(Dictionary<int, ResourcePack> newLoadedPackages) {
+            foreach (var package in activePackages) {
                 package.Value.UnLoad(activeTileTypes, activeUnitTypes);
             }
+
+            activePackages = newLoadedPackages;
         }
 
         private void StartLoadingPackages(IEnumerable<ResourcePack> packages) {

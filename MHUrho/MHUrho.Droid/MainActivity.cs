@@ -44,7 +44,7 @@ namespace MHUrho.Droid
             SetContentView(layout);
 
 
-            MyGame.Config = ConfigManagerDroid.LoadConfig(Assets);
+            MyGame.Config = FileManagerDroid.LoadConfig(Assets);
 
             myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));
             //to stop the game use await surface.Stop().

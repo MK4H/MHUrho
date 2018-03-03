@@ -10,7 +10,7 @@ namespace MHUrho.Desktop
     {
         static void Main(string[] args) {
 
-            MyGame.Config = ConfigManagerDesktop.LoadConfig();
+            MyGame.Config = FileManagerDesktop.LoadConfig();
         
             new MyGame(new ApplicationOptions("Data")).Run();
         }
