@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using MHUrho.Graphics;
 using NUnit.Framework;
 
 using MHUrho.Logic;
@@ -182,9 +182,7 @@ namespace NUnit.Tests {
 
             #region NOT USED IN TEST
 
-            public Model Model => throw new NotImplementedException();
-
-            public Material Material => throw new NotImplementedException();
+            public MapGraphics Graphics => throw new NotImplementedException();
 
             public bool IsXInside(int x) {
                 throw new NotImplementedException();
@@ -234,6 +232,8 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
             #endregion
+
+            
 
             public IntVector2 TopLeft { get; private set; }
 

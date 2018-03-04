@@ -32,22 +32,16 @@ namespace MHUrho.Droid {
         }
 
         public override Stream OpenStaticFileRW(string relativePath) {
-            throw new NotImplementedException();
-        }
-
-        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
-            Java.IO.File file = new Java.IO.File(Path.Combine(DynamicDirPath, relativePath));
-            if (file.Exists()) {
-                if (file.IsFile) {
-                    return new FileStream(file.AbsolutePath, fileMode, fileAccess);
-                }
-              
-                throw new System.IO.IOException($"Cannot open directory as a file: {file.AbsolutePath}"); 
+            if (System.IO.File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
+                return OpenDynamicFile(relativePath, FileMode.Open, FileAccess.ReadWrite);
             }
 
             CopyStaticToDynamic(relativePath);
+            return OpenDynamicFile(relativePath, FileMode.Open, FileAccess.ReadWrite);
+        }
 
-            return new FileStream(file.AbsolutePath, fileMode, fileAccess);
+        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
+            return new FileStream(Path.Combine(DynamicDirPath, relativePath), fileMode, fileAccess);
         }
 
         public override void CopyStaticToDynamic(string srcRelativePath) {

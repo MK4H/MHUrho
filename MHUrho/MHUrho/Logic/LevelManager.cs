@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MHUrho.Control;
 using MHUrho.Packaging;
 using Urho;
 using MHUrho.Storage;
+using Urho.Actions;
 
 namespace MHUrho.Logic
 {
@@ -22,7 +24,8 @@ namespace MHUrho.Logic
 
         private readonly Scene scene;
 
-        private readonly Node node;
+        private CameraController cameraController;
+        private IGameController inputController;
 
         readonly List<Unit> units;
 
@@ -76,13 +79,20 @@ namespace MHUrho.Logic
         }
 
 
-        public static LevelManager Load(Context context, Node levelNode, StLevel storedLevel) {
+        public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
-            Node mapNode = levelNode.CreateChild("MapNode");
+            var scene = new Scene(game.Context);
+            scene.CreateComponent<Octree>();
+
+            LoadSceneParts(game, scene);
+            var cameraController = LoadCamera(game, scene);
+            var inputController = game.menuController.GetGameController(cameraController);
+
             //Load data
+            Node mapNode = scene.CreateChild("MapNode");
             Map map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(map, levelNode, scene);
+            LevelManager level = new LevelManager(map, scene, cameraController, inputController);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
@@ -111,10 +121,9 @@ namespace MHUrho.Logic
             return level;
         }
 
-        public static LevelManager LoadFrom(Context context, Stream stream, bool leaveOpen = false) {
+        public static LevelManager LoadFrom(MyGame game, Stream stream, bool leaveOpen = false) {
             var storedLevel = StLevel.Parser.ParseFrom(stream);
-            var levelNode = scene.CreateChild("Level Node");
-            var level = Load(scene, levelNode, storedLevel);
+            var level = Load(game, storedLevel);
             if (!leaveOpen) {
                 stream.Close();
             }
@@ -128,14 +137,22 @@ namespace MHUrho.Logic
         /// <param name="mapSize">Size of the map to create</param>
         /// <param name="packages">packages to load</param>
         /// <returns>Loaded default level</returns>
-        public static LevelManager LoadDefaultLevel(Scene scene, IntVector2 mapSize, IEnumerable<string> packages) {
+        public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, IEnumerable<string> packages) {
             PackageManager.Instance.LoadWholePackages(packages);
-            var levelNode = scene.CreateChild("Level Node");
-            Node mapNode = levelNode.CreateChild("MapNode");
+
+            var scene = new Scene(game.Context);
+            scene.CreateComponent<Octree>();
+
+            LoadSceneParts(game, scene);
+            var cameraController = LoadCamera(game, scene);
+            var inputController = game.menuController.GetGameController(cameraController);
+
+
+            Node mapNode = scene.CreateChild("MapNode");
 
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
 
-            CurrentLevel = new LevelManager(map, levelNode, scene);
+            CurrentLevel = new LevelManager(map, scene, cameraController, inputController);
             return CurrentLevel;
         }
 
@@ -166,18 +183,71 @@ namespace MHUrho.Logic
         }
 
         public void End() {
+            inputController.Disable();
+            Map.Dispose();
+            scene.RemoveAllChildren();
             scene.Dispose();
+            CurrentLevel = null;
         }
 
-        protected LevelManager(Map map, Node node, Scene scene)
+        protected LevelManager(Map map, 
+                               Scene scene, 
+                               CameraController cameraController, 
+                               IGameController inputController)
         {
+            this.scene = scene;
             units = new List<Unit>();
             this.Map = map;
             this.pathFind = new AStar(map);
-            this.node = node;
             this.Players = new Player[0];
+            this.cameraController = cameraController;
+            this.inputController = inputController;
         }
-        
+
+        private static async void LoadSceneParts(MyGame game, Scene scene) {
+            // Box	
+            Node boxNode = scene.CreateChild(name: "Box node");
+            boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
+            boxNode.SetScale(0f);
+            boxNode.Rotation = new Quaternion(x: 60, y: 0, z: 30);
+
+            StaticModel boxModel = boxNode.CreateComponent<StaticModel>();
+            boxModel.Model = game.ResourceCache.GetModel("Models/Box.mdl");
+            boxModel.SetMaterial(game.ResourceCache.GetMaterial("Materials/BoxMaterial.xml"));
+            boxModel.CastShadows = true;
+
+            // Light
+            Node lightNode = scene.CreateChild(name: "light");
+            //lightNode.Position = new Vector3(0, 5, 0);
+            lightNode.Rotation = new Quaternion(45, 0, 0);
+            var light = lightNode.CreateComponent<Light>();
+            light.LightType = LightType.Directional;
+            //light.Range = 10;
+            light.Brightness = 1f;
+            light.CastShadows = true;
+            light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
+            light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
+
+            //TODO: Remove this
+            await boxNode.RunActionsAsync(new EaseBounceOut(new ScaleTo(duration: 1f, scale: 1)));
+            await boxNode.RunActionsAsync(new RepeatForever(
+                new RotateBy(duration: 1, deltaAngleX: 90, deltaAngleY: 0, deltaAngleZ: 0)));
+
+        }
+
+        private static CameraController LoadCamera(MyGame game, Scene scene) {
+            // Camera
+
+            CameraController cameraController = CameraController.GetCameraController(scene);
+
+            // Viewport
+            var viewport = new Viewport(game.Context, scene, cameraController.Camera, null);
+            viewport.SetClearColor(Color.White);
+            game.Renderer.SetViewport(0, viewport);
+
+            return cameraController;
+        }
+
     }
 }
    

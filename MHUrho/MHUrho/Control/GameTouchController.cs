@@ -5,7 +5,7 @@ using Urho;
 
 namespace MHUrho.Control
 {
-    public class TouchControler
+    public class GameTouchController : TouchController, IGameController
     {
         private enum CameraMovementType { Horizontal, Vertical, FreeFloat }
 
@@ -13,25 +13,26 @@ namespace MHUrho.Control
         public float Sensitivity { get; set; }
         public bool ContinuousMovement { get; private set; } = true;
 
+
+
         private CameraController cameraController;
-        private readonly Input input;
 
         private CameraMovementType movementType;
 
         private readonly Dictionary<int, Vector2> activeTouches = new Dictionary<int, Vector2>();
 
+
         
 
-        public TouchControler(CameraController cameraController, Input input, float sensitivity = 0.1f) {
+        public GameTouchController(CameraController cameraController, MyGame game, float sensitivity = 0.1f) : base(game) {
             this.cameraController = cameraController;
-            this.input = input;
             this.Sensitivity = sensitivity;
 
             //SwitchToContinuousMovement();
             SwitchToDiscontinuousMovement();
             movementType = CameraMovementType.Horizontal;
 
-            RegisterHandlers();
+            Enable();
         }
 
         public void SwitchToContinuousMovement() {
@@ -47,18 +48,18 @@ namespace MHUrho.Control
             
         }
 
-        private void TouchBegin(TouchBeginEventArgs e) {
+        protected override void TouchBegin(TouchBeginEventArgs e) {
             activeTouches.Add(e.TouchID, new Vector2(e.X, e.Y));
         }
 
-        private void TouchEnd(TouchEndEventArgs e) {
+        protected override void TouchEnd(TouchEndEventArgs e) {
             activeTouches.Remove(e.TouchID);
 
             cameraController.AddHorizontalMovement(cameraController.StaticHorizontalMovement);
             cameraController.HardResetHorizontalMovement();
         }
 
-        private void TouchMove(TouchMoveEventArgs e) {
+        protected override void TouchMove(TouchMoveEventArgs e) {
             try {
                 switch (movementType) {
                     case CameraMovementType.Horizontal:
@@ -92,11 +93,5 @@ namespace MHUrho.Control
         }
 
 
-
-        private void RegisterHandlers() {
-            input.TouchBegin += TouchBegin;
-            input.TouchEnd += TouchEnd;
-            input.TouchMove += TouchMove;
-        }
     }
 }

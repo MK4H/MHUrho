@@ -134,6 +134,7 @@ namespace MHUrho.Packaging
         /// <param name="packages"></param>
         public void LoadWholePackages(IEnumerable<string> packages) {
             Dictionary<int, ResourcePack> newLoadedPackages = new Dictionary<int, ResourcePack>();
+            activeTileTypes = new Dictionary<int, TileType>();
             //Get default pack
             int defaultPackageID = GetID(newLoadedPackages);
             GetPackage("Default", defaultPackageID, activePackages, newLoadedPackages);
@@ -145,12 +146,14 @@ namespace MHUrho.Packaging
             //Unloads the packages that were left in previously loaded packages and not moved
             // to new loaded packages
             UnloadOldActivePackages(newLoadedPackages);
-            
-
+           
             StartLoadingPackages(newLoadedPackages.Values);
 
             //If it was not loaded, load it with new ID, else just leave it with old ID
-            DefaultTileType = newLoadedPackages[defaultPackageID].GetTileType("Default") ?? newLoadedPackages[defaultPackageID].LoadTileType("Default", GetID(activeTileTypes));
+            if ((DefaultTileType = newLoadedPackages[defaultPackageID].GetTileType("Default")) == null) {
+                DefaultTileType = newLoadedPackages[defaultPackageID].LoadTileType("Default", GetID(activeTileTypes));
+            }
+ 
             
 
             foreach (var package in newLoadedPackages.Values) {

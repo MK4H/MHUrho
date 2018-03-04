@@ -9,7 +9,7 @@ using MHUrho.Storage;
 
 namespace MHUrho.Logic
 {
-    public class Map : IMap {
+    public class Map : IMap, IDisposable {
 
         private readonly Tile[] contents;
        
@@ -388,5 +388,9 @@ namespace MHUrho.Logic
             Graphics = MapGraphics.Build(node, contents, new IntVector2(Width, Height));
         }
 
+        public void Dispose() {
+            ((IDisposable) Graphics).Dispose();
+            node.Dispose();
+        }
     }
 }

@@ -13,7 +13,7 @@ using Urho.Resources;
 
 namespace MHUrho.Control
 {
-    public class MouseAndKeyboardController
+    public class GameMandKController : MandKController, IGameController
     {
         private enum CameraMovementType { Fixed, FreeFloat}
 
@@ -40,25 +40,20 @@ namespace MHUrho.Control
             }
         }
 
-
+        
         public float CameraScrollSensitivity { get; set; }
 
         public float CameraRotationSensitivity { get; set; }
 
-        public float MouseSensitivity { get; set; }
-
         public bool MouseBorderCameraMovement { get; set; }
 
         private CameraController cameraController;
-        private readonly Input input;
-        private readonly UI ui;
-        private readonly MyGame game;
-
-
-        private CameraMovementType cameraType;
 
         private List<KeyAction> actions;
         private Dictionary<Key, Actions> keyActions;
+
+        private CameraMovementType cameraType;
+
 
         //private float KeyRotationSensitivity => KeyCameraSensitivity * 3;
 
@@ -67,136 +62,20 @@ namespace MHUrho.Control
         private bool mouseInLeftRight;
         private bool mouseInTopBottom;
 
-        public MouseAndKeyboardController(
-                                MyGame game,
-                                Input input, 
-                                UI ui, 
-                                Context context, 
-                                ResourceCache resourceCache) {
-            this.game = game;
-            this.input = input;
-            this.MouseSensitivity = 0.2f;
+
+
+        public GameMandKController(MyGame game, CameraController cameraController) : base(game) {
             this.CameraScrollSensitivity = 5f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
-            this.ui = ui;
-
-            var style = resourceCache.GetXmlFile("UI/DefaultStyle.xml");
-            ui.Root.SetDefaultStyle(style);
-
-            var cursor = ui.Root.CreateCursor("UICursor");
-            ui.Cursor = cursor;
-            ui.Cursor.SetStyleAuto(style);
-            ui.Cursor.Position = new IntVector2(ui.Root.Width / 2, ui.Root.Height / 2);
-
-            var cursorImage = resourceCache.GetImage("Textures/xamarin.png");
-            ui.Cursor.DefineShape("MyShape",
-                cursorImage,
-                new IntRect(0, 0, cursorImage.Width - 1, cursorImage.Height - 1),
-                new IntVector2(cursorImage.Width / 2, cursorImage.Height / 2));
-            //TODO: Shape keeps reseting to NORMAL, even though i set it here
-            ui.Cursor.Shape = "MyShape";
-            ui.Cursor.UseSystemShapes = false;
-            ui.Cursor.Visible = true;
-
-            //TODO: TEMPORARY, probably move to UIManager or something
-            var button = ui.Root.CreateButton("StartButton");
-            button.SetStyleAuto(style);
-            button.Size = new IntVector2(50, 50);
-            button.Position = new IntVector2(100, 100);
-            button.Pressed += Button_Pressed;
-            button.HoverBegin += Button_HoverBegin;
-            button.HoverEnd += Button_HoverEnd;
-            button.SetColor(Color.Green);
-
-            button = ui.Root.CreateButton("SaveButton");
-            button.SetStyleAuto(style);
-            button.Size = new IntVector2(50, 50);
-            button.Position = new IntVector2(150, 100);
-            button.Pressed += Button_Pressed;
-            button.HoverBegin += Button_HoverBegin;
-            button.HoverEnd += Button_HoverEnd;
-            button.SetColor(Color.Yellow);
-
-            button = ui.Root.CreateButton("LoadButton");
-            button.SetStyleAuto(style);
-            button.Size = new IntVector2(50, 50);
-            button.Position = new IntVector2(200, 100);
-            button.Pressed += Button_Pressed;
-            button.HoverBegin += Button_HoverBegin;
-            button.HoverEnd += Button_HoverEnd;
-            button.SetColor(Color.Blue);
-
-            button = ui.Root.CreateButton("EndButton");
-            button.SetStyleAuto(style);
-            button.Size = new IntVector2(50, 50);
-            button.Position = new IntVector2(250, 100);
-            button.Pressed += Button_Pressed;
-            button.HoverBegin += Button_HoverBegin;
-            button.HoverEnd += Button_HoverEnd;
-            button.SetColor(Color.Red);
-
-            input.SetMouseMode(MouseMode.Absolute);
-            input.SetMouseVisible(false);
-
-            
+            this.cameraController = cameraController;
 
             FillActionList();
 
             //TODO: Load from config
             SetKeyBindings();
 
-            RegisterCallbacks();
-
-        }
-
-        public void ConnectCamera(CameraController cameraController) {
-            this.cameraController = cameraController;
-
-            cameraController.Drag = 10;
-        }
-
-        //TODO: TEMPORARY, probably move to UIManager or something
-        private void Button_HoverEnd(HoverEndEventArgs obj) {
-            Log.Write(LogLevel.Debug, "Hover end");
-        }
-
-        //TODO: TEMPORARY, probably move to UIManager or something
-        private void Button_HoverBegin(HoverBeginEventArgs obj) {
-            Log.Write(LogLevel.Debug, "Hover begin");
-        }
-
-        //TODO: TEMPORARY, probably move to UIManager or something
-        private void Button_Pressed(PressedEventArgs obj) {
-            Log.Write(LogLevel.Debug, "Button pressed");
-
-            switch (obj.Element.Name) {
-                case "StartButton":
-                    game.StartDefaultLevel();
-                    break;
-                case "SaveButton":
-                    //TODO: Move this elsewhere
-                    using (var saveFile =
-                        new Google.Protobuf.CodedOutputStream(MyGame.Config.OpenDynamicFile("savedGame.save", System.IO.FileMode.Create,
-                                                      System.IO.FileAccess.Write))) {
-                        LevelManager.CurrentLevel.Save().WriteTo(saveFile);
-                    }
-                        
-                    break;
-                case "LoadButton":
-                    using (Stream saveFile = MyGame.Config.OpenDynamicFile("savedGame.save",
-                                                                           System.IO.FileMode.Open,
-                                                                           FileAccess.Read)) {
-                        LevelManager.Load(new Node(),
-                                          StLevel.Parser.ParseFrom(saveFile));
-                    }
-                    
-                    break;
-                case "EndButton":
-                    break;
-                default:
-                    break;
-            }
+            Enable();
         }
 
         void FillActionList() {
@@ -228,25 +107,11 @@ namespace MHUrho.Control
             };
         }
 
-        private void RegisterCallbacks() {
-            input.KeyUp += KeyUp;
-            input.KeyDown += KeyDown;
-            input.MouseButtonDown += MouseButtonDown;
-            input.MouseButtonUp += MouseButtonUp;
-            input.MouseMoved += MouseMoved;
-            input.MouseWheel += MouseWheel;
-        }
-
         private KeyAction GetAction(Actions action) {
             return actions[(int)action];
         }
 
-        private void KeyDown(KeyDownEventArgs e) {
-            //TODO: Just switch keyActions dictionary
-            if (cameraController == null) {
-                return;
-            }
-
+        protected override void KeyDown(KeyDownEventArgs e) {
             if (keyActions.TryGetValue(e.Key, out Actions action)) {
                 if (!e.Repeat) {
                     GetAction(action).KeyDown?.Invoke(e.Qualifiers);
@@ -257,40 +122,31 @@ namespace MHUrho.Control
             }
         }
 
-        private void KeyUp(KeyUpEventArgs e) {
-            //TODO: Just switch keyActions dictionary
-            if (cameraController == null) {
-                return;
-            }
-
+        protected override void KeyUp(KeyUpEventArgs e) {
             if (keyActions.TryGetValue(e.Key, out Actions action)) {
                 GetAction(action).KeyUp?.Invoke(e.Qualifiers);
             }
         }
 
-        private void MouseButtonDown(MouseButtonDownEventArgs e) {
-            Log.Write(LogLevel.Debug, $"Mouse button down at: X={ui.Cursor.Position.X}, Y={ui.Cursor.Position.Y}");
+        protected override void MouseButtonDown(MouseButtonDownEventArgs e) {
+            Log.Write(LogLevel.Debug, $"Mouse button down at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
         }
 
-        private void MouseButtonUp(MouseButtonUpEventArgs e) {
-            Log.Write(LogLevel.Debug, $"Mouse button up at: X={ui.Cursor.Position.X}, Y={ui.Cursor.Position.Y}");
+        protected override void MouseButtonUp(MouseButtonUpEventArgs e) {
+            Log.Write(LogLevel.Debug, $"Mouse button up at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
         }
 
-        private void MouseMoved(MouseMovedEventArgs e) {
-            if (cameraController == null) {
-                return;
-            }
-
+        protected override void MouseMoved(MouseMovedEventArgs e) {
             if (cameraType == CameraMovementType.FreeFloat) {
                 cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseSensitivity);
             }
             else if (cameraType == CameraMovementType.Fixed) {
-                MouseBorderMovement(ui.Cursor.Position);
+                MouseBorderMovement(UI.Cursor.Position);
             }
 
         }
 
-        private void MouseWheel(MouseWheelEventArgs e) {
+        protected override void MouseWheel(MouseWheelEventArgs e) {
 
         }
 
@@ -301,33 +157,33 @@ namespace MHUrho.Control
             if (!mouseInLeftRight) {
                 //Mouse was not in the border area before, check if it is now 
                 // and if it is, set the movement
-                if (mousePos.X < ui.Root.Width * CloseToBorder) {
+                if (mousePos.X < UI.Root.Width * CloseToBorder) {
                     cameraMovement.X = -CameraScrollSensitivity;
                     mouseInLeftRight = true;
                 }
-                else if (mousePos.X > ui.Root.Width * (1 - CloseToBorder)) {
+                else if (mousePos.X > UI.Root.Width * (1 - CloseToBorder)) {
                     cameraMovement.X = CameraScrollSensitivity;
                     mouseInLeftRight = true;
                 }
 
             }
-            else if (ui.Root.Width * CloseToBorder <= mousePos.X && mousePos.X <= ui.Root.Width * (1 - CloseToBorder)) {
+            else if (UI.Root.Width * CloseToBorder <= mousePos.X && mousePos.X <= UI.Root.Width * (1 - CloseToBorder)) {
                 //Mouse was in the area, and now it is not, reset the movement
                 cameraMovement.X = 0;
                 mouseInLeftRight = false;
             }
 
             if (!mouseInTopBottom) {
-                if (mousePos.Y < ui.Root.Height * CloseToBorder) {
+                if (mousePos.Y < UI.Root.Height * CloseToBorder) {
                     cameraMovement.Y = CameraScrollSensitivity;
                     mouseInTopBottom = true;
                 }
-                else if (mousePos.Y > ui.Root.Height * (1 - CloseToBorder)) {
+                else if (mousePos.Y > UI.Root.Height * (1 - CloseToBorder)) {
                     cameraMovement.Y = -CameraScrollSensitivity;
                     mouseInTopBottom = true;
                 }
             }
-            else if (ui.Root.Height * CloseToBorder <= mousePos.Y && mousePos.Y <= ui.Root.Height * (1 - CloseToBorder)) {
+            else if (UI.Root.Height * CloseToBorder <= mousePos.Y && mousePos.Y <= UI.Root.Height * (1 - CloseToBorder)) {
                 cameraMovement.Y = 0;
                 mouseInTopBottom = false;
             }
@@ -435,13 +291,13 @@ namespace MHUrho.Control
             if (cameraType == CameraMovementType.FreeFloat) {
                 cameraController.SwitchToFixed();
                 cameraType = CameraMovementType.Fixed;
-                ui.Cursor.Visible = true;
+                UI.Cursor.Visible = true;
                 
             }
             else {
                 cameraController.SwitchToFree();
                 cameraType = CameraMovementType.FreeFloat;
-                ui.Cursor.Visible = false;
+                UI.Cursor.Visible = false;
             }
         }
     }

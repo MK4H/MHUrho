@@ -8,7 +8,7 @@ using Urho.Resources;
 
 namespace MHUrho.Graphics
 {
-    public class MapGraphics {
+    public class MapGraphics : IDisposable {
         private Model model;
 
         private Material material;
@@ -172,5 +172,9 @@ namespace MHUrho.Graphics
             return vertexBuffer;
         }
 
+        public void Dispose() {
+            model.Dispose();
+            material.Dispose();
+        }
     }
 }

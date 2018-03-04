@@ -109,6 +109,7 @@ namespace MHUrho.Logic
             Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
 
             //TODO: Connect units
+            
         }
 
         public void FinishLoading() {
@@ -119,6 +120,7 @@ namespace MHUrho.Logic
             this.storage = storedTile;
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
+            PassingUnits = new List<Unit>();
         }
 
         public Tile(int x, int y, TileType tileType) {
