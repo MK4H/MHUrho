@@ -4,8 +4,9 @@
     <description>Default package present in every copy of the game</description>
     <pathToXml>default/default.xml</pathToXml>
   </resourcePack>
-  <resourcePack name="Test2ResourcePack">
-    <pathToXml>TEST2RP/rpdescription.xml</pathToXml>
+  <resourcePack name="testRP2">
+    <description>Second test pack to test multiple resource packs</description>
+    <pathToXml>TEST2RP/testResPack2.xml</pathToXml>
   </resourcePack>
 
 </resourcePackDirectory>

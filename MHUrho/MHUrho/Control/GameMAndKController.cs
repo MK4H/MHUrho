@@ -7,6 +7,7 @@ using Urho.IO;
 
 using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho.Gui;
 using Urho.Resources;
@@ -47,7 +48,8 @@ namespace MHUrho.Control
 
         public bool MouseBorderCameraMovement { get; set; }
 
-        private CameraController cameraController;
+        private readonly CameraController cameraController;
+        private readonly Octree octree;
 
         private List<KeyAction> actions;
         private Dictionary<Key, Actions> keyActions;
@@ -63,12 +65,12 @@ namespace MHUrho.Control
         private bool mouseInTopBottom;
 
 
-
-        public GameMandKController(MyGame game, CameraController cameraController) : base(game) {
+        public GameMandKController(MyGame game, Octree octree, CameraController cameraController) : base(game) {
             this.CameraScrollSensitivity = 5f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
             this.cameraController = cameraController;
+            this.octree = octree;
 
             FillActionList();
 
@@ -129,7 +131,10 @@ namespace MHUrho.Control
         }
 
         protected override void MouseButtonDown(MouseButtonDownEventArgs e) {
-            Log.Write(LogLevel.Debug, $"Mouse button down at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
+            if (UI.FocusElement == null) {
+                Log.Write(LogLevel.Debug, $"Mouse button down at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
+            }
+            
         }
 
         protected override void MouseButtonUp(MouseButtonUpEventArgs e) {
@@ -298,6 +303,12 @@ namespace MHUrho.Control
                 cameraController.SwitchToFree();
                 cameraType = CameraMovementType.FreeFloat;
                 UI.Cursor.Visible = false;
+            }
+        }
+
+        private void DisplayTileTypes() {
+            foreach (var tileType in PackageManager.Instance.TileTypes) {
+                //TODO: THis
             }
         }
     }

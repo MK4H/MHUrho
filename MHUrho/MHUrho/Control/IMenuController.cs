@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Urho;
 
 namespace MHUrho.Control
 {
@@ -12,6 +13,6 @@ namespace MHUrho.Control
 
         void Disable();
 
-        IGameController GetGameController(CameraController cameraController);
+        IGameController GetGameController(CameraController cameraController, Octree octree);
     }
 }

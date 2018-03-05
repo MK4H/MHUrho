@@ -25,6 +25,7 @@ namespace MHUrho.Control
             button.HoverBegin += Button_HoverBegin;
             button.HoverEnd += Button_HoverEnd;
             button.SetColor(Color.Green);
+            button.FocusMode = FocusMode.ResetFocus;
 
             button = UI.Root.CreateButton("SaveButton");
             button.SetStyleAuto(style);
@@ -34,6 +35,7 @@ namespace MHUrho.Control
             button.HoverBegin += Button_HoverBegin;
             button.HoverEnd += Button_HoverEnd;
             button.SetColor(Color.Yellow);
+            button.FocusMode = FocusMode.ResetFocus;
 
             button = UI.Root.CreateButton("LoadButton");
             button.SetStyleAuto(style);
@@ -43,6 +45,7 @@ namespace MHUrho.Control
             button.HoverBegin += Button_HoverBegin;
             button.HoverEnd += Button_HoverEnd;
             button.SetColor(Color.Blue);
+            button.FocusMode = FocusMode.ResetFocus;
 
             button = UI.Root.CreateButton("EndButton");
             button.SetStyleAuto(style);
@@ -52,11 +55,12 @@ namespace MHUrho.Control
             button.HoverBegin += Button_HoverBegin;
             button.HoverEnd += Button_HoverEnd;
             button.SetColor(Color.Red);
+            button.FocusMode = FocusMode.ResetFocus;
 
         }
 
-        public IGameController GetGameController(CameraController cameraController) {
-            return new GameMandKController(Game, cameraController);
+        public IGameController GetGameController(CameraController cameraController, Octree octree) {
+            return new GameMandKController(Game, octree, cameraController);
         }
 
         protected override void KeyUp(KeyUpEventArgs e) {
@@ -71,7 +75,7 @@ namespace MHUrho.Control
 
         }
 
-        protected override void MouseButtonUp(MouseButtonUpEventArgs e) {
+        protected override void MouseButtonUp(MouseButtonUpEventArgs e) { 
 
         }
 
@@ -100,7 +104,9 @@ namespace MHUrho.Control
             switch (obj.Element.Name) {
                 case "StartButton":
                     LevelManager.CurrentLevel?.End();
-                    LevelManager.LoadDefaultLevel(Game,new IntVector2(100,100),new List<string>());
+                    //TODO: TEMPORARY
+                    //LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), new List<string>());
+                    LevelManager.LoadDefaultLevel(Game,new IntVector2(100,100),new List<string>{"testRP2"});
                     break;
                 case "SaveButton":
                     //TODO: Move this elsewhere

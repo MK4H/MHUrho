@@ -82,11 +82,11 @@ namespace MHUrho.Logic
         public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
             var scene = new Scene(game.Context);
-            scene.CreateComponent<Octree>();
+            var octree = scene.CreateComponent<Octree>();
 
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
-            var inputController = game.menuController.GetGameController(cameraController);
+            var inputController = game.menuController.GetGameController(cameraController, octree);
 
             //Load data
             Node mapNode = scene.CreateChild("MapNode");
@@ -141,11 +141,11 @@ namespace MHUrho.Logic
             PackageManager.Instance.LoadWholePackages(packages);
 
             var scene = new Scene(game.Context);
-            scene.CreateComponent<Octree>();
+            var octree = scene.CreateComponent<Octree>();
 
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
-            var inputController = game.menuController.GetGameController(cameraController);
+            var inputController = game.menuController.GetGameController(cameraController, octree);
 
 
             Node mapNode = scene.CreateChild("MapNode");
@@ -184,6 +184,7 @@ namespace MHUrho.Logic
 
         public void End() {
             inputController.Disable();
+            inputController = null;
             Map.Dispose();
             scene.RemoveAllChildren();
             scene.Dispose();

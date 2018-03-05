@@ -46,8 +46,8 @@ namespace MHUrho.Control
             button.SetColor(Color.Red);
         }
 
-        public IGameController GetGameController(CameraController cameraController) {
-            return new GameTouchController(cameraController, Game);
+        public IGameController GetGameController(CameraController cameraController, Octree octree) {
+            return new GameTouchController(Game, octree, cameraController);
         }
 
         //TODO: TEMPORARY, probably move to UIManager or something

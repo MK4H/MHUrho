@@ -11,7 +11,8 @@ namespace MHUrho.Desktop
         static void Main(string[] args) {
 
             MyGame.Config = FileManagerDesktop.LoadConfig();
-        
+            MyGame.Config.CopyStaticToDynamic(Path.Combine("Data","Test"));
+
             new MyGame(new ApplicationOptions("Data")).Run();
         }
     }

@@ -49,6 +49,7 @@ namespace MHUrho.Control
             if (Enabled) {
                 return;
             }
+            Enabled = true;
 
             Input.KeyUp += KeyUp;
             Input.KeyDown += KeyDown;
@@ -62,6 +63,7 @@ namespace MHUrho.Control
             if (!Enabled) {
                 return;
             }
+            Enabled = false;
 
             Input.KeyUp -= KeyUp;
             Input.KeyDown -= KeyDown;

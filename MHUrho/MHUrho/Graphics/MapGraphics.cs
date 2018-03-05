@@ -46,7 +46,7 @@ namespace MHUrho.Graphics
 
             IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
             foreach (var tileType in PackageManager.Instance.TileTypes) {
-                var tileTypeImage = tileType.GetImage();
+                var tileTypeImage = tileType.GetImage().ConvertToRGBA();
                 if (!mapImage.SetSubimage(tileTypeImage, subimageRect)) {
                     //TODO: Error;
                     throw new Exception("Could not copy tileType image to the map texture image");

@@ -15,7 +15,8 @@ namespace MHUrho.Control
 
 
 
-        private CameraController cameraController;
+        private readonly CameraController cameraController;
+        private readonly Octree octree;
 
         private CameraMovementType movementType;
 
@@ -24,9 +25,10 @@ namespace MHUrho.Control
 
         
 
-        public GameTouchController(CameraController cameraController, MyGame game, float sensitivity = 0.1f) : base(game) {
+        public GameTouchController(MyGame game, Octree octree, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
             this.cameraController = cameraController;
             this.Sensitivity = sensitivity;
+            this.octree = octree;
 
             //SwitchToContinuousMovement();
             SwitchToDiscontinuousMovement();

@@ -13,7 +13,7 @@ namespace MHUrho.Desktop {
             var configManager = new FileManagerDesktop(
                 new List<string>()
                 {
-                    Path.Combine("Test","ResourceDir","DirDescription.xml")
+                    Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
                 },
                 "TODO",
                 "TODO",
