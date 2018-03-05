@@ -45,8 +45,14 @@ namespace MHUrho.Droid
 
 
             MyGame.Config = FileManagerDroid.LoadConfig(Assets);
+            MyGame.Config.CopyStaticToDynamic(Path.Combine("Data", "Test"));
 
-            myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));
+            try {
+                myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));
+            }
+            catch (Exception e) {
+                Urho.IO.Log.Write(LogLevel.Debug, e.ToString());
+            }
             //to stop the game use await surface.Stop().
         }
 

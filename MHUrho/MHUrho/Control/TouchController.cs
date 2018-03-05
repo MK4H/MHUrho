@@ -20,7 +20,7 @@ namespace MHUrho.Control
             Enabled = false;
         }
 
-        public virtual void Enable() {
+        public void Enable() {
             if (Enabled) return;
             Enabled = true;
 
@@ -29,7 +29,7 @@ namespace MHUrho.Control
             Input.TouchMove += TouchMove;
         }
 
-        public virtual void Disable() {
+        public void Disable() {
             if (!Enabled) return;
             Enabled = false;
 

@@ -11,7 +11,7 @@ namespace MHUrho.Logic
 {
     public class Map : IMap, IDisposable {
 
-        private readonly Tile[] contents;
+        private readonly Tile[] tiles;
        
         public MapGraphics Graphics { get; private set; }
 
@@ -53,17 +53,16 @@ namespace MHUrho.Logic
         //TODO: Split map into chunks, that will be separately in memory
 
         public static Map CreateDefaultMap(Node mapNode, IntVector2 size) {
+            Map newMap = new Map(mapNode, size.X, size.Y);
 
-            int tileCount = size.X * size.Y;
-            Tile[] tiles = new Tile[tileCount];
 
             TileType defaultTileType = PackageManager.Instance.DefaultTileType;
 
-            for (int i = 0; i < tileCount; i++) {
-                tiles[i] = new Tile(i % size.X, i / size.X, defaultTileType);
+            for (int i = 0; i < newMap.tiles.Length; i++) {
+                newMap.tiles[i] = new Tile(i % size.X, i / size.X, defaultTileType, newMap);
             }
 
-            Map newMap = new Map(mapNode, size.X, size.Y, tiles);
+            
             newMap.BuildGeometry();
             return newMap;
         }
@@ -84,10 +83,10 @@ namespace MHUrho.Logic
             try {
                 int i = 0;
                 foreach (var tile in storedMap.Tiles) {
-                    newMap.contents[i++] = Tile.StartLoading(tile);
+                    newMap.tiles[i++] = Tile.StartLoading(tile, newMap);
                 }
 
-                if (i < newMap.contents.Length) {
+                if (i < newMap.tiles.Length) {
                     throw new ArgumentException();
                 }
             }
@@ -104,7 +103,7 @@ namespace MHUrho.Logic
         }
 
         public void ConnectReferences() {
-            foreach (var tile in contents) {
+            foreach (var tile in tiles) {
                 tile.ConnectReferences();
             }
         }
@@ -113,7 +112,7 @@ namespace MHUrho.Logic
         /// Builds geometry and releases stored data
         /// </summary>
         public void FinishLoading() {
-            foreach (var tile in contents) {
+            foreach (var tile in tiles) {
                 tile.FinishLoading();
             }
 
@@ -129,7 +128,7 @@ namespace MHUrho.Logic
 
             var storedTiles = storedMap.Tiles;
 
-            foreach (var tile in contents) {
+            foreach (var tile in tiles) {
                 storedTiles.Add(tile.Save());
             }
 
@@ -140,14 +139,14 @@ namespace MHUrho.Logic
             this.node = mapNode;
             this.TopLeft = new IntVector2(0, 0);
             this.BottomRight = new IntVector2(storedMap.Size.X - 1, storedMap.Size.Y - 1);
-            this.contents = new Tile[Width * Height];
+            this.tiles = new Tile[Width * Height];
         }
 
-        protected Map(Node mapNode, int width, int height, Tile[] contents) {
+        protected Map(Node mapNode, int width, int height) {
             this.node = mapNode;
             TopLeft = new IntVector2(0, 0);
             BottomRight = new IntVector2(width - 1, height - 1);
-            this.contents = contents;
+            this.tiles = new Tile[Width * Height];
         }
 
 
@@ -238,7 +237,7 @@ namespace MHUrho.Logic
         /// <param name="y"></param>
         /// <returns>the tile at [x,y]</returns>
         public ITile GetTile(int x, int y) {
-            return contents[x + y * Width];
+            return tiles[x + y * Width];
         }
 
         /// <summary>
@@ -384,14 +383,27 @@ namespace MHUrho.Logic
             }
         }
 
+        public ITile Clicked(RayQueryResult rayQueryResult) {
+            return Graphics.HandleRaycast(rayQueryResult);
+        }
 
-        private void BuildGeometry() {
-            Graphics = MapGraphics.Build(node, contents, new IntVector2(Width, Height));
+        public void ChangeTileType(ITile tile, TileType newType) {
+            if (tile.Type == newType) {
+                return;
+            }
+
+            tile.ChangeType(newType);
+            Graphics.ChangeTileType(tile);
         }
 
         public void Dispose() {
             ((IDisposable) Graphics).Dispose();
             node.Dispose();
         }
+
+        private void BuildGeometry() {
+            Graphics = MapGraphics.Build(node, this, tiles, new IntVector2(Width, Height));
+        }
+
     }
 }

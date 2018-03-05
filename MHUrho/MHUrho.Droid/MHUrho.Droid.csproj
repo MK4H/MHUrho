@@ -93,9 +93,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\Values\Styles.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\Data\Test\ResourceDir\TEST2RP\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\MHUrho\MHUrho.csproj">
       <Project>{054fd144-14a7-4596-b205-8fbca2d83cbb}</Project>
@@ -113,6 +111,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </AndroidAsset>
     <AndroidAsset Include="Assets\Data\Test\ResourceDir\DirDescription.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Data\Test\ResourceDir\TEST2RP\sand.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </AndroidAsset>
+    <AndroidAsset Include="Assets\Data\Test\ResourceDir\TEST2RP\testResPack2.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </AndroidAsset>
   </ItemGroup>

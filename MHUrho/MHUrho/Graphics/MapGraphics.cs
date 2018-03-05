@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -9,14 +10,52 @@ using Urho.Resources;
 namespace MHUrho.Graphics
 {
     public class MapGraphics : IDisposable {
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct TileVertex {
+            public Vector3 Position;
+            public Vector3 Normal;
+            public Vector2 TexCoords;
+
+            public TileVertex(Vector3 position, Vector3 normal, Vector2 texCoords) {
+                this.Position = position;
+                this.Normal = normal;
+                this.TexCoords = texCoords;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct TileInVB {
+            public const int VerticiesPerTile = 4;
+
+            public TileVertex TopLeft;
+            public TileVertex TopRight;
+            public TileVertex BottomLeft;
+            public TileVertex BottomRight;
+
+            public void ChangeTextureCoords(Rect rect) {
+                TopLeft.TexCoords = rect.Min;
+                TopRight.TexCoords = new Vector2(rect.Max.X, rect.Min.Y);
+                BottomLeft.TexCoords = new Vector2(rect.Min.X, rect.Max.Y);
+                BottomRight.TexCoords = rect.Max;
+            }
+        }
+
+
         private Model model;
+        private VertexBuffer vertexBuffer;
 
         private Material material;
 
-        public static MapGraphics Build(Node mapNode, Tile[] tiles, IntVector2 size) {
-            MapGraphics graphics = new MapGraphics();
-            graphics.material = CreateMaterial();
-            graphics.model = CreateModel(tiles, size);
+        private readonly Map map;
+        //TODO: Probably split map into more parts to speed up raycasts and drawing
+        private readonly Node mapNode;
+
+        public static MapGraphics Build(Node mapNode, Map map, Tile[] tiles, IntVector2 size) {
+            MapGraphics graphics = new MapGraphics(map, mapNode);
+            graphics.CreateMaterial();
+            graphics.CreateModel(tiles, size);
+
 
             StaticModel model = mapNode.CreateComponent<StaticModel>();
             model.Model = graphics.model;
@@ -25,11 +64,35 @@ namespace MHUrho.Graphics
             return graphics;
         }
 
-        protected MapGraphics() {
-
+        protected MapGraphics(Map map, Node mapNode) {
+            this.map = map;
+            this.mapNode = mapNode;
         }
 
-        private static Material CreateMaterial() {
+        public ITile HandleRaycast(RayQueryResult rayQueryResult) {
+            if (rayQueryResult.Node == mapNode) {
+                return map.GetTile((int)Math.Floor(rayQueryResult.Position.X), (int)Math.Floor(rayQueryResult.Position.Z));
+            }
+            return null;
+        }
+
+        public void ChangeTileType(ITile changedTile) {
+            int tileIndex = changedTile.Location.X + changedTile.Location.Y * map.Width;
+            IntPtr tilePointer = vertexBuffer.Lock((uint)tileIndex * TileInVB.VerticiesPerTile, TileInVB.VerticiesPerTile, false);
+            if (tilePointer == IntPtr.Zero) {
+                //TODO: Error
+                throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+            }
+
+            unsafe {
+                TileInVB* tileInVertexBuffer = (TileInVB*) tilePointer.ToPointer();
+                tileInVertexBuffer->ChangeTextureCoords(changedTile.Type.TextureCoords);
+            }
+
+            vertexBuffer.Unlock();
+        }
+
+        private void CreateMaterial() {
             //Count for output image size
             int tileTypeCount = PackageManager.Instance.TileTypeCount;
 
@@ -64,10 +127,10 @@ namespace MHUrho.Graphics
                 subimageRect.Right += Tile.ImageWidth;
             }
 
-            return Material.FromImage(mapImage);
+            material = Material.FromImage(mapImage);
         }
 
-        private static Model CreateModel(Tile[] tiles, IntVector2 size) {
+        private void CreateModel(Tile[] tiles, IntVector2 size) {
 
             //4 verticies for every tile, so that we can map every tile to different texture
             // and the same tile types to the same textures
@@ -153,7 +216,8 @@ namespace MHUrho.Graphics
             model.SetGeometry(0, 0, geom);
             model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(size.X, 1, size.Y));
 
-            return model;
+            this.model = model;
+            this.vertexBuffer = vb;
         }
 
         private static unsafe float* FillVertex(float* vertexBuffer, Vector3 position, Vector3 normal, Vector2 texCoords) {

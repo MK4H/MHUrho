@@ -42,9 +42,9 @@ namespace MHUrho.Logic
         }
 
         /// <summary>
-        /// Tile type of this tile
+        /// Tile type of this tile, only Map should set this
         /// </summary>
-        public TileType Type { get; set; }
+        public TileType Type { get; internal set; }
         
         /// <summary>
         /// The area in the map this tile represents
@@ -68,7 +68,6 @@ namespace MHUrho.Logic
         public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
         public float Height { get; private set; }
-
 
         /// <summary>
         /// Stores tile image between the steps of loading
@@ -98,8 +97,8 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="storedTile">Image of the tile</param>
         /// <returns>Partially initialized tile</returns>
-        public static Tile StartLoading(StTile storedTile) {
-            return new Tile(storedTile);
+        public static Tile StartLoading(StTile storedTile, Map map) {
+            return new Tile(storedTile, map);
         }
 
         /// <summary>
@@ -116,14 +115,14 @@ namespace MHUrho.Logic
             storage = null;
         }
 
-        protected Tile(StTile storedTile) {
+        protected Tile(StTile storedTile, Map map) {
             this.storage = storedTile;
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
             PassingUnits = new List<Unit>();
         }
 
-        public Tile(int x, int y, TileType tileType) {
+        public Tile(int x, int y, TileType tileType, Map map) {
             MapArea = new IntRect(x, y, x + 1, y + 1);
             PassingUnits = new List<Unit>();
             Unit = null;
@@ -191,6 +190,9 @@ namespace MHUrho.Logic
             }
         }
 
-        
-    }
+        public void ChangeType(TileType newType) {
+            Type = newType;
+        }
+
+    } 
 }

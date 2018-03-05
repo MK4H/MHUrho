@@ -19,11 +19,12 @@ namespace MHUrho.Logic
 
         public Map Map { get; private set; }
 
+        public Scene Scene { get; private set; }
+
         //TODO: Probably not public
         public Player[] Players;
 
-        private readonly Scene scene;
-
+        
         private CameraController cameraController;
         private IGameController inputController;
 
@@ -82,17 +83,16 @@ namespace MHUrho.Logic
         public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
             var scene = new Scene(game.Context);
-            var octree = scene.CreateComponent<Octree>();
+            scene.CreateComponent<Octree>();
 
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
-            var inputController = game.menuController.GetGameController(cameraController, octree);
 
             //Load data
             Node mapNode = scene.CreateChild("MapNode");
             Map map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(map, scene, cameraController, inputController);
+            LevelManager level = new LevelManager(game, map, scene, cameraController);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
@@ -141,18 +141,17 @@ namespace MHUrho.Logic
             PackageManager.Instance.LoadWholePackages(packages);
 
             var scene = new Scene(game.Context);
-            var octree = scene.CreateComponent<Octree>();
+            scene.CreateComponent<Octree>();
 
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
-            var inputController = game.menuController.GetGameController(cameraController, octree);
 
 
             Node mapNode = scene.CreateChild("MapNode");
 
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
 
-            CurrentLevel = new LevelManager(map, scene, cameraController, inputController);
+            CurrentLevel = new LevelManager(game, map, scene, cameraController);
             return CurrentLevel;
         }
 
@@ -183,26 +182,38 @@ namespace MHUrho.Logic
         }
 
         public void End() {
-            inputController.Disable();
+            inputController.Dispose();
             inputController = null;
             Map.Dispose();
-            scene.RemoveAllChildren();
-            scene.Dispose();
+            Scene.RemoveAllChildren();
+            Scene.Dispose();
             CurrentLevel = null;
         }
 
-        protected LevelManager(Map map, 
+        public void HandleRaycast(RayQueryResult rayQueryResult) {
+            //TODO: Switch on current user action, like building, selecting units etc.
+            var clickedTile = Map.Clicked(rayQueryResult);
+            if (clickedTile != null && inputController.SelectedTileType != null) {
+                Map.ChangeTileType(clickedTile, inputController.SelectedTileType);
+            }
+        }
+
+        public void HandleRaycast(List<RayQueryResult> rayQueryResults) {
+
+        }
+
+        protected LevelManager(MyGame game,
+                               Map map, 
                                Scene scene, 
-                               CameraController cameraController, 
-                               IGameController inputController)
+                               CameraController cameraController)
         {
-            this.scene = scene;
+            this.Scene = scene;
             units = new List<Unit>();
             this.Map = map;
             this.pathFind = new AStar(map);
             this.Players = new Player[0];
             this.cameraController = cameraController;
-            this.inputController = inputController;
+            this.inputController = game.menuController.GetGameController(cameraController, this);
         }
 
         private static async void LoadSceneParts(MyGame game, Scene scene) {
@@ -248,6 +259,8 @@ namespace MHUrho.Logic
 
             return cameraController;
         }
+
+
 
     }
 }

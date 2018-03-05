@@ -79,5 +79,11 @@ namespace MHUrho.Logic
         void RemoveUnit(Unit unit);
 
         StTile Save();
+
+        /// <summary>
+        /// Should only be called by Map class (how i wish C# had friend functions)
+        /// </summary>
+        /// <param name="newType"></param>
+        void ChangeType(TileType newType);
     }
 }

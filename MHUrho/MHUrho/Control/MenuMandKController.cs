@@ -59,8 +59,8 @@ namespace MHUrho.Control
 
         }
 
-        public IGameController GetGameController(CameraController cameraController, Octree octree) {
-            return new GameMandKController(Game, octree, cameraController);
+        public IGameController GetGameController(CameraController cameraController, LevelManager levelManager) {
+            return new GameMandKController(Game, levelManager, cameraController);
         }
 
         protected override void KeyUp(KeyUpEventArgs e) {
@@ -104,7 +104,7 @@ namespace MHUrho.Control
             switch (obj.Element.Name) {
                 case "StartButton":
                     LevelManager.CurrentLevel?.End();
-                    LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), new List<string>());
+                    LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), new List<string>{"testRP2"});
                     break;
                 case "SaveButton":
                     //TODO: Move this elsewhere

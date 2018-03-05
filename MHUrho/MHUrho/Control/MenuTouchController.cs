@@ -46,8 +46,8 @@ namespace MHUrho.Control
             button.SetColor(Color.Red);
         }
 
-        public IGameController GetGameController(CameraController cameraController, Octree octree) {
-            return new GameTouchController(Game, octree, cameraController);
+        public IGameController GetGameController(CameraController cameraController, LevelManager levelManager) {
+            return new GameTouchController(Game, levelManager, cameraController);
         }
 
         //TODO: TEMPORARY, probably move to UIManager or something
@@ -57,7 +57,7 @@ namespace MHUrho.Control
             switch (obj.Element.Name) {
                 case "StartButton":
                     LevelManager.CurrentLevel?.End();
-                    LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), new List<string>());
+                    LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), new List<string>{"testRP2"});
                     break;
                 case "SaveButton":
                     //TODO: Move this elsewhere

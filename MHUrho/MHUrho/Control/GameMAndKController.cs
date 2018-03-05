@@ -10,6 +10,7 @@ using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho.Gui;
+using Urho.Urho2D;
 using Urho.Resources;
 
 namespace MHUrho.Control
@@ -41,13 +42,19 @@ namespace MHUrho.Control
             }
         }
 
+        //TODO: Move the selection panel to its own class probably
+        public TileType SelectedTileType => selected == null ? null : tileTypeButtons[selected]; 
         
+
+        public bool DoOnlySingleRaycasts { get; set; }
+
         public float CameraScrollSensitivity { get; set; }
 
         public float CameraRotationSensitivity { get; set; }
 
         public bool MouseBorderCameraMovement { get; set; }
 
+        private readonly LevelManager levelManager;
         private readonly CameraController cameraController;
         private readonly Octree octree;
 
@@ -64,20 +71,36 @@ namespace MHUrho.Control
         private bool mouseInLeftRight;
         private bool mouseInTopBottom;
 
+        private UIElement selectionBar;
 
-        public GameMandKController(MyGame game, Octree octree, CameraController cameraController) : base(game) {
+        private Dictionary<UIElement, TileType> tileTypeButtons;
+        private UIElement selected;
+
+        private int hovering = 0;
+
+
+        public GameMandKController(MyGame game, LevelManager levelManager, CameraController cameraController) : base(game) {
             this.CameraScrollSensitivity = 5f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
             this.cameraController = cameraController;
-            this.octree = octree;
+            this.octree = levelManager.Scene.GetComponent<Octree>();
+            this.levelManager = levelManager;
+            this.DoOnlySingleRaycasts = true;
 
             FillActionList();
 
             //TODO: Load from config
             SetKeyBindings();
 
+            DisplayTileTypes();
+
             Enable();
+        }
+
+        public void Dispose() {
+            selectionBar.Remove();
+            Disable();
         }
 
         void FillActionList() {
@@ -131,14 +154,36 @@ namespace MHUrho.Control
         }
 
         protected override void MouseButtonDown(MouseButtonDownEventArgs e) {
-            if (UI.FocusElement == null) {
+            if (hovering == 0) {
                 Log.Write(LogLevel.Debug, $"Mouse button down at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
+
+                var clickedRay = cameraController.Camera.GetScreenRay(UI.Cursor.Position.X / (float)UI.Root.Width,
+                                                                      UI.Cursor.Position.Y / (float)UI.Root.Height);
+
+                if (DoOnlySingleRaycasts) {
+                    var raycastResult = octree.RaycastSingle(clickedRay);
+                    if (raycastResult.HasValue) {
+                        levelManager.HandleRaycast(raycastResult.Value);
+                    }
+                }
+                else {
+                    var raycastResults = octree.Raycast(clickedRay);
+                    if (raycastResults.Count != 0) {
+                        levelManager.HandleRaycast(raycastResults);
+                    }
+                }
             }
+
+            
+            
             
         }
 
         protected override void MouseButtonUp(MouseButtonUpEventArgs e) {
-            Log.Write(LogLevel.Debug, $"Mouse button up at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
+            if (hovering == 0) {
+                Log.Write(LogLevel.Debug, $"Mouse button up at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
+            }
+            
         }
 
         protected override void MouseMoved(MouseMovedEventArgs e) {
@@ -306,10 +351,85 @@ namespace MHUrho.Control
             }
         }
 
+
+
         private void DisplayTileTypes() {
+
+            tileTypeButtons = new Dictionary<UIElement, TileType>();
+
+            selectionBar = UI.Root.CreateWindow();
+            selectionBar.SetStyle("windowStyle");
+            selectionBar.LayoutMode = LayoutMode.Horizontal;
+            selectionBar.LayoutSpacing = 10;
+            selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
+            selectionBar.Position = new IntVector2(0,UI.Root.Height - 100);
+            selectionBar.Height = 100;
+            selectionBar.SetFixedWidth( UI.Root.Width );
+            selectionBar.SetColor(Color.Yellow);
+            selectionBar.FocusMode = FocusMode.NotFocusable;
+            selectionBar.ClipChildren = true;
+            selectionBar.HoverBegin += UIHoverBegin;
+            selectionBar.HoverEnd += UIHoverEnd;
+
             foreach (var tileType in PackageManager.Instance.TileTypes) {
-                //TODO: THis
+                var tileImage = tileType.GetImage().ConvertToRGBA();
+
+                var buttonTexture = new Texture2D();
+                buttonTexture.FilterMode = TextureFilterMode.Nearest;
+                buttonTexture.SetNumLevels(1);
+                buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat , TextureUsage.Static);
+                buttonTexture.SetData(tileType.GetImage());
+
+
+
+                var button = selectionBar.CreateButton();
+                button.SetStyle("TextureButton");
+                button.Size = new IntVector2(100, 100);
+                button.HorizontalAlignment = HorizontalAlignment.Center;
+                button.VerticalAlignment = VerticalAlignment.Center;
+                button.Pressed += Button_Pressed;
+                button.HoverBegin += Button_HoverBegin;
+                button.HoverBegin += UIHoverBegin;
+                button.HoverEnd += Button_HoverEnd;
+                button.HoverEnd += UIHoverEnd;
+                button.Texture = buttonTexture;
+                button.FocusMode = FocusMode.ResetFocus;
+                button.MaxSize = new IntVector2(100, 100);
+                button.MinSize = new IntVector2(100, 100);
+
+                tileTypeButtons.Add(button, tileType);
             }
+        }
+
+        private void Button_Pressed(PressedEventArgs e) {
+            selected?.SetColor(Color.White);
+            if (selected != e.Element) {
+                selected = e.Element;
+                e.Element.SetColor(Color.Gray);
+            }
+            else {
+                selected = null;
+            }
+        }
+
+        private void Button_HoverBegin(HoverBeginEventArgs e) {
+            if (e.Element != selected) {
+                e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
+            }  
+        }
+
+        private void Button_HoverEnd(HoverEndEventArgs e) {
+            if (e.Element != selected) {
+                e.Element.SetColor(Color.White);
+            }
+        }
+
+        private void UIHoverBegin(HoverBeginEventArgs e) {
+            hovering++;
+        }
+
+        private void UIHoverEnd(HoverEndEventArgs e) {
+            hovering--;
         }
     }
 }
