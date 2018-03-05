@@ -57,15 +57,10 @@ namespace MHUrho.Logic
             int tileCount = size.X * size.Y;
             Tile[] tiles = new Tile[tileCount];
 
-            //TileType defaultTileType = PackageManager.Instance.DefaultTileType;
-
-            //TODO: TEMPORARY
-            List<TileType> tileTypes = new List<TileType>(PackageManager.Instance.TileTypes);
+            TileType defaultTileType = PackageManager.Instance.DefaultTileType;
 
             for (int i = 0; i < tileCount; i++) {
-                //tiles[i] = new Tile(i % size.X, i / size.X, defaultTileType);
-                //TODO: TEMPORARY
-                tiles[i] = new Tile(i % size.X, i / size.X, tileTypes[i % tileTypes.Count]);
+                tiles[i] = new Tile(i % size.X, i / size.X, defaultTileType);
             }
 
             Map newMap = new Map(mapNode, size.X, size.Y, tiles);
