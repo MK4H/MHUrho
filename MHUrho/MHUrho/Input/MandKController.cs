@@ -5,7 +5,7 @@ using Urho;
 using Urho.Gui;
 using Urho.Resources;
 
-namespace MHUrho.Control
+namespace MHUrho.Input
 {
     public abstract class MandKController
     {
@@ -15,7 +15,7 @@ namespace MHUrho.Control
 
         protected MyGame Game;
 
-        protected Input Input => Game.Input;
+        protected Urho.Input Input => Game.Input;
         protected UI UI => Game.UI;
 
         protected MandKController(MyGame game) {

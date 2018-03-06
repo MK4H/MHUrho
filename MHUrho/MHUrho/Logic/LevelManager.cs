@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using MHUrho.Control;
+using MHUrho.Input;
 using MHUrho.Packaging;
 using Urho;
 using MHUrho.Storage;
@@ -190,15 +191,16 @@ namespace MHUrho.Logic
             CurrentLevel = null;
         }
 
-        public void HandleRaycast(RayQueryResult rayQueryResult) {
+        public void HandleRaycast(IPlayer player, RayQueryResult rayQueryResult) {
             //TODO: Switch on current user action, like building, selecting units etc.
             var clickedTile = Map.Clicked(rayQueryResult);
-            if (clickedTile != null && inputController.SelectedTileType != null) {
-                Map.ChangeTileType(clickedTile, inputController.SelectedTileType);
+            if (clickedTile != null ) {
+                player.Click(clickedTile);
             }
+
         }
 
-        public void HandleRaycast(List<RayQueryResult> rayQueryResults) {
+        public void HandleRaycast(IPlayer player, List<RayQueryResult> rayQueryResults) {
 
         }
 
@@ -211,9 +213,10 @@ namespace MHUrho.Logic
             units = new List<Unit>();
             this.Map = map;
             this.pathFind = new AStar(map);
-            this.Players = new Player[0];
+            this.Players = new Player[1];
+            Players[0] = new Player(this);
             this.cameraController = cameraController;
-            this.inputController = game.menuController.GetGameController(cameraController, this);
+            this.inputController = game.menuController.GetGameController(cameraController, this, Players[0]);
         }
 
         private static async void LoadSceneParts(MyGame game, Scene scene) {

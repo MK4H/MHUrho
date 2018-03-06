@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 using Urho.Gui;
 using Urho.IO;
 
-namespace MHUrho.Control
+namespace MHUrho.Input
 {
     class MenuMandKController : MandKController, IMenuController
     {
@@ -59,8 +60,8 @@ namespace MHUrho.Control
 
         }
 
-        public IGameController GetGameController(CameraController cameraController, LevelManager levelManager) {
-            return new GameMandKController(Game, levelManager, cameraController);
+        public IGameController GetGameController(CameraController cameraController, LevelManager levelManager, Player player) {
+            return new GameMandKController(Game, levelManager, player, cameraController);
         }
 
         protected override void KeyUp(KeyUpEventArgs e) {

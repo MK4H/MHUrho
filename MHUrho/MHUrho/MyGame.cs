@@ -10,7 +10,7 @@ using Urho.Shapes;
 using Urho.IO;
 using System.IO;
 using System.Reflection;
-using MHUrho.Control;
+using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 

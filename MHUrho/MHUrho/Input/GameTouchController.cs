@@ -2,25 +2,27 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
+using MHUrho.Control;
 using MHUrho.Packaging;
 using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
 
-namespace MHUrho.Control
+namespace MHUrho.Input
 {
     public class GameTouchController : TouchController, IGameController
     {
         private enum CameraMovementType { Horizontal, Vertical, FreeFloat }
 
 
+        public IPlayer Player { get; set; }
+
         public float Sensitivity { get; set; }
         public bool ContinuousMovement { get; private set; } = true;
 
         public bool DoOnlySingleRaycasts { get; set; }
 
-        //TODO: Move this to separate class probably
-        public TileType SelectedTileType => selected == null ? null : tileTypeButtons[selected];
+        public bool UIPressed { get; set; }
 
         private readonly CameraController cameraController;
         private readonly Octree octree;
@@ -31,19 +33,15 @@ namespace MHUrho.Control
         private readonly Dictionary<int, Vector2> activeTouches = new Dictionary<int, Vector2>();
 
 
-        private UIElement selectionBar;
+        
 
-        private Dictionary<UIElement, TileType> tileTypeButtons;
-        private UIElement selected;
-
-        private bool UIPressed;
-
-        public GameTouchController(MyGame game, LevelManager levelManager, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
+        public GameTouchController(MyGame game, LevelManager levelManager, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
             this.cameraController = cameraController;
             this.Sensitivity = sensitivity;
             this.levelManager = levelManager;
             this.octree = levelManager.Scene.GetComponent<Octree>();
             this.DoOnlySingleRaycasts = true;
+            this.Player = player;
 
             //SwitchToContinuousMovement();
             SwitchToDiscontinuousMovement();
@@ -51,7 +49,6 @@ namespace MHUrho.Control
 
             Enable();
 
-            DisplayTileTypes();
         }
 
         public void SwitchToContinuousMovement() {
@@ -69,8 +66,6 @@ namespace MHUrho.Control
 
         public void Dispose() {
             Disable();
-
-            selectionBar.Remove();
         }
 
 
@@ -85,13 +80,13 @@ namespace MHUrho.Control
                 if (DoOnlySingleRaycasts) {
                     var raycastResult = octree.RaycastSingle(clickedRay);
                     if (raycastResult.HasValue) {
-                        levelManager.HandleRaycast(raycastResult.Value);
+                        levelManager.HandleRaycast(Player, raycastResult.Value);
                     }
                 }
                 else {
                     var raycastResults = octree.Raycast(clickedRay);
                     if (raycastResults.Count != 0) {
-                        levelManager.HandleRaycast(raycastResults);
+                        levelManager.HandleRaycast(Player, raycastResults);
                     }
                 }
             }
@@ -139,68 +134,6 @@ namespace MHUrho.Control
             }
         }
 
-        private void DisplayTileTypes() {
 
-            tileTypeButtons = new Dictionary<UIElement, TileType>();
-
-            selectionBar = UI.Root.CreateWindow();
-            selectionBar.SetStyle("windowStyle");
-            selectionBar.LayoutMode = LayoutMode.Horizontal;
-            selectionBar.LayoutSpacing = 10;
-            selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
-            selectionBar.Position = new IntVector2(0, UI.Root.Height - 100);
-            selectionBar.Height = 100;
-            selectionBar.SetFixedWidth(UI.Root.Width);
-            selectionBar.SetColor(Color.Yellow);
-            selectionBar.FocusMode = FocusMode.NotFocusable;
-            selectionBar.ClipChildren = true;
-            selectionBar.HoverBegin += SelectionBar_HoverBegin;
-
-            foreach (var tileType in PackageManager.Instance.TileTypes) {
-                var tileImage = tileType.GetImage().ConvertToRGBA();
-
-                var buttonTexture = new Texture2D();
-                buttonTexture.FilterMode = TextureFilterMode.Nearest;
-                buttonTexture.SetNumLevels(1);
-                buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-                buttonTexture.SetData(tileType.GetImage());
-
-
-
-                var button = selectionBar.CreateButton();
-                button.SetStyle("TextureButton");
-                button.Size = new IntVector2(100, 100);
-                button.HorizontalAlignment = HorizontalAlignment.Center;
-                button.VerticalAlignment = VerticalAlignment.Center;
-                button.Pressed += Button_Pressed;
-                button.Pressed += UI_Pressed;
-                button.Texture = buttonTexture;
-                button.FocusMode = FocusMode.ResetFocus;
-                button.MaxSize = new IntVector2(100, 100);
-                button.MinSize = new IntVector2(100, 100);
-
-                tileTypeButtons.Add(button, tileType);
-            }
-        }
-
-        private void SelectionBar_HoverBegin(HoverBeginEventArgs obj) {
-            UIPressed = true;
-        }
-
-        private void Button_Pressed(PressedEventArgs e) {
-            selected?.SetColor(Color.White);
-            if (selected != e.Element) {
-                selected = e.Element;
-                e.Element.SetColor(Color.Gray);
-            }
-            else {
-                //DESELECT
-                selected = null;
-            }
-        }
-
-        private void UI_Pressed(PressedEventArgs e) {
-            UIPressed = true;
-        }
     }
 }

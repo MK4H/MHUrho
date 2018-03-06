@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using MHUrho.Graphics;
+
 using NUnit.Framework;
 
 using MHUrho.Logic;
 using MHUrho.Storage;
+using MHUrho.Control;
+using MHUrho.Graphics;
 using Urho;
 
 namespace NUnit.Tests {
@@ -113,6 +115,10 @@ namespace NUnit.Tests {
                 public StTile Save() {
                     throw new NotImplementedException();
                 }
+
+                public void ChangeType(TileType newType) {
+                    throw new NotImplementedException();
+                }
                 #endregion
 
                 public IntVector2 Location { get; private set; }
@@ -164,6 +170,10 @@ namespace NUnit.Tests {
                 }
 
                 public StTile Save() {
+                    throw new NotImplementedException();
+                }
+
+                public void ChangeType(TileType newType) {
                     throw new NotImplementedException();
                 }
                 #endregion

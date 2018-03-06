@@ -1,14 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using MHUrho.Storage;
 using Urho;
+using MHUrho.Logic;
 
 
-namespace MHUrho.Logic
+namespace MHUrho.Control
 {
     public class Player : IPlayer {
+
+        enum State {
+            None,
+            TileTypes,
+            Buildings,
+            Units
+        }
+
         class LineOrder
         {
             IntVector2 MovePoint, End1, End2, Delta;
@@ -103,12 +111,21 @@ namespace MHUrho.Logic
 
         readonly LevelManager level;
 
-        List<Player> friends;
+        List<IPlayer> friends;
 
         List<Unit> units;
 
-        SelectedType typeOfSelected;
+        private Type selectedType;
         List<ISelectable> selected;
+
+        private object UISelected;
+        private State state;
+
+        public Player(LevelManager level) {
+            this.level = level;
+            units = new List<Unit>();
+            selected = new List<ISelectable>();
+        }
 
         public StPlayer Save() {
             var storedPlayer = new StPlayer();
@@ -120,7 +137,7 @@ namespace MHUrho.Logic
         /// Processes a player click on a unit
         /// </summary>
         /// <param name="unit">The unit that was clicked</param>
-        public void ClickUnit(IUnit unit)
+        public void Click(IUnit unit)
         {
             // My unit
             if (unit.Player == this)
@@ -139,72 +156,46 @@ namespace MHUrho.Logic
             }
         }
 
-
-        private void MyUnitClick(IUnit unit)
-        {
-            if (typeOfSelected == SelectedType.Unit)
-            {
-                if (unit.Select())
-                {
-                    selected.Add(unit);
-                    typeOfSelected = SelectedType.Unit;
-                }
-                // Clicked on already selected unit
-                else
-                {
-                    selected.Remove(unit);
-                    // Deselected last unit
-                    if (selected.Count == 0)
-                    {
-                        typeOfSelected = SelectedType.None;
-                    }
-                    unit.Deselect();
-                }
-            }
-            else
-            {
-                //TODO: Deselect all currently selected
-                ClearSelected();
-                unit.Select();
-                selected.Add(unit);
-                typeOfSelected = SelectedType.Unit;
-            }
-        }
-
-        private void FriednlyUnitClick(IUnit unit)
-        {
-
-        }
-
-        private void EnemyUnitClick(IUnit unit)
-        {
-            if (typeOfSelected == SelectedType.Unit)
-            {
-                foreach (var item in selected)
-                {
-                    item.Order(unit);
-                }
-            }
-        }
-
+ 
         /// <summary>
         /// Processes user click on a tile
         /// </summary>
         /// <param name="tile">The tile clicked</param>
-        public void ClickTile(ITile tile)
+        public void Click(ITile tile)
         {
-            if (typeOfSelected == SelectedType.None)
-            {
-                //TODO:TEMP
-                tile.SpawnUnit(this);
+            if (state == State.TileTypes) {
+                level.Map.ChangeTileType(tile, (TileType) UISelected);
             }
-            else if (typeOfSelected == SelectedType.Unit)
-            {
-                //TODO: return value
-                OrderUnits(tile);
-            }
+
+            //if (typeOfSelected == SelectedType.None)
+            //{
+            //    //TODO:TEMP
+            //    tile.SpawnUnit(this);
+            //}
+            //else if (typeOfSelected == SelectedType.Unit)
+            //{
+            //    //TODO: return value
+            //    OrderUnits(tile);
+            //}
         }
 
+        public void UISelect(TileType tileType) {
+            UISelected = tileType;
+            state = State.TileTypes;
+        }
+
+        public void UISelect(IUnit unit) {
+
+        }
+
+        public void UIDeselect() {
+            UISelected = null;
+            state = State.None;
+        }
+
+        //public void UISelect(IBuilding building) {
+
+        //}
 
         private bool OrderUnits(ITile tile)
         {
@@ -310,12 +301,51 @@ namespace MHUrho.Logic
         }
 
 
-        public Player(LevelManager level)
-        {
-            this.level = level;
-            units = new List<Unit>();
-            selected = new List<ISelectable>();
-            typeOfSelected = SelectedType.None;
+    
+
+        private void MyUnitClick(IUnit unit) {
+            //if ()
+            //{
+            //    if (unit.Select())
+            //    {
+            //        selected.Add(unit);
+            //        typeOfSelected = SelectedType.Unit;
+            //    }
+            //    // Clicked on already selected unit
+            //    else
+            //    {
+            //        selected.Remove(unit);
+            //        // Deselected last unit
+            //        if (selected.Count == 0)
+            //        {
+            //            typeOfSelected = SelectedType.None;
+            //        }
+            //        unit.Deselect();
+            //    }
+            //}
+            //else
+            //{
+            //    //TODO: Deselect all currently selected
+            //    ClearSelected();
+            //    unit.Select();
+            //    selected.Add(unit);
+            //    typeOfSelected = SelectedType.Unit;
+            //}
         }
+
+        private void FriednlyUnitClick(IUnit unit) {
+
+        }
+
+        private void EnemyUnitClick(IUnit unit) {
+            //if (typeOfSelected == SelectedType.Unit)
+            //{
+            //    foreach (var item in selected)
+            //    {
+            //        item.Order(unit);
+            //    }
+            //}
+        }
+
     }
 }

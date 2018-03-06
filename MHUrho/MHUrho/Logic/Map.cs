@@ -393,7 +393,11 @@ namespace MHUrho.Logic
             }
 
             tile.ChangeType(newType);
-            Graphics.ChangeTileType(tile);
+            Graphics.ChangeTileType(tile.Location, newType);
+        }
+
+        public void ChangeTileType(ITile centerTile, TileType newType, IntVector2 rectangleSize) {
+
         }
 
         public void Dispose() {

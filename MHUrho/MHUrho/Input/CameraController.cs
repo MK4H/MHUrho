@@ -7,7 +7,7 @@ using Urho.IO;
 
 using MHUrho.Helpers;
 
-namespace MHUrho.Control
+namespace MHUrho.Input
 {
     public class CameraController : Component {
 

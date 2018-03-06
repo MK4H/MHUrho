@@ -1,21 +1,30 @@
-﻿using MHUrho.Storage;
+﻿using MHUrho.Logic;
+using MHUrho.Storage;
 
-namespace MHUrho.Logic {
+namespace MHUrho.Control {
     public interface IPlayer {
         
         int ID { get; }
         
+
+
         /// <summary>
         /// Processes a player click on a unit
         /// </summary>
         /// <param name="unit">The unit that was clicked</param>
-        void ClickUnit(IUnit unit);
+        void Click(IUnit unit);
 
         /// <summary>
         /// Processes user click on a tile
         /// </summary>
         /// <param name="tile">The tile clicked</param>
-        void ClickTile(ITile tile);
+        void Click(ITile tile);
+
+        void UISelect(TileType tileType);
+
+        void UISelect(IUnit unit);
+
+        void UIDeselect();
 
         /// <summary>
         /// Clears list of currently selected 

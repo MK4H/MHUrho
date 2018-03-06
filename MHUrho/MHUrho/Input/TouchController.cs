@@ -4,14 +4,14 @@ using System.Text;
 using Urho;
 using Urho.Gui;
 
-namespace MHUrho.Control
+namespace MHUrho.Input
 {
     public abstract class TouchController
     {
         public bool Enabled { get; private set; }
 
         protected MyGame Game;
-        protected Input Input => Game.Input;
+        protected Urho.Input Input => Game.Input;
 
         protected UI UI => Game.UI;
 

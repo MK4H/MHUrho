@@ -39,6 +39,21 @@ namespace MHUrho.Graphics
                 BottomLeft.TexCoords = new Vector2(rect.Min.X, rect.Max.Y);
                 BottomRight.TexCoords = rect.Max;
             }
+
+            public TileInVB(Tile tile) {
+                TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, 0, tile.MapArea.Top),
+                                         new Vector3(0, 1, 0),
+                                         new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
+                TopRight = new TileVertex(  new Vector3(tile.MapArea.Right, 0, tile.MapArea.Top),
+                                            new Vector3(0, 1, 0),
+                                            new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
+                BottomLeft = new TileVertex(new Vector3(tile.MapArea.Left, 0, tile.MapArea.Bottom),
+                                            new Vector3(0, 1, 0),
+                                            new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
+                BottomRight = new TileVertex(new Vector3(tile.MapArea.Right, 0, tile.MapArea.Bottom),
+                                             new Vector3(0, 1, 0),
+                                             new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
+            }
         }
 
 
@@ -76,20 +91,43 @@ namespace MHUrho.Graphics
             return null;
         }
 
-        public void ChangeTileType(ITile changedTile) {
-            int tileIndex = changedTile.Location.X + changedTile.Location.Y * map.Width;
-            IntPtr tilePointer = vertexBuffer.Lock((uint)tileIndex * TileInVB.VerticiesPerTile, TileInVB.VerticiesPerTile, false);
-            if (tilePointer == IntPtr.Zero) {
-                //TODO: Error
-                throw new Exception("Could not lock tile vertex buffer position to memory to change it");
-            }
+        public void ChangeTileType(IntVector2 location, TileType newTileType) {
+            ChangeTileType(location, newTileType, new IntVector2(1, 1));
+        }
 
-            unsafe {
-                TileInVB* tileInVertexBuffer = (TileInVB*) tilePointer.ToPointer();
-                tileInVertexBuffer->ChangeTextureCoords(changedTile.Type.TextureCoords);
-            }
+        /// <summary>
+        /// Changes whole rectangle of tiles to <paramref name="newTileType"/>
+        /// </summary>
+        /// <param name="topLeft"></param>
+        /// <param name="newTileType"></param>
+        /// <param name="rectangleSize"></param>
+        public void ChangeTileType(IntVector2 topLeft, TileType newTileType, IntVector2 rectangleSize) {
 
-            vertexBuffer.Unlock();
+            for (int y = topLeft.Y; y < topLeft.Y + rectangleSize.Y; y++) {
+                int startTileIndex = topLeft.X + y * map.Width;
+                uint start = (uint) startTileIndex * TileInVB.VerticiesPerTile;
+                uint count = (uint) rectangleSize.X * TileInVB.VerticiesPerTile;
+
+                {
+                    IntPtr vbPointer = vertexBuffer.Lock(start, count);
+                    if (vbPointer == IntPtr.Zero) {
+                        //TODO: Error
+                        throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                    }
+
+                    unsafe {
+                        TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+
+                        for (int x = 0; x < rectangleSize.X; x++) {
+                            tileInVertexBuffer->ChangeTextureCoords(newTileType.TextureCoords);
+                            tileInVertexBuffer++;
+                        }
+                    }
+                }
+                
+                vertexBuffer.Unlock();
+            }
+            
         }
 
         private void CreateMaterial() {
@@ -160,35 +198,13 @@ namespace MHUrho.Graphics
             }
 
             unsafe {
-                float* verBuff = (float*)vbPointer.ToPointer();
+                TileInVB* verBuff = (TileInVB*)vbPointer.ToPointer();
                 short* inBuff = (short*)ibPointer.ToPointer();
 
                 int vertexIndex = 0;
                 foreach (var tile in tiles) {
                     //Create verticies
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Left, 0, tile.MapArea.Top),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
-
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Right, 0, tile.MapArea.Top),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
-
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Left, 0, tile.MapArea.Bottom),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
-
-                    verBuff = FillVertex(
-                        verBuff,
-                        new Vector3(tile.MapArea.Right, 0, tile.MapArea.Bottom),
-                        new Vector3(0, 1, 0),
-                        new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
+                    *(verBuff++) = new TileInVB(tile);
 
                     //Connect verticies to triangles
                     *(inBuff++) = (short)(vertexIndex + 0);
@@ -218,22 +234,6 @@ namespace MHUrho.Graphics
 
             this.model = model;
             this.vertexBuffer = vb;
-        }
-
-        private static unsafe float* FillVertex(float* vertexBuffer, Vector3 position, Vector3 normal, Vector2 texCoords) {
-            //Position
-            *(vertexBuffer++) = position.X;
-            *(vertexBuffer++) = position.Y;
-            *(vertexBuffer++) = position.Z;
-            //Normal
-            *(vertexBuffer++) = normal.X;
-            *(vertexBuffer++) = normal.Y;
-            *(vertexBuffer++) = normal.Z;
-            //Texture
-            *(vertexBuffer++) = texCoords.X;
-            *(vertexBuffer++) = texCoords.Y;
-
-            return vertexBuffer;
         }
 
         public void Dispose() {
