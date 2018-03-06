@@ -16,6 +16,22 @@ namespace MHUrho.Helpers
             return new IntVector2(rectangle.Left, rectangle.Top);
         }
 
+        public static IntVector2 TopRight(this IntRect rectangle) {
+            return new IntVector2(rectangle.Right, rectangle.Top);
+        }
+
+        public static IntVector2 BottomLeft(this IntRect rectangle) {
+            return new IntVector2(rectangle.Left, rectangle.Bottom);
+        }
+
+        public static IntVector2 BottomRight(this IntRect rectangle) {
+            return new IntVector2(rectangle.Right, rectangle.Bottom);
+        }
+
+        public static IntVector2 Size(this IntRect rectangle) {
+            return new IntVector2(Width(rectangle), Height(rectangle));
+        }
+
         public static int Width(this IntRect rectangle) {
             return rectangle.Right - rectangle.Left;
         }

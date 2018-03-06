@@ -11,6 +11,8 @@ namespace MHUrho.Graphics
 {
     public class MapGraphics : IDisposable {
 
+        private const float HighlightHeightAboveTerain = 0.005f;
+
         [StructLayout(LayoutKind.Sequential)]
         struct TileVertex {
             public Vector3 Position;
@@ -68,7 +70,7 @@ namespace MHUrho.Graphics
         private readonly Node mapNode;
 
         public static MapGraphics Build(Node mapNode, Map map, ITile[] tiles, IntVector2 size) {
-            MapGraphics graphics = new MapGraphics(map, tiles, mapNode);
+            MapGraphics graphics = new MapGraphics(map, mapNode);
             graphics.CreateMaterial();
             graphics.CreateModel(tiles, size);
 
@@ -80,7 +82,7 @@ namespace MHUrho.Graphics
             return graphics;
         }
 
-        protected MapGraphics(Map map, ITile[] tiles, Node mapNode) {
+        protected MapGraphics(Map map, Node mapNode) {
             this.map = map;
             this.mapNode = mapNode;
         }
@@ -139,38 +141,39 @@ namespace MHUrho.Graphics
                 highlightMaterial.SetTechnique(0, CoreAssets.Techniques.NoTextureUnlitVCol, 1, 1);
                 highlight.SetMaterial(highlightMaterial);
             }
-
+            highlight.Enabled = true;
 
             highlight.BeginGeometry(0, PrimitiveType.LineStrip);
             
             //Top side
             for (int x = rectangle.Left; x <= rectangle.Right; x++) {
-                highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Top) + 0.1f, rectangle.Top));
+                highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
                 highlight.DefineColor(Color.Green);
             }
 
             //Right side
             for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
-                highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetHeightAt(rectangle.Right + 1, y) + 0.1f, y));
+                highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
                 highlight.DefineColor(Color.Green);
             }
 
             //Bottom side
             for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
-                highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Bottom + 1) + 0.1f, rectangle.Bottom + 1));
+                highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
                 highlight.DefineColor(Color.Green);
             }
 
             //Left side
             for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
-                highlight.DefineVertex(new Vector3(rectangle.Left, map.GetHeightAt(rectangle.Left, y) + 0.1f, y));
+                highlight.DefineVertex(new Vector3(rectangle.Left, map.GetHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
                 highlight.DefineColor(Color.Green);
             }
+
+            highlight.Commit();
         }
 
         public void HideHighlight() {
-            highlight.Remove();
-            highlight = null;
+            highlight.Enabled = false;
         }
 
         private void CreateMaterial() {

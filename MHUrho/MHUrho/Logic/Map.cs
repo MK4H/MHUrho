@@ -5,6 +5,7 @@ using MHUrho.Graphics;
 using Urho;
 using MHUrho.Packaging;
 using MHUrho.Storage;
+using MHUrho.Helpers;
 
 
 namespace MHUrho.Logic
@@ -14,7 +15,6 @@ namespace MHUrho.Logic
         private readonly ITile[] tiles;
        
        
-
         /// <summary>
         /// Coordinates of the top left corner of the map
         /// </summary>
@@ -47,6 +47,8 @@ namespace MHUrho.Logic
         /// Y coordinate of the bottom row of the map
         /// </summary>
         public int Bottom => BottomRight.Y;
+
+        public IntRect? HighlightedArea { get; private set; }
 
         private readonly Node node;
 
@@ -404,7 +406,13 @@ namespace MHUrho.Logic
         }
 
         public void ChangeTileType(ITile centerTile, TileType newType, IntVector2 rectangleSize) {
+            IntVector2 topLeft = centerTile.Location - (rectangleSize / 2);
+            IntVector2 bottomRight = topLeft + rectangleSize;
+            SquishToMap(ref topLeft, ref bottomRight);
+            rectangleSize = bottomRight - topLeft;
 
+            ForEachInRectangle(topLeft, bottomRight, (tile) => { tile.ChangeType(newType); });
+            graphics.ChangeTileType(topLeft, newType, rectangleSize);
         }
 
         //TODO: Handle right and bottom side tiles better
@@ -507,6 +515,18 @@ namespace MHUrho.Logic
 
         private ITile SafeGetTile(IntVector2 position) {
             return SafeGetTile(position.X, position.Y);
+        }
+
+        private void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
+            for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+                for (int x = topLeft.X; x <= bottomRight.X; x++) {
+                    action(GetTile(x, y));
+                }
+            }
+        }
+
+        private void ForEachInRectangle(IntRect rectangle, Action<ITile> action) {
+            ForEachInRectangle(rectangle.TopLeft(), rectangle.BottomRight(), action);
         }
     }
 }

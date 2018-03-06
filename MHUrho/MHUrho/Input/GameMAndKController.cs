@@ -73,6 +73,7 @@ namespace MHUrho.Input
 
         private MandKUI myUI;
 
+        private ITile cursorTile;
         
         public GameMandKController(MyGame game, LevelManager levelManager, Player player, CameraController cameraController) : base(game) {
             this.CameraScrollSensitivity = 5f;
@@ -91,6 +92,9 @@ namespace MHUrho.Input
             SetKeyBindings();
 
             Enable();
+
+            //TODO: Create some toggling for drawing highlight
+            cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };
         }
 
         public void Dispose() {
@@ -184,20 +188,28 @@ namespace MHUrho.Input
             else if (cameraType == CameraMovementType.Fixed) {
                 MouseBorderMovement(UI.Cursor.Position);
 
-                var clickedRay = cameraController.Camera.GetScreenRay(UI.Cursor.Position.X / (float)UI.Root.Width,
-                                                                      UI.Cursor.Position.Y / (float)UI.Root.Height);
+                DrawHighlight();
 
-                var raycastResult = octree.RaycastSingle(clickedRay);
-                if (raycastResult.HasValue) {
-                    ITile centerTile = levelManager.Map.Raycast(raycastResult.Value);
-                    levelManager.Map.HighlightArea(centerTile, new IntVector2(3, 3));
-                }
             }
 
         }
 
         protected override void MouseWheel(MouseWheelEventArgs e) {
 
+        }
+
+        private void DrawHighlight() {
+            var clickedRay = cameraController.Camera.GetScreenRay(UI.Cursor.Position.X / (float)UI.Root.Width,
+                                                                  UI.Cursor.Position.Y / (float)UI.Root.Height);
+            var raycastResult = octree.RaycastSingle(clickedRay);
+            if (raycastResult.HasValue) {
+ 
+                ITile centerTile = levelManager.Map.Raycast(raycastResult.Value);
+                if (centerTile != null && (cursorTile == null || centerTile != cursorTile)) {
+                    levelManager.Map.HighlightArea(centerTile, new IntVector2(3, 3));
+                    cursorTile = centerTile;
+                }
+            }
         }
 
         private void MouseBorderMovement(IntVector2 mousePos) {
@@ -342,12 +354,12 @@ namespace MHUrho.Input
                 cameraController.SwitchToFixed();
                 cameraType = CameraMovementType.Fixed;
                 UI.Cursor.Visible = true;
-                
             }
             else {
                 cameraController.SwitchToFree();
                 cameraType = CameraMovementType.FreeFloat;
                 UI.Cursor.Visible = false;
+                levelManager.Map.HideHighlight();
             }
         }
 

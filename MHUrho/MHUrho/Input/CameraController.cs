@@ -9,6 +9,8 @@ using MHUrho.Helpers;
 
 namespace MHUrho.Input
 {
+    public delegate void OnCameraMove(float timeStep);
+
     public class CameraController : Component {
 
         public bool SmoothMovement { get; set; } = true;
@@ -32,6 +34,9 @@ namespace MHUrho.Input
         public float StaticPitch => staticRotation.X;
 
         public Camera Camera { get; private set; }
+
+        public event OnCameraMove OnFixedMove;
+        public event OnCameraMove OnFreeFloatMove;
 
         /// <summary>
         /// For storing the default camera holder while following unit or other things
@@ -233,11 +238,13 @@ namespace MHUrho.Input
                 if (FreeFloat) {
                     MoveRelativeToLookingDirection(tickMovement);
                     RotateCameraFree(tickRotation);
+                    OnFreeFloatMove?.Invoke(timeStep);
                 }
                 else {
                     MoveHorizontal(tickMovement.X, tickMovement.Z);
                     MoveVertical(tickMovement.Y);
                     RotateCameraFixed(tickRotation);
+                    OnFixedMove?.Invoke(timeStep);
                 }
 
                 if (SmoothMovement) {

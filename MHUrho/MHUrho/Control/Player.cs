@@ -164,7 +164,8 @@ namespace MHUrho.Control
         public void Click(ITile tile)
         {
             if (state == State.TileTypes) {
-                level.Map.ChangeTileType(tile, (TileType) UISelected);
+                //level.Map.ChangeTileType(tile, (TileType) UISelected);
+                level.Map.ChangeTileType(tile, (TileType) UISelected, new IntVector2(3, 3));
             }
 
             //if (typeOfSelected == SelectedType.None)
