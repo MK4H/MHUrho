@@ -183,6 +183,15 @@ namespace MHUrho.Input
             }
             else if (cameraType == CameraMovementType.Fixed) {
                 MouseBorderMovement(UI.Cursor.Position);
+
+                var clickedRay = cameraController.Camera.GetScreenRay(UI.Cursor.Position.X / (float)UI.Root.Width,
+                                                                      UI.Cursor.Position.Y / (float)UI.Root.Height);
+
+                var raycastResult = octree.RaycastSingle(clickedRay);
+                if (raycastResult.HasValue) {
+                    ITile centerTile = levelManager.Map.Raycast(raycastResult.Value);
+                    levelManager.Map.HighlightArea(centerTile, new IntVector2(3, 3));
+                }
             }
 
         }

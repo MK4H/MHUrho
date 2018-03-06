@@ -40,7 +40,7 @@ namespace MHUrho.Graphics
                 BottomRight.TexCoords = rect.Max;
             }
 
-            public TileInVB(Tile tile) {
+            public TileInVB(ITile tile) {
                 TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, 0, tile.MapArea.Top),
                                          new Vector3(0, 1, 0),
                                          new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
@@ -58,16 +58,17 @@ namespace MHUrho.Graphics
 
 
         private Model model;
-        private VertexBuffer vertexBuffer;
+        private VertexBuffer mapVertexBuffer;
 
         private Material material;
+        private CustomGeometry highlight;
 
         private readonly Map map;
         //TODO: Probably split map into more parts to speed up raycasts and drawing
         private readonly Node mapNode;
 
-        public static MapGraphics Build(Node mapNode, Map map, Tile[] tiles, IntVector2 size) {
-            MapGraphics graphics = new MapGraphics(map, mapNode);
+        public static MapGraphics Build(Node mapNode, Map map, ITile[] tiles, IntVector2 size) {
+            MapGraphics graphics = new MapGraphics(map, tiles, mapNode);
             graphics.CreateMaterial();
             graphics.CreateModel(tiles, size);
 
@@ -79,7 +80,7 @@ namespace MHUrho.Graphics
             return graphics;
         }
 
-        protected MapGraphics(Map map, Node mapNode) {
+        protected MapGraphics(Map map, ITile[] tiles, Node mapNode) {
             this.map = map;
             this.mapNode = mapNode;
         }
@@ -109,7 +110,7 @@ namespace MHUrho.Graphics
                 uint count = (uint) rectangleSize.X * TileInVB.VerticiesPerTile;
 
                 {
-                    IntPtr vbPointer = vertexBuffer.Lock(start, count);
+                    IntPtr vbPointer = mapVertexBuffer.Lock(start, count);
                     if (vbPointer == IntPtr.Zero) {
                         //TODO: Error
                         throw new Exception("Could not lock tile vertex buffer position to memory to change it");
@@ -125,9 +126,51 @@ namespace MHUrho.Graphics
                     }
                 }
                 
-                vertexBuffer.Unlock();
+                mapVertexBuffer.Unlock();
             }
             
+        }
+
+        public void HighlightArea(IntRect rectangle) {
+
+            if (highlight == null) {
+                highlight = mapNode.CreateComponent<CustomGeometry>();
+                var highlightMaterial = new Material();
+                highlightMaterial.SetTechnique(0, CoreAssets.Techniques.NoTextureUnlitVCol, 1, 1);
+                highlight.SetMaterial(highlightMaterial);
+            }
+
+
+            highlight.BeginGeometry(0, PrimitiveType.LineStrip);
+            
+            //Top side
+            for (int x = rectangle.Left; x <= rectangle.Right; x++) {
+                highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Top) + 0.1f, rectangle.Top));
+                highlight.DefineColor(Color.Green);
+            }
+
+            //Right side
+            for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
+                highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetHeightAt(rectangle.Right + 1, y) + 0.1f, y));
+                highlight.DefineColor(Color.Green);
+            }
+
+            //Bottom side
+            for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
+                highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Bottom + 1) + 0.1f, rectangle.Bottom + 1));
+                highlight.DefineColor(Color.Green);
+            }
+
+            //Left side
+            for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
+                highlight.DefineVertex(new Vector3(rectangle.Left, map.GetHeightAt(rectangle.Left, y) + 0.1f, y));
+                highlight.DefineColor(Color.Green);
+            }
+        }
+
+        public void HideHighlight() {
+            highlight.Remove();
+            highlight = null;
         }
 
         private void CreateMaterial() {
@@ -168,7 +211,7 @@ namespace MHUrho.Graphics
             material = Material.FromImage(mapImage);
         }
 
-        private void CreateModel(Tile[] tiles, IntVector2 size) {
+        private void CreateModel(ITile[] tiles, IntVector2 size) {
 
             //4 verticies for every tile, so that we can map every tile to different texture
             // and the same tile types to the same textures
@@ -206,14 +249,14 @@ namespace MHUrho.Graphics
                     //Create verticies
                     *(verBuff++) = new TileInVB(tile);
 
-                    //Connect verticies to triangles
-                    *(inBuff++) = (short)(vertexIndex + 0);
+                    //Connect verticies to triangles                 
                     *(inBuff++) = (short)(vertexIndex + 2);
                     *(inBuff++) = (short)(vertexIndex + 3);
+                    *(inBuff++) = (short)(vertexIndex + 1);
 
-                    *(inBuff++) = (short)(vertexIndex + 3);
                     *(inBuff++) = (short)(vertexIndex + 1);
                     *(inBuff++) = (short)(vertexIndex + 0);
+                    *(inBuff++) = (short)(vertexIndex + 2);
 
                     vertexIndex += 4;
                 }
@@ -233,7 +276,7 @@ namespace MHUrho.Graphics
             model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(size.X, 1, size.Y));
 
             this.model = model;
-            this.vertexBuffer = vb;
+            this.mapVertexBuffer = vb;
         }
 
         public void Dispose() {

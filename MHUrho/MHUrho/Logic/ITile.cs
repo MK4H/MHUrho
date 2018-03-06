@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Control;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;
 
@@ -61,6 +62,13 @@ namespace MHUrho.Logic
         /// Heigth of the center of the tile
         /// </summary>
         float Height { get; }
+
+        /// <summary>
+        /// Continues loading by connecting references
+        /// </summary>
+        void ConnectReferences();
+
+        void FinishLoading();
 
         bool SpawnUnit(Player player);
 

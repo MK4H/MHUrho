@@ -4,9 +4,7 @@ using Urho;
 
 namespace MHUrho.Logic {
     public interface IMap {
-        
-        MapGraphics Graphics { get; }
-        
+               
         /// <summary>
         /// Coordinates of the top left corner of the map
         /// </summary>
@@ -107,6 +105,30 @@ namespace MHUrho.Logic {
         void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight);
         ITile FindClosestEmptyTile(ITile closestTo);
 
+        float GetHeightAt(int x, int y);
+
+        float GetHeightAt(IntVector2 position);
+
+        float GetHeightAt(float x, float y);
+
+        float GetHeightAt(Vector2 position);
+
         StMap Save();
+
+        /// <summary>
+        /// Highlights rectangle of size <paramref name="size"/> with tile 
+        /// <paramref name="center"/> at its center
+        /// Squishes the rectangle to map if it does not fit
+        /// </summary>
+        /// <param name="center">Tile at the center of the rectangle</param>
+        /// <param name="size">Size of the highlighted rectangle</param>
+        void HighlightArea(ITile center, IntVector2 size);
+
+        /// <summary>
+        /// Hides highlight displayed by HighlightArea <see cref="HighlightArea(ITile, IntVector2)"/>
+        /// </summary>
+        void HideHighlight();
+
+
     }
 }

@@ -193,7 +193,7 @@ namespace MHUrho.Logic
 
         public void HandleRaycast(IPlayer player, RayQueryResult rayQueryResult) {
             //TODO: Switch on current user action, like building, selecting units etc.
-            var clickedTile = Map.Clicked(rayQueryResult);
+            var clickedTile = Map.Raycast(rayQueryResult);
             if (clickedTile != null ) {
                 player.Click(clickedTile);
             }

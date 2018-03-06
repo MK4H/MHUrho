@@ -93,8 +93,17 @@ namespace NUnit.Tests {
                 public Vector2 Center => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
-
+               
                 public LevelManager Level => throw new NotImplementedException();
+
+                public void ConnectReferences() {
+                    throw new NotImplementedException();
+                }
+
+                public void FinishLoading() {
+                    throw new NotImplementedException();
+                }
+
 
                 public bool SpawnUnit(Player player) {
                     throw new NotImplementedException();
@@ -150,8 +159,17 @@ namespace NUnit.Tests {
                 public Vector2 Center => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
+               
 
                 public LevelManager Level => throw new NotImplementedException();
+
+                public void ConnectReferences() {
+                    throw new NotImplementedException();
+                }
+
+                public void FinishLoading() {
+                    throw new NotImplementedException();
+                }
 
                 public bool SpawnUnit(Player player) {
                     throw new NotImplementedException();
@@ -238,9 +256,34 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public float GetHeightAt(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public float GetHeightAt(IntVector2 position) {
+                throw new NotImplementedException();
+            }
+
+            public float GetHeightAt(float x, float y) {
+                throw new NotImplementedException();
+            }
+
+            public float GetHeightAt(Vector2 position) {
+                throw new NotImplementedException();
+            }
+
             public StMap Save() {
                 throw new NotImplementedException();
             }
+
+            public void HighlightArea(ITile center, IntVector2 size) {
+                throw new NotImplementedException();
+            }
+
+            public void HideHighlight() {
+                throw new NotImplementedException();
+            }
+
             #endregion
 
             

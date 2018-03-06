@@ -1,0 +1,3 @@
+Barycentric coordinates for height at general point inside a tile (Christer Ericson's Real-Time Collision Detection)
+
+

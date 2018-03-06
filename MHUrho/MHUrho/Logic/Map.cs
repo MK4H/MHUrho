@@ -11,9 +11,9 @@ namespace MHUrho.Logic
 {
     public class Map : IMap, IDisposable {
 
-        private readonly Tile[] tiles;
+        private readonly ITile[] tiles;
        
-        public MapGraphics Graphics { get; private set; }
+       
 
         /// <summary>
         /// Coordinates of the top left corner of the map
@@ -50,7 +50,7 @@ namespace MHUrho.Logic
 
         private readonly Node node;
 
-        //TODO: Split map into chunks, that will be separately in memory
+        private MapGraphics graphics;
 
         public static Map CreateDefaultMap(Node mapNode, IntVector2 size) {
             Map newMap = new Map(mapNode, size.X, size.Y);
@@ -121,10 +121,10 @@ namespace MHUrho.Logic
 
         public StMap Save() {
             var storedMap = new StMap();
-            var StSize = new StIntVector2();
-            StSize.X = Width;
-            StSize.Y = Height;
-            storedMap.Size = StSize;
+            var stSize = new StIntVector2();
+            stSize.X = Width;
+            stSize.Y = Height;
+            storedMap.Size = stSize;
 
             var storedTiles = storedMap.Tiles;
 
@@ -139,18 +139,25 @@ namespace MHUrho.Logic
             this.node = mapNode;
             this.TopLeft = new IntVector2(0, 0);
             this.BottomRight = new IntVector2(storedMap.Size.X - 1, storedMap.Size.Y - 1);
-            this.tiles = new Tile[Width * Height];
+            this.tiles = new ITile[Width * Height];
         }
 
         protected Map(Node mapNode, int width, int height) {
             this.node = mapNode;
             TopLeft = new IntVector2(0, 0);
             BottomRight = new IntVector2(width - 1, height - 1);
-            this.tiles = new Tile[Width * Height];
+            this.tiles = new ITile[Width * Height];
         }
 
+        internal static Map CreateTestMap(ITile[] newTiles, IntVector2 size) {
+            return new Map(newTiles, size);
+        }
 
-       
+        private Map(ITile[] tiles, IntVector2 size) {
+            this.tiles = tiles;
+            this.TopLeft = new IntVector2(0, 0);
+            this.BottomRight = new IntVector2(size.X - 1, size.Y - 1);
+        }
 
         /// <summary>
         /// Checks if the point is inside the map, which means it could be used for indexing into the map
@@ -383,8 +390,8 @@ namespace MHUrho.Logic
             }
         }
 
-        public ITile Clicked(RayQueryResult rayQueryResult) {
-            return Graphics.HandleRaycast(rayQueryResult);
+        public ITile Raycast(RayQueryResult rayQueryResult) {
+            return graphics.HandleRaycast(rayQueryResult);
         }
 
         public void ChangeTileType(ITile tile, TileType newType) {
@@ -393,21 +400,113 @@ namespace MHUrho.Logic
             }
 
             tile.ChangeType(newType);
-            Graphics.ChangeTileType(tile.Location, newType);
+            graphics.ChangeTileType(tile.Location, newType);
         }
 
         public void ChangeTileType(ITile centerTile, TileType newType, IntVector2 rectangleSize) {
 
         }
 
+        //TODO: Handle right and bottom side tiles better
+        public float GetHeightAt(int x, int y) {
+            ITile tile;
+            if ((tile = SafeGetTile(x,y)) != null) {
+                return tile.Height;
+            }
+
+
+
+            if (x < 0) {
+                x = 0;
+            }
+            else if (x >= Width) {
+                x = Width - 1;
+            }
+
+            if (y < 0) {
+                y = 0;
+            }
+            else if (y >= Height) {
+                y = Height - 1;
+            }
+
+            return GetTile(x, y).Height;
+        }
+
+        public float GetHeightAt(IntVector2 position) {
+            return GetHeightAt(position.X, position.Y);
+        }
+
+        public float GetHeightAt(float x, float y) {
+
+            int topLeftX = (int) Math.Floor(x);
+            int topLeftY = (int) Math.Floor(y);
+
+
+            Vector2 topLeftToPoint = new Vector2(x - topLeftX, y -topLeftY);
+            // These two heights will be needed always because of the order of indicies in the
+            // geometry, which creates an edge between bottomLeft and topRight
+            float botLeftHeight = GetHeightAt(topLeftX, topLeftY + 1);
+            float topRightHeight = GetHeightAt(topLeftX + 1, topLeftY);
+            
+
+                         
+            //Barycentric coordinates
+            float v = topLeftToPoint.X; //topRight coef
+            float w = topLeftToPoint.Y; //bottomLeft coef
+            float u = 1.0f - v - w; //topLeft or bottomRight coef
+
+            if (u <= 1) {
+                //In top left triangle
+                float topLeftHeight = GetHeightAt(topLeftX, topLeftY);
+                return u * topLeftHeight + v * topRightHeight + w * botLeftHeight;
+            }
+            else {
+                //In bottom right triangle
+                float bottomRightHeight = GetHeightAt(topLeftX + 1, topLeftY + 1);
+                float tmp = v;
+                v = 1.0f - w;
+                w = 1.0f - tmp;
+                u = 1.0f - v - w;
+                return u * bottomRightHeight + v * topRightHeight + w * botLeftHeight;
+            }
+
+         
+        }
+
+        public float GetHeightAt(Vector2 position) {
+            return GetHeightAt(position.X, position.Y);
+        }
+
+        public void HighlightArea(ITile center, IntVector2 size) {
+            IntVector2 topLeft = center.Location - (size / 2);
+            IntVector2 bottomRight = center.Location + (size / 2);
+            SquishToMap(ref topLeft, ref bottomRight);
+            graphics.HighlightArea(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y));
+        }
+
+        public void HideHighlight() {
+            graphics.HideHighlight();
+        }
+
         public void Dispose() {
-            ((IDisposable) Graphics).Dispose();
+            ((IDisposable) graphics).Dispose();
             node.Dispose();
         }
 
         private void BuildGeometry() {
-            Graphics = MapGraphics.Build(node, this, tiles, new IntVector2(Width, Height));
+            graphics = MapGraphics.Build(node, this, tiles, new IntVector2(Width, Height));
         }
 
+        private ITile SafeGetTile(int x, int y) {
+            if (0 <= x && x < Width && 0 <= y && y < Height) {
+                return GetTile(x, y);
+            }
+            return null;
+        }
+
+        private ITile SafeGetTile(IntVector2 position) {
+            return SafeGetTile(position.X, position.Y);
+        }
     }
 }
