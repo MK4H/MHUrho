@@ -107,7 +107,7 @@ namespace MHUrho.Graphics
         public void ChangeTileType(IntVector2 topLeft, TileType newTileType, IntVector2 rectangleSize) {
 
             for (int y = topLeft.Y; y < topLeft.Y + rectangleSize.Y; y++) {
-                int startTileIndex = topLeft.X + y * map.Width;
+                int startTileIndex = GetTileIndex(topLeft.X, y);
                 uint start = (uint) startTileIndex * TileInVB.VerticiesPerTile;
                 uint count = (uint) rectangleSize.X * TileInVB.VerticiesPerTile;
 
@@ -130,6 +130,103 @@ namespace MHUrho.Graphics
                 
                 mapVertexBuffer.Unlock();
             }
+            
+        }
+        /// <summary>
+        /// Changes corner height of the specified corner of all four neighbouring tiles
+        /// </summary>
+        /// <param name="cornerPosition">Position of a corner iside a map or on the border of the map</param>
+        /// <param name="newHeight">New height of the corner</param>
+        public void ChangeCornerHeight(IntVector2 cornerPosition, float newHeight) {
+
+            if (!map.IsInside(cornerPosition)) {
+                throw new ArgumentException("argument is outside of the map", nameof(cornerPosition));
+            }
+
+            if (map.IsInside(cornerPosition.X - 1, cornerPosition.Y - 1)) {
+                //Everything is inside
+                int start = GetTileIndex(cornerPosition.X - 1,cornerPosition.Y - 1) * TileInVB.VerticiesPerTile;
+
+                
+                {
+                    //TODO: Maybe lock the whole needed part at once
+                    //First two tiles, changing bottomRight corner and bottomLeft corner
+                    IntPtr vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
+                    if (vbPointer == IntPtr.Zero) {
+                        //TODO: Error
+                        throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                    }
+
+                    unsafe {
+                        //TODO: Recalculate normals
+                        TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+                        tileInVertexBuffer->BottomRight.Position.Y = newHeight;
+                        tileInVertexBuffer++;
+                        tileInVertexBuffer->BottomLeft.Position.Y = newHeight;
+                    }
+
+                    mapVertexBuffer.Unlock();
+                    start = GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
+
+                    vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
+                    if (vbPointer == IntPtr.Zero) {
+                        //TODO: Error
+                        throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                    }
+
+                    unsafe {
+                        //TODO: Recalculate normals
+                        TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+                        tileInVertexBuffer->TopRight.Position.Y = newHeight;
+                        tileInVertexBuffer++;
+                        tileInVertexBuffer->TopLeft.Position.Y = newHeight;
+                    }
+
+                    mapVertexBuffer.Unlock();
+                }
+            }
+            else if (map.IsInside(cornerPosition.X, cornerPosition.Y - 1)) {
+                //We are changing left border
+                {
+                    //Lock just one tile
+                    int start = GetTileIndex(cornerPosition.X, cornerPosition.Y - 1);
+                    IntPtr vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile);
+                    if (vbPointer == IntPtr.Zero) {
+                        //TODO: Error
+                        throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                    }
+
+                    unsafe {
+                        //TODO: Recalculate normals
+                        TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+                        tileInVertexBuffer->BottomRight.Position.Y = newHeight;
+                        tileInVertexBuffer++;
+                        tileInVertexBuffer->BottomLeft.Position.Y = newHeight;
+                    }
+
+                    mapVertexBuffer.Unlock();
+                    start = GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
+
+                    vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
+                    if (vbPointer == IntPtr.Zero) {
+                        //TODO: Error
+                        throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                    }
+
+                    unsafe {
+                        //TODO: Recalculate normals
+                        TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+                        tileInVertexBuffer->TopRight.Position.Y = newHeight;
+                        tileInVertexBuffer++;
+                        tileInVertexBuffer->TopLeft.Position.Y = newHeight;
+                    }
+
+                    mapVertexBuffer.Unlock();
+                }
+            }
+            
+
+            
             
         }
 
@@ -174,6 +271,11 @@ namespace MHUrho.Graphics
 
         public void HideHighlight() {
             highlight.Enabled = false;
+        }
+
+        public void Dispose() {
+            model.Dispose();
+            material.Dispose();
         }
 
         private void CreateMaterial() {
@@ -282,9 +384,12 @@ namespace MHUrho.Graphics
             this.mapVertexBuffer = vb;
         }
 
-        public void Dispose() {
-            model.Dispose();
-            material.Dispose();
+        private int GetTileIndex(int x, int y) {
+            return x + map.Width * y;
+        }
+
+        private int GetTileIndex(IntVector2 position) {
+            return GetTileIndex(position.X, position.Y);
         }
     }
 }

@@ -167,7 +167,11 @@ namespace MHUrho.Logic
         /// <param name="point">the point to check</param>
         /// <returns>True if it is inside, False if not</returns>
         public bool IsInside(IntVector2 point) {
-            return point.X >= Left && point.X <= Right && point.Y >= Top && point.Y <= Bottom;
+            return IsInside(point.X, point.Y);
+        }
+
+        public bool IsInside(int x, int y) {
+            return Left <= x && x <= Right && Top <= y && y <= Bottom;
         }
 
         public bool IsXInside(int x) {

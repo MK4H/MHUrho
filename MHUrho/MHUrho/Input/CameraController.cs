@@ -226,6 +226,22 @@ namespace MHUrho.Input
             }
         }
 
+        /// <summary>
+        /// Gets a point pointed at by touch or mouse (represented as normalized screen coords) <paramref name="normalizedScreenPos"/> 
+        /// in the plane vertical and ortogonal to camera direction in XZ
+        /// </summary>
+        /// <param name="point">World point in the desired plane</param>
+        /// <param name="normalizedScreenPos">Normalized screen position of the input</param>
+        /// <returns>Point in the desired plane pointed at by the input</returns>
+        public Vector3 GetPointUnderInput(Vector3 point, Vector2 normalizedScreenPos) {
+            Plane plane = new Plane(cameraNode.Direction.XZ(), point);
+
+            var cameraRay = Camera.GetScreenRay(normalizedScreenPos.X, normalizedScreenPos.Y);
+            var hitDist = cameraRay.HitDistance(plane);
+
+            return cameraRay.Origin + cameraRay.Direction * hitDist;
+        }
+
         protected override void OnUpdate(float timeStep) {
             if (timeStep > 0 && (staticMovement.LengthSquared > NearZero || 
                                  decayingMovement.LengthSquared > NearZero || 
@@ -306,6 +322,7 @@ namespace MHUrho.Input
             cameraNode.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, -rot.Y),TransformSpace.Parent);
             cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Right, rot.X),TransformSpace.Parent);
         }
+
         
     }
 }
