@@ -52,14 +52,6 @@ namespace MHUrho.Logic
         /// </summary>
         public IntRect MapArea { get; private set; }
 
-        /// <summary>
-        /// X index in the Map array
-        /// </summary>
-        public int XIndex => MapArea.Left;
-        /// <summary>
-        /// Y index in the Map array
-        /// </summary>
-        public int YIndex => MapArea.Top;
 
         /// <summary>
         /// Location in the Map matrix
@@ -98,8 +90,8 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="storedTile">Image of the tile</param>
         /// <returns>Partially initialized tile</returns>
-        public static Tile StartLoading(StTile storedTile, Map map) {
-            return new Tile(storedTile, map);
+        public static Tile StartLoading(StTile storedTile) {
+            return new Tile(storedTile);
         }
 
         /// <summary>
@@ -116,14 +108,14 @@ namespace MHUrho.Logic
             storage = null;
         }
 
-        protected Tile(StTile storedTile, Map map) {
+        protected Tile(StTile storedTile) {
             this.storage = storedTile;
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
             PassingUnits = new List<Unit>();
         }
 
-        public Tile(int x, int y, TileType tileType, Map map) {
+        public Tile(int x, int y, TileType tileType) {
             MapArea = new IntRect(x, y, x + 1, y + 1);
             PassingUnits = new List<Unit>();
             Unit = null;

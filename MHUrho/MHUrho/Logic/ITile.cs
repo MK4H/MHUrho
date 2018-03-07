@@ -36,15 +36,6 @@ namespace MHUrho.Logic
         /// </summary>
         IntRect MapArea { get; }
 
-        /// <summary>
-        /// X index in the Map array
-        /// </summary>
-        int XIndex { get; }
-
-        /// <summary>
-        /// Y index in the Map array
-        /// </summary>
-        int YIndex { get; }
 
         /// <summary>
         /// Location in the Map matrix

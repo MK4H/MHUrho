@@ -84,10 +84,6 @@ namespace NUnit.Tests {
 
                 public IntRect MapArea => throw new NotImplementedException();
 
-                public int XIndex => throw new NotImplementedException();
-
-                public int YIndex => throw new NotImplementedException();
-
                 
 
                 public Vector2 Center => throw new NotImplementedException();
@@ -152,9 +148,6 @@ namespace NUnit.Tests {
 
                 public IntRect MapArea => throw new NotImplementedException();
 
-                public int XIndex => throw new NotImplementedException();
-
-                public int YIndex => throw new NotImplementedException();
 
                 public Vector2 Center => throw new NotImplementedException();
 

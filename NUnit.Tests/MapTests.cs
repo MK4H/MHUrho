@@ -60,15 +60,6 @@ namespace NUnit.Tests {
             public IntRect MapArea { get; private set; }
 
             /// <summary>
-            /// X index in the Map array
-            /// </summary>
-            public int XIndex => MapArea.Left;
-            /// <summary>
-            /// Y index in the Map array
-            /// </summary>
-            public int YIndex => MapArea.Top;
-
-            /// <summary>
             /// Location in the Map matrix
             /// </summary>
             public IntVector2 Location => new IntVector2(MapArea.Left, MapArea.Top);

@@ -54,7 +54,8 @@ message StPath {
 
 message StMap {
 	StIntVector2 size = 1;
-	repeated StTile tiles = 2;
+	float borderHeight = 2;
+	repeated StTile tiles = 3;
 }
 
 message StTileType {

@@ -9,7 +9,20 @@ using Urho.Resources;
 
 namespace MHUrho.Graphics
 {
+    public delegate bool IsBorder(int x, int y);
+
     public class MapGraphics : IDisposable {
+
+        internal enum BorderType { Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight }
+
+        internal interface BorderTile {
+            float TopLeftHeight { get; }
+            float TopRightHeight { get; }
+            float BotLeftHeight { get; }
+            float BotRightHeight { get; }
+
+            BorderType BorderType { get; }
+        }
 
         private const float HighlightHeightAboveTerain = 0.005f;
 
@@ -42,7 +55,7 @@ namespace MHUrho.Graphics
                 BottomRight.TexCoords = rect.Max;
             }
 
-            public TileInVB(ITile tile) {
+            private TileInVB(ITile tile) {
                 TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, 0, tile.MapArea.Top),
                                          new Vector3(0, 1, 0),
                                          new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
@@ -56,6 +69,120 @@ namespace MHUrho.Graphics
                                              new Vector3(0, 1, 0),
                                              new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
             }
+
+            private TileInVB(ITile tile,
+                             float topLeftHeight,
+                             float topRightHeight,
+                             float botLeftHeight,
+                             float botRightHeight) {
+
+                TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, topLeftHeight, tile.MapArea.Top),
+                                         new Vector3(0, 1, 0),
+                                         new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
+                TopRight = new TileVertex(new Vector3(tile.MapArea.Right, topRightHeight, tile.MapArea.Top),
+                                          new Vector3(0, 1, 0),
+                                          new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
+                BottomLeft = new TileVertex(new Vector3(tile.MapArea.Left, botLeftHeight, tile.MapArea.Bottom),
+                                            new Vector3(0, 1, 0),
+                                            new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
+                BottomRight = new TileVertex(new Vector3(tile.MapArea.Right, botRightHeight, tile.MapArea.Bottom),
+                                             new Vector3(0, 1, 0),
+                                             new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
+
+                LocalNormals();
+            }
+
+            public static TileInVB InnerTile(ITile[] tiles, int index, int rowSize) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: tiles[index].Height,
+                                    topRightHeight: tiles[index + 1].Height,
+                                    botLeftHeight: tiles[index + rowSize].Height,
+                                    botRightHeight: tiles[index + rowSize + 1].Height);
+            }
+
+            public static TileInVB TopBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: borderHeight,
+                                    topRightHeight: borderHeight,
+                                    botLeftHeight: tiles[index + rowSize].Height,
+                                    botRightHeight: tiles[index + rowSize + 1].Height);
+            }
+
+            public static TileInVB BottomBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: tiles[index].Height,
+                                    topRightHeight: tiles[index + 1].Height,
+                                    botLeftHeight: borderHeight,
+                                    botRightHeight: borderHeight);
+            }
+
+            public static TileInVB LeftBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: borderHeight,
+                                    topRightHeight: tiles[index + 1].Height,
+                                    botLeftHeight: borderHeight,
+                                    botRightHeight: tiles[index + rowSize + 1].Height);
+            }
+
+            public static TileInVB RightBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: tiles[index].Height,
+                                    topRightHeight: borderHeight,
+                                    botLeftHeight: tiles[index + rowSize].Height,
+                                    botRightHeight: borderHeight);
+            }
+
+            public static TileInVB TopLeftCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: borderHeight,
+                                    topRightHeight: borderHeight,
+                                    botLeftHeight: borderHeight,
+                                    botRightHeight: tiles[index + rowSize + 1].Height);
+            }
+
+            public static TileInVB TopRightCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: borderHeight,
+                                    topRightHeight: borderHeight,
+                                    botLeftHeight: tiles[index + rowSize].Height,
+                                    botRightHeight: borderHeight);
+            }
+
+            public static TileInVB BotLeftCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: borderHeight,
+                                    topRightHeight: tiles[index + 1].Height,
+                                    botLeftHeight: borderHeight,
+                                    botRightHeight: borderHeight);
+            }
+
+            public static TileInVB BotRightCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
+                return new TileInVB(tile: tiles[index],
+                                    topLeftHeight: tiles[index].Height,
+                                    topRightHeight: borderHeight,
+                                    botLeftHeight: borderHeight,
+                                    botRightHeight: borderHeight);
+            }
+
+
+            /// <summary>
+            /// Creates normals just from this tile, disregarding the angle of surrounding tiles
+            /// </summary>
+            private void LocalNormals() {
+                TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
+                                               TopRight.Position - TopLeft.Position);
+                TopRight.Normal = Vector3.Cross(BottomRight.Position - TopRight.Position,
+                                                TopLeft.Position - TopRight.Position);
+                BottomLeft.Normal = Vector3.Cross(BottomRight.Position - BottomLeft.Position,
+                                                  TopLeft.Position - BottomLeft.Position);
+                BottomRight.Normal = Vector3.Cross(TopRight.Position - BottomRight.Position,
+                                                   BottomLeft.Position - BottomRight.Position);
+                TopLeft.Normal.Normalize();
+                TopRight.Normal.Normalize();
+                BottomLeft.Normal.Normalize();
+                BottomRight.Normal.Normalize();
+            }
+
         }
 
 
@@ -69,10 +196,21 @@ namespace MHUrho.Graphics
         //TODO: Probably split map into more parts to speed up raycasts and drawing
         private readonly Node mapNode;
 
-        public static MapGraphics Build(Node mapNode, Map map, ITile[] tiles, IntVector2 size) {
+        private bool smoothing;
+
+        public static MapGraphics Build(Node mapNode, 
+                                        Map map, 
+                                        ITile[] tiles, 
+                                        IntVector2 size,
+                                        float borderHeight,
+                                        IsBorder isBorder,
+                                        IsBorder isTopBorder,
+                                        IsBorder isBottomBorder,
+                                        IsBorder isLeftBorder,
+                                        IsBorder isRightBorder) {
             MapGraphics graphics = new MapGraphics(map, mapNode);
             graphics.CreateMaterial();
-            graphics.CreateModel(tiles, size);
+            graphics.CreateModel(tiles, size, borderHeight, isBorder, isTopBorder, isBottomBorder, isLeftBorder, isRightBorder);
 
 
             StaticModel model = mapNode.CreateComponent<StaticModel>();
@@ -316,7 +454,14 @@ namespace MHUrho.Graphics
             material = Material.FromImage(mapImage);
         }
 
-        private void CreateModel(ITile[] tiles, IntVector2 size) {
+        private void CreateModel(ITile[] tiles, 
+                                 IntVector2 size,
+                                 float borderHeight,
+                                 IsBorder isBorder,
+                                 IsBorder isTopBorder,
+                                 IsBorder isBottomBorder,
+                                 IsBorder isLeftBorder,
+                                 IsBorder isRightBorder) {
 
             //4 verticies for every tile, so that we can map every tile to different texture
             // and the same tile types to the same textures
@@ -350,9 +495,48 @@ namespace MHUrho.Graphics
                 short* inBuff = (short*)ibPointer.ToPointer();
 
                 int vertexIndex = 0;
-                foreach (var tile in tiles) {
+                for (int i = 0; i < tiles.Length; i++) {
+
+
+                    ITile tile = tiles[i];
+                    TileInVB val;
+
+                    if (isBorder(tile.Location.X, tile.Location.Y)) {
+                        if (isLeftBorder(tile.Location.X, tile.Location.Y)) {
+                            if (isTopBorder(tile.Location.X, tile.Location.Y)) {
+                                val = TileInVB.TopLeftCorner(tiles, i, size.X, borderHeight);
+                            }
+                            else if (isBottomBorder(tile.Location.X, tile.Location.Y)) {
+                                val = TileInVB.BotLeftCorner(tiles, i, size.X, borderHeight);
+                            }
+                            else {
+                                val = TileInVB.LeftBorder(tiles, i, size.X, borderHeight);
+                            }
+                        }
+                        else if (isRightBorder(tile.Location.X, tile.Location.Y)) {
+                            if (isTopBorder(tile.Location.X, tile.Location.Y)) {
+                                val = TileInVB.TopRightCorner(tiles, i, size.X, borderHeight);
+                            }
+                            else if (isBottomBorder(tile.Location.X, tile.Location.Y)) {
+                                val = TileInVB.BotRightCorner(tiles, i, size.X, borderHeight);
+                            }
+                            else {
+                                val = TileInVB.RightBorder(tiles, i, size.X, borderHeight);
+                            }
+                        }
+                        else if (isTopBorder(tile.Location.X, tile.Location.Y)) {
+                            val = TileInVB.TopBorder(tiles, i, size.X, borderHeight);
+                        }
+                        else { //BottomBorder
+                            val = TileInVB.BottomBorder(tiles, i, size.X, borderHeight);
+                        }
+                    }
+                    else {
+                        val = TileInVB.InnerTile(tiles, i, size.X);
+                    }
+
                     //Create verticies
-                    *(verBuff++) = new TileInVB(tile);
+                    *(verBuff++) = val;
 
                     //Connect verticies to triangles                 
                     *(inBuff++) = (short)(vertexIndex + 2);
