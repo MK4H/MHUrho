@@ -8,27 +8,13 @@ using Urho;
 using Urho.Resources;
 using MHUrho.Storage;
 
-namespace MHUrho.Map
+namespace MHUrho.WorldMap
 {
     public partial class Map {
-        private delegate bool IsBorder(int x, int y);
 
         private enum BorderType { None, Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight }
 
-        public class MapGraphics : IDisposable {
-
-            
-
-            internal interface IBorderTile {
-                float TopLeftHeight { get; }
-                float TopRightHeight { get; }
-                float BotLeftHeight { get; }
-                float BotRightHeight { get; }
-
-                BorderType BorderType { get; }
-
-                StBorderTile Save();
-            }
+        private class MapGraphics : IDisposable {
 
             private const float HighlightHeightAboveTerain = 0.005f;
 
@@ -106,70 +92,15 @@ namespace MHUrho.Map
                                         botRightHeight: tiles[index + rowSize + 1].Height);
                 }
 
-                public static TileInVB TopBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: borderHeight,
-                                        topRightHeight: borderHeight,
-                                        botLeftHeight: tiles[index + rowSize].Height,
-                                        botRightHeight: tiles[index + rowSize + 1].Height);
+                public static TileInVB BorderTile(BorderTile borderTile) {
+                    return new TileInVB(tile: borderTile,
+                                        topLeftHeight: borderTile.TopLeftHeight,
+                                        topRightHeight: borderTile.TopRightHeight,
+                                        botLeftHeight: borderTile.BotLeftHeight,
+                                        botRightHeight: borderTile.BotRightHeight);
                 }
 
-                public static TileInVB BottomBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: tiles[index].Height,
-                                        topRightHeight: tiles[index + 1].Height,
-                                        botLeftHeight: borderHeight,
-                                        botRightHeight: borderHeight);
-                }
-
-                public static TileInVB LeftBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: borderHeight,
-                                        topRightHeight: tiles[index + 1].Height,
-                                        botLeftHeight: borderHeight,
-                                        botRightHeight: tiles[index + rowSize + 1].Height);
-                }
-
-                public static TileInVB RightBorder(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: tiles[index].Height,
-                                        topRightHeight: borderHeight,
-                                        botLeftHeight: tiles[index + rowSize].Height,
-                                        botRightHeight: borderHeight);
-                }
-
-                public static TileInVB TopLeftCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: borderHeight,
-                                        topRightHeight: borderHeight,
-                                        botLeftHeight: borderHeight,
-                                        botRightHeight: tiles[index + rowSize + 1].Height);
-                }
-
-                public static TileInVB TopRightCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: borderHeight,
-                                        topRightHeight: borderHeight,
-                                        botLeftHeight: tiles[index + rowSize].Height,
-                                        botRightHeight: borderHeight);
-                }
-
-                public static TileInVB BotLeftCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: borderHeight,
-                                        topRightHeight: tiles[index + 1].Height,
-                                        botLeftHeight: borderHeight,
-                                        botRightHeight: borderHeight);
-                }
-
-                public static TileInVB BotRightCorner(ITile[] tiles, int index, int rowSize, float borderHeight) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: tiles[index].Height,
-                                        topRightHeight: borderHeight,
-                                        botLeftHeight: borderHeight,
-                                        botRightHeight: borderHeight);
-                }
-
+                
 
                 /// <summary>
                 /// Creates normals just from this tile, disregarding the angle of surrounding tiles
@@ -177,8 +108,8 @@ namespace MHUrho.Map
                 private void LocalNormals() {
                     TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
                                                    TopRight.Position - TopLeft.Position);
-                    TopRight.Normal = Vector3.Cross(BottomRight.Position - TopRight.Position,
-                                                    TopLeft.Position - TopRight.Position);
+                    TopRight.Normal = Vector3.Cross(TopLeft.Position - TopRight.Position,
+                                                    BottomRight.Position - TopRight.Position);
                     BottomLeft.Normal = Vector3.Cross(BottomRight.Position - BottomLeft.Position,
                                                       TopLeft.Position - BottomLeft.Position);
                     BottomRight.Normal = Vector3.Cross(TopRight.Position - BottomRight.Position,
@@ -207,12 +138,10 @@ namespace MHUrho.Map
             public static MapGraphics Build(Node mapNode,
                                             Map map,
                                             ITile[] tiles,
-                                            IntVector2 size,
-                                            float borderHeight,
-                                            IsBorder isBorder) {
+                                            IntVector2 size) {
                 MapGraphics graphics = new MapGraphics(map, mapNode);
                 graphics.CreateMaterial();
-                graphics.CreateModel(tiles, size, borderHeight, isBorder);
+                graphics.CreateModel(tiles, map);
 
 
                 StaticModel model = mapNode.CreateComponent<StaticModel>();
@@ -235,7 +164,7 @@ namespace MHUrho.Map
             }
 
             public void ChangeTileType(IntVector2 location, TileType newTileType) {
-                ChangeTileType(location, newTileType, new IntVector2(1, 1));
+                ChangeTileType(location, location,newTileType);
             }
 
             /// <summary>
@@ -243,13 +172,15 @@ namespace MHUrho.Map
             /// </summary>
             /// <param name="topLeft"></param>
             /// <param name="newTileType"></param>
-            /// <param name="rectangleSize"></param>
-            public void ChangeTileType(IntVector2 topLeft, TileType newTileType, IntVector2 rectangleSize) {
-
-                for (int y = topLeft.Y; y < topLeft.Y + rectangleSize.Y; y++) {
-                    int startTileIndex = GetTileIndex(topLeft.X, y);
+            /// <param name="bottomRight"></param>
+            public void ChangeTileType(IntVector2 topLeft, IntVector2 bottomRight, TileType newTileType) {
+                //+ [1,1] because i want to change the bottomRight tile to
+                // example TL[1,1], BR[3,3], BT-TL = [2,2],but really i want to change 3 by 3
+                IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);  
+                for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+                    int startTileIndex = map.GetTileIndex(topLeft.X, y);
                     uint start = (uint)startTileIndex * TileInVB.VerticiesPerTile;
-                    uint count = (uint)rectangleSize.X * TileInVB.VerticiesPerTile;
+                    uint count = (uint)rectSize.X * TileInVB.VerticiesPerTile;
 
                     {
                         IntPtr vbPointer = mapVertexBuffer.Lock(start, count);
@@ -261,7 +192,7 @@ namespace MHUrho.Map
                         unsafe {
                             TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
 
-                            for (int x = 0; x < rectangleSize.X; x++) {
+                            for (int x = 0; x < rectSize.X; x++) {
                                 tileInVertexBuffer->ChangeTextureCoords(newTileType.TextureCoords);
                                 tileInVertexBuffer++;
                             }
@@ -285,7 +216,7 @@ namespace MHUrho.Map
 
                 if (map.IsInside(cornerPosition.X - 1, cornerPosition.Y - 1)) {
                     //Everything is inside
-                    int start = GetTileIndex(cornerPosition.X - 1, cornerPosition.Y - 1) * TileInVB.VerticiesPerTile;
+                    int start = map.GetTileIndex(cornerPosition.X - 1, cornerPosition.Y - 1) * TileInVB.VerticiesPerTile;
 
 
                     {
@@ -306,7 +237,7 @@ namespace MHUrho.Map
                         }
 
                         mapVertexBuffer.Unlock();
-                        start = GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
+                        start = map.GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
 
                         vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
                         if (vbPointer == IntPtr.Zero) {
@@ -329,7 +260,7 @@ namespace MHUrho.Map
                     //We are changing left border
                     {
                         //Lock just one tile
-                        int start = GetTileIndex(cornerPosition.X, cornerPosition.Y - 1);
+                        int start = map.GetTileIndex(cornerPosition.X, cornerPosition.Y - 1);
                         IntPtr vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile);
                         if (vbPointer == IntPtr.Zero) {
                             //TODO: Error
@@ -345,7 +276,7 @@ namespace MHUrho.Map
                         }
 
                         mapVertexBuffer.Unlock();
-                        start = GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
+                        start = map.GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
 
                         vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
                         if (vbPointer == IntPtr.Zero) {
@@ -456,17 +387,14 @@ namespace MHUrho.Map
                 material = Material.FromImage(mapImage);
             }
 
-            private void CreateModel(ITile[] tiles,
-                                     IntVector2 size,
-                                     float borderHeight,
-                                     IsBorder isBorder) {
+            private void CreateModel(ITile[] tiles, Map map) {
 
                 //4 verticies for every tile, so that we can map every tile to different texture
                 // and the same tile types to the same textures
-                uint numVerticies = (uint)(size.X * size.Y * 4);
+                uint numVerticies = (uint)(map.WidthWithBorders * map.LengthWithBorders * 4);
                 //TODO: maybe connect the neighbouring verticies
                 //two triangles per tile, 3 indicies per triangle
-                uint numIndicies = (uint)(size.X * size.Y * 6);
+                uint numIndicies = (uint)(map.WidthWithBorders * map.LengthWithBorders * 6);
 
                 Model model = new Model();
 
@@ -499,31 +427,16 @@ namespace MHUrho.Map
                         ITile tile = tiles[i];
                         TileInVB val;
 
-                        if (isBorder(tile.Location.X, tile.Location.Y)) {
-                            switch (((IBorderTile)tile).BorderType) {
-                                case BorderType.None:
-                                    throw new Exception("Implementation error, vaue should not be None")
-                                case BorderType.Top:
-                                    val = TileInVB.BotLeftCorner
-                                    break;
-                                case BorderType.Bottom:
-                                    break;
-                                case BorderType.Left:
-                                    break;
-                                case BorderType.Right:
-                                    break;
-                                case BorderType.TopLeft:
-                                    break;
-                                case BorderType.TopRight:
-                                    break;
-                                case BorderType.BottomLeft:
-                                    break;
-                                case BorderType.BottomRight:
-                                    break;
+                        if (map.IsBorder(tile.Location.X, tile.Location.Y)) {
+                            var borderTile = (BorderTile)tile;
+                            if (borderTile.BorderType == BorderType.None) {
+                                throw new Exception("Implementation error, value should not be None");
                             }
+
+                            val = TileInVB.BorderTile(borderTile);
                         }
                         else {
-                            val = TileInVB.InnerTile(tiles, i, size.X);
+                            val = TileInVB.InnerTile(tiles, i, map.WidthWithBorders);
                         }
 
                         //Create verticies
@@ -553,19 +466,12 @@ namespace MHUrho.Map
 
                 model.NumGeometries = 1;
                 model.SetGeometry(0, 0, geom);
-                model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(size.X, 1, size.Y));
+                model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(map.WidthWithBorders, 1, map.LengthWithBorders));
 
                 this.model = model;
                 this.mapVertexBuffer = vb;
             }
 
-            private int GetTileIndex(int x, int y) {
-                return x + map.Width * y;
-            }
-
-            private int GetTileIndex(IntVector2 position) {
-                return GetTileIndex(position.X, position.Y);
-            }
         }
 
     }

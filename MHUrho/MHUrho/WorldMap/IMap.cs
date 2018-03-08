@@ -1,8 +1,8 @@
-﻿using MHUrho.Graphics;
+﻿using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 
-namespace MHUrho.Map {
+namespace MHUrho.WorldMap {
     public interface IMap {
                
         /// <summary>

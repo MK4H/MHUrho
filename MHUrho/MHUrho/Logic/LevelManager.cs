@@ -8,6 +8,7 @@ using MHUrho.Packaging;
 using Urho;
 using MHUrho.Storage;
 using Urho.Actions;
+using MHUrho.WorldMap;
 
 namespace MHUrho.Logic
 {
@@ -91,7 +92,7 @@ namespace MHUrho.Logic
 
             //Load data
             Node mapNode = scene.CreateChild("MapNode");
-            Map map = Map.StartLoading(mapNode, storedLevel.Map);
+            var map = Map.StartLoading(mapNode, storedLevel.Map);
 
             LevelManager level = new LevelManager(game, map, scene, cameraController);
 

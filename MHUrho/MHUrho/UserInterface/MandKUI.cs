@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Input;
@@ -36,11 +37,15 @@ namespace MHUrho.UserInterface
         }
 
         public void Dispose() {
+            Disable();
+            selectionBar.RemoveAllChildren();
             selectionBar.Remove();
+            selectionBar.Dispose();
+            Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
         }
 
         private void DisplayTileTypes() {
-
+            //TODO: Buttons and window are not reacting on Hover sometimes after load/restart of the game
             tileTypeButtons = new Dictionary<UIElement, TileType>();
 
             selectionBar = UI.Root.CreateWindow();
@@ -87,8 +92,29 @@ namespace MHUrho.UserInterface
             }
         }
 
+        public void Disable() {
+            selectionBar.HoverBegin -= UIHoverBegin;
+            selectionBar.HoverEnd -= UIHoverEnd;
+
+            foreach (var button in tileTypeButtons) {
+                button.Key.HoverBegin -= Button_HoverBegin;
+                button.Key.HoverBegin -= UIHoverBegin;
+                button.Key.HoverEnd -= Button_HoverEnd;
+                button.Key.HoverEnd -= UIHoverEnd;
+            }
+        }
+
+        public void Hide() {
+            selectionBar.Visible = false;
+        }
+
+        public void Show() {
+            selectionBar.Visible = true;
+        }
+
         private void Button_Pressed(PressedEventArgs e) {
             selected?.SetColor(Color.White);
+            e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
             if (selected != e.Element) {
                 selected = e.Element;
                 e.Element.SetColor(Color.Gray);
@@ -114,12 +140,17 @@ namespace MHUrho.UserInterface
         private void UIHoverBegin(HoverBeginEventArgs e) {
             hovering++;
             inputCtl.UIHovering = true;
+
+            Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
         }
 
         private void UIHoverEnd(HoverEndEventArgs e) {
             if (--hovering == 0) {
                 inputCtl.UIHovering = false;
             }
+
+            Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
         }
+
     }
 }

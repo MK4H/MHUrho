@@ -14,7 +14,9 @@ namespace MHUrho.Control
             None,
             TileTypes,
             Buildings,
-            Units
+            Units,
+            HeightVertex,
+            HeightSelection
         }
 
         class LineOrder
@@ -163,9 +165,23 @@ namespace MHUrho.Control
         /// <param name="tile">The tile clicked</param>
         public void Click(ITile tile)
         {
-            if (state == State.TileTypes) {
-                //level.Map.ChangeTileType(tile, (TileType) UISelected);
-                level.Map.ChangeTileType(tile, (TileType) UISelected, new IntVector2(3, 3));
+            switch (state) {
+                case State.None:
+                    break;
+                case State.TileTypes:
+                    //level.Map.ChangeTileType(tile, (TileType) UISelected);
+                    level.Map.ChangeTileType(tile, (TileType)UISelected, new IntVector2(3, 3));
+                    break;
+                case State.Buildings:
+                    break;
+                case State.Units:
+                    break;
+                case State.HeightVertex:
+                    break;
+                case State.HeightSelection:
+                    break;
+                default:
+                    throw new NotImplementedException("Given state is not implemented");
             }
 
             //if (typeOfSelected == SelectedType.None)

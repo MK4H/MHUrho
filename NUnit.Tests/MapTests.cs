@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.WorldMap;
 using MHUrho.Storage;
 using Urho;
 

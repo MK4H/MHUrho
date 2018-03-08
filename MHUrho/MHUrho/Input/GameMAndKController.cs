@@ -42,7 +42,6 @@ namespace MHUrho.Input
             }
         }
 
- 
         public IPlayer Player { get; set; }
 
         public bool DoOnlySingleRaycasts { get; set; }

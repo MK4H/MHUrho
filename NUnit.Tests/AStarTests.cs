@@ -6,7 +6,7 @@ using NUnit.Framework;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.Control;
-using MHUrho.Graphics;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace NUnit.Tests {
@@ -203,7 +203,6 @@ namespace NUnit.Tests {
 
             #region NOT USED IN TEST
 
-            public MapGraphics Graphics => throw new NotImplementedException();
 
             public bool IsXInside(int x) {
                 throw new NotImplementedException();
