@@ -2,7 +2,7 @@
 using MHUrho.Storage;
 using Urho;
 
-namespace MHUrho.Logic {
+namespace MHUrho.Map {
     public interface IMap {
                
         /// <summary>
@@ -16,7 +16,7 @@ namespace MHUrho.Logic {
         IntVector2 BottomRight { get; }
 
         int Width { get; }
-        int Height { get; }
+        int Length { get; }
 
         /// <summary>
         /// X coordinate of the left row of the map

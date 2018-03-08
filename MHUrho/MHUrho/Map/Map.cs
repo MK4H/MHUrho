@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Graphics;
@@ -9,11 +11,11 @@ using MHUrho.Storage;
 using MHUrho.Helpers;
 
 
-namespace MHUrho.Logic
+namespace MHUrho.Map
 {
-    public class Map : IMap, IDisposable {
+    public partial class Map : IMap, IDisposable {
 
-        private class BorderTile : ITile {
+        private class BorderTile : ITile, MapGraphics.IBorderTile{
             public Unit Unit => throw new NotImplementedException();
 
             public List<Unit> PassingUnits => throw new NotImplementedException();
@@ -32,18 +34,19 @@ namespace MHUrho.Logic
 
             public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
-            public float Height { get; private set; }
-
-            private StTile storage;
-
-            public static ITile LoadTileOrBorder(StTile storedTile, Map map) {
-                if (map.IsBorder(storedTile.Position.X, storedTile.Position.Y)) {
-                    return new BorderTile(storedTile);
-                }
-                else {
-                    return Tile.StartLoading(storedTile);
-                }
+            public float Height {
+                get => TopLeftHeight;
+                private set => TopLeftHeight = value;
             }
+
+            public float TopLeftHeight { get; set; }
+            public float TopRightHeight { get; set; }
+            public float BotLeftHeight { get; set; }
+            public float BotRightHeight { get; set; }
+
+            public MapGraphics.BorderType BorderType { get; private set; }
+
+            private StBorderTile storage;
 
             public void ConnectReferences() {
                 Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
@@ -69,30 +72,44 @@ namespace MHUrho.Logic
                 throw new NotImplementedException();
             }
 
-            public StTile Save() {
-                var storedTile = new StTile();
-                storedTile.UnitID = 0;
-                storedTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y };
-                storedTile.Height = Height;
-                storedTile.TileTypeID = Type.ID;
+            StTile ITile.Save() {
+                throw new NotImplementedException();
+            }
 
-                return storedTile;
+            public StBorderTile Save() {
+                var stBorderTile = new StBorderTile();
+                stBorderTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y };
+                stBorderTile.TileTypeID = Type.ID;
+                stBorderTile.TopLeftHeight = TopLeftHeight;
+                stBorderTile.TopRightHeight = TopRightHeight;
+                stBorderTile.BotLeftHeight = BotLeftHeight;
+                stBorderTile.BotRightHeight = BotRightHeight;
+
+
+                return stBorderTile;
             }
 
             public void ChangeType(TileType newType) {
                 Type = newType;
             }
 
-            public BorderTile(StTile stTile) {
-                this.storage = stTile;
-                this.MapArea = new IntRect(stTile.Position.X, stTile.Position.Y, stTile.Position.X + 1, stTile.Position.Y + 1);
-                this.Height = stTile.Height;
+            public BorderTile(StBorderTile stBorderTile) {
+                this.storage = stBorderTile;
+                this.MapArea = new IntRect(stBorderTile.Position.X, stBorderTile.Position.Y, stBorderTile.Position.X + 1, stBorderTile.Position.Y + 1);
+                this.TopLeftHeight = stBorderTile.TopLeftHeight;
+                this.TopRightHeight = stBorderTile.TopRightHeight;
+                this.BotLeftHeight = stBorderTile.BotLeftHeight;
+                this.BotRightHeight = stBorderTile.BotRightHeight;
             }
 
-            public BorderTile(int x, int y, TileType tileType) {
+            public BorderTile(int x, int y, TileType tileType, MapGraphics.BorderType borderType) {
                 MapArea = new IntRect(x, y, x + 1, y + 1);
                 this.Type = tileType;
-                this.Height = 0;
+                this.BorderType = borderType;
+                this.TopLeftHeight = 0;
+                this.TopRightHeight = 0;
+                this.BotLeftHeight = 0;
+                this.BotRightHeight = 0;
             }
         }
 
@@ -100,19 +117,24 @@ namespace MHUrho.Logic
        
        
         /// <summary>
-        /// Coordinates of the top left corner of the map
+        /// Coordinates of the top left tile of the playing map
         /// </summary>
         public IntVector2 TopLeft { get; private set; }
 
 
         /// <summary>
-        /// Coordinates of the bottom right corner of the map
+        /// Coordinates of the bottom right tile of the playing map
         /// </summary>
         public IntVector2 BottomRight { get; private set; }
 
-        public int Width => Right - Left;
-
-        public int Height => Bottom - Top;
+        /// <summary>
+        /// Width of the whole playing field
+        /// </summary>
+        public int Width => Right - Left + 1;
+        /// <summary>
+        /// Length of the whole playing field
+        /// </summary>
+        public int Length => Bottom - Top + 1;
 
         /// <summary>
         /// X coordinate of the left row of the map
@@ -137,22 +159,35 @@ namespace MHUrho.Logic
         private readonly Node node;
 
         private MapGraphics graphics;
-
-        private float borderHeight;
-
+        /// <summary>
+        /// Width of the whole map with borders included
+        /// </summary>
         private int WidthWithBorders => Width + 2;
+        /// <summary>
+        /// Length of the whole map with the borders included
+        /// </summary>
+        private int LengthWithBorders => Length + 2;
 
-        private int HeightWithBorders => Height + 2;
-
-        public static Map CreateDefaultMap(Node mapNode, IntVector2 size, float borderHeight) {
-            Map newMap = new Map(mapNode, size.X, size.Y, borderHeight);
+        /// <summary>
+        /// Creates default map at height 0 with all tiles with the default type
+        /// </summary>
+        /// <param name="mapNode">Node to connect the map to</param>
+        /// <param name="size">Size of the playing field, excluding the borders</param>
+        /// <returns>Fully created map</returns>
+        public static Map CreateDefaultMap(Node mapNode, IntVector2 size) {
+            Map newMap = new Map(mapNode, size.X, size.Y);
 
             TileType defaultTileType = PackageManager.Instance.DefaultTileType;
 
             for (int i = 0; i < newMap.tiles.Length; i++) {
-                IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.HeightWithBorders);
+                IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.LengthWithBorders);
                 if (newMap.IsBorder(tilePosition)) {
-                    newMap.tiles[i] = new BorderTile(tilePosition.X, tilePosition.Y, defaultTileType);
+                    MapGraphics.BorderType borderType = newMap.GetBorderType(tilePosition.X, tilePosition.Y);
+
+                    Debug.Assert(borderType == MapGraphics.BorderType.None,
+                                 "Error in implementation of IsBorder or GetBorderType");
+
+                    newMap.tiles[i] = new BorderTile(tilePosition.X, tilePosition.Y, defaultTileType, borderType);
                 }
                 else {
                     newMap.tiles[i] = new Tile(tilePosition.X, tilePosition.Y, defaultTileType);
@@ -177,13 +212,29 @@ namespace MHUrho.Logic
         public static Map StartLoading(Node mapNode, StMap storedMap) {
             var newMap = new Map(mapNode, storedMap);
             try {
-                int i = 0;
-                foreach (var tile in storedMap.Tiles) {
-                    newMap.tiles[i++] = BorderTile.LoadTileOrBorder(tile, newMap);
-                }
+                var tiles = storedMap.Tiles.GetEnumerator();
+                var borderTiles = storedMap.BorderTiles.GetEnumerator();
+                for (int y = 0; y < newMap.LengthWithBorders; y++) {
+                    for (int x = 0; x < newMap.WidthWithBorders; x++) {
+                        ITile newTile;
+                        if (newMap.IsBorder(x, y)) {
+                            if (!borderTiles.MoveNext()) {
+                                //TODO: Exception
+                                throw new Exception("Corrupted save file");
+                            }
+                            newTile = new BorderTile(borderTiles.Current);
+                        }
+                        else {
+                            if (!tiles.MoveNext()) {
+                                //TODO: Exception
+                                throw new Exception("Corrupted save file");
+                            }
 
-                if (i < newMap.tiles.Length) {
-                    throw new ArgumentException();
+                            newTile = Tile.StartLoading(tiles.Current);
+                        }
+
+                        newMap.tiles[newMap.GetTileIndex(x,y)] = newTile;
+                    }
                 }
             }
             catch (IndexOutOfRangeException e) {
@@ -219,30 +270,41 @@ namespace MHUrho.Logic
             var storedMap = new StMap();
             var stSize = new StIntVector2();
             stSize.X = Width;
-            stSize.Y = Height;
+            stSize.Y = Length;
             storedMap.Size = stSize;
 
             var storedTiles = storedMap.Tiles;
+            var storedBorderTiles = storedMap.BorderTiles;
 
             foreach (var tile in tiles) {
-                storedTiles.Add(tile.Save());
+                if (IsBorder(tile.Location)) {
+                    storedTiles.Add(tile.Save());
+                }
+                else {
+                    storedBorderTiles.Add(((MapGraphics.IBorderTile) tile).Save());
+                } 
             }
 
             return storedMap;
         }
 
         protected Map(Node mapNode, StMap storedMap)
-            :this(mapNode, storedMap.Size.X, storedMap.Size.Y, storedMap.BorderHeight) {
+            :this(mapNode, storedMap.Size.X, storedMap.Size.Y) {
 
         }
 
-        protected Map(Node mapNode, int width, int length, float borderHeight) {
+        /// <summary>
+        /// Creates map connected to mapNode with the PLAYING FIELD of width <paramref name="width"/> and length <paramref name="length"/>
+        /// </summary>
+        /// <param name="mapNode"></param>
+        /// <param name="width">Width of the playing field without borders</param>
+        /// <param name="length">Length of the playing field without borders</param>
+        protected Map(Node mapNode, int width, int length) {
             this.node = mapNode;
             this.TopLeft = new IntVector2(1, 1);
-            this.BottomRight = new IntVector2(width, length);
-            //To make room for the borderTiles
-            this.tiles = new ITile[(Width + 2) * (Height + 2)];
-            this.borderHeight = borderHeight;
+            this.BottomRight = TopLeft + new IntVector2(width - 1, length - 1);
+
+            this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
         }
 
         internal static Map CreateTestMap(ITile[] newTiles, IntVector2 size) {
@@ -255,6 +317,11 @@ namespace MHUrho.Logic
             this.BottomRight = new IntVector2(size.X - 1, size.Y - 1);
         }
 
+
+        public bool IsInside(int x, int y) {
+            return Left <= x && x <= Right && Top <= y && y <= Bottom;
+        }
+
         /// <summary>
         /// Checks if the point is inside the map, which means it could be used for indexing into the map
         /// </summary>
@@ -262,10 +329,6 @@ namespace MHUrho.Logic
         /// <returns>True if it is inside, False if not</returns>
         public bool IsInside(IntVector2 point) {
             return IsInside(point.X, point.Y);
-        }
-
-        public bool IsInside(int x, int y) {
-            return Left <= x && x <= Right && Top <= y && y <= Bottom;
         }
 
         public bool IsXInside(int x) {
@@ -369,7 +432,7 @@ namespace MHUrho.Logic
                 return true;
             }
             int recWidth = bottomRight.X - topLeft.X;
-            int recHeight = bottomRight.Y - topLeft.Y;
+            int recLength = bottomRight.Y - topLeft.Y;
 
             bool fits = true;
             int where;
@@ -388,11 +451,11 @@ namespace MHUrho.Logic
                 bottomRight.X += dist;
             }
 
-            if (recHeight > Height) {
+            if (recLength > Length) {
                 //Rectangle is wider than the map, center it on the map
-                int diff = recHeight - Height;
+                int diff = recLength - Length;
                 topLeft.Y = diff / 2;
-                bottomRight.Y = topLeft.Y + recHeight;
+                bottomRight.Y = topLeft.Y + recLength;
 
                 fits = false;
             }
@@ -531,8 +594,8 @@ namespace MHUrho.Logic
             if (y < 0) {
                 y = 0;
             }
-            else if (y >= Height) {
-                y = Height - 1;
+            else if (y >= Length) {
+                y = Length - 1;
             }
 
             return GetTile(x, y).Height;
@@ -603,15 +666,19 @@ namespace MHUrho.Logic
             graphics = MapGraphics.Build(node, 
                                          this, 
                                          tiles, 
-                                         new IntVector2(WidthWithBorders, HeightWithBorders),
-                                         IsTopBorder,
-                                         IsBottomBorder,
-                                         IsLeftBorder,
-                                         IsRightBorder);
+                                         new IntVector2(WidthWithBorders, LengthWithBorders));
+        }
+
+        private int GetTileIndex(int x, int y) {
+            return x + y * WidthWithBorders;
+        }
+
+        private int GetTileIndex(IntVector2 location) {
+            return GetTileIndex(location.X, location.Y);
         }
 
         private ITile SafeGetTile(int x, int y) {
-            if (0 <= x && x < Width && 0 <= y && y < Height) {
+            if (IsInside(x,y)) {
                 return GetTile(x, y);
             }
             return null;
@@ -634,15 +701,53 @@ namespace MHUrho.Logic
         }
 
         private bool IsBorder(int x, int y) {
-            return (0 <= x && x < Left) ||
-                   (Right < x && x < WidthWithBorders) ||
-                   (0 <= y && y < Top) ||
-                   (Bottom < y && y < WidthWithBorders);
+            return IsLeftBorder(x,y) ||
+                   IsRightBorder(x,y) ||
+                   IsTopBorder(x,y) ||
+                   IsBottomBorder(x,y);
 
         }
 
         private bool IsBorder(IntVector2 location) {
             return IsBorder(location.X, location.Y);
+        }
+
+        private MapGraphics.BorderType GetBorderType(int x, int y) {
+            if (IsLeftBorder(x,y)) {
+                if (IsTopBorder(x, y)) {
+                    return MapGraphics.BorderType.TopLeft;
+                }
+                if (IsBottomBorder(x, y)) {
+                    return MapGraphics.BorderType.BottomLeft;
+                }
+                return MapGraphics.BorderType.Left;
+            }
+
+            if (IsRightBorder(x, y)) {
+                if (IsTopBorder(x, y)) {
+                    return MapGraphics.BorderType.TopRight;
+                }
+                if (IsBottomBorder(x, y)) {
+                    return MapGraphics.BorderType.BottomRight;
+                }
+                return MapGraphics.BorderType.Right;
+            }
+
+            if (IsTopBorder(x, y)) {
+                //We already know its not left or right border
+                return MapGraphics.BorderType.Top;
+            }
+
+            if (IsBottomBorder(x, y)) {
+                //We already know its not left or right border
+                return MapGraphics.BorderType.Bottom;
+            }
+
+            return MapGraphics.BorderType.None;
+        }
+
+        private MapGraphics.BorderType GetBorderType(IntVector2 location) {
+            return GetBorderType(location.X, location.Y);
         }
 
         private bool IsTopBorder(int x, int y) {
@@ -654,7 +759,7 @@ namespace MHUrho.Logic
         }
 
         private bool IsBottomBorder(int x, int y) {
-            return (Bottom < y && y < WidthWithBorders);
+            return (Bottom + 1 <= y && y < WidthWithBorders);
         }
 
         private bool IsBottomBorder(IntVector2 location) {
@@ -669,11 +774,12 @@ namespace MHUrho.Logic
         }
 
         private bool IsRightBorder(int x, int y) {
-            return (Right < x && x < WidthWithBorders);
+            return (Right + 1 <= x && x < WidthWithBorders);
         }
 
         private bool IsRightBorder(IntVector2 location) {
             return IsRightBorder(location.X, location.Y);
         }
+
     }
 }

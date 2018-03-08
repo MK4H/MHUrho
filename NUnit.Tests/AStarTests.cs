@@ -288,7 +288,7 @@ namespace NUnit.Tests {
 
             public int Width => Right + 1;
 
-            public int Height => Bottom + 1;
+            public int Length => Bottom + 1;
 
             public int Left => TopLeft.X;
 

@@ -101,9 +101,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Data\Test\Assemblies\TestPlugin.dll">
+    <AndroidAsset Include="Assets\Data\Test\Assemblies\TestPlugin.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </AndroidAsset>
     <AndroidAsset Include="Assets\Data\Test\ResourceDir\default\default.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </AndroidAsset>

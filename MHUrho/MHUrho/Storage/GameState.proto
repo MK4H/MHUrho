@@ -30,6 +30,15 @@ message StTile {
 	float height = 5;
 }
 
+message StBorderTile {
+	int32 tileTypeID = 1;
+	StIntVector2 position = 2;
+	float topLeftHeight = 3;
+	float topRightHeight = 4;
+	float botLeftHeight = 5;
+	float botRightHeight = 6;
+}
+
 message StUnit {
 	int32 id = 1;
 	int32 typeID = 2;
@@ -54,8 +63,8 @@ message StPath {
 
 message StMap {
 	StIntVector2 size = 1;
-	float borderHeight = 2;
-	repeated StTile tiles = 3;
+	repeated StTile tiles = 2;
+	repeated StBorderTile borderTiles = 3;
 }
 
 message StTileType {
