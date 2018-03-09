@@ -192,19 +192,6 @@ namespace MHUrho.Logic
             CurrentLevel = null;
         }
 
-        public void HandleRaycast(IPlayer player, RayQueryResult rayQueryResult) {
-            //TODO: Switch on current user action, like building, selecting units etc.
-            var clickedTile = Map.Raycast(rayQueryResult);
-            if (clickedTile != null ) {
-                player.Click(clickedTile);
-            }
-
-        }
-
-        public void HandleRaycast(IPlayer player, List<RayQueryResult> rayQueryResults) {
-
-        }
-
         protected LevelManager(MyGame game,
                                Map map, 
                                Scene scene, 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Urho;
@@ -8,6 +9,7 @@ using Urho.IO;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Control;
+using MHUrho.EditorTools;
 using MHUrho.UserInterface;
 using Urho.Gui;
 using Urho.Urho2D;
@@ -17,7 +19,9 @@ namespace MHUrho.Input
 {
     public class GameMandKController : MandKController, IGameController
     {
-        private enum CameraMovementType { Fixed, FreeFloat}
+        private enum CameraMovementType { Fixed, FreeFloat }
+
+        private enum Mode { LockedToPoint, MouseAreaSelection, WorldAreaSelection}
 
         private enum Actions {  CameraMoveForward = 0,
                                 CameraMoveBackward,
@@ -44,6 +48,8 @@ namespace MHUrho.Input
 
         public IPlayer Player { get; set; }
 
+        public MandKUI UIManager { get; private set; }
+
         public bool DoOnlySingleRaycasts { get; set; }
 
         public float CameraScrollSensitivity { get; set; }
@@ -58,19 +64,17 @@ namespace MHUrho.Input
         private readonly CameraController cameraController;
         private readonly Octree octree;
 
+        private IMandKTool tool;
+
         private List<KeyAction> actions;
         private Dictionary<Key, Actions> keyActions;
 
         private CameraMovementType cameraType;
 
-        //private float KeyRotationSensitivity => KeyCameraSensitivity * 3;
-
         private const float CloseToBorder = 1/20f;
 
         private bool mouseInLeftRight;
         private bool mouseInTopBottom;
-
-        private MandKUI myUI;
 
         private ITile cursorTile;
         
@@ -83,7 +87,11 @@ namespace MHUrho.Input
             this.levelManager = levelManager;
             this.DoOnlySingleRaycasts = true;
             this.Player = player;
-            this.myUI = new MandKUI(game, this);
+            this.UIManager = new MandKUI(game, this);
+
+
+            this.tool = new VertexHeightToolMandK(this);
+            tool.Enable();
 
             FillActionList();
 
@@ -93,12 +101,46 @@ namespace MHUrho.Input
             Enable();
 
             //TODO: Create some toggling for drawing highlight
-            cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };
+            //cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };
         }
 
         public void Dispose() {
-            myUI.Dispose();
+            UIManager.Dispose();
             Disable();
+        }
+
+        public List<RayQueryResult> CursorRaycast() {
+            var cursorRay = GetCursorRay();
+            return octree.Raycast(cursorRay);
+        }
+
+        public RayQueryResult? CursorRaycastFirstOnly() {
+            var cursorRay = GetCursorRay();
+            return octree.RaycastSingle(cursorRay);
+        }
+
+        public float RaycastHeightAbovePoint(Vector3 point) {
+            Vector3 resultPoint = cameraController.GetPointUnderInput(point, new Vector2(UI.Cursor.Position.X / (float) UI.Root.Width,
+                                                                                         UI.Cursor.Position.Y / (float) UI.Root.Height));
+            return resultPoint.Y;
+        }
+
+        /// <summary>
+        /// Gets the map matrix coordinates of the tile corner closest to the cursor
+        /// 
+        /// <seealso cref="GetClosestTileCornerPosition"/>
+        /// </summary>
+        /// <returns></returns>
+        public IntVector2? GetClosestTileCorner() {
+            return levelManager.Map.RaycastToVertex(CursorRaycast());
+        }
+
+        /// <summary>
+        /// Gets the world position of the tile corner closest to the cursor
+        /// </summary>
+        /// <returns></returns>
+        public Vector3? GetClosestTileCornerPosition() {
+            return levelManager.Map.RaycastToVertexPosition(CursorRaycast());
         }
 
         void FillActionList() {
@@ -161,13 +203,13 @@ namespace MHUrho.Input
                 if (DoOnlySingleRaycasts) {
                     var raycastResult = octree.RaycastSingle(clickedRay);
                     if (raycastResult.HasValue) {
-                        levelManager.HandleRaycast(Player, raycastResult.Value);
+                        Player.HandleRaycast(raycastResult.Value);
                     }
                 }
                 else {
                     var raycastResults = octree.Raycast(clickedRay);
                     if (raycastResults.Count != 0) {
-                        levelManager.HandleRaycast(Player, raycastResults);
+                        Player.HandleRaycast(raycastResults);
                     }
                 }
             }   
@@ -186,7 +228,6 @@ namespace MHUrho.Input
             }
             else if (cameraType == CameraMovementType.Fixed) {
                 MouseBorderMovement(UI.Cursor.Position);
-
                 DrawHighlight();
 
             }
@@ -197,13 +238,18 @@ namespace MHUrho.Input
 
         }
 
+        private Ray GetCursorRay() {
+            return cameraController.Camera.GetScreenRay(UI.Cursor.Position.X / (float)UI.Root.Width,
+                                                        UI.Cursor.Position.Y / (float)UI.Root.Height);
+        }
+
         private void DrawHighlight() {
             var clickedRay = cameraController.Camera.GetScreenRay(UI.Cursor.Position.X / (float)UI.Root.Width,
                                                                   UI.Cursor.Position.Y / (float)UI.Root.Height);
             var raycastResult = octree.RaycastSingle(clickedRay);
             if (raycastResult.HasValue) {
  
-                ITile centerTile = levelManager.Map.Raycast(raycastResult.Value);
+                ITile centerTile = levelManager.Map.RaycastToTile(raycastResult.Value);
                 if (centerTile != null && (cursorTile == null || centerTile != cursorTile)) {
                     levelManager.Map.HighlightArea(centerTile, new IntVector2(3, 3));
                     cursorTile = centerTile;
@@ -358,7 +404,7 @@ namespace MHUrho.Input
                 cameraController.SwitchToFree();
                 cameraType = CameraMovementType.FreeFloat;
                 UI.Cursor.Visible = false;
-                levelManager.Map.HideHighlight();
+                levelManager.Map.DisableHighlight();
             }
         }
 

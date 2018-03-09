@@ -12,7 +12,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-    class MandKUI : IDisposable
+    public class MandKUI : IDisposable
     {
         private readonly MyGame game;
         private readonly GameMandKController inputCtl;
@@ -23,9 +23,7 @@ namespace MHUrho.UserInterface
 
         private Urho.Input Input => game.Input;
 
-        private UIElement selectionBar;
-
-        private Dictionary<UIElement, TileType> tileTypeButtons;
+        private readonly  UIElement selectionBar;
         private UIElement selected;
 
         private int hovering = 0;
@@ -33,20 +31,6 @@ namespace MHUrho.UserInterface
         public MandKUI(MyGame game, GameMandKController inputCtl) {
             this.game = game;
             this.inputCtl = inputCtl;
-            DisplayTileTypes();
-        }
-
-        public void Dispose() {
-            Disable();
-            selectionBar.RemoveAllChildren();
-            selectionBar.Remove();
-            selectionBar.Dispose();
-            Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
-        }
-
-        private void DisplayTileTypes() {
-            //TODO: Buttons and window are not reacting on Hover sometimes after load/restart of the game
-            tileTypeButtons = new Dictionary<UIElement, TileType>();
 
             selectionBar = UI.Root.CreateWindow();
             selectionBar.SetStyle("windowStyle");
@@ -61,55 +45,77 @@ namespace MHUrho.UserInterface
             selectionBar.ClipChildren = true;
             selectionBar.HoverBegin += UIHoverBegin;
             selectionBar.HoverEnd += UIHoverEnd;
+        }
 
-            foreach (var tileType in PackageManager.Instance.TileTypes) {
-                var tileImage = tileType.GetImage().ConvertToRGBA();
-
-                var buttonTexture = new Texture2D();
-                buttonTexture.FilterMode = TextureFilterMode.Nearest;
-                buttonTexture.SetNumLevels(1);
-                buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-                buttonTexture.SetData(tileType.GetImage());
-
+        public void Dispose() {
+            DisableUI();
+            selectionBar.RemoveAllChildren();
+            selectionBar.Remove();
+            selectionBar.Dispose();
+            Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
+        }
 
 
-                var button = selectionBar.CreateButton();
-                button.SetStyle("TextureButton");
-                button.Size = new IntVector2(100, 100);
-                button.HorizontalAlignment = HorizontalAlignment.Center;
-                button.VerticalAlignment = VerticalAlignment.Center;
+        public void EnableUI() {
+            selectionBar.HoverBegin += UIHoverBegin;
+            selectionBar.HoverEnd += UIHoverEnd;
+
+            foreach (Button button in selectionBar.Children) {
+                button.HoverBegin += Button_HoverBegin;
+                button.HoverBegin += UIHoverBegin;
+                button.HoverEnd += Button_HoverEnd;
+                button.HoverEnd += UIHoverEnd;
+                button.Pressed += Button_Pressed;
+            }
+        }
+
+        public void DisableUI() {
+            selectionBar.HoverBegin -= UIHoverBegin;
+            selectionBar.HoverEnd -= UIHoverEnd;
+
+            foreach (Button button in selectionBar.Children) {
+                button.HoverBegin -= Button_HoverBegin;
+                button.HoverBegin -= UIHoverBegin;
+                button.HoverEnd -= Button_HoverEnd;
+                button.HoverEnd -= UIHoverEnd;
+                button.Pressed -= Button_Pressed;
+            }
+        }
+
+        public void HideUI() {
+            selectionBar.Visible = false;
+        }
+
+        public void ShowUI() {
+            selectionBar.Visible = true;
+        }
+
+        public void SelectionBarShowButtons(List<Button> buttons) {
+            //Clear selection bar
+            selectionBar.RemoveAllChildren();
+
+            foreach (var button in buttons) {
+                selectionBar.AddChild(button);
                 button.Pressed += Button_Pressed;
                 button.HoverBegin += Button_HoverBegin;
                 button.HoverBegin += UIHoverBegin;
                 button.HoverEnd += Button_HoverEnd;
                 button.HoverEnd += UIHoverEnd;
-                button.Texture = buttonTexture;
-                button.FocusMode = FocusMode.ResetFocus;
-                button.MaxSize = new IntVector2(100, 100);
-                button.MinSize = new IntVector2(100, 100);
-
-                tileTypeButtons.Add(button, tileType);
             }
         }
 
-        public void Disable() {
-            selectionBar.HoverBegin -= UIHoverBegin;
-            selectionBar.HoverEnd -= UIHoverEnd;
+        public void SelectionBarClearButtons() {
+            selected = null;
 
-            foreach (var button in tileTypeButtons) {
-                button.Key.HoverBegin -= Button_HoverBegin;
-                button.Key.HoverBegin -= UIHoverBegin;
-                button.Key.HoverEnd -= Button_HoverEnd;
-                button.Key.HoverEnd -= UIHoverEnd;
+            foreach (Button button in selectionBar.Children) {
+                button.Pressed -= Button_Pressed;
+                button.HoverBegin -= Button_HoverBegin;
+                button.HoverBegin -= UIHoverBegin;
+                button.HoverEnd -= Button_HoverEnd;
+                button.HoverEnd -= UIHoverEnd;
             }
-        }
 
-        public void Hide() {
-            selectionBar.Visible = false;
-        }
-
-        public void Show() {
-            selectionBar.Visible = true;
+            selectionBar.RemoveAllChildren();
         }
 
         private void Button_Pressed(PressedEventArgs e) {
@@ -118,7 +124,7 @@ namespace MHUrho.UserInterface
             if (selected != e.Element) {
                 selected = e.Element;
                 e.Element.SetColor(Color.Gray);
-                player.UISelect(tileTypeButtons[selected]);
+                //player.UISelect(tileTypeButtons[selected]);
             }
             else {
                 selected = null;

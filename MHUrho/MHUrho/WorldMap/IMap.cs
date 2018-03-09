@@ -127,7 +127,7 @@ namespace MHUrho.WorldMap {
         /// <summary>
         /// Hides highlight displayed by HighlightArea <see cref="HighlightArea(ITile, IntVector2)"/>
         /// </summary>
-        void HideHighlight();
+        void DisableHighlight();
 
 
     }

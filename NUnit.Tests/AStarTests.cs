@@ -272,7 +272,7 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
-            public void HideHighlight() {
+            public void DisableHighlight() {
                 throw new NotImplementedException();
             }
 

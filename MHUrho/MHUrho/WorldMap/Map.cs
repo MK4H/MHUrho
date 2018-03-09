@@ -563,8 +563,32 @@ namespace MHUrho.WorldMap
             }
         }
 
-        public ITile Raycast(RayQueryResult rayQueryResult) {
-            return graphics.HandleRaycast(rayQueryResult);
+        public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) {
+            return graphics.RaycastToTile(rayQueryResults);
+        }
+
+        /// <summary>
+        /// Gets the position of the closest tile corner to the point clicked
+        /// </summary>
+        /// <param name="rayQueryResult">result of raycast to process</param>
+        /// <returns>Position of the closest tile corner to click or null if the clicked thing was not map</returns>
+        public Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResult) {
+            return graphics.RaycastToVertex(rayQueryResult);
+        }
+
+        /// <summary>
+        /// Gets map matrix coords of the tile corner
+        /// </summary>
+        /// <param name="rayQueryResult"></param>
+        /// <returns></returns>
+        public IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResult) {
+            var cornerPosition = RaycastToVertexPosition(rayQueryResult);
+
+            if (!cornerPosition.HasValue) {
+                return null;
+            }
+
+            return new IntVector2((int)cornerPosition.Value.X, (int)cornerPosition.Value.Z);
         }
 
         public void ChangeTileType(ITile tile, TileType newType) {
@@ -662,8 +686,16 @@ namespace MHUrho.WorldMap
             graphics.HighlightArea(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y));
         }
 
-        public void HideHighlight() {
-            graphics.HideHighlight();
+        public void DisableHighlight() {
+            graphics.DisableHighlight();
+        }
+
+        public void HighlightCorner(IntVector2 coords) {
+
+        }
+
+        public void HighlightCorner(Vector3 cornerPosition) {
+
         }
 
         public void Dispose() {

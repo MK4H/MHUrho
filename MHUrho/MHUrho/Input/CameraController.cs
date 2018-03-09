@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 using Urho;
@@ -228,7 +229,7 @@ namespace MHUrho.Input
 
         /// <summary>
         /// Gets a point pointed at by touch or mouse (represented as normalized screen coords) <paramref name="normalizedScreenPos"/> 
-        /// in the plane vertical and ortogonal to camera direction in XZ
+        /// in the vertical plane perpendicular to camera direction in XZ
         /// </summary>
         /// <param name="point">World point in the desired plane</param>
         /// <param name="normalizedScreenPos">Normalized screen position of the input</param>
@@ -239,7 +240,11 @@ namespace MHUrho.Input
             var cameraRay = Camera.GetScreenRay(normalizedScreenPos.X, normalizedScreenPos.Y);
             var hitDist = cameraRay.HitDistance(plane);
 
-            return cameraRay.Origin + cameraRay.Direction * hitDist;
+            var result = cameraRay.Origin + cameraRay.Direction * hitDist;
+
+            Debug.Assert(FloatHelpers.FloatsEqual(result.X, point.X) && FloatHelpers.FloatsEqual(result.Z, point.Z));
+
+            return result;
         }
 
         protected override void OnUpdate(float timeStep) {

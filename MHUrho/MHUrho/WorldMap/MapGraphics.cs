@@ -156,9 +156,23 @@ namespace MHUrho.WorldMap
                 this.mapNode = mapNode;
             }
 
-            public ITile HandleRaycast(RayQueryResult rayQueryResult) {
-                if (rayQueryResult.Node == mapNode) {
-                    return map.GetTile((int)Math.Floor(rayQueryResult.Position.X), (int)Math.Floor(rayQueryResult.Position.Z));
+            public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) {
+                foreach (var rayQueryResult in rayQueryResults) {
+                    if (rayQueryResult.Node == mapNode) {
+                        return map.GetTile((int)Math.Floor(rayQueryResult.Position.X), (int)Math.Floor(rayQueryResult.Position.Z));
+                    }
+                }
+                return null;
+            }
+
+            public Vector3? RaycastToVertex(List<RayQueryResult> rayQueryResults) {
+                foreach (var rayQueryResult in rayQueryResults) {
+                    if (rayQueryResult.Node == mapNode) {
+                        IntVector2 corner = new IntVector2((int) Math.Round(rayQueryResult.Position.X),
+                                                           (int) Math.Round(rayQueryResult.Position.Z));
+                        float height = map.GetHeightAt(corner);
+                        return new Vector3(corner.X, height, corner.Y);
+                    }
                 }
                 return null;
             }
@@ -340,7 +354,7 @@ namespace MHUrho.WorldMap
                 highlight.Commit();
             }
 
-            public void HideHighlight() {
+            public void DisableHighlight() {
                 highlight.Enabled = false;
             }
 

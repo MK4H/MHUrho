@@ -1,12 +1,16 @@
-﻿using MHUrho.Logic;
+﻿using System.Collections.Generic;
+using MHUrho.Logic;
 using MHUrho.Storage;
+using Urho;
 
 namespace MHUrho.Control {
     public interface IPlayer {
         
         int ID { get; }
-        
 
+        void HandleRaycast(RayQueryResult rayQueryResult);
+
+        void HandleRaycast(List<RayQueryResult> rayQueryResults);
 
         /// <summary>
         /// Processes a player click on a unit
