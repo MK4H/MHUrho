@@ -56,6 +56,10 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public void ChangeHeight(float heightDelta) {
+                throw new NotImplementedException();
+            }
+
             #endregion
 
             public IntRect MapArea { get; private set; }

@@ -187,5 +187,14 @@ namespace MHUrho.Logic
             Type = newType;
         }
 
+        /// <summary>
+        /// Called by the Map to change height
+        /// 
+        /// If you want to change height, go through TODO:LINK MAP FUNCTION TO CHANGE TILE HEIGHT
+        /// </summary>
+        /// <param name="heightDelta"></param>
+        public void ChangeHeight(float heightDelta) {
+            Height = heightDelta;
+        }
     } 
 }

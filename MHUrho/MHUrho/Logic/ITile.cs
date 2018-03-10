@@ -50,7 +50,7 @@ namespace MHUrho.Logic
 
         //TODO: Maybe height for every corner
         /// <summary>
-        /// Heigth of the center of the tile
+        /// Heigth of the top left corner of the tile
         /// </summary>
         float Height { get; }
 
@@ -85,5 +85,13 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="newType"></param>
         void ChangeType(TileType newType);
+
+        /// <summary>
+        /// Called by the Map to change height
+        /// 
+        /// If you want to change height, go through TODO:LINK MAP FUNCTION TO CHANGE TILE HEIGHT
+        /// </summary>
+        /// <param name="heightDelta"></param>
+        void ChangeHeight(float heightDelta);
     }
 }

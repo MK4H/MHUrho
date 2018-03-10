@@ -80,13 +80,13 @@ namespace MHUrho.Input
                 if (DoOnlySingleRaycasts) {
                     var raycastResult = octree.RaycastSingle(clickedRay);
                     if (raycastResult.HasValue) {
-                        levelManager.HandleRaycast(Player, raycastResult.Value);
+                        //levelManager.HandleRaycast(Player, raycastResult.Value);
                     }
                 }
                 else {
                     var raycastResults = octree.Raycast(clickedRay);
                     if (raycastResults.Count != 0) {
-                        levelManager.HandleRaycast(Player, raycastResults);
+                        //levelManager.HandleRaycast(Player, raycastResults);
                     }
                 }
             }

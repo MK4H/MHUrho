@@ -81,7 +81,7 @@ namespace MHUrho.WorldMap
                                                  new Vector3(0, 1, 0),
                                                  new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
 
-                    LocalNormals();
+                    CalculateLocalNormals();
                 }
 
                 public static TileInVB InnerTile(ITile[] tiles, int index, int rowSize) {
@@ -105,7 +105,7 @@ namespace MHUrho.WorldMap
                 /// <summary>
                 /// Creates normals just from this tile, disregarding the angle of surrounding tiles
                 /// </summary>
-                private void LocalNormals() {
+                public void CalculateLocalNormals() {
                     TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
                                                    TopRight.Position - TopLeft.Position);
                     TopRight.Normal = Vector3.Cross(TopLeft.Position - TopRight.Position,
@@ -141,7 +141,7 @@ namespace MHUrho.WorldMap
                                             IntVector2 size) {
                 MapGraphics graphics = new MapGraphics(map, mapNode);
                 graphics.CreateMaterial();
-                graphics.CreateModel(tiles, map);
+                graphics.CreateModel(tiles);
 
 
                 StaticModel model = mapNode.CreateComponent<StaticModel>();
@@ -217,12 +217,13 @@ namespace MHUrho.WorldMap
                 }
 
             }
+            
             /// <summary>
             /// Changes corner height of the specified corner of all four neighbouring tiles
             /// </summary>
             /// <param name="cornerPosition">Position of a corner iside a map or on the border of the map</param>
             /// <param name="newHeight">New height of the corner</param>
-            public void ChangeCornerHeight(IntVector2 cornerPosition, float newHeight) {
+            public void ChangeCornerHeightTo(IntVector2 cornerPosition, float newHeight) {
 
                 if (!map.IsInside(cornerPosition)) {
                     throw new ArgumentException("argument is outside of the map", nameof(cornerPosition));
@@ -315,6 +316,25 @@ namespace MHUrho.WorldMap
 
             }
 
+            public void ChangeCornerHeights(List<IntVector2> cornerPositions, float heightDelta) {
+                //TODO: Lock just the needed part
+                IntPtr vbPointer = mapVertexBuffer.Lock(0, (uint)map.tiles.Length * TileInVB.VerticiesPerTile);
+                if (vbPointer == IntPtr.Zero) {
+                    //TODO: Error
+                    throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                }
+
+                unsafe {
+                    TileInVB* basePointer = (TileInVB*)vbPointer.ToPointer();
+
+                    foreach (var corner in cornerPositions) {
+                        ChangeCornerHeight(basePointer, corner, heightDelta);
+                    }
+                }
+
+                mapVertexBuffer.Unlock();
+            }
+
             public void HighlightArea(IntRect rectangle) {
 
                 if (highlight == null) {
@@ -355,7 +375,9 @@ namespace MHUrho.WorldMap
             }
 
             public void DisableHighlight() {
-                highlight.Enabled = false;
+                if (highlight != null) {
+                    highlight.Enabled = false;
+                }
             }
 
             public void Dispose() {
@@ -401,7 +423,7 @@ namespace MHUrho.WorldMap
                 material = Material.FromImage(mapImage);
             }
 
-            private void CreateModel(ITile[] tiles, Map map) {
+            private void CreateModel(ITile[] tiles) {
 
                 //4 verticies for every tile, so that we can map every tile to different texture
                 // and the same tile types to the same textures
@@ -484,6 +506,38 @@ namespace MHUrho.WorldMap
 
                 this.model = model;
                 this.mapVertexBuffer = vb;
+            }
+
+            private unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, IntVector2 cornerPosition, float heightDelta) {
+                ITile topLeftTile, topRightTile, bottomLeftTile, bottomRightTile;
+                TileInVB* topLeftTileInVB, topRightTileInVB, bottomLeftTileInVB, bottomRightTileInVB;
+
+                if ((topLeftTile = map.TileByTopLeftCorner(cornerPosition, true)) != null) {
+                    topLeftTileInVB = (vertexBufferBase + map.GetTileIndex(topLeftTile));
+                    topLeftTileInVB->TopLeft.Position.Y += heightDelta;
+                    topLeftTileInVB->CalculateLocalNormals();
+                }
+
+                if ((topRightTile = map.TileByTopRightCorner(cornerPosition, true)) != null) {
+                    topRightTileInVB = (vertexBufferBase + map.GetTileIndex(topRightTile));
+                    topRightTileInVB->TopRight.Position.Y += heightDelta;
+                    topRightTileInVB->CalculateLocalNormals();
+                }
+
+                if ((bottomLeftTile = map.TileByBottomLeftCorner(cornerPosition, true)) != null) {
+                    bottomLeftTileInVB = (vertexBufferBase + map.GetTileIndex(bottomLeftTile));
+                    bottomLeftTileInVB->BottomLeft.Position.Y += heightDelta;
+                    bottomLeftTileInVB->CalculateLocalNormals();
+                }
+
+                if ((bottomRightTile = map.TileByBottomRightCorner(cornerPosition, true)) != null) {
+                    bottomRightTileInVB = (vertexBufferBase + map.GetTileIndex(bottomRightTile));
+                    bottomRightTileInVB->BottomRight.Position.Y += heightDelta;
+                    bottomRightTileInVB->CalculateLocalNormals();
+                }
+
+                //TODO: Correct smooth normals
+                //Needs to be done after all the heights are changed and all local normals recalculated
             }
 
         }

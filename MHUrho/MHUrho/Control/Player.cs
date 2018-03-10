@@ -144,10 +144,10 @@ namespace MHUrho.Control
                     throw new ArgumentOutOfRangeException();
             }
 
-            var clickedTile = level.Map.RaycastToTile(rayQueryResult);
-            if (clickedTile != null) {
-                Click(clickedTile);
-            }
+            //var clickedTile = level.Map.RaycastToTile(rayQueryResult);
+            //if (clickedTile != null) {
+            //    Click(clickedTile);
+            //}
 
         }
 
@@ -185,24 +185,24 @@ namespace MHUrho.Control
         /// <param name="tile">The tile clicked</param>
         public void Click(ITile tile)
         {
-            switch (Selected.Type) {
-                case State.None:
-                    break;
-                case State.TileTypes:
-                    //level.Map.ChangeTileType(tile, (TileType) UISelected);
-                    level.Map.ChangeTileType(tile, (TileType)UISelected, new IntVector2(3, 3));
-                    break;
-                case State.Buildings:
-                    break;
-                case State.Units:
-                    break;
-                case State.HeightVertex:
-                    break;
-                case State.HeightSelection:
-                    break;
-                default:
-                    throw new NotImplementedException("Given state is not implemented");
-            }
+            //switch (Selected.Type) {
+            //    case State.None:
+            //        break;
+            //    case State.TileTypes:
+            //        //level.Map.ChangeTileType(tile, (TileType) UISelected);
+            //        level.Map.ChangeTileType(tile, (TileType)UISelected, new IntVector2(3, 3));
+            //        break;
+            //    case State.Buildings:
+            //        break;
+            //    case State.Units:
+            //        break;
+            //    case State.HeightVertex:
+            //        break;
+            //    case State.HeightSelection:
+            //        break;
+            //    default:
+            //        throw new NotImplementedException("Given state is not implemented");
+            //}
 
             //if (typeOfSelected == SelectedType.None)
             //{
@@ -217,8 +217,8 @@ namespace MHUrho.Control
         }
 
         public void UISelect(TileType tileType) {
-            UISelected = tileType;
-            state = State.TileTypes;
+            //UISelected = tileType;
+            //state = State.TileTypes;
         }
 
         public void UISelect(IUnit unit) {
@@ -226,8 +226,8 @@ namespace MHUrho.Control
         }
 
         public void UIDeselect() {
-            UISelected = null;
-            state = State.None;
+            //UISelected = null;
+            //state = State.None;
         }
 
         //public void UISelect(IBuilding building) {
@@ -330,7 +330,7 @@ namespace MHUrho.Control
         /// </summary>
         public void ClearSelected()
         {
-            WorldSelected = null;
+            //WorldSelected = null;
         }
 
         private void MyUnitClick(IUnit unit) {

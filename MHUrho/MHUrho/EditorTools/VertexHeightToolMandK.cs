@@ -8,25 +8,34 @@ using MHUrho.UserInterface;
 using MHUrho.Packaging;
 using MHUrho.Input;
 using MHUrho.Control;
+using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools {
-    class VertexHeightToolMandK : VertexHeightTool, IMandKTool
-    {
+    class VertexHeightToolMandK : VertexHeightTool, IMandKTool {
+        private const float Sensitivity = 0.01f;
+
         private enum Mode { None, Selecting, Moving };
 
         private List<Button> buttons;
         private Mode mode;
         private GameMandKController input;
+        private Map map;
+
+        private List<IntVector2> verticies;
+        private Vector3 mainPoint;
 
 
-        public VertexHeightToolMandK(GameMandKController input) {
+        public VertexHeightToolMandK(GameMandKController input, Map map) {
 
             //var buttonTexture = new Texture2D();
             //buttonTexture.FilterMode = TextureFilterMode.Nearest;
             //buttonTexture.SetNumLevels(1);
             //buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
             //buttonTexture.SetData(tileType.GetImage());
-
+            this.buttons = new List<Button>();
+            this.input = input;
+            this.map = map;
+            this.verticies = new List<IntVector2>();
 
 
             var selectingButton = new Button();
@@ -34,11 +43,11 @@ namespace MHUrho.EditorTools {
             selectingButton.Size = new IntVector2(100, 100);
             selectingButton.HorizontalAlignment = HorizontalAlignment.Center;
             selectingButton.VerticalAlignment = VerticalAlignment.Center;
-            selectingButton.Pressed += SwitchToSelecting;
+            selectingButton.Pressed += SelectingButtonPress;
             selectingButton.FocusMode = FocusMode.ResetFocus;
             selectingButton.MaxSize = new IntVector2(100, 100);
             selectingButton.MinSize = new IntVector2(100, 100);
-            selectingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamaring.png");
+            selectingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
             buttons.Add(selectingButton);
 
@@ -47,29 +56,123 @@ namespace MHUrho.EditorTools {
             movingButton.Size = new IntVector2(100, 100);
             movingButton.HorizontalAlignment = HorizontalAlignment.Center;
             movingButton.VerticalAlignment = VerticalAlignment.Center;
-            movingButton.Pressed += SwitchToMoving;
+            movingButton.Pressed += MovingButtonPress;
             movingButton.FocusMode = FocusMode.ResetFocus;
             movingButton.MaxSize = new IntVector2(100, 100);
             movingButton.MinSize = new IntVector2(100, 100);
-            movingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamaring.png");
+            movingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
             buttons.Add(movingButton);
         }
 
         public void Enable() {
             input.UIManager.SelectionBarShowButtons(buttons);
+            input.RegisterToolAction(9, SwitchToSelectingWithKey);
         }
 
         public void Disable() {
             input.UIManager.SelectionBarClearButtons();
+            input.UnregisterToolAction(9);
+            input.MouseMove -= OnMouseMove;
         }
 
-        private void SwitchToSelecting(PressedEventArgs e) {
-            mode = mode == Mode.Selecting ? Mode.None : Mode.Selecting;
+        private void OnMouseMove(MouseMovedEventArgs e) {
+            if (mode == Mode.Moving) {
+                map.ChangeHeight(verticies, -e.DY * Sensitivity);
+            }
         }
 
-        private void SwitchToMoving(PressedEventArgs e) {
+        private void MouseDownSelect(MouseButtonDownEventArgs e) {
+            var raycastResult = input.CursorRaycast();
+            var vertex = map.RaycastToVertex(raycastResult);
+            if (vertex.HasValue) {
+                //TODO: this is slow, make it faster
+                if (verticies.Contains(vertex.Value)) {
+                    verticies.Remove(vertex.Value);
+                }
+                else {
+                    verticies.Add(vertex.Value);
+                }
+            }
+        }
+
+        private void MouseDownMove(MouseButtonDownEventArgs e) {
+            SwitchFromMoving();
+        }
+
+        private void SelectingButtonPress(PressedEventArgs e) {
+            if (mode != Mode.Selecting) {
+                SwitchToSelecting();
+            }
+            else {
+                SwitchFromSelecting();
+            }
+        }
+
+        private void MovingButtonPress(PressedEventArgs e) {
+            if (mode != Mode.Moving) {
+                SwitchToMoving();
+            }
+            else {
+                SwitchFromMoving();
+            }
+        }
+
+        private void SwitchToSelectingWithKey(int qualifiers) {
+            SwitchToSelecting();
+        }
+
+        private void SwitchToMoving() {
+            switch (mode) {
+                case Mode.None:
+                    break;
+                case Mode.Selecting:
+                    SwitchFromSelecting();
+                    break;
+                case Mode.Moving:
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            input.HideCursor();
+            input.MouseDown += MouseDownMove;
+            input.MouseMove += OnMouseMove;
             mode = mode == Mode.Moving ? Mode.None : Mode.Moving;
+            //TODO: maybe change the index to passing the button itself
+            input.UIManager.SelectButton(1);
+        }
+
+        private void SwitchToSelecting() {
+            switch (mode) {
+                case Mode.None:
+                    break;
+                case Mode.Selecting:
+                    return;
+                case Mode.Moving:
+                    SwitchFromMoving();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            input.ShowCursor();
+            input.MouseDown += MouseDownSelect;
+            mode = mode == Mode.Selecting ? Mode.None : Mode.Selecting;
+            input.UIManager.SelectButton(0);
+        }
+
+        private void SwitchFromMoving() {
+            input.MouseMove -= OnMouseMove;
+            input.MouseDown -= MouseDownMove;
+            input.UIManager.Deselect();
+            input.ShowCursor();
+            mode = Mode.None;
+        }
+
+        private void SwitchFromSelecting() {
+            input.MouseDown -= MouseDownSelect;
+            input.UIManager.Deselect();
+            mode = Mode.None;
         }
     }
 }

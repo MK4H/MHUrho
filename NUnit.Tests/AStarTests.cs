@@ -124,6 +124,11 @@ namespace NUnit.Tests {
                 public void ChangeType(TileType newType) {
                     throw new NotImplementedException();
                 }
+
+                public void ChangeHeight(float heightDelta) {
+                    throw new NotImplementedException();
+                }
+
                 #endregion
 
                 public IntVector2 Location { get; private set; }
@@ -187,6 +192,11 @@ namespace NUnit.Tests {
                 public void ChangeType(TileType newType) {
                     throw new NotImplementedException();
                 }
+
+                public void ChangeHeight(float heightDelta) {
+                    throw new NotImplementedException();
+                }
+
                 #endregion
 
                 public IntVector2 Location { get; private set; }

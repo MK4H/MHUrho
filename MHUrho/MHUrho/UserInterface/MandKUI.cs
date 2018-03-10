@@ -48,7 +48,8 @@ namespace MHUrho.UserInterface
         }
 
         public void Dispose() {
-            DisableUI();
+            ClearDelegates();
+            inputCtl.Tool.Disable();
             selectionBar.RemoveAllChildren();
             selectionBar.Remove();
             selectionBar.Dispose();
@@ -57,29 +58,11 @@ namespace MHUrho.UserInterface
 
 
         public void EnableUI() {
-            selectionBar.HoverBegin += UIHoverBegin;
-            selectionBar.HoverEnd += UIHoverEnd;
-
-            foreach (Button button in selectionBar.Children) {
-                button.HoverBegin += Button_HoverBegin;
-                button.HoverBegin += UIHoverBegin;
-                button.HoverEnd += Button_HoverEnd;
-                button.HoverEnd += UIHoverEnd;
-                button.Pressed += Button_Pressed;
-            }
+            selectionBar.Enabled = true;
         }
 
         public void DisableUI() {
-            selectionBar.HoverBegin -= UIHoverBegin;
-            selectionBar.HoverEnd -= UIHoverEnd;
-
-            foreach (Button button in selectionBar.Children) {
-                button.HoverBegin -= Button_HoverBegin;
-                button.HoverBegin -= UIHoverBegin;
-                button.HoverEnd -= Button_HoverEnd;
-                button.HoverEnd -= UIHoverEnd;
-                button.Pressed -= Button_Pressed;
-            }
+            selectionBar.Enabled = false;
         }
 
         public void HideUI() {
@@ -96,7 +79,6 @@ namespace MHUrho.UserInterface
 
             foreach (var button in buttons) {
                 selectionBar.AddChild(button);
-                button.Pressed += Button_Pressed;
                 button.HoverBegin += Button_HoverBegin;
                 button.HoverBegin += UIHoverBegin;
                 button.HoverEnd += Button_HoverEnd;
@@ -108,7 +90,6 @@ namespace MHUrho.UserInterface
             selected = null;
 
             foreach (Button button in selectionBar.Children) {
-                button.Pressed -= Button_Pressed;
                 button.HoverBegin -= Button_HoverBegin;
                 button.HoverBegin -= UIHoverBegin;
                 button.HoverEnd -= Button_HoverEnd;
@@ -118,17 +99,15 @@ namespace MHUrho.UserInterface
             selectionBar.RemoveAllChildren();
         }
 
-        private void Button_Pressed(PressedEventArgs e) {
+        public void Deselect() {
+            selected.SetColor(Color.White);
+            selected = null;
+        }
+
+        public void SelectButton(int index) {
             selected?.SetColor(Color.White);
-            e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
-            if (selected != e.Element) {
-                selected = e.Element;
-                e.Element.SetColor(Color.Gray);
-                //player.UISelect(tileTypeButtons[selected]);
-            }
-            else {
-                selected = null;
-            }
+            selected = selectionBar.GetChild((uint) index);
+            selected.SetColor(Color.Gray);
         }
 
         private void Button_HoverBegin(HoverBeginEventArgs e) {
@@ -156,6 +135,18 @@ namespace MHUrho.UserInterface
             }
 
             Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
+        }
+
+        private void ClearDelegates() {
+            selectionBar.HoverBegin -= UIHoverBegin;
+            selectionBar.HoverEnd -= UIHoverEnd;
+
+            foreach (UIElement button in selectionBar.Children) {
+                button.HoverBegin -= Button_HoverBegin;
+                button.HoverBegin -= UIHoverBegin;
+                button.HoverEnd -= Button_HoverEnd;
+                button.HoverEnd -= UIHoverEnd;
+            }
         }
 
     }

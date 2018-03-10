@@ -5,7 +5,7 @@ using MHUrho.UserInterface;
 
 namespace MHUrho.EditorTools
 {
-    interface IMandKTool {
+    public interface IMandKTool {
         void Enable();
 
         void Disable();

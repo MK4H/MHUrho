@@ -93,6 +93,10 @@ namespace MHUrho.WorldMap
                 Type = newType;
             }
 
+            public void ChangeHeight(float heightDelta) {
+                Height += heightDelta;
+            }
+
             public BorderTile(StBorderTile stBorderTile, Map map) {
                 this.storage = stBorderTile;
                 this.MapArea = new IntRect(stBorderTile.Position.X, stBorderTile.Position.Y, stBorderTile.Position.X + 1, stBorderTile.Position.Y + 1);
@@ -168,6 +172,14 @@ namespace MHUrho.WorldMap
         /// Length of the whole map with the borders included
         /// </summary>
         private int LengthWithBorders => Length + 2;
+
+        private int LeftWithBorders => Left - 1;
+
+        private int RightWithBorders => Right + 1;
+
+        private int TopWithBorders => Top - 1;
+
+        private int BottomWithBorders => Bottom + 1;
 
         /// <summary>
         /// Creates default map at height 0 with all tiles with the default type
@@ -331,7 +343,7 @@ namespace MHUrho.WorldMap
         }
 
         /// <summary>
-        /// Checks if the point is inside the map, which means it could be used for indexing into the map
+        /// Checks if the point is inside the playfield, which means it could be used for indexing into the map
         /// </summary>
         /// <param name="point">the point to check</param>
         /// <returns>True if it is inside, False if not</returns>
@@ -690,12 +702,45 @@ namespace MHUrho.WorldMap
             graphics.DisableHighlight();
         }
 
-        public void HighlightCorner(IntVector2 coords) {
+        public void ChangeHeight(List<IntVector2> tileCorners, float heightDelta) {
 
+            foreach (var tileCorner in tileCorners) {
+                if (!IsBorderCorner(tileCorner)) {
+                    //Just need to change one value in the tile with this corner as topLeft corner
+                    ITile tile = GetTile(tileCorner);
+
+                    Debug.Assert(tile != null, "tile corner was in the list while being outside the map");
+                    tile?.ChangeHeight(heightDelta);
+                }
+                else {
+                  
+                    ITile tile = TileByBottomRightCorner(tileCorner, true);
+                    if (tile != null && IsBorder(tile)) {
+                        ((BorderTile) tile).BotRightHeight += heightDelta;
+                    }
+
+                    tile = TileByBottomLeftCorner(tileCorner, true);
+                    if (tile != null && IsBorder(tile)) {
+                        ((BorderTile) tile).BotLeftHeight += heightDelta;
+                    }
+
+                    tile = TileByTopRightCorner(tileCorner, true);
+                    if (tile != null && IsBorder(tile)) {
+                        ((BorderTile)tile).TopRightHeight += heightDelta;
+                    }
+
+                    tile = TileByTopLeftCorner(tileCorner, true);
+                    //Because normal tiles contain height of their top left corner, we can just use 
+                    // the default changeHeight method
+                    tile?.ChangeHeight(heightDelta);
+                }
+            }
+
+            graphics.ChangeCornerHeights(tileCorners, heightDelta);
         }
 
-        public void HighlightCorner(Vector3 cornerPosition) {
-
+        public void ChangeHeightTo(List<IntVector2> tileCorners, float newHeight) {
+            throw new NotImplementedException();
         }
 
         public void Dispose() {
@@ -716,6 +761,10 @@ namespace MHUrho.WorldMap
 
         private int GetTileIndex(IntVector2 location) {
             return GetTileIndex(location.X, location.Y);
+        }
+
+        private int GetTileIndex(ITile tile) {
+            return GetTileIndex(tile.Location);
         }
 
         private void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
@@ -740,6 +789,10 @@ namespace MHUrho.WorldMap
 
         private bool IsBorder(IntVector2 location) {
             return IsBorder(location.X, location.Y);
+        }
+
+        private bool IsBorder(ITile tile) {
+            return IsBorder(tile.Location);
         }
 
         private BorderType GetBorderType(int x, int y) {
@@ -809,6 +862,46 @@ namespace MHUrho.WorldMap
 
         private bool IsRightBorder(IntVector2 location) {
             return IsRightBorder(location.X, location.Y);
+        }
+
+        private ITile GetTileWithBorders(IntVector2 coords) {
+            if (LeftWithBorders <= coords.X &&
+                coords.X <= RightWithBorders &&
+                TopWithBorders <= coords.Y &&
+                coords.Y <= BottomWithBorders) {
+
+                return tiles[GetTileIndex(coords)];
+            }
+            return null;
+        }
+
+        private ITile TileByTopLeftCorner(IntVector2 topLeftCorner, bool withBorders) {
+            return withBorders ? GetTileWithBorders(topLeftCorner) : GetTile(topLeftCorner);
+        }
+
+        private ITile TileByTopRightCorner(IntVector2 topRightCorner, bool withBorders) {
+            IntVector2 topLeft = topRightCorner + new IntVector2(-1, 0);
+            return withBorders ? GetTileWithBorders(topLeft) : GetTile(topLeft);
+        }
+
+        private ITile TileByBottomLeftCorner(IntVector2 bottomLeftCorner, bool withBorders) {
+            IntVector2 topLeft = bottomLeftCorner + new IntVector2(0, -1);
+            return withBorders ? GetTileWithBorders(topLeft) : GetTile(topLeft);
+        }
+        private ITile TileByBottomRightCorner(IntVector2 bottomRightCorner, bool withBorders) {
+            IntVector2 topLeft = bottomRightCorner + new IntVector2(-1, -1);
+            return withBorders ? GetTileWithBorders(topLeft) : GetTile(topLeft);
+        }
+
+        private bool IsBorderCorner(int x, int y) {
+            return (LeftWithBorders <= x && x <= Left) ||
+                   (Right <= x && x <= RightWithBorders) ||
+                   (TopWithBorders <= y && y <= TopWithBorders) ||
+                   (BottomWithBorders <= y && y <= BottomWithBorders);
+        }
+
+        private bool IsBorderCorner(IntVector2 corner) {
+            return IsBorderCorner(corner.X, corner.Y);
         }
 
     }
