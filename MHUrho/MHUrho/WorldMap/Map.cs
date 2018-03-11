@@ -743,6 +743,12 @@ namespace MHUrho.WorldMap
             throw new NotImplementedException();
         }
 
+        public ITile GetContainingTile(Vector3 point) {
+            int topLeftX = (int)Math.Floor(point.X);
+            int topLeftZ = (int)Math.Floor(point.Z);
+            return GetTile(topLeftX, topLeftZ);
+        }
+
         public void Dispose() {
             ((IDisposable) graphics).Dispose();
             node.Dispose();
@@ -896,7 +902,7 @@ namespace MHUrho.WorldMap
         private bool IsBorderCorner(int x, int y) {
             return (LeftWithBorders <= x && x <= Left) ||
                    (Right <= x && x <= RightWithBorders) ||
-                   (TopWithBorders <= y && y <= TopWithBorders) ||
+                   (TopWithBorders <= y && y <= Top) ||
                    (BottomWithBorders <= y && y <= BottomWithBorders);
         }
 

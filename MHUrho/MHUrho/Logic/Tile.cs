@@ -194,7 +194,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="heightDelta"></param>
         public void ChangeHeight(float heightDelta) {
-            Height = heightDelta;
+            Height += heightDelta;
         }
     } 
 }

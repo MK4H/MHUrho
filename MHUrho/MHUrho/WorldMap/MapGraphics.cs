@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -123,6 +124,55 @@ namespace MHUrho.WorldMap
             }
 
 
+            private class CornerTiles : IEnumerable<ITile>,IEnumerator<ITile> {
+                public ITile TopLeft;
+                public ITile TopRight;
+                public ITile BottomLeft;
+                public ITile BottomRight;
+
+                private int state = -1;
+
+                public IEnumerator<ITile> GetEnumerator() {
+                    state = 0;
+                    return this;
+                }
+
+                IEnumerator IEnumerable.GetEnumerator() {
+                    return GetEnumerator();
+                }
+
+                public bool MoveNext() {
+                    do {
+                        ++state;
+                    } while (state < 4 && Current == null);
+
+                    return state < 4;
+                }
+
+                public void Reset() {
+                    state = -1;
+                }
+
+                public ITile Current {
+                    get {
+                        switch (state) {
+                            case 0: return TopLeft;
+                            case 1: return TopRight;
+                            case 2: return BottomLeft;
+                            case 3: return BottomRight;
+                            default:
+                                throw new InvalidOperationException("Current with invalid state");
+                        }
+                    }
+                }
+
+                object IEnumerator.Current => Current;
+
+                public void Dispose() {
+
+                }
+            }
+
             private Model model;
             private VertexBuffer mapVertexBuffer;
 
@@ -178,7 +228,7 @@ namespace MHUrho.WorldMap
             }
 
             public void ChangeTileType(IntVector2 location, TileType newTileType) {
-                ChangeTileType(location, location,newTileType);
+                ChangeTileType(location, location, newTileType);
             }
 
             /// <summary>
@@ -190,7 +240,7 @@ namespace MHUrho.WorldMap
             public void ChangeTileType(IntVector2 topLeft, IntVector2 bottomRight, TileType newTileType) {
                 //+ [1,1] because i want to change the bottomRight tile to
                 // example TL[1,1], BR[3,3], BT-TL = [2,2],but really i want to change 3 by 3
-                IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);  
+                IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);
                 for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
                     int startTileIndex = map.GetTileIndex(topLeft.X, y);
                     uint start = (uint)startTileIndex * TileInVB.VerticiesPerTile;
@@ -217,104 +267,6 @@ namespace MHUrho.WorldMap
                 }
 
             }
-            
-            /// <summary>
-            /// Changes corner height of the specified corner of all four neighbouring tiles
-            /// </summary>
-            /// <param name="cornerPosition">Position of a corner iside a map or on the border of the map</param>
-            /// <param name="newHeight">New height of the corner</param>
-            public void ChangeCornerHeightTo(IntVector2 cornerPosition, float newHeight) {
-
-                if (!map.IsInside(cornerPosition)) {
-                    throw new ArgumentException("argument is outside of the map", nameof(cornerPosition));
-                }
-
-                if (map.IsInside(cornerPosition.X - 1, cornerPosition.Y - 1)) {
-                    //Everything is inside
-                    int start = map.GetTileIndex(cornerPosition.X - 1, cornerPosition.Y - 1) * TileInVB.VerticiesPerTile;
-
-
-                    {
-                        //TODO: Maybe lock the whole needed part at once
-                        //First two tiles, changing bottomRight corner and bottomLeft corner
-                        IntPtr vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
-                        if (vbPointer == IntPtr.Zero) {
-                            //TODO: Error
-                            throw new Exception("Could not lock tile vertex buffer position to memory to change it");
-                        }
-
-                        unsafe {
-                            //TODO: Recalculate normals
-                            TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-                            tileInVertexBuffer->BottomRight.Position.Y = newHeight;
-                            tileInVertexBuffer++;
-                            tileInVertexBuffer->BottomLeft.Position.Y = newHeight;
-                        }
-
-                        mapVertexBuffer.Unlock();
-                        start = map.GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
-
-                        vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
-                        if (vbPointer == IntPtr.Zero) {
-                            //TODO: Error
-                            throw new Exception("Could not lock tile vertex buffer position to memory to change it");
-                        }
-
-                        unsafe {
-                            //TODO: Recalculate normals
-                            TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-                            tileInVertexBuffer->TopRight.Position.Y = newHeight;
-                            tileInVertexBuffer++;
-                            tileInVertexBuffer->TopLeft.Position.Y = newHeight;
-                        }
-
-                        mapVertexBuffer.Unlock();
-                    }
-                }
-                else if (map.IsInside(cornerPosition.X, cornerPosition.Y - 1)) {
-                    //We are changing left border
-                    {
-                        //Lock just one tile
-                        int start = map.GetTileIndex(cornerPosition.X, cornerPosition.Y - 1);
-                        IntPtr vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile);
-                        if (vbPointer == IntPtr.Zero) {
-                            //TODO: Error
-                            throw new Exception("Could not lock tile vertex buffer position to memory to change it");
-                        }
-
-                        unsafe {
-                            //TODO: Recalculate normals
-                            TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-                            tileInVertexBuffer->BottomRight.Position.Y = newHeight;
-                            tileInVertexBuffer++;
-                            tileInVertexBuffer->BottomLeft.Position.Y = newHeight;
-                        }
-
-                        mapVertexBuffer.Unlock();
-                        start = map.GetTileIndex(cornerPosition.X - 1, cornerPosition.Y);
-
-                        vbPointer = mapVertexBuffer.Lock((uint)start, TileInVB.VerticiesPerTile * 2);
-                        if (vbPointer == IntPtr.Zero) {
-                            //TODO: Error
-                            throw new Exception("Could not lock tile vertex buffer position to memory to change it");
-                        }
-
-                        unsafe {
-                            //TODO: Recalculate normals
-                            TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-                            tileInVertexBuffer->TopRight.Position.Y = newHeight;
-                            tileInVertexBuffer++;
-                            tileInVertexBuffer->TopLeft.Position.Y = newHeight;
-                        }
-
-                        mapVertexBuffer.Unlock();
-                    }
-                }
-
-
-
-
-            }
 
             public void ChangeCornerHeights(List<IntVector2> cornerPositions, float heightDelta) {
                 //TODO: Lock just the needed part
@@ -327,9 +279,30 @@ namespace MHUrho.WorldMap
                 unsafe {
                     TileInVB* basePointer = (TileInVB*)vbPointer.ToPointer();
 
+                    List<CornerTiles> changedCorners = new List<CornerTiles>(cornerPositions.Count); 
+
                     foreach (var corner in cornerPositions) {
-                        ChangeCornerHeight(basePointer, corner, heightDelta);
+                        ChangeCornerHeight(basePointer, corner, heightDelta, changedCorners);
                     }
+
+                    foreach (var changedCorner in changedCorners) {
+                        foreach (var tile in changedCorner) {
+                            var vbTile = basePointer + map.GetTileIndex(tile);
+                            vbTile->CalculateLocalNormals();
+                        }
+                        
+                    }
+
+                    //Smoothing normals, probably redo a little
+                    //foreach (var changedCorner in changedCorners) {
+                    //    foreach (var tile in changedCorner) {
+                    //        //For all 4 corners of the tile, because their normals could have changed
+                    //        CalculateSmoothNormals(basePointer, tile.Location);
+                    //        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(1, 0));
+                    //        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(0, 1));
+                    //        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(1, 1));
+                    //    }
+                    //}
                 }
 
                 mapVertexBuffer.Unlock();
@@ -508,38 +481,67 @@ namespace MHUrho.WorldMap
                 this.mapVertexBuffer = vb;
             }
 
-            private unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, IntVector2 cornerPosition, float heightDelta) {
-                ITile topLeftTile, topRightTile, bottomLeftTile, bottomRightTile;
-                TileInVB* topLeftTileInVB, topRightTileInVB, bottomLeftTileInVB, bottomRightTileInVB;
+            private unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, 
+                                                   IntVector2 cornerPosition, 
+                                                   float heightDelta, 
+                                                   List<CornerTiles> changedCorners) {
 
-                if ((topLeftTile = map.TileByTopLeftCorner(cornerPosition, true)) != null) {
-                    topLeftTileInVB = (vertexBufferBase + map.GetTileIndex(topLeftTile));
+                CornerTiles cornerTiles = new CornerTiles();
+
+                if ((cornerTiles.TopLeft = map.TileByTopLeftCorner(cornerPosition, true)) != null) {
+                    var topLeftTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.TopLeft));
                     topLeftTileInVB->TopLeft.Position.Y += heightDelta;
-                    topLeftTileInVB->CalculateLocalNormals();
                 }
 
-                if ((topRightTile = map.TileByTopRightCorner(cornerPosition, true)) != null) {
-                    topRightTileInVB = (vertexBufferBase + map.GetTileIndex(topRightTile));
+                if ((cornerTiles.TopRight = map.TileByTopRightCorner(cornerPosition, true)) != null) {
+                    var topRightTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.TopRight));
                     topRightTileInVB->TopRight.Position.Y += heightDelta;
-                    topRightTileInVB->CalculateLocalNormals();
                 }
 
-                if ((bottomLeftTile = map.TileByBottomLeftCorner(cornerPosition, true)) != null) {
-                    bottomLeftTileInVB = (vertexBufferBase + map.GetTileIndex(bottomLeftTile));
+                if ((cornerTiles.BottomLeft = map.TileByBottomLeftCorner(cornerPosition, true)) != null) {
+                    var bottomLeftTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.BottomLeft));
                     bottomLeftTileInVB->BottomLeft.Position.Y += heightDelta;
-                    bottomLeftTileInVB->CalculateLocalNormals();
                 }
 
-                if ((bottomRightTile = map.TileByBottomRightCorner(cornerPosition, true)) != null) {
-                    bottomRightTileInVB = (vertexBufferBase + map.GetTileIndex(bottomRightTile));
+                if ((cornerTiles.BottomRight = map.TileByBottomRightCorner(cornerPosition, true)) != null) {
+                    var bottomRightTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.BottomRight));
                     bottomRightTileInVB->BottomRight.Position.Y += heightDelta;
-                    bottomRightTileInVB->CalculateLocalNormals();
                 }
 
-                //TODO: Correct smooth normals
-                //Needs to be done after all the heights are changed and all local normals recalculated
+                changedCorners.Add(cornerTiles);
             }
 
+
+            private unsafe void CalculateSmoothNormals(TileInVB* vertexBufferBase, IntVector2 corner) {
+                ITile tile;
+                TileInVB* topLeftTile = null, topRightTile = null, bottomLeftTile = null, bottomRightTile = null;
+                Vector3 normal = new Vector3();
+                if ((tile = map.TileByTopLeftCorner(corner, true)) != null) {
+                    topLeftTile = (vertexBufferBase + map.GetTileIndex(tile));
+                    normal += topLeftTile->TopLeft.Normal;
+                }
+
+                if ((tile = map.TileByTopRightCorner(corner, true)) != null) {
+                    topRightTile = (vertexBufferBase + map.GetTileIndex(tile));
+                    normal += topRightTile->TopRight.Normal;
+                }
+
+                if ((tile = map.TileByBottomLeftCorner(corner, true)) != null) {
+                    bottomLeftTile = (vertexBufferBase + map.GetTileIndex(tile));
+                    normal += bottomLeftTile->BottomLeft.Normal;
+                }
+
+                if ((tile = map.TileByBottomRightCorner(corner, true)) != null) {
+                    bottomRightTile = (vertexBufferBase + map.GetTileIndex(tile));
+                    normal += bottomRightTile->BottomRight.Normal;
+                }
+
+                normal.Normalize();
+                if (topLeftTile != null) topLeftTile->TopLeft.Normal = normal;
+                if (topRightTile != null) topRightTile->TopRight.Normal = normal;
+                if (bottomLeftTile != null) bottomLeftTile->BottomLeft.Normal = normal;
+                if (bottomRightTile != null) bottomRightTile->BottomRight.Normal = normal;
+            }
         }
 
     }

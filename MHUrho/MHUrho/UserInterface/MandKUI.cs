@@ -73,7 +73,7 @@ namespace MHUrho.UserInterface
             selectionBar.Visible = true;
         }
 
-        public void SelectionBarShowButtons(List<Button> buttons) {
+        public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
             //Clear selection bar
             selectionBar.RemoveAllChildren();
 
@@ -104,9 +104,9 @@ namespace MHUrho.UserInterface
             selected = null;
         }
 
-        public void SelectButton(int index) {
+        public void SelectButton(Button button) {
             selected?.SetColor(Color.White);
-            selected = selectionBar.GetChild((uint) index);
+            selected = button;
             selected.SetColor(Color.Gray);
         }
 

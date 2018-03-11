@@ -109,7 +109,8 @@ namespace MHUrho.Input
 
             Enable();
 
-            this.Tool = new VertexHeightToolMandK(this, levelManager.Map);
+            //this.Tool = new VertexHeightToolMandK(this, levelManager.Map);
+            this.Tool = new TileTypeToolMandK(this, levelManager.Map);
             Tool.Enable();
 
             //TODO: Create some toggling for drawing highlight

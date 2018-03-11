@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace MHUrho.EditorTools {
-    class VertexHeightTool : Tool
+    abstract class VertexHeightTool : Tool
     {
 
     }

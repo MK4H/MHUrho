@@ -76,6 +76,13 @@ namespace MHUrho.EditorTools {
             input.MouseMove -= OnMouseMove;
         }
 
+        public override void Dispose() {
+            Disable();
+            foreach (var button in buttons) {
+                button.Dispose();
+            }
+        }
+
         private void OnMouseMove(MouseMovedEventArgs e) {
             if (mode == Mode.Moving) {
                 map.ChangeHeight(verticies, -e.DY * Sensitivity);
@@ -139,7 +146,7 @@ namespace MHUrho.EditorTools {
             input.MouseMove += OnMouseMove;
             mode = mode == Mode.Moving ? Mode.None : Mode.Moving;
             //TODO: maybe change the index to passing the button itself
-            input.UIManager.SelectButton(1);
+            input.UIManager.SelectButton(buttons[1]);
         }
 
         private void SwitchToSelecting() {
@@ -158,7 +165,7 @@ namespace MHUrho.EditorTools {
             input.ShowCursor();
             input.MouseDown += MouseDownSelect;
             mode = mode == Mode.Selecting ? Mode.None : Mode.Selecting;
-            input.UIManager.SelectButton(0);
+            input.UIManager.SelectButton(buttons[0]);
         }
 
         private void SwitchFromMoving() {
