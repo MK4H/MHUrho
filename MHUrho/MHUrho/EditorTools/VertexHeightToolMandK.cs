@@ -24,6 +24,7 @@ namespace MHUrho.EditorTools {
         private List<IntVector2> verticies;
         private Vector3 mainPoint;
 
+        private bool enabled;
 
         public VertexHeightToolMandK(GameMandKController input, Map map) {
 
@@ -48,6 +49,7 @@ namespace MHUrho.EditorTools {
             selectingButton.MaxSize = new IntVector2(100, 100);
             selectingButton.MinSize = new IntVector2(100, 100);
             selectingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+            selectingButton.Visible = false;
 
             buttons.Add(selectingButton);
 
@@ -61,19 +63,26 @@ namespace MHUrho.EditorTools {
             movingButton.MaxSize = new IntVector2(100, 100);
             movingButton.MinSize = new IntVector2(100, 100);
             movingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+            selectingButton.Visible = false;
 
             buttons.Add(movingButton);
         }
 
         public void Enable() {
+            if (enabled) return;
+
             input.UIManager.SelectionBarShowButtons(buttons);
             input.RegisterToolAction(9, SwitchToSelectingWithKey);
+            enabled = true;
         }
 
         public void Disable() {
+            if (!enabled) return;
+
             input.UIManager.SelectionBarClearButtons();
             input.UnregisterToolAction(9);
             input.MouseMove -= OnMouseMove;
+            enabled = false;
         }
 
         public override void Dispose() {

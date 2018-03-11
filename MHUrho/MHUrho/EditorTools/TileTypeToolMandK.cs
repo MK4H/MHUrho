@@ -16,14 +16,20 @@ namespace MHUrho.EditorTools
 
         private GameMandKController input;
         private Map map;
+        private StaticRectangleToolMandK highlight;
 
         private Button selected;
+        private ITile centerTile;
+
+        private bool mouseButtonDown;
+        private bool enabled;
 
         public TileTypeToolMandK(GameMandKController input, Map map) {
 
             this.input = input;
             this.map = map;
             this.tileTypeButtons = new Dictionary<Button, TileType>();
+            this.highlight = new StaticRectangleToolMandK(input, map, new IntVector2(3,3));
 
             foreach (var tileType in PackageManager.Instance.TileTypes) {
                 var tileImage = tileType.GetImage().ConvertToRGBA();
@@ -52,12 +58,25 @@ namespace MHUrho.EditorTools
         }
 
         public void Enable() {
+            if (enabled) return;
+
+
+            highlight.Enable();
             input.UIManager.SelectionBarShowButtons(tileTypeButtons.Keys);
+            enabled = true;
         }
 
         public void Disable() {
+            if (!enabled) return;
+
+
+            highlight.Disable();
             input.UIManager.SelectionBarClearButtons();
             input.MouseDown -= OnMouseDown;
+            input.MouseUp -= OnMouseUp;
+            input.MouseMove -= OnMouseMove;
+            enabled = false;
+            
         }
 
         public override void Dispose() {
@@ -75,21 +94,41 @@ namespace MHUrho.EditorTools
                 input.UIManager.Deselect();
                 selected = null;
                 input.MouseDown -= OnMouseDown;
+                input.MouseUp -= OnMouseUp;
+                input.MouseMove -= OnMouseMove;
             }
             else {
                 input.UIManager.SelectButton((Button)e.Element);
                 selected = (Button)e.Element;
                 input.MouseDown += OnMouseDown;
+                input.MouseUp += OnMouseUp;
+                input.MouseMove += OnMouseMove;
             }
         }
 
         private void OnMouseDown(MouseButtonDownEventArgs e) {
             if (selected != null) {
-                var raycast = input.CursorRaycast();
-                var tile = map.RaycastToTile(raycast);
+                centerTile = input.GetTileUnderCursor();
                 //TODO: Rectangle
-                if (tile != null) {
-                    map.ChangeTileType(tile, tileTypeButtons[selected], new IntVector2(3, 3));
+                if (centerTile != null) {
+                    map.ChangeTileType(centerTile, tileTypeButtons[selected], highlight.Size);
+                }
+                mouseButtonDown = true;
+            }
+        }
+
+        private void OnMouseUp(MouseButtonUpEventArgs e) {
+            if (selected != null) {
+                mouseButtonDown = false;
+            }
+        }
+
+        private void OnMouseMove(MouseMovedEventArgs e) {
+            if (selected != null && mouseButtonDown) {
+                var newCenterTile = input.GetTileUnderCursor();
+                if (newCenterTile != null && newCenterTile != centerTile) {
+                    centerTile = newCenterTile;
+                    map.ChangeTileType(centerTile, tileTypeButtons[selected], new IntVector2(3, 3));
                 }
             }
         }

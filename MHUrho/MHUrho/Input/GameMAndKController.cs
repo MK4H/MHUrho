@@ -69,8 +69,6 @@ namespace MHUrho.Input
 
         public bool UIHovering { get; set; }
 
-        public IMandKTool Tool { get; private set; }
-
         public event OnMouseMove MouseMove;
         public event OnMouseDown MouseDown;
         public event OnMouseUp MouseUp;
@@ -86,11 +84,16 @@ namespace MHUrho.Input
 
         private CameraMovementType cameraType;
 
-        private const float CloseToBorder = 1/20f;
+        private const float CloseToBorder = 1/100f;
 
         private bool mouseInLeftRight;
         private bool mouseInTopBottom;
-        
+
+        /// <summary>
+        /// Is set to null at the end of MouseDown, MouseMove, MouseUp and ViewMoved handlers
+        /// </summary>
+        private ITile cachedTileUnderCursor;
+
         public GameMandKController(MyGame game, LevelManager levelManager, Player player, CameraController cameraController) : base(game) {
             this.CameraScrollSensitivity = 5f;
             this.CameraRotationSensitivity = 15f;
@@ -102,6 +105,8 @@ namespace MHUrho.Input
             this.Player = player;
             this.UIManager = new MandKUI(game, this);
 
+            cameraController.OnFixedMove += OnViewMoved;
+
             FillActionList();
 
             //TODO: Load from config
@@ -109,9 +114,8 @@ namespace MHUrho.Input
 
             Enable();
 
-            //this.Tool = new VertexHeightToolMandK(this, levelManager.Map);
-            this.Tool = new TileTypeToolMandK(this, levelManager.Map);
-            Tool.Enable();
+            UIManager.AddTool(new VertexHeightToolMandK(this, levelManager.Map));
+            UIManager.AddTool(new TileTypeToolMandK(this, levelManager.Map));
 
             //TODO: Create some toggling for drawing highlight
             //cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };
@@ -154,6 +158,20 @@ namespace MHUrho.Input
         /// <returns></returns>
         public Vector3? GetClosestTileCornerPosition() {
             return levelManager.Map.RaycastToVertexPosition(CursorRaycast());
+        }
+
+        /// <summary>
+        /// Gets tile currently under the cursor, is cached for the calls in the same
+        /// handler, so all tools calling this from MouseMove will get the same value,
+        /// calculated on the first call
+        /// </summary>
+        /// <returns>Tile under the cursor</returns>
+        public ITile GetTileUnderCursor() {
+            if (cachedTileUnderCursor != null) {
+                return cachedTileUnderCursor;
+            }
+            var raycast = CursorRaycast();
+            return (cachedTileUnderCursor = levelManager.Map.RaycastToTile(raycast));
         }
 
         public void HideCursor() {
@@ -232,6 +250,7 @@ namespace MHUrho.Input
                 Log.Write(LogLevel.Debug, $"Mouse button down at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
 
                 MouseDown?.Invoke(e);
+                cachedTileUnderCursor = null;
             }   
         }
 
@@ -240,6 +259,7 @@ namespace MHUrho.Input
                 Log.Write(LogLevel.Debug, $"Mouse button up at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
 
                 MouseUp?.Invoke(e);
+                cachedTileUnderCursor = null;
             }
             
         }
@@ -249,11 +269,11 @@ namespace MHUrho.Input
                 cameraController.AddRotation(new Vector2(e.DY, -e.DX) * MouseSensitivity);
             }
             else if (cameraType == CameraMovementType.Fixed) {
-                if (Tool == null) {
-                    MouseBorderMovement(UI.Cursor.Position);
-                }
+
+                MouseBorderMovement(UI.Cursor.Position);
 
                 MouseMove?.Invoke(e);
+                cachedTileUnderCursor = null;
                 //DrawHighlight();
             }
 
@@ -261,6 +281,14 @@ namespace MHUrho.Input
 
         protected override void MouseWheel(MouseWheelEventArgs e) {
 
+        }
+
+        private void OnViewMoved(float timeStep) {
+            //TODO: REDO THIS
+            if (UI.Cursor.Visible) {
+                MouseMove?.Invoke(new MouseMovedEventArgs());
+                cachedTileUnderCursor = null;
+            }
         }
 
         private Ray GetCursorRay() {
