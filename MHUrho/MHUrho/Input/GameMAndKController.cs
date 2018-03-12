@@ -116,6 +116,7 @@ namespace MHUrho.Input
 
             UIManager.AddTool(new VertexHeightToolMandK(this, levelManager.Map));
             UIManager.AddTool(new TileTypeToolMandK(this, levelManager.Map));
+            UIManager.AddTool(new TileHeightToolMandK(this, levelManager.Map));
 
             //TODO: Create some toggling for drawing highlight
             //cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };
@@ -179,7 +180,15 @@ namespace MHUrho.Input
             UI.Cursor.Position = new IntVector2(UI.Root.Width / 2, UI.Root.Height / 2);
         }
 
-        public void ShowCursor() {
+        /// <summary>
+        /// Makes cursor visible
+        /// </summary>
+        /// <param name="abovePoint">world point above which the cursor should show up, or null if does not matter</param>
+        public void ShowCursor(Vector3? abovePoint = null) {
+            if (abovePoint != null) {
+                var screenPoint = cameraController.Camera.WorldToScreenPoint(abovePoint.Value);
+                UI.Cursor.Position = new IntVector2((int)(UI.Root.Width * screenPoint.X), (int)(UI.Root.Height * screenPoint.Y));
+            }
             UI.Cursor.Visible = true;
         }
 

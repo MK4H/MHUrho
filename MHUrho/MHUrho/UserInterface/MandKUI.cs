@@ -47,9 +47,9 @@ namespace MHUrho.UserInterface
             selectionBar.LayoutMode = LayoutMode.Horizontal;
             selectionBar.LayoutSpacing = 10;
             selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
-            selectionBar.Position = new IntVector2(100, UI.Root.Height - 100);
+            selectionBar.Position = new IntVector2(50, UI.Root.Height - 100);
             selectionBar.Height = 100;
-            selectionBar.SetFixedWidth(UI.Root.Width - 100);
+            selectionBar.SetFixedWidth(UI.Root.Width - 50);
             selectionBar.SetColor(Color.Yellow);
             selectionBar.FocusMode = FocusMode.NotFocusable;
             selectionBar.ClipChildren = true;
@@ -58,12 +58,13 @@ namespace MHUrho.UserInterface
 
 
             toolSelection = UI.Root.CreateWindow();
-            toolSelection.LayoutMode = LayoutMode.Horizontal;
+            toolSelection.LayoutMode = LayoutMode.Vertical;
             toolSelection.LayoutSpacing = 0;
             toolSelection.HorizontalAlignment = HorizontalAlignment.Left;
-            toolSelection.Position = new IntVector2(0, UI.Root.Height - 100);
-            toolSelection.Height = 100;
-            toolSelection.SetFixedWidth(100);
+            toolSelection.VerticalAlignment = VerticalAlignment.Bottom;
+            toolSelection.Position = new IntVector2(0, 0);
+            toolSelection.Height = UI.Root.Height;
+            toolSelection.SetFixedWidth(50);
             toolSelection.SetColor(Color.Blue);
             toolSelection.FocusMode = FocusMode.NotFocusable;
             toolSelection.ClipChildren = true;

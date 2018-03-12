@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Input;
+using MHUrho.Logic;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -18,6 +19,8 @@ namespace MHUrho.EditorTools
         private Map map;
 
         private bool enabled;
+
+        private ITile fixedCenter;
 
         public StaticRectangleToolMandK(GameMandKController input, Map map, IntVector2 size) {
             this.input = input;
@@ -45,7 +48,20 @@ namespace MHUrho.EditorTools
             enabled = false;
         }
 
+        public void FixHighlight(ITile centerTile) {
+            fixedCenter = centerTile;
+        }
+
+        public void FreeHighlight() {
+            fixedCenter = null;
+        }
+
         private void OnMouseMove(MouseMovedEventArgs e) {
+            if (fixedCenter != null) {
+                map.HighlightArea(fixedCenter, Size);
+                return;
+            }
+
             var centerTile = input.GetTileUnderCursor();
             if (centerTile != null) {
                 map.HighlightArea(centerTile, Size);

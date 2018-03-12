@@ -268,6 +268,97 @@ namespace MHUrho.WorldMap
 
             }
 
+            public void ChangeTileHeight(IntVector2 topLeft, IntVector2 bottomRight, float heightDelta) {
+                
+                //+ [1,1] because i want to change the bottomRight tile to
+                // example TL[1,1], BR[3,3], BT-TL = [2,2],but really i want to change 3 by 3
+                IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);
+                
+
+                for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+                    int startTileIndex = map.GetTileIndex(topLeft.X, y);
+                    uint start = (uint)startTileIndex * TileInVB.VerticiesPerTile;
+                    uint count = (uint)rectSize.X * TileInVB.VerticiesPerTile;
+
+                    {
+                        IntPtr vbPointer = mapVertexBuffer.Lock(start, count);
+                        if (vbPointer == IntPtr.Zero) {
+                            //TODO: Error
+                            throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                        }
+
+                        unsafe {
+                            TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+
+                            for (int x = topLeft.X; x <= bottomRight.X; x++) {
+
+                                if (x == topLeft.X || x == bottomRight.X || y == topLeft.Y || y == bottomRight.Y) {
+                                    //Is surrounding tile
+                                    if (x == topLeft.X) {
+                                        if (y == topLeft.Y) {
+                                            //Top left corner tile
+                                            tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                        }
+                                        else if (y == bottomRight.Y) {
+                                            //bottom left corner tile
+                                            tileInVertexBuffer->TopRight.Position.Y += heightDelta;
+                                        }
+                                        else {
+                                            //left side tile
+                                            tileInVertexBuffer->TopRight.Position.Y += heightDelta;
+                                            tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                        }
+                                    }
+                                    else if (x == bottomRight.X) {
+                                        if (y == topLeft.Y) {
+                                            //top right corner tile
+                                            tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
+                                        }
+                                        else if (y == bottomRight.Y) {
+                                            //bottom right corner tile
+                                            tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
+                                        }
+                                        else {
+                                            //right side tile
+                                            tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
+                                            tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
+                                        }
+                                    }
+                                    else if (y == topLeft.Y) {
+                                        //top side tile
+                                        tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
+                                        tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                    }
+                                    else if (y == bottomRight.Y) {
+                                        //bottom side tile
+                                        tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
+                                        tileInVertexBuffer->TopRight.Position.Y += heightDelta;
+                                    }
+                                    else {
+                                        //TODO: Exception
+                                        throw new Exception("Implementation error, wrong if condition here");
+                                    }
+                                }
+                                else {
+                                    //inner tile
+                                    tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
+                                    tileInVertexBuffer->TopRight.Position.Y += heightDelta;
+                                    tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
+                                    tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+
+                                }
+
+                                tileInVertexBuffer->CalculateLocalNormals();
+
+                                tileInVertexBuffer++;
+                            }
+                        }
+                    }
+
+                    mapVertexBuffer.Unlock();
+                }
+            }
+
             public void ChangeCornerHeights(List<IntVector2> cornerPositions, float heightDelta) {
                 //TODO: Lock just the needed part
                 IntPtr vbPointer = mapVertexBuffer.Lock(0, (uint)map.tiles.Length * TileInVB.VerticiesPerTile);

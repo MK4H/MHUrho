@@ -118,7 +118,7 @@ namespace MHUrho.EditorTools
                 centerTile = input.GetTileUnderCursor();
                 //TODO: Rectangle
                 if (centerTile != null) {
-                    map.ChangeTileType(centerTile, tileTypeButtons[selected], highlight.Size);
+                    map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
                 }
                 mouseButtonDown = true;
             }
@@ -135,7 +135,7 @@ namespace MHUrho.EditorTools
                 var newCenterTile = input.GetTileUnderCursor();
                 if (newCenterTile != null && newCenterTile != centerTile) {
                     centerTile = newCenterTile;
-                    map.ChangeTileType(centerTile, tileTypeButtons[selected], new IntVector2(3, 3));
+                    map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
                 }
             }
         }
