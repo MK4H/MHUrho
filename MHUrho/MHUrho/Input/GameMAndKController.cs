@@ -95,7 +95,7 @@ namespace MHUrho.Input
         private ITile cachedTileUnderCursor;
 
         public GameMandKController(MyGame game, LevelManager levelManager, Player player, CameraController cameraController) : base(game) {
-            this.CameraScrollSensitivity = 5f;
+            this.CameraScrollSensitivity = 20f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
             this.cameraController = cameraController;

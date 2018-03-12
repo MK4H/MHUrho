@@ -12,6 +12,8 @@ using Urho.Urho2D;
 namespace MHUrho.EditorTools
 {
     class TileTypeToolMandK : TileTypeTool, IMandKTool {
+        public IEnumerable<Button> Buttons => tileTypeButtons.Keys;
+
         private Dictionary<Button, TileType> tileTypeButtons;
 
         private GameMandKController input;
@@ -52,6 +54,7 @@ namespace MHUrho.EditorTools
                 button.FocusMode = FocusMode.ResetFocus;
                 button.MaxSize = new IntVector2(100, 100);
                 button.MinSize = new IntVector2(100, 100);
+                button.Visible = false;
 
                 tileTypeButtons.Add(button, tileType);
             }
@@ -69,6 +72,10 @@ namespace MHUrho.EditorTools
         public void Disable() {
             if (!enabled) return;
 
+            if (selected != null) {
+                input.UIManager.Deselect();
+                selected = null;
+            }
 
             highlight.Disable();
             input.UIManager.SelectionBarClearButtons();

@@ -624,26 +624,24 @@ namespace MHUrho.WorldMap
         //TODO: Handle right and bottom side tiles better
         public float GetHeightAt(int x, int y) {
             ITile tile;
-            if ((tile = GetTile(x,y)) != null) {
+            if ((tile = GetTileWithBorders(x,y)) != null) {
                 return tile.Height;
             }
 
-
-            if (x < 0) {
-                x = 0;
-            }
-            else if (x >= Width) {
-                x = Width - 1;
+            BorderTile bTile;
+            if ((bTile = (BorderTile)TileByTopRightCorner(new IntVector2(x,y), true)) != null) {
+                return bTile.TopRightHeight;
             }
 
-            if (y < 0) {
-                y = 0;
-            }
-            else if (y >= Length) {
-                y = Length - 1;
+            if ((bTile = (BorderTile)TileByBottomLeftCorner(new IntVector2(x, y), true)) != null) {
+                return bTile.BotLeftHeight;
             }
 
-            return GetTile(x, y).Height;
+            if ((bTile = (BorderTile)TileByBottomRightCorner(new IntVector2(x, y), true)) != null) {
+                return bTile.BotRightHeight;
+            }
+
+            throw new ArgumentOutOfRangeException($"Point [{x},{y}] is not inside the map, even with borders");
         }
 
         public float GetHeightAt(IntVector2 position) {
@@ -870,15 +868,19 @@ namespace MHUrho.WorldMap
             return IsRightBorder(location.X, location.Y);
         }
 
-        private ITile GetTileWithBorders(IntVector2 coords) {
-            if (LeftWithBorders <= coords.X &&
-                coords.X <= RightWithBorders &&
-                TopWithBorders <= coords.Y &&
-                coords.Y <= BottomWithBorders) {
+        private ITile GetTileWithBorders(int x, int y) {
+            if (LeftWithBorders <= x &&
+                x <= RightWithBorders &&
+                TopWithBorders <= y &&
+                y <= BottomWithBorders) {
 
-                return tiles[GetTileIndex(coords)];
+                return tiles[GetTileIndex(x,y)];
             }
             return null;
+        }
+
+        private ITile GetTileWithBorders(IntVector2 coords) {
+            return GetTileWithBorders(coords.X, coords.Y);
         }
 
         private ITile TileByTopLeftCorner(IntVector2 topLeftCorner, bool withBorders) {
@@ -901,9 +903,9 @@ namespace MHUrho.WorldMap
 
         private bool IsBorderCorner(int x, int y) {
             return (LeftWithBorders <= x && x <= Left) ||
-                   (Right <= x && x <= RightWithBorders) ||
+                   (Right <= x && x <= RightWithBorders + 1) || //+1 because RightWithBorders contains coords of the topLeftCorner
                    (TopWithBorders <= y && y <= Top) ||
-                   (BottomWithBorders <= y && y <= BottomWithBorders);
+                   (Bottom <= y && y <= BottomWithBorders + 1);
         }
 
         private bool IsBorderCorner(IntVector2 corner) {

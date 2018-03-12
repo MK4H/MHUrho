@@ -76,35 +76,41 @@ namespace MHUrho.UserInterface
             selectionBar.RemoveAllChildren();
             selectionBar.Remove();
             selectionBar.Dispose();
+            toolSelection.RemoveAllChildren();
+            toolSelection.Remove();
+            toolSelection.Dispose();
+
             Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
         }
 
         public void EnableUI() {
             selectionBar.Enabled = true;
+            toolSelection.Enabled = true;
         }
 
         public void DisableUI() {
             selectionBar.Enabled = false;
+            toolSelection.Enabled = false;
         }
 
         public void HideUI() {
             selectionBar.Visible = false;
+            toolSelection.Visible = false;
         }
 
         public void ShowUI() {
             selectionBar.Visible = true;
+            toolSelection.Visible = true;
         }
 
         public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
-            //Clear selection bar
-            selectionBar.RemoveAllChildren();
 
             foreach (var button in buttons) {
-                selectionBar.AddChild(button);
                 button.HoverBegin += Button_HoverBegin;
                 button.HoverBegin += UIHoverBegin;
                 button.HoverEnd += Button_HoverEnd;
                 button.HoverEnd += UIHoverEnd;
+                button.Visible = true;
             }
         }
 
@@ -116,9 +122,8 @@ namespace MHUrho.UserInterface
                 button.HoverBegin -= UIHoverBegin;
                 button.HoverEnd -= Button_HoverEnd;
                 button.HoverEnd -= UIHoverEnd;
+                button.Visible = false;
             }
-
-            selectionBar.RemoveAllChildren();
         }
 
         public void Deselect() {
@@ -139,12 +144,19 @@ namespace MHUrho.UserInterface
             button.HorizontalAlignment = HorizontalAlignment.Center;
             button.VerticalAlignment = VerticalAlignment.Center;
             button.Pressed += ToolSwitchbuttonPress;
+            button.HoverBegin += UIHoverBegin;
+            button.HoverEnd += UIHoverEnd;
             button.FocusMode = FocusMode.ResetFocus;
             button.MaxSize = new IntVector2(50, 50);
             button.MinSize = new IntVector2(50, 50);
             button.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
             tools.Add(button, tool);
+
+            foreach (var toolButton in tool.Buttons) {
+                selectionBar.AddChild(toolButton);
+            }
+
         }
 
         public void RemoveTool(IMandKTool tool) {
@@ -181,8 +193,17 @@ namespace MHUrho.UserInterface
         private void ClearDelegates() {
             selectionBar.HoverBegin -= UIHoverBegin;
             selectionBar.HoverEnd -= UIHoverEnd;
+            toolSelection.HoverBegin -= UIHoverBegin;
+            toolSelection.HoverEnd -= UIHoverEnd;
 
-            foreach (UIElement button in selectionBar.Children) {
+            foreach (var button in selectionBar.Children) {
+                button.HoverBegin -= Button_HoverBegin;
+                button.HoverBegin -= UIHoverBegin;
+                button.HoverEnd -= Button_HoverEnd;
+                button.HoverEnd -= UIHoverEnd;
+            }
+
+            foreach (var button in toolSelection.Children) {
                 button.HoverBegin -= Button_HoverBegin;
                 button.HoverBegin -= UIHoverBegin;
                 button.HoverEnd -= Button_HoverEnd;

@@ -12,6 +12,8 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools {
     class VertexHeightToolMandK : VertexHeightTool, IMandKTool {
+        public IEnumerable<Button> Buttons => buttons;
+
         private const float Sensitivity = 0.01f;
 
         private enum Mode { None, Selecting, Moving };
@@ -63,7 +65,7 @@ namespace MHUrho.EditorTools {
             movingButton.MaxSize = new IntVector2(100, 100);
             movingButton.MinSize = new IntVector2(100, 100);
             movingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
-            selectingButton.Visible = false;
+            movingButton.Visible = false;
 
             buttons.Add(movingButton);
         }
@@ -79,6 +81,17 @@ namespace MHUrho.EditorTools {
         public void Disable() {
             if (!enabled) return;
 
+            if (mode != Mode.None) {
+                input.UIManager.Deselect();
+                mode = Mode.None;
+
+                input.MouseDown -= MouseDownMove;
+                input.MouseMove -= OnMouseMove;
+                input.MouseDown -= MouseDownSelect;
+                input.ShowCursor();
+            }
+
+            verticies.Clear();
             input.UIManager.SelectionBarClearButtons();
             input.UnregisterToolAction(9);
             input.MouseMove -= OnMouseMove;
