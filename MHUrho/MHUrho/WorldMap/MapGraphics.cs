@@ -123,6 +123,72 @@ namespace MHUrho.WorldMap
 
             }
 
+            [StructLayout(LayoutKind.Sequential)]
+            struct TileInIB {
+
+                public const int IndiciesPerTile = 6;
+                /*
+                 * 0-----1
+                 * |     |
+                 * |     |
+                 * 2-----3
+                 *
+                 * We switch from
+                 * 0-----1
+                 * |   / |
+                 * |  /  |
+                 * | /   |
+                 * 2-----3
+                 *
+                 * to
+                 * 0-----1
+                 * | \   |
+                 * |  \  |
+                 * |   \ |
+                 * 2-----3
+
+                 */
+
+                private short cornerA1;
+                private short middleA;
+                private short cornerA2;
+                private short cornerB1;
+                private short middleB;
+                private short cornerB2;
+
+                /// <summary>
+                /// Rotates the split in the quad
+                /// </summary>
+                public void Rotate() {
+                    //Because values will be some indecies to the vertex buffer, do rotation by rotating values
+                    short tmp = cornerA1;
+                    cornerA1 = middleA;
+                    cornerB2 = middleA;
+                    middleA = cornerA2;
+                    cornerA2 = middleB;
+                    cornerB1 = middleB;
+                    middleB = tmp;
+                }
+
+                public TileInIB(short topLeft, short topRight, short bottomLeft, short bottomRight, SplitDirection splitDir) {
+                    if (splitDir == SplitDirection.TopLeft) {
+                        cornerA1 = topLeft;
+                        middleA = bottomLeft;
+                        cornerA2 = bottomRight;
+                        cornerB1 = bottomRight;
+                        middleB = topRight;
+                        cornerB2 = topLeft;
+                    }
+                    else {
+                        cornerA1 = bottomLeft;
+                        middleA = bottomRight;
+                        cornerA2 = topRight;
+                        cornerB1 = topRight;
+                        middleB = topLeft;
+                        cornerB2 = bottomLeft;
+                    }
+                }
+            }
 
             private class CornerTiles : IEnumerable<ITile>,IEnumerator<ITile> {
                 public ITile TopLeft;
@@ -133,7 +199,7 @@ namespace MHUrho.WorldMap
                 private int state = -1;
 
                 public IEnumerator<ITile> GetEnumerator() {
-                    state = 0;
+                    state = -1;
                     return this;
                 }
 
@@ -175,6 +241,7 @@ namespace MHUrho.WorldMap
 
             private Model model;
             private VertexBuffer mapVertexBuffer;
+            private IndexBuffer mapIndexBuffer;
 
             private Material material;
             private CustomGeometry highlight;
@@ -399,6 +466,22 @@ namespace MHUrho.WorldMap
                 mapVertexBuffer.Unlock();
             }
 
+            public void RotateTileTriangles(IntVector2 tileCoords) {
+                var ib = mapIndexBuffer.Lock((uint) (map.GetTileIndex(tileCoords) * TileInIB.IndiciesPerTile),
+                                             TileInIB.IndiciesPerTile);
+                if (ib == IntPtr.Zero) {
+                    //TODO: Error
+                    throw new Exception("Could not lock tile index buffer position to memory to change it");
+                }
+
+                unsafe {
+                    var tilePointer = (TileInIB*)ib.ToPointer();
+                    tilePointer->Rotate();
+                }
+
+                mapIndexBuffer.Unlock();
+            }
+
             public void HighlightArea(IntRect rectangle) {
 
                 if (highlight == null) {
@@ -518,7 +601,7 @@ namespace MHUrho.WorldMap
 
                 unsafe {
                     TileInVB* verBuff = (TileInVB*)vbPointer.ToPointer();
-                    short* inBuff = (short*)ibPointer.ToPointer();
+                    TileInIB* inBuff = (TileInIB*)ibPointer.ToPointer();
 
                     int vertexIndex = 0;
                     for (int i = 0; i < tiles.Length; i++) {
@@ -542,16 +625,14 @@ namespace MHUrho.WorldMap
                         //Create verticies
                         *(verBuff++) = val;
 
-                        //Connect verticies to triangles                 
-                        *(inBuff++) = (short)(vertexIndex + 2);
-                        *(inBuff++) = (short)(vertexIndex + 3);
-                        *(inBuff++) = (short)(vertexIndex + 1);
+                        //Connect verticies to triangles        
+                        *(inBuff++) = new TileInIB((short) (vertexIndex + 0),
+                                                   (short) (vertexIndex + 1),
+                                                   (short) (vertexIndex + 2),
+                                                   (short) (vertexIndex + 3),
+                                                   tile.SplitDir);
 
-                        *(inBuff++) = (short)(vertexIndex + 1);
-                        *(inBuff++) = (short)(vertexIndex + 0);
-                        *(inBuff++) = (short)(vertexIndex + 2);
-
-                        vertexIndex += 4;
+                        vertexIndex += TileInVB.VerticiesPerTile;
                     }
 
                 }
@@ -570,6 +651,7 @@ namespace MHUrho.WorldMap
 
                 this.model = model;
                 this.mapVertexBuffer = vb;
+                this.mapIndexBuffer = ib;
             }
 
             private unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, 

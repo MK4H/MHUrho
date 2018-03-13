@@ -16,7 +16,7 @@ namespace MHUrho.EditorTools {
 
         private const float Sensitivity = 0.01f;
 
-        private enum Mode { None, Selecting, Moving };
+        private enum Mode { None, Selecting, Moving, Rotating };
 
         private List<Button> buttons;
         private Mode mode;
@@ -68,6 +68,20 @@ namespace MHUrho.EditorTools {
             movingButton.Visible = false;
 
             buttons.Add(movingButton);
+
+            var rotatingButton = new Button();
+            rotatingButton.SetStyle("VertexHeightToolButton");
+            rotatingButton.Size = new IntVector2(100, 100);
+            rotatingButton.HorizontalAlignment = HorizontalAlignment.Center;
+            rotatingButton.VerticalAlignment = VerticalAlignment.Center;
+            rotatingButton.Pressed += RotatingButtonPress;
+            rotatingButton.FocusMode = FocusMode.ResetFocus;
+            rotatingButton.MaxSize = new IntVector2(100, 100);
+            rotatingButton.MinSize = new IntVector2(100, 100);
+            rotatingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+            rotatingButton.Visible = false;
+
+            buttons.Add(rotatingButton);
         }
 
         public void Enable() {
@@ -129,6 +143,13 @@ namespace MHUrho.EditorTools {
             SwitchFromMoving();
         }
 
+        private void MouseDownRotating(MouseButtonDownEventArgs e) {
+            var tile = input.GetTileUnderCursor();
+            if (tile != null) {
+                map.RotateTileSplit(tile);
+            }
+        }
+
         private void SelectingButtonPress(PressedEventArgs e) {
             if (mode != Mode.Selecting) {
                 SwitchToSelecting();
@@ -147,6 +168,15 @@ namespace MHUrho.EditorTools {
             }
         }
 
+        private void RotatingButtonPress(PressedEventArgs e) {
+            if (mode != Mode.Rotating) {
+                SwitchToRotating();
+            }
+            else {
+                SwitchFromRotating();
+            }
+        }
+
         private void SwitchToSelectingWithKey(int qualifiers) {
             SwitchToSelecting();
         }
@@ -160,13 +190,16 @@ namespace MHUrho.EditorTools {
                     break;
                 case Mode.Moving:
                     return;
+                case Mode.Rotating:
+                    SwitchFromRotating();
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
             input.HideCursor();
             input.MouseDown += MouseDownMove;
             input.MouseMove += OnMouseMove;
-            mode = mode == Mode.Moving ? Mode.None : Mode.Moving;
+            mode = Mode.Moving;
             //TODO: maybe change the index to passing the button itself
             input.UIManager.SelectButton(buttons[1]);
         }
@@ -180,14 +213,24 @@ namespace MHUrho.EditorTools {
                 case Mode.Moving:
                     SwitchFromMoving();
                     break;
+                case Mode.Rotating:
+                    SwitchFromRotating();
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
             input.ShowCursor();
             input.MouseDown += MouseDownSelect;
-            mode = mode == Mode.Selecting ? Mode.None : Mode.Selecting;
+            mode = Mode.Selecting;
             input.UIManager.SelectButton(buttons[0]);
+        }
+
+        private void SwitchToRotating() {
+            input.ShowCursor();
+            input.MouseDown += MouseDownRotating;
+            mode = Mode.Rotating;
+            input.UIManager.SelectButton(buttons[2]);
         }
 
         private void SwitchFromMoving() {
@@ -200,6 +243,12 @@ namespace MHUrho.EditorTools {
 
         private void SwitchFromSelecting() {
             input.MouseDown -= MouseDownSelect;
+            input.UIManager.Deselect();
+            mode = Mode.None;
+        }
+
+        private void SwitchFromRotating() {
+            input.MouseDown -= MouseDownRotating;
             input.UIManager.Deselect();
             mode = Mode.None;
         }

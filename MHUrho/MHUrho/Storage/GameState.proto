@@ -28,6 +28,7 @@ message StTile {
 	int32 tileTypeID = 3;
 	StIntVector2 position = 4;
 	float height = 5;
+	bool splitDirection = 6;
 }
 
 message StBorderTile {
@@ -37,6 +38,7 @@ message StBorderTile {
 	float topRightHeight = 4;
 	float botLeftHeight = 5;
 	float botRightHeight = 6;
+	bool splitDirection = 7;
 }
 
 message StUnit {

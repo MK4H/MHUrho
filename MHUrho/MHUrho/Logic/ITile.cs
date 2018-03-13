@@ -8,6 +8,12 @@ using Urho;
 
 namespace MHUrho.Logic
 {
+
+    //TODO: Move it somewhere else
+    public enum SplitDirection {
+        TopRight,
+        TopLeft
+    };
     public interface ITile {
 
         /// <summary>
@@ -93,5 +99,10 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="heightDelta"></param>
         void ChangeHeight(float heightDelta);
+
+        /// <summary>
+        /// Direction of the split of the two triangles making up the tile
+        /// </summary>
+        SplitDirection SplitDir { get; set; }
     }
 }

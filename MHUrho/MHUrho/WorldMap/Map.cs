@@ -46,6 +46,8 @@ namespace MHUrho.WorldMap
 
             public BorderType BorderType { get; private set; }
 
+            public SplitDirection SplitDir { get; set; }
+
             private StBorderTile storage;
 
             public void ConnectReferences() {
@@ -84,7 +86,7 @@ namespace MHUrho.WorldMap
                 stBorderTile.TopRightHeight = TopRightHeight;
                 stBorderTile.BotLeftHeight = BotLeftHeight;
                 stBorderTile.BotRightHeight = BotRightHeight;
-
+                stBorderTile.SplitDirection = SplitDir == SplitDirection.TopLeft;
 
                 return stBorderTile;
             }
@@ -104,6 +106,7 @@ namespace MHUrho.WorldMap
                 this.TopRightHeight = stBorderTile.TopRightHeight;
                 this.BotLeftHeight = stBorderTile.BotLeftHeight;
                 this.BotRightHeight = stBorderTile.BotRightHeight;
+                this.SplitDir = stBorderTile.SplitDirection ? SplitDirection.TopLeft : SplitDirection.TopRight;
                 BorderType = map.GetBorderType(this.Location);
             }
 
@@ -823,6 +826,12 @@ namespace MHUrho.WorldMap
 
         public void ChangeHeightTo(List<IntVector2> tileCorners, float newHeight) {
             throw new NotImplementedException();
+        }
+
+        public void RotateTileSplit(ITile tile) {
+            graphics.RotateTileTriangles(tile.Location);
+            //Switch direction
+            tile.SplitDir = tile.SplitDir == SplitDirection.TopRight ? SplitDirection.TopLeft : SplitDirection.TopRight;
         }
 
         public ITile GetContainingTile(Vector3 point) {
