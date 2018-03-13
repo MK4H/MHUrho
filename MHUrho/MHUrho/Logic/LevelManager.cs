@@ -226,10 +226,20 @@ namespace MHUrho.Logic
             var light = lightNode.CreateComponent<Light>();
             light.LightType = LightType.Directional;
             //light.Range = 10;
-            light.Brightness = 1f;
+            light.Brightness = 0.5f;
             light.CastShadows = true;
             light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
             light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
+
+            // Ambient light
+            var zoneNode = scene.CreateChild("Zone");
+            var zone = zoneNode.CreateComponent<Zone>();
+
+            zone.SetBoundingBox(new BoundingBox(-1000.0f, 1000.0f));
+            zone.AmbientColor = new Color(0.5f, 0.5f, 0.5f);
+            zone.FogColor = new Color(0.1f, 0.2f, 0.3f);
+            zone.FogStart = 10;
+            zone.FogEnd = 100;
 
             //TODO: Remove this
             await boxNode.RunActionsAsync(new EaseBounceOut(new ScaleTo(duration: 1f, scale: 1)));
