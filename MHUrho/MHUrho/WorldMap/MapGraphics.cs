@@ -351,22 +351,30 @@ namespace MHUrho.WorldMap
 
             }
 
-            public void ChangeTileHeight(IntVector2 topLeft, IntVector2 bottomRight, float heightDelta) {
-                
+          
+
+            /// <summary>
+            /// Changes tile height to the height of the logical tiles
+            /// </summary>
+            /// <param name="topLeft"></param>
+            /// <param name="bottomRight"></param>
+            public void CorrectTileHeight(  IntVector2 topLeft, 
+                                            IntVector2 bottomRight) {
+
                 //+ [1,1] because i want to change the bottomRight tile to
                 // example TL[1,1], BR[3,3], BT-TL = [2,2],but really i want to change 3 by 3
                 IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);
-                
+
 
                 for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
                     int startTileIndex = map.GetTileIndex(topLeft.X, y);
 
 
                     {
-                        IntPtr vbPointer = mapVertexBuffer.Lock((uint)startTileIndex * TileInVB.VerticiesPerTile, 
+                        IntPtr vbPointer = mapVertexBuffer.Lock((uint)startTileIndex * TileInVB.VerticiesPerTile,
                                                                 (uint)rectSize.X * TileInVB.VerticiesPerTile);
-                        IntPtr ibPointer = mapIndexBuffer.Lock((uint) startTileIndex * TileInIB.IndiciesPerTile,
-                                                               (uint) rectSize.X * TileInIB.IndiciesPerTile);
+                        IntPtr ibPointer = mapIndexBuffer.Lock((uint)startTileIndex * TileInIB.IndiciesPerTile,
+                                                               (uint)rectSize.X * TileInIB.IndiciesPerTile);
                         if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
                             //TODO: Error
                             throw new Exception("Could not lock buffer to memory to change it");
@@ -374,7 +382,7 @@ namespace MHUrho.WorldMap
 
                         unsafe {
                             TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-                            TileInIB* tileInIndexBuffer = (TileInIB*) ibPointer.ToPointer();
+                            TileInIB* tileInIndexBuffer = (TileInIB*)ibPointer.ToPointer();
 
                             for (int x = topLeft.X; x <= bottomRight.X; x++) {
 
@@ -383,42 +391,42 @@ namespace MHUrho.WorldMap
                                     if (x == topLeft.X) {
                                         if (y == topLeft.Y) {
                                             //Top left corner tile
-                                            tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                            tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
                                         }
                                         else if (y == bottomRight.Y) {
                                             //bottom left corner tile
-                                            tileInVertexBuffer->TopRight.Position.Y += heightDelta;
+                                            tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
                                         }
                                         else {
                                             //left side tile
-                                            tileInVertexBuffer->TopRight.Position.Y += heightDelta;
-                                            tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                            tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
+                                            tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
                                         }
                                     }
                                     else if (x == bottomRight.X) {
                                         if (y == topLeft.Y) {
                                             //top right corner tile
-                                            tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
+                                            tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
                                         }
                                         else if (y == bottomRight.Y) {
                                             //bottom right corner tile
-                                            tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
+                                            tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
                                         }
                                         else {
                                             //right side tile
-                                            tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
-                                            tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
+                                            tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
+                                            tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
                                         }
                                     }
                                     else if (y == topLeft.Y) {
                                         //top side tile
-                                        tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
-                                        tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                        tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
+                                        tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
                                     }
                                     else if (y == bottomRight.Y) {
                                         //bottom side tile
-                                        tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
-                                        tileInVertexBuffer->TopRight.Position.Y += heightDelta;
+                                        tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
+                                        tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
                                     }
                                     else {
                                         //TODO: Exception
@@ -427,10 +435,10 @@ namespace MHUrho.WorldMap
                                 }
                                 else {
                                     //inner tile
-                                    tileInVertexBuffer->TopLeft.Position.Y += heightDelta;
-                                    tileInVertexBuffer->TopRight.Position.Y += heightDelta;
-                                    tileInVertexBuffer->BottomLeft.Position.Y += heightDelta;
-                                    tileInVertexBuffer->BottomRight.Position.Y += heightDelta;
+                                    tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
+                                    tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
+                                    tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
+                                    tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
 
                                 }
 
@@ -446,6 +454,7 @@ namespace MHUrho.WorldMap
                     mapVertexBuffer.Unlock();
                     mapIndexBuffer.Unlock();
                 }
+
             }
 
             public void ChangeCornerHeights(List<IntVector2> cornerPositions, float heightDelta) {

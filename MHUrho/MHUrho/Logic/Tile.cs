@@ -197,5 +197,9 @@ namespace MHUrho.Logic
         public void ChangeHeight(float heightDelta) {
             Height += heightDelta;
         }
+
+        public void SetHeight(float newHeight) {
+            Height = newHeight;
+        }
     } 
 }

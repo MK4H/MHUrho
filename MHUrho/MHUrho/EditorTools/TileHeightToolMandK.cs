@@ -69,12 +69,11 @@ namespace MHUrho.EditorTools
                 centerTile = null;
                 highlight.FreeHighlight();
             }
-            
         }
 
         private void MouseMove(MouseMovedEventArgs e) {
             if (mouseButtonDown) {
-                map.ChangeTileHeight(centerTile, highlight.Size, e.DY * Sensitivity);
+                map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
             }
         }
     }

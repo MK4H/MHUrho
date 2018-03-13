@@ -100,5 +100,13 @@ namespace MHUrho.Logic
         /// <param name="heightDelta"></param>
         void ChangeHeight(float heightDelta);
 
+        /// <summary>
+        /// Called by the Map to set height
+        /// 
+        /// If you want to set height, go through TODO:LINK MAP FUNCTION TO CHANGE TILE HEIGHT
+        /// </summary>
+        /// <param name="newHeight"></param>
+        void SetHeight(float newHeight);
+
     }
 }

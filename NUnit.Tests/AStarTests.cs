@@ -129,6 +129,10 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
+                public void SetHeight(float newHeight) {
+                    throw new NotImplementedException();
+                }
+
                 #endregion
 
                 public IntVector2 Location { get; private set; }
@@ -194,6 +198,10 @@ namespace NUnit.Tests {
                 }
 
                 public void ChangeHeight(float heightDelta) {
+                    throw new NotImplementedException();
+                }
+
+                public void SetHeight(float newHeight) {
                     throw new NotImplementedException();
                 }
 

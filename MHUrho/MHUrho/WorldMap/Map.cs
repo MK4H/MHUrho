@@ -15,6 +15,31 @@ namespace MHUrho.WorldMap
 {
     public partial class Map : IMap, IDisposable {
 
+        /// <summary>
+        /// Gets new height of the [x,y] tile corner from previous height and position of the corner
+        /// Can and WILL BE CALLED MULTIPLE TIMES FOR THE SAME X,Y COORDINATES
+        /// </summary>
+        /// <param name="previousHeight">Previous height of the [x,y] corner</param>
+        /// <param name="x">X coord of the tile corner</param>
+        /// <param name="y">Y coord of the tile corner</param>
+        /// <returns>New height of the [x,y] corner</returns>
+        public delegate float ChangeCornerHeightDelegate(float previousHeight, int x, int y);
+
+        /// <summary>
+        /// Gets new height of the top left corner of the tile [x,y] from previous height and position of this corner
+        /// Can and WILL BE CALLED MULTIPLE TIMES FOR THE SAME X,Y COORDINATES
+        /// 
+        /// Used in a rectangle, for 3x3 rectangle of tiles called 4x4 times, to change even the bottom and right sides
+        /// of the bottom and right tiles
+        /// 
+        /// So for 3x3 rectangle with top left [0,0] it is called even at [3,0],[0,3] and [3,3]
+        /// </summary>
+        /// <param name="previousHeight">Previous height of the tile corner</param>
+        /// <param name="x">X coord of the tile corner</param>
+        /// <param name="y">Y coord of the tile corner</param>
+        /// <returns>New height of the tile top left corner</returns>
+        public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
+
         private class BorderTile : ITile {
             Unit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
 
@@ -94,6 +119,10 @@ namespace MHUrho.WorldMap
 
             public void ChangeHeight(float heightDelta) {
                 Height += heightDelta;
+            }
+
+            public void SetHeight(float newHeight) {
+                Height = newHeight;
             }
 
             public BorderTile(StBorderTile stBorderTile, Map map) {
@@ -330,12 +359,67 @@ namespace MHUrho.WorldMap
             return new Map(newTiles, size);
         }
 
+        //TODO: THIS, ITS STILL BROKEN
         private Map(ITile[] tiles, IntVector2 size) {
-            this.tiles = tiles;
-            this.TopLeft = new IntVector2(0, 0);
+            this.tiles = new ITile[size.X + 2 + size.Y + 2];
+            this.TopLeft = new IntVector2(1, 1);
             this.BottomRight = new IntVector2(size.X - 1, size.Y - 1);
-        }
 
+            Array.Copy(tiles, 0, this.tiles, GetTileIndex(TopLeft), tiles.Length);
+
+
+            for (int x = LeftWithBorders + 1; x < RightWithBorders; x++) {
+
+                tiles[GetTileIndex(x, TopWithBorders)] =
+                    new BorderTile(x, TopWithBorders, null, BorderType.None) {
+                                                                                 BotLeftHeight = 
+                                                                                     GetHeightAt(x, TopWithBorders + 1),
+                                                                                 BotRightHeight =
+                                                                                     GetHeightAt(x + 1,
+                                                                                                 TopWithBorders + 1)
+                                                                                 
+                                                                             };
+
+            }
+
+            for (int y = TopWithBorders + 1; y < BottomWithBorders; y++) {
+                tiles[GetTileIndex(LeftWithBorders, y)] =
+                    new BorderTile(LeftWithBorders, y, null, BorderType.None) {
+                                                                                    TopRightHeight = GetHeightAt(LeftWithBorders + 1,
+                                                                                                                 y),
+                                                                                  BotRightHeight = GetHeightAt(LeftWithBorders + 1,
+                                                                                                               y + 1)
+                                                                              };
+
+
+            }
+
+            for (int y = TopWithBorders + 1; y < BottomWithBorders; y++) {
+                tiles[GetTileIndex(RightWithBorders, y)] =
+                    new BorderTile(RightWithBorders, y, null, BorderType.None) {
+                                                                                  TopLeftHeight = GetHeightAt(RightWithBorders,
+                                                                                                               y),
+                                                                                  BotLeftHeight = GetHeightAt(RightWithBorders,
+                                                                                                               y + 1)
+                                                                              };
+
+
+            }
+
+            for (int x = LeftWithBorders + 1; x < RightWithBorders; x++) {
+
+                tiles[GetTileIndex(x, BottomWithBorders)] =
+                    new BorderTile(x, BottomWithBorders, null, BorderType.None) {
+                                                                                 TopLeftHeight =
+                                                                                     GetHeightAt(x, BottomWithBorders),
+                                                                                 TopRightHeight =
+                                                                                     GetHeightAt(x + 1,
+                                                                                                 BottomWithBorders)
+
+                                                                             };
+
+            }
+        }
 
         public bool IsInside(int x, int y) {
             return Left <= x && x <= Right && Top <= y && y <= Bottom;
@@ -624,6 +708,12 @@ namespace MHUrho.WorldMap
 
         }
 
+        /// <summary>
+        /// For fast relative height changing in response to every mouse movement
+        /// </summary>
+        /// <param name="centerTile">center tile of the rectangle</param>
+        /// <param name="rectangleSize">Size of the rectangle in which the height changes</param>
+        /// <param name="heightDelta">By how much should the hight change</param>
         public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, float heightDelta) {
             IntVector2 topLeft = centerTile.Location - (rectangleSize / 2);
             IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1, 1));
@@ -700,8 +790,129 @@ namespace MHUrho.WorldMap
                 }
             }
 
-            graphics.ChangeTileHeight(topLeft, bottomRight, heightDelta);
+            graphics.CorrectTileHeight(topLeft, bottomRight);
 
+        }
+
+        public void ChangeTileHeight(ITile centerTile, 
+                                     IntVector2 rectangleSize,
+                                     ChangeTileHeightDelegate newHeightFunction) {
+
+            //COPYING IS FREQUENT SOURCE OF ERRORS
+            IntVector2 topLeft = centerTile.Location - (rectangleSize / 2);
+            IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1, 1));
+            SquishToMap(ref topLeft, ref bottomRight);
+
+            //Make the rectangle larger, to include the surrounding tiles
+            // I need to change height of their side or corner, to make the map continuous
+            topLeft -= new IntVector2(1, 1);
+            bottomRight += new IntVector2(1, 1);
+
+            for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+                for (int x = topLeft.X; x <= bottomRight.X; x++) {
+                    if (x == topLeft.X || x == bottomRight.X || y == topLeft.Y || y == bottomRight.Y) {
+                        //Its a side tile of this rectangle
+                        if (IsBorder(x, y)) {
+                            if (x == topLeft.X) {
+                                if (y == topLeft.Y) {
+                                    //Top left corner tile 
+                                    ((BorderTile) GetTileWithBorders(x, y)).BotRightHeight =
+                                        newHeightFunction(((BorderTile) GetTileWithBorders(x, y)).BotRightHeight, 
+                                                          x + 1,
+                                                          y + 1);
+
+                                }
+                                else if (y == bottomRight.Y) {
+                                    //bottom left corner tile
+                                    ((BorderTile)GetTileWithBorders(x, y)).TopRightHeight = 
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopRightHeight,
+                                                          x + 1,
+                                                          y);
+                                }
+                                else {
+                                    //left side tile
+                                    ((BorderTile)GetTileWithBorders(x, y)).TopRightHeight =
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopRightHeight,
+                                                          x + 1,
+                                                          y);
+                                    ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight =
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotRightHeight,
+                                                          x + 1,
+                                                          y + 1);
+                                }
+                            }
+                            else if (x == bottomRight.X) {
+                                if (y == topLeft.Y) {
+                                    //top right corner tile
+                                    ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight = 
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight,
+                                                          x,
+                                                          y - 1);
+                                }
+                                else if (y == bottomRight.Y) {
+                                    //bottom right corner tile
+                                    ((BorderTile) GetTileWithBorders(x, y)).TopLeftHeight =
+                                        newHeightFunction(((BorderTile) GetTileWithBorders(x, y)).TopLeftHeight,
+                                                          x,
+                                                          y);
+                                }
+                                else {
+                                    //right side tile
+                                    ((BorderTile)GetTileWithBorders(x, y)).TopLeftHeight =
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopLeftHeight,
+                                                          x,
+                                                          y);
+                                    ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight =
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight,
+                                                          x,
+                                                          y - 1);
+                                }
+                            }
+                            else if (y == topLeft.Y) {
+                                //top side tile
+                                ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight =
+                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight,
+                                                      x,
+                                                      y - 1);
+                                ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight =
+                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotRightHeight,
+                                                      x + 1,
+                                                      y + 1);
+                            }
+                            else if (y == bottomRight.Y) {
+                                //bottom side tile
+                                ((BorderTile)GetTileWithBorders(x, y)).TopLeftHeight =
+                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopLeftHeight,
+                                                      x,
+                                                      y);
+                                ((BorderTile)GetTileWithBorders(x, y)).TopRightHeight =
+                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopRightHeight,
+                                                      x + 1,
+                                                      y);
+                            }
+                            else {
+                                //TODO: Exception
+                                throw new Exception("Implementation error, wrong if condition here");
+                            }
+                        }
+                        else if ((x == bottomRight.X && y != topLeft.Y) ||
+                                 (y == bottomRight.Y && x != topLeft.X)) {
+                            //Only the right side tiles need to change on the border if they are normal inner tiles
+                            // excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
+                            ITile tile = GetTile(x, y);
+                            tile.SetHeight(newHeightFunction(tile.Height, x, y));
+                        }
+                    }
+                    else {
+                        //inner tile
+                        Debug.Assert(!IsBorder(x, y));
+                        ITile tile = GetTile(x, y);
+                        tile.SetHeight(newHeightFunction(tile.Height, x, y));
+                    }
+                }
+            }
+
+            graphics.CorrectTileHeight(topLeft, bottomRight);
         }
 
         //TODO: Handle right and bottom side tiles better
