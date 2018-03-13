@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Packaging;
 using MHUrho.Storage;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace MHUrho.Logic
@@ -60,8 +61,12 @@ namespace MHUrho.Logic
 
         public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
+        public Vector3 Center3 => new Vector3(Center.X, map.GetHeightAt(Center), Center.Y);
+
         public float Height { get; private set; }
 
+
+        private readonly Map map;
 
         /// <summary>
         /// Stores tile image between the steps of loading
@@ -90,9 +95,10 @@ namespace MHUrho.Logic
         /// After everything had it StartLoading called, call ConnectReferences on everything
         /// </summary>
         /// <param name="storedTile">Image of the tile</param>
+        /// <param name="map">Map this tile is in</param>
         /// <returns>Partially initialized tile</returns>
-        public static Tile StartLoading(StTile storedTile) {
-            return new Tile(storedTile);
+        public static Tile StartLoading(StTile storedTile, Map map) {
+            return new Tile(storedTile, map);
         }
 
         /// <summary>
@@ -109,19 +115,21 @@ namespace MHUrho.Logic
             storage = null;
         }
 
-        protected Tile(StTile storedTile) {
+        protected Tile(StTile storedTile, Map map) {
             this.storage = storedTile;
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
+            this.map = map;
             PassingUnits = new List<Unit>();
         }
 
-        public Tile(int x, int y, TileType tileType) {
+        public Tile(int x, int y, TileType tileType, Map map) {
             MapArea = new IntRect(x, y, x + 1, y + 1);
             PassingUnits = new List<Unit>();
             Unit = null;
             this.Type = tileType;
             this.Height = 0;
+            this.map = map;
         }
 
         /// <summary>
@@ -130,19 +138,20 @@ namespace MHUrho.Logic
         /// <returns></returns>
         public bool SpawnUnit(Player player)
         {
-            Unit unit = new Unit(this, player);
-            LevelManager.CurrentLevel.RegisterUnit(unit);
+            //Unit unit = new Unit(this, player);
+            //LevelManager.CurrentLevel.RegisterUnit(unit);
 
-            if (this.Unit != null)
-            {
-                PassingUnits.Add(unit);
-                return false;
-            }
-            else
-            {
-                this.Unit = unit;
-                return true;
-            }
+            //if (this.Unit != null)
+            //{
+            //    PassingUnits.Add(unit);
+            //    return false;
+            //}
+            //else
+            //{
+            //    this.Unit = unit;
+            //    return true;
+            //}
+            throw new NotImplementedException();
         }
 
         public void AddPassingUnit(Unit unit)

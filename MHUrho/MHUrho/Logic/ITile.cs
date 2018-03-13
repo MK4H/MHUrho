@@ -53,6 +53,11 @@ namespace MHUrho.Logic
         /// </summary>
         Vector2 Center { get; }
 
+        /// <summary>
+        /// 3D coords of the center of the tile
+        /// </summary>
+        Vector3 Center3 { get; }
+
 
         //TODO: Maybe height for every corner
         /// <summary>

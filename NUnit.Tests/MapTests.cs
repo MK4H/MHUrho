@@ -75,6 +75,8 @@ namespace NUnit.Tests {
 
             public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
+            public Vector3 Center3 => throw new NotImplementedException();
+
             public float Height { get; private set; }
 
             public HeightTestTile(IntVector2 location, float height) {

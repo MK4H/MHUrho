@@ -88,6 +88,8 @@ namespace NUnit.Tests {
 
                 public Vector2 Center => throw new NotImplementedException();
 
+                public Vector3 Center3 => throw new NotImplementedException();
+
                 public float Height => throw new NotImplementedException();
                
                 public LevelManager Level => throw new NotImplementedException();
@@ -159,6 +161,8 @@ namespace NUnit.Tests {
 
 
                 public Vector2 Center => throw new NotImplementedException();
+
+                public Vector3 Center3 => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
                

@@ -16,10 +16,12 @@ namespace MHUrho.Logic
 
         public ResourcePack Package { get; private set; }
 
+        public Model Model { get; private set; }
+
         HashSet<string> PassableTileTypes;
 
         //TODO: More loaded properties
-        Model model;
+        
 
         public StUnitType Save() {
             var storedUnitType = new StUnitType();
@@ -37,7 +39,7 @@ namespace MHUrho.Logic
 
         public void Dispose() {
             //TODO: Release all disposable resources
-            model.Dispose();
+            Model.Dispose();
         }
 
     }

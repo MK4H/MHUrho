@@ -13,8 +13,6 @@ namespace MHUrho.Logic
 
         UnitType Type { get; }
 
-        void Update(TimeSpan gameTime);
-
         Vector2 Position { get; }
 
         ITile Tile { get; }

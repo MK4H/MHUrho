@@ -117,6 +117,7 @@ namespace MHUrho.Input
             UIManager.AddTool(new VertexHeightToolMandK(this, levelManager.Map));
             UIManager.AddTool(new TileTypeToolMandK(this, levelManager.Map));
             UIManager.AddTool(new TileHeightToolMandK(this, levelManager.Map));
+            UIManager.AddTool(new UnitSelectorToolMandK(this, levelManager.Map));
 
             //TODO: Create some toggling for drawing highlight
             //cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };

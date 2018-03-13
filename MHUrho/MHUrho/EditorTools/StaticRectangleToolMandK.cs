@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MHUrho.Input;
 using MHUrho.Logic;
@@ -11,7 +12,7 @@ namespace MHUrho.EditorTools
 {
     class StaticRectangleToolMandK : StaticRectangleTool, IMandKTool
     {
-        public IEnumerable<Button> Buttons => null;
+        public IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
 
         public IntVector2 Size { get; set; }
 

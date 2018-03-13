@@ -65,22 +65,6 @@ namespace MHUrho.Logic
             }
         }
 
-        public ITile TryMoveUnitThroughTileAt(Unit unit, IntVector2 tileIndex)
-        {
-            ITile TargetTile = Map.GetTile(tileIndex);
-            //TODO: Out of range Exception
-            if (unit.CanPass(TargetTile))
-            {
-                unit.Tile.RemoveUnit(unit);
-                TargetTile.AddPassingUnit(unit);
-                return TargetTile;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
 
         public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
@@ -99,7 +83,8 @@ namespace MHUrho.Logic
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
             foreach (var unit in storedLevel.Units) {
-                level.units.Add(Unit.Load(unit));
+                //TODO: Group units under one node
+                level.units.Add(Unit.Load(unit, scene.CreateChild("UnitNode")));
             }
 
             foreach (var player in storedLevel.Players) {

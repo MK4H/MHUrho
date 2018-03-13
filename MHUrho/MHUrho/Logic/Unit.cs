@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using Urho;
 
 
@@ -36,7 +37,9 @@ namespace MHUrho.Logic
         #endregion
 
         #region Private members
-        
+
+        private readonly Node node;
+
         /// <summary>
         /// Flag to prevent double selection
         /// </summary>
@@ -67,8 +70,8 @@ namespace MHUrho.Logic
 
         #region Public methods
 
-        public static Unit Load(StUnit storedUnit) {
-            return new Unit(storedUnit);
+        public static Unit Load(StUnit storedUnit, Node node) {
+            return new Unit(storedUnit, node);
         }
 
         public StUnit Save() {
@@ -82,26 +85,7 @@ namespace MHUrho.Logic
             return storedUnit;
         }
         
-        /// <summary>
-        /// Updates the unit, moves it according to the time since the last tick
-        /// </summary>
-        /// <param name="gameTime">The real time since the last update</param>
-        public void Update(TimeSpan gameTime)
-        {
-            if (path != null)
-            {
-                if (target != null && target.Tile != path.Target)
-                {
-                    Order(target);
-                }
-                MoveAlongThePath((float)gameTime.TotalSeconds);
-            }
-            // if no path, then stay in the middle of the tile
-            else if (!AmInTheMiddle())
-            {
-                MoveToMiddle((float)gameTime.TotalSeconds);
-            }
-        }
+
 
         /// <summary>
         /// Tries to select the unit, if not selected sets selected, if selected does nothing
@@ -184,7 +168,8 @@ namespace MHUrho.Logic
         /// Initializes everything apart from the things referenced by their ID or position
         /// </summary>
         /// <param name="storedUnit">Image of the unit</param>
-        protected Unit(StUnit storedUnit) {
+        protected Unit(StUnit storedUnit, Node node) {
+            this.node = node;
             this.Selected = false;
             this.storage = storedUnit;
             this.ID = storedUnit.Id;
@@ -192,113 +177,28 @@ namespace MHUrho.Logic
             this.Position = new Vector2(storedUnit.Position.X, storedUnit.Position.Y);
         }
         
-        public Unit(Tile tile, Player player)
+        public Unit(UnitType type, Node node, Tile tile, Player player)
         {
+            this.node = node;
             this.Tile = tile;
             this.Position = tile.Center;
             this.Player = player;
+            this.Type = type;
             Selected = false;
         }
 
         #endregion
 
         #region Private Methods
-        /// <summary>
-        /// Moves unit to the middle of the Tile in Tile property
-        /// </summary>
-        /// <param name="elapsedSeconds"></param>
-        void MoveToMiddle(float elapsedSeconds)
-        {
-            Vector2 NewPosition = Position + GetMoveVector(Tile.Center, elapsedSeconds);
-            if (Vector2.Subtract(Position,Tile.Center).LengthSquared < Vector2.Subtract(Position, NewPosition).LengthSquared)
-            {
-                Position = Tile.Center;
-            }
-            else
-            {
-                Position = NewPosition;
-            }
+
+        private void InitializeNode() {
+            var staticModel = node.CreateComponent<StaticModel>();
         }
 
-        /// <summary>
-        /// Moves unit towars the Tile that is next on the path
-        /// </summary>
-        /// <param name="elapsedSeconds"></param>
-        void MoveAlongThePath(float elapsedSeconds)
-        {
-            if (path.Current == Tile.Location && AmInTheMiddle())
-            {
-                if (!path.MoveNext())
-                {
-                    path = null;
-                }
-                else
-                {
-                    //TODO: Make the path return the exact points which the unit should pass
-                    MoveTowards(new Vector2(path.Current.X + 0.5f, path.Current.Y + 0.5f), elapsedSeconds);
-                }
-            }
-            else if (path.Current == Tile.Location)
-            {
-                MoveToMiddle(elapsedSeconds);
-            }
-            else
-            {
-                MoveTowards(new Vector2(path.Current.X + 0.5f, path.Current.Y + 0.5f), elapsedSeconds);
-            }
-        }
-
-        /// <summary>
-        /// Moves unit towards the destination vector
-        /// </summary>
-        /// <param name="destination"></param>
-        /// <param name="elapsedSeconds"></param>
-        void MoveTowards(Vector2 destination, float elapsedSeconds)
-        {
-            Position += GetMoveVector(destination, elapsedSeconds);
-            IntVector2 TileIndex = new IntVector2((int)Position.X, (int)Position.Y);
-            if (TileIndex == path.Current)
-            {
-                ITile NewTile = LevelManager.CurrentLevel.TryMoveUnitThroughTileAt(this, TileIndex);
-                if (NewTile == null)
-                {
-                    Order(path.Target);
-                }
-                else
-                {
-                    Tile = NewTile;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Calculates by how much should the unit move
-        /// </summary>
-        /// <param name="destination">The point in space that the unit is trying to get to</param>
-        /// <param name="elapsedSeconds"> How many seconds passed since the last update</param>
-        /// <returns></returns>
-        Vector2 GetMoveVector(Vector2 destination, float elapsedSeconds)
-        {
-            Vector2 MovementDirection = destination - Position;
-            MovementDirection.Normalize();
-            return MovementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
-        }
-
-        /// <summary>
-        /// Radius of the circle around the middle that counts as the middle
-        /// For float rounding errors
-        /// </summary>
-        const float Tolerance = 0.1f;
-        /// <summary>
-        /// Checks if the unit is in the middle of the current tile
-        /// </summary>
-        /// <returns></returns>
-        bool AmInTheMiddle()
-        {
-            return Vector2.Subtract(Tile.Center, Position).LengthFast < Tolerance;
-        }
 
         
         #endregion
+
+     
     }
 }
