@@ -46,8 +46,6 @@ namespace MHUrho.WorldMap
 
             public BorderType BorderType { get; private set; }
 
-            public SplitDirection SplitDir { get; set; }
-
             private StBorderTile storage;
 
             public void ConnectReferences() {
@@ -86,7 +84,6 @@ namespace MHUrho.WorldMap
                 stBorderTile.TopRightHeight = TopRightHeight;
                 stBorderTile.BotLeftHeight = BotLeftHeight;
                 stBorderTile.BotRightHeight = BotRightHeight;
-                stBorderTile.SplitDirection = SplitDir == SplitDirection.TopLeft;
 
                 return stBorderTile;
             }
@@ -106,7 +103,6 @@ namespace MHUrho.WorldMap
                 this.TopRightHeight = stBorderTile.TopRightHeight;
                 this.BotLeftHeight = stBorderTile.BotLeftHeight;
                 this.BotRightHeight = stBorderTile.BotRightHeight;
-                this.SplitDir = stBorderTile.SplitDirection ? SplitDirection.TopLeft : SplitDirection.TopRight;
                 BorderType = map.GetBorderType(this.Location);
             }
 
@@ -740,36 +736,57 @@ namespace MHUrho.WorldMap
             int topLeftX = (int) Math.Floor(x);
             int topLeftY = (int) Math.Floor(y);
 
-
-            Vector2 topLeftToPoint = new Vector2(x - topLeftX, y -topLeftY);
-            // These two heights will be needed always because of the order of indicies in the
-            // geometry, which creates an edge between bottomLeft and topRight
-            float botLeftHeight = GetHeightAt(topLeftX, topLeftY + 1);
+            float topLeftHeight = GetHeightAt(topLeftX, topLeftY);
             float topRightHeight = GetHeightAt(topLeftX + 1, topLeftY);
-            
+            float botLeftHeight = GetHeightAt(topLeftX, topLeftY + 1);
+            float botRightHeight = GetHeightAt(topLeftX + 1, topLeftY + 1);
 
-                         
-            //Barycentric coordinates
-            float v = topLeftToPoint.X; //topRight coef
-            float w = topLeftToPoint.Y; //bottomLeft coef
-            float u = 1.0f - v - w; //topLeft or bottomRight coef
+            if (topLeftHeight + botRightHeight >= topRightHeight + botLeftHeight) {
+                //Tile is split from topleft to botRight
+                Vector2 botLeftToTargetDistance = new Vector2(x - topLeftX, y - (topLeftY + 1));
 
-            if (u <= 1) {
-                //In top left triangle
-                float topLeftHeight = GetHeightAt(topLeftX, topLeftY);
-                return u * topLeftHeight + v * topRightHeight + w * botLeftHeight;
+                //Barycentric coordinates
+                float v = botLeftToTargetDistance.X; //botRight coef
+                float w = botLeftToTargetDistance.Y; //topLeft coef
+                float u = 1.0f - v - w; //botLeft or topRight coef
+
+                if (u <= 1) {
+                    //In bottom left triangle
+                    return u * botLeftHeight + v * botRightHeight + w * topLeftHeight;
+                }
+                else {
+                    float tmp = v;
+                    v = 1.0f - w;
+                    w = 1.0f - tmp;
+                    u = 1.0f - v - w;
+                    return u * topRightHeight + v * botRightHeight + w * topLeftHeight;
+                }
+
             }
             else {
-                //In bottom right triangle
-                float bottomRightHeight = GetHeightAt(topLeftX + 1, topLeftY + 1);
-                float tmp = v;
-                v = 1.0f - w;
-                w = 1.0f - tmp;
-                u = 1.0f - v - w;
-                return u * bottomRightHeight + v * topRightHeight + w * botLeftHeight;
-            }
+                //Tile is split from topRight to botLeft
+                Vector2 topLeftToTargetDistance = new Vector2(x - topLeftX, y - topLeftY);
 
-         
+                //Barycentric coordinates
+                float v = topLeftToTargetDistance.X; //topRight coef
+                float w = topLeftToTargetDistance.Y; //bottomLeft coef
+                float u = 1.0f - v - w; //topLeft or bottomRight coef
+
+                if (u <= 1) {
+                    //In top left triangle
+
+                    return u * topLeftHeight + v * topRightHeight + w * botLeftHeight;
+                }
+                else {
+                    //In bottom right triangle
+
+                    float tmp = v;
+                    v = 1.0f - w;
+                    w = 1.0f - tmp;
+                    u = 1.0f - v - w;
+                    return u * botRightHeight + v * topRightHeight + w * botLeftHeight;
+                }
+            }
         }
 
         public float GetHeightAt(Vector2 position) {
@@ -826,12 +843,6 @@ namespace MHUrho.WorldMap
 
         public void ChangeHeightTo(List<IntVector2> tileCorners, float newHeight) {
             throw new NotImplementedException();
-        }
-
-        public void RotateTileSplit(ITile tile) {
-            graphics.RotateTileTriangles(tile.Location);
-            //Switch direction
-            tile.SplitDir = tile.SplitDir == SplitDirection.TopRight ? SplitDirection.TopLeft : SplitDirection.TopRight;
         }
 
         public ITile GetContainingTile(Vector3 point) {

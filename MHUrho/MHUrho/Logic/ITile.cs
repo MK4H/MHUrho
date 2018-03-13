@@ -100,9 +100,5 @@ namespace MHUrho.Logic
         /// <param name="heightDelta"></param>
         void ChangeHeight(float heightDelta);
 
-        /// <summary>
-        /// Direction of the split of the two triangles making up the tile
-        /// </summary>
-        SplitDirection SplitDir { get; set; }
     }
 }

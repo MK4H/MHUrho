@@ -121,6 +121,13 @@ namespace MHUrho.WorldMap
                     BottomRight.Normal.Normalize();
                 }
 
+                public bool IsTopLeftBotRightDiagHigher() {
+                    return TopLeft.Position.Y + BottomRight.Position.Y >= TopRight.Position.Y + BottomLeft.Position.Y ;
+                }
+
+                public bool IsTopRightBotLeftDiagHigher() {
+                    return !IsTopLeftBotRightDiagHigher();
+                }
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -156,22 +163,17 @@ namespace MHUrho.WorldMap
                 private short middleB;
                 private short cornerB2;
 
-                /// <summary>
-                /// Rotates the split in the quad
-                /// </summary>
-                public void Rotate() {
-                    //Because values will be some indecies to the vertex buffer, do rotation by rotating values
-                    short tmp = cornerA1;
-                    cornerA1 = middleA;
-                    cornerB2 = middleA;
-                    middleA = cornerA2;
-                    cornerA2 = middleB;
-                    cornerB1 = middleB;
-                    middleB = tmp;
+                public unsafe void TestAndRotate(TileInVB * tileInVB) {
+                    var cornerA1LocalIndex = cornerA1 % 4;
+                    if ((tileInVB->IsTopLeftBotRightDiagHigher() && (cornerA1LocalIndex == 1 || cornerA1LocalIndex == 2)) ||
+                        (tileInVB->IsTopRightBotLeftDiagHigher() && (cornerA1LocalIndex == 0 || cornerA1LocalIndex == 3))) {
+                        //If the diagonal is not the one that is higher, rotate the diagonal
+                        Rotate();
+                    }
                 }
 
-                public TileInIB(short topLeft, short topRight, short bottomLeft, short bottomRight, SplitDirection splitDir) {
-                    if (splitDir == SplitDirection.TopLeft) {
+                public TileInIB(short topLeft, short topRight, short bottomLeft, short bottomRight,ref TileInVB tileInVB ) {
+                    if (tileInVB.IsTopLeftBotRightDiagHigher()) {
                         cornerA1 = topLeft;
                         middleA = bottomLeft;
                         cornerA2 = bottomRight;
@@ -187,6 +189,20 @@ namespace MHUrho.WorldMap
                         middleB = topLeft;
                         cornerB2 = bottomLeft;
                     }
+                }
+
+                /// <summary>
+                /// Rotates the split in the quad
+                /// </summary>
+                private void Rotate() {
+                    //Because values will be some indecies to the vertex buffer, do rotation by rotating values
+                    short tmp = cornerA1;
+                    cornerA1 = middleA;
+                    cornerB2 = middleA;
+                    middleA = cornerA2;
+                    cornerA2 = middleB;
+                    cornerB1 = middleB;
+                    middleB = tmp;
                 }
             }
 
@@ -344,18 +360,21 @@ namespace MHUrho.WorldMap
 
                 for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
                     int startTileIndex = map.GetTileIndex(topLeft.X, y);
-                    uint start = (uint)startTileIndex * TileInVB.VerticiesPerTile;
-                    uint count = (uint)rectSize.X * TileInVB.VerticiesPerTile;
+
 
                     {
-                        IntPtr vbPointer = mapVertexBuffer.Lock(start, count);
-                        if (vbPointer == IntPtr.Zero) {
+                        IntPtr vbPointer = mapVertexBuffer.Lock((uint)startTileIndex * TileInVB.VerticiesPerTile, 
+                                                                (uint)rectSize.X * TileInVB.VerticiesPerTile);
+                        IntPtr ibPointer = mapIndexBuffer.Lock((uint) startTileIndex * TileInIB.IndiciesPerTile,
+                                                               (uint) rectSize.X * TileInIB.IndiciesPerTile);
+                        if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
                             //TODO: Error
-                            throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                            throw new Exception("Could not lock buffer to memory to change it");
                         }
 
                         unsafe {
                             TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
+                            TileInIB* tileInIndexBuffer = (TileInIB*) ibPointer.ToPointer();
 
                             for (int x = topLeft.X; x <= bottomRight.X; x++) {
 
@@ -416,39 +435,45 @@ namespace MHUrho.WorldMap
                                 }
 
                                 tileInVertexBuffer->CalculateLocalNormals();
+                                tileInIndexBuffer->TestAndRotate(tileInVertexBuffer);
 
                                 tileInVertexBuffer++;
+                                tileInIndexBuffer++;
                             }
                         }
                     }
 
                     mapVertexBuffer.Unlock();
+                    mapIndexBuffer.Unlock();
                 }
             }
 
             public void ChangeCornerHeights(List<IntVector2> cornerPositions, float heightDelta) {
                 //TODO: Lock just the needed part
                 IntPtr vbPointer = mapVertexBuffer.Lock(0, (uint)map.tiles.Length * TileInVB.VerticiesPerTile);
-                if (vbPointer == IntPtr.Zero) {
+                IntPtr ibPointer = mapIndexBuffer.Lock(0, (uint) map.tiles.Length * TileInIB.IndiciesPerTile);
+                if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
                     //TODO: Error
-                    throw new Exception("Could not lock tile vertex buffer position to memory to change it");
+                    throw new Exception("Could not lock buffer to memory to change it");
                 }
 
                 unsafe {
-                    TileInVB* basePointer = (TileInVB*)vbPointer.ToPointer();
+                    TileInVB* vbBasePointer = (TileInVB*)vbPointer.ToPointer();
+                    TileInIB* ibBasePointer = (TileInIB*) ibPointer.ToPointer();
 
                     List<CornerTiles> changedCorners = new List<CornerTiles>(cornerPositions.Count); 
 
                     foreach (var corner in cornerPositions) {
-                        ChangeCornerHeight(basePointer, corner, heightDelta, changedCorners);
+                        ChangeCornerHeight(vbBasePointer, corner, heightDelta, changedCorners);
                     }
 
                     foreach (var changedCorner in changedCorners) {
                         foreach (var tile in changedCorner) {
-                            var vbTile = basePointer + map.GetTileIndex(tile);
+                            var vbTile = vbBasePointer + map.GetTileIndex(tile);
+                            var ibTile = ibBasePointer + map.GetTileIndex(tile);
                             vbTile->CalculateLocalNormals();
+                            ibTile->TestAndRotate(vbTile);
                         }
-                        
                     }
 
                     //Smoothing normals, probably redo a little
@@ -464,21 +489,6 @@ namespace MHUrho.WorldMap
                 }
 
                 mapVertexBuffer.Unlock();
-            }
-
-            public void RotateTileTriangles(IntVector2 tileCoords) {
-                var ib = mapIndexBuffer.Lock((uint) (map.GetTileIndex(tileCoords) * TileInIB.IndiciesPerTile),
-                                             TileInIB.IndiciesPerTile);
-                if (ib == IntPtr.Zero) {
-                    //TODO: Error
-                    throw new Exception("Could not lock tile index buffer position to memory to change it");
-                }
-
-                unsafe {
-                    var tilePointer = (TileInIB*)ib.ToPointer();
-                    tilePointer->Rotate();
-                }
-
                 mapIndexBuffer.Unlock();
             }
 
@@ -630,7 +640,7 @@ namespace MHUrho.WorldMap
                                                    (short) (vertexIndex + 1),
                                                    (short) (vertexIndex + 2),
                                                    (short) (vertexIndex + 3),
-                                                   tile.SplitDir);
+                                                   ref val);
 
                         vertexIndex += TileInVB.VerticiesPerTile;
                     }

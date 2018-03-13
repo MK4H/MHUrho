@@ -62,8 +62,6 @@ namespace MHUrho.Logic
 
         public float Height { get; private set; }
 
-        //TODO: Move this somewhere else
-        public SplitDirection SplitDir { get; set; }
 
         /// <summary>
         /// Stores tile image between the steps of loading
@@ -77,7 +75,6 @@ namespace MHUrho.Logic
             storedTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y};
             storedTile.Height = Height;
             storedTile.TileTypeID = Type.ID;
-            storedTile.SplitDirection = SplitDir == SplitDirection.TopLeft;
 
             var storedPassingUnits = storedTile.PassingUnitIDs;
             foreach (var passingUnit in PassingUnits) {
@@ -116,7 +113,6 @@ namespace MHUrho.Logic
             this.storage = storedTile;
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
-            this.SplitDir = storedTile.SplitDirection ? SplitDirection.TopLeft : SplitDirection.TopRight;
             PassingUnits = new List<Unit>();
         }
 
