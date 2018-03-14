@@ -158,8 +158,9 @@ namespace MHUrho.Packaging
 
             foreach (var package in newLoadedPackages.Values) {
                 IEnumerable<TileType> tileTypes = package.LoadAllTileTypes(() =>  GetID(activeTileTypes));
-
                 AddToActive(tileTypes);
+                IEnumerable<UnitType> unitTypes = package.LoadAllUnitTypes(() => GetID(activeUnitTypes));
+                AddToActive(unitTypes);
             }
         }
 
@@ -370,6 +371,12 @@ namespace MHUrho.Packaging
         private void AddToActive(IEnumerable<TileType> tileTypes) {
             foreach (var tileType in tileTypes) {
                 activeTileTypes.Add(tileType.ID, tileType);
+            }
+        }
+
+        private void AddToActive(IEnumerable<UnitType> unitTypes) {
+            foreach (var unitType in unitTypes) {
+                activeUnitTypes.Add(unitType.ID, unitType);
             }
         }
     }

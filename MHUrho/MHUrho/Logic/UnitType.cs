@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;
@@ -21,7 +22,32 @@ namespace MHUrho.Logic
         HashSet<string> PassableTileTypes;
 
         //TODO: More loaded properties
-        
+
+        protected UnitType(string name, Model model, ResourcePack package) {
+            this.Name = name;
+            this.Model = model;
+            this.Package = package;
+        }
+
+        public static UnitType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
+            //TODO: Check for errors
+            string name = xml.Attribute("name").Value;
+            string relativeModelPath = xml.Element(PackageManager.XMLNamespace + "modelPath").Value.Trim();
+
+            relativeModelPath = FileManager.CorrectRelativePath(relativeModelPath);
+
+            string modelPath = System.IO.Path.Combine(pathToPackageXMLDirname, relativeModelPath);
+            var model = PackageManager.Instance.ResourceCache.GetModel(modelPath);
+
+
+            UnitType newUnitType = new UnitType(name, model, package) 
+                                   {
+                                        ID = newID
+                                    };
+
+            return newUnitType;
+        }
+
 
         public StUnitType Save() {
             var storedUnitType = new StUnitType();

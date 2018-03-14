@@ -95,23 +95,10 @@ namespace MHUrho.UnitComponents
         /// <param name="elapsedSeconds"> How many seconds passed since the last update</param>
         /// <returns></returns>
         private Vector3 GetMoveVector(Vector3 destination, float elapsedSeconds) {
-            Vector3 MovementDirection = destination - Node.Position;
-            MovementDirection.Normalize();
-            return MovementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
+            Vector3 movementDirection = destination - Node.Position;
+            movementDirection.Normalize();
+            return movementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
         }
 
-        /// <summary>
-        /// Radius of the circle around the middle that counts as the middle
-        /// For float rounding errors
-        /// </summary>
-        private const float Tolerance = 0.1f;
-
-        /// <summary>
-        /// Checks if the unit is in the middle of the current tile
-        /// </summary>
-        /// <returns></returns>
-        private bool AmInTheMiddle() {
-            return Vector2.Subtract(target.Center, Node.Position.XZ2()).LengthFast < Tolerance;
-        }
     }
 }

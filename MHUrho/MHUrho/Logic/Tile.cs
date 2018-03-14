@@ -61,12 +61,11 @@ namespace MHUrho.Logic
 
         public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
-        public Vector3 Center3 => new Vector3(Center.X, map.GetHeightAt(Center), Center.Y);
+        public Vector3 Center3 => new Vector3(Center.X, Map.GetHeightAt(Center), Center.Y);
 
         public float Height { get; private set; }
 
-
-        private readonly Map map;
+        public Map Map { get; private set; }
 
         /// <summary>
         /// Stores tile image between the steps of loading
@@ -119,7 +118,7 @@ namespace MHUrho.Logic
             this.storage = storedTile;
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
-            this.map = map;
+            this.Map = map;
             PassingUnits = new List<Unit>();
         }
 
@@ -129,7 +128,7 @@ namespace MHUrho.Logic
             Unit = null;
             this.Type = tileType;
             this.Height = 0;
-            this.map = map;
+            this.Map = map;
         }
 
         /// <summary>
@@ -209,6 +208,10 @@ namespace MHUrho.Logic
 
         public void SetHeight(float newHeight) {
             Height = newHeight;
+        }
+
+        public Path GetPath(IUnit forUnit) {
+            return Map.GetPath(forUnit, this);
         }
     } 
 }

@@ -6,5 +6,8 @@
       <texturePath>sand.jpg</texturePath>
       <movementSpeed>0.5</movementSpeed>
     </tileType>
+    <unitType name="TestUnit">
+      <modelPath>Box.mdl</modelPath>
+    </unitType>
   </tileTypes>
 </resourcePack>

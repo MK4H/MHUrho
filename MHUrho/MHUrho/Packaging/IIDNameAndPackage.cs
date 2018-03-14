@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.Packaging
 {
-    interface IIDNameAndPackage
+    public interface IIDNameAndPackage
     {
         int ID { get; set; }
         string Name { get; }

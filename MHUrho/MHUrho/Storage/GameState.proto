@@ -48,6 +48,7 @@ message StUnit {
 	int32 playerID = 4;
 	StPath path = 5;
 	int32 targetUnitID = 6;
+	map<string,bytes> extendedInfo = 10;
 }
 
 message StBuilding {
@@ -59,6 +60,7 @@ message StPlayer {
 }
 
 message StPath {
+//TODO: Probably just store target and recompute the path when loading
 	repeated StIntVector2 pathPoints = 1;
 	int32 currentIndex = 2;
 }

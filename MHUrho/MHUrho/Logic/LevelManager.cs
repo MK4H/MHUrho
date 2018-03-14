@@ -31,40 +31,23 @@ namespace MHUrho.Logic
         private IGameController inputController;
 
         readonly List<Unit> units;
-
-        readonly IPathFindAlg pathFind;
+        
         /// <summary>
-        /// Registers unit after it is spawned by a Tile or a Building
+        /// Add unit to the level after it is spawned
         /// </summary>
-        /// <param name="unit">The unit to be registered</param>
-        public void RegisterUnit(Unit unit)
+        /// <param name="unit">The unit to be added</param>
+        public void AddUnit(Unit unit)
         {
             units.Add(unit);
-        }
+            var containingTile = Map.GetContainingTile(unit.Position);
+            if (!containingTile.TryAddOwningUnit(unit)) {
+                var targetTile = Map.FindClosestEmptyTile(containingTile);
+                if (targetTile == null) {
+                    //TODO: There is no closest empty tile, everything is full
+                }
 
-        public Path GetPath(Unit unit, ITile target)
-        {
-            if (target.Unit != null)
-            {
-                target = Map.FindClosestEmptyTile(target);
-            }
-
-            if (target == null)
-            {
-                return null;
-            }
-
-            var fullPath = pathFind.FindPath(unit, target.Location);
-            if (fullPath == null)
-            {
-                return null;
-            }
-            else
-            {
-                return new Path(fullPath, target);
             }
         }
-
 
         public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
@@ -185,7 +168,6 @@ namespace MHUrho.Logic
             this.Scene = scene;
             units = new List<Unit>();
             this.Map = map;
-            this.pathFind = new AStar(map);
             this.Players = new Player[1];
             Players[0] = new Player(this);
             this.cameraController = cameraController;

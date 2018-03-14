@@ -105,20 +105,27 @@ namespace MHUrho.Packaging {
             TileType tileType;
             if (!tileTypes.TryGetValue(name, out tileType)) {
                 //Load from file
-                var tileTypeElements = (from element in data.Root.Element(PackageManager.XMLNamespace + "tileTypes").Elements(PackageManager.XMLNamespace + "tileType")
-                    where element.Attribute("name").Value == name
-                    select element).ToArray();
+                var tileTypeElements = (from element in data
+                                                       .Root.Element(PackageManager.XMLNamespace + "tileTypes")
+                                                       .Elements(PackageManager.XMLNamespace + "tileType")
+                                       where element.Attribute("name").Value == name
+                                       select element).GetEnumerator();
 
-                if (tileTypeElements.Length > 1) {
+                tileTypeElements.MoveNext();
+                if (!tileTypeElements.MoveNext()) {
+                    throw new ArgumentException("TileType of that name does not exist in this package");
+                }
+
+                var tileTypeElement = tileTypeElements.Current;
+
+                if (tileTypeElements.MoveNext()) {
                     //TODO: Exception
                     throw new Exception("Duplicate tileType names");
                 }
 
-                if (tileTypeElements.Length == 0) {
-                    throw new ArgumentException("TileType of that name does not exist in this package");
-                }
+                tileTypeElements.Dispose();
 
-                tileType = TileType.Load(tileTypeElements[0], newID, System.IO.Path.GetDirectoryName(pathToXml), this);
+                tileType = TileType.Load(tileTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
                 tileTypes.Add(name, tileType);
             }
             else {
@@ -128,6 +135,117 @@ namespace MHUrho.Packaging {
 
             return tileType;
         }
+
+        public UnitType LoadUnitType(string name, int newID) {
+            if (data == null) {
+                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+            }
+
+            if (name == null) {
+                throw new ArgumentNullException("Name of the unit type cannot be null");
+            }
+
+            UnitType unitType;
+            if (!unitTypes.TryGetValue(name, out unitType)) {
+                //Load from file
+                var unitTypeElements = (from element in data
+                                                        .Root.Element(PackageManager.XMLNamespace + "unitTypes")
+                                                        .Elements(PackageManager.XMLNamespace + "unitType")
+                                        where element.Attribute("name").Value == name
+                                        select element).GetEnumerator();
+
+                unitTypeElements.MoveNext();
+                if (!unitTypeElements.MoveNext()) {
+                    throw new ArgumentException("unit type of that name does not exist in this package");
+                }
+
+                var unitTypeElement = unitTypeElements.Current;
+
+                if (unitTypeElements.MoveNext()) {
+                    //TODO: Exception
+                    throw new Exception("Duplicate unit type names");
+                }
+
+                unitTypeElements.Dispose();
+
+                unitType = UnitType.Load(unitTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
+                unitTypes.Add(name, unitType);
+            }
+            else {
+                //Just change ID
+                unitType.ID = newID;
+            }
+
+            return unitType;
+        }
+
+        //TODO: CONVERT THE TWO PRECEDING METHODS TO THIS
+        //public T LoadType<T>(string name, int newID) where T:IIDNameAndPackage {
+        //    Dictionary<string, T> types;
+        //    string xmlGroupName;
+        //    string xmlItemName;
+        //    Func<XElement, int, string, ResourcePack, T> loadFunc;
+
+        //    if (typeof(T) == typeof(UnitType)) {
+        //        types = (Dictionary<string, T>)(object)unitTypes;
+        //        xmlGroupName = "unitTypes";
+        //        xmlItemName = "unitType";
+        //        loadFunc = UnitType.Load;
+
+        //    }
+        //    else if (typeof(T) == typeof(TileType)) {
+        //        types = (Dictionary<string, T>)(object)tileTypes;
+        //        xmlGroupName = "tileTypes";
+        //        xmlItemName = "tileType";
+        //    }
+        //    else {
+        //        throw new ArgumentException("Unknown type argument", nameof(T));
+        //    }
+
+
+        //    if (data == null) {
+        //        throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+        //    }
+
+        //    if (name == null) {
+        //        throw new ArgumentNullException($"Name of the {xmlItemName} cannot be null");
+        //    }
+
+
+
+        //    T type;
+        //    if (!types.TryGetValue(name, out type)) {
+        //        //Load from file
+        //        var typeElements = (from element in data
+        //                                                .Root.Element(PackageManager.XMLNamespace + "tileTypes")
+        //                                                .Elements(PackageManager.XMLNamespace + "tileType")
+        //                                where element.Attribute("name").Value == name
+        //                                select element).GetEnumerator();
+
+        //        typeElements.MoveNext();
+        //        if (!typeElements.MoveNext()) {
+        //            throw new ArgumentException("TileType of that name does not exist in this package");
+        //        }
+
+        //        var typeElement = typeElements.Current;
+
+        //        if (typeElements.MoveNext()) {
+        //            //TODO: Exception
+        //            throw new Exception("Duplicate tileType names");
+        //        }
+
+        //        typeElements.Dispose();
+
+        //        type = TileType.Load(typeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
+        //        tileTypes.Add(name, tileType);
+        //    }
+        //    else {
+        //        //Just change ID
+        //        type.ID = newID;
+        //    }
+
+        //    return type;
+        //}
 
         public IEnumerable<TileType> LoadAllTileTypes(GenerateID generateId) {
             if (data == null) {
@@ -155,6 +273,37 @@ namespace MHUrho.Packaging {
             }
 
             return loadedTileTypes;
+        }
+
+        public IEnumerable<UnitType> LoadAllUnitTypes(GenerateID generateID) {
+            //TODO: make this and LoadAllTileTypes into one method, this is just lazy
+            if (data == null) {
+                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+            }
+
+            List<UnitType> loadedUnitTypes = new List<UnitType>();
+
+            var unitTypeElements = from elements in data.Root.Element(PackageManager.XMLNamespace + "unitTypes").Elements(PackageManager.XMLNamespace + "unitType") select elements;
+
+            foreach (var unitTypeElement in unitTypeElements) {
+                string name = unitTypeElement.Attribute("name").Value;
+
+                UnitType loadedUnitType;
+                if (unitTypes.TryGetValue(name, out loadedUnitType)) {
+                    //Was already loaded for previous game, generate new ID for this game
+                    loadedUnitType.ID = generateID();
+                }
+                else {
+                    //Load it fresh from the xml
+                    loadedUnitType = UnitType.Load(unitTypeElement, generateID(), System.IO.Path.GetDirectoryName(pathToXml), this);
+
+                    unitTypes.Add(loadedUnitType.Name, loadedUnitType);
+                }
+               
+                loadedUnitTypes.Add(loadedUnitType);
+            }
+
+            return loadedUnitTypes;
         }
 
         /// <summary>

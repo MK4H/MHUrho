@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.WorldMap;
 using Urho;
+using MHUrho.Logic;
 using Priority_Queue;
 
 
 
 
-namespace MHUrho.Logic {
+namespace MHUrho.WorldMap {
     internal class AStar : IPathFindAlg {
         private readonly IMap map;
 

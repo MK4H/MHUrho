@@ -386,61 +386,10 @@ namespace MHUrho.WorldMap
 
                             for (int x = topLeft.X; x <= bottomRight.X; x++) {
 
-                                if (x == topLeft.X || x == bottomRight.X || y == topLeft.Y || y == bottomRight.Y) {
-                                    //Is surrounding tile
-                                    if (x == topLeft.X) {
-                                        if (y == topLeft.Y) {
-                                            //Top left corner tile
-                                            tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
-                                        }
-                                        else if (y == bottomRight.Y) {
-                                            //bottom left corner tile
-                                            tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
-                                        }
-                                        else {
-                                            //left side tile
-                                            tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
-                                            tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
-                                        }
-                                    }
-                                    else if (x == bottomRight.X) {
-                                        if (y == topLeft.Y) {
-                                            //top right corner tile
-                                            tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
-                                        }
-                                        else if (y == bottomRight.Y) {
-                                            //bottom right corner tile
-                                            tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
-                                        }
-                                        else {
-                                            //right side tile
-                                            tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
-                                            tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
-                                        }
-                                    }
-                                    else if (y == topLeft.Y) {
-                                        //top side tile
-                                        tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
-                                        tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
-                                    }
-                                    else if (y == bottomRight.Y) {
-                                        //bottom side tile
-                                        tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
-                                        tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
-                                    }
-                                    else {
-                                        //TODO: Exception
-                                        throw new Exception("Implementation error, wrong if condition here");
-                                    }
-                                }
-                                else {
-                                    //inner tile
-                                    tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
-                                    tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
-                                    tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
-                                    tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
-
-                                }
+                                tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
+                                tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
+                                tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
+                                tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
 
                                 tileInVertexBuffer->CalculateLocalNormals();
                                 tileInIndexBuffer->TestAndRotate(tileInVertexBuffer);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MHUrho.Control;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using Urho;
@@ -84,8 +85,20 @@ namespace MHUrho.Logic
             storedUnit.TypeID = Type.ID;
             return storedUnit;
         }
-        
 
+        /// <summary>
+        /// Continues loading by connecting references
+        /// </summary>
+        public void ConnectReferences() {
+            Type = PackageManager.Instance.GetUnitType(storage.TypeID);
+
+            //TODO: Connect other things
+
+        }
+
+        public void FinishLoading() {
+            storage = null;
+        }
 
         /// <summary>
         /// Tries to select the unit, if not selected sets selected, if selected does nothing
@@ -104,14 +117,12 @@ namespace MHUrho.Logic
 
         public bool Order(ITile tile)
         {
-            path = LevelManager.CurrentLevel.GetPath(this,tile);
+            path = tile.GetPath(this);
             if (path == null)
             {
                 return false;
             }
-            path.MoveNext();
-            Tile.RemoveUnit(this);
-            Tile.AddPassingUnit(this);
+
             return true;
         }
 
@@ -126,7 +137,7 @@ namespace MHUrho.Logic
 
             target = unit;
             // TODO: Maybe calculate where they will meet and pathfind there
-            Path NewPath = LevelManager.CurrentLevel.GetPath(this, unit.Tile);
+            Path NewPath = unit.Tile.GetPath(this);
             if (NewPath == null)
             {
                 return false;
@@ -142,6 +153,7 @@ namespace MHUrho.Logic
         {
             Selected = false;
         }
+        
         //TODO: Link CanPass to TileType loaded from XML description
         //TODO: Load Passable terrain types from XML unit description
         public bool CanPass(ITile tile)

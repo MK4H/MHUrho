@@ -59,7 +59,9 @@ namespace MHUrho.WorldMap
 
             public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
-            public Vector3 Center3 => new Vector3(Center.X, map.GetHeightAt(Center), Center.Y);
+            public Vector3 Center3 => new Vector3(Center.X, Map.GetHeightAt(Center), Center.Y);
+
+            public Map Map { get; private set; }
 
             public float Height {
                 get => TopLeftHeight;
@@ -73,7 +75,7 @@ namespace MHUrho.WorldMap
 
             public BorderType BorderType { get; private set; }
 
-            private Map map;
+            
 
             private StBorderTile storage;
 
@@ -129,6 +131,10 @@ namespace MHUrho.WorldMap
                 Height = newHeight;
             }
 
+            public Path GetPath(IUnit forUnit) {
+                return null;
+            }
+
             public BorderTile(StBorderTile stBorderTile, Map map) {
                 this.storage = stBorderTile;
                 this.MapArea = new IntRect(stBorderTile.Position.X, stBorderTile.Position.Y, stBorderTile.Position.X + 1, stBorderTile.Position.Y + 1);
@@ -136,6 +142,7 @@ namespace MHUrho.WorldMap
                 this.TopRightHeight = stBorderTile.TopRightHeight;
                 this.BotLeftHeight = stBorderTile.BotLeftHeight;
                 this.BotRightHeight = stBorderTile.BotRightHeight;
+                this.Map = map;
                 BorderType = map.GetBorderType(this.Location);
             }
 
@@ -147,12 +154,13 @@ namespace MHUrho.WorldMap
                 this.TopRightHeight = 0;
                 this.BotLeftHeight = 0;
                 this.BotRightHeight = 0;
+                this.Map = map;
             }
         }
 
         private readonly ITile[] tiles;
-       
-       
+        private readonly IPathFindAlg pathFind;
+
         /// <summary>
         /// Coordinates of the top left tile of the playing map
         /// </summary>
@@ -357,6 +365,7 @@ namespace MHUrho.WorldMap
             this.BottomRight = TopLeft + new IntVector2(width - 1, length - 1);
 
             this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
+            this.pathFind = new AStar(this);
         }
 
         internal static Map CreateTestMap(ITile[] newTiles, IntVector2 size) {
@@ -1053,10 +1062,28 @@ namespace MHUrho.WorldMap
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets tile containing <paramref name="point"/> projection into the XZ plane
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
         public ITile GetContainingTile(Vector3 point) {
+            return GetContainingTile(point.XZ());
+        }
+
+        /// <summary>
+        /// Gets tile containing <paramref name="point"/> in the XZ plane
+        /// </summary>
+        /// <param name="point">The point in the XZ plane</param>
+        /// <returns>The tile containing <paramref name="point"/></returns>
+        public ITile GetContainingTile(Vector2 point) {
             int topLeftX = (int)Math.Floor(point.X);
-            int topLeftZ = (int)Math.Floor(point.Z);
+            int topLeftZ = (int)Math.Floor(point.Y);
             return GetTile(topLeftX, topLeftZ);
+        }
+
+        public Path GetPath(IUnit forUnit, ITile to) {
+            return new Path(pathFind.FindPath(forUnit, to.Location), to);
         }
 
         public void Dispose() {
@@ -1164,6 +1191,7 @@ namespace MHUrho.WorldMap
         private bool IsBottomBorder(IntVector2 location) {
             return IsBottomBorder(location.X, location.Y);
         }
+
         private bool IsLeftBorder(int x, int y) {
             return (0 <= x && x < Left);
         }

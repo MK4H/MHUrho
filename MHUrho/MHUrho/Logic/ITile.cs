@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Packaging;
 using MHUrho.Storage;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace MHUrho.Logic
@@ -65,6 +66,8 @@ namespace MHUrho.Logic
         /// </summary>
         float Height { get; }
 
+        Map Map { get; }
+
         /// <summary>
         /// Continues loading by connecting references
         /// </summary>
@@ -112,6 +115,8 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="newHeight"></param>
         void SetHeight(float newHeight);
+
+        Path GetPath(IUnit forUnit);
 
     }
 }
