@@ -107,14 +107,39 @@ namespace MHUrho.WorldMap
                 /// Creates normals just from this tile, disregarding the angle of surrounding tiles
                 /// </summary>
                 public void CalculateLocalNormals() {
-                    TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
-                                                   TopRight.Position - TopLeft.Position);
-                    TopRight.Normal = Vector3.Cross(TopLeft.Position - TopRight.Position,
-                                                    BottomRight.Position - TopRight.Position);
-                    BottomLeft.Normal = Vector3.Cross(BottomRight.Position - BottomLeft.Position,
-                                                      TopLeft.Position - BottomLeft.Position);
-                    BottomRight.Normal = Vector3.Cross(TopRight.Position - BottomRight.Position,
-                                                       BottomLeft.Position - BottomRight.Position);
+                    if (IsTopLeftBotRightDiagHigher()) {
+                        TopRight.Normal = Vector3.Cross(TopLeft.Position - TopRight.Position,
+                                                        BottomRight.Position - TopRight.Position);
+                        BottomLeft.Normal = Vector3.Cross(BottomRight.Position - BottomLeft.Position,
+                                                          TopLeft.Position - BottomLeft.Position);
+
+                        TopLeft.Normal = AverageNormalNotNormalized(ref TopLeft.Position,
+                                                                    ref BottomLeft.Position,
+                                                                    ref BottomRight.Position,
+                                                                    ref TopRight.Position);
+                        BottomRight.Normal = AverageNormalNotNormalized(ref BottomRight.Position,
+                                                                        ref TopRight.Position,
+                                                                        ref TopLeft.Position,
+                                                                        ref BottomLeft.Position);
+
+                    }
+                    else {
+                        TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
+                                                       TopRight.Position - TopLeft.Position);
+                        BottomRight.Normal = Vector3.Cross(TopRight.Position - BottomRight.Position,
+                                                           BottomLeft.Position - BottomRight.Position);
+                        TopRight.Normal = AverageNormalNotNormalized(ref TopRight.Position,
+                                                                     ref TopLeft.Position,
+                                                                     ref BottomLeft.Position,
+                                                                     ref BottomRight.Position);
+                        BottomLeft.Normal = AverageNormalNotNormalized(ref BottomLeft.Position,
+                                                                       ref BottomRight.Position,
+                                                                       ref TopRight.Position,
+                                                                       ref TopLeft.Position);
+
+                    }
+
+                    
                     TopLeft.Normal.Normalize();
                     TopRight.Normal.Normalize();
                     BottomLeft.Normal.Normalize();
@@ -127,6 +152,31 @@ namespace MHUrho.WorldMap
 
                 public bool IsTopRightBotLeftDiagHigher() {
                     return !IsTopLeftBotRightDiagHigher();
+                }
+
+                /// <summary>
+                /// Gets the average vector of the normals of the two adjacent triangles
+                /// 
+                /// This normal vector is not normalized yet
+                /// </summary>
+                /// <param name="center">the point where the normal vector originates</param>
+                /// <param name="first">first vector in counterclockwise direction</param>
+                /// <param name="second">second vector in counterclockwise direction</param>
+                /// <param name="third">third vector in counterclockwise direction</param>
+                /// <returns>Not normalized normal vector</returns>
+                private Vector3 AverageNormalNotNormalized(ref Vector3 center,
+                                                           ref Vector3 first,
+                                                           ref Vector3 second,
+                                                           ref Vector3 third) {
+
+                    var topLeftNormal1 = Vector3.Cross(first - center,
+                                                       second - center);
+                    var topLeftNormal2 = Vector3.Cross(second - center,
+                                                       third - center);
+                    topLeftNormal1.Normalize();
+                    topLeftNormal2.Normalize();
+
+                    return topLeftNormal1 + topLeftNormal2;
                 }
             }
 
