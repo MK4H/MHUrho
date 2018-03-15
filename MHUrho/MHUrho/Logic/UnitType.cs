@@ -88,7 +88,9 @@ namespace MHUrho.Logic
         }
 
         public Unit GetNewUnit(Node unitNode, ITile tile, IPlayer player) {
-            return new Unit(this, tile, player);
+            unitNode.AddComponent(new Unit(this, tile, player));
+            unitNode.Position = tile.Center3;
+            return unitNode.GetComponent<Unit>();
         }
 
         public Unit LoadUnit(Node unitNode, StUnit storedUnit) {

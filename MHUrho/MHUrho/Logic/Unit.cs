@@ -25,7 +25,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Position in the level
         /// </summary>
-        public Vector2 Position {
+        public Vector2 XZPosition {
             get {
                 Debug.Assert(Node != null, nameof(Node) + " != null");
                 return Node.Position.XZ2();
@@ -70,18 +70,21 @@ namespace MHUrho.Logic
             if (type == null) {
                 throw new ArgumentException("Type of this unit was not loaded");
             }
-            return new Unit(type, storedUnit);
+
+            return Load(type, node, storedUnit);
         }
 
         public static Unit Load(UnitType type, Node node, StUnit storedUnit) {
             //TODO: Check arguments
-            return new Unit(type, storedUnit);
+            node.AddComponent(new Unit(type, storedUnit));
+            node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
+            return node.GetComponent<Unit>();
         }
 
         public StUnit Save() {
             var storedUnit = new StUnit();
             storedUnit.Id = UnitID;
-            storedUnit.Position = new StVector2 {X = Position.X, Y = Position.Y};
+            storedUnit.Position = new StVector3 {X = XZPosition.X, Y = Node.Position.Y, Z = XZPosition.Y};
             storedUnit.PlayerID = Player.ID;
             //storedUnit.Path = path.Save();
             //storedUnit.TargetUnitID = target.UnitID;
@@ -187,14 +190,12 @@ namespace MHUrho.Logic
             this.storage = storedUnit;
             this.UnitID = storedUnit.Id;
             this.UnitType = type;
-            this.Position = new Vector2(storedUnit.Position.X, storedUnit.Position.Y);
             this.logic = UnitType.UnitLogic.CreateNewInstance(LevelManager.CurrentLevel,Node, this);
         }
         
         public Unit(UnitType type, ITile tile, IPlayer player)
         {
             this.Tile = tile;
-            this.Position = tile.Center;
             this.Player = player;
             this.UnitType = type;
         }
