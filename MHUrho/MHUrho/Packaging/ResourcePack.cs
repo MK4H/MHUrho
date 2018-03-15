@@ -111,7 +111,7 @@ namespace MHUrho.Packaging {
                                        where element.Attribute("name").Value == name
                                        select element).GetEnumerator();
 
-                tileTypeElements.MoveNext();
+
                 if (!tileTypeElements.MoveNext()) {
                     throw new ArgumentException("TileType of that name does not exist in this package");
                 }
@@ -154,7 +154,6 @@ namespace MHUrho.Packaging {
                                         where element.Attribute("name").Value == name
                                         select element).GetEnumerator();
 
-                unitTypeElements.MoveNext();
                 if (!unitTypeElements.MoveNext()) {
                     throw new ArgumentException("unit type of that name does not exist in this package");
                 }

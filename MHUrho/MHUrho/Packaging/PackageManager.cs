@@ -159,8 +159,8 @@ namespace MHUrho.Packaging
             foreach (var package in newLoadedPackages.Values) {
                 IEnumerable<TileType> tileTypes = package.LoadAllTileTypes(() =>  GetID(activeTileTypes));
                 AddToActive(tileTypes);
-                IEnumerable<UnitType> unitTypes = package.LoadAllUnitTypes(() => GetID(activeUnitTypes));
-                AddToActive(unitTypes);
+                //IEnumerable<UnitType> unitTypes = package.LoadAllUnitTypes(() => GetID(activeUnitTypes));
+                //AddToActive(unitTypes);
             }
         }
 
