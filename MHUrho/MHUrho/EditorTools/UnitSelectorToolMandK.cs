@@ -57,15 +57,15 @@ namespace MHUrho.EditorTools
         }
 
         private void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
-            map.ForEachInRectangle(topLeft, bottomRight,)
+            map.ForEachInRectangle(topLeft, bottomRight, SelectUnitsInTile);
         }
 
 
 
-        private void SselectUnitsInTile(ITile tile) {
+        private void SelectUnitsInTile(ITile tile) {
             Selector selector = tile.Unit.Node.GetComponent<Selector>();
             if (selector != null) {
-                var unit = selector.Node.GetComponent<UnitLogic>();
+                var unit = selector.Node.GetComponent<Unit>();
             }
         }
     }

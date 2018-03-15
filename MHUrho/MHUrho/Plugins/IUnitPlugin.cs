@@ -11,9 +11,11 @@ namespace MHUrho.Plugins
     public interface IUnitPlugin {
         bool IsMyUnitType(string unitTypeName);
 
+        bool Order(ITile tile);
+
         void OnUpdate(float timeStep);
 
-        IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, IUnit unit);
+        IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
         //TODO: Expand this
     }
 }

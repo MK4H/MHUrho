@@ -41,9 +41,9 @@ namespace MHUrho.WorldMap
         public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
 
         private class BorderTile : ITile {
-            IUnit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
+            Unit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
 
-            List<IUnit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
+            List<Unit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
 
             float ITile.MovementSpeedModifier => throw new InvalidOperationException("Cannot move through Border tile");
 
@@ -91,15 +91,15 @@ namespace MHUrho.WorldMap
                 throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
-            void ITile.AddPassingUnit(IUnit unit) {
+            void ITile.AddPassingUnit(Unit unit) {
                 throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
-            bool ITile.TryAddOwningUnit(IUnit unit) {
+            bool ITile.TryAddOwningUnit(Unit unit) {
                 throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
-            void ITile.RemoveUnit(IUnit unit) {
+            void ITile.RemoveUnit(Unit unit) {
                 throw new InvalidOperationException("Cannot remove unit from Border tile");
             }
 
@@ -131,7 +131,7 @@ namespace MHUrho.WorldMap
                 Height = newHeight;
             }
 
-            public Path GetPath(IUnit forUnit) {
+            public Path GetPath(Unit forUnit) {
                 return null;
             }
 
@@ -1082,7 +1082,7 @@ namespace MHUrho.WorldMap
             return GetTile(topLeftX, topLeftZ);
         }
 
-        public Path GetPath(IUnit forUnit, ITile to) {
+        public Path GetPath(Unit forUnit, ITile to) {
             return new Path(pathFind.FindPath(forUnit, to.Location), to);
         }
 

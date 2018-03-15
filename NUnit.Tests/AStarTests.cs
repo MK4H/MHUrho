@@ -17,7 +17,7 @@ namespace NUnit.Tests {
         private TestMap oneWithCross;
         private TestMap randomWithCross;
 
-        class TestUnit : IUnit {
+        class TestUnit : Unit {
             #region NOT USED IN TEST
 
             public int ID => throw new NotImplementedException();
@@ -35,7 +35,7 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
-            public bool Order(IUnit unit) {
+            public bool Order(Unit unit) {
                 throw new NotImplementedException();
             }
 
@@ -65,7 +65,7 @@ namespace NUnit.Tests {
                 return tile.MovementSpeedModifier * defaultSpeed;
             }
 
-            public TestUnit(float speed, ITile tile, Vector2 position) {
+            public TestUnit(float speed, ITile tile, Vector2 position): base(null, null) {
                 this.defaultSpeed = speed;
                 this.Tile = tile;
                 this.Position = position;
@@ -76,9 +76,9 @@ namespace NUnit.Tests {
 
             class PassableTestTile : ITile {
                 #region NOT USED IN TEST
-                public IUnit Unit => throw new NotImplementedException();
+                public Unit Unit => throw new NotImplementedException();
 
-                public List<IUnit> PassingUnits => throw new NotImplementedException();
+                public List<Unit> PassingUnits => throw new NotImplementedException();
 
                 public TileType Type => throw new NotImplementedException();
 
@@ -109,15 +109,15 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
-                public void AddPassingUnit(IUnit unit) {
+                public void AddPassingUnit(Unit unit) {
                     throw new NotImplementedException();
                 }
 
-                public bool TryAddOwningUnit(IUnit unit) {
+                public bool TryAddOwningUnit(Unit unit) {
                     throw new NotImplementedException();
                 }
 
-                public void RemoveUnit(IUnit unit) {
+                public void RemoveUnit(Unit unit) {
                     throw new NotImplementedException();
                 }
 
@@ -137,7 +137,7 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
-                public Path GetPath(IUnit forUnit) {
+                public Path GetPath(Unit forUnit) {
                     throw new NotImplementedException();
                 }
 
@@ -155,9 +155,9 @@ namespace NUnit.Tests {
 
             class NotPassableTestTile : ITile {
                 #region NOT USED IN TEST
-                public IUnit Unit => throw new NotImplementedException();
+                public Unit Unit => throw new NotImplementedException();
 
-                public List<IUnit> PassingUnits => throw new NotImplementedException();
+                public List<Unit> PassingUnits => throw new NotImplementedException();
 
 
 
@@ -189,15 +189,15 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
-                public void AddPassingUnit(IUnit unit) {
+                public void AddPassingUnit(Unit unit) {
                     throw new NotImplementedException();
                 }
 
-                public bool TryAddOwningUnit(IUnit unit) {
+                public bool TryAddOwningUnit(Unit unit) {
                     throw new NotImplementedException();
                 }
 
-                public void RemoveUnit(IUnit unit) {
+                public void RemoveUnit(Unit unit) {
                     throw new NotImplementedException();
                 }
 
@@ -217,7 +217,7 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
-                public Path GetPath(IUnit forUnit) {
+                public Path GetPath(Unit forUnit) {
                     throw new NotImplementedException();
                 }
 

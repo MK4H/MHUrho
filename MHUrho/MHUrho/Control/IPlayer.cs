@@ -16,7 +16,7 @@ namespace MHUrho.Control {
         /// Processes a player click on a unit
         /// </summary>
         /// <param name="unit">The unit that was clicked</param>
-        void Click(IUnit unit);
+        void Click(Unit unit);
 
         /// <summary>
         /// Processes user click on a tile
@@ -26,7 +26,7 @@ namespace MHUrho.Control {
 
         void UISelect(TileType tileType);
 
-        void UISelect(IUnit unit);
+        void UISelect(Unit unit);
 
         void UIDeselect();
 

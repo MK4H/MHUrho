@@ -16,9 +16,9 @@ namespace NUnit.Tests {
 
         private class HeightTestTile : ITile {
             #region NOT USED IN TESTS
-            public IUnit Unit => throw new NotImplementedException();
+            public Unit Unit => throw new NotImplementedException();
 
-            public List<IUnit> PassingUnits => throw new NotImplementedException();
+            public List<Unit> PassingUnits => throw new NotImplementedException();
 
             public float MovementSpeedModifier => throw new NotImplementedException();
 
@@ -38,15 +38,15 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
-            public void AddPassingUnit(IUnit unit) {
+            public void AddPassingUnit(Unit unit) {
                 throw new NotImplementedException();
             }
 
-            public bool TryAddOwningUnit(IUnit unit) {
+            public bool TryAddOwningUnit(Unit unit) {
                 throw new NotImplementedException();
             }
 
-            public void RemoveUnit(IUnit unit) {
+            public void RemoveUnit(Unit unit) {
                 throw new NotImplementedException();
             }
 
@@ -66,7 +66,7 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
-            public Path GetPath(IUnit forUnit) {
+            public Path GetPath(Unit forUnit) {
                 throw new NotImplementedException();
             }
 

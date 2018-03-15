@@ -12,7 +12,7 @@ namespace MHUrho.Logic
         //TODO: Other overloads, for clicking buttons etc.
         bool Order(ITile tile);
 
-        bool Order(IUnit unit);
+        bool Order(Unit unit);
         void Deselect();
     }
 }

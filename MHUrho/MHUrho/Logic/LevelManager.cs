@@ -30,7 +30,7 @@ namespace MHUrho.Logic
         private CameraController cameraController;
         private IGameController inputController;
 
-        readonly List<IUnit> units;
+        readonly List<Unit> units;
         
         /// <summary>
         /// Spawns new unit of given type into the world map
@@ -71,7 +71,7 @@ namespace MHUrho.Logic
 
             foreach (var unit in storedLevel.Units) {
                 //TODO: Group units under one node
-                level.units.Add(UnitLogic.Load(PackageManager.Instance, scene.CreateChild("UnitNode"), unit));
+                level.units.Add(Unit.Load(PackageManager.Instance, scene.CreateChild("UnitNode"), unit));
             }
 
             foreach (var player in storedLevel.Players) {
@@ -170,7 +170,7 @@ namespace MHUrho.Logic
                                CameraController cameraController)
         {
             this.Scene = scene;
-            units = new List<IUnit>();
+            units = new List<Unit>();
             this.Map = map;
             this.Players = new Player[1];
             Players[0] = new Player(this);

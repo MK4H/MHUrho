@@ -18,13 +18,13 @@ namespace MHUrho.Logic
         /// <summary>
         /// Unit that owns the tile, there can only be one
         /// </summary>
-        public IUnit Unit { get; private set; }
+        public Unit Unit { get; private set; }
 
         /// <summary>
         /// Other units that are passing through the tile
         /// Units cannot stop in this tile if Unit is not null
         /// </summary>
-        public List<IUnit> PassingUnits { get; private set; }
+        public List<Unit> PassingUnits { get; private set; }
 
         /// <summary>
         /// Modifier of the movement speed of units passing through this tile
@@ -75,14 +75,14 @@ namespace MHUrho.Logic
 
         public StTile Save() {
             var storedTile = new StTile();
-            storedTile.UnitID = Unit?.ID ?? 0;
+            storedTile.UnitID = Unit?.UnitID ?? 0;
             storedTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y};
             storedTile.Height = Height;
             storedTile.TileTypeID = Type.ID;
 
             var storedPassingUnits = storedTile.PassingUnitIDs;
             foreach (var passingUnit in PassingUnits) {
-                storedPassingUnits.Add(passingUnit.ID);
+                storedPassingUnits.Add(passingUnit.UnitID);
             }
 
             return storedTile;
@@ -119,12 +119,12 @@ namespace MHUrho.Logic
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
             this.Map = map;
-            PassingUnits = new List<IUnit>();
+            PassingUnits = new List<Unit>();
         }
 
         public Tile(int x, int y, TileType tileType, Map map) {
             MapArea = new IntRect(x, y, x + 1, y + 1);
-            PassingUnits = new List<IUnit>();
+            PassingUnits = new List<Unit>();
             Unit = null;
             this.Type = tileType;
             this.Height = 0;
@@ -153,7 +153,7 @@ namespace MHUrho.Logic
             throw new NotImplementedException();
         }
 
-        public void AddPassingUnit(IUnit unit)
+        public void AddPassingUnit(Unit unit)
         {
             PassingUnits.Add(unit);
         }
@@ -163,7 +163,7 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="unit">The new owning unit</param>
         /// <returns>true if set, false if not set</returns>
-        public bool TryAddOwningUnit(IUnit unit)
+        public bool TryAddOwningUnit(Unit unit)
         {
             //TODO: locking/threading
             if (Unit == null)
@@ -179,7 +179,7 @@ namespace MHUrho.Logic
         /// Removes a unit from this tile, either the owning unit or one of the passing units
         /// </summary>
         /// <param name="unit">the unit to remove</param>
-        public void RemoveUnit(IUnit unit)
+        public void RemoveUnit(Unit unit)
         {
             //TODO: Error, unit not present
             if (Unit == unit)
@@ -210,7 +210,7 @@ namespace MHUrho.Logic
             Height = newHeight;
         }
 
-        public Path GetPath(IUnit forUnit) {
+        public Path GetPath(Unit forUnit) {
             return Map.GetPath(forUnit, this);
         }
     } 

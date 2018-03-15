@@ -14,7 +14,7 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class UnitLogic : Component
+    public class Unit : Component
     {
         #region Public members
 
@@ -55,25 +55,6 @@ namespace MHUrho.Logic
         private readonly IUnitPlugin logic;
 
         /// <summary>
-        /// Flag to prevent double selection
-        /// </summary>
-        bool Selected;
-
-        //TEMPORARY
-        public bool IsSelected { get { return Selected; } }
-
-
-        /// <summary>
-        /// Current path this unit is following
-        /// </summary>
-        Path path;
-
-        /// <summary>
-        /// Current target this unit is trying to attack
-        /// </summary>
-        IUnit target;
-
-        /// <summary>
         /// Holds the image of this unit between the steps of loading
         /// After the last step, is set to null to free the resources
         /// In game is null
@@ -84,17 +65,17 @@ namespace MHUrho.Logic
 
         #region Public methods
 
-        public static UnitLogic Load(PackageManager packageManager, Node node, StUnit storedUnit) {
+        public static Unit Load(PackageManager packageManager, Node node, StUnit storedUnit) {
             var type = packageManager.GetUnitType(storedUnit.TypeID);
             if (type == null) {
                 throw new ArgumentException("Type of this unit was not loaded");
             }
-            return new UnitLogic(type, storedUnit);
+            return new Unit(type, storedUnit);
         }
 
-        public static UnitLogic Load(UnitType type, Node node, StUnit storedUnit) {
+        public static Unit Load(UnitType type, Node node, StUnit storedUnit) {
             //TODO: Check arguments
-            return new UnitLogic(type, storedUnit);
+            return new Unit(type, storedUnit);
         }
 
         public StUnit Save() {
@@ -102,8 +83,8 @@ namespace MHUrho.Logic
             storedUnit.Id = UnitID;
             storedUnit.Position = new StVector2 {X = Position.X, Y = Position.Y};
             storedUnit.PlayerID = Player.ID;
-            storedUnit.Path = path.Save();
-            storedUnit.TargetUnitID = target.ID;
+            //storedUnit.Path = path.Save();
+            //storedUnit.TargetUnitID = target.UnitID;
             storedUnit.TypeID = UnitType.ID;
             return storedUnit;
         }
@@ -112,7 +93,17 @@ namespace MHUrho.Logic
         /// Continues loading by connecting references
         /// </summary>
         public void ConnectReferences() {
-            UnitType = PackageManager.Instance.GetUnitType(storage.TypeID);
+            if (storage.Path != null ) {
+                var walker = GetComponent<WorldWalker>();
+                if (walker == null) {
+                    //TODO: Exception
+                    throw new
+                        Exception("Corrupted save file, unit has stored path even though it does not have a WorldWalker");
+                }
+
+                walker.GoAlong(Path.Load(storage.Path));
+            }
+
 
             //TODO: Connect other things
 
@@ -122,34 +113,27 @@ namespace MHUrho.Logic
             storage = null;
         }
 
-        /// <summary>
-        /// Tries to select the unit, if not selected sets selected, if selected does nothing
-        /// </summary>
-        /// <returns>true if unit was not selected, false if unit was selected</returns>
-        public bool Select()
-        {
-            //TODO: More processing
-            if (!Selected)
-            {
-                Selected = true;
-                return true;
+
+        public bool Order(ITile tile) {
+            //Logic consumed order, return
+            if (logic.Order(tile)) return true;
+
+            var worldWalker = GetComponent<WorldWalker>();
+            if (worldWalker != null) {
+                var path = tile.GetPath(this);
+                if (path != null) {
+                    //Walker consumed order, return
+                    worldWalker.GoAlong(path);
+                    return true;
+                }
             }
+
+            //Nothing could be done with this order
             return false;
         }
 
-        public bool Order(ITile tile)
-        {
-            path = tile.GetPath(this);
-            if (path == null)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         // TODO: differentiate between Meele and range units
-        public bool Order(IUnit unit)
+        public bool Order(Unit unit)
         {
             // JUST MEELE UNITS FOR NOW
             if (unit.Player == Player)
@@ -157,24 +141,21 @@ namespace MHUrho.Logic
                 throw new ArgumentException("Attacking my own units");
             }
 
-            target = unit;
-            // TODO: Maybe calculate where they will meet and pathfind there
-            Path NewPath = unit.Tile.GetPath(this);
-            if (NewPath == null)
-            {
-                return false;
-            }
+            //target = unit;
+            //// TODO: Maybe calculate where they will meet and pathfind there
+            //Path NewPath = unit.Tile.GetPath(this);
+            //if (NewPath == null)
+            //{
+            //    return false;
+            //}
 
-            path.MoveNext();
-            Tile.RemoveUnit(this);
-            Tile.AddPassingUnit(this);
-            return true;
+            //path.MoveNext();
+            //Tile.RemoveUnit(this);
+            //Tile.AddPassingUnit(this);
+            //return true;
+            throw new NotImplementedException();
         }
 
-        public void Deselect()
-        {
-            Selected = false;
-        }
         
         //TODO: Link CanPass to TileType loaded from XML description
         //TODO: Load Passable terrain types from XML unit description
@@ -202,23 +183,20 @@ namespace MHUrho.Logic
         /// Initializes everything apart from the things referenced by their ID or position
         /// </summary>
         /// <param name="storedUnit">Image of the unit</param>
-        protected UnitLogic(UnitType type, StUnit storedUnit) {
-            this.Selected = false;
+        protected Unit(UnitType type, StUnit storedUnit) {
             this.storage = storedUnit;
             this.UnitID = storedUnit.Id;
             this.UnitType = type;
-            this.path = Path.Load(storedUnit.Path);
             this.Position = new Vector2(storedUnit.Position.X, storedUnit.Position.Y);
             this.logic = UnitType.UnitLogic.CreateNewInstance(LevelManager.CurrentLevel,Node, this);
         }
         
-        public UnitLogic(UnitType type, ITile tile, IPlayer player)
+        public Unit(UnitType type, ITile tile, IPlayer player)
         {
             this.Tile = tile;
             this.Position = tile.Center;
             this.Player = player;
             this.UnitType = type;
-            Selected = false;
         }
 
         #endregion

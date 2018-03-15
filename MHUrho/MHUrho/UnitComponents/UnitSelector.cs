@@ -8,10 +8,10 @@ namespace MHUrho.UnitComponents
 {
     public class UnitSelector : Selector
     {
-        private readonly IUnit unit;
+        private readonly Unit unit;
         private readonly LevelManager level;
 
-        public UnitSelector(IUnit unit, LevelManager level) {
+        public UnitSelector(Unit unit, LevelManager level) {
             this.unit = unit;
             this.level = level;
         }
@@ -28,7 +28,7 @@ namespace MHUrho.UnitComponents
             return unit.Order(tile);
         }
 
-        public override bool Ordered(IUnit unit) {
+        public override bool Ordered(Unit unit) {
             throw new NotImplementedException();
         }
 

@@ -7,24 +7,24 @@ using MHUrho.Storage;
 
 namespace MHUrho.Logic
 {
-    public interface IUnit : ISelectable {
+    //public interface IUnit : ISelectable {
 
-        int ID { get; }
+    //    int ID { get; }
 
-        UnitType Type { get; }
+    //    UnitType Type { get; }
 
-        Node Node { get; }
+    //    Node Node { get; }
 
-        Vector2 Position { get; }
+    //    Vector2 Position { get; }
 
-        ITile Tile { get; }
+    //    ITile Tile { get; }
 
-        IPlayer Player { get; }
+    //    IPlayer Player { get; }
 
-        bool CanPass(ITile tile);
+    //    bool CanPass(ITile tile);
 
-        float MovementSpeed(ITile tile);
+    //    float MovementSpeed(ITile tile);
 
-        StUnit Save();
-    }
+    //    StUnit Save();
+    //}
 }

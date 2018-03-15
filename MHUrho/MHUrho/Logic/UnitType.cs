@@ -87,12 +87,12 @@ namespace MHUrho.Logic
             return passableTileTypes.Contains(tileType);
         }
 
-        public IUnit GetNewUnit(Node unitNode, ITile tile, IPlayer player) {
-            return new UnitLogic(this, unitNode, tile, player);
+        public Unit GetNewUnit(Node unitNode, ITile tile, IPlayer player) {
+            return new Unit(this, tile, player);
         }
 
-        public IUnit LoadUnit(Node unitNode, StUnit storedUnit) {
-            return Logic.UnitLogic.Load(this, unitNode, storedUnit);
+        public Unit LoadUnit(Node unitNode, StUnit storedUnit) {
+            return Logic.Unit.Load(this, unitNode, storedUnit);
         }
 
         public void Dispose() {

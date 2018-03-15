@@ -110,13 +110,13 @@ namespace MHUrho.Control
 
         List<IPlayer> friends;
 
-        List<UnitLogic> units;
+        List<Unit> units;
 
         
 
         public Player(LevelManager level) {
             this.level = level;
-            units = new List<UnitLogic>();
+            units = new List<Unit>();
         }
 
         public StPlayer Save() {
@@ -159,7 +159,7 @@ namespace MHUrho.Control
         /// Processes a player click on a unit
         /// </summary>
         /// <param name="unit">The unit that was clicked</param>
-        public void Click(IUnit unit)
+        public void Click(Unit unit)
         {
             // My unit
             if (unit.Player == this)
@@ -221,7 +221,7 @@ namespace MHUrho.Control
             //state = State.TileTypes;
         }
 
-        public void UISelect(IUnit unit) {
+        public void UISelect(Unit unit) {
 
         }
 
@@ -333,7 +333,7 @@ namespace MHUrho.Control
             //WorldSelected = null;
         }
 
-        private void MyUnitClick(IUnit unit) {
+        private void MyUnitClick(Unit unit) {
             //if ()
             //{
             //    if (unit.Select())
@@ -363,11 +363,11 @@ namespace MHUrho.Control
             //}
         }
 
-        private void FriednlyUnitClick(IUnit unit) {
+        private void FriednlyUnitClick(Unit unit) {
 
         }
 
-        private void EnemyUnitClick(IUnit unit) {
+        private void EnemyUnitClick(Unit unit) {
             //if (typeOfSelected == SelectedType.Unit)
             //{
             //    foreach (var item in selected)

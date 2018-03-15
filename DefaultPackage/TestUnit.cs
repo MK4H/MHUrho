@@ -10,14 +10,14 @@ namespace DefaultPackage
     {
         private LevelManager level;
         private Node unitNode;
-        private IUnit unit;
+        private Unit unit;
         
 
         public TestUnit() {
 
         }
 
-        private TestUnit(LevelManager level, Node unitNode, IUnit unit) {
+        private TestUnit(LevelManager level, Node unitNode, Unit unit) {
             this.level = level;
             this.unitNode = unitNode;
             this.unit = unit;
@@ -33,7 +33,11 @@ namespace DefaultPackage
             
         }
 
-        public IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, IUnit unit) {
+        public bool Order(ITile tile) {
+            return false;
+        }
+
+        public IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
             return new TestUnit(level, unitNode, unit);
         }
 
