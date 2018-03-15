@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MHUrho.Input;
+using MHUrho.Logic;
+using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -18,6 +20,8 @@ namespace MHUrho.EditorTools
         private Map map;
 
         private readonly DynamicRectangleToolMandK dynamicHighlight;
+
+        private List<Selector> selected;
 
         private bool enabled;
 
@@ -48,13 +52,21 @@ namespace MHUrho.EditorTools
             enabled = false;
         }
 
-        private void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
-            //TODO: MAP SELECT
-            Urho.IO.Log.Write(LogLevel.Debug, $"Selection: {topLeft} | {bottomRight}");
+        public override void Dispose() {
+
         }
 
-        public override void Dispose() {
-            
+        private void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
+            map.ForEachInRectangle(topLeft, bottomRight,)
+        }
+
+
+
+        private void SselectUnitsInTile(ITile tile) {
+            Selector selector = tile.Unit.Node.GetComponent<Selector>();
+            if (selector != null) {
+                var unit = selector.Node.GetComponent<UnitLogic>();
+            }
         }
     }
 }

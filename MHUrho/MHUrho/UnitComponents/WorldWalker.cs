@@ -9,7 +9,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    class WorldWalker : Component
+    public class WorldWalker : Component
     {
         private Map map;
         private LevelManager level;

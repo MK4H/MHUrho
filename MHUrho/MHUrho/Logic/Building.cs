@@ -13,7 +13,7 @@ namespace MHUrho.Logic
         Tile[] Tiles;
         List<Tile> Damaged;
         LevelManager level;
-        Unit[] Workers;
+        UnitLogic[] Workers;
         public IntRect Rectangle { get; private set; }
 
         public IntVector2 Location{ get { return Rectangle.TopLeft(); } }

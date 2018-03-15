@@ -13,6 +13,8 @@ namespace MHUrho.Logic
 
         UnitType Type { get; }
 
+        Node Node { get; }
+
         Vector2 Position { get; }
 
         ITile Tile { get; }

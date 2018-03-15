@@ -41,9 +41,9 @@ namespace MHUrho.WorldMap
         public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
 
         private class BorderTile : ITile {
-            Unit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
+            IUnit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
 
-            List<Unit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
+            List<IUnit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
 
             float ITile.MovementSpeedModifier => throw new InvalidOperationException("Cannot move through Border tile");
 
@@ -91,15 +91,15 @@ namespace MHUrho.WorldMap
                 throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
-            void ITile.AddPassingUnit(Unit unit) {
+            void ITile.AddPassingUnit(IUnit unit) {
                 throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
-            bool ITile.TryAddOwningUnit(Unit unit) {
+            bool ITile.TryAddOwningUnit(IUnit unit) {
                 throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
-            void ITile.RemoveUnit(Unit unit) {
+            void ITile.RemoveUnit(IUnit unit) {
                 throw new InvalidOperationException("Cannot remove unit from Border tile");
             }
 
@@ -1086,6 +1086,19 @@ namespace MHUrho.WorldMap
             return new Path(pathFind.FindPath(forUnit, to.Location), to);
         }
 
+        public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
+            for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+                for (int x = topLeft.X; x <= bottomRight.X; x++) {
+                    action(GetTile(x, y));
+                }
+            }
+        }
+
+        public void ForEachInRectangle(IntRect rectangle, Action<ITile> action) {
+            ForEachInRectangle(rectangle.TopLeft(), rectangle.BottomRight(), action);
+        }
+
+
         public void Dispose() {
             ((IDisposable) graphics).Dispose();
             node.Dispose();
@@ -1110,18 +1123,7 @@ namespace MHUrho.WorldMap
             return GetTileIndex(tile.Location);
         }
 
-        private void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
-            for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
-                for (int x = topLeft.X; x <= bottomRight.X; x++) {
-                    action(GetTile(x, y));
-                }
-            }
-        }
-
-        private void ForEachInRectangle(IntRect rectangle, Action<ITile> action) {
-            ForEachInRectangle(rectangle.TopLeft(), rectangle.BottomRight(), action);
-        }
-
+     
         private bool IsBorder(int x, int y) {
             return IsLeftBorder(x,y) ||
                    IsRightBorder(x,y) ||

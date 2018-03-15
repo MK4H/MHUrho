@@ -6,7 +6,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    abstract class Selector : Component {
+    public abstract class Selector : Component {
         public abstract bool Ordered(ITile tile);
 
         public abstract bool Ordered(IUnit unit);

@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Control;
 using MHUrho.Packaging;
 using MHUrho.Storage;
+using MHUrho.Plugins;
 using Urho;
 
 namespace MHUrho.Logic
@@ -19,13 +23,15 @@ namespace MHUrho.Logic
 
         public Model Model { get; private set; }
 
-        HashSet<string> PassableTileTypes;
+        public IUnitPlugin UnitLogic { get; private set; }
+        HashSet<string> passableTileTypes;
 
         //TODO: More loaded properties
 
-        protected UnitType(string name, Model model, ResourcePack package) {
+        protected UnitType(string name, Model model, IUnitPlugin unitPlugin, ResourcePack package) {
             this.Name = name;
             this.Model = model;
+            this.UnitLogic = unitPlugin;
             this.Package = package;
         }
 
@@ -33,21 +39,39 @@ namespace MHUrho.Logic
             //TODO: Check for errors
             string name = xml.Attribute("name").Value;
             string relativeModelPath = xml.Element(PackageManager.XMLNamespace + "modelPath").Value.Trim();
+            string relativeAssemblyPath = xml.Element(PackageManager.XMLNamespace + "assemblyPath").Value.Trim();
 
             relativeModelPath = FileManager.CorrectRelativePath(relativeModelPath);
+            relativeAssemblyPath = FileManager.CorrectRelativePath(relativeAssemblyPath);
 
             string modelPath = System.IO.Path.Combine(pathToPackageXMLDirname, relativeModelPath);
             var model = PackageManager.Instance.ResourceCache.GetModel(modelPath);
 
+            var assembly = Assembly.LoadFile(System.IO.Path.Combine(pathToPackageXMLDirname, relativeAssemblyPath));
 
-            UnitType newUnitType = new UnitType(name, model, package) 
-                                   {
-                                        ID = newID
-                                    };
+            var unitPlugins = from type in assembly.GetTypes()
+                              where typeof(IUnitPlugin).IsAssignableFrom(type)
+                              select type;
+            IUnitPlugin pluginInstance = null;
+            foreach (var plugin in unitPlugins) {
+                pluginInstance = (IUnitPlugin)Activator.CreateInstance(plugin);
+                if (pluginInstance.IsMyUnitType(name)) {
+                    break;
+                }
+            }
+
+            if (pluginInstance == null) {
+                //TODO: Exception
+                throw new Exception("Unit type loading failed, could not load unit plugin");
+            }
+
+            UnitType newUnitType = new UnitType(name, model, pluginInstance, package) 
+                                        {
+                                            ID = newID
+                                        };
 
             return newUnitType;
         }
-
 
         public StUnitType Save() {
             var storedUnitType = new StUnitType();
@@ -60,7 +84,15 @@ namespace MHUrho.Logic
 
         public bool CanPass(string tileType)
         {
-            return PassableTileTypes.Contains(tileType);
+            return passableTileTypes.Contains(tileType);
+        }
+
+        public IUnit GetNewUnit(Node unitNode, ITile tile, IPlayer player) {
+            return new UnitLogic(this, unitNode, tile, player);
+        }
+
+        public IUnit LoadUnit(Node unitNode, StUnit storedUnit) {
+            return Logic.UnitLogic.Load(this, unitNode, storedUnit);
         }
 
         public void Dispose() {

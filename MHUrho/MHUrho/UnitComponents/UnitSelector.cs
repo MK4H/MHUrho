@@ -6,7 +6,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
-    class UnitSelector : Selector
+    public class UnitSelector : Selector
     {
         private readonly IUnit unit;
         private readonly LevelManager level;

@@ -30,22 +30,26 @@ namespace MHUrho.Logic
         private CameraController cameraController;
         private IGameController inputController;
 
-        readonly List<Unit> units;
+        readonly List<IUnit> units;
         
         /// <summary>
-        /// Add unit to the level after it is spawned
+        /// Spawns new unit of given type into the world map
         /// </summary>
-        /// <param name="unit">The unit to be added</param>
-        public void AddUnit(Unit unit)
-        {
-            units.Add(unit);
-            var containingTile = Map.GetContainingTile(unit.Position);
-            if (!containingTile.TryAddOwningUnit(unit)) {
-                var targetTile = Map.FindClosestEmptyTile(containingTile);
+        /// <param name="unitType">The unit to be added</param>
+        /// <param name="tile">Tile to spawn the unit at</param>
+        public void SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
+            Node unitNode = Scene.CreateChild("Unit");
+
+            var newUnit = unitType.GetNewUnit(unitNode, tile, player);
+            units.Add(newUnit);
+
+            if (!tile.TryAddOwningUnit(newUnit)) {
+                var targetTile = Map.FindClosestEmptyTile(tile);
                 if (targetTile == null) {
                     //TODO: There is no closest empty tile, everything is full
                 }
 
+                newUnit.Order(targetTile);
             }
         }
 
@@ -67,7 +71,7 @@ namespace MHUrho.Logic
 
             foreach (var unit in storedLevel.Units) {
                 //TODO: Group units under one node
-                level.units.Add(Unit.Load(unit, scene.CreateChild("UnitNode")));
+                level.units.Add(UnitLogic.Load(PackageManager.Instance, scene.CreateChild("UnitNode"), unit));
             }
 
             foreach (var player in storedLevel.Players) {
@@ -166,7 +170,7 @@ namespace MHUrho.Logic
                                CameraController cameraController)
         {
             this.Scene = scene;
-            units = new List<Unit>();
+            units = new List<IUnit>();
             this.Map = map;
             this.Players = new Player[1];
             Players[0] = new Player(this);

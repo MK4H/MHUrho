@@ -110,13 +110,13 @@ namespace MHUrho.Control
 
         List<IPlayer> friends;
 
-        List<Unit> units;
+        List<UnitLogic> units;
 
         
 
         public Player(LevelManager level) {
             this.level = level;
-            units = new List<Unit>();
+            units = new List<UnitLogic>();
         }
 
         public StPlayer Save() {

@@ -20,13 +20,13 @@ namespace MHUrho.Logic
         /// <summary>
         /// Unit that owns the tile, there can only be one
         /// </summary>
-        Unit Unit { get; }
+        IUnit Unit { get; }
 
         /// <summary>
         /// Other units that are passing through the tile
         /// Units cannot stop in this tile if Unit is not null
         /// </summary>
-        List<Unit> PassingUnits { get; }
+        List<IUnit> PassingUnits { get; }
 
         /// <summary>
         /// Default modifier of the movement speed of units passing through this tile
@@ -77,20 +77,20 @@ namespace MHUrho.Logic
 
         bool SpawnUnit(Player player);
 
-        void AddPassingUnit(Unit unit);
+        void AddPassingUnit(IUnit unit);
 
         /// <summary>
         /// Tries to set unit as owning unit, succedes if there is not one already
         /// </summary>
         /// <param name="unit">The new owning unit</param>
         /// <returns>true if set, false if not set</returns>
-        bool TryAddOwningUnit(Unit unit);
+        bool TryAddOwningUnit(IUnit unit);
 
         /// <summary>
         /// Removes a unit from this tile, either the owning unit or one of the passing units
         /// </summary>
         /// <param name="unit">the unit to remove</param>
-        void RemoveUnit(Unit unit);
+        void RemoveUnit(IUnit unit);
 
         StTile Save();
 

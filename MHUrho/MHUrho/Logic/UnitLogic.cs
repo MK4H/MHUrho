@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using MHUrho.Control;
+using MHUrho.Helpers;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using Urho;
@@ -11,18 +14,27 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public class Unit : IUnit
+    public class UnitLogic : Component
     {
         #region Public members
 
-        public int ID { get; private set; }
+        public int UnitID { get; private set; }
 
-        public UnitType Type { get; private set;}
+        public UnitType UnitType { get; private set;}
 
         /// <summary>
         /// Position in the level
         /// </summary>
-        public Vector2 Position { get; private set; }
+        public Vector2 Position {
+            get {
+                Debug.Assert(Node != null, nameof(Node) + " != null");
+                return Node.Position.XZ2();
+            }
+            private set {
+                Debug.Assert(Node != null, nameof(Node) + " != null");
+                Node.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetHeightAt(value), value.Y);
+            }
+        }
 
         /// <summary>
         /// Tile this unit is standing on
@@ -39,7 +51,8 @@ namespace MHUrho.Logic
 
         #region Private members
 
-        private readonly Node node;
+
+        private readonly IUnitPlugin logic;
 
         /// <summary>
         /// Flag to prevent double selection
@@ -71,18 +84,27 @@ namespace MHUrho.Logic
 
         #region Public methods
 
-        public static Unit Load(StUnit storedUnit, Node node) {
-            return new Unit(storedUnit, node);
+        public static UnitLogic Load(PackageManager packageManager, Node node, StUnit storedUnit) {
+            var type = packageManager.GetUnitType(storedUnit.TypeID);
+            if (type == null) {
+                throw new ArgumentException("Type of this unit was not loaded");
+            }
+            return new UnitLogic(type, storedUnit);
+        }
+
+        public static UnitLogic Load(UnitType type, Node node, StUnit storedUnit) {
+            //TODO: Check arguments
+            return new UnitLogic(type, storedUnit);
         }
 
         public StUnit Save() {
             var storedUnit = new StUnit();
-            storedUnit.Id = ID;
+            storedUnit.Id = UnitID;
             storedUnit.Position = new StVector2 {X = Position.X, Y = Position.Y};
             storedUnit.PlayerID = Player.ID;
             storedUnit.Path = path.Save();
             storedUnit.TargetUnitID = target.ID;
-            storedUnit.TypeID = Type.ID;
+            storedUnit.TypeID = UnitType.ID;
             return storedUnit;
         }
 
@@ -90,7 +112,7 @@ namespace MHUrho.Logic
         /// Continues loading by connecting references
         /// </summary>
         public void ConnectReferences() {
-            Type = PackageManager.Instance.GetUnitType(storage.TypeID);
+            UnitType = PackageManager.Instance.GetUnitType(storage.TypeID);
 
             //TODO: Connect other things
 
@@ -180,22 +202,22 @@ namespace MHUrho.Logic
         /// Initializes everything apart from the things referenced by their ID or position
         /// </summary>
         /// <param name="storedUnit">Image of the unit</param>
-        protected Unit(StUnit storedUnit, Node node) {
-            this.node = node;
+        protected UnitLogic(UnitType type, StUnit storedUnit) {
             this.Selected = false;
             this.storage = storedUnit;
-            this.ID = storedUnit.Id;
+            this.UnitID = storedUnit.Id;
+            this.UnitType = type;
             this.path = Path.Load(storedUnit.Path);
             this.Position = new Vector2(storedUnit.Position.X, storedUnit.Position.Y);
+            this.logic = UnitType.UnitLogic.CreateNewInstance(LevelManager.CurrentLevel,Node, this);
         }
         
-        public Unit(UnitType type, Node node, Tile tile, Player player)
+        public UnitLogic(UnitType type, ITile tile, IPlayer player)
         {
-            this.node = node;
             this.Tile = tile;
             this.Position = tile.Center;
             this.Player = player;
-            this.Type = type;
+            this.UnitType = type;
             Selected = false;
         }
 
@@ -204,7 +226,7 @@ namespace MHUrho.Logic
         #region Private Methods
 
         private void InitializeNode() {
-            var staticModel = node.CreateComponent<StaticModel>();
+            var staticModel = Node.CreateComponent<StaticModel>();
         }
 
 

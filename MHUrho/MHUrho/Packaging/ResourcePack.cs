@@ -111,7 +111,6 @@ namespace MHUrho.Packaging {
                                        where element.Attribute("name").Value == name
                                        select element).GetEnumerator();
 
-                tileTypeElements.MoveNext();
                 if (!tileTypeElements.MoveNext()) {
                     throw new ArgumentException("TileType of that name does not exist in this package");
                 }
