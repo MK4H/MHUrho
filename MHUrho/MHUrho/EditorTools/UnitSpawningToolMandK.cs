@@ -105,7 +105,7 @@ namespace MHUrho.EditorTools
                 var tile = input.GetTileUnderCursor();
                 //TODO: Rectangle
                 if (tile != null) {
-                    unitTypeButtons[selected].NewUnit();
+                    //unitTypeButtons[selected].NewUnit();
                 }
             }
         }

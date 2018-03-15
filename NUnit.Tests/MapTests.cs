@@ -24,6 +24,8 @@ namespace NUnit.Tests {
 
             public TileType Type => throw new NotImplementedException();
 
+            public Map Map => throw new NotImplementedException();
+
             public void ConnectReferences() {
                 throw new NotImplementedException();
             }
@@ -61,6 +63,10 @@ namespace NUnit.Tests {
             }
 
             public void SetHeight(float newHeight) {
+                throw new NotImplementedException();
+            }
+
+            public Path GetPath(IUnit forUnit) {
                 throw new NotImplementedException();
             }
 

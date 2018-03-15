@@ -91,7 +91,9 @@ namespace NUnit.Tests {
                 public Vector3 Center3 => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
-               
+
+                public Map Map => throw new NotImplementedException();
+
                 public LevelManager Level => throw new NotImplementedException();
 
                 public void ConnectReferences() {
@@ -132,6 +134,10 @@ namespace NUnit.Tests {
                 }
 
                 public void SetHeight(float newHeight) {
+                    throw new NotImplementedException();
+                }
+
+                public Path GetPath(IUnit forUnit) {
                     throw new NotImplementedException();
                 }
 
@@ -165,7 +171,9 @@ namespace NUnit.Tests {
                 public Vector3 Center3 => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
-               
+
+                public Map Map => throw new NotImplementedException();
+
 
                 public LevelManager Level => throw new NotImplementedException();
 
@@ -206,6 +214,10 @@ namespace NUnit.Tests {
                 }
 
                 public void SetHeight(float newHeight) {
+                    throw new NotImplementedException();
+                }
+
+                public Path GetPath(IUnit forUnit) {
                     throw new NotImplementedException();
                 }
 
