@@ -17,6 +17,10 @@ namespace MHUrho.UserInterface
         private static Color selectedColor = Color.Gray;
         private static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
+        private static Texture2D DefaultButtonTexture =
+            PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+
+
         private readonly MyGame game;
         private readonly GameMandKController inputCtl;
 
@@ -115,6 +119,9 @@ namespace MHUrho.UserInterface
             }
         }
 
+        /// <summary>
+        /// Deactivates buttons and hides them
+        /// </summary>
         public void SelectionBarClearButtons() {
             selectionBarSelected = null;
 
@@ -150,7 +157,7 @@ namespace MHUrho.UserInterface
             button.FocusMode = FocusMode.ResetFocus;
             button.MaxSize = new IntVector2(50, 50);
             button.MinSize = new IntVector2(50, 50);
-            button.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+            button.Texture = tool.Icon ?? DefaultButtonTexture;
 
             tools.Add(button, tool);
 

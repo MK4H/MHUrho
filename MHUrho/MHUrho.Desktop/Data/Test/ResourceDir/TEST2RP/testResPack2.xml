@@ -7,4 +7,11 @@
       <movementSpeed>0.5</movementSpeed>
     </tileType>
   </tileTypes>
+  <unitTypes>
+    <unitType name="TestUnit">
+      <iconPath>sand.jpg</iconPath>
+      <modelPath>Box.mdl</modelPath>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </unitType>
+  </unitTypes>
 </resourcePack>

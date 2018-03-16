@@ -29,31 +29,31 @@ namespace MHUrho.EditorTools
             this.map = map;
             this.unitTypeButtons = new Dictionary<Button, UnitType>();
 
-            //foreach (var tileType in PackageManager.Instance.TileTypes) {
-            //    var tileImage = tileType.GetImage().ConvertToRGBA();
+            foreach (var unitType in PackageManager.Instance.UnitTypes) {
+                var unitIcon = unitType.Icon;
 
-            //    var buttonTexture = new Texture2D();
-            //    buttonTexture.FilterMode = TextureFilterMode.Nearest;
-            //    buttonTexture.SetNumLevels(1);
-            //    buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-            //    buttonTexture.SetData(tileType.GetImage());
+                var buttonTexture = new Texture2D();
+                buttonTexture.FilterMode = TextureFilterMode.Nearest;
+                buttonTexture.SetNumLevels(1);
+                buttonTexture.SetSize(unitIcon.Width, unitIcon.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
+                buttonTexture.SetData(unitIcon);
 
 
 
-            //    var button = new Button();
-            //    button.SetStyle("TextureButton");
-            //    button.Size = new IntVector2(100, 100);
-            //    button.HorizontalAlignment = HorizontalAlignment.Center;
-            //    button.VerticalAlignment = VerticalAlignment.Center;
-            //    button.Pressed += Button_Pressed;
-            //    button.Texture = buttonTexture;
-            //    button.FocusMode = FocusMode.ResetFocus;
-            //    button.MaxSize = new IntVector2(100, 100);
-            //    button.MinSize = new IntVector2(100, 100);
-            //    button.Visible = false;
+                var button = new Button();
+                button.SetStyle("UnitButton");
+                button.Size = new IntVector2(100, 100);
+                button.HorizontalAlignment = HorizontalAlignment.Center;
+                button.VerticalAlignment = VerticalAlignment.Center;
+                button.Pressed += Button_Pressed;
+                button.Texture = buttonTexture;
+                button.FocusMode = FocusMode.ResetFocus;
+                button.MaxSize = new IntVector2(100, 100);
+                button.MinSize = new IntVector2(100, 100);
+                button.Visible = false;
 
-            //    tileTypeButtons.Add(button, tileType);
-            //}
+                unitTypeButtons.Add(button, unitType);
+            }
         }
 
         public void Enable() {

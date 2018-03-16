@@ -12,12 +12,11 @@ namespace MHUrho
         public List<string> PackagePaths { get; protected set; }
 
         public string LogPath { get; private set; }
+        public string StaticDirPath { get; protected set; }
+        public string DynamicDirPath { get; protected set; }
 
         protected string ConfigFilePath;
         protected string DefaultConfigFilePath;
-
-        protected string StaticDirPath;
-        protected string DynamicDirPath;
 
         public static string CorrectRelativePath(string relativePath) {
             if (relativePath == null) {

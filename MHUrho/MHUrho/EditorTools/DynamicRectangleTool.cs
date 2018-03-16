@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.EditorTools
 {
-    class DynamicRectangleTool
+    abstract class DynamicRectangleTool : Tool
     {
     }
 }

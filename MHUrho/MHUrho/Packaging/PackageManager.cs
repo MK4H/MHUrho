@@ -36,6 +36,10 @@ namespace MHUrho.Packaging
 
         public IEnumerable<TileType> TileTypes => activeTileTypes.Values;
 
+        public int UnitTypeCount => activeUnitTypes.Count;
+
+        public IEnumerable<UnitType> UnitTypes => activeUnitTypes.Values;
+
         public TileType DefaultTileType { get; private set; }
 
         private readonly XmlSchemaSet schemas;
@@ -59,7 +63,7 @@ namespace MHUrho.Packaging
                 Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Config.OpenStaticFileRO(ResPacDirSchemaPath)));
             }
             catch (IOException e) {
-                Log.Write(LogLevel.Error, string.Format("Error loading ResroucePack schema: {0}", e));
+                Log.Write(LogLevel.Error, string.Format("Error loading ResourcePack schema: {0}", e));
                 if (Debugger.IsAttached) Debugger.Break();
                 //Reading of static file of this app failed, something is horribly wrong, die
                 //TODO: Error reading static data of app
@@ -93,9 +97,9 @@ namespace MHUrho.Packaging
         public void LoadPackages(StPackages storedPackages) {
             //Remap everything from LevelLocal IDs to Global names so we can check if there are already things loaded
             Dictionary<string, TileType> loadedTileTypes = RemapToFullName(activeTileTypes);
-            activeTileTypes = new Dictionary<int, TileType>();
             Dictionary<string, UnitType> loadedUnitTypes = RemapToFullName(activeUnitTypes);
-            activeUnitTypes = new Dictionary<int, UnitType>();
+
+            ClearActiveTypes();
 
             //Load the packages for this level, if already loaded just remap the ID
             Dictionary<int, ResourcePack>
@@ -108,20 +112,8 @@ namespace MHUrho.Packaging
             {
                 StartLoadingPackages(newActivePackages.Values);
 
-                foreach (var storedTileType in storedPackages.TileTypes) {
-
-                    TileType tileType;
-                    //If already loaded, just get it
-                    if (!loadedTileTypes.TryGetValue(GetFullName(storedTileType.PackageID, storedTileType.Name),
-                                                    out tileType)) {
-                        //Was not loaded, load it from package
-                        tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TileTypeID);
-                    }
-
-                    tileType.ID = storedTileType.TileTypeID;
-                    activeTileTypes.Add( tileType.ID, tileType);
-                }
-
+                LoadTileTypes(storedPackages.TileTypes, loadedTileTypes);
+                LoadUnitTypes(storedPackages.UnitTypes, loadedUnitTypes);
 
                 FinishLoadingPackages(newActivePackages.Values);
             }
@@ -134,13 +126,14 @@ namespace MHUrho.Packaging
         /// <param name="packages"></param>
         public void LoadWholePackages(IEnumerable<string> packages) {
             Dictionary<int, ResourcePack> newLoadedPackages = new Dictionary<int, ResourcePack>();
-            activeTileTypes = new Dictionary<int, TileType>();
+            ClearActiveTypes();
+            
             //Get default pack
-            int defaultPackageID = GetID(newLoadedPackages);
+            int defaultPackageID = GetNewID(newLoadedPackages);
             GetPackage("Default", defaultPackageID, activePackages, newLoadedPackages);
 
             foreach (var package in packages) {
-                GetPackage(package, GetID(newLoadedPackages), activePackages, newLoadedPackages);
+                GetPackage(package, GetNewID(newLoadedPackages), activePackages, newLoadedPackages);
             }
 
             //Unloads the packages that were left in previously loaded packages and not moved
@@ -151,16 +144,16 @@ namespace MHUrho.Packaging
 
             //If it was not loaded, load it with new ID, else just leave it with old ID
             if ((DefaultTileType = newLoadedPackages[defaultPackageID].GetTileType("Default")) == null) {
-                DefaultTileType = newLoadedPackages[defaultPackageID].LoadTileType("Default", GetID(activeTileTypes));
+                DefaultTileType = newLoadedPackages[defaultPackageID].LoadTileType("Default", GetNewID(activeTileTypes));
             }
  
             
 
             foreach (var package in newLoadedPackages.Values) {
-                IEnumerable<TileType> tileTypes = package.LoadAllTileTypes(() =>  GetID(activeTileTypes));
+                IEnumerable<TileType> tileTypes = package.LoadAllTileTypes(() =>  GetNewID(activeTileTypes));
                 AddToActive(tileTypes);
-                //IEnumerable<UnitType> unitTypes = package.LoadAllUnitTypes(() => GetID(activeUnitTypes));
-                //AddToActive(unitTypes);
+                IEnumerable<UnitType> unitTypes = package.LoadAllUnitTypes(() => GetNewID(activeUnitTypes));
+                AddToActive(unitTypes);
             }
         }
 
@@ -282,7 +275,7 @@ namespace MHUrho.Packaging
 
         private const int MaxTries = 10000;
 
-        private int GetID<T>(IDictionary<int, T> dictionary) {
+        private int GetNewID<T>(IDictionary<int, T> dictionary) {
             int id, i = 0;
             while (dictionary.ContainsKey(id = rng.Next())) {
                 i++;
@@ -376,6 +369,46 @@ namespace MHUrho.Packaging
 
         private void AddToActive(IEnumerable<UnitType> unitTypes) {
             foreach (var unitType in unitTypes) {
+                activeUnitTypes.Add(unitType.ID, unitType);
+            }
+        }
+
+        /// <summary>
+        /// Clears <see cref="activeTileTypes"/>, <see cref="activeUnitTypes"/>, ...
+        /// </summary>
+        private void ClearActiveTypes() {
+            activeTileTypes = new Dictionary<int, TileType>();
+            activeUnitTypes = new Dictionary<int, UnitType>();
+        }
+
+        private void LoadTileTypes(IEnumerable<StTileType> storedTileTypes, Dictionary<string, TileType> loadedTileTypes) {
+            foreach (var storedTileType in storedTileTypes) {
+
+                TileType tileType;
+                //If already loaded, just get it
+                if (!loadedTileTypes.TryGetValue(GetFullName(storedTileType.PackageID, storedTileType.Name),
+                                                 out tileType)) {
+                    //Was not loaded, load it from package
+                    tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TileTypeID);
+                }
+
+                tileType.ID = storedTileType.TileTypeID;
+                activeTileTypes.Add(tileType.ID, tileType);
+            }
+        }
+
+        //TODO: Refactor this and the above to be the same generic method
+        private void LoadUnitTypes(IEnumerable<StUnitType> storedUnitTypes, Dictionary<string, UnitType> loadedUnitTypes) {
+            foreach (var storedUnitType in storedUnitTypes) {
+                UnitType unitType;
+                //If already loaded, just get it
+                if (!loadedUnitTypes.TryGetValue(GetFullName(storedUnitType.PackageID, storedUnitType.Name),
+                                                 out unitType)) {
+                    //Was not loaded, load it from package
+                    unitType = activePackages[storedUnitType.PackageID].LoadUnitType(storedUnitType.Name, storedUnitType.UnitTypeID);
+                }
+
+                unitType.ID = storedUnitType.UnitTypeID;
                 activeUnitTypes.Add(unitType.ID, unitType);
             }
         }

@@ -18,7 +18,13 @@ namespace MHUrho.Logic
     {
         #region Public members
 
-        public int UnitID { get; private set; }
+        /// <summary>
+        /// ID of this unit
+        /// Hides component member ID, but having two IDs would be more confusing
+        /// 
+        /// If you need component ID, just cast this to component and access ID
+        /// </summary>
+        public new int ID { get; private set; }
 
         public UnitType UnitType { get; private set;}
 
@@ -65,6 +71,13 @@ namespace MHUrho.Logic
 
         #region Public methods
 
+        /// <summary>
+        /// Loads unit component from <paramref name="storedUnit"/> and adds it to the <paramref name="node"/>
+        /// </summary>
+        /// <param name="packageManager">Package manager to get unitType</param>
+        /// <param name="node">scene node of the unit</param>
+        /// <param name="storedUnit">stored unit</param>
+        /// <returns>Loaded unit component, already added to the node</returns>
         public static Unit Load(PackageManager packageManager, Node node, StUnit storedUnit) {
             var type = packageManager.GetUnitType(storedUnit.TypeID);
             if (type == null) {
@@ -74,16 +87,45 @@ namespace MHUrho.Logic
             return Load(type, node, storedUnit);
         }
 
+        /// <summary>
+        /// Loads unit component of <paramref name="type"/> from <paramref name="storedUnit"/> and adds it to the <paramref name="node"/> 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="node"></param>
+        /// <param name="storedUnit"></param>
+        /// <returns>Loaded unit component, already added to the node</returns>
         public static Unit Load(UnitType type, Node node, StUnit storedUnit) {
-            //TODO: Check arguments
+            //TODO: Check arguments - node cant have more than one Unit component
+            if (type.ID != storedUnit.TypeID) {
+                throw new ArgumentException("provided type is not the type of the stored unit",nameof(type));
+            }
+
             node.AddComponent(new Unit(type, storedUnit));
+            //This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
+            // to this class, and for that i need to set the Position here
             node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
             return node.GetComponent<Unit>();
         }
 
+        /// <summary>
+        /// Creates new instance of the <see cref="Unit"/> component and ads it to the <paramref name="unitNode"/>
+        /// </summary>
+        /// <param name="id">The unique identifier of the unit, must be unique among other units</param>
+        /// <param name="unitNode">Scene node of the unit</param>
+        /// <param name="type">type of the unit</param>
+        /// <param name="tile">tile where the unit will spawn</param>
+        /// <param name="player">owner of the unit</param>
+        /// <returns>the unit component, already added to the node</returns>
+        public static Unit CreateNew(int id, Node unitNode, UnitType type, ITile tile, IPlayer player) {
+            //TODO: Check if there is already a Unit component on this node, if there is, throw exception
+            unitNode.AddComponent(new Unit(id, type, tile, player));
+            unitNode.Position = tile.Center3;
+            return unitNode.GetComponent<Unit>();
+        }
+
         public StUnit Save() {
             var storedUnit = new StUnit();
-            storedUnit.Id = UnitID;
+            storedUnit.Id = ID;
             storedUnit.Position = new StVector3 {X = XZPosition.X, Y = Node.Position.Y, Z = XZPosition.Y};
             storedUnit.PlayerID = Player.ID;
             //storedUnit.Path = path.Save();
@@ -188,13 +230,23 @@ namespace MHUrho.Logic
         /// <param name="storedUnit">Image of the unit</param>
         protected Unit(UnitType type, StUnit storedUnit) {
             this.storage = storedUnit;
-            this.UnitID = storedUnit.Id;
+            this.ID = storedUnit.Id;
             this.UnitType = type;
             this.logic = UnitType.UnitLogic.CreateNewInstance(LevelManager.CurrentLevel,Node, this);
         }
         
-        public Unit(UnitType type, ITile tile, IPlayer player)
+        /// <summary>
+        /// If you want to spawn new unit, call <see cref="LevelManager.SpawnUnit(Logic.UnitType,ITile,IPlayer)"/>
+        /// 
+        /// Constructs new instance of Unit control component
+        /// </summary>
+        /// <param name="id">identifier unique between units </param>
+        /// <param name="type">the type of the unit</param>
+        /// <param name="tile">Tile where the unit spawned</param>
+        /// <param name="player">Owner of the unit</param>
+        protected Unit(int id, UnitType type, ITile tile, IPlayer player)
         {
+            this.ID = id;
             this.Tile = tile;
             this.Player = player;
             this.UnitType = type;

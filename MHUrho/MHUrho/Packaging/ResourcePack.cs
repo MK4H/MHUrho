@@ -253,7 +253,14 @@ namespace MHUrho.Packaging {
 
             List<TileType> loadedTileTypes = new List<TileType>();
 
-            var tileTypeElements = from elements in data.Root.Element(PackageManager.XMLNamespace + "tileTypes").Elements(PackageManager.XMLNamespace + "tileType") select elements;
+            var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
+
+            if (tileTypesElement == null) {
+                //There are no tile types in this package
+                return Enumerable.Empty<TileType>();
+            }
+
+            var tileTypeElements = from elements in tileTypesElement.Elements(PackageManager.XMLNamespace + "tileType") select elements;
 
             foreach (var tileTypeElement in tileTypeElements) {
                 string name = tileTypeElement.Attribute("name").Value;
@@ -282,7 +289,14 @@ namespace MHUrho.Packaging {
 
             List<UnitType> loadedUnitTypes = new List<UnitType>();
 
-            var unitTypeElements = from elements in data.Root.Element(PackageManager.XMLNamespace + "unitTypes").Elements(PackageManager.XMLNamespace + "unitType") select elements;
+            var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
+
+            if (unitTypesElement == null) {
+                //There are no unit types in this package
+                return Enumerable.Empty<UnitType>();
+            }
+
+            var unitTypeElements = from elements in unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType") select elements;
 
             foreach (var unitTypeElement in unitTypeElements) {
                 string name = unitTypeElement.Attribute("name").Value;

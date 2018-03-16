@@ -53,6 +53,10 @@ namespace MHUrho.EditorTools
             enabled = false;
         }
 
+        public override void Dispose() {
+            Disable();
+            highlight?.Dispose();
+        }
         private void MouseDown(MouseButtonDownEventArgs e) {
             centerTile = input.GetTileUnderCursor();
             if (centerTile != null) {
@@ -76,5 +80,7 @@ namespace MHUrho.EditorTools
                 map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
             }
         }
+
+        
     }
 }

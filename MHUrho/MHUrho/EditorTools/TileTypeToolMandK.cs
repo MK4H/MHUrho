@@ -40,7 +40,7 @@ namespace MHUrho.EditorTools
                 buttonTexture.FilterMode = TextureFilterMode.Nearest;
                 buttonTexture.SetNumLevels(1);
                 buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-                buttonTexture.SetData(tileType.GetImage());
+                buttonTexture.SetData(tileImage);
 
 
 

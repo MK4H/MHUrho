@@ -45,6 +45,13 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="unitTypes" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="unitType" type="unitTypeType" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -54,6 +61,15 @@
     <xs:sequence>
       <xs:element name="texturePath" type="xs:string"/>
       <xs:element name="movementSpeed" type="xs:float"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="unitTypeType">
+    <xs:sequence>
+      <xs:element name="iconPath" type="xs:string"/>
+      <xs:element name="modelPath" type="xs:string"/>
+      <xs:element name="assemblyPath" type="xs:string"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string"/>
   </xs:complexType>

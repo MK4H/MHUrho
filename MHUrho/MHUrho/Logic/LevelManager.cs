@@ -30,28 +30,9 @@ namespace MHUrho.Logic
         private CameraController cameraController;
         private IGameController inputController;
 
-        readonly List<Unit> units;
-        
-        /// <summary>
-        /// Spawns new unit of given type into the world map
-        /// </summary>
-        /// <param name="unitType">The unit to be added</param>
-        /// <param name="tile">Tile to spawn the unit at</param>
-        public void SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
-            Node unitNode = Scene.CreateChild("Unit");
+        private readonly Dictionary<int,Unit> units;
 
-            var newUnit = unitType.GetNewUnit(unitNode, tile, player);
-            units.Add(newUnit);
-
-            if (!tile.TryAddOwningUnit(newUnit)) {
-                var targetTile = Map.FindClosestEmptyTile(tile);
-                if (targetTile == null) {
-                    //TODO: There is no closest empty tile, everything is full
-                }
-
-                newUnit.Order(targetTile);
-            }
-        }
+        private readonly Random rng;
 
         public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
@@ -71,7 +52,8 @@ namespace MHUrho.Logic
 
             foreach (var unit in storedLevel.Units) {
                 //TODO: Group units under one node
-                level.units.Add(Unit.Load(PackageManager.Instance, scene.CreateChild("UnitNode"), unit));
+                var loadedUnit = Unit.Load(PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
+                level.units.Add(loadedUnit.ID, loadedUnit);
             }
 
             foreach (var player in storedLevel.Players) {
@@ -139,7 +121,7 @@ namespace MHUrho.Logic
 
             var stUnits = level.Units;
             foreach (var unit in units) {
-                stUnits.Add(unit.Save());
+                stUnits.Add(unit.Value.Save());
             }
 
             var stPlayers = level.Players;
@@ -170,12 +152,35 @@ namespace MHUrho.Logic
                                CameraController cameraController)
         {
             this.Scene = scene;
-            units = new List<Unit>();
+            units = new Dictionary<int, Unit>();
             this.Map = map;
             this.Players = new Player[1];
             Players[0] = new Player(this);
             this.cameraController = cameraController;
             this.inputController = game.menuController.GetGameController(cameraController, this, Players[0]);
+            this.rng = new Random();
+        }
+
+        /// <summary>
+        /// Spawns new unit of given <paramref name="unitType"/> into the world map at <paramref name="tile"/>
+        /// </summary>
+        /// <param name="unitType">The unit to be added</param>
+        /// <param name="tile">Tile to spawn the unit at</param>
+        /// <param name="player">owner of the new unit</param>
+        public void SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
+            Node unitNode = Scene.CreateChild("Unit");
+
+            var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, tile, player);
+            units.Add(newUnit.ID,newUnit);
+
+            if (!tile.TryAddOwningUnit(newUnit)) {
+                var targetTile = Map.FindClosestEmptyTile(tile);
+                if (targetTile == null) {
+                    //TODO: There is no closest empty tile, everything is full
+                }
+
+                newUnit.Order(targetTile);
+            }
         }
 
         private static async void LoadSceneParts(MyGame game, Scene scene) {
@@ -232,7 +237,19 @@ namespace MHUrho.Logic
             return cameraController;
         }
 
+        private const int MaxTries = 10000000;
+        private int GetNewID<T>(IDictionary<int, T> dictionary) {
+            int id, i = 0;
+            while (dictionary.ContainsKey(id = rng.Next())) {
+                i++;
+                if (i > MaxTries) {
+                    //TODO: Exception
+                    throw new Exception("Could not find free ID");
+                }
+            }
 
+            return id;
+        }
 
     }
 }

@@ -56,6 +56,10 @@ namespace MHUrho.EditorTools
             enabled = false;
         }
 
+        public override void Dispose() {
+            Disable();
+        }
+
         private void MouseDown(MouseButtonDownEventArgs e) {
             var tile = input.GetTileUnderCursor();
             //TODO: Raycast into a plane and get point even outside the map
@@ -98,5 +102,7 @@ namespace MHUrho.EditorTools
                 map.HighlightArea(topLeft, bottomRight);
             }
         }
+
+        
     }
 }

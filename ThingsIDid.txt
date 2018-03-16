@@ -1,3 +1,9 @@
 Barycentric coordinates for height at general point inside a tile (Christer Ericson's Real-Time Collision Detection)
 
+Isolate dependence on StUnit only to Unit class
+- that is why Unit is created and loaded by static methods that add the created instance immediately to the provided scene node,
+  so i can set the position of the unit (by setting the position of the node)
+- this would not be possible within constructor, because i could add the unit to node only after the constructor
+
+
 
