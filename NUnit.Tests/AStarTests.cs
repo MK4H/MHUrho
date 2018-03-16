@@ -65,7 +65,7 @@ namespace NUnit.Tests {
                 return tile.MovementSpeedModifier * defaultSpeed;
             }
 
-            public TestUnit(float speed, ITile tile, Vector2 position): base(null, null) {
+            public TestUnit(float speed, ITile tile, Vector2 position): base(null, null, null, null) {
                 this.defaultSpeed = speed;
                 this.Tile = tile;
                 this.Position = position;
@@ -134,6 +134,10 @@ namespace NUnit.Tests {
                 }
 
                 public void SetHeight(float newHeight) {
+                    throw new NotImplementedException();
+                }
+
+                public void CornerHeightChange() {
                     throw new NotImplementedException();
                 }
 
@@ -214,6 +218,10 @@ namespace NUnit.Tests {
                 }
 
                 public void SetHeight(float newHeight) {
+                    throw new NotImplementedException();
+                }
+
+                public void CornerHeightChange() {
                     throw new NotImplementedException();
                 }
 

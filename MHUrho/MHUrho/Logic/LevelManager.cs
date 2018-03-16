@@ -15,6 +15,9 @@ namespace MHUrho.Logic
 
     public class LevelManager
     {
+        /// <summary>
+        /// Currently running level, CANNOT BE USED DURING LOADING
+        /// </summary>
         public static LevelManager CurrentLevel { get; private set; }
 
         public float GameSpeed { get; set; } = 1f;
@@ -23,14 +26,12 @@ namespace MHUrho.Logic
 
         public Scene Scene { get; private set; }
 
-        //TODO: Probably not public
-        public Player[] Players;
 
-        
         private CameraController cameraController;
         private IGameController inputController;
 
         private readonly Dictionary<int,Unit> units;
+        private readonly Dictionary<int, Player> players;
 
         private readonly Random rng;
 
@@ -46,32 +47,50 @@ namespace MHUrho.Logic
             Node mapNode = scene.CreateChild("MapNode");
             var map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(game, map, scene, cameraController);
+            LevelManager level = new LevelManager(map, scene, cameraController);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
             foreach (var unit in storedLevel.Units) {
                 //TODO: Group units under one node
-                var loadedUnit = Unit.Load(PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
+                var loadedUnit = Unit.Load(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
                 level.units.Add(loadedUnit.ID, loadedUnit);
             }
 
-            foreach (var player in storedLevel.Players) {
-                //TODO: Load players
-            }
+            //TODO: Remove this
+            Player firstPlayer = null;
 
+            foreach (var player in storedLevel.Players) {
+                var loadedPlayer = Player.Load(player);
+                //TODO: If player needs controller, give him
+                if (firstPlayer == null) {
+                    firstPlayer = loadedPlayer;
+                }
+
+                level.players.Add(loadedPlayer.ID, loadedPlayer);
+            }
+            //TODO: Move this inside the foreach
+            level.inputController = game.menuController.GetGameController(cameraController, level, firstPlayer);
+            
             //Connect references
             map.ConnectReferences();
 
-            //level.units.ForEach((unit) => { unit.ConnectReferences(); });
+            foreach (var unit in level.units.Values) {
+                unit.ConnectReferences(level);
+            }
 
+            foreach (var player in level.players.Values) {
+                player.ConnectReferences(level);
+            }
 
 
             //Build geometry and other things
 
             map.FinishLoading();
 
-            //level.units.ForEach((unit) => { unit.FinishLoading(); });
+            foreach (var unit in level.units.Values) {
+                unit.FinishLoading();
+            }
 
             CurrentLevel = level;
             return level;
@@ -89,7 +108,6 @@ namespace MHUrho.Logic
         /// <summary>
         /// Loads default level to use in level builder as basis, loads specified packages plus default package
         /// </summary>
-        /// <param name="levelNode">Scene node of the level</param>
         /// <param name="mapSize">Size of the map to create</param>
         /// <param name="packages">packages to load</param>
         /// <returns>Loaded default level</returns>
@@ -107,7 +125,14 @@ namespace MHUrho.Logic
 
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
 
-            CurrentLevel = new LevelManager(game, map, scene, cameraController);
+            CurrentLevel = new LevelManager(map, scene, cameraController);
+
+
+            //TODO: Temporary player
+            var player = new Player(CurrentLevel.GetNewID(CurrentLevel.players));
+            CurrentLevel.players.Add(player.ID, player);
+            CurrentLevel.inputController = game.menuController.GetGameController(cameraController, CurrentLevel, player);
+
             return CurrentLevel;
         }
 
@@ -125,7 +150,7 @@ namespace MHUrho.Logic
             }
 
             var stPlayers = level.Players;
-            foreach (var player in Players) {
+            foreach (var player in players.Values) {
                 stPlayers.Add(player.Save());
             }
 
@@ -146,19 +171,18 @@ namespace MHUrho.Logic
             CurrentLevel = null;
         }
 
-        protected LevelManager(MyGame game,
-                               Map map, 
+        protected LevelManager(Map map, 
                                Scene scene, 
                                CameraController cameraController)
         {
             this.Scene = scene;
-            units = new Dictionary<int, Unit>();
-            this.Map = map;
-            this.Players = new Player[1];
-            Players[0] = new Player(this);
-            this.cameraController = cameraController;
-            this.inputController = game.menuController.GetGameController(cameraController, this, Players[0]);
+            this.units = new Dictionary<int, Unit>();
+            this.players = new Dictionary<int, Player>();
             this.rng = new Random();
+            this.Map = map;
+
+            this.cameraController = cameraController;
+           
         }
 
         /// <summary>
@@ -170,8 +194,9 @@ namespace MHUrho.Logic
         public void SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
             Node unitNode = Scene.CreateChild("Unit");
 
-            var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, tile, player);
+            var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, this, tile, player);
             units.Add(newUnit.ID,newUnit);
+            player.AddUnit(newUnit);
 
             if (!tile.TryAddOwningUnit(newUnit)) {
                 var targetTile = Map.FindClosestEmptyTile(tile);
@@ -181,6 +206,21 @@ namespace MHUrho.Logic
 
                 newUnit.Order(targetTile);
             }
+        }
+
+        public Unit GetUnit(int ID) {
+            if (!units.TryGetValue(ID, out Unit value)) {
+                throw new ArgumentOutOfRangeException("Unit with this ID does not exist in the current level");
+            }
+            return value;
+        }
+
+        public Player GetPlayer(int ID) {
+            if (!players.TryGetValue(ID, out Player player)) {
+                throw new ArgumentOutOfRangeException("Player with this ID does not exist in the current level");
+            }
+
+            return player;
         }
 
         private static async void LoadSceneParts(MyGame game, Scene scene) {

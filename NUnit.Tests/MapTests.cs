@@ -66,6 +66,10 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public void CornerHeightChange() {
+                throw new NotImplementedException();
+            }
+
             public Path GetPath(Unit forUnit) {
                 throw new NotImplementedException();
             }

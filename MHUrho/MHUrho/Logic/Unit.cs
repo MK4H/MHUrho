@@ -72,35 +72,38 @@ namespace MHUrho.Logic
         #region Public methods
 
         /// <summary>
-        /// Loads unit component from <paramref name="storedUnit"/> and adds it to the <paramref name="node"/>
+        /// Loads unit component from <paramref name="storedUnit"/> and all other needed components
+        ///  and adds them to the <paramref name="node"/>
         /// </summary>
+        /// <param name="level"></param>
         /// <param name="packageManager">Package manager to get unitType</param>
         /// <param name="node">scene node of the unit</param>
         /// <param name="storedUnit">stored unit</param>
         /// <returns>Loaded unit component, already added to the node</returns>
-        public static Unit Load(PackageManager packageManager, Node node, StUnit storedUnit) {
+        public static Unit Load(LevelManager level, PackageManager packageManager, Node node, StUnit storedUnit) {
             var type = packageManager.GetUnitType(storedUnit.TypeID);
             if (type == null) {
                 throw new ArgumentException("Type of this unit was not loaded");
             }
 
-            return Load(type, node, storedUnit);
+            return type.LoadUnit(level, node, storedUnit);
         }
 
         /// <summary>
-        /// Loads unit component of <paramref name="type"/> from <paramref name="storedUnit"/> and adds it to the <paramref name="node"/> 
+        /// Loads ONLY the unit component of <paramref name="type"/> from <paramref name="storedUnit"/> and adds it to the <paramref name="node"/> 
+        /// If you use this, you still need to add Model, Materials and other behavior to the unit
         /// </summary>
         /// <param name="type"></param>
         /// <param name="node"></param>
         /// <param name="storedUnit"></param>
         /// <returns>Loaded unit component, already added to the node</returns>
-        public static Unit Load(UnitType type, Node node, StUnit storedUnit) {
+        public static Unit Load(LevelManager level, UnitType type, Node node, StUnit storedUnit) {
             //TODO: Check arguments - node cant have more than one Unit component
             if (type.ID != storedUnit.TypeID) {
                 throw new ArgumentException("provided type is not the type of the stored unit",nameof(type));
             }
 
-            node.AddComponent(new Unit(type, storedUnit));
+            node.AddComponent(new Unit(level, type, node, storedUnit));
             //This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
             // to this class, and for that i need to set the Position here
             node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
@@ -116,9 +119,9 @@ namespace MHUrho.Logic
         /// <param name="tile">tile where the unit will spawn</param>
         /// <param name="player">owner of the unit</param>
         /// <returns>the unit component, already added to the node</returns>
-        public static Unit CreateNew(int id, Node unitNode, UnitType type, ITile tile, IPlayer player) {
+        public static Unit CreateNew(int id, Node unitNode, UnitType type, LevelManager level, ITile tile, IPlayer player) {
             //TODO: Check if there is already a Unit component on this node, if there is, throw exception
-            unitNode.AddComponent(new Unit(id, type, tile, player));
+            unitNode.AddComponent(new Unit(id, type, level, unitNode, tile, player));
             unitNode.Position = tile.Center3;
             return unitNode.GetComponent<Unit>();
         }
@@ -137,7 +140,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Continues loading by connecting references
         /// </summary>
-        public void ConnectReferences() {
+        public void ConnectReferences(LevelManager level) {
             if (storage.Path != null ) {
                 var walker = GetComponent<WorldWalker>();
                 if (walker == null) {
@@ -149,7 +152,7 @@ namespace MHUrho.Logic
                 walker.GoAlong(Path.Load(storage.Path));
             }
 
-
+            Player = level.GetPlayer(storage.PlayerID);
             //TODO: Connect other things
 
         }
@@ -220,6 +223,10 @@ namespace MHUrho.Logic
             return tile.MovementSpeedModifier;
         }
 
+
+        public void SetHeight(float newHeight) {
+            Node.Position = new Vector3(Node.Position.X, newHeight, Node.Position.Z);
+        }
         #endregion
 
         #region Constructors
@@ -227,12 +234,15 @@ namespace MHUrho.Logic
         /// <summary>
         /// Initializes everything apart from the things referenced by their ID or position
         /// </summary>
+        /// <param name="level">level into which the unit is being loaded</param>
+        /// <param name="type">type of the loading unit</param>
+        /// <param name="unitNode"></param>
         /// <param name="storedUnit">Image of the unit</param>
-        protected Unit(UnitType type, StUnit storedUnit) {
+        protected Unit(LevelManager level, UnitType type, Node unitNode, StUnit storedUnit) {
             this.storage = storedUnit;
             this.ID = storedUnit.Id;
             this.UnitType = type;
-            this.logic = UnitType.UnitLogic.CreateNewInstance(LevelManager.CurrentLevel,Node, this);
+            this.logic = UnitType.UnitLogic.CreateNewInstance(level, unitNode, this);
         }
         
         /// <summary>
@@ -242,14 +252,17 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="id">identifier unique between units </param>
         /// <param name="type">the type of the unit</param>
+        /// <param name="level"></param>
+        /// <param name="unitNode"></param>
         /// <param name="tile">Tile where the unit spawned</param>
         /// <param name="player">Owner of the unit</param>
-        protected Unit(int id, UnitType type, ITile tile, IPlayer player)
+        protected Unit(int id, UnitType type, LevelManager level, Node unitNode, ITile tile, IPlayer player)
         {
             this.ID = id;
             this.Tile = tile;
             this.Player = player;
             this.UnitType = type;
+            this.logic = type.UnitLogic.CreateNewInstance(level, unitNode, this);
         }
 
         #endregion

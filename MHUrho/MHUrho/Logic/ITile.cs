@@ -75,8 +75,6 @@ namespace MHUrho.Logic
 
         void FinishLoading();
 
-        bool SpawnUnit(Player player);
-
         void AddPassingUnit(Unit unit);
 
         /// <summary>
@@ -103,18 +101,25 @@ namespace MHUrho.Logic
         /// <summary>
         /// Called by the Map to change height
         /// 
-        /// If you want to change height, go through TODO:LINK MAP FUNCTION TO CHANGE TILE HEIGHT
+        /// If you want to change height, go through <see cref="Map.ChangeTileHeight(ITile, float)"/>
         /// </summary>
         /// <param name="heightDelta"></param>
-        void ChangeHeight(float heightDelta);
+        /// <param name="signalNeighbours">If <see cref="ChangeHeight(float, bool)"/> should signal neighbours automatically
+        /// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
+        void ChangeHeight(float heightDelta, bool signalNeighbours = true);
 
         /// <summary>
-        /// Called by the Map to set height
-        /// 
-        /// If you want to set height, go through TODO:LINK MAP FUNCTION TO CHANGE TILE HEIGHT
+        /// Sets the height of the top left corner of the tile to <paramref name="newHeight"/>
         /// </summary>
-        /// <param name="newHeight"></param>
-        void SetHeight(float newHeight);
+        /// <param name="newHeight">the height to set</param>
+        /// <param name="signalNeighbours">If <see cref="SetHeight(float, bool)"/> should signal neighbours automatically
+        /// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
+        void SetHeight(float newHeight, bool signalNeighbours = true);
+
+        /// <summary>
+        /// Is called every time any of the 4 corners of the tile change height
+        /// </summary>
+        void CornerHeightChange();
 
         Path GetPath(Unit forUnit);
 

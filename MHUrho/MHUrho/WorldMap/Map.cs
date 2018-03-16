@@ -68,6 +68,7 @@ namespace MHUrho.WorldMap
                 private set => TopLeftHeight = value;
             }
 
+            //TODO: WHEN SETTING THESE CORNERHEIGHTCHANGE is NOT called
             public float TopLeftHeight { get; set; }
             public float TopRightHeight { get; set; }
             public float BotLeftHeight { get; set; }
@@ -85,10 +86,6 @@ namespace MHUrho.WorldMap
 
             public void FinishLoading() {
                 storage = null;
-            }
-
-            bool ITile.SpawnUnit(Player player) {
-                throw new InvalidOperationException("Cannot add unit to Border tile");
             }
 
             void ITile.AddPassingUnit(Unit unit) {
@@ -123,12 +120,22 @@ namespace MHUrho.WorldMap
                 Type = newType;
             }
 
-            public void ChangeHeight(float heightDelta) {
+            public void ChangeHeight(float heightDelta, bool signalNeighbours = true) {
                 Height += heightDelta;
+                if (signalNeighbours) {
+                    Map.ForEachAroundCorner(Location, (tile) => { tile.CornerHeightChange(); });
+                }
             }
 
-            public void SetHeight(float newHeight) {
+            public void SetHeight(float newHeight, bool signalNeighbours = true) {
                 Height = newHeight;
+                if (signalNeighbours) {
+                    Map.ForEachAroundCorner(Location, (tile) => { tile.CornerHeightChange(); });
+                }
+            }
+
+            public void CornerHeightChange() {
+                //Nothing
             }
 
             public Path GetPath(Unit forUnit) {
@@ -707,7 +714,7 @@ namespace MHUrho.WorldMap
         }
 
         public void ChangeTileHeight(ITile tile, float heightDelta) {
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -781,16 +788,18 @@ namespace MHUrho.WorldMap
                                  (y == bottomRight.Y && x != topLeft.X)) {
                             //Only the right side tiles need to change on the border if they are normal inner tiles
                             // excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
-                            GetTile(x, y).ChangeHeight(heightDelta);
+                            GetTile(x, y).ChangeHeight(heightDelta, false);
                         } 
                     }
                     else {
                         //inner tile
                         Debug.Assert(!IsBorder(x, y));
-                        GetTile(x, y).ChangeHeight(heightDelta);
+                        GetTile(x, y).ChangeHeight(heightDelta, false);
                     }
                 }
             }
+
+            ForEachInRectangle(topLeft, bottomRight, (tile) => { tile.CornerHeightChange(); });
 
             graphics.CorrectTileHeight(topLeft, bottomRight);
 
@@ -902,17 +911,19 @@ namespace MHUrho.WorldMap
                             //Only the right side tiles need to change on the border if they are normal inner tiles
                             // excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
                             ITile tile = GetTile(x, y);
-                            tile.SetHeight(newHeightFunction(tile.Height, x, y));
+                            tile.SetHeight(newHeightFunction(tile.Height, x, y), false);
                         }
                     }
                     else {
                         //inner tile
                         Debug.Assert(!IsBorder(x, y));
                         ITile tile = GetTile(x, y);
-                        tile.SetHeight(newHeightFunction(tile.Height, x, y));
+                        tile.SetHeight(newHeightFunction(tile.Height, x, y), false);
                     }
                 }
             }
+
+            ForEachInRectangle(topLeft, bottomRight, (tile) => { tile.CornerHeightChange(); });
 
             graphics.CorrectTileHeight(topLeft, bottomRight);
         }
@@ -960,10 +971,10 @@ namespace MHUrho.WorldMap
 
                 //Barycentric coordinates
                 float v = botLeftToTargetDistance.X; //botRight coef
-                float w = botLeftToTargetDistance.Y; //topLeft coef
+                float w = -botLeftToTargetDistance.Y; //topLeft coef, inverted because we are counting from botLeft
                 float u = 1.0f - v - w; //botLeft or topRight coef
 
-                if (u <= 1) {
+                if (u >= 0) {
                     //In bottom left triangle
                     return u * botLeftHeight + v * botRightHeight + w * topLeftHeight;
                 }
@@ -985,7 +996,7 @@ namespace MHUrho.WorldMap
                 float w = topLeftToTargetDistance.Y; //bottomLeft coef
                 float u = 1.0f - v - w; //topLeft or bottomRight coef
 
-                if (u <= 1) {
+                if (u >= 0) {
                     //In top left triangle
 
                     return u * topLeftHeight + v * topRightHeight + w * botLeftHeight;
@@ -1098,6 +1109,24 @@ namespace MHUrho.WorldMap
             ForEachInRectangle(rectangle.TopLeft(), rectangle.BottomRight(), action);
         }
 
+        public void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action) {
+            ITile tile;
+            if ((tile = GetTileWithBorders(cornerCoords)) != null) {
+                action(tile);
+            }
+
+            if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(-1, 0))) != null) {
+                action(tile);
+            }
+
+            if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(0, -1))) != null) {
+                action(tile);
+            }
+
+            if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(-1, -1))) != null) {
+                action(tile);
+            }
+        }
 
         public void Dispose() {
             ((IDisposable) graphics).Dispose();

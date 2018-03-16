@@ -36,5 +36,13 @@ namespace MHUrho.Control {
         void ClearSelected();
 
         StPlayer Save();
+
+        void ConnectReferences(LevelManager level);
+
+        void FinishLoading();
+
+        void AddUnit(Unit unit);
+
+        void RemoveUnit(Unit unit);
     }
 }

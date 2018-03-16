@@ -106,23 +106,56 @@ namespace MHUrho.Control
 
         public Selected Selected { get; set; }
 
-        readonly LevelManager level;
+        private readonly List<IPlayer> friends;
 
-        List<IPlayer> friends;
+        private readonly List<Unit> units;
 
-        List<Unit> units;
+        private StPlayer storedPlayer;
 
-        
-
-        public Player(LevelManager level) {
-            this.level = level;
+        public Player(int ID) {
+            this.ID = ID;
             units = new List<Unit>();
+            friends = new List<IPlayer>();
+        }
+
+        protected Player(StPlayer storedPlayer) 
+            : this(storedPlayer.PlayerID) {
+            this.storedPlayer = storedPlayer;
+        }
+
+        public static Player Load(StPlayer storedPlayer) {
+            var newPlayer = new Player(storedPlayer);
+            return newPlayer;
         }
 
         public StPlayer Save() {
             var storedPlayer = new StPlayer();
-            //TODO: THIS
+
+            storedPlayer.PlayerID = ID;
+
+            var stUnitIDs = storedPlayer.UnitIDs;
+            foreach (var unit in units) {
+                stUnitIDs.Add(unit.ID);
+            }
+
+            //TODO: Buildings
+
+            var stFriendIDs = storedPlayer.FriendPlayerIDs;
+            foreach (var friend in friends) {
+                stFriendIDs.Add(friend.ID);
+            }
+
             return storedPlayer;
+        }
+
+        public void ConnectReferences(LevelManager level) {
+            foreach (var unitID in storedPlayer.UnitIDs) {
+                units.Add(level.GetUnit(unitID));
+            }
+        }
+
+        public void FinishLoading() {
+            storedPlayer = null;
         }
 
         public void HandleRaycast(RayQueryResult rayQueryResult) {
@@ -153,6 +186,18 @@ namespace MHUrho.Control
 
         public void HandleRaycast(List<RayQueryResult> rayQueryResults) {
 
+        }
+
+        /// <summary>
+        /// Adds unit to players units
+        /// </summary>
+        /// <param name="unit">unit to add</param>
+        public void AddUnit(Unit unit) {
+            units.Add(unit);
+        }
+
+        public void RemoveUnit(Unit unit) {
+            units.Remove(unit);
         }
 
         /// <summary>

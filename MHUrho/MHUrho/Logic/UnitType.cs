@@ -73,11 +73,12 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="unitID">identifier unique between units</param>
         /// <param name="unitNode">scene node of the new unit</param>
+        /// <param name="level">Level where the unit is being created</param>
         /// <param name="tile">tile where the unit will spawn</param>
         /// <param name="player">owner of the unit</param>
         /// <returns>New unit of this type</returns>
-        public Unit CreateNewUnit(int unitID, Node unitNode, ITile tile, IPlayer player) {
-            var unit = Unit.CreateNew(unitID, unitNode, this, tile, player);
+        public Unit CreateNewUnit(int unitID, Node unitNode, LevelManager level, ITile tile, IPlayer player) {
+            var unit = Unit.CreateNew(unitID, unitNode, this, level, tile, player);
             AddComponents(unitNode);
 
             return unit;
@@ -90,12 +91,13 @@ namespace MHUrho.Logic
         /// Also adds all other components needed by this <see cref="UnitType"/>
         /// Needs to be followed by <see cref="Unit.ConnectReferences"/> and then <see cref="Unit.FinishLoading"/>
         /// </summary>
+        /// <param name="level"></param>
         /// <param name="unitNode">scene node representing the new unit</param>
         /// <param name="storedUnit"></param>
         /// <returns>Unit in first stage of loading, needs to be followed by <see cref="Unit.ConnectReferences"/> and
         /// <see cref="Unit.FinishLoading"/></returns>
-        public Unit LoadUnit(Node unitNode, StUnit storedUnit) {
-            var unit = Unit.Load(this, unitNode, storedUnit);
+        public Unit LoadUnit(LevelManager level, Node unitNode, StUnit storedUnit) {
+            var unit = Unit.Load(level, this, unitNode, storedUnit);
             AddComponents(unitNode);
             return unit;
         }
