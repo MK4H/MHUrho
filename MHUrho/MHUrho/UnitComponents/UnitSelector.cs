@@ -35,5 +35,7 @@ namespace MHUrho.UnitComponents
         //public void Ordered(IBuilding building) {
 
         //}
+
+        //TODO: Hook up a reaction to unit death to deselect it from all tools
     }
 }

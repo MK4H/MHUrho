@@ -111,12 +111,24 @@ namespace MHUrho.UserInterface
         public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
 
             foreach (var button in buttons) {
-                button.HoverBegin += Button_HoverBegin;
-                button.HoverBegin += UIHoverBegin;
-                button.HoverEnd += Button_HoverEnd;
-                button.HoverEnd += UIHoverEnd;
-                button.Visible = true;
+                SelectionBarShowButton(button);
             }
+        }
+
+        public void SelectionBarShowButton(Button button) {
+            if (selectionBar.FindChild(button) == uint.MaxValue) {
+                throw new ArgumentException("button is not a child of the selectionBar");
+            }
+
+            button.HoverBegin += Button_HoverBegin;
+            button.HoverBegin += UIHoverBegin;
+            button.HoverEnd += Button_HoverEnd;
+            button.HoverEnd += UIHoverEnd;
+            button.Visible = true;
+        }
+
+        public void SelectionBarAddButton(Button button) {
+            selectionBar.AddChild(button);
         }
 
         /// <summary>
@@ -126,11 +138,13 @@ namespace MHUrho.UserInterface
             selectionBarSelected = null;
 
             foreach (Button button in selectionBar.Children) {
-                button.HoverBegin -= Button_HoverBegin;
-                button.HoverBegin -= UIHoverBegin;
-                button.HoverEnd -= Button_HoverEnd;
-                button.HoverEnd -= UIHoverEnd;
-                button.Visible = false;
+                if (button.Visible) {
+                    button.HoverBegin -= Button_HoverBegin;
+                    button.HoverBegin -= UIHoverBegin;
+                    button.HoverEnd -= Button_HoverEnd;
+                    button.HoverEnd -= UIHoverEnd;
+                    button.Visible = false;
+                }
             }
         }
 

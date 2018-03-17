@@ -107,7 +107,12 @@ namespace MHUrho.Logic
             Model.Dispose();
         }
 
+        /// <summary>
+        /// Adds components according to the XML file
+        /// </summary>
+        /// <param name="unitNode"></param>
         private void AddComponents(Node unitNode) {
+            //TODO: READ FROM XML
             //TODO: Animated model
             var staticModel = unitNode.CreateComponent<StaticModel>();
             staticModel.Model = Model;
