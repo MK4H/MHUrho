@@ -1100,7 +1100,11 @@ namespace MHUrho.WorldMap
         public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
             for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
                 for (int x = topLeft.X; x <= bottomRight.X; x++) {
-                    action(GetTile(x, y));
+                    var tile = GetTile(x, y);
+                    if (tile != null) {
+                        action(tile);
+                    }
+                    
                 }
             }
         }

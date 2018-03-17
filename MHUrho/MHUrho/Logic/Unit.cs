@@ -134,6 +134,9 @@ namespace MHUrho.Logic
             //storedUnit.Path = path.Save();
             //storedUnit.TargetUnitID = target.UnitID;
             storedUnit.TypeID = UnitType.ID;
+
+#error Save state of the plugin
+            //TODO: Selection after load does not work because they dont have the selector component added to them
             return storedUnit;
         }
 
