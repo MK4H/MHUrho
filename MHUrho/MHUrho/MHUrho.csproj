@@ -11,43 +11,10 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.5.1" />
     <PackageReference Include="OptimizedPriorityQueue" Version="4.1.1" />
-    <PackageReference Include="UrhoSharp" Version="1.8.65" />
+    <PackageReference Include="UrhoSharp" Version="1.8.91" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Storage\GameState.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>GameState.proto</DependentUpon>
-    </Compile>
-    <Compile Update="Storage\PluginStorage.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>PluginStorage.proto</DependentUpon>
-    </Compile>
-    <Compile Update="Storage\UrhoTypes.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>UrhoTypes.proto</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Storage\GameState.proto">
-      <Generator>ProtobufGenerator</Generator>
-      <LastGenOutput>GameState.cs</LastGenOutput>
-    </None>
-    <None Update="Storage\MHUrhoTypes.proto">
-      <Generator>ProtobufGenerator</Generator>
-    </None>
-    <None Update="Storage\PluginStorage.proto">
-      <Generator>ProtobufGenerator</Generator>
-      <LastGenOutput>PluginStorage.cs</LastGenOutput>
-    </None>
-    <None Update="Storage\UrhoTypes.proto">
-      <Generator>ProtobufGenerator</Generator>
-      <LastGenOutput>UrhoTypes.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
+  <PropertyGroup>
+    <ProtoIncludes>.;Storage</ProtoIncludes>
+  </PropertyGroup>
 </Project>

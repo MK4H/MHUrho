@@ -26,7 +26,7 @@ namespace NUnit.Tests {
 
             public Map Map => throw new NotImplementedException();
 
-            public void ConnectReferences() {
+            public void ConnectReferences(LevelManager level) {
                 throw new NotImplementedException();
             }
 

@@ -96,7 +96,7 @@ namespace NUnit.Tests {
 
                 public LevelManager Level => throw new NotImplementedException();
 
-                public void ConnectReferences() {
+                public void ConnectReferences(LevelManager level) {
                     throw new NotImplementedException();
                 }
 
@@ -177,7 +177,7 @@ namespace NUnit.Tests {
 
                 public LevelManager Level => throw new NotImplementedException();
 
-                public void ConnectReferences() {
+                public void ConnectReferences(LevelManager level) {
                     throw new NotImplementedException();
                 }
 

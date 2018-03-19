@@ -5,7 +5,7 @@ using Urho;
 
 namespace MHUrho.Storage
 {
-    public class PluginDataStorage {
+    public class PluginDataWrapper {
         Google.Protobuf.Collections.MapField<string, Data> map;
 
         public void Store<T>(string key, T value) {
@@ -230,8 +230,8 @@ namespace MHUrho.Storage
             throw new ArgumentException("Given type does not equal the stored type", nameof(T));
         }
 
-        public PluginDataStorage(Google.Protobuf.Collections.MapField<string, Data> map) {
-            this.map = map;
+        public PluginDataWrapper(PluginData pluginData) {
+            this.map = pluginData.DataMap;
         }
     }
 }

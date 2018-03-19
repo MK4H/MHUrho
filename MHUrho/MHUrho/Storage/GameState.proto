@@ -2,7 +2,6 @@
 package MHUrho.Storage;
 
 import "UrhoTypes.proto";
-import "MHUrhoTypes.proto";
 import "PluginStorage.proto";
 
 message StLevel {
@@ -49,10 +48,9 @@ message StUnit {
 	int32 typeID = 2;
 	StVector3 position = 3;
 	int32 playerID = 4;
-	StPath path = 5;
-	int32 targetUnitID = 6;
-	PluginData userPlugin = 7;
-	map<string,PluginData> defaultComponentData = 8;
+	int32 targetUnitID = 5;
+	PluginData userPlugin = 6;
+	map<string,PluginData> defaultComponentData = 7;
 }
 
 message StBuilding {

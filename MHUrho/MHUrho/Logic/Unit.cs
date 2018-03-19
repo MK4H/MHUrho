@@ -137,10 +137,9 @@ namespace MHUrho.Logic
             //storedUnit.TargetUnitID = target.UnitID;
             storedUnit.TypeID = UnitType.ID;
 
-            //TODO: Selection after load does not work because they dont have the selector component added to them
+
             storedUnit.UserPlugin = new PluginData();
-            var pluginDataWrapper = new PluginDataStorage(storedUnit.UserPlugin.DataMap);
-            logic.SaveState(pluginDataWrapper);
+            logic.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
@@ -156,17 +155,6 @@ namespace MHUrho.Logic
         /// Continues loading by connecting references and loading components
         /// </summary>
         public void ConnectReferences(LevelManager level) {
-            if (storage.Path != null ) {
-                var walker = GetComponent<WorldWalker>();
-                if (walker == null) {
-                    //TODO: Exception
-                    throw new
-                        Exception("Corrupted save file, unit has stored path even though it does not have a WorldWalker");
-                }
-
-                walker.GoAlong(Path.Load(storage.Path));
-            }
-
             Player = level.GetPlayer(storage.PlayerID);
             //TODO: Connect other things
 
@@ -260,7 +248,7 @@ namespace MHUrho.Logic
             this.storage = storedUnit;
             this.ID = storedUnit.Id;
             this.UnitType = type;
-            this.logic = UnitType.UnitLogic.CreateNewInstance(level, unitNode, this);
+            this.logic = UnitType.UnitLogic.LoadNewInstance(level, unitNode, this, new PluginDataWrapper(storedUnit.UserPlugin));
         }
         
         /// <summary>

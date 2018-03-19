@@ -156,7 +156,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Urho, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\UrhoSharp.1.8.65\lib\Xamarin.iOS10\Urho.dll</HintPath>
+      <HintPath>..\..\packages\UrhoSharp.1.8.91\lib\Xamarin.iOS10\Urho.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>

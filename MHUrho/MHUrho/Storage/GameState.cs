@@ -23,53 +23,51 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg9HYW1lU3RhdGUucHJvdG8SDk1IVXJoby5TdG9yYWdlGg9VcmhvVHlwZXMu",
-            "cHJvdG8aEU1IVXJob1R5cGVzLnByb3RvGhNQbHVnaW5TdG9yYWdlLnByb3Rv",
-            "IsABCgdTdExldmVsEiIKA21hcBgBIAEoCzIVLk1IVXJoby5TdG9yYWdlLlN0",
-            "TWFwEiUKBXVuaXRzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2UuU3RVbml0EikK",
-            "B3BsYXllcnMYAyADKAsyGC5NSFVyaG8uU3RvcmFnZS5TdFBsYXllchIRCgln",
-            "YW1lU3BlZWQYBCABKAISLAoIcGFja2FnZXMYBSABKAsyGi5NSFVyaG8uU3Rv",
-            "cmFnZS5TdFBhY2thZ2VzIs4BCgpTdFBhY2thZ2VzEisKCHBhY2thZ2VzGAEg",
-            "AygLMhkuTUhVcmhvLlN0b3JhZ2UuU3RQYWNrYWdlEi0KCXRpbGVUeXBlcxgC",
-            "IAMoCzIaLk1IVXJoby5TdG9yYWdlLlN0VGlsZVR5cGUSLQoJdW5pdFR5cGVz",
-            "GAMgAygLMhouTUhVcmhvLlN0b3JhZ2UuU3RVbml0VHlwZRI1Cg1idWlsZGlu",
-            "Z1R5cGVzGAQgAygLMh4uTUhVcmhvLlN0b3JhZ2UuU3RCdWlsZGluZ1R5cGUi",
-            "JQoJU3RQYWNrYWdlEgoKAklEGAEgASgFEgwKBG5hbWUYAiABKAkinAEKBlN0",
-            "VGlsZRIOCgZ1bml0SUQYASABKAUSFgoOcGFzc2luZ1VuaXRJRHMYAiADKAUS",
-            "EgoKdGlsZVR5cGVJRBgDIAEoBRIuCghwb3NpdGlvbhgEIAEoCzIcLk1IVXJo",
-            "by5TdG9yYWdlLlN0SW50VmVjdG9yMhIOCgZoZWlnaHQYBSABKAISFgoOc3Bs",
-            "aXREaXJlY3Rpb24YBiABKAgiyAEKDFN0Qm9yZGVyVGlsZRISCgp0aWxlVHlw",
-            "ZUlEGAEgASgFEi4KCHBvc2l0aW9uGAIgASgLMhwuTUhVcmhvLlN0b3JhZ2Uu",
-            "U3RJbnRWZWN0b3IyEhUKDXRvcExlZnRIZWlnaHQYAyABKAISFgoOdG9wUmln",
-            "aHRIZWlnaHQYBCABKAISFQoNYm90TGVmdEhlaWdodBgFIAEoAhIWCg5ib3RS",
-            "aWdodEhlaWdodBgGIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgHIAEoCCL4AgoG",
-            "U3RVbml0EgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIrCghwb3NpdGlv",
-            "bhgDIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMxIQCghwbGF5ZXJJ",
-            "RBgEIAEoBRIkCgRwYXRoGAUgASgLMhYuTUhVcmhvLlN0b3JhZ2UuU3RQYXRo",
-            "EhQKDHRhcmdldFVuaXRJRBgGIAEoBRIuCgp1c2VyUGx1Z2luGAcgASgLMhou",
-            "TUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50",
-            "RGF0YRgIIAMoCzIwLk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29t",
-            "cG9uZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkS",
-            "CwoDa2V5GAEgASgJEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2Uu",
-            "UGx1Z2luRGF0YToCOAEiDAoKU3RCdWlsZGluZyJbCghTdFBsYXllchIQCghw",
-            "bGF5ZXJJRBgBIAEoBRIPCgd1bml0SURzGAIgAygFEhMKC2J1aWxkaW5nSURz",
-            "GAMgAygFEhcKD2ZyaWVuZFBsYXllcklEcxgEIAMoBSKNAQoFU3RNYXASKgoE",
-            "c2l6ZRgBIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIlCgV0",
-            "aWxlcxgCIAMoCzIWLk1IVXJoby5TdG9yYWdlLlN0VGlsZRIxCgtib3JkZXJU",
-            "aWxlcxgDIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0Qm9yZGVyVGlsZSJBCgpT",
-            "dFRpbGVUeXBlEhEKCXBhY2thZ2VJRBgBIAEoBRISCgp0aWxlVHlwZUlEGAIg",
-            "ASgFEgwKBG5hbWUYAyABKAkiQQoKU3RVbml0VHlwZRIRCglwYWNrYWdlSUQY",
-            "ASABKAUSEgoKdW5pdFR5cGVJRBgCIAEoBRIMCgRuYW1lGAMgASgJIjEKDlN0",
-            "QnVpbGRpbmdUeXBlEhEKCXBhY2thZ2VJRBgBIAEoBRIMCgRuYW1lGAIgASgJ",
-            "YgZwcm90bzM="));
+            "cHJvdG8aE1BsdWdpblN0b3JhZ2UucHJvdG8iwAEKB1N0TGV2ZWwSIgoDbWFw",
+            "GAEgASgLMhUuTUhVcmhvLlN0b3JhZ2UuU3RNYXASJQoFdW5pdHMYAiADKAsy",
+            "Fi5NSFVyaG8uU3RvcmFnZS5TdFVuaXQSKQoHcGxheWVycxgDIAMoCzIYLk1I",
+            "VXJoby5TdG9yYWdlLlN0UGxheWVyEhEKCWdhbWVTcGVlZBgEIAEoAhIsCghw",
+            "YWNrYWdlcxgFIAEoCzIaLk1IVXJoby5TdG9yYWdlLlN0UGFja2FnZXMizgEK",
+            "ClN0UGFja2FnZXMSKwoIcGFja2FnZXMYASADKAsyGS5NSFVyaG8uU3RvcmFn",
+            "ZS5TdFBhY2thZ2USLQoJdGlsZVR5cGVzGAIgAygLMhouTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RUaWxlVHlwZRItCgl1bml0VHlwZXMYAyADKAsyGi5NSFVyaG8uU3Rv",
+            "cmFnZS5TdFVuaXRUeXBlEjUKDWJ1aWxkaW5nVHlwZXMYBCADKAsyHi5NSFVy",
+            "aG8uU3RvcmFnZS5TdEJ1aWxkaW5nVHlwZSIlCglTdFBhY2thZ2USCgoCSUQY",
+            "ASABKAUSDAoEbmFtZRgCIAEoCSKcAQoGU3RUaWxlEg4KBnVuaXRJRBgBIAEo",
+            "BRIWCg5wYXNzaW5nVW5pdElEcxgCIAMoBRISCgp0aWxlVHlwZUlEGAMgASgF",
+            "Ei4KCHBvc2l0aW9uGAQgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0",
+            "b3IyEg4KBmhlaWdodBgFIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgGIAEoCCLI",
+            "AQoMU3RCb3JkZXJUaWxlEhIKCnRpbGVUeXBlSUQYASABKAUSLgoIcG9zaXRp",
+            "b24YAiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISFQoNdG9w",
+            "TGVmdEhlaWdodBgDIAEoAhIWCg50b3BSaWdodEhlaWdodBgEIAEoAhIVCg1i",
+            "b3RMZWZ0SGVpZ2h0GAUgASgCEhYKDmJvdFJpZ2h0SGVpZ2h0GAYgASgCEhYK",
+            "DnNwbGl0RGlyZWN0aW9uGAcgASgIItICCgZTdFVuaXQSCgoCaWQYASABKAUS",
+            "DgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0",
+            "b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEhQKDHRhcmdldFVu",
+            "aXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3Jh",
+            "Z2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzIw",
+            "Lk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9uZW50RGF0YUVu",
+            "dHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5GAEgASgJ",
+            "EikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YToC",
+            "OAEiDAoKU3RCdWlsZGluZyJbCghTdFBsYXllchIQCghwbGF5ZXJJRBgBIAEo",
+            "BRIPCgd1bml0SURzGAIgAygFEhMKC2J1aWxkaW5nSURzGAMgAygFEhcKD2Zy",
+            "aWVuZFBsYXllcklEcxgEIAMoBSKNAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIc",
+            "Lk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIW",
+            "Lk1IVXJoby5TdG9yYWdlLlN0VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIc",
+            "Lk1IVXJoby5TdG9yYWdlLlN0Qm9yZGVyVGlsZSJBCgpTdFRpbGVUeXBlEhEK",
+            "CXBhY2thZ2VJRBgBIAEoBRISCgp0aWxlVHlwZUlEGAIgASgFEgwKBG5hbWUY",
+            "AyABKAkiQQoKU3RVbml0VHlwZRIRCglwYWNrYWdlSUQYASABKAUSEgoKdW5p",
+            "dFR5cGVJRBgCIAEoBRIMCgRuYW1lGAMgASgJIjEKDlN0QnVpbGRpbmdUeXBl",
+            "EhEKCXBhY2thZ2VJRBgBIAEoBRIMCgRuYW1lGAIgASgJYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Players", "GameSpeed", "Packages" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackages), global::MHUrho.Storage.StPackages.Parser, new[]{ "Packages", "TileTypes", "UnitTypes", "BuildingTypes" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackage), global::MHUrho.Storage.StPackage.Parser, new[]{ "ID", "Name" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "Position", "Height", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "Position", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "Path", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "PlayerID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles" }, null, null, null),
@@ -1196,7 +1194,6 @@ namespace MHUrho.Storage {
       typeID_ = other.typeID_;
       Position = other.position_ != null ? other.Position.Clone() : null;
       playerID_ = other.playerID_;
-      Path = other.path_ != null ? other.Path.Clone() : null;
       targetUnitID_ = other.targetUnitID_;
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
       defaultComponentData_ = other.defaultComponentData_.Clone();
@@ -1251,19 +1248,8 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "path" field.</summary>
-    public const int PathFieldNumber = 5;
-    private global::MHUrho.Storage.StPath path_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::MHUrho.Storage.StPath Path {
-      get { return path_; }
-      set {
-        path_ = value;
-      }
-    }
-
     /// <summary>Field number for the "targetUnitID" field.</summary>
-    public const int TargetUnitIDFieldNumber = 6;
+    public const int TargetUnitIDFieldNumber = 5;
     private int targetUnitID_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int TargetUnitID {
@@ -1274,7 +1260,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "userPlugin" field.</summary>
-    public const int UserPluginFieldNumber = 7;
+    public const int UserPluginFieldNumber = 6;
     private global::MHUrho.Storage.PluginData userPlugin_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::MHUrho.Storage.PluginData UserPlugin {
@@ -1285,9 +1271,9 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "defaultComponentData" field.</summary>
-    public const int DefaultComponentDataFieldNumber = 8;
+    public const int DefaultComponentDataFieldNumber = 7;
     private static readonly pbc::MapField<string, global::MHUrho.Storage.PluginData>.Codec _map_defaultComponentData_codec
-        = new pbc::MapField<string, global::MHUrho.Storage.PluginData>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.PluginData.Parser), 66);
+        = new pbc::MapField<string, global::MHUrho.Storage.PluginData>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.PluginData.Parser), 58);
     private readonly pbc::MapField<string, global::MHUrho.Storage.PluginData> defaultComponentData_ = new pbc::MapField<string, global::MHUrho.Storage.PluginData>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::MapField<string, global::MHUrho.Storage.PluginData> DefaultComponentData {
@@ -1311,7 +1297,6 @@ namespace MHUrho.Storage {
       if (TypeID != other.TypeID) return false;
       if (!object.Equals(Position, other.Position)) return false;
       if (PlayerID != other.PlayerID) return false;
-      if (!object.Equals(Path, other.Path)) return false;
       if (TargetUnitID != other.TargetUnitID) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
       if (!DefaultComponentData.Equals(other.DefaultComponentData)) return false;
@@ -1325,7 +1310,6 @@ namespace MHUrho.Storage {
       if (TypeID != 0) hash ^= TypeID.GetHashCode();
       if (position_ != null) hash ^= Position.GetHashCode();
       if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
-      if (path_ != null) hash ^= Path.GetHashCode();
       if (TargetUnitID != 0) hash ^= TargetUnitID.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
       hash ^= DefaultComponentData.GetHashCode();
@@ -1355,16 +1339,12 @@ namespace MHUrho.Storage {
         output.WriteRawTag(32);
         output.WriteInt32(PlayerID);
       }
-      if (path_ != null) {
-        output.WriteRawTag(42);
-        output.WriteMessage(Path);
-      }
       if (TargetUnitID != 0) {
-        output.WriteRawTag(48);
+        output.WriteRawTag(40);
         output.WriteInt32(TargetUnitID);
       }
       if (userPlugin_ != null) {
-        output.WriteRawTag(58);
+        output.WriteRawTag(50);
         output.WriteMessage(UserPlugin);
       }
       defaultComponentData_.WriteTo(output, _map_defaultComponentData_codec);
@@ -1384,9 +1364,6 @@ namespace MHUrho.Storage {
       }
       if (PlayerID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerID);
-      }
-      if (path_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Path);
       }
       if (TargetUnitID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TargetUnitID);
@@ -1417,12 +1394,6 @@ namespace MHUrho.Storage {
       }
       if (other.PlayerID != 0) {
         PlayerID = other.PlayerID;
-      }
-      if (other.path_ != null) {
-        if (path_ == null) {
-          path_ = new global::MHUrho.Storage.StPath();
-        }
-        Path.MergeFrom(other.Path);
       }
       if (other.TargetUnitID != 0) {
         TargetUnitID = other.TargetUnitID;
@@ -1463,25 +1434,18 @@ namespace MHUrho.Storage {
             PlayerID = input.ReadInt32();
             break;
           }
-          case 42: {
-            if (path_ == null) {
-              path_ = new global::MHUrho.Storage.StPath();
-            }
-            input.ReadMessage(path_);
-            break;
-          }
-          case 48: {
+          case 40: {
             TargetUnitID = input.ReadInt32();
             break;
           }
-          case 58: {
+          case 50: {
             if (userPlugin_ == null) {
               userPlugin_ = new global::MHUrho.Storage.PluginData();
             }
             input.ReadMessage(userPlugin_);
             break;
           }
-          case 66: {
+          case 58: {
             defaultComponentData_.AddEntriesFrom(input, _map_defaultComponentData_codec);
             break;
           }

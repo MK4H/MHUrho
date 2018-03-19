@@ -22,8 +22,6 @@ namespace DefaultPackage
             this.level = level;
             this.unitNode = unitNode;
             this.unit = unit;
-            unitNode.AddComponent(new WorldWalker(level));
-            unitNode.AddComponent(new UnitSelector(unit, level));
         }
 
         public bool IsMyUnitType(string unitTypeName) {
@@ -39,10 +37,19 @@ namespace DefaultPackage
         }
 
         public IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
+            unitNode.AddComponent(new WorldWalker(level));
+            unitNode.AddComponent(new UnitSelector(unit, level));
             return new TestUnit(level, unitNode, unit);
         }
 
-        public void SaveState(PluginDataStorage pluginDataStorage) {
+        public IUnitPlugin LoadNewInstance(LevelManager level, 
+                                           Node unitNode, 
+                                           Unit unit,
+                                           PluginDataWrapper pluginDataStorage) {
+            return new TestUnit(level, unitNode, unit);
+        }
+
+        public void SaveState(PluginDataWrapper pluginDataStorage) {
 
         }
 
