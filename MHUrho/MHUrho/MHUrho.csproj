@@ -20,12 +20,33 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>GameState.proto</DependentUpon>
     </Compile>
+    <Compile Update="Storage\PluginStorage.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PluginStorage.proto</DependentUpon>
+    </Compile>
+    <Compile Update="Storage\UrhoTypes.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UrhoTypes.proto</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Storage\GameState.proto">
       <Generator>ProtobufGenerator</Generator>
       <LastGenOutput>GameState.cs</LastGenOutput>
+    </None>
+    <None Update="Storage\MHUrhoTypes.proto">
+      <Generator>ProtobufGenerator</Generator>
+    </None>
+    <None Update="Storage\PluginStorage.proto">
+      <Generator>ProtobufGenerator</Generator>
+      <LastGenOutput>PluginStorage.cs</LastGenOutput>
+    </None>
+    <None Update="Storage\UrhoTypes.proto">
+      <Generator>ProtobufGenerator</Generator>
+      <LastGenOutput>UrhoTypes.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 using MHUrho.Logic;
+using MHUrho.Storage;
 
 namespace MHUrho.Plugins
 {
@@ -16,6 +17,8 @@ namespace MHUrho.Plugins
         void OnUpdate(float timeStep);
 
         IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
+
+        void SaveState(PluginDataStorage pluginDataStorage);
         //TODO: Expand this
     }
 }

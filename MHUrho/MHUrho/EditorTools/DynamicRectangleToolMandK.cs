@@ -21,6 +21,7 @@ namespace MHUrho.EditorTools
         private Map map;
 
         private IntVector2 mouseDownPos;
+        private IntVector2 lastMousePos;
         //TODO: Raycast into a plane and get point even outside the map
         private bool validMouseDown;
 
@@ -65,6 +66,7 @@ namespace MHUrho.EditorTools
             //TODO: Raycast into a plane and get point even outside the map
             if (tile != null) {
                 mouseDownPos = tile.Location;
+                lastMousePos = tile.Location;
                 validMouseDown = true;
             }
         }
@@ -72,18 +74,29 @@ namespace MHUrho.EditorTools
         private void MouseUp(MouseButtonUpEventArgs e) {
             var tile = input.GetTileUnderCursor();
 
+            IntVector2 topLeft, bottomRight;
             if (tile != null && validMouseDown) {
                 var endTilePos = tile.Location;
-                var topLeft = new IntVector2(Math.Min(mouseDownPos.X, endTilePos.X),
+                topLeft = new IntVector2(Math.Min(mouseDownPos.X, endTilePos.X),
                                              Math.Min(mouseDownPos.Y, endTilePos.Y));
-                var bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
+                bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
                                                  Math.Max(mouseDownPos.Y, endTilePos.Y));
 
-                selectionHandler?.Invoke(topLeft, bottomRight);
-                //TODO: Different highlight
-                map.DisableHighlight();
-                validMouseDown = false;
             }
+            else if (validMouseDown) {
+                topLeft = new IntVector2(Math.Min(mouseDownPos.X, lastMousePos.X),
+                                             Math.Min(mouseDownPos.Y, lastMousePos.Y));
+                bottomRight = new IntVector2(Math.Max(mouseDownPos.X, lastMousePos.X),
+                                                 Math.Max(mouseDownPos.Y, lastMousePos.Y));
+            }
+            else {
+                return;
+            }
+
+            selectionHandler?.Invoke(topLeft, bottomRight);
+            //TODO: Different highlight
+            map.DisableHighlight();
+            validMouseDown = false;
         }
 
         private void MouseMove(MouseMovedEventArgs e) {
@@ -100,6 +113,7 @@ namespace MHUrho.EditorTools
                                                  Math.Max(mouseDownPos.Y, endTilePos.Y));
 
                 map.HighlightArea(topLeft, bottomRight);
+                lastMousePos = tile.Location;
             }
         }
 

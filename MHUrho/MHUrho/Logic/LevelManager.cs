@@ -7,6 +7,7 @@ using MHUrho.Input;
 using MHUrho.Packaging;
 using Urho;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using Urho.Actions;
 using MHUrho.WorldMap;
 
@@ -26,9 +27,12 @@ namespace MHUrho.Logic
 
         public Scene Scene { get; private set; }
 
+        public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
         private CameraController cameraController;
         private IGameController inputController;
+
+        
 
         private readonly Dictionary<int,Unit> units;
         private readonly Dictionary<int, Player> players;
@@ -73,7 +77,7 @@ namespace MHUrho.Logic
             level.inputController = game.menuController.GetGameController(cameraController, level, firstPlayer);
             
             //Connect references
-            map.ConnectReferences();
+            map.ConnectReferences(level);
 
             foreach (var unit in level.units.Values) {
                 unit.ConnectReferences(level);
@@ -182,7 +186,8 @@ namespace MHUrho.Logic
             this.Map = map;
 
             this.cameraController = cameraController;
-           
+            this.DefaultComponentFactory = new DefaultComponentFactory();
+
         }
 
         /// <summary>

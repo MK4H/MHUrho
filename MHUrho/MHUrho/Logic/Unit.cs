@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Google.Protobuf;
 using MHUrho.Control;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
@@ -135,13 +137,23 @@ namespace MHUrho.Logic
             //storedUnit.TargetUnitID = target.UnitID;
             storedUnit.TypeID = UnitType.ID;
 
-#error Save state of the plugin
             //TODO: Selection after load does not work because they dont have the selector component added to them
+            storedUnit.UserPlugin = new PluginData();
+            var pluginDataWrapper = new PluginDataStorage(storedUnit.UserPlugin.DataMap);
+            logic.SaveState(pluginDataWrapper);
+
+            foreach (var component in Node.Components) {
+                var defaultComponent = component as DefaultComponent;
+                if (defaultComponent != null) {
+                    storedUnit.DefaultComponentData.Add(defaultComponent.Name, defaultComponent.SaveState());
+                }
+            }
+
             return storedUnit;
         }
 
         /// <summary>
-        /// Continues loading by connecting references
+        /// Continues loading by connecting references and loading components
         /// </summary>
         public void ConnectReferences(LevelManager level) {
             if (storage.Path != null ) {
@@ -158,6 +170,9 @@ namespace MHUrho.Logic
             Player = level.GetPlayer(storage.PlayerID);
             //TODO: Connect other things
 
+            foreach (var defaultComponent in storage.DefaultComponentData) {
+                Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level));
+            }
         }
 
         public void FinishLoading() {

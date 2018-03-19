@@ -80,7 +80,7 @@ namespace MHUrho.WorldMap
 
             private StBorderTile storage;
 
-            public void ConnectReferences() {
+            public void ConnectReferences(LevelManager level) {
                 Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
             }
 
@@ -316,9 +316,9 @@ namespace MHUrho.WorldMap
             return newMap;
         }
 
-        public void ConnectReferences() {
+        public void ConnectReferences(LevelManager level) {
             foreach (var tile in tiles) {
-                tile.ConnectReferences();
+                tile.ConnectReferences(level);
             }
         }
 

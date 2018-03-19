@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
+using MHUrho.Storage;
 using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
-    public class UnitSelector : Selector
-    {
+    public class UnitSelector : Selector {
+        public static string ComponentName = "UnitSelector";
+
+        public override string Name => ComponentName;
+
         private readonly Unit unit;
         private readonly LevelManager level;
 
@@ -37,5 +41,16 @@ namespace MHUrho.UnitComponents
         //}
 
         //TODO: Hook up a reaction to unit death to deselect it from all tools
+
+        public override PluginData SaveState() {
+            var data =  new PluginData();
+            data.DataMap.Add("unit", new Data {Int = unit.ID});
+            return data;
+        }
+
+        public static UnitSelector Load(LevelManager level, PluginData data) {
+            var unitID = data.DataMap["unit"].Int;
+            return new UnitSelector(level.GetUnit(unitID), level);
+        }
     }
 }

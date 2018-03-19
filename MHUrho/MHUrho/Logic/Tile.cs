@@ -103,10 +103,18 @@ namespace MHUrho.Logic
         /// <summary>
         /// Continues loading by connecting references
         /// </summary>
-        public void ConnectReferences() {
+        public void ConnectReferences(LevelManager level) {
             Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
 
-            //TODO: Connect units
+            if (storage.UnitID != 0) {
+                Unit = level.GetUnit(storage.UnitID);
+            }
+
+            foreach (var passingUnit in storage.PassingUnitIDs) {
+                PassingUnits.Add(level.GetUnit(passingUnit));
+            }
+
+            //TODO: Connect buildings
             
         }
 

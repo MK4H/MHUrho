@@ -2,6 +2,7 @@
 using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
+using MHUrho.Storage;
 using Urho;
 
 namespace DefaultPackage
@@ -39,6 +40,10 @@ namespace DefaultPackage
 
         public IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
             return new TestUnit(level, unitNode, unit);
+        }
+
+        public void SaveState(PluginDataStorage pluginDataStorage) {
+
         }
 
     }

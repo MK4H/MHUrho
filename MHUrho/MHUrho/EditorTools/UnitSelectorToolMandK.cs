@@ -86,8 +86,9 @@ namespace MHUrho.EditorTools
             //TODO: Maybe delete selector class, just search for unit
             Selector selector = tile.Unit?.Node.GetComponent<Selector>();
             //Not selectable
-            if (selector == null) return;
+            if (selector == null || selector.Selected) return;
 
+            selector.Selected = true;
             var unit = tile.Unit.Node.GetComponent<Unit>();
 
             //TODO: Check owner of the units

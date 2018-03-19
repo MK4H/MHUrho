@@ -1,0 +1,84 @@
+﻿syntax = "proto3";
+package MHUrho.Storage;
+
+import "UrhoTypes.proto";
+import "MHUrhoTypes.proto";
+
+message PluginData {
+	map<string,Data> dataMap = 1;
+}
+
+message Data {
+	oneof contents{
+		float float = 1;
+		double double = 2;
+		int32 int = 3;
+		int64 long = 4;
+		uint32 uint = 5;
+		uint64 ulong = 6;
+		bool bool = 7;
+		string string = 8;
+		bytes byteArray = 9;
+		StIntVector2 intVector2 = 10;
+		StIntVector3 intVector3 = 11;
+		StVector2 vector2 = 12;
+		StVector3 vector3 = 13;
+		FloatList floatList = 14;
+		DoubleList doubleList = 15;
+		IntList intList = 16;
+		LongList longList = 17;
+		BoolList boolList = 18;
+		StringList stringList = 19;
+		ByteArrayList byteArrayList = 20;
+		IntVector2List intVector2List = 21;
+		IntVector3List intVector3List = 22;
+		Vector2List vector2List = 23;
+		Vector3List vector3List = 24;
+		StPath path = 25;
+	}
+}
+
+message FloatList {
+	repeated float value = 1;
+}
+
+message DoubleList {
+	repeated double value = 1;
+}
+
+message IntList {
+	repeated int32 value = 1;
+}
+
+message LongList {
+	repeated int64 value = 1;
+}
+
+message BoolList {
+	repeated bool value = 1;
+}
+
+message StringList {
+	repeated string value = 1;
+}
+
+message ByteArrayList {
+	repeated bytes value = 1;
+}
+
+message IntVector2List {
+	repeated StIntVector2 value = 1;
+}
+
+message IntVector3List {
+	repeated StIntVector3 value = 1;
+}
+
+message Vector2List {
+	repeated StVector2 value = 1;
+}
+
+message Vector3List {
+	repeated StVector3 value = 1;
+}
+

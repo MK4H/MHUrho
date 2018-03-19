@@ -58,11 +58,11 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
-            public void ChangeHeight(float heightDelta) {
+            public void ChangeHeight(float heightDelta, bool signalNeighbours) {
                 throw new NotImplementedException();
             }
 
-            public void SetHeight(float newHeight) {
+            public void SetHeight(float newHeight, bool signalNeighbours) {
                 throw new NotImplementedException();
             }
 

@@ -71,7 +71,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Continues loading by connecting references
         /// </summary>
-        void ConnectReferences();
+        void ConnectReferences(LevelManager level);
 
         void FinishLoading();
 

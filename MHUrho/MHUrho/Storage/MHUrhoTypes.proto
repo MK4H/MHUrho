@@ -1,0 +1,10 @@
+﻿syntax = "proto3";
+package MHUrho.Storage;
+
+import "UrhoTypes.proto";
+
+message StPath {
+	//TODO: Probably just store target and recompute the path when loading
+	repeated StIntVector2 pathPoints = 1;
+	int32 currentIndex = 2;
+}

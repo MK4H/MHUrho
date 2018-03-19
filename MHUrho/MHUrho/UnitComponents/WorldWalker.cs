@@ -5,12 +5,16 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    public class WorldWalker : Component
-    {
+    public class WorldWalker : DefaultComponent {
+        public static string ComponentName = "WorldWalker";
+
+        public override string Name => ComponentName;
+
         private Map map;
         private LevelManager level;
 
@@ -22,6 +26,15 @@ namespace MHUrho.UnitComponents
             ReceiveSceneUpdates = false;
             this.level = level;
             this.map = level.Map;
+        }
+
+        protected WorldWalker(LevelManager level, bool activated, Path path, ITile target) {
+
+            ReceiveSceneUpdates = activated;
+            this.level = level;
+            this.map = level.Map;
+            this.path = path;
+            this.target = target;
         }
 
         public void GoAlong(Path path) {
@@ -100,5 +113,34 @@ namespace MHUrho.UnitComponents
             return movementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
         }
 
+        public override PluginData SaveState() {
+            var storageData = new PluginData();
+            if (ReceiveSceneUpdates == true) {
+                storageData.DataMap.Add("activated", new Data {Bool = true});
+                var pathData = new Data() { Path = path.Save() };
+
+                storageData.DataMap.Add("path", pathData);
+
+                var currentTargetData = new Data() { IntVector2 = target.Location.Save() };
+                storageData.DataMap.Add("cTarget", currentTargetData);
+            }
+            else {
+                storageData.DataMap.Add("activated", new Data { Bool = false });
+            }
+
+            return storageData;
+        }
+
+        public static WorldWalker Load(LevelManager level, PluginData data) {
+            var activated = data.DataMap["activated"].Bool;
+            Path path = null;
+            ITile target = null;
+            if (activated) {
+                path = Path.Load(data.DataMap["path"].Path);
+                target = level.Map.GetTile(data.DataMap["cTarget"].IntVector2.ToIntVector2());
+            }
+           
+            return new WorldWalker(level, activated, path, target);
+        }
     }
 }
