@@ -1,3 +1,63 @@
+Unity Ahead of Time compilation and System.Reflection restrictions
+
+Wave engine severe lack of documentation and guides
+
+Android filesystem - app files in .apk format read-only mapped to /apk, unreadable by System.IO
+
+Manual runtime generation of map model
+- visual studio android emulator OpenGl bug making manually generated map model invisible 
+
+tile textures and mapping of tiles to tile textures
+
+pathfinding algorithms - A*
+
+prioriy queue - C5 library, BlueRaja priority queue
+
+Unit tests for android, NUnit and Visual studio integration
+
+Camera control, rotations, transform spaces, camera bounding
+
+Game state saving - important for mobile because of the posibility of termination on lost focus
+- internal XML scene serialization of Urho3D
+- external binary protocol buffers format, for posible external map editor tool integration, speed and save file size
+- protobuf-net asReference problems with collections
+
+- store used packages, used tileTypes, unitTypes and building types with their level local ID and global name
+  - reference by level local ID
+
+- multiphase loading because of the ID references
+
+Shadows, ambient light, normal vectors for map
+
+Which diagonal should be the one between the triangles forming one tile
+- let user choose (create tool) - needs to be saved in save file, hard height interpolation inside a tile
+- decided that the one that is higher - easy height interpolation, consistent across the whole map, less data stored
+
+Border tiles - where to store height
+- topLeft corner, interpolate rest from the neighbouring tiles and their top left corner
+  - needs to somehow include extra tiles at the right and bottom to fill the heights of all the tile corners
+  - border tiles, tiles at the border that store all 4 of their corner heights
+    - to hide the map ending, to store the height of rightmost and bottommost playfield tiles 
+- center of the tile - cannot be displayed in the game, can only set heights of the corners
+
+Tools - to separate different types input handling
+- UI and Input connection
+
+UI - UrhoSharp/Urho3D vs platform specific
+  - problem with urhoSharp being just an external viewport
+  - Xamarin.Forms, Xamarin.Android
+
+Input - mouse and keyboard, touch
+  - sensitivity, continuous movement vs. noncontinuous movement
+  - key rebinding
+
+Vertex buffer and index buffer locking speeds
+- lock whole needed part or is locking rows enough
+
+Ambient light and fog
+- smoother, less visible shadows
+- fog looks wierd
+
 Barycentric coordinates for height at general point inside a tile (Christer Ericson's Real-Time Collision Detection)
 
 Isolate dependence on StUnit only to Unit class
@@ -6,4 +66,11 @@ Isolate dependence on StUnit only to Unit class
 - this would not be possible within constructor, because i could add the unit to node only after the constructor
 
 
+Protocol buffers visual studio integration, tools and multiple .proto files in one package
+- they keep failing, because they are calling protoc with every file separately
+- the extension even copies the .proto file to tempfile and runs it there, completely missing imports
 
+
+TODO:
+
+Mipmapping of tile textures
