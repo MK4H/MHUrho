@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
@@ -11,6 +12,8 @@ namespace MHUrho.UnitComponents
         public static string ComponentName = "UnitSelector";
 
         public override string Name => ComponentName;
+
+        public override IPlayer Player => unit.Player;
 
         private readonly Unit unit;
         private readonly LevelManager level;

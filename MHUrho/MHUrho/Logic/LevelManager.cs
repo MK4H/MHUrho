@@ -6,6 +6,7 @@ using MHUrho.Control;
 using MHUrho.Input;
 using MHUrho.Packaging;
 using Urho;
+using Urho.Physics;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using Urho.Actions;
@@ -34,7 +35,7 @@ namespace MHUrho.Logic
 
         
 
-        private readonly Dictionary<int,Unit> units;
+        private readonly Dictionary<int, Unit> units;
         private readonly Dictionary<int, Player> players;
 
         private readonly Random rng;
@@ -120,6 +121,10 @@ namespace MHUrho.Logic
 
             var scene = new Scene(game.Context);
             scene.CreateComponent<Octree>();
+            var physics = scene.CreateComponent<PhysicsWorld>();
+            //TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
+            physics.Enabled = true;
+            
 
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
@@ -128,6 +133,7 @@ namespace MHUrho.Logic
             Node mapNode = scene.CreateChild("MapNode");
 
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
+
 
             CurrentLevel = new LevelManager(map, scene, cameraController);
 
@@ -211,6 +217,14 @@ namespace MHUrho.Logic
 
                 newUnit.Order(targetTile);
             }
+
+            unitNode.AddComponent(new DirectShooter(unitNode.Position +
+                                                    new Vector3(0,
+                                                                0,
+                                                                50),
+                                                    10,
+                                                    1,
+                                                    1));
         }
 
         public Unit GetUnit(int ID) {
@@ -226,6 +240,33 @@ namespace MHUrho.Logic
             }
 
             return player;
+        }
+
+        public void GetClicked(List<RayQueryResult> rayquery) {
+            rayquery.Sort((a, b) => {
+                              if (a.Distance < b.Distance) {
+                                  return -1;
+                              }
+                              else if (a.Distance > b.Distance) {
+                                  return 1;
+                              }
+                              else {
+                                  return 0;
+                              }
+                          });
+
+            foreach (var result in rayquery) {
+                switch (result.Node.Name) {
+                    case "Unit":
+
+                        break;
+                    case "Map":
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException("Unknown node type");
+                }
+            }          
+
         }
 
         private static async void LoadSceneParts(MyGame game, Scene scene) {

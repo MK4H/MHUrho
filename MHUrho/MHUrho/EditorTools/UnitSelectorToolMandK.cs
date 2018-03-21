@@ -40,6 +40,8 @@ namespace MHUrho.EditorTools
 
         private bool enabled;
 
+        private ITile clickedTile;
+
         public UnitSelectorToolMandK(GameMandKController input, Map map) {
             this.input = input;
             this.map = map;
@@ -52,7 +54,7 @@ namespace MHUrho.EditorTools
         public void Enable() {
             if (enabled) return;
 
-            dynamicHighlight.selectionHandler += HandleSelection;
+            dynamicHighlight.SelectionHandler += HandleSelection;
 
             dynamicHighlight.Enable();
 
@@ -64,7 +66,7 @@ namespace MHUrho.EditorTools
         public void Disable() {
             if (!enabled) return;
 
-            dynamicHighlight.selectionHandler -= HandleSelection;
+            dynamicHighlight.SelectionHandler -= HandleSelection;
             dynamicHighlight.Disable();
 
             input.UIManager.SelectionBarClearButtons();
@@ -81,6 +83,23 @@ namespace MHUrho.EditorTools
             map.ForEachInRectangle(topLeft, bottomRight, SelectUnitsInTile);
         }
 
+        private void HandleSingleClick(MouseButtonUpEventArgs e) {
+            foreach (var result in input.CursorRaycast()) {
+                var selector = result.Node.GetComponent<Selector>();
+                if (selector != null && selector.Player == input.Player) {
+                    var unitSelector = selector as UnitSelector;
+                    if (unitSelector != null) {
+                        var unit = unitSelector.GetComponent<Unit>();
+
+                        AddUnit(unit);
+                        return;
+                    }
+                }
+
+                //TODO: Target
+            }
+        }
+
         //TODO: Select other things too
         private void SelectUnitsInTile(ITile tile) {
             //TODO: Maybe delete selector class, just search for unit
@@ -89,20 +108,9 @@ namespace MHUrho.EditorTools
             if (selector == null || selector.Selected) return;
 
             selector.Selected = true;
-            var unit = tile.Unit.Node.GetComponent<Unit>();
+            var unit = selector.Node.GetComponent<Unit>();
 
-            //TODO: Check owner of the units
-            if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
-                info.Units.Add(unit);
-                DisplayCount(info.Button, info.Count);
-            }
-            else {
-                var button = CreateButton(unit.UnitType);
-                selected.Add(unit.UnitType, new SelectedInfo(button, new List<Unit> {unit}));
-                buttons.Add(button, unit.UnitType);
-                input.UIManager.SelectionBarAddButton(button);
-                input.UIManager.SelectionBarShowButton(button);
-            }
+            AddUnit(unit);
         }
 
         private Button CreateButton(UnitType unitType) {
@@ -141,6 +149,21 @@ namespace MHUrho.EditorTools
         private void DisplayCount(Button button, int count) {
             Text text = (Text)button.GetChild("Count");
             text.Value = count.ToString();
+        }
+
+        private void AddUnit(Unit unit) {
+            //TODO: Check owner of the units
+            if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
+                info.Units.Add(unit);
+                DisplayCount(info.Button, info.Count);
+            }
+            else {
+                var button = CreateButton(unit.UnitType);
+                selected.Add(unit.UnitType, new SelectedInfo(button, new List<Unit> { unit }));
+                buttons.Add(button, unit.UnitType);
+                input.UIManager.SelectionBarAddButton(button);
+                input.UIManager.SelectionBarShowButton(button);
+            }
         }
     }
 }

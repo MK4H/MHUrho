@@ -12,6 +12,7 @@ using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using Urho;
+using Urho.Physics;
 
 
 namespace MHUrho.Logic
@@ -125,6 +126,18 @@ namespace MHUrho.Logic
             //TODO: Check if there is already a Unit component on this node, if there is, throw exception
             unitNode.AddComponent(new Unit(id, type, level, unitNode, tile, player));
             unitNode.Position = tile.Center3;
+            
+            //TODO: Storing and loading
+            var rigidBody = unitNode.CreateComponent<RigidBody>();
+            rigidBody.CollisionLayer = 1; //CollisionLayer 1 is units, 2 is arrows
+            rigidBody.CollisionMask = 2;
+            rigidBody.Kinematic = true;
+            rigidBody.Mass = 1;
+            rigidBody.UseGravity = false;
+
+            var collider = unitNode.CreateComponent<CollisionShape>();
+            collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
+
             return unitNode.GetComponent<Unit>();
         }
 
