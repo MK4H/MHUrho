@@ -19,5 +19,6 @@ namespace MHUrho.Helpers
         public static StVector2 ToStVector2(this Vector2 vector2) {
             return new StVector2 {X = vector2.X, Y = vector2.Y};
         }
+
     }
 }

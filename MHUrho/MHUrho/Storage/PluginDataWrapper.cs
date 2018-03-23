@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Urho;
+using MHUrho.Helpers;
 
 namespace MHUrho.Storage
 {
@@ -105,8 +107,44 @@ namespace MHUrho.Storage
             return new NamedPluginDataWriter(PluginData);
         }
 
-        protected static Dictionary<Type, Func<Data, object>> FromDataConvertors;
+        protected static Dictionary<Type, Func<Data, object>> FromDataConvertors 
+            = new Dictionary<Type, Func<Data, object>> 
+            {
+                //TODO: Type checks
+                { typeof(float),(data) => data.Float },
+                { typeof(double),(data) => data.Double },
+                { typeof(int), (data) => data.Int },
+                { typeof(long), (data) => data.Long },
+                { typeof(uint), (data) => data.Uint },
+                { typeof(ulong), (data) => data.Ulong },
+                { typeof(bool), (data) => data.Bool },
+                { typeof(string), (data) => data.String },
+                { typeof(Google.Protobuf.ByteString), (data) => data.ByteArray },
+                { typeof(IntVector2), (data) => data.IntVector2.ToIntVector2() },
+                { typeof(IntVector3), (data) => data.IntVector3.ToIntVector3() },
+                { typeof(Vector2), (data) => data.Vector2.ToVector2() },
+                { typeof(Vector3), (data) => data.Vector3.ToVector3() },
+                //TODO: Lists
+            };
 
-        protected static Dictionary<Type, Func<object, Data>> ToDataConvertors;
+        protected static Dictionary<Type, Func<object, Data>> ToDataConvertors 
+            = new Dictionary<Type, Func<object, Data>> 
+            {
+                //TODO: Type checks
+                { typeof(float),(o) => new Data{Float = (float)o} },
+                { typeof(double),(o) => new Data{Double = (double)o } },
+                { typeof(int), (o) => new Data{Int = (int)o } },
+                { typeof(long), (o) => new Data{Long = (long)o } },
+                { typeof(uint), (o) => new Data{Uint = (uint)o } },
+                { typeof(ulong), (o) => new Data{Ulong = (ulong)o } },
+                { typeof(bool), (o) => new Data{Bool = (bool)o } },
+                { typeof(string), (o) => new Data{String = (string)o } },
+                { typeof(Google.Protobuf.ByteString), (o) => new Data{ByteArray = (Google.Protobuf.ByteString)o } },
+                { typeof(IntVector2), (o) => new Data{ IntVector2 = ((IntVector2)o).ToStIntVector2()} },
+                { typeof(IntVector3), (o) => new Data{ IntVector3 = ((IntVector3)o).ToStIntVector3() } },
+                { typeof(Vector2), (o) => new Data{ Vector2 = ((Vector2)o).ToStVector2()} },
+                { typeof(Vector3), (o) => new Data{ Vector3 = ((Vector3)o).ToStVector3()} },
+                //TODO: Lists
+            };
     }
 }
