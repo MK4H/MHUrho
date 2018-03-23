@@ -221,7 +221,8 @@ namespace MHUrho.Logic
             unitNode.AddComponent(new DirectShooter(unitNode.Position +
                                                     new Vector3(0,
                                                                 0,
-                                                                50),
+                                                                10),
+                                                    new ProjectileType(10, Map),
                                                     10,
                                                     1,
                                                     1));
@@ -299,8 +300,8 @@ namespace MHUrho.Logic
 
             zone.SetBoundingBox(new BoundingBox(-1000.0f, 1000.0f));
             zone.AmbientColor = new Color(0.5f, 0.5f, 0.5f);
-            zone.FogColor = new Color(0.1f, 0.2f, 0.3f);
-            zone.FogStart = 10;
+            zone.FogColor = new Color(0.7f, 0.7f, 0.7f);
+            zone.FogStart = 50;
             zone.FogEnd = 100;
 
             //TODO: Remove this

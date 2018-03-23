@@ -19,7 +19,7 @@ namespace MHUrho.Plugins
         IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
 
         /// <summary>
-        /// Creates new instance in the state saved in <paramref name="pluginDataStorage"/>
+        /// Creates new instance in the state saved in <paramref name="pluginData"/>
         /// 
         /// Does NOT LOAD the default plugins the unit had when saving, that is done independently by
         /// the Unit class
@@ -27,11 +27,11 @@ namespace MHUrho.Plugins
         /// <param name="level">level into which the unit is being loaded</param>
         /// <param name="unitNode">scene node of the unit</param>
         /// <param name="unit">the unit logic class</param>
-        /// <param name="pluginDataStorage">stored state of the unit plugin</param>
+        /// <param name="pluginData">stored state of the unit plugin</param>
         /// <returns>New instance loaded into saved state</returns>
-        IUnitPlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginDataStorage);
+        IUnitPlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginData);
 
-        void SaveState(PluginDataWrapper pluginDataStorage);
+        void SaveState(PluginDataWrapper pluginData);
         //TODO: Expand this
     }
 }

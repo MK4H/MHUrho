@@ -23,46 +23,58 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChNQbHVnaW5TdG9yYWdlLnByb3RvEg5NSFVyaG8uU3RvcmFnZRoPVXJob1R5",
-            "cGVzLnByb3RvGhFNSFVyaG9UeXBlcy5wcm90byKMAQoKUGx1Z2luRGF0YRI4",
-            "CgdkYXRhTWFwGAEgAygLMicuTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YS5E",
-            "YXRhTWFwRW50cnkaRAoMRGF0YU1hcEVudHJ5EgsKA2tleRgBIAEoCRIjCgV2",
-            "YWx1ZRgCIAEoCzIULk1IVXJoby5TdG9yYWdlLkRhdGE6AjgBIsgHCgREYXRh",
-            "Eg8KBWZsb2F0GAEgASgCSAASEAoGZG91YmxlGAIgASgBSAASDQoDaW50GAMg",
-            "ASgFSAASDgoEbG9uZxgEIAEoA0gAEg4KBHVpbnQYBSABKA1IABIPCgV1bG9u",
-            "ZxgGIAEoBEgAEg4KBGJvb2wYByABKAhIABIQCgZzdHJpbmcYCCABKAlIABIT",
-            "CglieXRlQXJyYXkYCSABKAxIABIyCgppbnRWZWN0b3IyGAogASgLMhwuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IySAASMgoKaW50VmVjdG9yMxgLIAEo",
-            "CzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yM0gAEiwKB3ZlY3RvcjIY",
-            "DCABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjJIABIsCgd2ZWN0b3Iz",
-            "GA0gASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzSAASLgoJZmxvYXRM",
-            "aXN0GA4gASgLMhkuTUhVcmhvLlN0b3JhZ2UuRmxvYXRMaXN0SAASMAoKZG91",
-            "YmxlTGlzdBgPIAEoCzIaLk1IVXJoby5TdG9yYWdlLkRvdWJsZUxpc3RIABIq",
-            "CgdpbnRMaXN0GBAgASgLMhcuTUhVcmhvLlN0b3JhZ2UuSW50TGlzdEgAEiwK",
-            "CGxvbmdMaXN0GBEgASgLMhguTUhVcmhvLlN0b3JhZ2UuTG9uZ0xpc3RIABIs",
-            "Cghib29sTGlzdBgSIAEoCzIYLk1IVXJoby5TdG9yYWdlLkJvb2xMaXN0SAAS",
-            "MAoKc3RyaW5nTGlzdBgTIAEoCzIaLk1IVXJoby5TdG9yYWdlLlN0cmluZ0xp",
-            "c3RIABI2Cg1ieXRlQXJyYXlMaXN0GBQgASgLMh0uTUhVcmhvLlN0b3JhZ2Uu",
-            "Qnl0ZUFycmF5TGlzdEgAEjgKDmludFZlY3RvcjJMaXN0GBUgASgLMh4uTUhV",
-            "cmhvLlN0b3JhZ2UuSW50VmVjdG9yMkxpc3RIABI4Cg5pbnRWZWN0b3IzTGlz",
-            "dBgWIAEoCzIeLk1IVXJoby5TdG9yYWdlLkludFZlY3RvcjNMaXN0SAASMgoL",
-            "dmVjdG9yMkxpc3QYFyABKAsyGy5NSFVyaG8uU3RvcmFnZS5WZWN0b3IyTGlz",
-            "dEgAEjIKC3ZlY3RvcjNMaXN0GBggASgLMhsuTUhVcmhvLlN0b3JhZ2UuVmVj",
-            "dG9yM0xpc3RIABImCgRwYXRoGBkgASgLMhYuTUhVcmhvLlN0b3JhZ2UuU3RQ",
-            "YXRoSABCCgoIY29udGVudHMiGgoJRmxvYXRMaXN0Eg0KBXZhbHVlGAEgAygC",
-            "IhsKCkRvdWJsZUxpc3QSDQoFdmFsdWUYASADKAEiGAoHSW50TGlzdBINCgV2",
-            "YWx1ZRgBIAMoBSIZCghMb25nTGlzdBINCgV2YWx1ZRgBIAMoAyIZCghCb29s",
-            "TGlzdBINCgV2YWx1ZRgBIAMoCCIbCgpTdHJpbmdMaXN0Eg0KBXZhbHVlGAEg",
-            "AygJIh4KDUJ5dGVBcnJheUxpc3QSDQoFdmFsdWUYASADKAwiPQoOSW50VmVj",
-            "dG9yMkxpc3QSKwoFdmFsdWUYASADKAsyHC5NSFVyaG8uU3RvcmFnZS5TdElu",
-            "dFZlY3RvcjIiPQoOSW50VmVjdG9yM0xpc3QSKwoFdmFsdWUYASADKAsyHC5N",
-            "SFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjMiNwoLVmVjdG9yMkxpc3QSKAoF",
-            "dmFsdWUYASADKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjIiNwoLVmVj",
-            "dG9yM0xpc3QSKAoFdmFsdWUYASADKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZl",
-            "Y3RvcjNiBnByb3RvMw=="));
+            "cGVzLnByb3RvGhFNSFVyaG9UeXBlcy5wcm90byK+AQoKUGx1Z2luRGF0YRIw",
+            "CgVuYW1lZBgBIAEoCzIfLk1IVXJoby5TdG9yYWdlLk5hbWVkUGx1Z2luRGF0",
+            "YUgAEjQKB2luZGV4ZWQYAiABKAsyIS5NSFVyaG8uU3RvcmFnZS5JbmRleGVk",
+            "UGx1Z2luRGF0YUgAEjQKCHN0cmVhbWVkGAMgASgLMiAuTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RyZWFtUGx1Z2luRGF0YUgAQhIKEGRhdGFTdG9yYWdlVHlwZXMilgEK",
+            "D05hbWVkUGx1Z2luRGF0YRI9CgdkYXRhTWFwGAEgAygLMiwuTUhVcmhvLlN0",
+            "b3JhZ2UuTmFtZWRQbHVnaW5EYXRhLkRhdGFNYXBFbnRyeRpECgxEYXRhTWFw",
+            "RW50cnkSCwoDa2V5GAEgASgJEiMKBXZhbHVlGAIgASgLMhQuTUhVcmhvLlN0",
+            "b3JhZ2UuRGF0YToCOAEimgEKEUluZGV4ZWRQbHVnaW5EYXRhEj8KB2RhdGFN",
+            "YXAYASADKAsyLi5NSFVyaG8uU3RvcmFnZS5JbmRleGVkUGx1Z2luRGF0YS5E",
+            "YXRhTWFwRW50cnkaRAoMRGF0YU1hcEVudHJ5EgsKA2tleRgBIAEoBRIjCgV2",
+            "YWx1ZRgCIAEoCzIULk1IVXJoby5TdG9yYWdlLkRhdGE6AjgBIjYKEFN0cmVh",
+            "bVBsdWdpbkRhdGESIgoEZGF0YRgBIAMoCzIULk1IVXJoby5TdG9yYWdlLkRh",
+            "dGEiyAcKBERhdGESDwoFZmxvYXQYASABKAJIABIQCgZkb3VibGUYAiABKAFI",
+            "ABINCgNpbnQYAyABKAVIABIOCgRsb25nGAQgASgDSAASDgoEdWludBgFIAEo",
+            "DUgAEg8KBXVsb25nGAYgASgESAASDgoEYm9vbBgHIAEoCEgAEhAKBnN0cmlu",
+            "ZxgIIAEoCUgAEhMKCWJ5dGVBcnJheRgJIAEoDEgAEjIKCmludFZlY3RvcjIY",
+            "CiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjJIABIyCgppbnRW",
+            "ZWN0b3IzGAsgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IzSAAS",
+            "LAoHdmVjdG9yMhgMIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMkgA",
+            "EiwKB3ZlY3RvcjMYDSABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjNI",
+            "ABIuCglmbG9hdExpc3QYDiABKAsyGS5NSFVyaG8uU3RvcmFnZS5GbG9hdExp",
+            "c3RIABIwCgpkb3VibGVMaXN0GA8gASgLMhouTUhVcmhvLlN0b3JhZ2UuRG91",
+            "YmxlTGlzdEgAEioKB2ludExpc3QYECABKAsyFy5NSFVyaG8uU3RvcmFnZS5J",
+            "bnRMaXN0SAASLAoIbG9uZ0xpc3QYESABKAsyGC5NSFVyaG8uU3RvcmFnZS5M",
+            "b25nTGlzdEgAEiwKCGJvb2xMaXN0GBIgASgLMhguTUhVcmhvLlN0b3JhZ2Uu",
+            "Qm9vbExpc3RIABIwCgpzdHJpbmdMaXN0GBMgASgLMhouTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RyaW5nTGlzdEgAEjYKDWJ5dGVBcnJheUxpc3QYFCABKAsyHS5NSFVy",
+            "aG8uU3RvcmFnZS5CeXRlQXJyYXlMaXN0SAASOAoOaW50VmVjdG9yMkxpc3QY",
+            "FSABKAsyHi5NSFVyaG8uU3RvcmFnZS5JbnRWZWN0b3IyTGlzdEgAEjgKDmlu",
+            "dFZlY3RvcjNMaXN0GBYgASgLMh4uTUhVcmhvLlN0b3JhZ2UuSW50VmVjdG9y",
+            "M0xpc3RIABIyCgt2ZWN0b3IyTGlzdBgXIAEoCzIbLk1IVXJoby5TdG9yYWdl",
+            "LlZlY3RvcjJMaXN0SAASMgoLdmVjdG9yM0xpc3QYGCABKAsyGy5NSFVyaG8u",
+            "U3RvcmFnZS5WZWN0b3IzTGlzdEgAEiYKBHBhdGgYGSABKAsyFi5NSFVyaG8u",
+            "U3RvcmFnZS5TdFBhdGhIAEIKCghjb250ZW50cyIaCglGbG9hdExpc3QSDQoF",
+            "dmFsdWUYASADKAIiGwoKRG91YmxlTGlzdBINCgV2YWx1ZRgBIAMoASIYCgdJ",
+            "bnRMaXN0Eg0KBXZhbHVlGAEgAygFIhkKCExvbmdMaXN0Eg0KBXZhbHVlGAEg",
+            "AygDIhkKCEJvb2xMaXN0Eg0KBXZhbHVlGAEgAygIIhsKClN0cmluZ0xpc3QS",
+            "DQoFdmFsdWUYASADKAkiHgoNQnl0ZUFycmF5TGlzdBINCgV2YWx1ZRgBIAMo",
+            "DCI9Cg5JbnRWZWN0b3IyTGlzdBIrCgV2YWx1ZRgBIAMoCzIcLk1IVXJoby5T",
+            "dG9yYWdlLlN0SW50VmVjdG9yMiI9Cg5JbnRWZWN0b3IzTGlzdBIrCgV2YWx1",
+            "ZRgBIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMyI3CgtWZWN0",
+            "b3IyTGlzdBIoCgV2YWx1ZRgBIAMoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVj",
+            "dG9yMiI3CgtWZWN0b3IzTGlzdBIoCgV2YWx1ZRgBIAMoCzIZLk1IVXJoby5T",
+            "dG9yYWdlLlN0VmVjdG9yM2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.PluginData), global::MHUrho.Storage.PluginData.Parser, new[]{ "DataMap" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.PluginData), global::MHUrho.Storage.PluginData.Parser, new[]{ "Named", "Indexed", "Streamed" }, new[]{ "DataStorageTypes" }, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.NamedPluginData), global::MHUrho.Storage.NamedPluginData.Parser, new[]{ "DataMap" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.IndexedPluginData), global::MHUrho.Storage.IndexedPluginData.Parser, new[]{ "DataMap" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StreamPluginData), global::MHUrho.Storage.StreamPluginData.Parser, new[]{ "Data" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.Data), global::MHUrho.Storage.Data.Parser, new[]{ "Float", "Double", "Int", "Long", "Uint", "Ulong", "Bool", "String", "ByteArray", "IntVector2", "IntVector3", "Vector2", "Vector3", "FloatList", "DoubleList", "IntList", "LongList", "BoolList", "StringList", "ByteArrayList", "IntVector2List", "IntVector3List", "Vector2List", "Vector3List", "Path" }, new[]{ "Contents" }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.FloatList), global::MHUrho.Storage.FloatList.Parser, new[]{ "Value" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.DoubleList), global::MHUrho.Storage.DoubleList.Parser, new[]{ "Value" }, null, null, null),
@@ -105,12 +117,252 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PluginData(PluginData other) : this() {
-      dataMap_ = other.dataMap_.Clone();
+      switch (other.DataStorageTypesCase) {
+        case DataStorageTypesOneofCase.Named:
+          Named = other.Named.Clone();
+          break;
+        case DataStorageTypesOneofCase.Indexed:
+          Indexed = other.Indexed.Clone();
+          break;
+        case DataStorageTypesOneofCase.Streamed:
+          Streamed = other.Streamed.Clone();
+          break;
+      }
+
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PluginData Clone() {
       return new PluginData(this);
+    }
+
+    /// <summary>Field number for the "named" field.</summary>
+    public const int NamedFieldNumber = 1;
+    /// <summary>
+    ///Data identified by user specified names, good if you dont belive yourself with consistent indexing
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.NamedPluginData Named {
+      get { return dataStorageTypesCase_ == DataStorageTypesOneofCase.Named ? (global::MHUrho.Storage.NamedPluginData) dataStorageTypes_ : null; }
+      set {
+        dataStorageTypes_ = value;
+        dataStorageTypesCase_ = value == null ? DataStorageTypesOneofCase.None : DataStorageTypesOneofCase.Named;
+      }
+    }
+
+    /// <summary>Field number for the "indexed" field.</summary>
+    public const int IndexedFieldNumber = 2;
+    /// <summary>
+    ///Data identified by user specified index, good for changing implementations
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.IndexedPluginData Indexed {
+      get { return dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed ? (global::MHUrho.Storage.IndexedPluginData) dataStorageTypes_ : null; }
+      set {
+        dataStorageTypes_ = value;
+        dataStorageTypesCase_ = value == null ? DataStorageTypesOneofCase.None : DataStorageTypesOneofCase.Indexed;
+      }
+    }
+
+    /// <summary>Field number for the "streamed" field.</summary>
+    public const int StreamedFieldNumber = 3;
+    /// <summary>
+    ///Data identified by their position in the list, good for unchaging implementations
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StreamPluginData Streamed {
+      get { return dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed ? (global::MHUrho.Storage.StreamPluginData) dataStorageTypes_ : null; }
+      set {
+        dataStorageTypes_ = value;
+        dataStorageTypesCase_ = value == null ? DataStorageTypesOneofCase.None : DataStorageTypesOneofCase.Streamed;
+      }
+    }
+
+    private object dataStorageTypes_;
+    /// <summary>Enum of possible cases for the "dataStorageTypes" oneof.</summary>
+    public enum DataStorageTypesOneofCase {
+      None = 0,
+      Named = 1,
+      Indexed = 2,
+      Streamed = 3,
+    }
+    private DataStorageTypesOneofCase dataStorageTypesCase_ = DataStorageTypesOneofCase.None;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public DataStorageTypesOneofCase DataStorageTypesCase {
+      get { return dataStorageTypesCase_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearDataStorageTypes() {
+      dataStorageTypesCase_ = DataStorageTypesOneofCase.None;
+      dataStorageTypes_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as PluginData);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(PluginData other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Named, other.Named)) return false;
+      if (!object.Equals(Indexed, other.Indexed)) return false;
+      if (!object.Equals(Streamed, other.Streamed)) return false;
+      if (DataStorageTypesCase != other.DataStorageTypesCase) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Named) hash ^= Named.GetHashCode();
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed) hash ^= Indexed.GetHashCode();
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) hash ^= Streamed.GetHashCode();
+      hash ^= (int) dataStorageTypesCase_;
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Named) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Named);
+      }
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Indexed);
+      }
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Streamed);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Named) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Named);
+      }
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Indexed);
+      }
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Streamed);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(PluginData other) {
+      if (other == null) {
+        return;
+      }
+      switch (other.DataStorageTypesCase) {
+        case DataStorageTypesOneofCase.Named:
+          if (Named == null) {
+            Named = new global::MHUrho.Storage.NamedPluginData();
+          }
+          Named.MergeFrom(other.Named);
+          break;
+        case DataStorageTypesOneofCase.Indexed:
+          if (Indexed == null) {
+            Indexed = new global::MHUrho.Storage.IndexedPluginData();
+          }
+          Indexed.MergeFrom(other.Indexed);
+          break;
+        case DataStorageTypesOneofCase.Streamed:
+          if (Streamed == null) {
+            Streamed = new global::MHUrho.Storage.StreamPluginData();
+          }
+          Streamed.MergeFrom(other.Streamed);
+          break;
+      }
+
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            global::MHUrho.Storage.NamedPluginData subBuilder = new global::MHUrho.Storage.NamedPluginData();
+            if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Named) {
+              subBuilder.MergeFrom(Named);
+            }
+            input.ReadMessage(subBuilder);
+            Named = subBuilder;
+            break;
+          }
+          case 18: {
+            global::MHUrho.Storage.IndexedPluginData subBuilder = new global::MHUrho.Storage.IndexedPluginData();
+            if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed) {
+              subBuilder.MergeFrom(Indexed);
+            }
+            input.ReadMessage(subBuilder);
+            Indexed = subBuilder;
+            break;
+          }
+          case 26: {
+            global::MHUrho.Storage.StreamPluginData subBuilder = new global::MHUrho.Storage.StreamPluginData();
+            if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) {
+              subBuilder.MergeFrom(Streamed);
+            }
+            input.ReadMessage(subBuilder);
+            Streamed = subBuilder;
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class NamedPluginData : pb::IMessage<NamedPluginData> {
+    private static readonly pb::MessageParser<NamedPluginData> _parser = new pb::MessageParser<NamedPluginData>(() => new NamedPluginData());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<NamedPluginData> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public NamedPluginData() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public NamedPluginData(NamedPluginData other) : this() {
+      dataMap_ = other.dataMap_.Clone();
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public NamedPluginData Clone() {
+      return new NamedPluginData(this);
     }
 
     /// <summary>Field number for the "dataMap" field.</summary>
@@ -125,11 +377,11 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as PluginData);
+      return Equals(other as NamedPluginData);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(PluginData other) {
+    public bool Equals(NamedPluginData other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -165,7 +417,7 @@ namespace MHUrho.Storage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(PluginData other) {
+    public void MergeFrom(NamedPluginData other) {
       if (other == null) {
         return;
       }
@@ -190,6 +442,224 @@ namespace MHUrho.Storage {
 
   }
 
+  public sealed partial class IndexedPluginData : pb::IMessage<IndexedPluginData> {
+    private static readonly pb::MessageParser<IndexedPluginData> _parser = new pb::MessageParser<IndexedPluginData>(() => new IndexedPluginData());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<IndexedPluginData> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[2]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public IndexedPluginData() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public IndexedPluginData(IndexedPluginData other) : this() {
+      dataMap_ = other.dataMap_.Clone();
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public IndexedPluginData Clone() {
+      return new IndexedPluginData(this);
+    }
+
+    /// <summary>Field number for the "dataMap" field.</summary>
+    public const int DataMapFieldNumber = 1;
+    private static readonly pbc::MapField<int, global::MHUrho.Storage.Data>.Codec _map_dataMap_codec
+        = new pbc::MapField<int, global::MHUrho.Storage.Data>.Codec(pb::FieldCodec.ForInt32(8), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.Data.Parser), 10);
+    private readonly pbc::MapField<int, global::MHUrho.Storage.Data> dataMap_ = new pbc::MapField<int, global::MHUrho.Storage.Data>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::MapField<int, global::MHUrho.Storage.Data> DataMap {
+      get { return dataMap_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as IndexedPluginData);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(IndexedPluginData other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!DataMap.Equals(other.DataMap)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= DataMap.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      dataMap_.WriteTo(output, _map_dataMap_codec);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += dataMap_.CalculateSize(_map_dataMap_codec);
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(IndexedPluginData other) {
+      if (other == null) {
+        return;
+      }
+      dataMap_.Add(other.dataMap_);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            dataMap_.AddEntriesFrom(input, _map_dataMap_codec);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StreamPluginData : pb::IMessage<StreamPluginData> {
+    private static readonly pb::MessageParser<StreamPluginData> _parser = new pb::MessageParser<StreamPluginData>(() => new StreamPluginData());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StreamPluginData> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StreamPluginData() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StreamPluginData(StreamPluginData other) : this() {
+      data_ = other.data_.Clone();
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StreamPluginData Clone() {
+      return new StreamPluginData(this);
+    }
+
+    /// <summary>Field number for the "data" field.</summary>
+    public const int DataFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.Data> _repeated_data_codec
+        = pb::FieldCodec.ForMessage(10, global::MHUrho.Storage.Data.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.Data> data_ = new pbc::RepeatedField<global::MHUrho.Storage.Data>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::MHUrho.Storage.Data> Data {
+      get { return data_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StreamPluginData);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StreamPluginData other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!data_.Equals(other.data_)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= data_.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      data_.WriteTo(output, _repeated_data_codec);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += data_.CalculateSize(_repeated_data_codec);
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StreamPluginData other) {
+      if (other == null) {
+        return;
+      }
+      data_.Add(other.data_);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            data_.AddEntriesFrom(input, _repeated_data_codec);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class Data : pb::IMessage<Data> {
     private static readonly pb::MessageParser<Data> _parser = new pb::MessageParser<Data>(() => new Data());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -197,7 +667,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[1]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1214,7 +1684,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[2]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1324,7 +1794,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[3]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1434,7 +1904,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[4]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1544,7 +2014,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[5]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1654,7 +2124,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[6]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1764,7 +2234,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[7]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[10]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1873,7 +2343,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[8]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[11]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1982,7 +2452,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[9]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[12]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2091,7 +2561,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[10]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[13]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2200,7 +2670,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[11]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[14]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2309,7 +2779,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[12]; }
+      get { return global::MHUrho.Storage.PluginStorageReflection.Descriptor.MessageTypes[15]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

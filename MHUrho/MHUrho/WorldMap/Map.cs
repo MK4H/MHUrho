@@ -434,6 +434,10 @@ namespace MHUrho.WorldMap
             return Left <= x && x <= Right && Top <= y && y <= Bottom;
         }
 
+        public bool IsInside(float x, float y) {
+            return Left <= x && x < Left + Width && Top <= y && y < Top + Length;
+        }
+
         /// <summary>
         /// Checks if the point is inside the playfield, which means it could be used for indexing into the map
         /// </summary>
@@ -441,6 +445,24 @@ namespace MHUrho.WorldMap
         /// <returns>True if it is inside, False if not</returns>
         public bool IsInside(IntVector2 point) {
             return IsInside(point.X, point.Y);
+        }
+
+        /// <summary>
+        /// Checks if <paramref name="point"/> is inside the map borders in the XZ plane
+        /// </summary>
+        /// <param name="point">position to check</param>
+        /// <returns>true if inside, false if outside</returns>
+        public bool IsInside(Vector2 point) {
+            return IsInside(point.X, point.Y);
+        }
+
+        /// <summary>
+        /// Checks if <paramref name="point"/> is inside the map borders and above terrain
+        /// </summary>
+        /// <param name="point">position to check</param>
+        /// <returns>true if inside, false if outside</returns>
+        public bool IsInside(Vector3 point) {
+            return IsInside(point.X, point.Z) && GetHeightAt(point.X, point.Z) <= point.Y;
         }
 
         public bool IsXInside(int x) {
@@ -671,21 +693,39 @@ namespace MHUrho.WorldMap
             return graphics.RaycastToTile(rayQueryResults);
         }
 
+        public ITile RaycastToTile(RayQueryResult rayQueryResult) {
+            return graphics.RaycastToTile(rayQueryResult);
+        }
+
         /// <summary>
         /// Gets the position of the closest tile corner to the point clicked
         /// </summary>
-        /// <param name="rayQueryResult">result of raycast to process</param>
+        /// <param name="rayQueryResults">result of raycast to process</param>
         /// <returns>Position of the closest tile corner to click or null if the clicked thing was not map</returns>
-        public Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResult) {
+        public Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResults) {
+            return graphics.RaycastToVertex(rayQueryResults);
+        }
+
+        public Vector3? RaycastToVertexPosition(RayQueryResult rayQueryResult) {
             return graphics.RaycastToVertex(rayQueryResult);
         }
 
         /// <summary>
         /// Gets map matrix coords of the tile corner
         /// </summary>
-        /// <param name="rayQueryResult"></param>
+        /// <param name="rayQueryResults"></param>
         /// <returns></returns>
-        public IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResult) {
+        public IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResults) {
+            var cornerPosition = RaycastToVertexPosition(rayQueryResults);
+
+            if (!cornerPosition.HasValue) {
+                return null;
+            }
+
+            return new IntVector2((int)cornerPosition.Value.X, (int)cornerPosition.Value.Z);
+        }
+
+        public IntVector2? RaycastToVertex(RayQueryResult rayQueryResult) {
             var cornerPosition = RaycastToVertexPosition(rayQueryResult);
 
             if (!cornerPosition.HasValue) {
@@ -1079,7 +1119,7 @@ namespace MHUrho.WorldMap
         /// <param name="point"></param>
         /// <returns></returns>
         public ITile GetContainingTile(Vector3 point) {
-            return GetContainingTile(point.XZ());
+            return GetContainingTile(point.XZ2());
         }
 
         /// <summary>

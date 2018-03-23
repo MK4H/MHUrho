@@ -10,8 +10,9 @@ namespace MHUrho.UnitComponents
 {
     public class DirectShooter : DefaultComponent
     {
+        public static string ComponentName = "DirectShooter";
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => ComponentName;
         
         /// <summary>
         /// Shots per minute
@@ -22,21 +23,45 @@ namespace MHUrho.UnitComponents
 
         private float delay;
 
+        private ProjectileType projectileType;
+
         /// <summary>
         /// Offset of the projectile source from Unit Node in the direction to the target
         /// </summary>
-        private float horizontalOffset;
+        private readonly float horizontalOffset;
         /// <summary>
         /// Offset of the projectile source from Unit Node vertically
         /// </summary>
-        private float verticalOffset;
+        private readonly float verticalOffset;
 
-        public override PluginData SaveState() {
-            throw new NotImplementedException();
+        public static DirectShooter Load(LevelManager level, PluginData storedData) {
+            var rateOfFire = storedData.Streamed.Data[0].Float;
+            var target = storedData.Streamed.Data[1].Vector3.ToVector3();
+            var horizontalOffset = storedData.Streamed.Data[2].Float;
+            var verticalOffset = storedData.Streamed.Data[3].Float;
+            return new DirectShooter(target,
+                                     new ProjectileType(30, level.Map), //TODO: Load projectileType by ID
+                                     rateOfFire,
+                                     horizontalOffset,
+                                     verticalOffset);
         }
 
-        public DirectShooter(Vector3 target, float rateOfFire, float horizontalOffset, float verticalOffset) {
+        public override PluginData SaveState() {
+            var storedData = new PluginData();
+            storedData.Streamed = new StreamPluginData();
+
+            storedData.Streamed.Data.Add(new Data {Float = RateOfFire});
+            storedData.Streamed.Data.Add(new Data {Vector3 = target.ToStVector3()});
+            storedData.Streamed.Data.Add(new Data { Float = horizontalOffset });
+            storedData.Streamed.Data.Add(new Data { Float = verticalOffset });
+            //storedData.DataMap.Add("projectileType",new Data { Int = projectileType})
+
+            return storedData;
+        }
+
+        public DirectShooter(Vector3 target, ProjectileType projectileType, float rateOfFire, float horizontalOffset, float verticalOffset) {
             this.target = target;
+            this.projectileType = projectileType;
             this.RateOfFire = rateOfFire;
             this.horizontalOffset = horizontalOffset;
             this.verticalOffset = verticalOffset;
@@ -60,16 +85,16 @@ namespace MHUrho.UnitComponents
             var offset = directionXZ * horizontalOffset + Vector3.UnitY * verticalOffset;
             if (GetTimesAndAngles(target,
                                   Node.Position + offset,
-                                  30, 
+                                  projectileType.ProjectileSpeed, 
                                   out float lowTime, 
                                   out Vector3 lowVector, 
                                   out float highTime,
                                   out Vector3 highVector)) {
 
                 var arrow = Node.Scene.CreateChild("Arrow");
-                Projectile.CreateNew(arrow, Node.Position + offset, lowVector, LevelManager.CurrentLevel);
+                projectileType.SpawnProjectile(arrow, Node.Position + offset, lowVector);
                 arrow = Node.Scene.CreateChild("Arrow");
-                Projectile.CreateNew(arrow, Node.Position + offset, highVector, LevelManager.CurrentLevel);
+                projectileType.SpawnProjectile(arrow, Node.Position + offset, highVector);
             }
 
             delay = 60 / RateOfFire;

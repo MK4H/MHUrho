@@ -47,12 +47,12 @@ namespace MHUrho.UnitComponents
 
         public override PluginData SaveState() {
             var data =  new PluginData();
-            data.DataMap.Add("unit", new Data {Int = unit.ID});
+            data.Streamed.Data.Add(new Data {Int = unit.ID});
             return data;
         }
 
         public static UnitSelector Load(LevelManager level, PluginData data) {
-            var unitID = data.DataMap["unit"].Int;
+            var unitID = data.Streamed.Data[0].Int;
             return new UnitSelector(level.GetUnit(unitID), level);
         }
     }

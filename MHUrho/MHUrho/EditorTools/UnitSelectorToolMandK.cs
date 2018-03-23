@@ -40,7 +40,6 @@ namespace MHUrho.EditorTools
 
         private bool enabled;
 
-        private ITile clickedTile;
 
         public UnitSelectorToolMandK(GameMandKController input, Map map) {
             this.input = input;
@@ -55,6 +54,7 @@ namespace MHUrho.EditorTools
             if (enabled) return;
 
             dynamicHighlight.SelectionHandler += HandleSelection;
+            dynamicHighlight.SingleClickHandler += HandleSingleClick;
 
             dynamicHighlight.Enable();
 
@@ -67,6 +67,7 @@ namespace MHUrho.EditorTools
             if (!enabled) return;
 
             dynamicHighlight.SelectionHandler -= HandleSelection;
+            dynamicHighlight.SingleClickHandler -= HandleSingleClick;
             dynamicHighlight.Disable();
 
             input.UIManager.SelectionBarClearButtons();
@@ -84,6 +85,7 @@ namespace MHUrho.EditorTools
         }
 
         private void HandleSingleClick(MouseButtonUpEventArgs e) {
+            //TODO: Check that the raycastResults are ordered by distance
             foreach (var result in input.CursorRaycast()) {
                 var selector = result.Node.GetComponent<Selector>();
                 if (selector != null && selector.Player == input.Player) {
@@ -97,6 +99,16 @@ namespace MHUrho.EditorTools
                 }
 
                 //TODO: Target
+
+                var tile = map.RaycastToTile(result);
+                if (tile != null) {
+                    foreach (var unit in GetAllSelectedUnits()) {
+                        if (!unit.Order(tile)) {
+                            //TODO: Display inposible cursor
+                        }
+                    }
+                }
+                
             }
         }
 
@@ -163,6 +175,14 @@ namespace MHUrho.EditorTools
                 buttons.Add(button, unit.UnitType);
                 input.UIManager.SelectionBarAddButton(button);
                 input.UIManager.SelectionBarShowButton(button);
+            }
+        }
+
+        private IEnumerable<Unit> GetAllSelectedUnits() {
+            foreach (var unitType in selected.Values) {
+                foreach (var unit in unitType.Units) {
+                    yield return unit;
+                }
             }
         }
     }

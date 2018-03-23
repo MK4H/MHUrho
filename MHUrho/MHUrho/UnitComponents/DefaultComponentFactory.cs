@@ -14,8 +14,10 @@ namespace MHUrho.UnitComponents
 
         public DefaultComponentFactory() {
             loaders = new Dictionary<string, LoadComponentDelegate>();
+            //TODO: Maybe reflection
             loaders.Add(UnitSelector.ComponentName, UnitSelector.Load);
             loaders.Add(WorldWalker.ComponentName, WorldWalker.Load);
+            loaders.Add(DirectShooter.ComponentName, DirectShooter.Load);
             //TODO: Add other components
         }
 

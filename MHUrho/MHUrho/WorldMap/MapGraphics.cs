@@ -340,24 +340,42 @@ namespace MHUrho.WorldMap
             }
 
             public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) {
+                
                 foreach (var rayQueryResult in rayQueryResults) {
-                    if (rayQueryResult.Node == mapNode) {
-                        return map.GetTile((int)Math.Floor(rayQueryResult.Position.X), (int)Math.Floor(rayQueryResult.Position.Z));
+                    ITile tile = RaycastToTile(rayQueryResult);
+
+                    if (tile != null) {
+                        return tile;
                     }
                 }
                 return null;
             }
 
+            public ITile RaycastToTile(RayQueryResult rayQueryResult) {
+                return rayQueryResult.Node == mapNode
+                           ? map.GetTile((int) Math.Floor(rayQueryResult.Position.X),
+                                         (int) Math.Floor(rayQueryResult.Position.Z))
+                           : null;
+            }
+
             public Vector3? RaycastToVertex(List<RayQueryResult> rayQueryResults) {
                 foreach (var rayQueryResult in rayQueryResults) {
-                    if (rayQueryResult.Node == mapNode) {
-                        IntVector2 corner = new IntVector2((int) Math.Round(rayQueryResult.Position.X),
-                                                           (int) Math.Round(rayQueryResult.Position.Z));
-                        float height = map.GetHeightAt(corner);
-                        return new Vector3(corner.X, height, corner.Y);
+                    Vector3? corner = RaycastToVertex(rayQueryResult);
+
+                    if (corner.HasValue) {
+                        return corner;
                     }
                 }
                 return null;
+            }
+
+            public Vector3? RaycastToVertex(RayQueryResult rayQueryResult) {
+                if (rayQueryResult.Node != mapNode) return null;
+
+                IntVector2 corner = new IntVector2((int)Math.Round(rayQueryResult.Position.X),
+                                                   (int)Math.Round(rayQueryResult.Position.Z));
+                float height = map.GetHeightAt(corner);
+                return new Vector3(corner.X, height, corner.Y);
             }
 
             public void ChangeTileType(IntVector2 location, TileType newTileType) {

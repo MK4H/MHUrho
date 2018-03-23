@@ -4,8 +4,27 @@ package MHUrho.Storage;
 import "UrhoTypes.proto";
 import "MHUrhoTypes.proto";
 
-message PluginData {
+message PluginData{
+	oneof dataStorageTypes {
+		//Data identified by user specified names, good if you dont belive yourself with consistent indexing
+		NamedPluginData named = 1;
+		//Data identified by user specified index, good for changing implementations
+		IndexedPluginData indexed = 2;
+		//Data identified by their position in the list, good for unchaging implementations
+		StreamPluginData streamed = 3;
+	}
+}
+
+message NamedPluginData {
 	map<string,Data> dataMap = 1;
+}
+
+message IndexedPluginData {
+	map<int32, Data> dataMap = 1;
+}
+
+message StreamPluginData {
+	repeated Data data = 1;
 }
 
 message Data {
