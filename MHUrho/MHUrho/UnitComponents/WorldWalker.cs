@@ -133,30 +133,28 @@ namespace MHUrho.UnitComponents
         }
 
         public override PluginData SaveState() {
-            var storageData = new PluginData();
+            var storageData = new IndexedPluginDataWriter();
             if (Enabled) {
-                storageData.Indexed.DataMap.Add(1,new Data {Bool = true});
-                var pathData = new Data() { Path = path.Save() };
+                storageData.Store(1,true);
 
-                storageData.Indexed.DataMap.Add(2, pathData);
-
-                var currentTargetData = new Data() { IntVector2 = target.Location.Save() };
-                storageData.Indexed.DataMap.Add(3, currentTargetData);
+                storageData.Store(2, path);
+                storageData.Store(3, target.Location);
             }
             else {
-                storageData.Indexed.DataMap.Add(1, new Data { Bool = false });
+                storageData.Store(1, false);
             }
 
-            return storageData;
+            return storageData.PluginData;
         }
 
         public static WorldWalker Load(LevelManager level, PluginData data) {
-            var activated = data.Indexed.DataMap[1].Bool;
+            var indexedData = new IndexedPluginDataReader(data);
+            var activated = indexedData.Get<bool>(1);
             Path path = null;
             ITile target = null;
             if (activated) {
-                path = Path.Load(data.Indexed.DataMap[2].Path);
-                target = level.Map.GetTile(data.Indexed.DataMap[3].IntVector2.ToIntVector2());
+                path = indexedData.Get<Path>(2);
+                target = level.Map.GetTile(indexedData.Get<IntVector2>(3));
             }
 
             return new WorldWalker(level, activated, path, target);

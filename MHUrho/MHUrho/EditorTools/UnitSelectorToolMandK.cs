@@ -90,7 +90,7 @@ namespace MHUrho.EditorTools
                 var selector = result.Node.GetComponent<Selector>();
                 if (selector != null && selector.Player == input.Player) {
                     var unitSelector = selector as UnitSelector;
-                    if (unitSelector != null) {
+                    if (unitSelector != null && !unitSelector.Selected) {
                         var unit = unitSelector.GetComponent<Unit>();
 
                         AddUnit(unit);

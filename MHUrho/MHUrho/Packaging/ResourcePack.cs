@@ -153,7 +153,6 @@ namespace MHUrho.Packaging {
                                         where element.Attribute("name").Value == name
                                         select element).GetEnumerator();
 
-                unitTypeElements.MoveNext();
                 if (!unitTypeElements.MoveNext()) {
                     throw new ArgumentException("unit type of that name does not exist in this package");
                 }

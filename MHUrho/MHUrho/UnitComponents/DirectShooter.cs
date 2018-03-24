@@ -35,10 +35,15 @@ namespace MHUrho.UnitComponents
         private readonly float verticalOffset;
 
         public static DirectShooter Load(LevelManager level, PluginData storedData) {
-            var rateOfFire = storedData.Streamed.Data[0].Float;
-            var target = storedData.Streamed.Data[1].Vector3.ToVector3();
-            var horizontalOffset = storedData.Streamed.Data[2].Float;
-            var verticalOffset = storedData.Streamed.Data[3].Float;
+            var sequentialDataReader = new SequentialPluginDataReader(storedData);
+            sequentialDataReader.MoveNext();
+            var rateOfFire = sequentialDataReader.GetCurrent<float>();
+            sequentialDataReader.MoveNext();
+            var target = sequentialDataReader.GetCurrent<Vector3>();
+            sequentialDataReader.MoveNext();
+            var horizontalOffset = sequentialDataReader.GetCurrent<float>();
+            sequentialDataReader.MoveNext();
+            var verticalOffset = sequentialDataReader.GetCurrent<float>();
             return new DirectShooter(target,
                                      new ProjectileType(30, level.Map), //TODO: Load projectileType by ID
                                      rateOfFire,
@@ -47,16 +52,16 @@ namespace MHUrho.UnitComponents
         }
 
         public override PluginData SaveState() {
-            var storedData = new PluginData();
-            storedData.Streamed = new StreamPluginData();
+            var sequentialData = new SequentialPluginDataWriter();
 
-            storedData.Streamed.Data.Add(new Data {Float = RateOfFire});
-            storedData.Streamed.Data.Add(new Data {Vector3 = target.ToStVector3()});
-            storedData.Streamed.Data.Add(new Data { Float = horizontalOffset });
-            storedData.Streamed.Data.Add(new Data { Float = verticalOffset });
+
+            sequentialData.StoreNext(RateOfFire);
+            sequentialData.StoreNext(target);
+            sequentialData.StoreNext(horizontalOffset);
+            sequentialData.StoreNext(verticalOffset);
             //storedData.DataMap.Add("projectileType",new Data { Int = projectileType})
 
-            return storedData;
+            return sequentialData.PluginData;
         }
 
         public DirectShooter(Vector3 target, ProjectileType projectileType, float rateOfFire, float horizontalOffset, float verticalOffset) {

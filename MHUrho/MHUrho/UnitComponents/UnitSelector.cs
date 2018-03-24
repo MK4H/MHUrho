@@ -46,13 +46,15 @@ namespace MHUrho.UnitComponents
         //TODO: Hook up a reaction to unit death to deselect it from all tools
 
         public override PluginData SaveState() {
-            var data =  new PluginData();
-            data.Streamed.Data.Add(new Data {Int = unit.ID});
-            return data;
+            var sequentialData = new SequentialPluginDataWriter();
+            sequentialData.StoreNext(unit.ID);
+            return sequentialData.PluginData;
         }
 
         public static UnitSelector Load(LevelManager level, PluginData data) {
-            var unitID = data.Streamed.Data[0].Int;
+            var sequentialData = new SequentialPluginDataReader(data);
+            sequentialData.MoveNext();
+            var unitID = sequentialData.GetCurrent<int>();
             return new UnitSelector(level.GetUnit(unitID), level);
         }
     }

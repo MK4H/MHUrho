@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.Logic;
 
 namespace MHUrho.Storage
 {
@@ -30,29 +31,29 @@ namespace MHUrho.Storage
         }
 
         /// <summary>
-        /// Creates a reader for wrapped data in Stream format,
-        /// written by <see cref="StreamedPluginDataWriter"/>
+        /// Creates a reader for wrapped data in Sequential format,
+        /// written by <see cref="SequentialPluginDataWriter"/>
         /// </summary>
-        /// <returns>Rreader for data in stream format</returns>
-        public StreamedPluginDataReader GetReaderForWrappedStreamedData() {
-            if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Streamed) {
+        /// <returns>Rreader for data in sequential format</returns>
+        public SequentialPluginDataReader GetReaderForWrappedSequentialData() {
+            if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
                 throw new
-                    InvalidOperationException("Cannot get StreamedReader for data that are not stored in streamed format");
+                    InvalidOperationException("Cannot get SequentialReader for data that are not stored in sequential format");
             }
-            return new StreamedPluginDataReader(PluginData);
+            return new SequentialPluginDataReader(PluginData);
         }
         /// <summary>
-        /// Creates a writer that stores data in Stream format,
-        /// the written data then can be read by <see cref="StreamedPluginDataReader"/>
+        /// Creates a writer that stores data in sequential format,
+        /// the written data then can be read by <see cref="SequentialPluginDataReader"/>
         /// </summary>
-        /// <returns>Writer that writes data in Stream format</returns>
-        public StreamedPluginDataWriter GetWriterForWrappedStreamedData() {
+        /// <returns>Writer that writes data in sequential format</returns>
+        public SequentialPluginDataWriter GetWriterForWrappedSequentialData() {
             if (PluginData.DataStorageTypesCase == PluginData.DataStorageTypesOneofCase.None) {
-                PluginData.Streamed = new StreamPluginData();
-            } else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Streamed) {
-                throw new InvalidOperationException("Cannot get streamedWriter for data that are not streamed");
+                PluginData.Sequential = new SequentialPluginData();
+            } else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
+                throw new InvalidOperationException("Cannot get sequentialWriter for data that are not sequential");
             }
-            return new StreamedPluginDataWriter(PluginData);
+            return new SequentialPluginDataWriter(PluginData);
         }
         /// <summary>
         /// Creates a reader for wrapped data in Indexed format
@@ -125,6 +126,8 @@ namespace MHUrho.Storage
                 { typeof(Vector2), (data) => data.Vector2.ToVector2() },
                 { typeof(Vector3), (data) => data.Vector3.ToVector3() },
                 //TODO: Lists
+                { typeof(Path), (data) => Path.Load(data.Path) }
+                
             };
 
         protected static Dictionary<Type, Func<object, Data>> ToDataConvertors 
@@ -145,6 +148,8 @@ namespace MHUrho.Storage
                 { typeof(Vector2), (o) => new Data{ Vector2 = ((Vector2)o).ToStVector2()} },
                 { typeof(Vector3), (o) => new Data{ Vector3 = ((Vector3)o).ToStVector3()} },
                 //TODO: Lists
+                { typeof(Path), (o) => new Data{ Path = ((Path)o).Save() } }
+                
             };
     }
 }

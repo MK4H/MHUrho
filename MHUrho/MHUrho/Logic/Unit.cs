@@ -197,7 +197,6 @@ namespace MHUrho.Logic
 
 
             storedUnit.UserPlugin = new PluginData();
-            storedUnit.UserPlugin.Named = new NamedPluginData();
             logic.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
             foreach (var component in Node.Components) {
@@ -215,6 +214,7 @@ namespace MHUrho.Logic
         /// </summary>
         public void ConnectReferences(LevelManager level) {
             Player = level.GetPlayer(storage.PlayerID);
+            Tile = level.Map.GetContainingTile(Position);
             //TODO: Connect other things
 
             foreach (var defaultComponent in storage.DefaultComponentData) {

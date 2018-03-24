@@ -11,7 +11,7 @@ message PluginData{
 		//Data identified by user specified index, good for changing implementations
 		IndexedPluginData indexed = 2;
 		//Data identified by their position in the list, good for unchaging implementations
-		StreamPluginData streamed = 3;
+		SequentialPluginData sequential = 3;
 	}
 }
 
@@ -23,7 +23,7 @@ message IndexedPluginData {
 	map<int32, Data> dataMap = 1;
 }
 
-message StreamPluginData {
+message SequentialPluginData {
 	repeated Data data = 1;
 }
 

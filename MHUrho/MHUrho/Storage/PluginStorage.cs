@@ -23,58 +23,58 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChNQbHVnaW5TdG9yYWdlLnByb3RvEg5NSFVyaG8uU3RvcmFnZRoPVXJob1R5",
-            "cGVzLnByb3RvGhFNSFVyaG9UeXBlcy5wcm90byK+AQoKUGx1Z2luRGF0YRIw",
+            "cGVzLnByb3RvGhFNSFVyaG9UeXBlcy5wcm90byLEAQoKUGx1Z2luRGF0YRIw",
             "CgVuYW1lZBgBIAEoCzIfLk1IVXJoby5TdG9yYWdlLk5hbWVkUGx1Z2luRGF0",
             "YUgAEjQKB2luZGV4ZWQYAiABKAsyIS5NSFVyaG8uU3RvcmFnZS5JbmRleGVk",
-            "UGx1Z2luRGF0YUgAEjQKCHN0cmVhbWVkGAMgASgLMiAuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RyZWFtUGx1Z2luRGF0YUgAQhIKEGRhdGFTdG9yYWdlVHlwZXMilgEK",
-            "D05hbWVkUGx1Z2luRGF0YRI9CgdkYXRhTWFwGAEgAygLMiwuTUhVcmhvLlN0",
-            "b3JhZ2UuTmFtZWRQbHVnaW5EYXRhLkRhdGFNYXBFbnRyeRpECgxEYXRhTWFw",
-            "RW50cnkSCwoDa2V5GAEgASgJEiMKBXZhbHVlGAIgASgLMhQuTUhVcmhvLlN0",
-            "b3JhZ2UuRGF0YToCOAEimgEKEUluZGV4ZWRQbHVnaW5EYXRhEj8KB2RhdGFN",
-            "YXAYASADKAsyLi5NSFVyaG8uU3RvcmFnZS5JbmRleGVkUGx1Z2luRGF0YS5E",
-            "YXRhTWFwRW50cnkaRAoMRGF0YU1hcEVudHJ5EgsKA2tleRgBIAEoBRIjCgV2",
-            "YWx1ZRgCIAEoCzIULk1IVXJoby5TdG9yYWdlLkRhdGE6AjgBIjYKEFN0cmVh",
-            "bVBsdWdpbkRhdGESIgoEZGF0YRgBIAMoCzIULk1IVXJoby5TdG9yYWdlLkRh",
-            "dGEiyAcKBERhdGESDwoFZmxvYXQYASABKAJIABIQCgZkb3VibGUYAiABKAFI",
-            "ABINCgNpbnQYAyABKAVIABIOCgRsb25nGAQgASgDSAASDgoEdWludBgFIAEo",
-            "DUgAEg8KBXVsb25nGAYgASgESAASDgoEYm9vbBgHIAEoCEgAEhAKBnN0cmlu",
-            "ZxgIIAEoCUgAEhMKCWJ5dGVBcnJheRgJIAEoDEgAEjIKCmludFZlY3RvcjIY",
-            "CiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjJIABIyCgppbnRW",
-            "ZWN0b3IzGAsgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IzSAAS",
-            "LAoHdmVjdG9yMhgMIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMkgA",
-            "EiwKB3ZlY3RvcjMYDSABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjNI",
-            "ABIuCglmbG9hdExpc3QYDiABKAsyGS5NSFVyaG8uU3RvcmFnZS5GbG9hdExp",
-            "c3RIABIwCgpkb3VibGVMaXN0GA8gASgLMhouTUhVcmhvLlN0b3JhZ2UuRG91",
-            "YmxlTGlzdEgAEioKB2ludExpc3QYECABKAsyFy5NSFVyaG8uU3RvcmFnZS5J",
-            "bnRMaXN0SAASLAoIbG9uZ0xpc3QYESABKAsyGC5NSFVyaG8uU3RvcmFnZS5M",
-            "b25nTGlzdEgAEiwKCGJvb2xMaXN0GBIgASgLMhguTUhVcmhvLlN0b3JhZ2Uu",
-            "Qm9vbExpc3RIABIwCgpzdHJpbmdMaXN0GBMgASgLMhouTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RyaW5nTGlzdEgAEjYKDWJ5dGVBcnJheUxpc3QYFCABKAsyHS5NSFVy",
-            "aG8uU3RvcmFnZS5CeXRlQXJyYXlMaXN0SAASOAoOaW50VmVjdG9yMkxpc3QY",
-            "FSABKAsyHi5NSFVyaG8uU3RvcmFnZS5JbnRWZWN0b3IyTGlzdEgAEjgKDmlu",
-            "dFZlY3RvcjNMaXN0GBYgASgLMh4uTUhVcmhvLlN0b3JhZ2UuSW50VmVjdG9y",
-            "M0xpc3RIABIyCgt2ZWN0b3IyTGlzdBgXIAEoCzIbLk1IVXJoby5TdG9yYWdl",
-            "LlZlY3RvcjJMaXN0SAASMgoLdmVjdG9yM0xpc3QYGCABKAsyGy5NSFVyaG8u",
-            "U3RvcmFnZS5WZWN0b3IzTGlzdEgAEiYKBHBhdGgYGSABKAsyFi5NSFVyaG8u",
-            "U3RvcmFnZS5TdFBhdGhIAEIKCghjb250ZW50cyIaCglGbG9hdExpc3QSDQoF",
-            "dmFsdWUYASADKAIiGwoKRG91YmxlTGlzdBINCgV2YWx1ZRgBIAMoASIYCgdJ",
-            "bnRMaXN0Eg0KBXZhbHVlGAEgAygFIhkKCExvbmdMaXN0Eg0KBXZhbHVlGAEg",
-            "AygDIhkKCEJvb2xMaXN0Eg0KBXZhbHVlGAEgAygIIhsKClN0cmluZ0xpc3QS",
-            "DQoFdmFsdWUYASADKAkiHgoNQnl0ZUFycmF5TGlzdBINCgV2YWx1ZRgBIAMo",
-            "DCI9Cg5JbnRWZWN0b3IyTGlzdBIrCgV2YWx1ZRgBIAMoCzIcLk1IVXJoby5T",
-            "dG9yYWdlLlN0SW50VmVjdG9yMiI9Cg5JbnRWZWN0b3IzTGlzdBIrCgV2YWx1",
-            "ZRgBIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMyI3CgtWZWN0",
-            "b3IyTGlzdBIoCgV2YWx1ZRgBIAMoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVj",
-            "dG9yMiI3CgtWZWN0b3IzTGlzdBIoCgV2YWx1ZRgBIAMoCzIZLk1IVXJoby5T",
-            "dG9yYWdlLlN0VmVjdG9yM2IGcHJvdG8z"));
+            "UGx1Z2luRGF0YUgAEjoKCnNlcXVlbnRpYWwYAyABKAsyJC5NSFVyaG8uU3Rv",
+            "cmFnZS5TZXF1ZW50aWFsUGx1Z2luRGF0YUgAQhIKEGRhdGFTdG9yYWdlVHlw",
+            "ZXMilgEKD05hbWVkUGx1Z2luRGF0YRI9CgdkYXRhTWFwGAEgAygLMiwuTUhV",
+            "cmhvLlN0b3JhZ2UuTmFtZWRQbHVnaW5EYXRhLkRhdGFNYXBFbnRyeRpECgxE",
+            "YXRhTWFwRW50cnkSCwoDa2V5GAEgASgJEiMKBXZhbHVlGAIgASgLMhQuTUhV",
+            "cmhvLlN0b3JhZ2UuRGF0YToCOAEimgEKEUluZGV4ZWRQbHVnaW5EYXRhEj8K",
+            "B2RhdGFNYXAYASADKAsyLi5NSFVyaG8uU3RvcmFnZS5JbmRleGVkUGx1Z2lu",
+            "RGF0YS5EYXRhTWFwRW50cnkaRAoMRGF0YU1hcEVudHJ5EgsKA2tleRgBIAEo",
+            "BRIjCgV2YWx1ZRgCIAEoCzIULk1IVXJoby5TdG9yYWdlLkRhdGE6AjgBIjoK",
+            "FFNlcXVlbnRpYWxQbHVnaW5EYXRhEiIKBGRhdGEYASADKAsyFC5NSFVyaG8u",
+            "U3RvcmFnZS5EYXRhIsgHCgREYXRhEg8KBWZsb2F0GAEgASgCSAASEAoGZG91",
+            "YmxlGAIgASgBSAASDQoDaW50GAMgASgFSAASDgoEbG9uZxgEIAEoA0gAEg4K",
+            "BHVpbnQYBSABKA1IABIPCgV1bG9uZxgGIAEoBEgAEg4KBGJvb2wYByABKAhI",
+            "ABIQCgZzdHJpbmcYCCABKAlIABITCglieXRlQXJyYXkYCSABKAxIABIyCgpp",
+            "bnRWZWN0b3IyGAogASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3Iy",
+            "SAASMgoKaW50VmVjdG9yMxgLIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50",
+            "VmVjdG9yM0gAEiwKB3ZlY3RvcjIYDCABKAsyGS5NSFVyaG8uU3RvcmFnZS5T",
+            "dFZlY3RvcjJIABIsCgd2ZWN0b3IzGA0gASgLMhkuTUhVcmhvLlN0b3JhZ2Uu",
+            "U3RWZWN0b3IzSAASLgoJZmxvYXRMaXN0GA4gASgLMhkuTUhVcmhvLlN0b3Jh",
+            "Z2UuRmxvYXRMaXN0SAASMAoKZG91YmxlTGlzdBgPIAEoCzIaLk1IVXJoby5T",
+            "dG9yYWdlLkRvdWJsZUxpc3RIABIqCgdpbnRMaXN0GBAgASgLMhcuTUhVcmhv",
+            "LlN0b3JhZ2UuSW50TGlzdEgAEiwKCGxvbmdMaXN0GBEgASgLMhguTUhVcmhv",
+            "LlN0b3JhZ2UuTG9uZ0xpc3RIABIsCghib29sTGlzdBgSIAEoCzIYLk1IVXJo",
+            "by5TdG9yYWdlLkJvb2xMaXN0SAASMAoKc3RyaW5nTGlzdBgTIAEoCzIaLk1I",
+            "VXJoby5TdG9yYWdlLlN0cmluZ0xpc3RIABI2Cg1ieXRlQXJyYXlMaXN0GBQg",
+            "ASgLMh0uTUhVcmhvLlN0b3JhZ2UuQnl0ZUFycmF5TGlzdEgAEjgKDmludFZl",
+            "Y3RvcjJMaXN0GBUgASgLMh4uTUhVcmhvLlN0b3JhZ2UuSW50VmVjdG9yMkxp",
+            "c3RIABI4Cg5pbnRWZWN0b3IzTGlzdBgWIAEoCzIeLk1IVXJoby5TdG9yYWdl",
+            "LkludFZlY3RvcjNMaXN0SAASMgoLdmVjdG9yMkxpc3QYFyABKAsyGy5NSFVy",
+            "aG8uU3RvcmFnZS5WZWN0b3IyTGlzdEgAEjIKC3ZlY3RvcjNMaXN0GBggASgL",
+            "MhsuTUhVcmhvLlN0b3JhZ2UuVmVjdG9yM0xpc3RIABImCgRwYXRoGBkgASgL",
+            "MhYuTUhVcmhvLlN0b3JhZ2UuU3RQYXRoSABCCgoIY29udGVudHMiGgoJRmxv",
+            "YXRMaXN0Eg0KBXZhbHVlGAEgAygCIhsKCkRvdWJsZUxpc3QSDQoFdmFsdWUY",
+            "ASADKAEiGAoHSW50TGlzdBINCgV2YWx1ZRgBIAMoBSIZCghMb25nTGlzdBIN",
+            "CgV2YWx1ZRgBIAMoAyIZCghCb29sTGlzdBINCgV2YWx1ZRgBIAMoCCIbCgpT",
+            "dHJpbmdMaXN0Eg0KBXZhbHVlGAEgAygJIh4KDUJ5dGVBcnJheUxpc3QSDQoF",
+            "dmFsdWUYASADKAwiPQoOSW50VmVjdG9yMkxpc3QSKwoFdmFsdWUYASADKAsy",
+            "HC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjIiPQoOSW50VmVjdG9yM0xp",
+            "c3QSKwoFdmFsdWUYASADKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3Rv",
+            "cjMiNwoLVmVjdG9yMkxpc3QSKAoFdmFsdWUYASADKAsyGS5NSFVyaG8uU3Rv",
+            "cmFnZS5TdFZlY3RvcjIiNwoLVmVjdG9yM0xpc3QSKAoFdmFsdWUYASADKAsy",
+            "GS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjNiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.PluginData), global::MHUrho.Storage.PluginData.Parser, new[]{ "Named", "Indexed", "Streamed" }, new[]{ "DataStorageTypes" }, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.PluginData), global::MHUrho.Storage.PluginData.Parser, new[]{ "Named", "Indexed", "Sequential" }, new[]{ "DataStorageTypes" }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.NamedPluginData), global::MHUrho.Storage.NamedPluginData.Parser, new[]{ "DataMap" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.IndexedPluginData), global::MHUrho.Storage.IndexedPluginData.Parser, new[]{ "DataMap" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StreamPluginData), global::MHUrho.Storage.StreamPluginData.Parser, new[]{ "Data" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.SequentialPluginData), global::MHUrho.Storage.SequentialPluginData.Parser, new[]{ "Data" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.Data), global::MHUrho.Storage.Data.Parser, new[]{ "Float", "Double", "Int", "Long", "Uint", "Ulong", "Bool", "String", "ByteArray", "IntVector2", "IntVector3", "Vector2", "Vector3", "FloatList", "DoubleList", "IntList", "LongList", "BoolList", "StringList", "ByteArrayList", "IntVector2List", "IntVector3List", "Vector2List", "Vector3List", "Path" }, new[]{ "Contents" }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.FloatList), global::MHUrho.Storage.FloatList.Parser, new[]{ "Value" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.DoubleList), global::MHUrho.Storage.DoubleList.Parser, new[]{ "Value" }, null, null, null),
@@ -124,8 +124,8 @@ namespace MHUrho.Storage {
         case DataStorageTypesOneofCase.Indexed:
           Indexed = other.Indexed.Clone();
           break;
-        case DataStorageTypesOneofCase.Streamed:
-          Streamed = other.Streamed.Clone();
+        case DataStorageTypesOneofCase.Sequential:
+          Sequential = other.Sequential.Clone();
           break;
       }
 
@@ -164,17 +164,17 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "streamed" field.</summary>
-    public const int StreamedFieldNumber = 3;
+    /// <summary>Field number for the "sequential" field.</summary>
+    public const int SequentialFieldNumber = 3;
     /// <summary>
     ///Data identified by their position in the list, good for unchaging implementations
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::MHUrho.Storage.StreamPluginData Streamed {
-      get { return dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed ? (global::MHUrho.Storage.StreamPluginData) dataStorageTypes_ : null; }
+    public global::MHUrho.Storage.SequentialPluginData Sequential {
+      get { return dataStorageTypesCase_ == DataStorageTypesOneofCase.Sequential ? (global::MHUrho.Storage.SequentialPluginData) dataStorageTypes_ : null; }
       set {
         dataStorageTypes_ = value;
-        dataStorageTypesCase_ = value == null ? DataStorageTypesOneofCase.None : DataStorageTypesOneofCase.Streamed;
+        dataStorageTypesCase_ = value == null ? DataStorageTypesOneofCase.None : DataStorageTypesOneofCase.Sequential;
       }
     }
 
@@ -184,7 +184,7 @@ namespace MHUrho.Storage {
       None = 0,
       Named = 1,
       Indexed = 2,
-      Streamed = 3,
+      Sequential = 3,
     }
     private DataStorageTypesOneofCase dataStorageTypesCase_ = DataStorageTypesOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -213,7 +213,7 @@ namespace MHUrho.Storage {
       }
       if (!object.Equals(Named, other.Named)) return false;
       if (!object.Equals(Indexed, other.Indexed)) return false;
-      if (!object.Equals(Streamed, other.Streamed)) return false;
+      if (!object.Equals(Sequential, other.Sequential)) return false;
       if (DataStorageTypesCase != other.DataStorageTypesCase) return false;
       return true;
     }
@@ -223,7 +223,7 @@ namespace MHUrho.Storage {
       int hash = 1;
       if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Named) hash ^= Named.GetHashCode();
       if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed) hash ^= Indexed.GetHashCode();
-      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) hash ^= Streamed.GetHashCode();
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Sequential) hash ^= Sequential.GetHashCode();
       hash ^= (int) dataStorageTypesCase_;
       return hash;
     }
@@ -243,9 +243,9 @@ namespace MHUrho.Storage {
         output.WriteRawTag(18);
         output.WriteMessage(Indexed);
       }
-      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) {
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Sequential) {
         output.WriteRawTag(26);
-        output.WriteMessage(Streamed);
+        output.WriteMessage(Sequential);
       }
     }
 
@@ -258,8 +258,8 @@ namespace MHUrho.Storage {
       if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Indexed) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Indexed);
       }
-      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Streamed);
+      if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Sequential) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Sequential);
       }
       return size;
     }
@@ -282,11 +282,11 @@ namespace MHUrho.Storage {
           }
           Indexed.MergeFrom(other.Indexed);
           break;
-        case DataStorageTypesOneofCase.Streamed:
-          if (Streamed == null) {
-            Streamed = new global::MHUrho.Storage.StreamPluginData();
+        case DataStorageTypesOneofCase.Sequential:
+          if (Sequential == null) {
+            Sequential = new global::MHUrho.Storage.SequentialPluginData();
           }
-          Streamed.MergeFrom(other.Streamed);
+          Sequential.MergeFrom(other.Sequential);
           break;
       }
 
@@ -319,12 +319,12 @@ namespace MHUrho.Storage {
             break;
           }
           case 26: {
-            global::MHUrho.Storage.StreamPluginData subBuilder = new global::MHUrho.Storage.StreamPluginData();
-            if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Streamed) {
-              subBuilder.MergeFrom(Streamed);
+            global::MHUrho.Storage.SequentialPluginData subBuilder = new global::MHUrho.Storage.SequentialPluginData();
+            if (dataStorageTypesCase_ == DataStorageTypesOneofCase.Sequential) {
+              subBuilder.MergeFrom(Sequential);
             }
             input.ReadMessage(subBuilder);
-            Streamed = subBuilder;
+            Sequential = subBuilder;
             break;
           }
         }
@@ -551,10 +551,10 @@ namespace MHUrho.Storage {
 
   }
 
-  public sealed partial class StreamPluginData : pb::IMessage<StreamPluginData> {
-    private static readonly pb::MessageParser<StreamPluginData> _parser = new pb::MessageParser<StreamPluginData>(() => new StreamPluginData());
+  public sealed partial class SequentialPluginData : pb::IMessage<SequentialPluginData> {
+    private static readonly pb::MessageParser<SequentialPluginData> _parser = new pb::MessageParser<SequentialPluginData>(() => new SequentialPluginData());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<StreamPluginData> Parser { get { return _parser; } }
+    public static pb::MessageParser<SequentialPluginData> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -567,20 +567,20 @@ namespace MHUrho.Storage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StreamPluginData() {
+    public SequentialPluginData() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StreamPluginData(StreamPluginData other) : this() {
+    public SequentialPluginData(SequentialPluginData other) : this() {
       data_ = other.data_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StreamPluginData Clone() {
-      return new StreamPluginData(this);
+    public SequentialPluginData Clone() {
+      return new SequentialPluginData(this);
     }
 
     /// <summary>Field number for the "data" field.</summary>
@@ -595,11 +595,11 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as StreamPluginData);
+      return Equals(other as SequentialPluginData);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(StreamPluginData other) {
+    public bool Equals(SequentialPluginData other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -635,7 +635,7 @@ namespace MHUrho.Storage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(StreamPluginData other) {
+    public void MergeFrom(SequentialPluginData other) {
       if (other == null) {
         return;
       }
