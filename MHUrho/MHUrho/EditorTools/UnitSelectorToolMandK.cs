@@ -103,8 +103,9 @@ namespace MHUrho.EditorTools
                 var tile = map.RaycastToTile(result);
                 if (tile != null) {
                     foreach (var unit in GetAllSelectedUnits()) {
+                        //TODO: FORMATIONS
                         if (!unit.Order(tile)) {
-                            //TODO: Display inposible cursor
+                            //TODO: Display imposible cursor
                         }
                     }
                 }

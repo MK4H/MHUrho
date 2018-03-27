@@ -104,8 +104,6 @@ namespace MHUrho.Control
 
         public int ID { get; private set; }
 
-        public Selected Selected { get; set; }
-
         private readonly List<IPlayer> friends;
 
         private readonly List<Unit> units;
@@ -158,36 +156,6 @@ namespace MHUrho.Control
             storedPlayer = null;
         }
 
-        public void HandleRaycast(RayQueryResult rayQueryResult) {
-            //TODO: Switch on current user action, like building, selecting units etc.
-            switch (Selected.Type) {
-                case Selected.SelectedType.MapVerticies:
-                    break;
-                case Selected.SelectedType.TileRectangle:
-                    break;
-                case Selected.SelectedType.NewBuilding:
-                    break;
-                case Selected.SelectedType.NewUnit:
-                    break;
-                case Selected.SelectedType.WorldUnits:
-                    break;
-                case Selected.SelectedType.WorldBuildings:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            //var clickedTile = level.Map.RaycastToTile(rayQueryResult);
-            //if (clickedTile != null) {
-            //    Click(clickedTile);
-            //}
-
-        }
-
-        public void HandleRaycast(List<RayQueryResult> rayQueryResults) {
-
-        }
-
         /// <summary>
         /// Adds unit to players units
         /// </summary>
@@ -200,84 +168,6 @@ namespace MHUrho.Control
             units.Remove(unit);
         }
 
-        /// <summary>
-        /// Processes a player click on a unit
-        /// </summary>
-        /// <param name="unit">The unit that was clicked</param>
-        public void Click(Unit unit)
-        {
-            // My unit
-            if (unit.Player == this)
-            {
-                MyUnitClick(unit);
-            }
-            // Friendly unit
-            else if (friends.Contains(unit.Player))
-            {
-                FriednlyUnitClick(unit);
-            }
-            // Enemy unit
-            else
-            {
-                EnemyUnitClick(unit);
-            }
-        }
-
- 
-        /// <summary>
-        /// Processes user click on a tile
-        /// </summary>
-        /// <param name="tile">The tile clicked</param>
-        public void Click(ITile tile)
-        {
-            //switch (Selected.Type) {
-            //    case State.None:
-            //        break;
-            //    case State.TileTypes:
-            //        //level.Map.ChangeTileType(tile, (TileType) UISelected);
-            //        level.Map.ChangeTileType(tile, (TileType)UISelected, new IntVector2(3, 3));
-            //        break;
-            //    case State.Buildings:
-            //        break;
-            //    case State.Units:
-            //        break;
-            //    case State.HeightVertex:
-            //        break;
-            //    case State.HeightSelection:
-            //        break;
-            //    default:
-            //        throw new NotImplementedException("Given state is not implemented");
-            //}
-
-            //if (typeOfSelected == SelectedType.None)
-            //{
-            //    //TODO:TEMP
-            //    tile.SpawnUnit(this);
-            //}
-            //else if (typeOfSelected == SelectedType.Unit)
-            //{
-            //    //TODO: return value
-            //    OrderUnits(tile);
-            //}
-        }
-
-        public void UISelect(TileType tileType) {
-            //UISelected = tileType;
-            //state = State.TileTypes;
-        }
-
-        public void UISelect(Unit unit) {
-
-        }
-
-        public void UIDeselect() {
-            //UISelected = null;
-            //state = State.None;
-        }
-
-        //public void UISelect(IBuilding building) {
-
-        //}
 
         //private bool OrderUnits(ITile tile)
         //{
@@ -368,59 +258,6 @@ namespace MHUrho.Control
             }
         }
         */
-
-
-        /// <summary>
-        /// Clears anything that is currently selected
-        /// </summary>
-        public void ClearSelected()
-        {
-            //WorldSelected = null;
-        }
-
-        private void MyUnitClick(Unit unit) {
-            //if ()
-            //{
-            //    if (unit.Select())
-            //    {
-            //        selected.Add(unit);
-            //        typeOfSelected = SelectedType.Unit;
-            //    }
-            //    // Clicked on already selected unit
-            //    else
-            //    {
-            //        selected.Remove(unit);
-            //        // Deselected last unit
-            //        if (selected.Count == 0)
-            //        {
-            //            typeOfSelected = SelectedType.None;
-            //        }
-            //        unit.Deselect();
-            //    }
-            //}
-            //else
-            //{
-            //    //TODO: Deselect all currently selected
-            //    ClearSelected();
-            //    unit.Select();
-            //    selected.Add(unit);
-            //    typeOfSelected = SelectedType.Unit;
-            //}
-        }
-
-        private void FriednlyUnitClick(Unit unit) {
-
-        }
-
-        private void EnemyUnitClick(Unit unit) {
-            //if (typeOfSelected == SelectedType.Unit)
-            //{
-            //    foreach (var item in selected)
-            //    {
-            //        item.Order(unit);
-            //    }
-            //}
-        }
 
     }
 }
