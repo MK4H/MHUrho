@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 
-namespace MHUrho.Control {
+namespace MHUrho.Logic {
     public interface IPlayer {
         
         int ID { get; }

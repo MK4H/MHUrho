@@ -54,7 +54,12 @@ message StUnit {
 }
 
 message StBuilding {
-
+	int32 id = 1;
+	int32 typeID = 2;
+	StIntVector2 location = 3;
+	int32 playerID = 4;
+	repeated int32 workerUnitID = 5;
+	PluginData userPlugin = 6;
 }
 
 message StPlayer {
@@ -87,6 +92,7 @@ message StUnitType {
 
 message StBuildingType {
 	int32 packageID = 1;
-	string name = 2;
+	int32 buildingTypeID = 2;
+	string name = 3;
 
 }

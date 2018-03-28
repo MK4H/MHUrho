@@ -5,26 +5,23 @@ using System.Text;
 
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.WorldMap;
 
 namespace MHUrho.Logic
 {
-    class Building
+    public class Building
     {
         Tile[] Tiles;
-        List<Tile> Damaged;
         LevelManager level;
         Unit[] Workers;
+
         public IntRect Rectangle { get; private set; }
 
-        public IntVector2 Location{ get { return Rectangle.TopLeft(); } }
+        public IntVector2 Location => Rectangle.TopLeft();
 
-        public IEnumerable<Tile> Active { get; private set; }
-
-        
-
-        public bool BuildAt(IntVector2 TopLeftCorner)
+        public static Building BuildAt(IntVector2 topLeftCorner, Map)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

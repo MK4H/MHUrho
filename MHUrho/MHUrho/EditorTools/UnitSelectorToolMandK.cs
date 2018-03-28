@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Control;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -31,6 +32,7 @@ namespace MHUrho.EditorTools
 
         private readonly GameMandKController input;
         private readonly Map map;
+        private readonly FormationController formation;
 
         private readonly DynamicRectangleToolMandK dynamicHighlight;
 
@@ -47,6 +49,7 @@ namespace MHUrho.EditorTools
             this.selected = new Dictionary<UnitType, SelectedInfo>();
             this.buttons = new Dictionary<Button, UnitType>();
 
+            this.formation = new FormationController(map);
             this.dynamicHighlight = new DynamicRectangleToolMandK(input, map);
         }
 
@@ -102,12 +105,7 @@ namespace MHUrho.EditorTools
 
                 var tile = map.RaycastToTile(result);
                 if (tile != null) {
-                    foreach (var unit in GetAllSelectedUnits()) {
-                        //TODO: FORMATIONS
-                        if (!unit.Order(tile)) {
-                            //TODO: Display imposible cursor
-                        }
-                    }
+                    formation.MoveToFormation(GetAllSelectedUnits(), tile);
                 }
                 
             }

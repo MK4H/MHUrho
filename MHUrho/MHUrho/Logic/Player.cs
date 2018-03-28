@@ -7,7 +7,7 @@ using MHUrho.Logic;
 using MHUrho.WorldMap;
 
 
-namespace MHUrho.Control
+namespace MHUrho.Logic
 {
     public class Player : IPlayer {
 
@@ -97,10 +97,6 @@ namespace MHUrho.Control
         //    }
         //}
 
-        //class SpawnOrder
-        //{
-
-        //}
 
         public int ID { get; private set; }
 

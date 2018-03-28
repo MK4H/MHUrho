@@ -45,7 +45,7 @@ namespace MHUrho.UnitComponents
             sequentialDataReader.MoveNext();
             var verticalOffset = sequentialDataReader.GetCurrent<float>();
             return new DirectShooter(target,
-                                     new ProjectileType(30, level.Map), //TODO: Load projectileType by ID
+                                     new ProjectileType(10, level.Map), //TODO: Load projectileType by ID
                                      rateOfFire,
                                      horizontalOffset,
                                      verticalOffset);

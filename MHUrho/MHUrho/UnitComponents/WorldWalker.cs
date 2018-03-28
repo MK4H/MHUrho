@@ -15,6 +15,14 @@ namespace MHUrho.UnitComponents
 
         public override string Name => ComponentName;
 
+        /// <summary>
+        /// If the unit should try and own the tile it stops at
+        /// If true, it tries and if it fails, pathfinds to the closest empty tile
+        /// If false, the unit just stays as a passing unit
+        /// Default true
+        /// </summary>
+        public bool OwnTileAtReachingTarget { get; set; } = true;
+
         private Map map;
         private LevelManager level;
         private Unit unit;
@@ -73,9 +81,19 @@ namespace MHUrho.UnitComponents
             //Middle was reached
             if (!path.MoveNext()) {
                 //Reached destination
-                Enabled = false;
+                Path newPath = null;
+                if (OwnTileAtReachingTarget && !path.Target.TryAddOwningUnit(unit)) {
+                    newPath = map.GetPath(unit, map.FindClosestEmptyTile(path.Target));
+                }
+
                 path.Dispose();
                 target = null;
+                Enabled = false;
+
+                if (newPath != null) {
+                    GoAlong(newPath);
+                }
+
                 return;
             }
 

@@ -308,6 +308,7 @@ namespace MHUrho.Logic
             Node.Position = newPosition;
             return true;
         }
+
         #endregion
 
         

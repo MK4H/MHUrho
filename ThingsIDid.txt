@@ -77,6 +77,9 @@ Getting all units in range, calculating how to shoot at the target
 https://blog.forrestthewoods.com/solving-ballistic-trajectories-b0165523348c
 
 
+Saving data for user provided plugins, wrappers around protocol buffers for easier access and some type safety
+- sequential, indexed and named polymorfic data streams
+
 
 TODO:
 

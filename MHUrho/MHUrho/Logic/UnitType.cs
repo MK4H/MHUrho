@@ -27,7 +27,8 @@ namespace MHUrho.Logic
         public Image Icon { get; private set; }
 
         public IUnitPlugin UnitLogic { get; private set; }
-        HashSet<string> passableTileTypes;
+
+        HashSet<TileType> passableTileTypes;
 
         //TODO: More loaded properties
 
@@ -63,7 +64,7 @@ namespace MHUrho.Logic
             return storedUnitType;
         }
 
-        public bool CanPass(string tileType)
+        public bool CanPass(TileType tileType)
         {
             return passableTileTypes.Contains(tileType);
         }
