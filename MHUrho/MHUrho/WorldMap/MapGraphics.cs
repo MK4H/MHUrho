@@ -721,36 +721,7 @@ namespace MHUrho.WorldMap
             }
 
 
-            private unsafe void CalculateSmoothNormals(TileInVB* vertexBufferBase, IntVector2 corner) {
-                ITile tile;
-                TileInVB* topLeftTile = null, topRightTile = null, bottomLeftTile = null, bottomRightTile = null;
-                Vector3 normal = new Vector3();
-                if ((tile = map.TileByTopLeftCorner(corner, true)) != null) {
-                    topLeftTile = (vertexBufferBase + map.GetTileIndex(tile));
-                    normal += topLeftTile->TopLeft.Normal;
-                }
-
-                if ((tile = map.TileByTopRightCorner(corner, true)) != null) {
-                    topRightTile = (vertexBufferBase + map.GetTileIndex(tile));
-                    normal += topRightTile->TopRight.Normal;
-                }
-
-                if ((tile = map.TileByBottomLeftCorner(corner, true)) != null) {
-                    bottomLeftTile = (vertexBufferBase + map.GetTileIndex(tile));
-                    normal += bottomLeftTile->BottomLeft.Normal;
-                }
-
-                if ((tile = map.TileByBottomRightCorner(corner, true)) != null) {
-                    bottomRightTile = (vertexBufferBase + map.GetTileIndex(tile));
-                    normal += bottomRightTile->BottomRight.Normal;
-                }
-
-                normal.Normalize();
-                if (topLeftTile != null) topLeftTile->TopLeft.Normal = normal;
-                if (topRightTile != null) topRightTile->TopRight.Normal = normal;
-                if (bottomLeftTile != null) bottomLeftTile->BottomLeft.Normal = normal;
-                if (bottomRightTile != null) bottomRightTile->BottomRight.Normal = normal;
-            }
+            
         }
 
     }

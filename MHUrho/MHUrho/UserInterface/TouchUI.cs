@@ -11,7 +11,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-    class TouchUI : IDisposable {
+    public class TouchUI : IDisposable {
 
         private readonly MyGame game;
         private readonly GameTouchController touchInputCtl;

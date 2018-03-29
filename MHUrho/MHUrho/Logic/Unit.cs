@@ -66,7 +66,7 @@ namespace MHUrho.Logic
         #region Private members
 
 
-        private IUnitPlugin logic;
+        private IUnitInstancePlugin logic;
 
         /// <summary>
         /// Holds the image of this unit between the steps of loading
@@ -314,10 +314,6 @@ namespace MHUrho.Logic
         
 
         #region Private Methods
-
-        private void InitializeNode() {
-            var staticModel = Node.CreateComponent<StaticModel>();
-        }
 
         private bool CheckTile(Vector3 newPosition) {
             ITile newTile;

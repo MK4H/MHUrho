@@ -18,6 +18,7 @@ namespace MHUrho.UnitComponents
             loaders.Add(UnitSelector.ComponentName, UnitSelector.Load);
             loaders.Add(WorldWalker.ComponentName, WorldWalker.Load);
             loaders.Add(DirectShooter.ComponentName, DirectShooter.Load);
+            loaders.Add(BuildingWorker.ComponentName, BuildingWorker.Load);
             //TODO: Add other components
         }
 

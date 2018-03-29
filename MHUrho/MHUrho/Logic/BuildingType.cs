@@ -22,9 +22,9 @@ namespace MHUrho.Logic
 
         public Image Icon { get; private set; }
 
-        public IBuildingPlugin BuildingLogic { get; private set; }
+        public IBuildingInstancePlugin BuildingLogic { get; private set; }
 
-        private IntVector2 size;
+        public IntVector2 Size { get; private set; }
 
         public StBuildingType Save() {
             return new StBuildingType {
@@ -34,13 +34,13 @@ namespace MHUrho.Logic
                                       };
         }
 
-        public Building BuildNewBuilding(int buildingID, Node buildingNode, LevelManager level, IntVector2 topLeftLocation, IPlayer player) {
+        //public Building BuildNewBuilding(int buildingID, Node buildingNode, LevelManager level, IntVector2 topLeftLocation, IPlayer player) {
 
-        }
+        //}
 
-        public Building LoadBuilding() {
+        //public Building LoadBuilding() {
 
-        }
+        //}
 
         public bool CanBuildAt(IntVector2 topLeftLocation) {
             return BuildingLogic.CanBuildAt(topLeftLocation);

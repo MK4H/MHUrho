@@ -10,6 +10,10 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
+    public delegate void MovementStartedDelegate(Unit unit);
+
+    public delegate void MovementEndedDelegate(Unit unit);
+
     public class WorldWalker : DefaultComponent {
         public static string ComponentName = "WorldWalker";
 
@@ -22,6 +26,9 @@ namespace MHUrho.UnitComponents
         /// Default true
         /// </summary>
         public bool OwnTileAtReachingTarget { get; set; } = true;
+
+        public event MovementStartedDelegate OnMovementStarted;
+        public event MovementEndedDelegate OnMovementEnded;
 
         private Map map;
         private LevelManager level;
@@ -49,6 +56,10 @@ namespace MHUrho.UnitComponents
         }
 
         public void GoAlong(Path path) {
+            if (this.path == null) {
+                OnMovementStarted?.Invoke(unit);
+            }
+
             this.path = path;
             if (!path.MoveNext()) {
                 //TODO: cannot enumerate path
@@ -92,6 +103,10 @@ namespace MHUrho.UnitComponents
 
                 if (newPath != null) {
                     GoAlong(newPath);
+                }
+                else {
+                    OnMovementEnded?.Invoke(unit);
+                    path = null;
                 }
 
                 return;

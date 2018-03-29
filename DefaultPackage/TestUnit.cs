@@ -7,7 +7,7 @@ using Urho;
 
 namespace DefaultPackage
 {
-    public class TestUnit : IUnitPlugin
+    public class TestUnit : IUnitInstancePlugin
     {
         private LevelManager level;
         private Node unitNode;
@@ -36,13 +36,13 @@ namespace DefaultPackage
             return false;
         }
 
-        public IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
+        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
             unitNode.AddComponent(new WorldWalker(level));
             unitNode.AddComponent(new UnitSelector(unit, level));
             return new TestUnit(level, unitNode, unit);
         }
 
-        public IUnitPlugin LoadNewInstance(LevelManager level, 
+        public IUnitInstancePlugin LoadNewInstance(LevelManager level, 
                                            Node unitNode, 
                                            Unit unit,
                                            PluginDataWrapper pluginDataStorage) {

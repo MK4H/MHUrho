@@ -7,9 +7,10 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public interface IBuildingPlugin
+    public interface IBuildingTypePlugin
     {
-        IUnitPlugin CreateNewInstance(LevelManager level, Node buildingNode, Building building);
+
+        IBuildingInstancePlugin CreateNewInstance(LevelManager level, Node buildingNode, Building building);
 
         /// <summary>
         /// Creates new instance in the state saved in <paramref name="pluginData"/>
@@ -19,9 +20,8 @@ namespace MHUrho.Plugins
         /// <param name="building">the building logic class</param>
         /// <param name="pluginData">stored state of the building plugin</param>
         /// <returns>New instance loaded into saved state</returns>
-        IUnitPlugin LoadNewInstance(LevelManager level, Node buildingNode, Building building, PluginDataWrapper pluginData);
+        IBuildingInstancePlugin LoadNewInstance(LevelManager level, Node buildingNode, Building building, PluginDataWrapper pluginData);
 
         bool CanBuildAt(IntVector2 topLeftLocation);
-
     }
 }

@@ -15,7 +15,6 @@ namespace MHUrho.Logic
 {
     public class UnitType : IIDNameAndPackage, IDisposable
     {
-
         public int ID { get; set; }
 
         public string Name { get; private set; }
@@ -26,13 +25,13 @@ namespace MHUrho.Logic
 
         public Image Icon { get; private set; }
 
-        public IUnitPlugin UnitLogic { get; private set; }
+        public IUnitInstancePlugin UnitLogic { get; private set; }
 
         HashSet<TileType> passableTileTypes;
 
         //TODO: More loaded properties
 
-        protected UnitType(string name, Model model, IUnitPlugin unitPlugin, Image icon, ResourcePack package) {
+        protected UnitType(string name, Model model, IUnitInstancePlugin unitPlugin, Image icon, ResourcePack package) {
             this.Name = name;
             this.Model = model;
             this.UnitLogic = unitPlugin;
@@ -78,7 +77,11 @@ namespace MHUrho.Logic
         /// <param name="tile">tile where the unit will spawn</param>
         /// <param name="player">owner of the unit</param>
         /// <returns>New unit of this type</returns>
-        public Unit CreateNewUnit(int unitID, Node unitNode, LevelManager level, ITile tile, IPlayer player) {
+        public Unit CreateNewUnit(int unitID, 
+                                  Node unitNode, 
+                                  LevelManager level, 
+                                  ITile tile, 
+                                  IPlayer player) {
             var unit = Unit.CreateNew(unitID, unitNode, this, level, tile, player);
             AddComponents(unitNode);
 
@@ -142,7 +145,7 @@ namespace MHUrho.Logic
             return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
         }
 
-        private static IUnitPlugin LoadUnitPlugin(XElement unitTypeXml, string pathToPackageXmlDir, string unitTypeName) {
+        private static IUnitInstancePlugin LoadUnitPlugin(XElement unitTypeXml, string pathToPackageXmlDir, string unitTypeName) {
             string relativeAssemblyPath = unitTypeXml.Element(PackageManager.XMLNamespace + "assemblyPath").Value.Trim();
             //Fix / or \ in the path
             relativeAssemblyPath = FileManager.CorrectRelativePath(relativeAssemblyPath);
@@ -152,11 +155,11 @@ namespace MHUrho.Logic
                                                                     relativeAssemblyPath));
 
             var unitPlugins = from type in assembly.GetTypes()
-                              where typeof(IUnitPlugin).IsAssignableFrom(type)
+                              where typeof(IUnitInstancePlugin).IsAssignableFrom(type)
                               select type;
-            IUnitPlugin pluginInstance = null;
+            IUnitInstancePlugin pluginInstance = null;
             foreach (var plugin in unitPlugins) {
-                pluginInstance = (IUnitPlugin)Activator.CreateInstance(plugin);
+                pluginInstance = (IUnitInstancePlugin)Activator.CreateInstance(plugin);
                 if (pluginInstance.IsMyUnitType(unitTypeName)) {
                     break;
                 }

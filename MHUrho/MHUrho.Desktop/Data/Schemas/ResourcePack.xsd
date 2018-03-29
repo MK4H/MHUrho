@@ -52,6 +52,20 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="projectileTypes" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="projectileType" type="projectileTypeType" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="buildingTypes" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="buildingType" type="buildingTypeType" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -62,7 +76,7 @@
       <xs:element name="texturePath" type="xs:string"/>
       <xs:element name="movementSpeed" type="xs:float"/>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute use="required" name="name" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="unitTypeType">
@@ -71,6 +85,24 @@
       <xs:element name="modelPath" type="xs:string"/>
       <xs:element name="assemblyPath" type="xs:string"/>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute use="required" name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="buildingTypeType">
+    <xs:sequence>
+      <xs:element name="iconPath" type="xs:string"/>
+      <xs:element name="modelPath" type="xs:string"/>
+      <xs:element name="assemblyPath" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute use="required" name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="projectileTypeType">
+    <xs:sequence>
+      <xs:element name="modelPath" type="xs:string"/>
+      <xs:element name="assemblyPath" type="xs:string"/>
+      <xs:element name="speed" type="xs:float"/>
+    </xs:sequence>
+    <xs:attribute use="required" name="name" type="xs:string"/>
   </xs:complexType>
 </xs:schema>

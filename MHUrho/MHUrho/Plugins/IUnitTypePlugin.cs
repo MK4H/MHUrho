@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Urho;
 using MHUrho.Logic;
 using MHUrho.Storage;
+using Urho;
 
 namespace MHUrho.Plugins
 {
-    //TODO: Either make one instance of this for every unit,
-    // OR make just it a singleton, where all the data will be stored in Unit class
-    public interface IUnitPlugin {
+    public interface IUnitTypePlugin
+    {
         bool IsMyUnitType(string unitTypeName);
 
-        bool Order(ITile tile);
-
-        void OnUpdate(float timeStep);
-
-        IUnitPlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
+        IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
 
         /// <summary>
         /// Creates new instance in the state saved in <paramref name="pluginData"/>
@@ -29,9 +24,6 @@ namespace MHUrho.Plugins
         /// <param name="unit">the unit logic class</param>
         /// <param name="pluginData">stored state of the unit plugin</param>
         /// <returns>New instance loaded into saved state</returns>
-        IUnitPlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginData);
-
-        void SaveState(PluginDataWrapper pluginData);
-        //TODO: Expand this
+        IUnitInstancePlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginData);
     }
 }

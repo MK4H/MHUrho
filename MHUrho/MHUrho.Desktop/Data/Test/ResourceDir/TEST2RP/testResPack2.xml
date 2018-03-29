@@ -14,4 +14,11 @@
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </unitType>
   </unitTypes>
+  <buildingTypes>
+    <buildingType name="testBuilding">
+      <iconPath>sand.jpg</iconPath>
+      <modelPath>Box.mdl</modelPath>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </buildingType>
+  </buildingTypes>
 </resourcePack>
