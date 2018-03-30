@@ -40,6 +40,14 @@ namespace MHUrho.Packaging
 
         public IEnumerable<UnitType> UnitTypes => activeUnitTypes.Values;
 
+        public int BuildingTypeCount => activeBuildingTypes.Count;
+
+        public IEnumerable<BuildingType> BuildingTypes => activeBuildingTypes.Values;
+
+        public int ProjectileTypeCount => activeProjectileTypes.Count;
+
+        public IEnumerable<ProjectileType> ProjectileTypes => activeProjectileTypes.Values;
+
         public TileType DefaultTileType { get; private set; }
 
         private readonly XmlSchemaSet schemas;
@@ -52,7 +60,9 @@ namespace MHUrho.Packaging
 
         private Dictionary<int, UnitType> activeUnitTypes;
 
-        //private Dictionary<int, BuildingType> activeTileTypes;
+        private Dictionary<int, BuildingType> activeBuildingTypes;
+
+        private Dictionary<int, ProjectileType> activeProjectileTypes;
 
         private readonly Random rng;
 
@@ -81,14 +91,20 @@ namespace MHUrho.Packaging
                 storedActivePackages.Add(new StPackage {ID = activePackage.Key, Name = activePackage.Value.Name});
             }
 
-            var storedActiveTileTypes = storedPackages.TileTypes;
             foreach (var activeTileType in activeTileTypes) {
-                storedActiveTileTypes.Add(activeTileType.Value.Save());
+                storedPackages.TileTypes.Add(activeTileType.Value.Save());
             }
 
-            var storedActiveUnitTypes = storedPackages.UnitTypes;
             foreach (var activeUnitType in activeUnitTypes) {
-                storedActiveUnitTypes.Add(activeUnitType.Value.Save());
+                storedPackages.UnitTypes.Add(activeUnitType.Value.Save());
+            }
+
+            foreach (var activeBuildingType in activeBuildingTypes) {
+                storedPackages.BuildingTypes.Add(activeBuildingType.Value.Save());
+            }
+
+            foreach (var activeProjectileType in activeProjectileTypes) {
+                storedPackages.ProjectileTypes.Add(activeProjectileType.Value.Save());
             }
 
             return storedPackages;
@@ -98,6 +114,8 @@ namespace MHUrho.Packaging
             //Remap everything from LevelLocal IDs to Global names so we can check if there are already things loaded
             Dictionary<string, TileType> loadedTileTypes = RemapToFullName(activeTileTypes);
             Dictionary<string, UnitType> loadedUnitTypes = RemapToFullName(activeUnitTypes);
+            Dictionary<string, BuildingType> loadedBuildingTypes = RemapToFullName(activeBuildingTypes);
+            Dictionary<string, ProjectileType> loadedProjectileTypes = RemapToFullName(activeProjectileTypes);
 
             ClearActiveTypes();
 
@@ -114,6 +132,8 @@ namespace MHUrho.Packaging
 
                 LoadTileTypes(storedPackages.TileTypes, loadedTileTypes);
                 LoadUnitTypes(storedPackages.UnitTypes, loadedUnitTypes);
+                LoadBuildingTypes(storedPackages.BuildingTypes, loadedBuildingTypes);
+                LoadProjectileTypes(storedPackages.ProjectileTypes, loadedProjectileTypes);
 
                 FinishLoadingPackages(newActivePackages.Values);
             }
@@ -150,11 +170,12 @@ namespace MHUrho.Packaging
             
 
             foreach (var package in newLoadedPackages.Values) {
-                IEnumerable<TileType> tileTypes = package.LoadAllTileTypes(() =>  GetNewID(activeTileTypes));
-                AddToActive(tileTypes);
-                IEnumerable<UnitType> unitTypes = package.LoadAllUnitTypes(() => GetNewID(activeUnitTypes));
-                AddToActive(unitTypes);
+                AddToActive(package.LoadAllTileTypes(() => GetNewID(activeTileTypes)));
+                AddToActive(package.LoadAllUnitTypes(() => GetNewID(activeUnitTypes)));
+                AddToActive(package.LoadAllBuildingTypes(() => GetNewID(activeBuildingTypes)));
             }
+
+            FinishLoadingPackages(newLoadedPackages.Values);
         }
 
         protected PackageManager(ResourceCache resourceCache)
@@ -166,6 +187,8 @@ namespace MHUrho.Packaging
             activePackages = new Dictionary<int, ResourcePack>();
             activeTileTypes = new Dictionary<int, TileType>();
             activeUnitTypes = new Dictionary<int, UnitType>();
+            activeBuildingTypes = new Dictionary<int, BuildingType>();
+            activeProjectileTypes = new Dictionary<int, ProjectileType>();
         }
 
         public TileType GetTileType(int ID) {
@@ -176,6 +199,16 @@ namespace MHUrho.Packaging
         public UnitType GetUnitType(int ID) {
             //TODO: React if it does not exist
             return activeUnitTypes[ID];
+        }
+
+        public BuildingType GetBuildingType(int ID) {
+            //TODO: React if it does not exist
+            return activeBuildingTypes[ID];
+        }
+
+        public ProjectileType GetProjectileType(int ID) {
+            //TODO: React if it does not exist
+            return activeProjectileTypes[ID];
         }
 
         public ResourcePack GetResourcePack(int ID) {
@@ -373,15 +406,29 @@ namespace MHUrho.Packaging
             }
         }
 
+        private void AddToActive(IEnumerable<BuildingType> buildingTypes) {
+            foreach (var buildingType in buildingTypes) {
+                activeBuildingTypes.Add(buildingType.ID, buildingType);
+            }
+        }
+
+        private void AddToActive(IEnumerable<ProjectileType> projectileTypes) {
+            foreach (var projectileType in projectileTypes) {
+                activeProjectileTypes.Add(projectileType.ID, projectileType);
+            }
+        }
+
         /// <summary>
         /// Clears <see cref="activeTileTypes"/>, <see cref="activeUnitTypes"/>, ...
         /// </summary>
         private void ClearActiveTypes() {
             activeTileTypes = new Dictionary<int, TileType>();
             activeUnitTypes = new Dictionary<int, UnitType>();
+            activeBuildingTypes = new Dictionary<int, BuildingType>();
+            activeProjectileTypes = new Dictionary<int, ProjectileType>();
         }
 
-        private void LoadTileTypes(IEnumerable<StTileType> storedTileTypes, Dictionary<string, TileType> loadedTileTypes) {
+        private void LoadTileTypes(IEnumerable<StEntityType> storedTileTypes, Dictionary<string, TileType> loadedTileTypes) {
             foreach (var storedTileType in storedTileTypes) {
 
                 TileType tileType;
@@ -389,27 +436,81 @@ namespace MHUrho.Packaging
                 if (!loadedTileTypes.TryGetValue(GetFullName(storedTileType.PackageID, storedTileType.Name),
                                                  out tileType)) {
                     //Was not loaded, load it from package
-                    tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TileTypeID);
+                    tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TypeID);
                 }
 
-                tileType.ID = storedTileType.TileTypeID;
+                tileType.ID = storedTileType.TypeID;
                 activeTileTypes.Add(tileType.ID, tileType);
             }
         }
 
         //TODO: Refactor this and the above to be the same generic method
-        private void LoadUnitTypes(IEnumerable<StUnitType> storedUnitTypes, Dictionary<string, UnitType> loadedUnitTypes) {
+        private void LoadUnitTypes(IEnumerable<StEntityType> storedUnitTypes, Dictionary<string, UnitType> loadedUnitTypes) {
             foreach (var storedUnitType in storedUnitTypes) {
-                UnitType unitType;
                 //If already loaded, just get it
                 if (!loadedUnitTypes.TryGetValue(GetFullName(storedUnitType.PackageID, storedUnitType.Name),
-                                                 out unitType)) {
+                                                 out UnitType unitType)) {
                     //Was not loaded, load it from package
-                    unitType = activePackages[storedUnitType.PackageID].LoadUnitType(storedUnitType.Name, storedUnitType.UnitTypeID);
+                    unitType = activePackages[storedUnitType.PackageID].LoadUnitType(storedUnitType.Name, storedUnitType.TypeID);
                 }
 
-                unitType.ID = storedUnitType.UnitTypeID;
+                unitType.ID = storedUnitType.TypeID;
                 activeUnitTypes.Add(unitType.ID, unitType);
+            }
+        }
+
+        private void LoadBuildingTypes(IEnumerable<StEntityType> storedBuildingTypes,
+                                       Dictionary<string, BuildingType> loadedBuildingTypes) {
+            foreach (var storedBuildingType in storedBuildingTypes) {
+                if (!loadedBuildingTypes.TryGetValue(GetFullName(storedBuildingType.PackageID, storedBuildingType.Name),
+                                                     out BuildingType buildingType)) {
+                    buildingType = activePackages[storedBuildingType.PackageID].LoadBuildingType(storedBuildingType.Name, storedBuildingType.TypeID);
+                }
+
+                buildingType.ID = storedBuildingType.TypeID;
+                activeBuildingTypes.Add(buildingType.ID, buildingType);
+            }
+        }
+
+        private void LoadProjectileTypes(IEnumerable<StEntityType> storedProjectileTypes,
+                                       Dictionary<string, ProjectileType> loadedProjectileTypes) {
+            foreach (var storedProjectileType in storedProjectileTypes) {
+                if (!loadedProjectileTypes.TryGetValue(GetFullName(storedProjectileType.PackageID, storedProjectileType.Name),
+                                                     out ProjectileType projectileType)) {
+                    projectileType = activePackages[storedProjectileType.PackageID]
+                        .LoadProjectileType(storedProjectileType.Name, storedProjectileType.TypeID);
+                }
+
+                projectileType.ID = storedProjectileType.TypeID;
+                activeProjectileTypes.Add(projectileType.ID, projectileType);
+            }
+        }
+
+        /// <summary>
+        /// Loads the types of type <typeparamref name="T"/> stored in <paramref name="storedTTypes"/>
+        /// 
+        /// If the type was already loaded in <paramref name="oldLoadedTTypes"/>, just assings the level local ID to it
+        /// If the type was not already loaded in <paramref name="oldLoadedTTypes"/>, loades it
+        /// 
+        /// Adds all types to be used in the new level to <paramref name="newLoadedTTypes"/>
+        /// </summary>
+        /// <typeparam name="T">Type of the stored entities, for example <see cref="UnitType"/>, <see cref="BuildingType"/> or other types</typeparam>
+        /// <param name="storedTTypes">Types of the kind needed for the newly loaded level</param>
+        /// <param name="oldLoadedTTypes">Types loaded for the previous level, used to prevent repeated loading</param>
+        /// <param name="newLoadedTTypes">Types loeaded for new level, should be one of the <see cref="activeUnitTypes"/>, 
+        /// <see cref="activeBuildingTypes"/>, <see cref="activeTileTypes"/>, <see cref="activeProjectileTypes"/> etc.</param>
+        private void LoadTypes<T>(IEnumerable<StEntityType> storedTTypes,
+                                         IDictionary<string, T> oldLoadedTTypes,
+                                         IDictionary<int, T> newLoadedTTypes) where T : class, IIDNameAndPackage {
+            foreach (var storedTType in storedTTypes) {
+                if (!oldLoadedTTypes.TryGetValue(GetFullName(storedTType.PackageID, storedTType.Name),
+                                                 out T TType)) {
+                    TType = activePackages[storedTType.PackageID]
+                            .LoadProjectileType(storedTType.Name, storedTType.TypeID);
+                }
+
+                TType.ID = storedTType.TypeID;
+                newLoadedTTypes.Add(TType.ID, TType);
             }
         }
     }

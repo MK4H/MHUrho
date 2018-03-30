@@ -17,9 +17,9 @@ namespace MHUrho.Plugins
         /// <returns>Target tile</returns>
         ITile GetExchangeTile(Unit unit);
 
-        void OnSelected(MandKUI mouseAndKeyboardUI);
+        void OnUpdate(float timeStep);
 
-        void OnSelected(TouchUI touchUI);
+        void SaveState(PluginDataWrapper pluginData);
 
     }
 }

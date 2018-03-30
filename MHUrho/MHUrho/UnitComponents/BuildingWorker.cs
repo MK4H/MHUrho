@@ -56,7 +56,7 @@ namespace MHUrho.UnitComponents
         private Unit unit;
 
         public static BuildingWorker Load(LevelManager level, PluginData pluginData) {
-
+            throw new NotImplementedException();
         }
 
         public override PluginData SaveState() {

@@ -14,6 +14,12 @@
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </unitType>
   </unitTypes>
+  <projectileTypes>
+    <projectileType name="TestProjectile">
+      <modelPath>Box.mdl</modelPath>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </projectileType>
+  </projectileTypes>
   <buildingTypes>
     <buildingType name="testBuilding">
       <iconPath>sand.jpg</iconPath>

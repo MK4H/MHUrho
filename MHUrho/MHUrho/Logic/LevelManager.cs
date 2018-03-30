@@ -37,6 +37,7 @@ namespace MHUrho.Logic
 
         private readonly Dictionary<int, Unit> units;
         private readonly Dictionary<int, Player> players;
+        private readonly Dictionary<int, Building> buildings;
 
         private readonly Random rng;
 
@@ -188,6 +189,7 @@ namespace MHUrho.Logic
             this.Scene = scene;
             this.units = new Dictionary<int, Unit>();
             this.players = new Dictionary<int, Player>();
+            this.buildings = new Dictionary<int, Building>();
             this.rng = new Random();
             this.Map = map;
 
@@ -222,10 +224,18 @@ namespace MHUrho.Logic
                                                     new Vector3(0,
                                                                 0,
                                                                 10),
-                                                    new ProjectileType(10, Map),
+                                                    PackageManager.Instance.(),
                                                     10,
                                                     1,
                                                     1));
+        }
+
+        public void BuildBuilding(BuildingType buildingType, IntVector2 centerTileLocation, IPlayer player) {
+            Node buildingNode = Scene.CreateChild("Building");
+
+            var newBuilding = buildingType.BuildNewBuilding(GetNewID(buildings), buildingNode, this, centerTileLocation, player);
+            buildings.Add(newBuilding.ID,newBuilding);
+            player.AddBuilding(newBuilding);
         }
 
         public Unit GetUnit(int ID) {

@@ -14,9 +14,10 @@ message StLevel {
 
 message StPackages {
 	repeated StPackage packages = 1;
-	repeated StTileType tileTypes = 2;
-	repeated StUnitType unitTypes = 3;
-	repeated StBuildingType buildingTypes = 4;
+	repeated StEntityType tileTypes = 2;
+	repeated StEntityType unitTypes = 3;
+	repeated StEntityType buildingTypes = 4;
+	repeated StEntityType projectileTypes = 5;
 }
 
 message StPackage {
@@ -76,23 +77,11 @@ message StMap {
 	repeated StBorderTile borderTiles = 3;
 }
 
-message StTileType {
+message StEntityType {
 	int32 packageID = 1;
-	//Global across all tileTypes in this level
-	int32 tileTypeID = 2;
+	//Global across all entities of the kind (for example tile types) in this level
+	int32 typeID = 2;
 	string name = 3;
 }
 
-message StUnitType {
-	//Global across all packages in this level
-	int32 packageID = 1;
-	int32 unitTypeID = 2;
-	string name = 3;
-}
 
-message StBuildingType {
-	int32 packageID = 1;
-	int32 buildingTypeID = 2;
-	string name = 3;
-
-}

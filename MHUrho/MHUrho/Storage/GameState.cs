@@ -27,48 +27,46 @@ namespace MHUrho.Storage {
             "GAEgASgLMhUuTUhVcmhvLlN0b3JhZ2UuU3RNYXASJQoFdW5pdHMYAiADKAsy",
             "Fi5NSFVyaG8uU3RvcmFnZS5TdFVuaXQSKQoHcGxheWVycxgDIAMoCzIYLk1I",
             "VXJoby5TdG9yYWdlLlN0UGxheWVyEhEKCWdhbWVTcGVlZBgEIAEoAhIsCghw",
-            "YWNrYWdlcxgFIAEoCzIaLk1IVXJoby5TdG9yYWdlLlN0UGFja2FnZXMizgEK",
+            "YWNrYWdlcxgFIAEoCzIaLk1IVXJoby5TdG9yYWdlLlN0UGFja2FnZXMihwIK",
             "ClN0UGFja2FnZXMSKwoIcGFja2FnZXMYASADKAsyGS5NSFVyaG8uU3RvcmFn",
-            "ZS5TdFBhY2thZ2USLQoJdGlsZVR5cGVzGAIgAygLMhouTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RUaWxlVHlwZRItCgl1bml0VHlwZXMYAyADKAsyGi5NSFVyaG8uU3Rv",
-            "cmFnZS5TdFVuaXRUeXBlEjUKDWJ1aWxkaW5nVHlwZXMYBCADKAsyHi5NSFVy",
-            "aG8uU3RvcmFnZS5TdEJ1aWxkaW5nVHlwZSIlCglTdFBhY2thZ2USCgoCSUQY",
-            "ASABKAUSDAoEbmFtZRgCIAEoCSKcAQoGU3RUaWxlEg4KBnVuaXRJRBgBIAEo",
-            "BRIWCg5wYXNzaW5nVW5pdElEcxgCIAMoBRISCgp0aWxlVHlwZUlEGAMgASgF",
-            "Ei4KCHBvc2l0aW9uGAQgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0",
-            "b3IyEg4KBmhlaWdodBgFIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgGIAEoCCLI",
-            "AQoMU3RCb3JkZXJUaWxlEhIKCnRpbGVUeXBlSUQYASABKAUSLgoIcG9zaXRp",
-            "b24YAiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISFQoNdG9w",
-            "TGVmdEhlaWdodBgDIAEoAhIWCg50b3BSaWdodEhlaWdodBgEIAEoAhIVCg1i",
-            "b3RMZWZ0SGVpZ2h0GAUgASgCEhYKDmJvdFJpZ2h0SGVpZ2h0GAYgASgCEhYK",
-            "DnNwbGl0RGlyZWN0aW9uGAcgASgIItICCgZTdFVuaXQSCgoCaWQYASABKAUS",
-            "DgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0",
-            "b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEhQKDHRhcmdldFVu",
-            "aXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3Jh",
-            "Z2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzIw",
-            "Lk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9uZW50RGF0YUVu",
-            "dHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5GAEgASgJ",
-            "EikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YToC",
-            "OAEisAEKClN0QnVpbGRpbmcSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIgASgF",
-            "Ei4KCGxvY2F0aW9uGAMgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0",
-            "b3IyEhAKCHBsYXllcklEGAQgASgFEhQKDHdvcmtlclVuaXRJRBgFIAMoBRIu",
-            "Cgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0",
-            "YSJbCghTdFBsYXllchIQCghwbGF5ZXJJRBgBIAEoBRIPCgd1bml0SURzGAIg",
-            "AygFEhMKC2J1aWxkaW5nSURzGAMgAygFEhcKD2ZyaWVuZFBsYXllcklEcxgE",
-            "IAMoBSKNAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIcLk1IVXJoby5TdG9yYWdl",
-            "LlN0SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIWLk1IVXJoby5TdG9yYWdl",
-            "LlN0VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIcLk1IVXJoby5TdG9yYWdl",
-            "LlN0Qm9yZGVyVGlsZSJBCgpTdFRpbGVUeXBlEhEKCXBhY2thZ2VJRBgBIAEo",
-            "BRISCgp0aWxlVHlwZUlEGAIgASgFEgwKBG5hbWUYAyABKAkiQQoKU3RVbml0",
-            "VHlwZRIRCglwYWNrYWdlSUQYASABKAUSEgoKdW5pdFR5cGVJRBgCIAEoBRIM",
-            "CgRuYW1lGAMgASgJIkkKDlN0QnVpbGRpbmdUeXBlEhEKCXBhY2thZ2VJRBgB",
-            "IAEoBRIWCg5idWlsZGluZ1R5cGVJRBgCIAEoBRIMCgRuYW1lGAMgASgJYgZw",
-            "cm90bzM="));
+            "ZS5TdFBhY2thZ2USLwoJdGlsZVR5cGVzGAIgAygLMhwuTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RFbnRpdHlUeXBlEi8KCXVuaXRUeXBlcxgDIAMoCzIcLk1IVXJoby5T",
+            "dG9yYWdlLlN0RW50aXR5VHlwZRIzCg1idWlsZGluZ1R5cGVzGAQgAygLMhwu",
+            "TUhVcmhvLlN0b3JhZ2UuU3RFbnRpdHlUeXBlEjUKD3Byb2plY3RpbGVUeXBl",
+            "cxgFIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0RW50aXR5VHlwZSIlCglTdFBh",
+            "Y2thZ2USCgoCSUQYASABKAUSDAoEbmFtZRgCIAEoCSKcAQoGU3RUaWxlEg4K",
+            "BnVuaXRJRBgBIAEoBRIWCg5wYXNzaW5nVW5pdElEcxgCIAMoBRISCgp0aWxl",
+            "VHlwZUlEGAMgASgFEi4KCHBvc2l0aW9uGAQgASgLMhwuTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RJbnRWZWN0b3IyEg4KBmhlaWdodBgFIAEoAhIWCg5zcGxpdERpcmVj",
+            "dGlvbhgGIAEoCCLIAQoMU3RCb3JkZXJUaWxlEhIKCnRpbGVUeXBlSUQYASAB",
+            "KAUSLgoIcG9zaXRpb24YAiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZl",
+            "Y3RvcjISFQoNdG9wTGVmdEhlaWdodBgDIAEoAhIWCg50b3BSaWdodEhlaWdo",
+            "dBgEIAEoAhIVCg1ib3RMZWZ0SGVpZ2h0GAUgASgCEhYKDmJvdFJpZ2h0SGVp",
+            "Z2h0GAYgASgCEhYKDnNwbGl0RGlyZWN0aW9uGAcgASgIItICCgZTdFVuaXQS",
+            "CgoCaWQYASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgL",
+            "MhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgF",
+            "EhQKDHRhcmdldFVuaXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhou",
+            "TUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50",
+            "RGF0YRgHIAMoCzIwLk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29t",
+            "cG9uZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkS",
+            "CwoDa2V5GAEgASgJEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2Uu",
+            "UGx1Z2luRGF0YToCOAEisAEKClN0QnVpbGRpbmcSCgoCaWQYASABKAUSDgoG",
+            "dHlwZUlEGAIgASgFEi4KCGxvY2F0aW9uGAMgASgLMhwuTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RJbnRWZWN0b3IyEhAKCHBsYXllcklEGAQgASgFEhQKDHdvcmtlclVu",
+            "aXRJRBgFIAMoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3Jh",
+            "Z2UuUGx1Z2luRGF0YSJbCghTdFBsYXllchIQCghwbGF5ZXJJRBgBIAEoBRIP",
+            "Cgd1bml0SURzGAIgAygFEhMKC2J1aWxkaW5nSURzGAMgAygFEhcKD2ZyaWVu",
+            "ZFBsYXllcklEcxgEIAMoBSKNAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIcLk1I",
+            "VXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIWLk1I",
+            "VXJoby5TdG9yYWdlLlN0VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIcLk1I",
+            "VXJoby5TdG9yYWdlLlN0Qm9yZGVyVGlsZSI/CgxTdEVudGl0eVR5cGUSEQoJ",
+            "cGFja2FnZUlEGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIMCgRuYW1lGAMgASgJ",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Players", "GameSpeed", "Packages" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackages), global::MHUrho.Storage.StPackages.Parser, new[]{ "Packages", "TileTypes", "UnitTypes", "BuildingTypes" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackages), global::MHUrho.Storage.StPackages.Parser, new[]{ "Packages", "TileTypes", "UnitTypes", "BuildingTypes", "ProjectileTypes" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackage), global::MHUrho.Storage.StPackage.Parser, new[]{ "ID", "Name" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "Position", "Height", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "Position", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
@@ -76,9 +74,7 @@ namespace MHUrho.Storage {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "WorkerUnitID", "UserPlugin" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "PlayerID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTileType), global::MHUrho.Storage.StTileType.Parser, new[]{ "PackageID", "TileTypeID", "Name" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnitType), global::MHUrho.Storage.StUnitType.Parser, new[]{ "PackageID", "UnitTypeID", "Name" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuildingType), global::MHUrho.Storage.StBuildingType.Parser, new[]{ "PackageID", "BuildingTypeID", "Name" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StEntityType), global::MHUrho.Storage.StEntityType.Parser, new[]{ "PackageID", "TypeID", "Name" }, null, null, null)
           }));
     }
     #endregion
@@ -338,6 +334,7 @@ namespace MHUrho.Storage {
       tileTypes_ = other.tileTypes_.Clone();
       unitTypes_ = other.unitTypes_.Clone();
       buildingTypes_ = other.buildingTypes_.Clone();
+      projectileTypes_ = other.projectileTypes_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -357,32 +354,42 @@ namespace MHUrho.Storage {
 
     /// <summary>Field number for the "tileTypes" field.</summary>
     public const int TileTypesFieldNumber = 2;
-    private static readonly pb::FieldCodec<global::MHUrho.Storage.StTileType> _repeated_tileTypes_codec
-        = pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.StTileType.Parser);
-    private readonly pbc::RepeatedField<global::MHUrho.Storage.StTileType> tileTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StTileType>();
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StEntityType> _repeated_tileTypes_codec
+        = pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.StEntityType.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StEntityType> tileTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StEntityType>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::MHUrho.Storage.StTileType> TileTypes {
+    public pbc::RepeatedField<global::MHUrho.Storage.StEntityType> TileTypes {
       get { return tileTypes_; }
     }
 
     /// <summary>Field number for the "unitTypes" field.</summary>
     public const int UnitTypesFieldNumber = 3;
-    private static readonly pb::FieldCodec<global::MHUrho.Storage.StUnitType> _repeated_unitTypes_codec
-        = pb::FieldCodec.ForMessage(26, global::MHUrho.Storage.StUnitType.Parser);
-    private readonly pbc::RepeatedField<global::MHUrho.Storage.StUnitType> unitTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StUnitType>();
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StEntityType> _repeated_unitTypes_codec
+        = pb::FieldCodec.ForMessage(26, global::MHUrho.Storage.StEntityType.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StEntityType> unitTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StEntityType>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::MHUrho.Storage.StUnitType> UnitTypes {
+    public pbc::RepeatedField<global::MHUrho.Storage.StEntityType> UnitTypes {
       get { return unitTypes_; }
     }
 
     /// <summary>Field number for the "buildingTypes" field.</summary>
     public const int BuildingTypesFieldNumber = 4;
-    private static readonly pb::FieldCodec<global::MHUrho.Storage.StBuildingType> _repeated_buildingTypes_codec
-        = pb::FieldCodec.ForMessage(34, global::MHUrho.Storage.StBuildingType.Parser);
-    private readonly pbc::RepeatedField<global::MHUrho.Storage.StBuildingType> buildingTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StBuildingType>();
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StEntityType> _repeated_buildingTypes_codec
+        = pb::FieldCodec.ForMessage(34, global::MHUrho.Storage.StEntityType.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StEntityType> buildingTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StEntityType>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::MHUrho.Storage.StBuildingType> BuildingTypes {
+    public pbc::RepeatedField<global::MHUrho.Storage.StEntityType> BuildingTypes {
       get { return buildingTypes_; }
+    }
+
+    /// <summary>Field number for the "projectileTypes" field.</summary>
+    public const int ProjectileTypesFieldNumber = 5;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StEntityType> _repeated_projectileTypes_codec
+        = pb::FieldCodec.ForMessage(42, global::MHUrho.Storage.StEntityType.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StEntityType> projectileTypes_ = new pbc::RepeatedField<global::MHUrho.Storage.StEntityType>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::MHUrho.Storage.StEntityType> ProjectileTypes {
+      get { return projectileTypes_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -402,6 +409,7 @@ namespace MHUrho.Storage {
       if(!tileTypes_.Equals(other.tileTypes_)) return false;
       if(!unitTypes_.Equals(other.unitTypes_)) return false;
       if(!buildingTypes_.Equals(other.buildingTypes_)) return false;
+      if(!projectileTypes_.Equals(other.projectileTypes_)) return false;
       return true;
     }
 
@@ -412,6 +420,7 @@ namespace MHUrho.Storage {
       hash ^= tileTypes_.GetHashCode();
       hash ^= unitTypes_.GetHashCode();
       hash ^= buildingTypes_.GetHashCode();
+      hash ^= projectileTypes_.GetHashCode();
       return hash;
     }
 
@@ -426,6 +435,7 @@ namespace MHUrho.Storage {
       tileTypes_.WriteTo(output, _repeated_tileTypes_codec);
       unitTypes_.WriteTo(output, _repeated_unitTypes_codec);
       buildingTypes_.WriteTo(output, _repeated_buildingTypes_codec);
+      projectileTypes_.WriteTo(output, _repeated_projectileTypes_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -435,6 +445,7 @@ namespace MHUrho.Storage {
       size += tileTypes_.CalculateSize(_repeated_tileTypes_codec);
       size += unitTypes_.CalculateSize(_repeated_unitTypes_codec);
       size += buildingTypes_.CalculateSize(_repeated_buildingTypes_codec);
+      size += projectileTypes_.CalculateSize(_repeated_projectileTypes_codec);
       return size;
     }
 
@@ -447,6 +458,7 @@ namespace MHUrho.Storage {
       tileTypes_.Add(other.tileTypes_);
       unitTypes_.Add(other.unitTypes_);
       buildingTypes_.Add(other.buildingTypes_);
+      projectileTypes_.Add(other.projectileTypes_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -471,6 +483,10 @@ namespace MHUrho.Storage {
           }
           case 34: {
             buildingTypes_.AddEntriesFrom(input, _repeated_buildingTypes_codec);
+            break;
+          }
+          case 42: {
+            projectileTypes_.AddEntriesFrom(input, _repeated_projectileTypes_codec);
             break;
           }
         }
@@ -2068,10 +2084,10 @@ namespace MHUrho.Storage {
 
   }
 
-  public sealed partial class StTileType : pb::IMessage<StTileType> {
-    private static readonly pb::MessageParser<StTileType> _parser = new pb::MessageParser<StTileType>(() => new StTileType());
+  public sealed partial class StEntityType : pb::IMessage<StEntityType> {
+    private static readonly pb::MessageParser<StEntityType> _parser = new pb::MessageParser<StEntityType>(() => new StEntityType());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<StTileType> Parser { get { return _parser; } }
+    public static pb::MessageParser<StEntityType> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -2084,22 +2100,22 @@ namespace MHUrho.Storage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StTileType() {
+    public StEntityType() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StTileType(StTileType other) : this() {
+    public StEntityType(StEntityType other) : this() {
       packageID_ = other.packageID_;
-      tileTypeID_ = other.tileTypeID_;
+      typeID_ = other.typeID_;
       name_ = other.name_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StTileType Clone() {
-      return new StTileType(this);
+    public StEntityType Clone() {
+      return new StEntityType(this);
     }
 
     /// <summary>Field number for the "packageID" field.</summary>
@@ -2113,17 +2129,17 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "tileTypeID" field.</summary>
-    public const int TileTypeIDFieldNumber = 2;
-    private int tileTypeID_;
+    /// <summary>Field number for the "typeID" field.</summary>
+    public const int TypeIDFieldNumber = 2;
+    private int typeID_;
     /// <summary>
-    ///Global across all tileTypes in this level
+    ///Global across all entities of the kind (for example tile types) in this level
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TileTypeID {
-      get { return tileTypeID_; }
+    public int TypeID {
+      get { return typeID_; }
       set {
-        tileTypeID_ = value;
+        typeID_ = value;
       }
     }
 
@@ -2140,11 +2156,11 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as StTileType);
+      return Equals(other as StEntityType);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(StTileType other) {
+    public bool Equals(StEntityType other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -2152,7 +2168,7 @@ namespace MHUrho.Storage {
         return true;
       }
       if (PackageID != other.PackageID) return false;
-      if (TileTypeID != other.TileTypeID) return false;
+      if (TypeID != other.TypeID) return false;
       if (Name != other.Name) return false;
       return true;
     }
@@ -2161,7 +2177,7 @@ namespace MHUrho.Storage {
     public override int GetHashCode() {
       int hash = 1;
       if (PackageID != 0) hash ^= PackageID.GetHashCode();
-      if (TileTypeID != 0) hash ^= TileTypeID.GetHashCode();
+      if (TypeID != 0) hash ^= TypeID.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       return hash;
     }
@@ -2177,9 +2193,9 @@ namespace MHUrho.Storage {
         output.WriteRawTag(8);
         output.WriteInt32(PackageID);
       }
-      if (TileTypeID != 0) {
+      if (TypeID != 0) {
         output.WriteRawTag(16);
-        output.WriteInt32(TileTypeID);
+        output.WriteInt32(TypeID);
       }
       if (Name.Length != 0) {
         output.WriteRawTag(26);
@@ -2193,8 +2209,8 @@ namespace MHUrho.Storage {
       if (PackageID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PackageID);
       }
-      if (TileTypeID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TileTypeID);
+      if (TypeID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeID);
       }
       if (Name.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
@@ -2203,15 +2219,15 @@ namespace MHUrho.Storage {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(StTileType other) {
+    public void MergeFrom(StEntityType other) {
       if (other == null) {
         return;
       }
       if (other.PackageID != 0) {
         PackageID = other.PackageID;
       }
-      if (other.TileTypeID != 0) {
-        TileTypeID = other.TileTypeID;
+      if (other.TypeID != 0) {
+        TypeID = other.TypeID;
       }
       if (other.Name.Length != 0) {
         Name = other.Name;
@@ -2231,356 +2247,7 @@ namespace MHUrho.Storage {
             break;
           }
           case 16: {
-            TileTypeID = input.ReadInt32();
-            break;
-          }
-          case 26: {
-            Name = input.ReadString();
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
-  public sealed partial class StUnitType : pb::IMessage<StUnitType> {
-    private static readonly pb::MessageParser<StUnitType> _parser = new pb::MessageParser<StUnitType>(() => new StUnitType());
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<StUnitType> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[10]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StUnitType() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StUnitType(StUnitType other) : this() {
-      packageID_ = other.packageID_;
-      unitTypeID_ = other.unitTypeID_;
-      name_ = other.name_;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StUnitType Clone() {
-      return new StUnitType(this);
-    }
-
-    /// <summary>Field number for the "packageID" field.</summary>
-    public const int PackageIDFieldNumber = 1;
-    private int packageID_;
-    /// <summary>
-    ///Global across all packages in this level
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int PackageID {
-      get { return packageID_; }
-      set {
-        packageID_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "unitTypeID" field.</summary>
-    public const int UnitTypeIDFieldNumber = 2;
-    private int unitTypeID_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int UnitTypeID {
-      get { return unitTypeID_; }
-      set {
-        unitTypeID_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 3;
-    private string name_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Name {
-      get { return name_; }
-      set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as StUnitType);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(StUnitType other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (PackageID != other.PackageID) return false;
-      if (UnitTypeID != other.UnitTypeID) return false;
-      if (Name != other.Name) return false;
-      return true;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (PackageID != 0) hash ^= PackageID.GetHashCode();
-      if (UnitTypeID != 0) hash ^= UnitTypeID.GetHashCode();
-      if (Name.Length != 0) hash ^= Name.GetHashCode();
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (PackageID != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(PackageID);
-      }
-      if (UnitTypeID != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(UnitTypeID);
-      }
-      if (Name.Length != 0) {
-        output.WriteRawTag(26);
-        output.WriteString(Name);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (PackageID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PackageID);
-      }
-      if (UnitTypeID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(UnitTypeID);
-      }
-      if (Name.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(StUnitType other) {
-      if (other == null) {
-        return;
-      }
-      if (other.PackageID != 0) {
-        PackageID = other.PackageID;
-      }
-      if (other.UnitTypeID != 0) {
-        UnitTypeID = other.UnitTypeID;
-      }
-      if (other.Name.Length != 0) {
-        Name = other.Name;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            input.SkipLastField();
-            break;
-          case 8: {
-            PackageID = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            UnitTypeID = input.ReadInt32();
-            break;
-          }
-          case 26: {
-            Name = input.ReadString();
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
-  public sealed partial class StBuildingType : pb::IMessage<StBuildingType> {
-    private static readonly pb::MessageParser<StBuildingType> _parser = new pb::MessageParser<StBuildingType>(() => new StBuildingType());
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<StBuildingType> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[11]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StBuildingType() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StBuildingType(StBuildingType other) : this() {
-      packageID_ = other.packageID_;
-      buildingTypeID_ = other.buildingTypeID_;
-      name_ = other.name_;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StBuildingType Clone() {
-      return new StBuildingType(this);
-    }
-
-    /// <summary>Field number for the "packageID" field.</summary>
-    public const int PackageIDFieldNumber = 1;
-    private int packageID_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int PackageID {
-      get { return packageID_; }
-      set {
-        packageID_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "buildingTypeID" field.</summary>
-    public const int BuildingTypeIDFieldNumber = 2;
-    private int buildingTypeID_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int BuildingTypeID {
-      get { return buildingTypeID_; }
-      set {
-        buildingTypeID_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 3;
-    private string name_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Name {
-      get { return name_; }
-      set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as StBuildingType);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(StBuildingType other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (PackageID != other.PackageID) return false;
-      if (BuildingTypeID != other.BuildingTypeID) return false;
-      if (Name != other.Name) return false;
-      return true;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (PackageID != 0) hash ^= PackageID.GetHashCode();
-      if (BuildingTypeID != 0) hash ^= BuildingTypeID.GetHashCode();
-      if (Name.Length != 0) hash ^= Name.GetHashCode();
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (PackageID != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(PackageID);
-      }
-      if (BuildingTypeID != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(BuildingTypeID);
-      }
-      if (Name.Length != 0) {
-        output.WriteRawTag(26);
-        output.WriteString(Name);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (PackageID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PackageID);
-      }
-      if (BuildingTypeID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(BuildingTypeID);
-      }
-      if (Name.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(StBuildingType other) {
-      if (other == null) {
-        return;
-      }
-      if (other.PackageID != 0) {
-        PackageID = other.PackageID;
-      }
-      if (other.BuildingTypeID != 0) {
-        BuildingTypeID = other.BuildingTypeID;
-      }
-      if (other.Name.Length != 0) {
-        Name = other.Name;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            input.SkipLastField();
-            break;
-          case 8: {
-            PackageID = input.ReadInt32();
-            break;
-          }
-          case 16: {
-            BuildingTypeID = input.ReadInt32();
+            TypeID = input.ReadInt32();
             break;
           }
           case 26: {

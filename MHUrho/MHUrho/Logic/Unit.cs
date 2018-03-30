@@ -146,7 +146,7 @@ namespace MHUrho.Logic
             node.AddComponent(unit);
             node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
 
-            unit.logic = type.UnitLogic.LoadNewInstance(level, node, unit, new PluginDataWrapper(storedUnit.UserPlugin));
+            unit.logic = type.LoadInstancePlugin(unit, level, storedUnit.UserPlugin);
             //This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
             // to this class, and for that i need to set the Position here
             
@@ -168,7 +168,7 @@ namespace MHUrho.Logic
             unitNode.AddComponent(unit);
             unitNode.Position = tile.Center3;
 
-            
+            unit.logic = type.GetNewInstancePlugin(unit, level);
 
             //TODO: Storing and loading
             var rigidBody = unitNode.CreateComponent<RigidBody>();
@@ -181,7 +181,7 @@ namespace MHUrho.Logic
             var collider = unitNode.CreateComponent<CollisionShape>();
             collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
 
-            unit.logic = type.UnitLogic.CreateNewInstance(level, unitNode, unit);
+           
 
             return unit;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Helpers;
 using MHUrho.Storage;
 using Urho;
 using Urho.Resources;
@@ -10,8 +11,11 @@ using MHUrho.Packaging;
 
 namespace MHUrho.Logic
 {
-    public class TileType : IIDNameAndPackage
-    {
+    public class TileType : IIDNameAndPackage {
+        private const string NameAttribute = "name";
+        private const string TexturePathElement = "texturePath";
+        private const string MovementSpeedElement = "movementSpeed";
+
         public int ID { get; set; }
 
         public float MovementSpeedModifier { get; private set; }
@@ -25,15 +29,11 @@ namespace MHUrho.Logic
 
         private readonly string imagePath;
 
-        public static TileType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
+        public static TileType Load(XElement xml, int newID, string pathToPackageXmlDirname, ResourcePack package) {
             //TODO: Check for errors
-            string name = xml.Attribute("name").Value;
-            string relativeImagePath = xml.Element(PackageManager.XMLNamespace + "texturePath").Value.Trim();
-            float movementSpeed = float.Parse(xml.Element(PackageManager.XMLNamespace + "movementSpeed").Value);
-
-            relativeImagePath = FileManager.CorrectRelativePath(relativeImagePath);
-
-            string imagePath = System.IO.Path.Combine(pathToPackageXMLDirname, relativeImagePath);
+            string name = xml.Attribute(NameAttribute).Value;
+            string imagePath = XmlHelpers.GetFullPath(xml, TexturePathElement, pathToPackageXmlDirname);
+            float movementSpeed = XmlHelpers.GetFloat(xml, MovementSpeedElement);
 
             TileType newTileType = new TileType(name, movementSpeed, imagePath, package) {
                 ID = newID
@@ -42,10 +42,10 @@ namespace MHUrho.Logic
             return newTileType;
         }
 
-        public StTileType Save() {
-            var storedTileType = new StTileType() {
+        public StEntityType Save() {
+            var storedTileType = new StEntityType {
                 Name = Name,
-                TileTypeID = ID,
+                TypeID = ID,
                 PackageID = Package.ID
             };
 
@@ -71,6 +71,7 @@ namespace MHUrho.Logic
         public Image GetImage() {
             return PackageManager.Instance.ResourceCache.GetImage(imagePath);
         }
+
 
     }
 }

@@ -7,26 +7,43 @@ using Urho;
 
 namespace DefaultPackage
 {
-    public class TestUnit : IUnitInstancePlugin
+    public class TestUnitType : IUnitTypePlugin {
+        public bool IsMyUnitType(string unitTypeName) {
+            return unitTypeName == "TestUnit";
+        }
+
+        public TestUnitType() {
+
+        }
+
+        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
+            unitNode.AddComponent(new WorldWalker(level));
+            unitNode.AddComponent(new UnitSelector(unit, level));
+            return new TestUnitInstance(level, unitNode, unit);
+        }
+
+        public IUnitInstancePlugin LoadNewInstance(LevelManager level,
+                                                   Node unitNode,
+                                                   Unit unit,
+                                                   PluginDataWrapper pluginDataStorage) {
+            return new TestUnitInstance(level, unitNode, unit);
+        }
+    }
+
+    public class TestUnitInstance : IUnitInstancePlugin
     {
         private LevelManager level;
         private Node unitNode;
         private Unit unit;
         
 
-        public TestUnit() {
-
-        }
-
-        private TestUnit(LevelManager level, Node unitNode, Unit unit) {
+        public TestUnitInstance(LevelManager level, Node unitNode, Unit unit) {
             this.level = level;
             this.unitNode = unitNode;
             this.unit = unit;
         }
 
-        public bool IsMyUnitType(string unitTypeName) {
-            return unitTypeName == "TestUnit";
-        }
+        
 
         public void OnUpdate(float timeStep) {
             
@@ -36,18 +53,7 @@ namespace DefaultPackage
             return false;
         }
 
-        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
-            unitNode.AddComponent(new WorldWalker(level));
-            unitNode.AddComponent(new UnitSelector(unit, level));
-            return new TestUnit(level, unitNode, unit);
-        }
-
-        public IUnitInstancePlugin LoadNewInstance(LevelManager level, 
-                                           Node unitNode, 
-                                           Unit unit,
-                                           PluginDataWrapper pluginDataStorage) {
-            return new TestUnit(level, unitNode, unit);
-        }
+        
 
         public void SaveState(PluginDataWrapper pluginDataStorage) {
 

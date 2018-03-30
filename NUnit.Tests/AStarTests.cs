@@ -65,7 +65,7 @@ namespace NUnit.Tests {
                 return tile.MovementSpeedModifier * defaultSpeed;
             }
 
-            public TestUnit(float speed, ITile tile, Vector2 position): base(null, null, null, null) {
+            public TestUnit(float speed, ITile tile, Vector2 position): base(0, null, null, null) {
                 this.defaultSpeed = speed;
                 this.Tile = tile;
                 this.Position = position;

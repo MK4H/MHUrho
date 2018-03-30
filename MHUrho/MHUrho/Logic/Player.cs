@@ -11,98 +11,14 @@ namespace MHUrho.Logic
 {
     public class Player : IPlayer {
 
-
-        //class LineOrder
-        //{
-        //    IntVector2 MovePoint, End1, End2, Delta;
-        //    bool Finished,OneEndHit;
-        //    Player Player;
-
-        //    public bool OrderNext(ref int toOrder)
-        //    {
-        //        if (Finished)
-        //        {
-        //            return false;
-        //        }
-
-        //        while (!Finished)
-        //        {
-        //            if (MovePoint == End1 || MovePoint == End2)
-        //            {
-        //                if (OneEndHit || (MovePoint == End1 && MovePoint == End2))
-        //                {
-        //                    Finished = true;
-        //                }
-        //                else
-        //                {
-        //                    OneEndHit = true;
-        //                }
-        //            }
-
-        //            if (!Player.level.Map.IsInside(MovePoint))
-        //            {
-        //                IntVector2.Add(ref MovePoint,ref Delta, out MovePoint);
-        //                Delta.X = -(Delta.X + 1);
-        //                Delta.Y = -(Delta.Y + 1);
-        //                continue;
-        //            }
-
-        //            if (Player.selected[toOrder].Order(Player.level.Map.GetTile(MovePoint)))
-        //            {
-        //                toOrder++;
-        //            }
-
-                    
-        //            IntVector2.Add(ref MovePoint,ref Delta,out MovePoint);
-        //            if (Delta.X != 0)
-        //            {
-        //                Delta.X = -(Delta.X + 1);
-        //            }
-        //            else if (Delta.Y != 0)
-        //            {
-        //                Delta.Y = -(Delta.Y + 1);
-        //            }
-                    
-        //            return true;
-        //        }
-        //        return false;
-        //    }
-
-        //    public LineOrder(IntVector2 end1, IntVector2 end2, Player player)
-        //    {
-        //        End1 = end1;
-        //        End2 = end2;
-        //        Player = player;
-        //        if (end1.X == end2.X)
-        //        {
-        //            Delta = new IntVector2(0, 1);
-        //        }
-        //        else if (end1.Y == end2.Y)
-        //        {
-        //            Delta = new IntVector2(1, 0);
-        //        }
-        //        else
-        //        {
-        //            throw new ArgumentException("Directions other than horizontal and vertical not supported");
-        //        }
-        //        // Center of the line
-        //        MovePoint = new IntVector2(
-        //                Math.Min(end2.X, end1.X) + Math.Abs(end2.X - end1.X) / 2,
-        //                Math.Min(end2.Y, end1.Y) + Math.Abs(end2.Y - end1.Y) / 2);
-        //    }
-
-        //    public override string ToString()
-        //    {
-        //        return string.Format("End1 = \"{0}\", End2 = \"{1}\"", End1, End2);
-        //    }
-        //}
-
-
         public int ID { get; private set; }
 
         private readonly List<IPlayer> friends;
 
+        //TODO: Split units and buildings by types
         private readonly List<Unit> units;
+
+        private readonly List<Building> buildings;
 
         private StPlayer storedPlayer;
 
@@ -158,6 +74,10 @@ namespace MHUrho.Logic
         /// <param name="unit">unit to add</param>
         public void AddUnit(Unit unit) {
             units.Add(unit);
+        }
+
+        public void AddBuilding(Building building) {
+            buildings.Add(building);
         }
 
         public void RemoveUnit(Unit unit) {

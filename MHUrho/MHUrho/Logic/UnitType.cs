@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using MHUrho.Control;
+using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.Plugins;
@@ -15,6 +16,12 @@ namespace MHUrho.Logic
 {
     public class UnitType : IIDNameAndPackage, IDisposable
     {
+        //XML ELEMENTS AND ATTRIBUTES
+        private const string NameAttribute = "name";
+        private const string ModelPathElement = "modelPath";
+        private const string IconPathElement = "iconPath";
+        private const string AssemblyPathElement = "assemblyPath";
+
         public int ID { get; set; }
 
         public string Name { get; private set; }
@@ -25,26 +32,30 @@ namespace MHUrho.Logic
 
         public Image Icon { get; private set; }
 
-        public IUnitInstancePlugin UnitLogic { get; private set; }
-
         HashSet<TileType> passableTileTypes;
+
+        private IUnitTypePlugin unitTypeLogic;
 
         //TODO: More loaded properties
 
-        protected UnitType(string name, Model model, IUnitInstancePlugin unitPlugin, Image icon, ResourcePack package) {
+        protected UnitType(string name, Model model, IUnitTypePlugin unitPlugin, Image icon, ResourcePack package) {
             this.Name = name;
             this.Model = model;
-            this.UnitLogic = unitPlugin;
+            this.unitTypeLogic = unitPlugin;
             this.Package = package;
             this.Icon = icon;
         }
 
         public static UnitType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
             //TODO: Check for errors
-            string name = xml.Attribute("name").Value;
+            string name = xml.Attribute(NameAttribute).Value;
             var model = LoadModel(xml, pathToPackageXMLDirname);
             var icon = LoadIcon(xml, pathToPackageXMLDirname);
-            var unitPluginLogic = LoadUnitPlugin(xml, pathToPackageXMLDirname, name);
+            var unitPluginLogic = 
+                XmlHelpers.LoadTypePlugin<IUnitTypePlugin>(xml, 
+                                                           AssemblyPathElement,
+                                                           pathToPackageXMLDirname,
+                                                           name);
         
             UnitType newUnitType = new UnitType(name, model, unitPluginLogic, icon, package) 
                                         {
@@ -54,11 +65,12 @@ namespace MHUrho.Logic
             return newUnitType;
         }
 
-        public StUnitType Save() {
-            var storedUnitType = new StUnitType();
-            storedUnitType.Name = Name;
-            storedUnitType.UnitTypeID = ID;
-            storedUnitType.PackageID = Package.ID;
+        public StEntityType Save() {
+            var storedUnitType = new StEntityType {
+                Name = Name,
+                TypeID = ID,
+                PackageID = Package.ID
+            };
 
             return storedUnitType;
         }
@@ -106,6 +118,16 @@ namespace MHUrho.Logic
             return unit;
         }
 
+        public IUnitInstancePlugin GetNewInstancePlugin(Unit unit, LevelManager level) {
+            return unitTypeLogic.CreateNewInstance(level, unit.Node, unit);
+        }
+
+        public IUnitInstancePlugin LoadInstancePlugin(Unit unit,
+                                                      LevelManager level,
+                                                      PluginData pluginData) {
+            return unitTypeLogic.LoadNewInstance(level, unit.Node, unit, new PluginDataWrapper(pluginData));
+        }
+
         public void Dispose() {
             //TODO: Release all disposable resources
             Model.Dispose();
@@ -129,48 +151,16 @@ namespace MHUrho.Logic
         private static Model LoadModel(XElement unitTypeXml, string pathToPackageXmlDir) {
             //TODO: Check for errors
 
-            string relativeModelPath = unitTypeXml.Element(PackageManager.XMLNamespace + "modelPath").Value.Trim();
-            relativeModelPath = FileManager.CorrectRelativePath(relativeModelPath);
-            string modelPath = System.IO.Path.Combine(pathToPackageXmlDir, relativeModelPath);
+            string modelPath = XmlHelpers.GetFullPath(unitTypeXml, ModelPathElement, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetModel(modelPath);
         }
 
         private static Image LoadIcon(XElement unitTypeXml, string pathToPackageXmlDir) {
-            string relativeIconPath = unitTypeXml.Element(PackageManager.XMLNamespace + "iconPath").Value.Trim();
-            relativeIconPath = FileManager.CorrectRelativePath(relativeIconPath);
-            string iconPath = System.IO.Path.Combine(pathToPackageXmlDir, relativeIconPath);
+            string iconPath = XmlHelpers.GetFullPath(unitTypeXml, IconPathElement, pathToPackageXmlDir);
 
             //TODO: Find a way to not need RGBA conversion
             return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
-        }
-
-        private static IUnitInstancePlugin LoadUnitPlugin(XElement unitTypeXml, string pathToPackageXmlDir, string unitTypeName) {
-            string relativeAssemblyPath = unitTypeXml.Element(PackageManager.XMLNamespace + "assemblyPath").Value.Trim();
-            //Fix / or \ in the path
-            relativeAssemblyPath = FileManager.CorrectRelativePath(relativeAssemblyPath);
-
-            var assembly = Assembly.LoadFile(System.IO.Path.Combine(MyGame.Config.DynamicDirPath, 
-                                                                    pathToPackageXmlDir, 
-                                                                    relativeAssemblyPath));
-
-            var unitPlugins = from type in assembly.GetTypes()
-                              where typeof(IUnitInstancePlugin).IsAssignableFrom(type)
-                              select type;
-            IUnitInstancePlugin pluginInstance = null;
-            foreach (var plugin in unitPlugins) {
-                pluginInstance = (IUnitInstancePlugin)Activator.CreateInstance(plugin);
-                if (pluginInstance.IsMyUnitType(unitTypeName)) {
-                    break;
-                }
-            }
-
-            if (pluginInstance == null) {
-                //TODO: Exception
-                throw new Exception("Unit type loading failed, could not load unit plugin");
-            }
-
-            return pluginInstance;
         }
     }
 }

@@ -7,10 +7,8 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public interface IUnitTypePlugin
+    public interface IUnitTypePlugin : ITypePlugin
     {
-        bool IsMyUnitType(string unitTypeName);
-
         IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
 
         /// <summary>

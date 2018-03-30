@@ -15,6 +15,8 @@ namespace MHUrho.Logic {
 
         void AddUnit(Unit unit);
 
+        void AddBuilding(Building building);
+
         void RemoveUnit(Unit unit);
     }
 }

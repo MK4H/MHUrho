@@ -30,6 +30,8 @@ namespace MHUrho.Packaging {
 
         private Dictionary<string, TileType> tileTypes;
         private Dictionary<string, UnitType> unitTypes;
+        private Dictionary<string, BuildingType> buildingTypes;
+        private Dictionary<string, ProjectileType> projectileTypes;
 
         private XDocument data;
 
@@ -66,6 +68,8 @@ namespace MHUrho.Packaging {
 
             tileTypes = new Dictionary<string, TileType>();
             unitTypes = new Dictionary<string, UnitType>();
+            buildingTypes = new Dictionary<string, BuildingType>();
+            projectileTypes = new Dictionary<string, ProjectileType>();
         }
 
         public void StartLoading(XmlSchemaSet schemas) {
@@ -94,9 +98,7 @@ namespace MHUrho.Packaging {
         }
 
         public TileType LoadTileType(string name, int newID) {
-            if (data == null) {
-                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
-            }
+            CheckIfLoading();
 
             if (name == null) {
                 throw new ArgumentNullException("Name of the tileType cannot be null");
@@ -104,25 +106,10 @@ namespace MHUrho.Packaging {
 
             TileType tileType;
             if (!tileTypes.TryGetValue(name, out tileType)) {
-                //Load from file
-                var tileTypeElements = (from element in data
-                                                       .Root.Element(PackageManager.XMLNamespace + "tileTypes")
-                                                       .Elements(PackageManager.XMLNamespace + "tileType")
-                                       where element.Attribute("name").Value == name
-                                       select element).GetEnumerator();
-
-                if (!tileTypeElements.MoveNext()) {
-                    throw new ArgumentException("TileType of that name does not exist in this package");
-                }
-
-                var tileTypeElement = tileTypeElements.Current;
-
-                if (tileTypeElements.MoveNext()) {
-                    //TODO: Exception
-                    throw new Exception("Duplicate tileType names");
-                }
-
-                tileTypeElements.Dispose();
+                var tileTypeElement = GetXmlTypeDescription(typeName: name,
+                                                            groupName: "tileTypes",
+                                                            itemName: "tileType",
+                                                            nameAttribute: "name");
 
                 tileType = TileType.Load(tileTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
                 tileTypes.Add(name, tileType);
@@ -135,10 +122,16 @@ namespace MHUrho.Packaging {
             return tileType;
         }
 
-        public UnitType LoadUnitType(string name, int newID) {
-            if (data == null) {
-                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+        public UnitType GetUnitType(string name) {
+            if (name == null) {
+                throw new ArgumentNullException("Name of the unitType cannot be null");
             }
+
+            return unitTypes.TryGetValue(name, out UnitType value) ? value : null;
+        }
+
+        public UnitType LoadUnitType(string name, int newID) {
+            CheckIfLoading();
 
             if (name == null) {
                 throw new ArgumentNullException("Name of the unit type cannot be null");
@@ -146,25 +139,10 @@ namespace MHUrho.Packaging {
 
             UnitType unitType;
             if (!unitTypes.TryGetValue(name, out unitType)) {
-                //Load from file
-                var unitTypeElements = (from element in data
-                                                        .Root.Element(PackageManager.XMLNamespace + "unitTypes")
-                                                        .Elements(PackageManager.XMLNamespace + "unitType")
-                                        where element.Attribute("name").Value == name
-                                        select element).GetEnumerator();
-
-                if (!unitTypeElements.MoveNext()) {
-                    throw new ArgumentException("unit type of that name does not exist in this package");
-                }
-
-                var unitTypeElement = unitTypeElements.Current;
-
-                if (unitTypeElements.MoveNext()) {
-                    //TODO: Exception
-                    throw new Exception("Duplicate unit type names");
-                }
-
-                unitTypeElements.Dispose();
+                var unitTypeElement = GetXmlTypeDescription(typeName: name,
+                                                                groupName: "unitTypes",
+                                                                itemName: "unitType",
+                                                                nameAttribute: "name");
 
                 unitType = UnitType.Load(unitTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
                 unitTypes.Add(name, unitType);
@@ -177,7 +155,71 @@ namespace MHUrho.Packaging {
             return unitType;
         }
 
-        //TODO: CONVERT THE TWO PRECEDING METHODS TO THIS
+        public BuildingType GetBuildingType(string name) {
+            if (name == null) {
+                throw new ArgumentNullException("Name of the buildingType cannot be null");
+            }
+
+            return buildingTypes.TryGetValue(name, out BuildingType value) ? value : null;
+        }
+
+        public BuildingType LoadBuildingType(string name, int newID) {
+            CheckIfLoading();
+
+            if (name == null) {
+                throw new ArgumentNullException("Name of the building type cannot be null");
+            }
+
+            if (!buildingTypes.TryGetValue(name, out BuildingType buildingType)) {
+                var buildingTypeElement = GetXmlTypeDescription(typeName: name,
+                                                                groupName: "buildingTypes",
+                                                                itemName: "buildingType",
+                                                                nameAttribute: "name");
+
+                buildingType = BuildingType.Load(buildingTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
+                buildingTypes.Add(name, buildingType);
+            }
+            else {
+                //Just change ID
+                buildingType.ID = newID;
+            }
+
+            return buildingType;
+        }
+
+        public ProjectileType GetProjectileType(string name) {
+            if (name == null) {
+                throw new ArgumentNullException("Name of the projectileType cannot be null");
+            }
+
+            return projectileTypes.TryGetValue(name, out ProjectileType value) ? value : null;
+        }
+
+        public ProjectileType LoadProjectileType(string name, int newID) {
+            CheckIfLoading();
+
+            if (name == null) {
+                throw new ArgumentNullException("Name of the projectile type cannot be null");
+            }
+
+            if (!projectileTypes.TryGetValue(name, out ProjectileType projectileType)) {
+                var projectileTypeElement = GetXmlTypeDescription(typeName: name,
+                                                                  groupName: "projectileTypes",
+                                                                  itemName: "projectileType",
+                                                                  nameAttribute: "name");
+
+                projectileType = ProjectileType.Load(projectileTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
+                projectileTypes.Add(name, projectileType);
+            }
+            else {
+                //Just change ID
+                projectileType.ID = newID;
+            }
+
+            return projectileType;
+        }
+
+        //TODO: CONVERT THE FOUR PRECEDING METHODS TO THIS
         //public T LoadType<T>(string name, int newID) where T:IIDNameAndPackage {
         //    Dictionary<string, T> types;
         //    string xmlGroupName;
@@ -300,8 +342,7 @@ namespace MHUrho.Packaging {
             foreach (var unitTypeElement in unitTypeElements) {
                 string name = unitTypeElement.Attribute("name").Value;
 
-                UnitType loadedUnitType;
-                if (unitTypes.TryGetValue(name, out loadedUnitType)) {
+                if (unitTypes.TryGetValue(name, out UnitType loadedUnitType)) {
                     //Was already loaded for previous game, generate new ID for this game
                     loadedUnitType.ID = generateID();
                 }
@@ -316,6 +357,42 @@ namespace MHUrho.Packaging {
             }
 
             return loadedUnitTypes;
+        }
+
+        public IEnumerable<BuildingType> LoadAllBuildingTypes(GenerateID generateID) {
+            if (data == null) {
+                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+            }
+
+            List<BuildingType> loadedBuildingTypes = new List<BuildingType>();
+
+            var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
+
+            if (buildingTypesElement == null) {
+                //There are no building types in this package
+                return Enumerable.Empty<BuildingType>();
+            }
+
+            var buildingTypeElements = from elements in buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType") select elements;
+
+            foreach (var buildingTypeElement in buildingTypeElements) {
+                string name = buildingTypeElement.Attribute("name").Value;
+
+                if (buildingTypes.TryGetValue(name, out BuildingType loadedBuildingType)) {
+                    //Was already loaded for previous game, generate new ID for this game
+                    loadedBuildingType.ID = generateID();
+                }
+                else {
+                    //Load it fresh from the xml
+                    loadedBuildingType = BuildingType.Load(buildingTypeElement, generateID(), System.IO.Path.GetDirectoryName(pathToXml), this);
+
+                    buildingTypes.Add(loadedBuildingType.Name, loadedBuildingType);
+                }
+
+                loadedBuildingTypes.Add(loadedBuildingType);
+            }
+
+            return loadedBuildingTypes;
         }
 
         /// <summary>
@@ -339,7 +416,7 @@ namespace MHUrho.Packaging {
         }
 
         private void ResetIDs<T>(IEnumerable<T> enumerable)
-            where T: IIDNameAndPackage {
+            where T: class, IIDNameAndPackage {
 
             foreach (var item in enumerable) {
                 item.ID = 0;
@@ -368,6 +445,36 @@ namespace MHUrho.Packaging {
                 deleted = true;
             }
             return deleted;
+        }
+
+        private XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName, string nameAttribute) {
+            //Load from file
+            var projectileTypeElements = (from element in data
+                                                          .Root.Element(PackageManager.XMLNamespace + groupName)
+                                                          .Elements(PackageManager.XMLNamespace + itemName)
+                                          where element.Attribute(nameAttribute).Value == typeName
+                                          select element).GetEnumerator();
+
+            if (!projectileTypeElements.MoveNext()) {
+                throw new ArgumentException("type of that name does not exist in this package");
+            }
+
+            var projectileTypeElement = projectileTypeElements.Current;
+
+            if (projectileTypeElements.MoveNext()) {
+                //TODO: Exception
+                throw new Exception("Duplicate type names");
+            }
+
+            projectileTypeElements.Dispose();
+
+            return projectileTypeElement;
+        }
+
+        private void CheckIfLoading() {
+            if (data == null) {
+                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
+            }
         }
     }
 }
