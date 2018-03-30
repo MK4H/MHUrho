@@ -485,33 +485,5 @@ namespace MHUrho.Packaging
                 activeProjectileTypes.Add(projectileType.ID, projectileType);
             }
         }
-
-        /// <summary>
-        /// Loads the types of type <typeparamref name="T"/> stored in <paramref name="storedTTypes"/>
-        /// 
-        /// If the type was already loaded in <paramref name="oldLoadedTTypes"/>, just assings the level local ID to it
-        /// If the type was not already loaded in <paramref name="oldLoadedTTypes"/>, loades it
-        /// 
-        /// Adds all types to be used in the new level to <paramref name="newLoadedTTypes"/>
-        /// </summary>
-        /// <typeparam name="T">Type of the stored entities, for example <see cref="UnitType"/>, <see cref="BuildingType"/> or other types</typeparam>
-        /// <param name="storedTTypes">Types of the kind needed for the newly loaded level</param>
-        /// <param name="oldLoadedTTypes">Types loaded for the previous level, used to prevent repeated loading</param>
-        /// <param name="newLoadedTTypes">Types loeaded for new level, should be one of the <see cref="activeUnitTypes"/>, 
-        /// <see cref="activeBuildingTypes"/>, <see cref="activeTileTypes"/>, <see cref="activeProjectileTypes"/> etc.</param>
-        private void LoadTypes<T>(IEnumerable<StEntityType> storedTTypes,
-                                         IDictionary<string, T> oldLoadedTTypes,
-                                         IDictionary<int, T> newLoadedTTypes) where T : class, IIDNameAndPackage {
-            foreach (var storedTType in storedTTypes) {
-                if (!oldLoadedTTypes.TryGetValue(GetFullName(storedTType.PackageID, storedTType.Name),
-                                                 out T TType)) {
-                    TType = activePackages[storedTType.PackageID]
-                            .LoadProjectileType(storedTType.Name, storedTType.TypeID);
-                }
-
-                TType.ID = storedTType.TypeID;
-                newLoadedTTypes.Add(TType.ID, TType);
-            }
-        }
     }
 }
