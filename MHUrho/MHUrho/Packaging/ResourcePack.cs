@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using MHUrho.Logic;
+using MHUrho.UnitComponents;
 using Urho;
 using Urho.Resources;
 
@@ -32,6 +33,7 @@ namespace MHUrho.Packaging {
         private Dictionary<string, UnitType> unitTypes;
         private Dictionary<string, BuildingType> buildingTypes;
         private Dictionary<string, ProjectileType> projectileTypes;
+        private Dictionary<string, IComponentFactory> components;
 
         private XDocument data;
 
@@ -218,6 +220,8 @@ namespace MHUrho.Packaging {
 
             return projectileType;
         }
+
+        public ConstructComponentDelegate GetComponentConstructor(string name)
 
         //TODO: CONVERT THE FOUR PRECEDING METHODS TO THIS
         //public T LoadType<T>(string name, int newID) where T:IIDNameAndPackage {

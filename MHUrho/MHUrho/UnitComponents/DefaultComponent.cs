@@ -7,10 +7,12 @@ using MHUrho.Storage;
 
 namespace MHUrho.UnitComponents
 {
-    public abstract class DefaultComponent : Component {
+    public abstract class DefaultComponent : Component{
 
         public abstract string Name { get; }
 
-        public abstract PluginData SaveState();
+        public abstract PluginDataWrapper SaveState();
+
+        public abstract DefaultComponent CloneComponent();
     }
 }

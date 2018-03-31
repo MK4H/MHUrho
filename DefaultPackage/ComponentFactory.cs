@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MHUrho.Logic;
-using MHUrho.Storage;
+using MHUrho.UnitComponents;
 
-namespace MHUrho.UnitComponents
+namespace DefaultPackage
 {
-    public class DefaultComponentFactory
+    class ComponentFactory : IComponentFactory
     {
-        public delegate DefaultComponent LoadComponentDelegate(LevelManager level, PluginData storedData);
-
         private readonly Dictionary<string, LoadComponentDelegate> loaders;
+        private readonly Dictionary<string, ConstructComponentDelegate> constructors;
 
-        public DefaultComponentFactory() {
+        public ComponentFactory() {
             loaders = new Dictionary<string, LoadComponentDelegate>();
             //TODO: Maybe reflection
             loaders.Add(UnitSelector.ComponentName, UnitSelector.Load);
@@ -20,10 +18,18 @@ namespace MHUrho.UnitComponents
             loaders.Add(DirectShooter.ComponentName, DirectShooter.Load);
             loaders.Add(BuildingWorker.ComponentName, BuildingWorker.Load);
             //TODO: Add other components
+
+            constructors = new Dictionary<string, ConstructComponentDelegate>();
         }
 
-        public DefaultComponent LoadComponent(string name, PluginData storedComponent, LevelManager level) {
-            return loaders[name].Invoke(level, storedComponent);
+
+
+        public LoadComponentDelegate GetComponentLoader(string componentName) {
+            return loaders[componentName];
+        }
+
+        public ConstructComponentDelegate GetComponentConstructor(string componentName) {
+            return constructors[componentName];
         }
     }
 }

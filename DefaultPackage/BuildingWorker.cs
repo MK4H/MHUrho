@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
+using Urho;
 
-namespace MHUrho.UnitComponents
-{
+namespace DefaultPackage {
     
 
     public class BuildingWorker : DefaultComponent {
@@ -49,7 +50,7 @@ namespace MHUrho.UnitComponents
 
         public override string Name => ComponentName;
 
-        public Building Building { get; private set; }
+        public Building Building { get; set; }
 
         private Queue<IWorkTask> workQueue;
 
@@ -59,8 +60,22 @@ namespace MHUrho.UnitComponents
             throw new NotImplementedException();
         }
 
-        public override PluginData SaveState() {
+        public override PluginDataWrapper SaveState() {
             throw new NotImplementedException();
+        }
+
+        public override DefaultComponent CloneComponent() {
+            return new BuildingWorker();
+        }
+
+        public override void OnAttachedToNode(Node node) {
+            base.OnAttachedToNode(node);
+
+            unit = node.GetComponent<Unit>();
+
+            if (unit == null) {
+                throw new InvalidOperationException("BuildingWorker can only be attached to node with unit component");
+            }
         }
 
         protected override void OnUpdate(float timeStep) {
@@ -83,5 +98,7 @@ namespace MHUrho.UnitComponents
 
             workQueue.Peek().InvokeTaskStarted(unit);
         }
+
+        
     }
 }

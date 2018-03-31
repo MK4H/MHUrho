@@ -66,6 +66,13 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="componentTypes" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="componentType" type="componentTypeType" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -102,6 +109,13 @@
       <xs:element name="modelPath" type="xs:string"/>
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="speed" type="xs:float"/>
+    </xs:sequence>
+    <xs:attribute use="required" name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="componentTypeType">
+    <xs:sequence>
+      <xs:element name="assemblyPath" type="xs:string" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute use="required" name="name" type="xs:string"/>
   </xs:complexType>

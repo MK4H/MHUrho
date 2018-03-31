@@ -5,9 +5,11 @@ using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.Packaging;
+using MHUrho.UnitComponents;
+using MHUrho.WorldMap;
 
-namespace MHUrho.UnitComponents
-{
+namespace DefaultPackage {
     public class DirectShooter : DefaultComponent
     {
         public static string ComponentName = "DirectShooter";
@@ -34,6 +36,19 @@ namespace MHUrho.UnitComponents
         /// </summary>
         private readonly float verticalOffset;
 
+        private readonly Map map;
+
+        public DirectShooter(Map map, Vector3 target, ProjectileType projectileType, float rateOfFire, float horizontalOffset, float verticalOffset) {
+            this.map = map;
+            this.target = target;
+            this.projectileType = projectileType;
+            this.RateOfFire = rateOfFire;
+            this.horizontalOffset = horizontalOffset;
+            this.verticalOffset = verticalOffset;
+            this.delay = 60 / RateOfFire;
+            ReceiveSceneUpdates = true;
+        }
+
         public static DirectShooter Load(LevelManager level, PluginData storedData) {
             var sequentialDataReader = new SequentialPluginDataReader(storedData);
             sequentialDataReader.MoveNext();
@@ -44,34 +59,30 @@ namespace MHUrho.UnitComponents
             var horizontalOffset = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
             var verticalOffset = sequentialDataReader.GetCurrent<float>();
-            return new DirectShooter(target,
-                                     new ProjectileType(10, level.Map), //TODO: Load projectileType by ID
+            sequentialDataReader.MoveNext();
+            var projectileTypeID = sequentialDataReader.GetCurrent<int>();
+            return new DirectShooter(level.Map,
+                                     target,
+                                     PackageManager.Instance.GetProjectileType(projectileTypeID),
                                      rateOfFire,
                                      horizontalOffset,
                                      verticalOffset);
         }
 
-        public override PluginData SaveState() {
+        public override PluginDataWrapper SaveState() {
             var sequentialData = new SequentialPluginDataWriter();
 
+            sequentialData.StoreNext<float>(RateOfFire);
+            sequentialData.StoreNext<Vector3>(target);
+            sequentialData.StoreNext<float>(horizontalOffset);
+            sequentialData.StoreNext<float>(verticalOffset);
+            sequentialData.StoreNext<int>(projectileType.ID);
 
-            sequentialData.StoreNext(RateOfFire);
-            sequentialData.StoreNext(target);
-            sequentialData.StoreNext(horizontalOffset);
-            sequentialData.StoreNext(verticalOffset);
-            //storedData.DataMap.Add("projectileType",new Data { Int = projectileType})
-
-            return sequentialData.PluginData;
+            return sequentialData;
         }
 
-        public DirectShooter(Vector3 target, ProjectileType projectileType, float rateOfFire, float horizontalOffset, float verticalOffset) {
-            this.target = target;
-            this.projectileType = projectileType;
-            this.RateOfFire = rateOfFire;
-            this.horizontalOffset = horizontalOffset;
-            this.verticalOffset = verticalOffset;
-            this.delay = 60 / RateOfFire;
-            ReceiveSceneUpdates = true;
+        public override DefaultComponent CloneComponent() {
+            return new DirectShooter(map, target, projectileType, RateOfFire, horizontalOffset, verticalOffset);
         }
 
         protected override void OnUpdate(float timeStep) {
@@ -97,9 +108,9 @@ namespace MHUrho.UnitComponents
                                   out Vector3 highVector)) {
 
                 var arrow = Node.Scene.CreateChild("Arrow");
-                projectileType.SpawnProjectile(arrow, Node.Position + offset, lowVector);
+                projectileType.SpawnProjectile(map, arrow, Node.Position + offset, lowVector);
                 arrow = Node.Scene.CreateChild("Arrow");
-                projectileType.SpawnProjectile(arrow, Node.Position + offset, highVector);
+                projectileType.SpawnProjectile(map, arrow, Node.Position + offset, highVector);
             }
 
             delay = 60 / RateOfFire;
@@ -153,5 +164,7 @@ namespace MHUrho.UnitComponents
 
             return true;
         }
+
+
     }
 }

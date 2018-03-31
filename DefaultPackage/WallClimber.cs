@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MHUrho.UnitComponents
-{
-    class Meele
+namespace DefaultPackage {
+    class WallClimber
     {
     }
 }

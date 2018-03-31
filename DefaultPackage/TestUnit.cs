@@ -8,7 +8,7 @@ using Urho;
 namespace DefaultPackage
 {
     public class TestUnitType : IUnitTypePlugin {
-        public bool IsMyUnitType(string unitTypeName) {
+        public bool IsMyType(string unitTypeName) {
             return unitTypeName == "TestUnit";
         }
 

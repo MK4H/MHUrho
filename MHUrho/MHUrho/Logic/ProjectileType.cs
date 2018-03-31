@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.WorldMap;
 using Urho;
@@ -11,6 +12,11 @@ namespace MHUrho.Logic
 {
     //TODO: Make this an arrow type
     public class ProjectileType : IIDNameAndPackage, IDisposable {
+        private const string NameAttribute = "name";
+        private const string ModelPathElement = "modelPath";
+        private const string SpeedElement = "speed";
+        private const string AssemblyPathElement = "assemblyPath";
+
         public float ProjectileSpeed { get; private set; }
 
         public int ID { get; set; }
@@ -35,12 +41,13 @@ namespace MHUrho.Logic
         }
 
         public static ProjectileType Load(XElement xml, int newID, string pathToPackageXMLDir, ResourcePack package) {
-            string name = xml.Attribute("name").Value;
-            var speed = LoadSpeed(xml);
+            string name = xml.Attribute(NameAttribute).Value;
+            var speed = XmlHelpers.GetFloat(xml,SpeedElement);
             var model = LoadModel(xml, pathToPackageXMLDir);
 
             var newProjectileType = new ProjectileType(name, speed, model, package);
 
+            return newProjectileType;
         }
 
         //TODO: PROJECTILE POOLING
@@ -75,13 +82,13 @@ namespace MHUrho.Logic
             material?.Dispose();
         }
 
-        private static Model LoadModel(XElement projectileTypeXml, string pathToPackageXMLDir) {
+        private static Model LoadModel(XElement projectileTypeXml, string pathToPackageXmlDir) {
 
-            string relativeModelPath =
-                FileManager.CorrectRelativePath(projectileTypeXml.Element(PackageManager.XMLNamespace + "modelPath").Value.Trim());
-            string fullPath = System.IO.Path.Combine(pathToPackageXMLDir, relativeModelPath);
+
+            string fullPath = XmlHelpers.GetFullPath(projectileTypeXml, ModelPathElement, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetModel(fullPath);
         }
+
     }
 }

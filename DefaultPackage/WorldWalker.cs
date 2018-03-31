@@ -6,10 +6,10 @@ using MHUrho.Logic;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using Urho;
 
-namespace MHUrho.UnitComponents
-{
+namespace DefaultPackage {
     public delegate void MovementStartedDelegate(Unit unit);
 
     public delegate void MovementEndedDelegate(Unit unit);
@@ -74,6 +74,10 @@ namespace MHUrho.UnitComponents
             base.OnAttachedToNode(node);
 
             unit = Node.GetComponent<Unit>();
+        }
+
+        public override DefaultComponent CloneComponent() {
+            return new WorldWalker(level);
         }
 
         protected override void OnUpdate(float timeStep) {
@@ -165,7 +169,7 @@ namespace MHUrho.UnitComponents
             return movementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
         }
 
-        public override PluginData SaveState() {
+        public override PluginDataWrapper SaveState() {
             var storageData = new IndexedPluginDataWriter();
             if (Enabled) {
                 storageData.Store(1,true);
@@ -177,7 +181,7 @@ namespace MHUrho.UnitComponents
                 storageData.Store(1, false);
             }
 
-            return storageData.PluginData;
+            return storageData;
         }
 
         public static WorldWalker Load(LevelManager level, PluginData data) {

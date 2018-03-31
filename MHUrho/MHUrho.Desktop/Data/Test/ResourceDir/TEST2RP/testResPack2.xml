@@ -27,4 +27,21 @@
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </buildingType>
   </buildingTypes>
+  <componentTypes>
+    <componentType name="BuildingWorker">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </componentType>
+    <componentType name="DirectShooter">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </componentType>
+    <componentType name="ResourceCarrier">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </componentType>
+    <componentType name="UnitSelector">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </componentType>
+    <componentType name="WorldWalker">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </componentType>
+  </componentTypes>
 </resourcePack>

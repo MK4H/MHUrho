@@ -9,6 +9,7 @@ using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.Plugins;
+using MHUrho.UnitComponents;
 using Urho;
 using Urho.Resources;
 
@@ -34,6 +35,8 @@ namespace MHUrho.Logic
 
         HashSet<TileType> passableTileTypes;
 
+        private readonly List<DefaultComponent> components;
+
         private IUnitTypePlugin unitTypeLogic;
 
         //TODO: More loaded properties
@@ -44,6 +47,7 @@ namespace MHUrho.Logic
             this.unitTypeLogic = unitPlugin;
             this.Package = package;
             this.Icon = icon;
+            components = new List<DefaultComponent>();
         }
 
         public static UnitType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
@@ -161,6 +165,10 @@ namespace MHUrho.Logic
 
             //TODO: Find a way to not need RGBA conversion
             return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
+        }
+
+        private static void LoadComponents(XElement unitTypeXml, List<DefaultComponent> components) {
+            unitTypeXml.Element(PackageManager.XMLNamespace + "components")
         }
     }
 }

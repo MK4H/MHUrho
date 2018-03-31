@@ -5,6 +5,8 @@ using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
+using Urho;
+using Urho.Resources;
 
 namespace MHUrho.UnitComponents
 {
@@ -15,12 +17,17 @@ namespace MHUrho.UnitComponents
 
         public override IPlayer Player => unit.Player;
 
-        private readonly Unit unit;
+        private Unit unit;
         private readonly LevelManager level;
 
-        public UnitSelector(Unit unit, LevelManager level) {
-            this.unit = unit;
+        public UnitSelector(LevelManager level) {
             this.level = level;
+        }
+
+        public static UnitSelector Load(LevelManager level, PluginData data) {
+            var sequentialData = new SequentialPluginDataReader(data);
+            sequentialData.MoveNext();
+            return new UnitSelector(level);
         }
 
         /// <summary>
@@ -39,23 +46,29 @@ namespace MHUrho.UnitComponents
             throw new NotImplementedException();
         }
 
-        //public void Ordered(IBuilding building) {
+        public void Ordered(Building building) {
 
-        //}
+        }
 
         //TODO: Hook up a reaction to unit death to deselect it from all tools
 
-        public override PluginData SaveState() {
+        public override PluginDataWrapper SaveState() {
             var sequentialData = new SequentialPluginDataWriter();
-            sequentialData.StoreNext(unit.ID);
-            return sequentialData.PluginData;
+            return sequentialData;
         }
 
-        public static UnitSelector Load(LevelManager level, PluginData data) {
-            var sequentialData = new SequentialPluginDataReader(data);
-            sequentialData.MoveNext();
-            var unitID = sequentialData.GetCurrent<int>();
-            return new UnitSelector(level.GetUnit(unitID), level);
+        public override void OnAttachedToNode(Node node) {
+            base.OnAttachedToNode(node);
+
+            unit = node.GetComponent<Unit>();
+
+            if (unit == null) {
+                throw new InvalidOperationException("Unit selector can only be attached to node with unit component");
+            }
+        }
+
+        public override DefaultComponent CloneComponent() {
+            return new UnitSelector(level);
         }
     }
 }
