@@ -35,7 +35,7 @@ namespace MHUrho.Logic
 
         HashSet<TileType> passableTileTypes;
 
-        private readonly List<DefaultComponent> components;
+        private readonly List<MHUrhoComponent> components;
 
         private IUnitTypePlugin unitTypeLogic;
 
@@ -47,7 +47,7 @@ namespace MHUrho.Logic
             this.unitTypeLogic = unitPlugin;
             this.Package = package;
             this.Icon = icon;
-            components = new List<DefaultComponent>();
+            components = new List<MHUrhoComponent>();
         }
 
         public static UnitType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
@@ -167,7 +167,7 @@ namespace MHUrho.Logic
             return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
         }
 
-        private static void LoadComponents(XElement unitTypeXml, List<DefaultComponent> components) {
+        private static void LoadComponents(XElement unitTypeXml, List<MHUrhoComponent> components) {
             unitTypeXml.Element(PackageManager.XMLNamespace + "components")
         }
     }

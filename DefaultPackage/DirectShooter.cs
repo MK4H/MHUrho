@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
@@ -10,7 +11,7 @@ using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 
 namespace DefaultPackage {
-    public class DirectShooter : DefaultComponent
+    public class DirectShooter : MHUrhoComponent
     {
         public static string ComponentName = "DirectShooter";
 
@@ -49,8 +50,8 @@ namespace DefaultPackage {
             ReceiveSceneUpdates = true;
         }
 
-        public static DirectShooter Load(LevelManager level, PluginData storedData) {
-            var sequentialDataReader = new SequentialPluginDataReader(storedData);
+        public static DirectShooter Load(LevelManager level, PluginDataWrapper storedData) {
+            var sequentialDataReader = storedData.GetReaderForWrappedSequentialData();
             sequentialDataReader.MoveNext();
             var rateOfFire = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
@@ -81,7 +82,7 @@ namespace DefaultPackage {
             return sequentialData;
         }
 
-        public override DefaultComponent CloneComponent() {
+        public override MHUrhoComponent CloneComponent() {
             return new DirectShooter(map, target, projectileType, RateOfFire, horizontalOffset, verticalOffset);
         }
 
@@ -166,5 +167,19 @@ namespace DefaultPackage {
         }
 
 
+    }
+
+    public class DirectShooterType : IComponentType {
+        public MHUrhoComponent CreateNewInstance(LevelManager level, XElement xmlData) {
+            return new DirectShooter(level.Map, new Vector3(-10, 0, 0), level.PackageManager, 6, 0.5f, 0.5f);
+        }
+
+        public MHUrhoComponent LoadSavedInstance(LevelManager level, PluginDataWrapper storedData) {
+            return DirectShooter.Load(level, storedData);
+        }
+
+        public bool IsMyType(string typeName) {
+            return typeName == DirectShooter.ComponentName;
+        }
     }
 }

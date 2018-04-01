@@ -8,7 +8,7 @@ using Urho.IO;
 using Urho.Resources;
 
 namespace DefaultPackage {
-    class ResourceCarrier : DefaultComponent {
+    class ResourceCarrier : MHUrhoComponent {
         public static string ComponentName => nameof(ResourceCarrier);
 
         public override string Name => ComponentName;
@@ -22,7 +22,7 @@ namespace DefaultPackage {
         }
 
 
-        public override DefaultComponent CloneComponent() {
+        public override MHUrhoComponent CloneComponent() {
             throw new NotImplementedException();
         }
     }

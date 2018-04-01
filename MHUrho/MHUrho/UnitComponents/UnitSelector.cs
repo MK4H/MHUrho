@@ -67,7 +67,7 @@ namespace MHUrho.UnitComponents
             }
         }
 
-        public override DefaultComponent CloneComponent() {
+        public override MHUrhoComponent CloneComponent() {
             return new UnitSelector(level);
         }
     }

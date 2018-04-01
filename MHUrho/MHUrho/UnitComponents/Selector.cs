@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    public abstract class Selector : DefaultComponent {
+    public abstract class Selector : MHUrhoComponent {
         public virtual IPlayer Player { get; }
 
         public virtual bool Selected { get; set; }

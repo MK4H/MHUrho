@@ -33,7 +33,7 @@ namespace MHUrho.Packaging {
         private Dictionary<string, UnitType> unitTypes;
         private Dictionary<string, BuildingType> buildingTypes;
         private Dictionary<string, ProjectileType> projectileTypes;
-        private Dictionary<string, IComponentFactory> components;
+        private Dictionary<string, IComponentType> componentTypes;
 
         private XDocument data;
 
@@ -221,7 +221,7 @@ namespace MHUrho.Packaging {
             return projectileType;
         }
 
-        public ConstructComponentDelegate GetComponentConstructor(string name)
+        public IComponentType 
 
         //TODO: CONVERT THE FOUR PRECEDING METHODS TO THIS
         //public T LoadType<T>(string name, int newID) where T:IIDNameAndPackage {

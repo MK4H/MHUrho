@@ -9,7 +9,7 @@ using Urho;
 namespace DefaultPackage {
     
 
-    public class BuildingWorker : DefaultComponent {
+    public class BuildingWorker : MHUrhoComponent {
 
         private interface IWorkTask {
             bool IsFinished();
@@ -64,7 +64,7 @@ namespace DefaultPackage {
             throw new NotImplementedException();
         }
 
-        public override DefaultComponent CloneComponent() {
+        public override MHUrhoComponent CloneComponent() {
             return new BuildingWorker();
         }
 

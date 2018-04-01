@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Xml.Linq;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
@@ -14,7 +15,7 @@ namespace DefaultPackage {
 
     public delegate void MovementEndedDelegate(Unit unit);
 
-    public class WorldWalker : DefaultComponent {
+    public class WorldWalker : MHUrhoComponent {
         public static string ComponentName = "WorldWalker";
 
         public override string Name => ComponentName;
@@ -55,6 +56,19 @@ namespace DefaultPackage {
             this.Enabled = activated;
         }
 
+        public static WorldWalker Load(LevelManager level, PluginDataWrapper data) {
+            var indexedData = data.GetReaderForWrappedIndexedData();
+            var activated = indexedData.Get<bool>(1);
+            Path path = null;
+            ITile target = null;
+            if (activated) {
+                path = indexedData.Get<Path>(2);
+                target = level.Map.GetTile(indexedData.Get<IntVector2>(3));
+            }
+
+            return new WorldWalker(level, activated, path, target);
+        }
+
         public void GoAlong(Path path) {
             if (this.path == null) {
                 OnMovementStarted?.Invoke(unit);
@@ -76,7 +90,7 @@ namespace DefaultPackage {
             unit = Node.GetComponent<Unit>();
         }
 
-        public override DefaultComponent CloneComponent() {
+        public override MHUrhoComponent CloneComponent() {
             return new WorldWalker(level);
         }
 
@@ -184,17 +198,20 @@ namespace DefaultPackage {
             return storageData;
         }
 
-        public static WorldWalker Load(LevelManager level, PluginData data) {
-            var indexedData = new IndexedPluginDataReader(data);
-            var activated = indexedData.Get<bool>(1);
-            Path path = null;
-            ITile target = null;
-            if (activated) {
-                path = indexedData.Get<Path>(2);
-                target = level.Map.GetTile(indexedData.Get<IntVector2>(3));
-            }
+        
+    }
 
-            return new WorldWalker(level, activated, path, target);
+    public class WorldWalkerType : IComponentType {
+        public MHUrhoComponent CreateNewInstance(LevelManager level, XElement xmlData) {
+            return new WorldWalker(level);
+        }
+
+        public MHUrhoComponent LoadSavedInstance(LevelManager level, PluginDataWrapper storedData) {
+            return WorldWalker.Load(level, storedData);
+        }
+
+        public bool IsMyType(string typeName) {
+            return typeName == WorldWalker.ComponentName;
         }
     }
 }

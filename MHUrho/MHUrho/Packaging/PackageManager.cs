@@ -196,9 +196,17 @@ namespace MHUrho.Packaging
             return activeTileTypes[ID];
         }
 
+        public TileType GetTileType(string fullName) {
+            //TODO: Get package name
+        }
+
         public UnitType GetUnitType(int ID) {
             //TODO: React if it does not exist
             return activeUnitTypes[ID];
+        }
+
+        public UnitType GetUnitType(string fullName) {
+
         }
 
         public BuildingType GetBuildingType(int ID) {
@@ -206,9 +214,17 @@ namespace MHUrho.Packaging
             return activeBuildingTypes[ID];
         }
 
+        public BuildingType GetBuildingType(string fullName) {
+
+        }
+
         public ProjectileType GetProjectileType(int ID) {
             //TODO: React if it does not exist
             return activeProjectileTypes[ID];
+        }
+
+        public ProjectileType GetProjectileType(string fullName) {
+
         }
 
         public ResourcePack GetResourcePack(int ID) {

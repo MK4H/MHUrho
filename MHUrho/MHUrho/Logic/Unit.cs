@@ -200,7 +200,7 @@ namespace MHUrho.Logic
             logic.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
             foreach (var component in Node.Components) {
-                var defaultComponent = component as DefaultComponent;
+                var defaultComponent = component as MHUrhoComponent;
                 if (defaultComponent != null) {
                     storedUnit.DefaultComponentData.Add(defaultComponent.Name, defaultComponent.SaveState());
                 }

@@ -28,6 +28,8 @@ namespace MHUrho.Logic
 
         public Scene Scene { get; private set; }
 
+        public PackageManager PackageManager => PackageManager.Instance;
+
         private CameraController cameraController;
         private IGameController inputController;
 
