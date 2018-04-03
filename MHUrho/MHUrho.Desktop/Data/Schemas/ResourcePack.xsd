@@ -84,6 +84,7 @@
       <xs:element name="iconPath" type="xs:string"/>
       <xs:element name="modelPath" type="xs:string"/>
       <xs:element name="assemblyPath" type="xs:string"/>
+      <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute use="required" name="name" type="xs:string"/>
   </xs:complexType>
@@ -93,6 +94,7 @@
       <xs:element name="iconPath" type="xs:string"/>
       <xs:element name="modelPath" type="xs:string"/>
       <xs:element name="assemblyPath" type="xs:string"/>
+      <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute use="required" name="name" type="xs:string"/>
   </xs:complexType>
@@ -100,9 +102,16 @@
   <xs:complexType name="projectileTypeType">
     <xs:sequence>
       <xs:element name="modelPath" type="xs:string"/>
-      <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="speed" type="xs:float"/>
+      <xs:element name="assemblyPath" type="xs:string"/>
+      <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute use="required" name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="extensionType">
+    <xs:sequence>
+      <xs:any minOccurs="0" processContents="skip"/>
+    </xs:sequence>
   </xs:complexType>
 </xs:schema>

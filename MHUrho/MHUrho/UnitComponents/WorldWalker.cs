@@ -74,6 +74,11 @@ namespace MHUrho.UnitComponents
             base.OnAttachedToNode(node);
 
             unit = Node.GetComponent<Unit>();
+
+            if (unit == null) {
+                throw new
+                    InvalidOperationException($"Cannot attach {nameof(WorldWalker)} to a node that does not have {nameof(Unit)} component");
+            }
         }
 
         protected override void OnUpdate(float timeStep) {

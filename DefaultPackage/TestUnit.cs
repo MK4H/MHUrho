@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Xml.Linq;
+using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using MHUrho.Storage;
@@ -8,7 +11,10 @@ using Urho;
 namespace DefaultPackage
 {
     public class TestUnitType : IUnitTypePlugin {
-        public bool IsMyUnitType(string unitTypeName) {
+
+        private ProjectileType projectileType;
+
+        public bool IsMyType(string unitTypeName) {
             return unitTypeName == "TestUnit";
         }
 
@@ -18,7 +24,16 @@ namespace DefaultPackage
 
         public IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
             unitNode.AddComponent(new WorldWalker(level));
-            unitNode.AddComponent(new UnitSelector(unit, level));
+            unitNode.AddComponent(new UnitSelector(level));
+            unitNode.AddComponent(new DirectShooter(level.Map,
+                                                    unitNode.Position +
+                                                    new Vector3(0,
+                                                                0,
+                                                                10),
+                                                    projectileType,
+                                                    10,
+                                                    1,
+                                                    1));
             return new TestUnitInstance(level, unitNode, unit);
         }
 
@@ -27,6 +42,12 @@ namespace DefaultPackage
                                                    Unit unit,
                                                    PluginDataWrapper pluginDataStorage) {
             return new TestUnitInstance(level, unitNode, unit);
+        }
+
+        public void Initialize(XElement extensionElement, PackageManager packageManager) {
+            projectileType = PackageManager.Instance
+                                           .LoadProjectileType(XmlHelpers.GetString(extensionElement, 
+                                                                                    "projectileType"));
         }
     }
 

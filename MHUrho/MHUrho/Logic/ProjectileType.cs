@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Helpers;
 using MHUrho.Packaging;
+using MHUrho.Storage;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
@@ -10,7 +12,12 @@ using Urho.Physics;
 namespace MHUrho.Logic
 {
     //TODO: Make this an arrow type
-    public class ProjectileType : IIDNameAndPackage, IDisposable {
+    public class ProjectileType : IEntityType, IDisposable {
+        private const string NameAttribute = "name";
+        private const string ModelPathElement = "modelPath";
+        private const string SpeedElement = "speed";
+        private const string AssemblyPathElement = "assemblyPath";
+
         public float ProjectileSpeed { get; private set; }
 
         public int ID { get; set; }
@@ -19,9 +26,13 @@ namespace MHUrho.Logic
 
         public ResourcePack Package { get; private set; }
 
-        private readonly Model model;
+        private Model model;
 
-        private readonly Material material;
+        private Material material;
+
+        public ProjectileType() {
+
+        }
 
         protected ProjectileType(string name,
                                  float projectileSpeed,
@@ -34,13 +45,13 @@ namespace MHUrho.Logic
             this.material = null;
         }
 
-        public static ProjectileType Load(XElement xml, int newID, string pathToPackageXMLDir, ResourcePack package) {
-            string name = xml.Attribute("name").Value;
-            var speed = LoadSpeed(xml);
-            var model = LoadModel(xml, pathToPackageXMLDir);
-
-            var newProjectileType = new ProjectileType(name, speed, model, package);
-
+        public void Load(XElement xml, int newID, ResourcePack package) {
+            ID = newID;
+            Name = xml.Attribute(NameAttribute).Value;
+            ProjectileSpeed = XmlHelpers.GetFloat(xml, SpeedElement);
+            model = LoadModel(xml, package.XmlDirectoryPath);
+            Package = package;
+            //TODO: Material  
         }
 
         //TODO: PROJECTILE POOLING
@@ -68,18 +79,22 @@ namespace MHUrho.Logic
             return projectile;
         }
 
-        
+        public StEntityType Save() {
+            return new StEntityType {
+                                        Name = Name,
+                                        TypeID = ID,
+                                        PackageID = Package.ID
+                                    };
+        }
 
         public void Dispose() {
             model?.Dispose();
             material?.Dispose();
         }
 
-        private static Model LoadModel(XElement projectileTypeXml, string pathToPackageXMLDir) {
+        private static Model LoadModel(XElement projectileTypeXml, string pathToPackageXmlDir) {
 
-            string relativeModelPath =
-                FileManager.CorrectRelativePath(projectileTypeXml.Element(PackageManager.XMLNamespace + "modelPath").Value.Trim());
-            string fullPath = System.IO.Path.Combine(pathToPackageXMLDir, relativeModelPath);
+            string fullPath = XmlHelpers.GetFullPath(projectileTypeXml, ModelPathElement, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetModel(fullPath);
         }

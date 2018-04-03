@@ -146,7 +146,7 @@ namespace MHUrho.Logic
             node.AddComponent(unit);
             node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
 
-            unit.logic = type.LoadInstancePlugin(unit, level, storedUnit.UserPlugin);
+
             //This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
             // to this class, and for that i need to set the Position here
             
@@ -220,6 +220,8 @@ namespace MHUrho.Logic
             foreach (var defaultComponent in storage.DefaultComponentData) {
                 Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level));
             }
+
+            logic = UnitType.LoadInstancePlugin(this, level, storage.UserPlugin);
         }
 
         public void FinishLoading() {

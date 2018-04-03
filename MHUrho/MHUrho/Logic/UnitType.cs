@@ -14,7 +14,7 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-    public class UnitType : IIDNameAndPackage, IDisposable
+    public class UnitType : IEntityType, IDisposable
     {
         //XML ELEMENTS AND ATTRIBUTES
         private const string NameAttribute = "name";
@@ -46,23 +46,42 @@ namespace MHUrho.Logic
             this.Icon = icon;
         }
 
-        public static UnitType Load(XElement xml, int newID, string pathToPackageXMLDirname, ResourcePack package) {
+        /// <summary>
+        /// Data has to be loaded after constructor by <see cref="Load(XElement, int, ResourcePack)"/>
+        /// It is done this way to allow cyclic references during the Load method, so anything 
+        /// that references this unitType back can get the reference during the loading of this instance
+        /// </summary>
+        public UnitType() {
+
+        }
+
+        /// <summary>
+        /// Loads the standard data of the unitType from the xml
+        /// 
+        /// THE STANDARD DATA cannot reference any other types, it would cause infinite cycles
+        /// 
+        /// After this loading, you should register this type so it can be referenced, and then call
+        /// <see cref="UnitType.ParseExtensionData(XElement, ResourcePack)"/>
+        /// </summary>
+        /// <param name="xml">xml element describing the type, according to <see cref="PackageManager.XMLNamespace"/> schema</param>
+        /// <param name="newID">ID of this type in the current game</param>
+        /// <param name="package">Package this unitType belongs to</param>
+        /// <returns>UnitType with filled standard members</returns>
+        public void Load(XElement xml, int newID, ResourcePack package) {
             //TODO: Check for errors
-            string name = xml.Attribute(NameAttribute).Value;
-            var model = LoadModel(xml, pathToPackageXMLDirname);
-            var icon = LoadIcon(xml, pathToPackageXMLDirname);
-            var unitPluginLogic = 
+            ID = newID;
+            Name = xml.Attribute(NameAttribute).Value;
+            Model = LoadModel(xml, package.XmlDirectoryPath);
+            Icon = LoadIcon(xml, package.XmlDirectoryPath);
+            Package = package;
+            unitTypeLogic = 
                 XmlHelpers.LoadTypePlugin<IUnitTypePlugin>(xml, 
                                                            AssemblyPathElement,
-                                                           pathToPackageXMLDirname,
-                                                           name);
-        
-            UnitType newUnitType = new UnitType(name, model, unitPluginLogic, icon, package) 
-                                        {
-                                            ID = newID
-                                        };
+                                                           package.XmlDirectoryPath,
+                                                           Name);
 
-            return newUnitType;
+            unitTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
+                                                package.PackageManager);
         }
 
         public StEntityType Save() {

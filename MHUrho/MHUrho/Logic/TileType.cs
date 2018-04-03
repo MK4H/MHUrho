@@ -11,7 +11,7 @@ using MHUrho.Packaging;
 
 namespace MHUrho.Logic
 {
-    public class TileType : IIDNameAndPackage {
+    public class TileType : IEntityType {
         private const string NameAttribute = "name";
         private const string TexturePathElement = "texturePath";
         private const string MovementSpeedElement = "movementSpeed";
@@ -27,19 +27,19 @@ namespace MHUrho.Logic
         //TODO: Check that texture is null
         public Rect TextureCoords { get; private set; }
 
-        private readonly string imagePath;
+        private string imagePath;
 
-        public static TileType Load(XElement xml, int newID, string pathToPackageXmlDirname, ResourcePack package) {
+        public static string GetNameFromXml(XElement tileTypeElement) {
+            return tileTypeElement.Attribute("name").Value;
+        }
+
+        public void Load(XElement xml, int newID, ResourcePack package) {
             //TODO: Check for errors
-            string name = xml.Attribute(NameAttribute).Value;
-            string imagePath = XmlHelpers.GetFullPath(xml, TexturePathElement, pathToPackageXmlDirname);
-            float movementSpeed = XmlHelpers.GetFloat(xml, MovementSpeedElement);
-
-            TileType newTileType = new TileType(name, movementSpeed, imagePath, package) {
-                ID = newID
-            };
-
-            return newTileType;
+            ID = newID;
+            Name = xml.Attribute(NameAttribute).Value;
+            imagePath = XmlHelpers.GetFullPath(xml, TexturePathElement, package.XmlDirectoryPath);
+            MovementSpeedModifier = XmlHelpers.GetFloat(xml, MovementSpeedElement);
+            Package = package;
         }
 
         public StEntityType Save() {
@@ -52,12 +52,8 @@ namespace MHUrho.Logic
             return storedTileType;
         }
 
-        protected TileType(string name, float movementSpeedModifier, string imagePath, ResourcePack package) {
+        public TileType() {
             ID = 0;
-            this.Name = name;
-            this.MovementSpeedModifier = movementSpeedModifier;
-            this.imagePath = imagePath;
-            this.Package = package;
         }
 
         /// <summary>

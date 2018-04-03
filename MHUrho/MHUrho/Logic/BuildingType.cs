@@ -12,7 +12,7 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-    public class BuildingType : IIDNameAndPackage, IDisposable
+    public class BuildingType : IEntityType, IDisposable
     {
         //XML ELEMENTS AND ATTRIBUTES
         private const string NameAttribute = "name";
@@ -47,19 +47,29 @@ namespace MHUrho.Logic
             this.Package = package;
         }
 
-        public static BuildingType Load(XElement xml, int newID, string pathToPackageXmlDir, ResourcePack package) {
-            string name = xml.Attribute(NameAttribute).Value;
+        /// <summary>
+        /// Data has to be loaded after constructor by <see cref="Load(XElement, int, ResourcePack)"/>
+        /// It is done this way to allow cyclic references during the Load method, so anything 
+        /// that references this buildingType back can get the reference during the loading of this instance
+        /// </summary>
+        public BuildingType() {
+
+        }
+
+        public void Load(XElement xml, int newID, ResourcePack package) {
+            ID = newID;
+            Name = xml.Attribute(NameAttribute).Value;
             //TODO: Join the implementations from all the 
-            var model = LoadModel(xml, pathToPackageXmlDir);
-            var icon = LoadIcon(xml, pathToPackageXmlDir);
-            var size = XmlHelpers.GetIntVector2(xml, SizeElement);
-            var buildingTypeLogic = XmlHelpers.LoadTypePlugin<IBuildingTypePlugin>(xml, AssemblyPathElement, pathToPackageXmlDir, name);
-
-            var newBuildingType = new BuildingType(name, model, buildingTypeLogic, icon, package) {
-                                                                                                      ID = newID
-                                                                                                  };
-
-            return newBuildingType;
+            Model = LoadModel(xml, package.XmlDirectoryPath);
+            Icon = LoadIcon(xml, package.XmlDirectoryPath);
+            Package = package;
+            //Size = XmlHelpers.GetIntVector2(xml, SizeElement);
+            //buildingTypeLogic = XmlHelpers.LoadTypePlugin<IBuildingTypePlugin>(xml, 
+            //                                                                   AssemblyPathElement, 
+            //                                                                   package.XmlDirectoryPath, 
+            //                                                                   Name);
+            //buildingTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
+            //                                        package.PackageManager);
         }
 
         public StEntityType Save() {

@@ -5,6 +5,7 @@ using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
@@ -34,6 +35,8 @@ namespace MHUrho.UnitComponents
         /// </summary>
         private readonly float verticalOffset;
 
+        private Map map;
+
         public static DirectShooter Load(LevelManager level, PluginData storedData) {
             var sequentialDataReader = new SequentialPluginDataReader(storedData);
             sequentialDataReader.MoveNext();
@@ -44,8 +47,11 @@ namespace MHUrho.UnitComponents
             var horizontalOffset = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
             var verticalOffset = sequentialDataReader.GetCurrent<float>();
-            return new DirectShooter(target,
-                                     new ProjectileType(10, level.Map), //TODO: Load projectileType by ID
+            sequentialDataReader.MoveNext();
+            var projectileTypeID = sequentialDataReader.GetCurrent<int>();
+            return new DirectShooter(level.Map,
+                                     target,
+                                     level.PackageManager.GetProjectileType(projectileTypeID),
                                      rateOfFire,
                                      horizontalOffset,
                                      verticalOffset);
@@ -55,16 +61,22 @@ namespace MHUrho.UnitComponents
             var sequentialData = new SequentialPluginDataWriter();
 
 
-            sequentialData.StoreNext(RateOfFire);
-            sequentialData.StoreNext(target);
-            sequentialData.StoreNext(horizontalOffset);
-            sequentialData.StoreNext(verticalOffset);
-            //storedData.DataMap.Add("projectileType",new Data { Int = projectileType})
+            sequentialData.StoreNext<float>(RateOfFire);
+            sequentialData.StoreNext<Vector3>(target);
+            sequentialData.StoreNext<float>(horizontalOffset);
+            sequentialData.StoreNext<float>(verticalOffset);
+            sequentialData.StoreNext<int>(projectileType.ID);
 
             return sequentialData.PluginData;
         }
 
-        public DirectShooter(Vector3 target, ProjectileType projectileType, float rateOfFire, float horizontalOffset, float verticalOffset) {
+        public DirectShooter(Map map, 
+                             Vector3 target, 
+                             ProjectileType projectileType, 
+                             float rateOfFire, 
+                             float horizontalOffset, 
+                             float verticalOffset) {
+            this.map = map;
             this.target = target;
             this.projectileType = projectileType;
             this.RateOfFire = rateOfFire;
@@ -97,9 +109,9 @@ namespace MHUrho.UnitComponents
                                   out Vector3 highVector)) {
 
                 var arrow = Node.Scene.CreateChild("Arrow");
-                projectileType.SpawnProjectile(arrow, Node.Position + offset, lowVector);
+                projectileType.SpawnProjectile(map,arrow, Node.Position + offset, lowVector);
                 arrow = Node.Scene.CreateChild("Arrow");
-                projectileType.SpawnProjectile(arrow, Node.Position + offset, highVector);
+                projectileType.SpawnProjectile(map,arrow, Node.Position + offset, highVector);
             }
 
             delay = 60 / RateOfFire;

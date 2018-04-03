@@ -42,7 +42,15 @@ namespace MHUrho.Helpers
             return new IntVector2(x, y);
         }
 
+        public static string GetString(XElement typeXmlElement, string childElementName) {
+            return typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value.Trim();
+        }
+
         public static T LoadTypePlugin<T>(XElement typeXml, string assemblyPathElementName, string pathToPackageXmlDir, string typeName) where T: class, ITypePlugin {
+            if (!System.IO.Path.IsPathRooted(pathToPackageXmlDir)) {
+                pathToPackageXmlDir = System.IO.Path.Combine(MyGame.Config.DynamicDirPath, pathToPackageXmlDir);
+            }
+
             string assemblyPath = GetFullPath(typeXml, assemblyPathElementName, pathToPackageXmlDir);
 
             var assembly = Assembly.LoadFile(assemblyPath);
@@ -64,9 +72,6 @@ namespace MHUrho.Helpers
                 //TODO: Exception
                 throw new Exception("Type plugin loading failed, could not load plugin");
             }
-
-
-
 
             if (pluginInstance == null) {
                 //TODO: Exception

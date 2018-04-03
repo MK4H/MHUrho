@@ -30,6 +30,8 @@ namespace MHUrho.Logic
 
         public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
+        public PackageManager PackageManager => PackageManager.Instance;
+
         private CameraController cameraController;
         private IGameController inputController;
 
@@ -219,15 +221,6 @@ namespace MHUrho.Logic
 
                 newUnit.Order(targetTile);
             }
-
-            unitNode.AddComponent(new DirectShooter(unitNode.Position +
-                                                    new Vector3(0,
-                                                                0,
-                                                                10),
-                                                    PackageManager.Instance.(),
-                                                    10,
-                                                    1,
-                                                    1));
         }
 
         public void BuildBuilding(BuildingType buildingType, IntVector2 centerTileLocation, IPlayer player) {

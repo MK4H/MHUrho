@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.UserInterface;
 using Urho;
@@ -42,5 +44,12 @@ namespace MHUrho.Plugins
         void AddSelected(IBuildingInstancePlugin buildingInstance);
 
         void RemoveSelected(IBuildingInstancePlugin buildingInstance);
+
+        /// <summary>
+        /// Called to initialize the instance
+        /// </summary>
+        /// <param name="extensionElement">extension element of the unitType xml description or null if there is none</param>
+        /// <param name="packageManager">package manager for connecting to other entityTypes</param>
+        void Initialize(XElement extensionElement, PackageManager packageManager);
     }
 }

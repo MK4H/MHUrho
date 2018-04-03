@@ -56,6 +56,8 @@ namespace MHUrho.Packaging
 
         private Dictionary<int, ResourcePack> activePackages;
 
+        private Dictionary<int, ResourcePack> loadingPackages;
+
         private Dictionary<int, TileType> activeTileTypes;
 
         private Dictionary<int, UnitType> activeUnitTypes;
@@ -120,24 +122,19 @@ namespace MHUrho.Packaging
             ClearActiveTypes();
 
             //Load the packages for this level, if already loaded just remap the ID
-            Dictionary<int, ResourcePack>
-                newActivePackages = GetActivePackages(storedPackages.Packages, activePackages);
-
-            //Unload the packages that were not remapped for this leve
-            UnloadOldActivePackages(newActivePackages);
+            loadingPackages = GetActivePackages(storedPackages.Packages, activePackages);
 
             //Load the items from packages
             {
-                StartLoadingPackages(newActivePackages.Values);
+                StartGroupLoadingPackages(loadingPackages.Values);
 
                 LoadTileTypes(storedPackages.TileTypes, loadedTileTypes);
                 LoadUnitTypes(storedPackages.UnitTypes, loadedUnitTypes);
                 LoadBuildingTypes(storedPackages.BuildingTypes, loadedBuildingTypes);
                 LoadProjectileTypes(storedPackages.ProjectileTypes, loadedProjectileTypes);
 
-                FinishLoadingPackages(newActivePackages.Values);
+                FinishGroupLoadingPackages();
             }
-
         }
 
         /// <summary>
@@ -145,37 +142,35 @@ namespace MHUrho.Packaging
         /// </summary>
         /// <param name="packages"></param>
         public void LoadWholePackages(IEnumerable<string> packages) {
-            Dictionary<int, ResourcePack> newLoadedPackages = new Dictionary<int, ResourcePack>();
             ClearActiveTypes();
+            loadingPackages = new Dictionary<int, ResourcePack>();
+
+            //Packages from method argument
+            List<ResourcePack> givenPackages = new List<ResourcePack>();
             
             //Get default pack
-            int defaultPackageID = GetNewID(newLoadedPackages);
-            GetPackage("Default", defaultPackageID, activePackages, newLoadedPackages);
+            int defaultPackageID = GetNewID(loadingPackages);
+            givenPackages.Add(GetAndMovePackage("Default", defaultPackageID, activePackages, loadingPackages));
 
             foreach (var package in packages) {
-                GetPackage(package, GetNewID(newLoadedPackages), activePackages, newLoadedPackages);
+                givenPackages.Add(GetAndMovePackage(package, GetNewID(loadingPackages), activePackages, loadingPackages));
             }
 
-            //Unloads the packages that were left in previously loaded packages and not moved
-            // to new loaded packages
-            UnloadOldActivePackages(newLoadedPackages);
-           
-            StartLoadingPackages(newLoadedPackages.Values);
+            StartGroupLoadingPackages(loadingPackages.Values);
 
             //If it was not loaded, load it with new ID, else just leave it with old ID
-            if ((DefaultTileType = newLoadedPackages[defaultPackageID].GetTileType("Default")) == null) {
-                DefaultTileType = newLoadedPackages[defaultPackageID].LoadTileType("Default", GetNewID(activeTileTypes));
+            if ((DefaultTileType = loadingPackages[defaultPackageID].GetTileType("Default")) == null) {
+                DefaultTileType = loadingPackages[defaultPackageID].LoadTileType("Default", GetNewID(activeTileTypes));
             }
  
-            
-
-            foreach (var package in newLoadedPackages.Values) {
+            foreach (var package in givenPackages) {
                 AddToActive(package.LoadAllTileTypes(() => GetNewID(activeTileTypes)));
                 AddToActive(package.LoadAllUnitTypes(() => GetNewID(activeUnitTypes)));
                 AddToActive(package.LoadAllBuildingTypes(() => GetNewID(activeBuildingTypes)));
             }
 
-            FinishLoadingPackages(newLoadedPackages.Values);
+            FinishGroupLoadingPackages();
+
         }
 
         protected PackageManager(ResourceCache resourceCache)
@@ -196,9 +191,55 @@ namespace MHUrho.Packaging
             return activeTileTypes[ID];
         }
 
+        public TileType LoadTileType(string fullName) {
+            GetPackageAndItemName(fullName, out string packageName, out string tileTypeName);
+
+            var resourcePack = availablePacks[packageName];
+            StartLoadingPackage(resourcePack);
+
+            TileType tileType;
+
+            if ((tileType = resourcePack.GetTileType(tileTypeName)) != null) {
+                if (tileType.ID == 0) {
+                    tileType.ID = GetNewID(activeTileTypes);
+                    activeTileTypes.Add(tileType.ID, tileType);
+                }
+            }
+            else {
+                tileType = resourcePack.LoadTileType(tileTypeName, GetNewID(activeTileTypes));
+                activeTileTypes.Add(tileType.ID, tileType);
+            }
+
+            EndLoadingPackage(resourcePack);
+            return tileType;
+        }
+
         public UnitType GetUnitType(int ID) {
             //TODO: React if it does not exist
             return activeUnitTypes[ID];
+        }
+
+        public UnitType LoadUnitType(string fullName) {
+            GetPackageAndItemName(fullName, out string packageName, out string unitTypeName);
+
+            var resourcePack = availablePacks[packageName];
+            StartLoadingPackage(resourcePack);
+
+            UnitType unitType;
+
+            if ((unitType = resourcePack.GetUnitType(unitTypeName)) != null) {
+                if (unitType.ID == 0) {
+                    unitType.ID = GetNewID(activeUnitTypes);
+                    activeUnitTypes.Add(unitType.ID, unitType);
+                }
+            }
+            else {
+                unitType = resourcePack.LoadUnitType(unitTypeName, GetNewID(activeUnitTypes));
+                activeUnitTypes.Add(unitType.ID, unitType);
+            }
+
+            EndLoadingPackage(resourcePack);
+            return unitType;
         }
 
         public BuildingType GetBuildingType(int ID) {
@@ -206,9 +247,55 @@ namespace MHUrho.Packaging
             return activeBuildingTypes[ID];
         }
 
+        public BuildingType LoadBuildingType(string fullName) {
+            GetPackageAndItemName(fullName, out string packageName, out string buildingTypeName);
+
+            var resourcePack = availablePacks[packageName];
+            StartLoadingPackage(resourcePack);
+
+            BuildingType buildingType;
+
+            if ((buildingType = resourcePack.GetBuildingType(buildingTypeName)) != null) {
+                if (buildingType.ID == 0) {
+                    buildingType.ID = GetNewID(activeBuildingTypes);
+                    activeBuildingTypes.Add(buildingType.ID, buildingType);
+                }
+            }
+            else {
+                buildingType = resourcePack.LoadBuildingType(buildingTypeName, GetNewID(activeBuildingTypes));
+                activeBuildingTypes.Add(buildingType.ID, buildingType);
+            }
+
+            EndLoadingPackage(resourcePack);
+            return buildingType;
+        }
+
         public ProjectileType GetProjectileType(int ID) {
             //TODO: React if it does not exist
             return activeProjectileTypes[ID];
+        }
+
+        public ProjectileType LoadProjectileType(string fullName) {
+            GetPackageAndItemName(fullName, out string packageName, out string projectileTypeName);
+
+            var resourcePack = availablePacks[packageName];
+            StartLoadingPackage(resourcePack);
+
+            ProjectileType projectileType;
+
+            if ((projectileType = resourcePack.GetProjectileType(projectileTypeName)) != null) {
+                if (projectileType.ID == 0) {
+                    projectileType.ID = GetNewID(activeProjectileTypes);
+                    activeProjectileTypes.Add(projectileType.ID, projectileType);
+                }
+            }
+            else {
+                projectileType = resourcePack.LoadProjectileType(projectileTypeName, GetNewID(activeProjectileTypes));
+                activeProjectileTypes.Add(projectileType.ID, projectileType);
+            }
+
+            EndLoadingPackage(resourcePack);
+            return projectileType;
         }
 
         public ResourcePack GetResourcePack(int ID) {
@@ -251,12 +338,12 @@ namespace MHUrho.Packaging
                 string directoryPath = Path.GetDirectoryName(path);
 
                 loadedPacks = from packages in doc.Root.Elements(XMLNamespace + "resourcePack")
-                    select ResourcePack.InitialLoad(
-                        packages.Attribute("name").Value,
-                        //PathtoXml is relative to ResourcePackDir.xml directory path
-                        Path.Combine(directoryPath,packages.Element(XMLNamespace + "pathToXml").Value), 
-                        packages.Element(XMLNamespace + "description")?.Value,
-                        packages.Element(XMLNamespace + "thumbnailPath")?.Value);
+                              select ResourcePack.InitialLoad(packages.Attribute("name").Value,
+                                                    //PathtoXml is relative to ResourcePackDir.xml directory path
+                                                    Path.Combine(directoryPath,packages.Element(XMLNamespace + "pathToXml").Value), 
+                                                    packages.Element(XMLNamespace + "description")?.Value,
+                                                    packages.Element(XMLNamespace + "thumbnailPath")?.Value,
+                                                    this);
             }
             catch (IOException e)
             {
@@ -322,11 +409,32 @@ namespace MHUrho.Packaging
         }
 
         private string GetFullName(int packageID, string name) {
-            return string.Concat(activePackages[packageID].Name, "/", name);
+            return string.Concat(loadingPackages?[packageID].Name ?? activePackages[packageID].Name, "/", name);
         }
 
         private static string GetFullName(string packageName, string name) {
             return string.Concat(packageName, "/", name);
+        }
+
+        private static void GetPackageAndItemName(string fullName, out string packageName, out string itemName) {
+            if (!TryGetPackageAndItemName(fullName, out packageName, out itemName)) {
+                throw new ArgumentException($"fullName does not have the right format",nameof(fullName));
+            }
+        }
+
+        private static bool TryGetPackageAndItemName(string fullName, out string packageName, out string itemName) {
+            packageName = null;
+            itemName = null;
+
+            var nameParts = fullName.Split('/');
+
+            if (nameParts.Length != 2 || nameParts[0].Length == 0 || nameParts[1].Length == 0) {
+                return false;
+            }
+
+            packageName = nameParts[0];
+            itemName = nameParts[1];
+            return true;
         }
 
         /// <summary>
@@ -345,7 +453,7 @@ namespace MHUrho.Packaging
 
             Dictionary<int, ResourcePack> newActivePackages = new Dictionary<int, ResourcePack>();
             foreach (var storedPackage in neededPackages) {
-                GetPackage(storedPackage.Name, storedPackage.ID, loadedPackages, newActivePackages);
+                GetAndMovePackage(storedPackage.Name, storedPackage.ID, loadedPackages, newActivePackages);
             }
 
             return newActivePackages;
@@ -359,7 +467,7 @@ namespace MHUrho.Packaging
         /// <param name="ID">New ID of the package</param>
         /// <param name="currentlyLoaded">packages loaded for previous levels that are loaded</param>
         /// <param name="newLoaded">New loaded packages for current level</param>
-        private void GetPackage(    string name, 
+        private ResourcePack GetAndMovePackage(    string name, 
                                     int ID, 
                                     Dictionary<int,ResourcePack> currentlyLoaded, 
                                     Dictionary<int, ResourcePack> newLoaded) {
@@ -371,25 +479,45 @@ namespace MHUrho.Packaging
             //Delete package from previously active
             currentlyLoaded.Remove(package.ID);
             package.AddToByID(ID, newLoaded);
+            return package;
         }
 
 
-        private void UnloadOldActivePackages(Dictionary<int, ResourcePack> newLoadedPackages) {
-            foreach (var package in activePackages) {
-                package.Value.UnLoad(activeTileTypes, activeUnitTypes);
+        private void UnloadPackages(IEnumerable<ResourcePack> packages) {
+            foreach (var package in packages) {
+                package.UnLoad(activeTileTypes, activeUnitTypes);
             }
-
-            activePackages = newLoadedPackages;
         }
 
-        private void StartLoadingPackages(IEnumerable<ResourcePack> packages) {
+        private void StartGroupLoadingPackages(IEnumerable<ResourcePack> packages) {
             foreach (var package in packages) {
                 package.StartLoading(schemas);
             }
         }
 
-        private void FinishLoadingPackages(IEnumerable<ResourcePack> packages) {
-            foreach (var package in packages) {
+        private void FinishGroupLoadingPackages() {
+            foreach (var package in loadingPackages.Values) {
+                package.FinishLoading();
+            }
+
+            //Unloads the packages that were left in previously loaded packages and not moved
+            // to new loaded packages
+            UnloadPackages(activePackages.Values);
+            activePackages = loadingPackages;
+            loadingPackages = null;
+        }
+
+        private void StartLoadingPackage(ResourcePack package) {
+            if (loadingPackages == null && !activePackages.ContainsValue(package)) {
+                 package.AddToByID(GetNewID(activePackages), activePackages);
+            }
+            else if (loadingPackages != null && !loadingPackages.ContainsValue(package)) {
+                package.AddToByID(GetNewID(loadingPackages), loadingPackages);
+            }
+        }
+
+        private void EndLoadingPackage(ResourcePack package) {
+            if (loadingPackages == null) {
                 package.FinishLoading();
             }
         }
@@ -420,12 +548,17 @@ namespace MHUrho.Packaging
 
         /// <summary>
         /// Clears <see cref="activeTileTypes"/>, <see cref="activeUnitTypes"/>, ...
+        /// and all their IDs
         /// </summary>
         private void ClearActiveTypes() {
             activeTileTypes = new Dictionary<int, TileType>();
             activeUnitTypes = new Dictionary<int, UnitType>();
             activeBuildingTypes = new Dictionary<int, BuildingType>();
             activeProjectileTypes = new Dictionary<int, ProjectileType>();
+
+            foreach (var package in activePackages.Values) {
+                package.ClearIDs();
+            }
         }
 
         private void LoadTileTypes(IEnumerable<StEntityType> storedTileTypes, Dictionary<string, TileType> loadedTileTypes) {
@@ -437,6 +570,11 @@ namespace MHUrho.Packaging
                                                  out tileType)) {
                     //Was not loaded, load it from package
                     tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TypeID);
+                }
+
+                //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
+                if (tileType.ID != 0) {
+                    activeProjectileTypes.Remove(tileType.ID);
                 }
 
                 tileType.ID = storedTileType.TypeID;
@@ -454,6 +592,11 @@ namespace MHUrho.Packaging
                     unitType = activePackages[storedUnitType.PackageID].LoadUnitType(storedUnitType.Name, storedUnitType.TypeID);
                 }
 
+                //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
+                if (unitType.ID != 0) {
+                    activeUnitTypes.Remove(unitType.ID);
+                }
+
                 unitType.ID = storedUnitType.TypeID;
                 activeUnitTypes.Add(unitType.ID, unitType);
             }
@@ -465,6 +608,11 @@ namespace MHUrho.Packaging
                 if (!loadedBuildingTypes.TryGetValue(GetFullName(storedBuildingType.PackageID, storedBuildingType.Name),
                                                      out BuildingType buildingType)) {
                     buildingType = activePackages[storedBuildingType.PackageID].LoadBuildingType(storedBuildingType.Name, storedBuildingType.TypeID);
+                }
+
+                //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
+                if (buildingType.ID != 0) {
+                    activeBuildingTypes.Remove(buildingType.ID);
                 }
 
                 buildingType.ID = storedBuildingType.TypeID;
@@ -479,6 +627,11 @@ namespace MHUrho.Packaging
                                                      out ProjectileType projectileType)) {
                     projectileType = activePackages[storedProjectileType.PackageID]
                         .LoadProjectileType(storedProjectileType.Name, storedProjectileType.TypeID);
+                }
+
+                //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
+                if (projectileType.ID != 0) {
+                    activeProjectileTypes.Remove(projectileType.ID);
                 }
 
                 projectileType.ID = storedProjectileType.TypeID;

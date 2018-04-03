@@ -5,6 +5,7 @@ using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
+using Urho;
 
 namespace MHUrho.UnitComponents
 {
@@ -15,12 +16,16 @@ namespace MHUrho.UnitComponents
 
         public override IPlayer Player => unit.Player;
 
-        private readonly Unit unit;
+        private Unit unit;
         private readonly LevelManager level;
 
-        public UnitSelector(Unit unit, LevelManager level) {
-            this.unit = unit;
+        public UnitSelector(LevelManager level) {
             this.level = level;
+        }
+
+        public static UnitSelector Load(LevelManager level, PluginData data) {
+            var sequentialData = new SequentialPluginDataReader(data);
+            return new UnitSelector(level);
         }
 
         /// <summary>
@@ -47,15 +52,18 @@ namespace MHUrho.UnitComponents
 
         public override PluginData SaveState() {
             var sequentialData = new SequentialPluginDataWriter();
-            sequentialData.StoreNext(unit.ID);
             return sequentialData.PluginData;
         }
 
-        public static UnitSelector Load(LevelManager level, PluginData data) {
-            var sequentialData = new SequentialPluginDataReader(data);
-            sequentialData.MoveNext();
-            var unitID = sequentialData.GetCurrent<int>();
-            return new UnitSelector(level.GetUnit(unitID), level);
+        public override void OnAttachedToNode(Node node) {
+            base.OnAttachedToNode(node);
+
+            unit = Node.GetComponent<Unit>();
+
+            if (unit == null) {
+                throw new
+                    InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Unit)} component");
+            }
         }
     }
 }

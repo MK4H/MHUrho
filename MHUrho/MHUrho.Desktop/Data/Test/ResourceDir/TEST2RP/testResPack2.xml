@@ -12,11 +12,15 @@
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
+      <extension>
+        <projectileType>testRP2/TestProjectile</projectileType>
+      </extension>
     </unitType>
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile">
       <modelPath>Box.mdl</modelPath>
+      <speed>30</speed>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </projectileType>
   </projectileTypes>

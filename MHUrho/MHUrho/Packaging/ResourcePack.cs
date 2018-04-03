@@ -26,7 +26,13 @@ namespace MHUrho.Packaging {
 
         public bool IsActive => ID != 0;
 
+        public string XmlDirectoryPath => System.IO.Path.GetDirectoryName(pathToXml);
+
+        public PackageManager PackageManager { get; private set; }
+
         private readonly string pathToXml;
+
+        
 
         private Dictionary<string, TileType> tileTypes;
         private Dictionary<string, UnitType> unitTypes;
@@ -51,19 +57,21 @@ namespace MHUrho.Packaging {
         public static ResourcePack InitialLoad( string name,
                                                 string pathToXml, 
                                                 string description, 
-                                                string pathToThumbnail) {
+                                                string pathToThumbnail,
+                                                PackageManager packageManager) {
             pathToXml = FileManager.CorrectRelativePath(pathToXml);
             pathToThumbnail = FileManager.CorrectRelativePath(pathToThumbnail);
             var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
 
-            return new ResourcePack(name, pathToXml, description ?? "No description", thumbnail);
+            return new ResourcePack(name, pathToXml, description ?? "No description", thumbnail, packageManager);
         }
 
-        protected ResourcePack(string name, string pathToXml, string description, Image thumbnail) {
+        protected ResourcePack(string name, string pathToXml, string description, Image thumbnail, PackageManager packageManager) {
             this.Name = name;
             this.pathToXml = pathToXml;
             this.Description = description;
             this.Thumbnail = thumbnail;
+            this.PackageManager = packageManager;
             this.FullyLoaded = false;
 
             tileTypes = new Dictionary<string, TileType>();
@@ -73,9 +81,6 @@ namespace MHUrho.Packaging {
         }
 
         public void StartLoading(XmlSchemaSet schemas) {
-            ResetIDs(tileTypes.Values);
-            ResetIDs(unitTypes.Values);
-
             data = XDocument.Load(MyGame.Config.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
             //TODO: Handler and signal that resource pack is in invalid state
             data.Validate(schemas, null);
@@ -87,6 +92,13 @@ namespace MHUrho.Packaging {
             data = null;
 
             FullyLoaded = !deleted;
+        }
+
+        public void ClearIDs() {
+            ResetIDs(tileTypes.Values);
+            ResetIDs(unitTypes.Values);
+            ResetIDs(buildingTypes.Values);
+            ResetIDs(projectileTypes.Values);
         }
 
         public TileType GetTileType(string name) {
@@ -104,22 +116,12 @@ namespace MHUrho.Packaging {
                 throw new ArgumentNullException("Name of the tileType cannot be null");
             }
 
-            TileType tileType;
-            if (!tileTypes.TryGetValue(name, out tileType)) {
-                var tileTypeElement = GetXmlTypeDescription(typeName: name,
-                                                            groupName: "tileTypes",
-                                                            itemName: "tileType",
-                                                            nameAttribute: "name");
+            var tileTypeElement = GetXmlTypeDescription(typeName: name,
+                                                        groupName: "tileTypes",
+                                                        itemName: "tileType");
 
-                tileType = TileType.Load(tileTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
-                tileTypes.Add(name, tileType);
-            }
-            else {
-                //Just change ID
-                tileType.ID = newID;
-            }
-
-            return tileType;
+           
+            return LoadType<TileType>(tileTypeElement, newID, tileTypes);
         }
 
         public UnitType GetUnitType(string name) {
@@ -137,22 +139,11 @@ namespace MHUrho.Packaging {
                 throw new ArgumentNullException("Name of the unit type cannot be null");
             }
 
-            UnitType unitType;
-            if (!unitTypes.TryGetValue(name, out unitType)) {
-                var unitTypeElement = GetXmlTypeDescription(typeName: name,
-                                                                groupName: "unitTypes",
-                                                                itemName: "unitType",
-                                                                nameAttribute: "name");
+            var unitTypeElement = GetXmlTypeDescription(typeName: name,
+                                                        groupName: "unitTypes",
+                                                        itemName: "unitType");
 
-                unitType = UnitType.Load(unitTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
-                unitTypes.Add(name, unitType);
-            }
-            else {
-                //Just change ID
-                unitType.ID = newID;
-            }
-
-            return unitType;
+            return LoadType<UnitType>(unitTypeElement, newID, unitTypes);
         }
 
         public BuildingType GetBuildingType(string name) {
@@ -170,21 +161,11 @@ namespace MHUrho.Packaging {
                 throw new ArgumentNullException("Name of the building type cannot be null");
             }
 
-            if (!buildingTypes.TryGetValue(name, out BuildingType buildingType)) {
-                var buildingTypeElement = GetXmlTypeDescription(typeName: name,
-                                                                groupName: "buildingTypes",
-                                                                itemName: "buildingType",
-                                                                nameAttribute: "name");
+            var buildingTypeElement = GetXmlTypeDescription(typeName: name,
+                                                            groupName: "buildingTypes",
+                                                            itemName: "buildingType");
 
-                buildingType = BuildingType.Load(buildingTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
-                buildingTypes.Add(name, buildingType);
-            }
-            else {
-                //Just change ID
-                buildingType.ID = newID;
-            }
-
-            return buildingType;
+            return LoadType<BuildingType>(buildingTypeElement, newID, buildingTypes);
         }
 
         public ProjectileType GetProjectileType(string name) {
@@ -202,21 +183,11 @@ namespace MHUrho.Packaging {
                 throw new ArgumentNullException("Name of the projectile type cannot be null");
             }
 
-            if (!projectileTypes.TryGetValue(name, out ProjectileType projectileType)) {
-                var projectileTypeElement = GetXmlTypeDescription(typeName: name,
-                                                                  groupName: "projectileTypes",
-                                                                  itemName: "projectileType",
-                                                                  nameAttribute: "name");
+            var projectileTypeElement = GetXmlTypeDescription(typeName: name,
+                                                              groupName: "projectileTypes",
+                                                              itemName: "projectileType");
 
-                projectileType = ProjectileType.Load(projectileTypeElement, newID, System.IO.Path.GetDirectoryName(pathToXml), this);
-                projectileTypes.Add(name, projectileType);
-            }
-            else {
-                //Just change ID
-                projectileType.ID = newID;
-            }
-
-            return projectileType;
+            return LoadType<ProjectileType>(projectileTypeElement, newID, projectileTypes);
         }
 
         //TODO: CONVERT THE FOUR PRECEDING METHODS TO THIS
@@ -288,11 +259,7 @@ namespace MHUrho.Packaging {
         //}
 
         public IEnumerable<TileType> LoadAllTileTypes(GenerateID generateId) {
-            if (data == null) {
-                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
-            }
-
-            List<TileType> loadedTileTypes = new List<TileType>();
+            CheckIfLoading();
 
             var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
 
@@ -300,35 +267,14 @@ namespace MHUrho.Packaging {
                 //There are no tile types in this package
                 return Enumerable.Empty<TileType>();
             }
-
-            var tileTypeElements = from elements in tileTypesElement.Elements(PackageManager.XMLNamespace + "tileType") select elements;
-
-            foreach (var tileTypeElement in tileTypeElements) {
-                string name = tileTypeElement.Attribute("name").Value;
-
-                TileType loadedTileType;
-                if (tileTypes.TryGetValue(name, out loadedTileType)) {
-                    loadedTileType.ID = generateId();
-                    loadedTileTypes.Add(loadedTileType);
-                    continue;
-                }
-
-                loadedTileType = TileType.Load(tileTypeElement, generateId(), System.IO.Path.GetDirectoryName(pathToXml), this);
-
-                tileTypes.Add(loadedTileType.Name, loadedTileType);
-                loadedTileTypes.Add(loadedTileType);
-            }
-
-            return loadedTileTypes;
+            //ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+            return tileTypesElement.Elements(PackageManager.XMLNamespace + "tileType")
+                                   .Select(element => LoadType<TileType>(element, generateId(), tileTypes))
+                                   .ToArray(); 
         }
 
         public IEnumerable<UnitType> LoadAllUnitTypes(GenerateID generateID) {
-            //TODO: make this and LoadAllTileTypes into one method, this is just lazy
-            if (data == null) {
-                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
-            }
-
-            List<UnitType> loadedUnitTypes = new List<UnitType>();
+            CheckIfLoading();
 
             var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
 
@@ -336,35 +282,15 @@ namespace MHUrho.Packaging {
                 //There are no unit types in this package
                 return Enumerable.Empty<UnitType>();
             }
-
-            var unitTypeElements = from elements in unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType") select elements;
-
-            foreach (var unitTypeElement in unitTypeElements) {
-                string name = unitTypeElement.Attribute("name").Value;
-
-                if (unitTypes.TryGetValue(name, out UnitType loadedUnitType)) {
-                    //Was already loaded for previous game, generate new ID for this game
-                    loadedUnitType.ID = generateID();
-                }
-                else {
-                    //Load it fresh from the xml
-                    loadedUnitType = UnitType.Load(unitTypeElement, generateID(), System.IO.Path.GetDirectoryName(pathToXml), this);
-
-                    unitTypes.Add(loadedUnitType.Name, loadedUnitType);
-                }
-               
-                loadedUnitTypes.Add(loadedUnitType);
-            }
-
-            return loadedUnitTypes;
+            //ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+            return unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType")
+                                   .Select(unitTypeElement =>
+                                               LoadType<UnitType>(unitTypeElement, generateID(), unitTypes))
+                                   .ToArray();
         }
 
         public IEnumerable<BuildingType> LoadAllBuildingTypes(GenerateID generateID) {
-            if (data == null) {
-                throw new InvalidOperationException("Before loading things, you need to call StartLoading");
-            }
-
-            List<BuildingType> loadedBuildingTypes = new List<BuildingType>();
+            CheckIfLoading();
 
             var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
 
@@ -372,27 +298,12 @@ namespace MHUrho.Packaging {
                 //There are no building types in this package
                 return Enumerable.Empty<BuildingType>();
             }
-
-            var buildingTypeElements = from elements in buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType") select elements;
-
-            foreach (var buildingTypeElement in buildingTypeElements) {
-                string name = buildingTypeElement.Attribute("name").Value;
-
-                if (buildingTypes.TryGetValue(name, out BuildingType loadedBuildingType)) {
-                    //Was already loaded for previous game, generate new ID for this game
-                    loadedBuildingType.ID = generateID();
-                }
-                else {
-                    //Load it fresh from the xml
-                    loadedBuildingType = BuildingType.Load(buildingTypeElement, generateID(), System.IO.Path.GetDirectoryName(pathToXml), this);
-
-                    buildingTypes.Add(loadedBuildingType.Name, loadedBuildingType);
-                }
-
-                loadedBuildingTypes.Add(loadedBuildingType);
-            }
-
-            return loadedBuildingTypes;
+            //ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+            return buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType")
+                                       .Select(buildingTypeElement =>
+                                                   LoadType<BuildingType>(buildingTypeElement, generateID(),
+                                                                          buildingTypes))
+                                       .ToArray();
         }
 
         /// <summary>
@@ -407,12 +318,22 @@ namespace MHUrho.Packaging {
 
         public void UnLoad(Dictionary<int, TileType> activeTileTypes, Dictionary<int, UnitType> activeUnitTypes) {
 
-            foreach (var unitType in unitTypes) {
-                unitType.Value.Dispose();
+            foreach (var unitType in unitTypes.Values) {
+                unitType.Dispose();
+            }
+
+            foreach (var buildingType in buildingTypes.Values) {
+                buildingType.Dispose();
+            }
+
+            foreach (var projectileType in projectileTypes.Values) {
+                projectileType.Dispose();
             }
 
             tileTypes = null;
             unitTypes = null;
+            buildingTypes = null;
+            projectileTypes = null;
         }
 
         private void ResetIDs<T>(IEnumerable<T> enumerable)
@@ -447,12 +368,12 @@ namespace MHUrho.Packaging {
             return deleted;
         }
 
-        private XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName, string nameAttribute) {
+        private XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName) {
             //Load from file
             var projectileTypeElements = (from element in data
                                                           .Root.Element(PackageManager.XMLNamespace + groupName)
                                                           .Elements(PackageManager.XMLNamespace + itemName)
-                                          where element.Attribute(nameAttribute).Value == typeName
+                                          where GetTypeName(element) == typeName
                                           select element).GetEnumerator();
 
             if (!projectileTypeElements.MoveNext()) {
@@ -475,6 +396,32 @@ namespace MHUrho.Packaging {
             if (data == null) {
                 throw new InvalidOperationException("Before loading things, you need to call StartLoading");
             }
+        }
+
+        private T LoadType<T>(XElement typeElement, int newID, IDictionary<string,T> typesDictionary)
+            where T : IEntityType,new()
+        {
+            string name = GetTypeName(typeElement);
+
+            if (!typesDictionary.TryGetValue(name, out T typeInstance)) {
+
+                typeInstance = new T();
+                typesDictionary.Add(name, typeInstance);
+
+                typeInstance.Load(typeElement, newID, this);
+
+            }
+            else if (typeInstance.ID == 0) {
+                //Just change ID
+                typeInstance.ID = newID;
+            }
+
+            return typeInstance;
+
+        }
+
+        private static string GetTypeName(XElement typeElement) {
+            return typeElement.Attribute("name").Value;
         }
     }
 }
