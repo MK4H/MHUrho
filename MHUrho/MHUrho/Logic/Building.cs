@@ -27,11 +27,11 @@ namespace MHUrho.Logic
 
         public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
+        public IPlayer Player { get; private set; }
+
         private IBuildingInstancePlugin logic;
 
         private ITile[] tiles;
-
-        private Unit[] workers;
 
         /// <summary>
         /// Builds the building at <paramref name="topLeftCorner"/> if its possible

@@ -63,13 +63,13 @@ namespace MHUrho.Logic
             Model = LoadModel(xml, package.XmlDirectoryPath);
             Icon = LoadIcon(xml, package.XmlDirectoryPath);
             Package = package;
-            //Size = XmlHelpers.GetIntVector2(xml, SizeElement);
-            //buildingTypeLogic = XmlHelpers.LoadTypePlugin<IBuildingTypePlugin>(xml, 
-            //                                                                   AssemblyPathElement, 
-            //                                                                   package.XmlDirectoryPath, 
-            //                                                                   Name);
-            //buildingTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
-            //                                        package.PackageManager);
+            Size = XmlHelpers.GetIntVector2(xml, SizeElement);
+            buildingTypeLogic = XmlHelpers.LoadTypePlugin<IBuildingTypePlugin>(xml,
+                                                                               AssemblyPathElement,
+                                                                               package.XmlDirectoryPath,
+                                                                               Name);
+            buildingTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
+                                                    package.PackageManager);
         }
 
         public StEntityType Save() {

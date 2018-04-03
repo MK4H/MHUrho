@@ -206,7 +206,8 @@ namespace MHUrho.Logic
         /// <param name="unitType">The unit to be added</param>
         /// <param name="tile">Tile to spawn the unit at</param>
         /// <param name="player">owner of the new unit</param>
-        public void SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
+        /// <returns></returns>
+        public Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
             Node unitNode = Scene.CreateChild("Unit");
 
             var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, this, tile, player);
@@ -221,6 +222,8 @@ namespace MHUrho.Logic
 
                 newUnit.Order(targetTile);
             }
+
+            return newUnit;
         }
 
         public void BuildBuilding(BuildingType buildingType, IntVector2 centerTileLocation, IPlayer player) {

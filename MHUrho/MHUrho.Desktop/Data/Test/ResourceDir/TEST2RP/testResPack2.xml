@@ -28,6 +28,7 @@
     <buildingType name="testBuilding">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
+      <size x="3" y="3"/>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </buildingType>
   </buildingTypes>

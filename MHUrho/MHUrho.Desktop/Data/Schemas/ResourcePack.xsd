@@ -103,6 +103,7 @@
     <xs:sequence>
       <xs:element name="modelPath" type="xs:string"/>
       <xs:element name="speed" type="xs:float"/>
+      <xs:element name="size" type="IntVector2"/>
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
@@ -113,5 +114,15 @@
     <xs:sequence>
       <xs:any minOccurs="0" processContents="skip"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="IntVector2">
+    <xs:attribute name="x" use="required" type="xs:int"/>
+    <xs:attribute name="y" use="required" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="Vector2">
+    <xs:attribute name="x" use="required" type="xs:float"/>
+    <xs:attribute name="y" use="required" type="xs:float"/>
   </xs:complexType>
 </xs:schema>

@@ -14,6 +14,8 @@ namespace MHUrho.UnitComponents
 
     public delegate void MovementEndedDelegate(Unit unit);
 
+    public delegate void MovementFailedDelegate(Unit unit);
+
     public class WorldWalker : DefaultComponent {
         public static string ComponentName = "WorldWalker";
 
@@ -29,6 +31,7 @@ namespace MHUrho.UnitComponents
 
         public event MovementStartedDelegate OnMovementStarted;
         public event MovementEndedDelegate OnMovementEnded;
+        public event MovementFailedDelegate OnMovementFailed;
 
         private Map map;
         private LevelManager level;
@@ -68,6 +71,36 @@ namespace MHUrho.UnitComponents
 
             target = map.GetTile(path.Current);
             Enabled = true;
+        }
+
+        public bool GoTo(ITile tile) {
+            var newPath = map.GetPath(unit, tile);
+            if (newPath == null) {
+                OnMovementFailed?.Invoke(unit);
+                return false;
+            }
+            GoAlong(newPath);
+            return true;
+        }
+
+        public bool GoTo(IntVector2 location) {
+            return GoTo(map.GetTile(location));
+        }
+
+
+        public WorldWalker OnMovementStartedCall(MovementStartedDelegate handler) {
+            OnMovementStarted += handler;
+            return this;
+        }
+
+        public WorldWalker OnMovementFinishedCall(MovementEndedDelegate handler) {
+            OnMovementEnded += handler;
+            return this;
+        }
+
+        public WorldWalker OnMovementFailedCall(MovementFailedDelegate handler) {
+            OnMovementFailed += handler;
+            return this;
         }
 
         public override void OnAttachedToNode(Node node) {
