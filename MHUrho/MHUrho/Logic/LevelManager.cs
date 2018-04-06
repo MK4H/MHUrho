@@ -35,8 +35,6 @@ namespace MHUrho.Logic
         private CameraController cameraController;
         private IGameController inputController;
 
-        
-
         private readonly Dictionary<int, Unit> units;
         private readonly Dictionary<int, Player> players;
         private readonly Dictionary<int, Building> buildings;
@@ -237,6 +235,13 @@ namespace MHUrho.Logic
         public Unit GetUnit(int ID) {
             if (!units.TryGetValue(ID, out Unit value)) {
                 throw new ArgumentOutOfRangeException("Unit with this ID does not exist in the current level");
+            }
+            return value;
+        }
+
+        public Building GetBuilding(int ID) {
+            if (!buildings.TryGetValue(ID, out Building value)) {
+                throw new ArgumentOutOfRangeException("Building with this ID does not exist in the current level");
             }
             return value;
         }

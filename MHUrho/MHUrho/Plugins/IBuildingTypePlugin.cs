@@ -17,7 +17,7 @@ namespace MHUrho.Plugins
         /// </summary>
         /// <param name="level">level in which the building is created</param>
         /// <param name="buildingNode">scene node of the building with <paramref name="building"/> already added as component</param>
-        /// <param name="building">building logic class</param>
+        /// <param name="building">building Plugin class</param>
         /// <returns>New instance in default state</returns>
         IBuildingInstancePlugin CreateNewInstance(LevelManager level, Node buildingNode, Building building);
 
@@ -26,7 +26,7 @@ namespace MHUrho.Plugins
         /// </summary>
         /// <param name="level">level into which the building is being loaded</param>
         /// <param name="buildingNode">scene node of the building with <paramref name="building"/> already added as component</param>
-        /// <param name="building">the building logic class</param>
+        /// <param name="building">the building Plugin class</param>
         /// <param name="pluginData">stored state of the building plugin</param>
         /// <returns>New instance loaded into saved state</returns>
         IBuildingInstancePlugin LoadNewInstance(LevelManager level, Node buildingNode, Building building, PluginDataWrapper pluginData);

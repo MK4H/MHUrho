@@ -9,7 +9,7 @@ namespace MHUrho.UnitComponents
 {
     
 
-    public class BuildingWorker : DefaultComponent {
+    public class WorkQueue : DefaultComponent {
 
         private interface IWorkTask {
             bool IsFinished();
@@ -118,22 +118,18 @@ namespace MHUrho.UnitComponents
             }
         }
 
-        public static string ComponentName = nameof(BuildingWorker);
+        public static string ComponentName = nameof(WorkQueue);
 
         public override string Name => ComponentName;
 
-        public Building Building { get; private set; }
-
         private readonly Queue<IWorkTask> workQueue;
 
-        private Unit unit;
-
-        public BuildingWorker(Building building) {
+        public WorkQueue(Building building) {
             this.Building = building;
             workQueue = new Queue<IWorkTask>();
         }
 
-        public static BuildingWorker Load(LevelManager level, PluginData pluginData) {
+        public static WorkQueue Load(LevelManager level, PluginData pluginData) {
             throw new NotImplementedException();
         }
 
@@ -145,16 +141,10 @@ namespace MHUrho.UnitComponents
             workQueue.Enqueue(task);
         }
 
-        public override void OnAttachedToNode(Node node) {
-            unit = node.GetComponent<Unit>();
-
-            if (unit == null) {
-                throw new InvalidOperationException("Cannot add buildingWorker to node without Unit component");
-            }
-        }
-
         protected override void OnUpdate(float timeStep) {
             base.OnUpdate(timeStep);
+
+            if (!EnabledEffective) return;
 
             if (workQueue.Count == 0) {
                 return;

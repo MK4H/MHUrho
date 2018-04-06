@@ -95,8 +95,14 @@ namespace MHUrho.EditorTools
                     var unitSelector = selector as UnitSelector;
                     if (unitSelector != null && !unitSelector.Selected) {
                         var unit = unitSelector.GetComponent<Unit>();
-
+                        unitSelector.Select();
                         AddUnit(unit);
+                        return;
+                    }
+                    else if (unitSelector != null && unitSelector.Selected) {
+                        var unit = unitSelector.GetComponent<Unit>();
+                        unitSelector.Deselect();
+                        RemoveUnit(unit);
                         return;
                     }
                 }
@@ -118,9 +124,8 @@ namespace MHUrho.EditorTools
             //Not selectable
             if (selector == null || selector.Selected) return;
 
-            selector.Selected = true;
+            selector.Select();
             var unit = selector.Node.GetComponent<Unit>();
-
             AddUnit(unit);
         }
 

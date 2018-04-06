@@ -29,7 +29,7 @@ namespace MHUrho.Logic
 
         public IPlayer Player { get; private set; }
 
-        private IBuildingInstancePlugin logic;
+        public IBuildingInstancePlugin Plugin { get; private set; }
 
         private ITile[] tiles;
 
@@ -49,7 +49,7 @@ namespace MHUrho.Logic
             var newBuilding = new Building(topLeftCorner, type, level);
             buildingNode.AddComponent(newBuilding);
 
-            newBuilding.logic = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
+            newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 
             var rigidBody = buildingNode.CreateComponent<RigidBody>();
             rigidBody.CollisionLayer = (int) CollisionLayer.Building;
@@ -81,7 +81,7 @@ namespace MHUrho.Logic
             float height = level.Map.GetHeightAt(positionXZ);
             node.Position = new Vector3(positionXZ.X, height, positionXZ.Y);
 
-            building.logic = type.LoadInstancePlugin(building, level, storedBuilding.UserPlugin);
+            building.Plugin = type.LoadInstancePlugin(building, level, storedBuilding.UserPlugin);
             return building;
         }
 
@@ -120,7 +120,15 @@ namespace MHUrho.Logic
         /// <param name="unit">Worker unit of the building</param>
         /// <returns>Target tile</returns>
         public ITile GetExchangeTile(Unit unit) {
-            return logic.GetExchangeTile(unit);
+            return Plugin.GetExchangeTile(unit);
+        }
+
+        public void Destroy() {
+
+        }
+
+        protected override void OnUpdate(float timeStep) {
+            Plugin.OnUpdate(timeStep);
         }
 
         private int GetTileIndex(int x, int y) {

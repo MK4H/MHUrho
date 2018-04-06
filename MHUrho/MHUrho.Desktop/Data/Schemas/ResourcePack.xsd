@@ -38,6 +38,13 @@
     <xs:complexContent>
       <xs:extension base="resourcePackBase">
         <xs:sequence>
+          <xs:element name="resourceTypes" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="resourceType" type="resourceTypeType" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
           <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:sequence>
@@ -71,6 +78,13 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="resourceTypeType">
+    <xs:sequence>
+      <xs:element name="iconPath" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="name" use="required" type="xs:string"/>
+  </xs:complexType>
+
   <xs:complexType name="tileTypeType">
     <xs:sequence>
       <xs:element name="texturePath" type="xs:string"/>
@@ -97,6 +111,15 @@
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute use="required" name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="playerTypeType">
+    <xs:sequence>
+      <xs:element name="iconPath" type="xs:string"/>
+      <xs:element name="assemblyPath" type="xs:string"/>
+      <xs:element name="extension" type="extensionType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" use="required" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="projectileTypeType">

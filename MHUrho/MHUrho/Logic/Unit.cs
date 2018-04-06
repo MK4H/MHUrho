@@ -61,12 +61,11 @@ namespace MHUrho.Logic
         /// </summary>
         public IPlayer Player { get; private set; }
 
+        public IUnitInstancePlugin Plugin { get; private set; }
+
         #endregion
 
         #region Private members
-
-
-        private IUnitInstancePlugin logic;
 
         /// <summary>
         /// Holds the image of this unit between the steps of loading
@@ -168,7 +167,7 @@ namespace MHUrho.Logic
             unitNode.AddComponent(unit);
             unitNode.Position = tile.Center3;
 
-            unit.logic = type.GetNewInstancePlugin(unit, level);
+            unit.Plugin = type.GetNewInstancePlugin(unit, level);
 
             //TODO: Storing and loading
             var rigidBody = unitNode.CreateComponent<RigidBody>();
@@ -197,7 +196,7 @@ namespace MHUrho.Logic
 
 
             storedUnit.UserPlugin = new PluginData();
-            logic.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
+            Plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
@@ -221,7 +220,7 @@ namespace MHUrho.Logic
                 Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level));
             }
 
-            logic = UnitType.LoadInstancePlugin(this, level, storage.UserPlugin);
+            Plugin = UnitType.LoadInstancePlugin(this, level, storage.UserPlugin);
         }
 
         public void FinishLoading() {
@@ -231,7 +230,7 @@ namespace MHUrho.Logic
 
         public bool Order(ITile tile) {
             //Logic consumed order, return
-            if (logic.Order(tile)) return true;
+            if (Plugin.Order(tile)) return true;
 
             var worldWalker = GetComponent<WorldWalker>();
             if (worldWalker != null) {
@@ -311,6 +310,10 @@ namespace MHUrho.Logic
             return true;
         }
 
+        public void ChangeType(UnitType newType) {
+            Node.RemoveAllComponents();
+
+        }
         #endregion
 
         

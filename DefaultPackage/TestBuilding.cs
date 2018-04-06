@@ -10,6 +10,7 @@ using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using MHUrho.UserInterface;
 using Urho;
+using WorkQueue = MHUrho.UnitComponents.WorkQueue;
 
 namespace DefaultPackage
 {
@@ -30,11 +31,11 @@ namespace DefaultPackage
             workers[0] = level.SpawnUnit(workerType, 
                                          level.Map.GetTile(building.Rectangle.TopLeft() + new IntVector2(1, 0)),
                                          building.Player);
-            workers[0].Node.AddComponent(new BuildingWorker(building));
+            workers[0].Node.AddComponent(new WorkQueue(building));
             workers[1] = level.SpawnUnit(workerType,
                                          level.Map.GetTile(building.Rectangle.TopLeft() + new IntVector2(0, 1)),
                                          building.Player);
-            workers[1].Node.AddComponent(new BuildingWorker(building));
+            workers[1].Node.AddComponent(new WorkQueue(building));
 
             return new TestBuildingInstance(level, buildingNode, building, workers);
         }
@@ -83,7 +84,7 @@ namespace DefaultPackage
         private LevelManager level;
         private Node buildingNode;
         private Building building;
-        private Unit[] workers;
+        private TestWorkerInstance[] workers;
 
         private int resources;
 
@@ -95,10 +96,11 @@ namespace DefaultPackage
             this.level = level;
             this.buildingNode = buildingNode;
             this.building = building;
-            this.workers = workers;
+            this.workers = new TestWorkerInstance[workers.Length];
 
-            foreach (var worker in workers) {
-                StartWorker(worker.GetComponent<BuildingWorker>());
+            for (int i = 0; i < workers.Length; i++) {
+                this.workers[i] = (TestWorkerInstance)workers[i].Plugin;
+                this.workers[i].WorkedBuilding = this;
             }
         }
 
@@ -121,27 +123,27 @@ namespace DefaultPackage
             
         }
 
-        private void StartWorker(BuildingWorker worker) {
+        //private void StartWorker(WorkQueue worker) {
          
-            worker.EnqueueTask(new BuildingWorker.DelegatedWorkTask()
-                                   .OnTaskStarted((unit, task) => {
-                                                      unit.GetComponent<WorldWalker>()
-                                                          .OnMovementFinishedCall((_) => task.Finish())
-                                                          .OnMovementFailedCall((_) => task.Finish())
-                                                          .GoTo(new IntVector2(10, 10));
-                                                  }));
+        //    worker.EnqueueTask(new WorkQueue.DelegatedWorkTask()
+        //                           .OnTaskStarted((unit, task) => {
+        //                                              unit.GetComponent<WorldWalker>()
+        //                                                  .OnMovementFinishedCall((_) => task.Finish())
+        //                                                  .OnMovementFailedCall((_) => task.Finish())
+        //                                                  .GoTo(new IntVector2(10, 10));
+        //                                          }));
 
-            worker.EnqueueTask(new BuildingWorker.TimedWorkTask(5));
+        //    worker.EnqueueTask(new WorkQueue.TimedWorkTask(5));
 
-            worker.EnqueueTask(new BuildingWorker.DelegatedWorkTask()
-                                   .OnTaskStarted((unit, task) => {
-                                                      unit.GetComponent<WorldWalker>()
-                                                          .OnMovementFinishedCall((_) => task.Finish())
-                                                          .OnMovementFailedCall((_) => task.Finish())
-                                                          .GoTo(building.GetExchangeTile(unit));
-                                                  })
-                               .OnTaskFinished((unit, task) => { StartWorker(worker); }));
-        }
+        //    worker.EnqueueTask(new WorkQueue.DelegatedWorkTask()
+        //                           .OnTaskStarted((unit, task) => {
+        //                                              unit.GetComponent<WorldWalker>()
+        //                                                  .OnMovementFinishedCall((_) => task.Finish())
+        //                                                  .OnMovementFailedCall((_) => task.Finish())
+        //                                                  .GoTo(building.GetExchangeTile(unit));
+        //                                          })
+        //                       .OnTaskFinished((unit, task) => { StartWorker(worker); }));
+        //}
 
     }
 }

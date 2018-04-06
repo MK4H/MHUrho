@@ -30,12 +30,10 @@ namespace DefaultPackage
     }
 
     public class TestWorkerInstance : IUnitInstancePlugin {
-        public bool Order(ITile tile) {
-            throw new NotImplementedException();
-        }
+        public TestBuildingInstance WorkedBuilding { get; set; }
 
         public void OnUpdate(float timeStep) {
-            throw new NotImplementedException();
+            
         }
 
         public void SaveState(PluginDataWrapper pluginData) {

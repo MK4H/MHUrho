@@ -10,10 +10,14 @@ namespace MHUrho.UnitComponents
     public abstract class Selector : DefaultComponent {
         public virtual IPlayer Player { get; }
 
-        public virtual bool Selected { get; set; }
+        public virtual bool Selected { get; protected set; }
 
-        public abstract bool Ordered(ITile tile);
+        public abstract bool Order(ITile tile);
 
-        public abstract bool Ordered(Unit unit);
+        public abstract bool Order(Unit unit);
+
+        public abstract void Select();
+
+        public abstract void Deselect();
     }
 }

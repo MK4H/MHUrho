@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MHUrho.Storage;
 using Urho;
@@ -9,22 +10,26 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Logic
 {
-    public class Player : IPlayer {
+    public class Player : Component, IPlayer {
 
         public int ID { get; private set; }
 
         private readonly List<IPlayer> friends;
 
         //TODO: Split units and buildings by types
-        private readonly List<Unit> units;
+        private readonly Dictionary<UnitType,List<Unit>> units;
 
-        private readonly List<Building> buildings;
+        private readonly Dictionary<BuildingType, List<Building>> buildings;
+
+        private readonly Dictionary<ResourceType, int> resources;
 
         private StPlayer storedPlayer;
 
         public Player(int ID) {
             this.ID = ID;
-            units = new List<Unit>();
+            units = new Dictionary<UnitType, List<Unit>>();
+            buildings = new Dictionary<BuildingType, List<Building>>();
+            resources = new Dictionary<ResourceType, int>();
             friends = new List<IPlayer>();
         }
 
@@ -43,24 +48,31 @@ namespace MHUrho.Logic
 
             storedPlayer.PlayerID = ID;
 
-            var stUnitIDs = storedPlayer.UnitIDs;
-            foreach (var unit in units) {
-                stUnitIDs.Add(unit.ID);
-            }
+            storedPlayer.UnitIDs.Add(from unitType in units
+                                     from unit in unitType.Value
+                                     select unit.ID);
 
-            //TODO: Buildings
+            storedPlayer.BuildingIDs.Add(from buildingType in buildings
+                                         from building in buildingType.Value
+                                         select building.ID);
 
-            var stFriendIDs = storedPlayer.FriendPlayerIDs;
-            foreach (var friend in friends) {
-                stFriendIDs.Add(friend.ID);
-            }
-
+            storedPlayer.FriendPlayerIDs.Add(from friend in friends
+                                             select friend.ID);
+            
             return storedPlayer;
         }
 
         public void ConnectReferences(LevelManager level) {
             foreach (var unitID in storedPlayer.UnitIDs) {
-                units.Add(level.GetUnit(unitID));
+                AddUnit(level.GetUnit(unitID));
+            }
+
+            foreach (var buildingID in storedPlayer.BuildingIDs) {
+                AddBuilding(level.GetBuilding(buildingID));
+            }
+
+            foreach (var friendID in storedPlayer.FriendPlayerIDs) {
+                friends.Add(level.GetPlayer(friendID));
             }
         }
 
@@ -73,107 +85,46 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="unit">unit to add</param>
         public void AddUnit(Unit unit) {
-            units.Add(unit);
+            if (units.TryGetValue(unit.UnitType, out var unitList)) {
+                unitList.Add(unit);
+            }
+            else {
+                units.Add(unit.UnitType, new List<Unit> {unit});
+            }
         }
 
         public void AddBuilding(Building building) {
-            buildings.Add(building);
-        }
-
-        public void RemoveUnit(Unit unit) {
-            units.Remove(unit);
-        }
-
-
-        //private bool OrderUnits(ITile tile)
-        //{
-        //    int ToOrder = 0;
-
-        //    // If i cant order to the clicked tile, imposible order
-        //    if (!selected[ToOrder++].Order(tile))
-        //    {
-        //        return false;
-        //    }
-
-        //    IntVector2 TopLeft = tile.Location;
-        //    IntVector2 BottomRight = tile.Location;
-        //    IntVector2 MoveBy = new IntVector2(1, 1);
-        //    List <LineOrder> LineOrders = new List<LineOrder>(4);
-        //    while (ToOrder < selected.Count)
-        //    {
-        //        // New Rectangle
-        //        IntVector2.Subtract(ref TopLeft,ref MoveBy,out TopLeft);
-        //        IntVector2.Add(ref BottomRight,ref MoveBy, out BottomRight);
-        //        // Top
-        //        LineOrders.Add(new LineOrder(TopLeft, new IntVector2(BottomRight.X,TopLeft.Y),this));
-        //        // Right without the two corners 
-        //        LineOrders.Add(new LineOrder(new IntVector2(BottomRight.X, TopLeft.Y + 1), new IntVector2(BottomRight.X,BottomRight.Y - 1), this));
-        //        // Bottom
-        //        LineOrders.Add(new LineOrder(BottomRight, new IntVector2(TopLeft.X,BottomRight.Y), this));
-        //        // Left without the two corners
-        //        LineOrders.Add(new LineOrder(new IntVector2(TopLeft.X, BottomRight.Y - 1), new IntVector2(TopLeft.X,TopLeft.Y + 1), this));
-
-        //        // Spawn all the lines
-        //        int i = 0;
-        //        while (ToOrder < selected.Count)
-        //        {
-        //            if (!LineOrders[i].OrderNext(ref ToOrder))
-        //            {
-        //                LineOrders.RemoveAt(i);
-        //                if (LineOrders.Count == 0)
-        //                {
-        //                    break;
-        //                }
-        //            }
-        //            i = (i + 1) % LineOrders.Count; 
-        //        }
-        //    }
-        //    return true;
-
-        //}
-
-
-        /*
-        /// <summary>
-        /// Spawns unit on the circumference of the square defined by the two points
-        /// </summary>
-        /// <param name="toOrder"></param>
-        /// <param name="topLeft"></param>
-        /// <param name="bottomRight"></param>
-        private void OrderSquare(ref int toOrder, Point topLeft, Point bottomRight )
-        {
-            Point TargetPoint = topLeft;
-            // Plus delta x, minus delta x;
-            int pdx = 1, mdx = 0, pdy = 0, mdy = 0; 
-            while (toOrder < selected.Count)
-            {
-                TargetPoint.X = TargetPoint.X + pdx - mdx;
-                TargetPoint.Y = TargetPoint.Y + pdy - mdy;
-
-                if (selected[toOrder].Order(Level.TileAt(TargetPoint)))
-                {
-                    toOrder++;
-                }
-
-                if (TargetPoint == topLeft)
-                {
-                    break;
-                }
-
-                if (TargetPoint == new Point(bottomRight.X,topLeft.Y) ||
-                    TargetPoint == bottomRight ||
-                    TargetPoint == new Point (topLeft.X, bottomRight.Y))
-                {
-                    // Rotate them in order to go around the circumference
-                    int tmp = pdx;
-                    pdx = mdy;
-                    mdy = mdx;
-                    mdx = pdy;
-                    pdy = tmp;
-                }
+            if (buildings.TryGetValue(building.BuildingType, out var buildingList)) {
+                buildingList.Add(building);
+            }
+            else {
+                buildings.Add(building.BuildingType, new List<Building> {building});
             }
         }
-        */
 
+        public bool RemoveUnit(Unit unit) {
+            return units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
+        }
+
+
+        public bool RemoveBuilding(Building building) {
+            return buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
+        }
+
+        public IEnumerable<Unit> GetUnitsOfType(UnitType type) {
+            return units.TryGetValue(type, out List<Unit> unitList) ? Enumerable.Empty<Unit>() : unitList;
+        }
+
+        public IEnumerable<Building> GetBuildingsOfType(BuildingType type) {
+            return buildings.TryGetValue(type, out var buildingList) ? Enumerable.Empty<Building>() : buildingList;
+        }
+
+        public int GetResourcesOfType(ResourceType type) {
+            return resources.TryGetValue(type, out int count) ? 0 : count;
+        }
+
+        protected override void OnUpdate(float timeStep) {
+            
+        }
     }
 }

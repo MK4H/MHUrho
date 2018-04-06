@@ -9,12 +9,25 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
+    public delegate void UnitSelectedDelegate(Unit unit);
+    public delegate void UnitDeselectedDelegate(Unit unit);
+    public delegate void UnitOrderedToTileDelegate(Unit unit, ITile targetTile);
+    public delegate void UnitOrderedToUnitDelegate(Unit unit, Unit targetUnit);
+    public delegate void UnitOrderedToBuildingDelegate(Unit unit, Building targetBuilding);
+
+
     public class UnitSelector : Selector {
         public static string ComponentName = "UnitSelector";
 
         public override string Name => ComponentName;
 
         public override IPlayer Player => unit.Player;
+
+        public event UnitSelectedDelegate UnitSelected;
+        public event UnitDeselectedDelegate UnitDeselected;
+        public event UnitOrderedToTileDelegate OrderedToTile;
+        public event UnitOrderedToUnitDelegate OrderedToUnit;
+        public event UnitOrderedToBuildingDelegate OrderedToBuilding;
 
         private Unit unit;
         private readonly LevelManager level;
@@ -29,24 +42,35 @@ namespace MHUrho.UnitComponents
         }
 
         /// <summary>
-        /// Orders this selected unit with target <paramref name="tile"/>
+        /// Orders this selected unit with target <paramref name="targetTile"/>
         /// 
         /// if the unit can do anything, returns true,the order is given and the unit will procede
         /// if the unit cant do anything, returns false
         /// </summary>
-        /// <param name="tile">target tile</param>
+        /// <param name="targetTile">target tile</param>
         /// <returns>True if unit was given order, False if there is nothing the unit can do</returns>
-        public override bool Ordered(ITile tile) {
-            return unit.Order(tile);
+        public override bool Order(ITile targetTile) {
+            //TODO: EventArgs to get if the event was handled
+            OrderedToTile?.Invoke(unit, targetTile);
         }
 
-        public override bool Ordered(Unit unit) {
-            throw new NotImplementedException();
+        public override bool Order(Unit targetUnit) {
+            OrderedToUnit?.Invoke(unit, targetUnit);
         }
 
-        //public void Ordered(IBuilding building) {
+        public override bool Order(Building targetBuilding) {
+            OrderedToBuilding?.Invoke(unit, targetBuilding);
+        }
 
-        //}
+        public override void Select() {
+            Selected = true;
+            UnitSelected?.Invoke(unit);
+        }
+
+        public override void Deselect() {
+            Selected = false;
+            UnitDeselected?.Invoke(unit);
+        }
 
         //TODO: Hook up a reaction to unit death to deselect it from all tools
 

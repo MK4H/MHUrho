@@ -9,6 +9,10 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
+    public delegate void HostileTargetAquiredDelegate(DirectShooter shooter, Unit targetUnit);
+    public delegate void ShotReloadedDelegate(DirectShooter shooter);
+    public delegate void ShotFiredDelegate(DirectShooter shooter);
+
     public class DirectShooter : DefaultComponent
     {
         public static string ComponentName = "DirectShooter";
@@ -19,6 +23,10 @@ namespace MHUrho.UnitComponents
         /// Shots per minute
         /// </summary>
         public float RateOfFire { get; set; }
+
+        public event HostileTargetAquiredDelegate HostileTargetAquired;
+        public event ShotReloadedDelegate ShotReloaded;
+        public event ShotFiredDelegate ShotFired;
 
         private Vector3 target; //TODO: Change to Target component
 
@@ -88,12 +96,15 @@ namespace MHUrho.UnitComponents
 
         protected override void OnUpdate(float timeStep) {
             base.OnUpdate(timeStep);
+            if (!EnabledEffective) return;
+
 
             if (delay > 0) {
                 delay -= timeStep;
                 return;
             }
 
+            ShotReloaded?.Invoke(this);
             //if (target == null) {
             //    //Check for target in range
             //}
@@ -112,6 +123,8 @@ namespace MHUrho.UnitComponents
                 projectileType.SpawnProjectile(map,arrow, Node.Position + offset, lowVector);
                 arrow = Node.Scene.CreateChild("Arrow");
                 projectileType.SpawnProjectile(map,arrow, Node.Position + offset, highVector);
+
+                ShotFired?.Invoke(this);
             }
 
             delay = 60 / RateOfFire;

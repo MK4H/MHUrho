@@ -70,12 +70,6 @@ namespace DefaultPackage
             
         }
 
-        public bool Order(ITile tile) {
-            return false;
-        }
-
-        
-
         public void SaveState(PluginDataWrapper pluginDataStorage) {
 
         }

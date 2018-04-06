@@ -15,7 +15,7 @@ namespace MHUrho.Plugins
         /// Create new instance of the unit in with default contents
         /// 
         /// Add components from <see cref="MHUrho.UnitComponents"/> to <paramref name="unitNode"/> and/or
-        /// create your own logic in <see cref="IUnitInstancePlugin.OnUpdate(float)"/>
+        /// create your own Plugin in <see cref="IUnitInstancePlugin.OnUpdate(float)"/>
         /// </summary>
         /// <param name="level"></param>
         /// <param name="unitNode"></param>
@@ -34,7 +34,7 @@ namespace MHUrho.Plugins
         /// </summary>
         /// <param name="level">level into which the unit is being loaded</param>
         /// <param name="unitNode">scene node of the unit</param>
-        /// <param name="unit">the unit logic class</param>
+        /// <param name="unit">the unit Plugin class</param>
         /// <param name="pluginData">stored state of the unit plugin</param>
         /// <returns>New instance loaded into saved state</returns>
         IUnitInstancePlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginData);
