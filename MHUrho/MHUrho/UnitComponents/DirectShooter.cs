@@ -15,10 +15,12 @@ namespace MHUrho.UnitComponents
 
     public class DirectShooter : DefaultComponent
     {
-        public static string ComponentName = "DirectShooter";
 
+        public static string ComponentName = nameof(DirectShooter);
+        public static DefaultComponents ComponentID = DefaultComponents.DirectShooter;
         public override string Name => ComponentName;
-        
+        public override DefaultComponents ID => ComponentID;
+
         /// <summary>
         /// Shots per minute
         /// </summary>
@@ -44,6 +46,22 @@ namespace MHUrho.UnitComponents
         private readonly float verticalOffset;
 
         private Map map;
+
+        public DirectShooter(Map map,
+                             Vector3 target,
+                             ProjectileType projectileType,
+                             float rateOfFire,
+                             float horizontalOffset,
+                             float verticalOffset) {
+            this.map = map;
+            this.target = target;
+            this.projectileType = projectileType;
+            this.RateOfFire = rateOfFire;
+            this.horizontalOffset = horizontalOffset;
+            this.verticalOffset = verticalOffset;
+            this.delay = 60 / RateOfFire;
+            ReceiveSceneUpdates = true;
+        }
 
         public static DirectShooter Load(LevelManager level, PluginData storedData) {
             var sequentialDataReader = new SequentialPluginDataReader(storedData);
@@ -78,21 +96,7 @@ namespace MHUrho.UnitComponents
             return sequentialData.PluginData;
         }
 
-        public DirectShooter(Map map, 
-                             Vector3 target, 
-                             ProjectileType projectileType, 
-                             float rateOfFire, 
-                             float horizontalOffset, 
-                             float verticalOffset) {
-            this.map = map;
-            this.target = target;
-            this.projectileType = projectileType;
-            this.RateOfFire = rateOfFire;
-            this.horizontalOffset = horizontalOffset;
-            this.verticalOffset = verticalOffset;
-            this.delay = 60 / RateOfFire;
-            ReceiveSceneUpdates = true;
-        }
+
 
         protected override void OnUpdate(float timeStep) {
             base.OnUpdate(timeStep);

@@ -17,14 +17,14 @@ namespace MHUrho.EditorTools
     class UnitSelectorToolMandK : UnitSelectorTool, IMandKTool {
 
         private class SelectedInfo {
-            public int Count => Units.Count;
+            public int Count => UnitSelectors.Count;
 
-            public readonly List<Unit> Units;
+            public readonly List<UnitSelector> UnitSelectors;
             public readonly Button Button;
 
-            public SelectedInfo(Button button, List<Unit> units) {
+            public SelectedInfo(Button button, List<UnitSelector> unitSelectors) {
                 Button = button;
-                Units = units;
+                UnitSelectors = unitSelectors;
             }
         }
 
@@ -94,15 +94,13 @@ namespace MHUrho.EditorTools
                 if (selector != null && selector.Player == input.Player) {
                     var unitSelector = selector as UnitSelector;
                     if (unitSelector != null && !unitSelector.Selected) {
-                        var unit = unitSelector.GetComponent<Unit>();
                         unitSelector.Select();
-                        AddUnit(unit);
+                        AddUnit(unitSelector);
                         return;
                     }
                     else if (unitSelector != null && unitSelector.Selected) {
-                        var unit = unitSelector.GetComponent<Unit>();
                         unitSelector.Deselect();
-                        RemoveUnit(unit);
+                        RemoveUnit(unitSelector);
                         return;
                     }
                 }
@@ -111,7 +109,7 @@ namespace MHUrho.EditorTools
 
                 var tile = map.RaycastToTile(result);
                 if (tile != null) {
-                    formation.MoveToFormation(GetAllSelectedUnits(), tile);
+                    formation.MoveToFormation(GetAllSelectedUnitSelectors(), tile);
                 }
                 
             }
@@ -120,13 +118,14 @@ namespace MHUrho.EditorTools
         //TODO: Select other things too
         private void SelectUnitsInTile(ITile tile) {
             //TODO: Maybe delete selector class, just search for unit
-            Selector selector = tile.Unit?.Node.GetComponent<Selector>();
-            //Not selectable
-            if (selector == null || selector.Selected) return;
+            foreach (var unit in tile.GetAllUnits()) {
+                UnitSelector selector = unit.GetComponent<UnitSelector>();
+                //Not selectable
+                if (selector == null || selector.Selected) return;
 
-            selector.Select();
-            var unit = selector.Node.GetComponent<Unit>();
-            AddUnit(unit);
+                selector.Select();
+                AddUnit(selector);
+            }
         }
 
         private Button CreateButton(UnitType unitType) {
@@ -167,25 +166,41 @@ namespace MHUrho.EditorTools
             text.Value = count.ToString();
         }
 
-        private void AddUnit(Unit unit) {
+        private void AddUnit(UnitSelector unitSelector) {
             //TODO: Check owner of the units
+            var unit = unitSelector.GetComponent<Unit>();
             if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
-                info.Units.Add(unit);
+                if (info.UnitSelectors.Count == 0) {
+                    input.UIManager.SelectionBarShowButton(info.Button);
+                }
+                info.UnitSelectors.Add(unitSelector);
                 DisplayCount(info.Button, info.Count);
             }
             else {
+                //Create info instance
                 var button = CreateButton(unit.UnitType);
-                selected.Add(unit.UnitType, new SelectedInfo(button, new List<Unit> { unit }));
+                selected.Add(unit.UnitType, new SelectedInfo(button, new List<UnitSelector> { unitSelector }));
                 buttons.Add(button, unit.UnitType);
                 input.UIManager.SelectionBarAddButton(button);
                 input.UIManager.SelectionBarShowButton(button);
             }
         }
 
-        private IEnumerable<Unit> GetAllSelectedUnits() {
+        private void RemoveUnit(UnitSelector unitSelector) {
+            var info = selected[unitSelector.GetComponent<Unit>().UnitType];
+            info.UnitSelectors.Remove(unitSelector);
+            if (info.Count == 0) {
+                input.UIManager.SelectionBarHideButton(info.Button);
+            }
+            else {
+                DisplayCount(info.Button, info.Count);
+            }
+        }
+
+        private IEnumerable<UnitSelector> GetAllSelectedUnitSelectors() {
             foreach (var unitType in selected.Values) {
-                foreach (var unit in unitType.Units) {
-                    yield return unit;
+                foreach (var unitSelector in unitType.UnitSelectors) {
+                    yield return unitSelector;
                 }
             }
         }

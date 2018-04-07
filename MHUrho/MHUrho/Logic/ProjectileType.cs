@@ -67,7 +67,7 @@ namespace MHUrho.Logic
             projectileNode.Scale = new Vector3(0.2f, 0.2f, 0.8f);
 
             var rigidBody = projectileNode.CreateComponent<RigidBody>();
-            rigidBody.CollisionLayer = (int)CollisionLayer.Arrow;
+            rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
             rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
             rigidBody.Kinematic = true;
             rigidBody.Mass = 1;

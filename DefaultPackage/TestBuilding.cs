@@ -26,7 +26,7 @@ namespace DefaultPackage
             return typeName == "TestBuilding";
         }
 
-        public IBuildingInstancePlugin CreateNewInstance(LevelManager level, Node buildingNode, Building building) {
+        public IBuildingInstancePlugin CreateNewInstance(LevelManager level, Building building) {
             Unit[] workers = new Unit[2];
             workers[0] = level.SpawnUnit(workerType, 
                                          level.Map.GetTile(building.Rectangle.TopLeft() + new IntVector2(1, 0)),
@@ -37,13 +37,13 @@ namespace DefaultPackage
                                          building.Player);
             workers[1].Node.AddComponent(new WorkQueue(building));
 
-            return new TestBuildingInstance(level, buildingNode, building, workers);
+            return new TestBuildingInstance(level, building, workers);
         }
 
-        public IBuildingInstancePlugin LoadNewInstance(LevelManager level, Node buildingNode, Building building,
-                                                       PluginDataWrapper pluginData) {
-            return new TestBuildingInstance(level, buildingNode, building,new Unit[0]);
+        public IBuildingInstancePlugin GetInstanceForLoading() {
+            return new TestBuildingInstance();
         }
+
 
         public bool CanBuildAt(IntVector2 topLeftLocation) {
             throw new NotImplementedException();
@@ -81,9 +81,10 @@ namespace DefaultPackage
     }
 
     public class TestBuildingInstance : IBuildingInstancePlugin {
+
+        public Building Building { get; private set; }
+
         private LevelManager level;
-        private Node buildingNode;
-        private Building building;
         private TestWorkerInstance[] workers;
 
         private int resources;
@@ -92,10 +93,14 @@ namespace DefaultPackage
 
         private float timeToNextResource = timeBetweenResourceSpawns;
 
-        public TestBuildingInstance(LevelManager level, Node buildingNode, Building building, Unit[] workers) {
+        public TestBuildingInstance() {
+
+        }
+
+        public TestBuildingInstance(LevelManager level, Building building, Unit[] workers) {
             this.level = level;
-            this.buildingNode = buildingNode;
-            this.building = building;
+
+            this.Building = building;
             this.workers = new TestWorkerInstance[workers.Length];
 
             for (int i = 0; i < workers.Length; i++) {
@@ -105,7 +110,7 @@ namespace DefaultPackage
         }
 
         public ITile GetExchangeTile(Unit unit) {
-            return level.Map.GetTile(building.Location + new IntVector2(1, 0));
+            return level.Map.GetTile(Building.Location + new IntVector2(1, 0));
         }
 
         public void OnUpdate(float timeStep) {
@@ -120,6 +125,10 @@ namespace DefaultPackage
         }
 
         public void SaveState(PluginDataWrapper pluginData) {
+            
+        }
+
+        public void LoadState(LevelManager level, Building building, PluginDataWrapper pluginData) {
             
         }
 

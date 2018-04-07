@@ -61,8 +61,9 @@ namespace MHUrho.Helpers
                                   select type;
 
                 foreach (var plugin in unitPlugins) {
-                    pluginInstance = (T)Activator.CreateInstance(plugin);
-                    if (pluginInstance.IsMyType(typeName)) {
+                    var newPluginInstance = (T)Activator.CreateInstance(plugin);
+                    if (newPluginInstance.IsMyType(typeName)) {
+                        pluginInstance = newPluginInstance;
                         break;
                     }
                 }

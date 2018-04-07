@@ -63,6 +63,8 @@ namespace MHUrho.Logic
 
         public IUnitInstancePlugin Plugin { get; private set; }
 
+        public bool AlwaysVertical { get; set; } = false;
+
         #endregion
 
         #region Private members
@@ -143,17 +145,18 @@ namespace MHUrho.Logic
 
             var unit = new Unit(type, storedUnit);
             node.AddComponent(unit);
-            node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
-
 
             //This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
             // to this class, and for that i need to set the Position here
+            node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);            
             
-            return node.GetComponent<Unit>();
+            unit.Plugin = type.GetInstancePluginForLoading();
+            return unit;
         }
 
         /// <summary>
         /// Creates new instance of the <see cref="Unit"/> component and ads it to the <paramref name="unitNode"/>
+        /// Also adds the unit as PassingUnit to <paramref name="tile"/>
         /// </summary>
         /// <param name="id">The unique identifier of the unit, must be unique among other units</param>
         /// <param name="unitNode">Scene node of the unit</param>
@@ -167,20 +170,15 @@ namespace MHUrho.Logic
             unitNode.AddComponent(unit);
             unitNode.Position = tile.Center3;
 
+            AddRigidBody(unitNode);
+
+
             unit.Plugin = type.GetNewInstancePlugin(unit, level);
 
-            //TODO: Storing and loading
-            var rigidBody = unitNode.CreateComponent<RigidBody>();
-            rigidBody.CollisionLayer = (int)CollisionLayer.Unit; 
-            rigidBody.CollisionMask =(int)( CollisionLayer.Arrow | CollisionLayer.Boulder);
-            rigidBody.Kinematic = true;
-            rigidBody.Mass = 1;
-            rigidBody.UseGravity = false;
+            //TODO: Move collisionShape to plugin
 
             var collider = unitNode.CreateComponent<CollisionShape>();
             collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
-
-           
 
             return unit;
         }
@@ -201,7 +199,7 @@ namespace MHUrho.Logic
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
                 if (defaultComponent != null) {
-                    storedUnit.DefaultComponentData.Add(defaultComponent.Name, defaultComponent.SaveState());
+                    storedUnit.DefaultComponentData.Add((int)defaultComponent.ID, defaultComponent.SaveState());
                 }
             }
 
@@ -220,56 +218,12 @@ namespace MHUrho.Logic
                 Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level));
             }
 
-            Plugin = UnitType.LoadInstancePlugin(this, level, storage.UserPlugin);
+            Plugin.LoadState(level, this, new PluginDataWrapper(storage.UserPlugin));
         }
 
         public void FinishLoading() {
             storage = null;
         }
-
-
-        public bool Order(ITile tile) {
-            //Logic consumed order, return
-            if (Plugin.Order(tile)) return true;
-
-            var worldWalker = GetComponent<WorldWalker>();
-            if (worldWalker != null) {
-                var path = tile.GetPath(this);
-                if (path != null) {
-                    //Walker consumed order, return
-                    worldWalker.GoAlong(path);
-                    return true;
-                }
-            }
-
-            //Nothing could be done with this order
-            return false;
-        }
-
-        // TODO: differentiate between Meele and range units
-        public bool Order(Unit unit)
-        {
-            // JUST MEELE UNITS FOR NOW
-            if (unit.Player == Player)
-            {
-                throw new ArgumentException("Attacking my own units");
-            }
-
-            //target = unit;
-            //// TODO: Maybe calculate where they will meet and pathfind there
-            //Path NewPath = unit.Tile.GetPath(this);
-            //if (NewPath == null)
-            //{
-            //    return false;
-            //}
-
-            //path.MoveNext();
-            //Tile.RemoveUnit(this);
-            //Tile.AddPassingUnit(this);
-            //return true;
-            throw new NotImplementedException();
-        }
-
         
         //TODO: Link CanPass to TileType loaded from XML description
         //TODO: Load Passable terrain types from XML unit description
@@ -306,19 +260,46 @@ namespace MHUrho.Logic
                 return false;
             }
 
+            FaceTowards(newPosition);
             Node.Position = newPosition;
             return true;
         }
 
         public void ChangeType(UnitType newType) {
             Node.RemoveAllComponents();
+            //TODO: THIS
+        }
 
+        /// <summary>
+        /// Rotates the unit to face towards the <paramref name="position"/>, either directly if <see cref="AlwaysVertical"/> is false and
+        /// <paramref name="rotateAroundY"/> is false, or to its projection into current the XZ plane of the Node if either of those two are true
+        /// </summary>
+        /// <param name="position">position to look towards</param>
+        /// <param name="rotateAroundY">If <see cref="AlwaysVertical"/> is false, controls if the rotation will be only around the Y axis
+        /// if <see cref="AlwaysVertical"/> is true, has no effect</param>
+        public void FaceTowards(Vector3 position, bool rotateAroundY = false) {
+            if (AlwaysVertical || rotateAroundY) {
+                //Only rotate around Y
+                Node.LookAt(new Vector3(position.X, Node.Position.Y, position.Z), Node.Up);
+            }
+            else {
+                Node.LookAt(position, Tile.Map.GetUpDirectionAt(Node.Position.XZ2()));
+            }
         }
         #endregion
 
-        
+
 
         #region Private Methods
+
+        private static void AddRigidBody(Node node) {
+            var rigidBody = node.CreateComponent<RigidBody>();
+            rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
+            rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
+            rigidBody.Kinematic = true;
+            rigidBody.Mass = 1;
+            rigidBody.UseGravity = false;
+        }
 
         private bool CheckTile(Vector3 newPosition) {
             ITile newTile;
@@ -338,7 +319,9 @@ namespace MHUrho.Logic
             Tile.AddPassingUnit(this);
             return true;
         }
-        
+
+
+
         #endregion
 
      

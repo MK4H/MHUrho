@@ -24,7 +24,9 @@ namespace MHUrho.Logic
         /// Other units that are passing through the tile
         /// Units cannot stop in this tile if Unit is not null
         /// </summary>
-        public List<Unit> PassingUnits { get; private set; }
+        public IReadOnlyList<Unit> PassingUnits => passingUnits;
+
+        public Building Building{ get; private set;}
 
         /// <summary>
         /// Modifier of the movement speed of units passing through this tile
@@ -73,6 +75,8 @@ namespace MHUrho.Logic
         /// </summary>
         private StTile storage;
 
+        private List<Unit> passingUnits;
+
         public StTile Save() {
             var storedTile = new StTile();
             storedTile.UnitID = Unit?.ID ?? 0;
@@ -111,7 +115,7 @@ namespace MHUrho.Logic
             }
 
             foreach (var passingUnit in storage.PassingUnitIDs) {
-                PassingUnits.Add(level.GetUnit(passingUnit));
+                passingUnits.Add(level.GetUnit(passingUnit));
             }
 
             //TODO: Connect buildings
@@ -127,12 +131,12 @@ namespace MHUrho.Logic
             this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
             this.Height = storedTile.Height;
             this.Map = map;
-            PassingUnits = new List<Unit>();
+            passingUnits = new List<Unit>();
         }
 
         public Tile(int x, int y, TileType tileType, Map map) {
             MapArea = new IntRect(x, y, x + 1, y + 1);
-            PassingUnits = new List<Unit>();
+            passingUnits = new List<Unit>();
             Unit = null;
             this.Type = tileType;
             this.Height = 0;
@@ -141,7 +145,7 @@ namespace MHUrho.Logic
 
         public void AddPassingUnit(Unit unit)
         {
-            PassingUnits.Add(unit);
+            passingUnits.Add(unit);
         }
 
         /// <summary>
@@ -174,7 +178,17 @@ namespace MHUrho.Logic
             }
             else
             {
-                PassingUnits.Remove(unit);
+                passingUnits.Remove(unit);
+            }
+        }
+
+        public IEnumerable<Unit> GetAllUnits() {
+            if (Unit != null) {
+                yield return Unit;
+            }
+            
+            foreach (var unit in PassingUnits) {
+                yield return unit;
             }
         }
 

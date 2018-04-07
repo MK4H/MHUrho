@@ -71,17 +71,21 @@ namespace MHUrho.Logic
             //TODO: Check for errors
             ID = newID;
             Name = xml.Attribute(NameAttribute).Value;
-            Model = LoadModel(xml, package.XmlDirectoryPath);
-            Icon = LoadIcon(xml, package.XmlDirectoryPath);
             Package = package;
-            unitTypeLogic = 
-                XmlHelpers.LoadTypePlugin<IUnitTypePlugin>(xml, 
+
+            unitTypeLogic =
+                XmlHelpers.LoadTypePlugin<IUnitTypePlugin>(xml,
                                                            AssemblyPathElement,
                                                            package.XmlDirectoryPath,
                                                            Name);
 
+            var data = unitTypeLogic.TypeData;
+
+            Model = LoadModel(xml, package.XmlDirectoryPath);
+            Icon = LoadIcon(xml, package.XmlDirectoryPath);
+            
             unitTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
-                                                package.PackageManager);
+                                     package.PackageManager);
         }
 
         public StEntityType Save() {
@@ -97,6 +101,10 @@ namespace MHUrho.Logic
         public bool CanPass(TileType tileType)
         {
             return passableTileTypes.Contains(tileType);
+        }
+
+        public bool CanSpawnAt(ITile tile) {
+            return unitTypeLogic.CanSpawnAt(tile);
         }
 
         /// <summary>
@@ -138,13 +146,11 @@ namespace MHUrho.Logic
         }
 
         public IUnitInstancePlugin GetNewInstancePlugin(Unit unit, LevelManager level) {
-            return unitTypeLogic.CreateNewInstance(level, unit.Node, unit);
+            return unitTypeLogic.CreateNewInstance(level, unit);
         }
 
-        public IUnitInstancePlugin LoadInstancePlugin(Unit unit,
-                                                      LevelManager level,
-                                                      PluginData pluginData) {
-            return unitTypeLogic.LoadNewInstance(level, unit.Node, unit, new PluginDataWrapper(pluginData));
+        public IUnitInstancePlugin GetInstancePluginForLoading() {
+            return unitTypeLogic.GetInstanceForLoading();
         }
 
         public void Dispose() {

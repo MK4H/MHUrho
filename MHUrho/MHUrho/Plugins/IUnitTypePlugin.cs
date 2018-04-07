@@ -12,32 +12,35 @@ namespace MHUrho.Plugins
     public interface IUnitTypePlugin : ITypePlugin
     {
         /// <summary>
+        /// Data overriding or superseding the XML data describing the type
+        /// </summary>
+        UnitTypeInitializationData TypeData{ get; }
+
+        /// <summary>
         /// Create new instance of the unit in with default contents
         /// 
-        /// Add components from <see cref="MHUrho.UnitComponents"/> to <paramref name="unitNode"/> and/or
+        /// Add components from <see cref="MHUrho.UnitComponents"/> to <see name="unit.Node"/> and/or
         /// create your own Plugin in <see cref="IUnitInstancePlugin.OnUpdate(float)"/>
         /// </summary>
         /// <param name="level"></param>
-        /// <param name="unitNode"></param>
         /// <param name="unit"></param>
         /// <returns></returns>
-        IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit);
+        IUnitInstancePlugin CreateNewInstance(LevelManager level, Unit unit);
+
 
         /// <summary>
-        /// Creates new instance in the state saved in <paramref name="pluginData"/>
-        /// 
-        /// DO NOT LOAD the default components the unit had when saving, that is done independently by
-        /// the Unit class and the components themselfs, just load your own data
-        /// 
-        /// The default components will be loaded and present on the <paramref name="unitNode"/>, so you 
-        /// can get them by calling <see cref="Node.GetComponent{T}(bool)"/>
+        /// Creates instance of <see cref="IUnitInstancePlugin"/> that will be loaded by <see cref="IUnitInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>
         /// </summary>
-        /// <param name="level">level into which the unit is being loaded</param>
-        /// <param name="unitNode">scene node of the unit</param>
-        /// <param name="unit">the unit Plugin class</param>
-        /// <param name="pluginData">stored state of the unit plugin</param>
-        /// <returns>New instance loaded into saved state</returns>
-        IUnitInstancePlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginData);
+        /// <returns></returns>
+        IUnitInstancePlugin GetInstanceForLoading();
+    
+
+        /// <summary>
+        /// Checks if the UnitType can be spawned at <paramref name="centerTile"/>
+        /// </summary>
+        /// <param name="centerTile">Tile to spawn the unit at, the center of the unit will be at the center of the tile</param>
+        /// <returns>true if can, false if cannot</returns>
+        bool CanSpawnAt(ITile centerTile);
 
         /// <summary>
         /// Called to initialize the instance

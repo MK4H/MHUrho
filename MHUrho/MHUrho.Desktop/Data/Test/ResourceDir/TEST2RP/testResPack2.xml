@@ -16,20 +16,29 @@
         <projectileType>testRP2/TestProjectile</projectileType>
       </extension>
     </unitType>
+    <unitType name="TestWorker">
+      <iconPath>sand.jpg</iconPath>
+      <modelPath>Box.mdl</modelPath>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </unitType>
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile">
       <modelPath>Box.mdl</modelPath>
       <speed>30</speed>
+      <size x="1" y="0.5"/>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </projectileType>
   </projectileTypes>
   <buildingTypes>
-    <buildingType name="testBuilding">
+    <buildingType name="TestBuilding">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
       <size x="3" y="3"/>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
+      <extension>
+        <workerType>testRP2/TestWorker</workerType>
+      </extension>
     </buildingType>
   </buildingTypes>
 </resourcePack>

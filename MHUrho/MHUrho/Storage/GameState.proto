@@ -51,7 +51,7 @@ message StUnit {
 	int32 playerID = 4;
 	int32 targetUnitID = 5;
 	PluginData userPlugin = 6;
-	map<string,PluginData> defaultComponentData = 7;
+	map<int32 ,PluginData> defaultComponentData = 7;
 }
 
 message StBuilding {
@@ -59,8 +59,8 @@ message StBuilding {
 	int32 typeID = 2;
 	StIntVector2 location = 3;
 	int32 playerID = 4;
-	repeated int32 workerUnitID = 5;
 	PluginData userPlugin = 6;
+	map<int32 ,PluginData> defaultComponentData = 7;
 }
 
 message StPlayer {

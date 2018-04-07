@@ -7,9 +7,8 @@ namespace MHUrho.Logic
     [Flags]
     enum CollisionLayer {
         Unit = 1,
-        Arrow = 2,
-        Building = 4,
-        Boulder = 8
+        Building = 2,
+        Projectile = 4
     }
     
 }

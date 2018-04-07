@@ -306,6 +306,23 @@ namespace MHUrho.Packaging {
                                        .ToArray();
         }
 
+        public IEnumerable<ProjectileType> LoadAllProjectileTypes(GenerateID generateID) {
+            CheckIfLoading();
+
+            var projectileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "projectileTypes");
+
+            if (projectileTypesElement == null) {
+                //There are no projectile types in this package
+                return Enumerable.Empty<ProjectileType>();
+            }
+            //ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+            return projectileTypesElement.Elements(PackageManager.XMLNamespace + "projectileType")
+                                         .Select(projectileTypeElement =>
+                                                   LoadType<ProjectileType>(projectileTypeElement, generateID(),
+                                                                            projectileTypes))
+                                         .ToArray();
+        }
+
         /// <summary>
         /// Provides "atomic" change of ID and addition to dictionary with this ID
         /// </summary>

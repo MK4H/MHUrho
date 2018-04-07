@@ -26,7 +26,12 @@ namespace MHUrho.Logic
         /// Other units that are passing through the tile
         /// Units cannot stop in this tile if Unit is not null
         /// </summary>
-        List<Unit> PassingUnits { get; }
+        IReadOnlyList<Unit> PassingUnits { get; }
+
+        /// <summary>
+        /// Building that owns this tile
+        /// </summary>
+        Building Building { get; }
 
         /// <summary>
         /// Default modifier of the movement speed of units passing through this tile
@@ -89,6 +94,8 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="unit">the unit to remove</param>
         void RemoveUnit(Unit unit);
+
+        IEnumerable<Unit> GetAllUnits();
 
         StTile Save();
 

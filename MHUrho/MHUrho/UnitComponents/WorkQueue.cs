@@ -14,8 +14,8 @@ namespace MHUrho.UnitComponents
         private interface IWorkTask {
             bool IsFinished();
             void OnUpdate(float timeStep);
-            void InvokeTaskStarted(Unit unit);
-            void InvokeTaskFinished(Unit unit);
+            void InvokeTaskStarted(WorkQueue workQueue);
+            void InvokeTaskFinished(WorkQueue workQueue);
             
         }
 
@@ -28,11 +28,11 @@ namespace MHUrho.UnitComponents
                 throw new NotImplementedException();
             }
 
-            void IWorkTask.InvokeTaskStarted(Unit unit) {
+            void IWorkTask.InvokeTaskStarted(WorkQueue workQueue) {
                 throw new NotImplementedException();
             }
 
-            void IWorkTask.InvokeTaskFinished(Unit unit) {
+            void IWorkTask.InvokeTaskFinished(WorkQueue workQueue) {
                 throw new NotImplementedException();
             }
 
@@ -42,15 +42,15 @@ namespace MHUrho.UnitComponents
                 //NOTHING
             }
 
-            protected abstract void InvokeTaskStarted(Unit unit);
+            protected abstract void InvokeTaskStarted(WorkQueue workQueue);
 
-            protected abstract void InvokeTaskFinished(Unit unit);
+            protected abstract void InvokeTaskFinished(WorkQueue workQueue);
         }
 
         public class TimedWorkTask : WorkTask {
             
-            public event Action<Unit, TimedWorkTask> TaskStarted;
-            public event Action<Unit, TimedWorkTask> TaskFinished;
+            public event Action<WorkQueue, TimedWorkTask> TaskStarted;
+            public event Action<WorkQueue, TimedWorkTask> TaskFinished;
 
             private float duration;
 
@@ -58,12 +58,12 @@ namespace MHUrho.UnitComponents
                 this.duration = duration;
             }
 
-            public TimedWorkTask OnTaskStarted(Action<Unit,TimedWorkTask> handler) {
+            public TimedWorkTask OnTaskStarted(Action<WorkQueue, TimedWorkTask> handler) {
                 TaskStarted += handler;
                 return this;
             }
 
-            public TimedWorkTask OnTaskFinished(Action<Unit,TimedWorkTask> handler) {
+            public TimedWorkTask OnTaskFinished(Action<WorkQueue, TimedWorkTask> handler) {
                 TaskFinished += handler;
                 return this;
             }
@@ -76,18 +76,18 @@ namespace MHUrho.UnitComponents
                 duration -= timeStep;
             }
 
-            protected override void InvokeTaskStarted(Unit unit) {
-                TaskStarted?.Invoke(unit, this);
+            protected override void InvokeTaskStarted(WorkQueue workQueue) {
+                TaskStarted?.Invoke(workQueue, this);
             }
 
-            protected override void InvokeTaskFinished(Unit unit) {
-                TaskFinished?.Invoke(unit, this);
+            protected override void InvokeTaskFinished(WorkQueue workQueue) {
+                TaskFinished?.Invoke(workQueue, this);
             }
         }
 
         public class DelegatedWorkTask : WorkTask {
-            public event Action<Unit, DelegatedWorkTask> TaskStarted;
-            public event Action<Unit, DelegatedWorkTask> TaskFinished;
+            public event Action<WorkQueue, DelegatedWorkTask> TaskStarted;
+            public event Action<WorkQueue, DelegatedWorkTask> TaskFinished;
 
             private bool finished = false;
 
@@ -95,12 +95,12 @@ namespace MHUrho.UnitComponents
                 finished = true;
             }
 
-            public DelegatedWorkTask OnTaskStarted(Action<Unit, DelegatedWorkTask> handler) {
+            public DelegatedWorkTask OnTaskStarted(Action<WorkQueue, DelegatedWorkTask> handler) {
                 TaskStarted += handler;
                 return this;
             }
 
-            public DelegatedWorkTask OnTaskFinished(Action<Unit, DelegatedWorkTask> handler) {
+            public DelegatedWorkTask OnTaskFinished(Action<WorkQueue, DelegatedWorkTask> handler) {
                 TaskFinished += handler;
                 return this;
             }
@@ -109,23 +109,24 @@ namespace MHUrho.UnitComponents
                 return finished;
             }
 
-            protected override void InvokeTaskStarted(Unit unit) {
-                TaskStarted?.Invoke(unit, this);
+            protected override void InvokeTaskStarted(WorkQueue workQueue) {
+                TaskStarted?.Invoke(workQueue, this);
             }
 
-            protected override void InvokeTaskFinished(Unit unit) {
-                TaskFinished?.Invoke(unit, this);
+            protected override void InvokeTaskFinished(WorkQueue workQueue) {
+                TaskFinished?.Invoke(workQueue, this);
             }
         }
 
         public static string ComponentName = nameof(WorkQueue);
+        public static DefaultComponents ComponentID = DefaultComponents.WorkQueue;
 
         public override string Name => ComponentName;
+        public override DefaultComponents ID => ComponentID;
 
         private readonly Queue<IWorkTask> workQueue;
 
         public WorkQueue(Building building) {
-            this.Building = building;
             workQueue = new Queue<IWorkTask>();
         }
 
@@ -154,14 +155,14 @@ namespace MHUrho.UnitComponents
             currentTask.OnUpdate(timeStep);
 
             if (currentTask.IsFinished()) {
-                currentTask.InvokeTaskFinished(unit);
+                currentTask.InvokeTaskFinished(this);
             }
 
             workQueue.Dequeue();
 
             if (workQueue.Count == 0) return;
 
-            workQueue.Peek().InvokeTaskStarted(unit);
+            workQueue.Peek().InvokeTaskStarted(this);
         }
 
         

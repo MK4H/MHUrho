@@ -12,6 +12,8 @@ namespace DefaultPackage
 {
     public class TestUnitType : IUnitTypePlugin {
 
+        public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
+
         private ProjectileType projectileType;
 
         public bool IsMyType(string unitTypeName) {
@@ -22,7 +24,10 @@ namespace DefaultPackage
 
         }
 
-        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
+        
+
+        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Unit unit) {
+            var unitNode = unit.Node;
             unitNode.AddComponent(new WorldWalker(level));
             unitNode.AddComponent(new UnitSelector(level));
             unitNode.AddComponent(new DirectShooter(level.Map,
@@ -34,14 +39,16 @@ namespace DefaultPackage
                                                     10,
                                                     1,
                                                     1));
-            return new TestUnitInstance(level, unitNode, unit);
+            return new TestUnitInstance(level, unit);
         }
 
-        public IUnitInstancePlugin LoadNewInstance(LevelManager level,
-                                                   Node unitNode,
-                                                   Unit unit,
-                                                   PluginDataWrapper pluginDataStorage) {
-            return new TestUnitInstance(level, unitNode, unit);
+        public IUnitInstancePlugin GetInstanceForLoading() {
+            return new TestUnitInstance();
+        }
+
+
+        public bool CanSpawnAt(ITile centerTile) {
+            return true;
         }
 
         public void Initialize(XElement extensionElement, PackageManager packageManager) {
@@ -56,15 +63,24 @@ namespace DefaultPackage
         private LevelManager level;
         private Node unitNode;
         private Unit unit;
-        
+        private WorldWalker walker;
 
-        public TestUnitInstance(LevelManager level, Node unitNode, Unit unit) {
-            this.level = level;
-            this.unitNode = unitNode;
-            this.unit = unit;
+        public TestUnitInstance() {
+
         }
 
-        
+        public TestUnitInstance(LevelManager level, Unit unit) {
+            this.level = level;
+            this.unitNode = unit.Node;
+            this.unit = unit;
+            this.walker = unit.GetComponent<WorldWalker>();
+            var selector = unitNode.GetComponent<UnitSelector>();
+            selector.OrderedToTile += SelectorOrderedToTile;
+        }
+
+        private void SelectorOrderedToTile(Unit unit, ITile targetTile, OrderArgs orderArgs) {
+            orderArgs.Executed = walker.GoTo(targetTile);
+        }
 
         public void OnUpdate(float timeStep) {
             
@@ -74,5 +90,13 @@ namespace DefaultPackage
 
         }
 
+        public void LoadState(LevelManager level,Unit unit, PluginDataWrapper pluginData) {
+            this.level = level;
+            this.unit = unit;
+            this.unitNode = unit.Node;
+            walker = unitNode.GetComponent<WorldWalker>();
+            var selector = unitNode.GetComponent<UnitSelector>();
+            selector.OrderedToTile += SelectorOrderedToTile;
+        }
     }
 }

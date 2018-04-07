@@ -6,38 +6,66 @@ using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using Urho;
 
 namespace DefaultPackage
 {
-    public class TestWorkerType : IUnitTypePlugin
-    {
+    public class TestWorkerType : IUnitTypePlugin {
+        public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
+
         public bool IsMyType(string typeName) {
             return typeName == "TestWorker";
         }
 
-        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Node unitNode, Unit unit) {
-            throw new NotImplementedException();
+        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Unit unit) {
+            var unitNode = unit.Node;
+            unitNode.AddComponent(new WorldWalker(level));
+            return new TestWorkerInstance(level, unit);
         }
 
-        public IUnitInstancePlugin LoadNewInstance(LevelManager level, Node unitNode, Unit unit, PluginDataWrapper pluginData) {
-            throw new NotImplementedException();
+        public IUnitInstancePlugin GetInstanceForLoading() {
+            return new TestWorkerInstance();
+        }
+
+
+        public bool CanSpawnAt(ITile centerTile) {
+            return centerTile.Type != PackageManager.Instance.DefaultTileType &&
+                   centerTile.Building == null;
         }
 
         public void Initialize(XElement extensionElement, PackageManager packageManager) {
-            throw new NotImplementedException();
+            
         }
     }
 
     public class TestWorkerInstance : IUnitInstancePlugin {
         public TestBuildingInstance WorkedBuilding { get; set; }
 
+        public TestWorkerInstance(LevelManager level, Unit unit) {
+
+        }
+
+        public TestWorkerInstance() {
+
+        }
+
         public void OnUpdate(float timeStep) {
-            
+            if (WorkedBuilding == null) {
+                throw new InvalidOperationException("TestWorker has no building");
+            }
+
+
         }
 
         public void SaveState(PluginDataWrapper pluginData) {
-            throw new NotImplementedException();
+            var indexedData = pluginData.GetWriterForWrappedIndexedData();
+            indexedData.Store(1, WorkedBuilding.Building.ID);
+        }
+
+        public void LoadState(LevelManager level, Unit unit, PluginDataWrapper pluginData) {
+            var indexedData = pluginData.GetReaderForWrappedIndexedData();
+            WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).Plugin;
         }
     }
 }

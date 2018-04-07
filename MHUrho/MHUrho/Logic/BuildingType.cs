@@ -88,16 +88,16 @@ namespace MHUrho.Logic
             throw new NotImplementedException();
         }
 
-        public bool CanBuildAt(IntVector2 topLeftLocation) {
-            return buildingTypeLogic.CanBuildAt(topLeftLocation);
+        public bool CanBuildAt(IntVector2 centerLocation) {
+            return buildingTypeLogic.CanBuildAt(centerLocation);
         }
 
         public IBuildingInstancePlugin GetNewInstancePlugin(Building building, LevelManager level) {
-            return buildingTypeLogic.CreateNewInstance(level, building.Node, building);
+            return buildingTypeLogic.CreateNewInstance(level, building);
         }
 
-        public IBuildingInstancePlugin LoadInstancePlugin(Building building, LevelManager level, PluginData pluginData) {
-            return buildingTypeLogic.LoadNewInstance(level, building.Node, building, new PluginDataWrapper(pluginData));
+        public IBuildingInstancePlugin GetInstancePluginForLoading() {
+            return buildingTypeLogic.GetInstanceForLoading();
         }
 
         public void Dispose() {

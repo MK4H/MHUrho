@@ -131,6 +131,22 @@ namespace MHUrho.UserInterface
             selectionBar.AddChild(button);
         }
 
+        public void SelectionBarHideButton(Button button) {
+            if (selectionBar.FindChild(button) == uint.MaxValue) {
+                throw new ArgumentException("button is not a child of the selectionBar");
+            }
+
+            if (!button.Visible) {
+                throw new ArgumentException("Hiding already hidden button");
+            }
+
+            button.HoverBegin -= Button_HoverBegin;
+            button.HoverBegin -= UIHoverBegin;
+            button.HoverEnd -= Button_HoverEnd;
+            button.HoverEnd -= UIHoverEnd;
+            button.Visible = false;
+        }
+
         /// <summary>
         /// Deactivates buttons and hides them
         /// </summary>

@@ -16,22 +16,19 @@ namespace MHUrho.Plugins
         /// Creates new instance from scratch
         /// </summary>
         /// <param name="level">level in which the building is created</param>
-        /// <param name="buildingNode">scene node of the building with <paramref name="building"/> already added as component</param>
         /// <param name="building">building Plugin class</param>
         /// <returns>New instance in default state</returns>
-        IBuildingInstancePlugin CreateNewInstance(LevelManager level, Node buildingNode, Building building);
+        IBuildingInstancePlugin CreateNewInstance(LevelManager level, Building building);
+
+
 
         /// <summary>
-        /// Creates new instance in the state saved in <paramref name="pluginData"/>
+        /// Creates instance of <see cref="IBuildingInstancePlugin"/> that will be loaded by <see cref="IBuildingInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>
         /// </summary>
-        /// <param name="level">level into which the building is being loaded</param>
-        /// <param name="buildingNode">scene node of the building with <paramref name="building"/> already added as component</param>
-        /// <param name="building">the building Plugin class</param>
-        /// <param name="pluginData">stored state of the building plugin</param>
-        /// <returns>New instance loaded into saved state</returns>
-        IBuildingInstancePlugin LoadNewInstance(LevelManager level, Node buildingNode, Building building, PluginDataWrapper pluginData);
+        /// <returns>New instance, that will be loaded in the next step</returns>
+        IBuildingInstancePlugin GetInstanceForLoading();
 
-        bool CanBuildAt(IntVector2 topLeftLocation);
+        bool CanBuildAt(IntVector2 centerLocation);
 
         void PopulateUI(MandKUI mouseAndKeyboardUI);
 

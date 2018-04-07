@@ -11,15 +11,18 @@ namespace MHUrho.UnitComponents
 {
     public delegate void UnitSelectedDelegate(Unit unit);
     public delegate void UnitDeselectedDelegate(Unit unit);
-    public delegate void UnitOrderedToTileDelegate(Unit unit, ITile targetTile);
-    public delegate void UnitOrderedToUnitDelegate(Unit unit, Unit targetUnit);
-    public delegate void UnitOrderedToBuildingDelegate(Unit unit, Building targetBuilding);
+    public delegate void UnitOrderedToTileDelegate(Unit unit, ITile targetTile, OrderArgs orderArgs);
+    public delegate void UnitOrderedToUnitDelegate(Unit unit, Unit targetUnit, OrderArgs orderArgs);
+    public delegate void UnitOrderedToBuildingDelegate(Unit unit, Building targetBuilding, OrderArgs orderArgs);
 
 
     public class UnitSelector : Selector {
-        public static string ComponentName = "UnitSelector";
+
+        public static string ComponentName = nameof(UnitSelector);
+        public static DefaultComponents ComponentID = DefaultComponents.UnitSelector;
 
         public override string Name => ComponentName;
+        public override DefaultComponents ID => ComponentID;
 
         public override IPlayer Player => unit.Player;
 
@@ -31,6 +34,7 @@ namespace MHUrho.UnitComponents
 
         private Unit unit;
         private readonly LevelManager level;
+
 
         public UnitSelector(LevelManager level) {
             this.level = level;
@@ -51,15 +55,21 @@ namespace MHUrho.UnitComponents
         /// <returns>True if unit was given order, False if there is nothing the unit can do</returns>
         public override bool Order(ITile targetTile) {
             //TODO: EventArgs to get if the event was handled
-            OrderedToTile?.Invoke(unit, targetTile);
+            var orderArgs = new OrderArgs();
+            OrderedToTile?.Invoke(unit, targetTile, orderArgs);
+            return orderArgs.Executed;
         }
 
         public override bool Order(Unit targetUnit) {
-            OrderedToUnit?.Invoke(unit, targetUnit);
+            var orderArgs = new OrderArgs();
+            OrderedToUnit?.Invoke(unit, targetUnit, orderArgs);
+            return orderArgs.Executed;
         }
 
         public override bool Order(Building targetBuilding) {
-            OrderedToBuilding?.Invoke(unit, targetBuilding);
+            var orderArgs = new OrderArgs();
+            OrderedToBuilding?.Invoke(unit, targetBuilding, orderArgs);
+            return orderArgs.Executed;
         }
 
         public override void Select() {

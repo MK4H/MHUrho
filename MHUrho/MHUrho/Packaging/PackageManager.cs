@@ -164,9 +164,11 @@ namespace MHUrho.Packaging
             }
  
             foreach (var package in givenPackages) {
-                AddToActive(package.LoadAllTileTypes(() => GetNewID(activeTileTypes)));
-                AddToActive(package.LoadAllUnitTypes(() => GetNewID(activeUnitTypes)));
-                AddToActive(package.LoadAllBuildingTypes(() => GetNewID(activeBuildingTypes)));
+                AddToActive(package.LoadAllTileTypes(() => GetNewID(activeTileTypes)), activeTileTypes);
+                AddToActive(package.LoadAllUnitTypes(() => GetNewID(activeUnitTypes)), activeUnitTypes);
+                AddToActive(package.LoadAllBuildingTypes(() => GetNewID(activeBuildingTypes)), activeBuildingTypes);
+                AddToActive(package.LoadAllProjectileTypes(() => GetNewID(activeProjectileTypes)), activeProjectileTypes);
+
             }
 
             FinishGroupLoadingPackages();
@@ -522,27 +524,20 @@ namespace MHUrho.Packaging
             }
         }
 
-        private void AddToActive(IEnumerable<TileType> tileTypes) {
-            foreach (var tileType in tileTypes) {
-                activeTileTypes.Add(tileType.ID, tileType);
-            }
-        }
-
-        private void AddToActive(IEnumerable<UnitType> unitTypes) {
-            foreach (var unitType in unitTypes) {
-                activeUnitTypes.Add(unitType.ID, unitType);
-            }
-        }
-
-        private void AddToActive(IEnumerable<BuildingType> buildingTypes) {
-            foreach (var buildingType in buildingTypes) {
-                activeBuildingTypes.Add(buildingType.ID, buildingType);
-            }
-        }
-
-        private void AddToActive(IEnumerable<ProjectileType> projectileTypes) {
-            foreach (var projectileType in projectileTypes) {
-                activeProjectileTypes.Add(projectileType.ID, projectileType);
+        private static void AddToActive<T>(IEnumerable<T> loadedTypes, IDictionary<int, T> activeTypesDictionary)
+            where T : IIDNameAndPackage
+        {
+            foreach (var loadedType in loadedTypes) {
+                if (activeTypesDictionary.TryGetValue(loadedType.ID, out var activeType)) {
+                    if (activeType.Equals(loadedType)) {
+                        //Type was loaded in advance, referenced by other already loaded type
+                        continue;
+                    }
+                    throw new InvalidOperationException("Type was given already used ID");
+                }
+                else {
+                    activeTypesDictionary.Add(loadedType.ID, loadedType);
+                }
             }
         }
 
@@ -561,7 +556,7 @@ namespace MHUrho.Packaging
             }
         }
 
-        private void LoadTileTypes(IEnumerable<StEntityType> storedTileTypes, Dictionary<string, TileType> loadedTileTypes) {
+        private void LoadTileTypes(IEnumerable<StEntityType> storedTileTypes, IDictionary<string, TileType> loadedTileTypes) {
             foreach (var storedTileType in storedTileTypes) {
 
                 TileType tileType;
@@ -569,12 +564,12 @@ namespace MHUrho.Packaging
                 if (!loadedTileTypes.TryGetValue(GetFullName(storedTileType.PackageID, storedTileType.Name),
                                                  out tileType)) {
                     //Was not loaded, load it from package
-                    tileType = activePackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TypeID);
+                    tileType = loadingPackages[storedTileType.PackageID].LoadTileType(storedTileType.Name, storedTileType.TypeID);
                 }
 
                 //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
                 if (tileType.ID != 0) {
-                    activeProjectileTypes.Remove(tileType.ID);
+                    activeTileTypes.Remove(tileType.ID);
                 }
 
                 tileType.ID = storedTileType.TypeID;
@@ -589,7 +584,7 @@ namespace MHUrho.Packaging
                 if (!loadedUnitTypes.TryGetValue(GetFullName(storedUnitType.PackageID, storedUnitType.Name),
                                                  out UnitType unitType)) {
                     //Was not loaded, load it from package
-                    unitType = activePackages[storedUnitType.PackageID].LoadUnitType(storedUnitType.Name, storedUnitType.TypeID);
+                    unitType = loadingPackages[storedUnitType.PackageID].LoadUnitType(storedUnitType.Name, storedUnitType.TypeID);
                 }
 
                 //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
@@ -607,7 +602,7 @@ namespace MHUrho.Packaging
             foreach (var storedBuildingType in storedBuildingTypes) {
                 if (!loadedBuildingTypes.TryGetValue(GetFullName(storedBuildingType.PackageID, storedBuildingType.Name),
                                                      out BuildingType buildingType)) {
-                    buildingType = activePackages[storedBuildingType.PackageID].LoadBuildingType(storedBuildingType.Name, storedBuildingType.TypeID);
+                    buildingType = loadingPackages[storedBuildingType.PackageID].LoadBuildingType(storedBuildingType.Name, storedBuildingType.TypeID);
                 }
 
                 //If the type was loaded by some referencing type before this stored loading, just assign it the correct ID
@@ -625,7 +620,7 @@ namespace MHUrho.Packaging
             foreach (var storedProjectileType in storedProjectileTypes) {
                 if (!loadedProjectileTypes.TryGetValue(GetFullName(storedProjectileType.PackageID, storedProjectileType.Name),
                                                      out ProjectileType projectileType)) {
-                    projectileType = activePackages[storedProjectileType.PackageID]
+                    projectileType = loadingPackages[storedProjectileType.PackageID]
                         .LoadProjectileType(storedProjectileType.Name, storedProjectileType.TypeID);
                 }
 

@@ -17,29 +17,25 @@ namespace MHUrho.UnitComponents
     public delegate void MovementFailedDelegate(Unit unit);
 
     public class WorldWalker : DefaultComponent {
-        public static string ComponentName = "WorldWalker";
+
+        public static string ComponentName = nameof(WorldWalker);
+        public static DefaultComponents ComponentID = DefaultComponents.WorldWalker;
 
         public override string Name => ComponentName;
-
-        /// <summary>
-        /// If the unit should try and own the tile it stops at
-        /// If true, it tries and if it fails, pathfinds to the closest empty tile
-        /// If false, the unit just stays as a passing unit
-        /// Default true
-        /// </summary>
-        public bool OwnTileAtReachingTarget { get; set; } = true;
+        public override DefaultComponents ID => ComponentID;
 
         public event MovementStartedDelegate OnMovementStarted;
         public event MovementEndedDelegate OnMovementEnded;
         public event MovementFailedDelegate OnMovementFailed;
 
-        private Map map;
+        private readonly Map map;
         private LevelManager level;
         private Unit unit;
 
         private Path path;
 
-        private ITile target;
+        private ITile nextTile;
+        private Vector3 nextWaypoint;
 
         public WorldWalker(LevelManager level) {
             ReceiveSceneUpdates = true;
@@ -54,8 +50,36 @@ namespace MHUrho.UnitComponents
             this.level = level;
             this.map = level.Map;
             this.path = path;
-            this.target = target;
+            this.nextTile = target;
             this.Enabled = activated;
+        }
+
+        public static WorldWalker Load(LevelManager level, PluginData data) {
+            var indexedData = new IndexedPluginDataReader(data);
+            var activated = indexedData.Get<bool>(1);
+            Path path = null;
+            ITile target = null;
+            if (activated) {
+                path = indexedData.Get<Path>(2);
+                target = level.Map.GetTile(indexedData.Get<IntVector2>(3));
+            }
+
+            return new WorldWalker(level, activated, path, target);
+        }
+
+        public override PluginData SaveState() {
+            var storageData = new IndexedPluginDataWriter();
+            if (Enabled) {
+                storageData.Store(1, true);
+
+                storageData.Store(2, path);
+                storageData.Store(3, nextTile.Location);
+            }
+            else {
+                storageData.Store(1, false);
+            }
+
+            return storageData.PluginData;
         }
 
         public void GoAlong(Path path) {
@@ -66,10 +90,14 @@ namespace MHUrho.UnitComponents
             this.path = path;
             if (!path.MoveNext()) {
                 //TODO: cannot enumerate path
-                throw new ArgumentException("Given path couldnt be enumerated");
+                throw new ArgumentException("Given path could not be enumerated");
             }
 
-            target = map.GetTile(path.Current);
+            nextTile = map.GetTile(path.Current);
+            nextWaypoint = nextTile.Center3;
+
+            nextWaypoint = GetNextWaypoint();
+
             Enabled = true;
         }
 
@@ -118,117 +146,94 @@ namespace MHUrho.UnitComponents
             base.OnUpdate(timeStep);
             //TODO: WHY DO I HAVE TO CHECK THIS MANUALLY ?
             if (EnabledEffective == false) return;
-            Debug.Assert(target != null, "Target was null with scene updates enabled");
+            Debug.Assert(nextTile != null, "Target was null with scene updates enabled");
 
-            if (map.GetContainingTile(unit.Position) != target) {
-                MoveTowards(target.Center3, timeStep);
+
+            if (!MoveTowards(nextWaypoint,timeStep)) {
                 return;
             }
 
-            if (!MoveToMiddle(timeStep)) return;
-
-            //Middle was reached
-            if (!path.MoveNext()) {
-                //Reached destination
-                Path newPath = null;
-                if (OwnTileAtReachingTarget && !path.Target.TryAddOwningUnit(unit)) {
-                    newPath = map.GetPath(unit, map.FindClosestEmptyTile(path.Target));
-                }
-
-                path.Dispose();
-                target = null;
-                Enabled = false;
-
-                if (newPath != null) {
-                    GoAlong(newPath);
-                }
-                else {
-                    OnMovementEnded?.Invoke(unit);
-                    path = null;
-                }
-
-                return;
-            }
-
-            target = map.GetTile(path.Current);
+            //nextWaypoint was reached
+            nextWaypoint = GetNextWaypoint();
         }
 
-        /// <summary>
-        /// Moves unit to the middle of the Tile in Tile property
-        /// </summary>
-        /// <param name="elapsedSeconds"></param>
-        /// <returns>If middle was reached</returns>
-        private bool MoveToMiddle(float elapsedSeconds) {
-            if (target.Center3 == unit.Position) return true;
 
-            Vector3 newPosition = unit.Position + GetMoveVector(target.Center3, elapsedSeconds);
-            if (Vector3.Distance(unit.Position, target.Center3) < Vector3.Distance(newPosition, target.Center3)) {
-                unit.MoveTo(target.Center3);
-                return true;
+        /// <summary>
+        /// Moves unit towards the <paramref name="point"/>
+        /// </summary>
+        /// <param name="point">Point to move towards</param>
+        /// <param name="timeStep">timeStep of the game</param>
+        private bool MoveTowards(Vector3 point ,float timeStep) {
+            bool reachedPoint = false;
+
+            Vector3 newPosition = unit.Position + GetMoveVector(point, timeStep);
+            if (ReachedPoint(Node.Position, newPosition, point)) {
+                newPosition = point;
+                reachedPoint = true;
+            }
+
+            if (unit.MoveTo(newPosition)) {
+                //Unit could move
+                return reachedPoint;
+            }
+            //Unit couldnt move to newPosition
+
+            //Recalculate path
+            var newPath = map.GetPath(unit, path.Target);
+            if (newPath == null || !newPath.MoveNext()) {
+                //Cant get there
+                OnMovementFailed?.Invoke(unit);
+                newPath?.Dispose();
+                ReachedDestination();
             }
             else {
-                unit.MoveTo(newPosition);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Moves unit towards the destination
-        /// </summary>
-        /// <param name="destination"></param>
-        /// <param name="elapsedSeconds"></param>
-        private void MoveTowards(Vector3 destination, float elapsedSeconds) {
-            if (!unit.MoveBy(GetMoveVector(destination, elapsedSeconds))) {
-                //Recalculate path
-                var newPath = map.GetPath(unit, path.Target);
-                if (newPath == null || !newPath.MoveNext()) {
-                    //Cant get there
-                    throw new NotImplementedException();
-                }
-
                 path.Dispose();
                 path = newPath;
             }
+            return false;
         }
 
         /// <summary>
         /// Calculates by how much should the unit move
         /// </summary>
         /// <param name="destination">The point in space that the unit is trying to get to</param>
-        /// <param name="elapsedSeconds"> How many seconds passed since the last update</param>
+        /// <param name="timeStep"> How many seconds passed since the last update</param>
         /// <returns></returns>
-        private Vector3 GetMoveVector(Vector3 destination, float elapsedSeconds) {
+        private Vector3 GetMoveVector(Vector3 destination, float timeStep) {
             Vector3 movementDirection = destination - unit.Position;
             movementDirection.Normalize();
-            return movementDirection * LevelManager.CurrentLevel.GameSpeed * elapsedSeconds;
+            return movementDirection * LevelManager.CurrentLevel.GameSpeed * timeStep;
         }
 
-        public override PluginData SaveState() {
-            var storageData = new IndexedPluginDataWriter();
-            if (Enabled) {
-                storageData.Store(1,true);
-
-                storageData.Store(2, path);
-                storageData.Store(3, target.Location);
-            }
-            else {
-                storageData.Store(1, false);
-            }
-
-            return storageData.PluginData;
+        private bool ReachedPoint(Vector3 currentPosition, Vector3 nextPosition, Vector3 point) {
+            return Vector3.Distance(currentPosition, point) < Vector3.Distance(nextPosition, point);
         }
 
-        public static WorldWalker Load(LevelManager level, PluginData data) {
-            var indexedData = new IndexedPluginDataReader(data);
-            var activated = indexedData.Get<bool>(1);
-            Path path = null;
-            ITile target = null;
-            if (activated) {
-                path = indexedData.Get<Path>(2);
-                target = level.Map.GetTile(indexedData.Get<IntVector2>(3));
+        private Vector3 GetNextWaypoint() {
+            if (nextWaypoint == nextTile.Center3) {
+                if (!path.MoveNext()) {
+                    //Reached destination
+
+                    OnMovementEnded?.Invoke(unit);
+                    ReachedDestination();
+                    return new Vector3();
+                }
+
+                nextTile = map.GetTile(path.Current);
+                var nextWaypointXZ = (nextWaypoint.XZ2() + nextTile.Center) / 2;
+
+                return new Vector3(nextWaypointXZ.X, map.GetHeightAt(nextWaypointXZ), nextWaypointXZ.Y);
             }
 
-            return new WorldWalker(level, activated, path, target);
+            return nextTile.Center3;
+
+        }
+
+        private void ReachedDestination() {
+            path.Dispose();
+            nextTile = null;
+            nextWaypoint = new Vector3();
+            Enabled = false;
         }
     }
 }

@@ -204,32 +204,42 @@ namespace MHUrho.Logic
         /// <param name="unitType">The unit to be added</param>
         /// <param name="tile">Tile to spawn the unit at</param>
         /// <param name="player">owner of the new unit</param>
-        /// <returns></returns>
+        /// <returns>The new unit if a unit was spawned, or null if no unit was spawned</returns>
         public Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
+
+            if (!unitType.CanSpawnAt(tile)) {
+                return null;
+            }
+
             Node unitNode = Scene.CreateChild("Unit");
 
             var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, this, tile, player);
             units.Add(newUnit.ID,newUnit);
             player.AddUnit(newUnit);
-
-            if (!tile.TryAddOwningUnit(newUnit)) {
-                var targetTile = Map.FindClosestEmptyTile(tile);
-                if (targetTile == null) {
-                    //TODO: There is no closest empty tile, everything is full
-                }
-
-                newUnit.Order(targetTile);
-            }
+            tile.AddPassingUnit(newUnit);
 
             return newUnit;
         }
 
-        public void BuildBuilding(BuildingType buildingType, IntVector2 centerTileLocation, IPlayer player) {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buildingType"></param>
+        /// <param name="centerTileLocation"></param>
+        /// <param name="player"></param>
+        /// <returns>The new building if building was built, or null if the building could not be built</returns>
+        public Building BuildBuilding(BuildingType buildingType, IntVector2 centerTileLocation, IPlayer player) {
+            if (!buildingType.CanBuildAt(centerTileLocation)) {
+                return null;
+            }
+
             Node buildingNode = Scene.CreateChild("Building");
 
             var newBuilding = buildingType.BuildNewBuilding(GetNewID(buildings), buildingNode, this, centerTileLocation, player);
             buildings.Add(newBuilding.ID,newBuilding);
             player.AddBuilding(newBuilding);
+
+            return newBuilding;
         }
 
         public Unit GetUnit(int ID) {

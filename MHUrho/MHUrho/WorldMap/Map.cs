@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using MHUrho.Control;
 using Urho;
@@ -41,9 +42,11 @@ namespace MHUrho.WorldMap
         public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
 
         private class BorderTile : ITile {
+            Building ITile.Building => throw new InvalidOperationException("Cannot add building to Border tile");
+
             Unit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
 
-            List<Unit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
+            IReadOnlyList<Unit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
 
             float ITile.MovementSpeedModifier => throw new InvalidOperationException("Cannot move through Border tile");
 
@@ -98,6 +101,10 @@ namespace MHUrho.WorldMap
 
             void ITile.RemoveUnit(Unit unit) {
                 throw new InvalidOperationException("Cannot remove unit from Border tile");
+            }
+
+            IEnumerable<Unit> ITile.GetAllUnits() {
+                return Enumerable.Empty<Unit>();
             }
 
             StTile ITile.Save() {
@@ -1005,7 +1012,7 @@ namespace MHUrho.WorldMap
             float botLeftHeight = GetHeightAt(topLeftX, topLeftY + 1);
             float botRightHeight = GetHeightAt(topLeftX + 1, topLeftY + 1);
 
-            if (topLeftHeight + botRightHeight >= topRightHeight + botLeftHeight) {
+            if (IsTileSplitFromTopLeftToBottomRight(topLeftHeight, topRightHeight, botLeftHeight, botRightHeight)) {
                 //Tile is split from topleft to botRight
                 Vector2 botLeftToTargetDistance = new Vector2(x - topLeftX, y - (topLeftY + 1));
 
@@ -1057,6 +1064,42 @@ namespace MHUrho.WorldMap
             return GetHeightAt(position.X, position.Y);
         }
 
+        public Vector3 GetUpDirectionAt(float x, float y) {
+            return GetUpDirectionAt(new Vector2(x, y));
+        }
+
+        public Vector3 GetUpDirectionAt(Vector2 position) {
+
+            var topLeftX = (int)Math.Floor(position.X);
+            var topLeftY = (int)Math.Floor(position.Y);
+
+            var topLeft = new Vector3(topLeftX, GetHeightAt(topLeftX, topLeftY), topLeftY);
+            var topRight = new Vector3(topLeftX + 1, GetHeightAt(topLeftX + 1, topLeftY), topLeftY);
+            var botLeft = new Vector3(topLeftX, GetHeightAt(topLeftX, topLeftY + 1), topLeftY + 1);
+            var botRight = new Vector3(topLeftX + 1, GetHeightAt(topLeftX + 1, topLeftY + 1), topLeftY + 1);
+
+            if (IsTileSplitFromTopLeftToBottomRight(topLeft.Y, topRight.Y, botLeft.Y, botRight.Y)) {
+                if ((topRight.XZ2() - position).LengthSquared < (botLeft.XZ2() - position).LengthSquared) {
+                    //point is in the topRight triangle
+                    return Vector3.Cross(botRight - topRight, topLeft - topRight);
+                }
+                else {
+                    //point is in the bottomLeft triangle
+                    return Vector3.Cross(botRight - botLeft, topLeft - botLeft);
+                }
+            }
+            else {
+                if ((topLeft.XZ2() - position).LengthSquared < (botRight.XZ2() - position).LengthSquared) {
+                    //point is in topLeft triangle
+                    return Vector3.Cross(topRight - topLeft, botLeft - topLeft);
+                }
+                else {
+                    //point is in the bottomRight triangle
+                    return Vector3.Cross(topRight - botRight, botLeft - botRight);
+                }
+            }
+        } 
+
         public void HighlightArea(ITile center, IntVector2 size) {
             IntVector2 topLeft = center.Location - (size / 2);
             IntVector2 bottomRight = center.Location + (size / 2);
@@ -1083,7 +1126,7 @@ namespace MHUrho.WorldMap
                     tile?.ChangeHeight(heightDelta);
                 }
                 else {
-                  
+                    //Change the height of all 4 tiles containing this corner
                     ITile tile = TileByBottomRightCorner(tileCorner, true);
                     if (tile != null && IsBorder(tile)) {
                         ((BorderTile) tile).BotRightHeight += heightDelta;
@@ -1327,5 +1370,11 @@ namespace MHUrho.WorldMap
             return IsBorderCorner(corner.X, corner.Y);
         }
 
+        private bool IsTileSplitFromTopLeftToBottomRight(float topLeftHeight,
+                                                         float topRightHeight,
+                                                         float bottomLeftHeight,
+                                                         float bottomRightHeight) {
+            return topLeftHeight + bottomRightHeight >= topRightHeight + bottomLeftHeight;
+        }
     }
 }

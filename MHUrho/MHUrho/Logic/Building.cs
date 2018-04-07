@@ -34,6 +34,11 @@ namespace MHUrho.Logic
         private ITile[] tiles;
 
         /// <summary>
+        /// Used to store the reference to storedBuilding between Load and ConnectReferences calls
+        /// </summary>
+        private StBuilding storedBuilding;
+
+        /// <summary>
         /// Builds the building at <paramref name="topLeftCorner"/> if its possible
         /// </summary>
         /// <param name="topLeftCorner"></param>
@@ -49,39 +54,38 @@ namespace MHUrho.Logic
             var newBuilding = new Building(topLeftCorner, type, level);
             buildingNode.AddComponent(newBuilding);
 
+            AddRigidBody(buildingNode);
+
             newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 
-            var rigidBody = buildingNode.CreateComponent<RigidBody>();
-            rigidBody.CollisionLayer = (int) CollisionLayer.Building;
-            rigidBody.CollisionLayer = (int) (CollisionLayer.Arrow | CollisionLayer.Boulder);
-            rigidBody.Kinematic = true;
-            rigidBody.Mass = 1;
-            rigidBody.UseGravity = false;
+
 
             var collider = buildingNode.CreateComponent<CollisionShape>();
-            //TODO: Collider
+            //TODO: Move collisionShape to plugin
             collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
 
 
             return newBuilding;
         }
 
-        public static Building Load(LevelManager level, BuildingType type, Node node, StBuilding storedBuilding) {
+        public static Building Load(LevelManager level, BuildingType type, Node buildingNode, StBuilding storedBuilding) {
             //TODO: Check arguments - node cant have more than one Building component
             if (type.ID != storedBuilding.TypeID) {
                 throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
             }
 
             var building = new Building(storedBuilding.Location.ToIntVector2(), type, level);
-            node.AddComponent(building);
+            buildingNode.AddComponent(building);
             Vector2 positionXZ =
-                new Vector2(building.Location.X + building.Size.X, building.Location.Y + building.Size.Y);
+                new Vector2(building.Location.X + building.Size.X / 2, building.Location.Y + building.Size.Y / 2);
             
             //TODO: LEVEL THE GROUND
             float height = level.Map.GetHeightAt(positionXZ);
-            node.Position = new Vector3(positionXZ.X, height, positionXZ.Y);
+            buildingNode.Position = new Vector3(positionXZ.X, height, positionXZ.Y);
 
-            building.Plugin = type.LoadInstancePlugin(building, level, storedBuilding.UserPlugin);
+            AddRigidBody(buildingNode);
+
+            building.Plugin = type.GetInstancePluginForLoading();
             return building;
         }
 
@@ -95,8 +99,6 @@ namespace MHUrho.Logic
             }
 
             return type.LoadBuilding();
-
-
         }
 
         protected Building(IntVector2 topLeftCorner, BuildingType type, LevelManager level) {
@@ -112,6 +114,19 @@ namespace MHUrho.Logic
                     tiles[GetTileIndex(x,y)] = level.Map.GetTile(topLeftCorner.X + x, topLeftCorner.Y + y);
                 }
             }
+        }
+
+        public void ConnectReferences(LevelManager level) {
+            Player = level.GetPlayer(storedBuilding.PlayerID);
+            //TODO: Tiles
+
+            foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
+                Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
+                                                                              defaultComponent.Value, 
+                                                                              level));
+            }
+
+            Plugin.LoadState(level, this, new PluginDataWrapper(storedBuilding.UserPlugin));
         }
 
         /// <summary>
@@ -137,6 +152,15 @@ namespace MHUrho.Logic
 
         private int GetTileIndex(IntVector2 location) {
             return GetTileIndex(location.X, location.Y);
+        }
+
+        private static void AddRigidBody(Node node) {
+            var rigidBody = node.CreateComponent<RigidBody>();
+            rigidBody.CollisionLayer = (int)CollisionLayer.Building;
+            rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
+            rigidBody.Kinematic = true;
+            rigidBody.Mass = 1;
+            rigidBody.UseGravity = false;
         }
     }
 }
