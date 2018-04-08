@@ -29,14 +29,14 @@ message StTile {
 	int32 unitID = 1;
 	repeated int32 passingUnitIDs = 2;
 	int32 tileTypeID = 3;
-	StIntVector2 position = 4;
+	StIntVector2 topLeftPosition = 4;
 	float height = 5;
 	bool splitDirection = 6;
 }
 
 message StBorderTile {
 	int32 tileTypeID = 1;
-	StIntVector2 position = 2;
+	StIntVector2 topLeftPosition = 2;
 	float topLeftHeight = 3;
 	float topRightHeight = 4;
 	float botLeftHeight = 5;

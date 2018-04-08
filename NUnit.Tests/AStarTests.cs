@@ -77,6 +77,9 @@ namespace NUnit.Tests {
             class PassableTestTile : ITile {
                 #region NOT USED IN TEST
                 public Unit Unit => throw new NotImplementedException();
+                IReadOnlyList<Unit> ITile.PassingUnits => PassingUnits;
+
+                public Building Building => throw new NotImplementedException();
 
                 public List<Unit> PassingUnits => throw new NotImplementedException();
 
@@ -84,11 +87,36 @@ namespace NUnit.Tests {
 
                 public IntRect MapArea => throw new NotImplementedException();
 
-                
+                public IntVector2 MapLocation => throw new NotImplementedException();
+
+                public IntVector2 TopLeft => throw new NotImplementedException();
+
+                public IntVector2 TopRight => throw new NotImplementedException();
+
+                public IntVector2 BottomLeft => throw new NotImplementedException();
+
+                public IntVector2 BottomRight => throw new NotImplementedException();
+
 
                 public Vector2 Center => throw new NotImplementedException();
 
                 public Vector3 Center3 => throw new NotImplementedException();
+
+                public Vector3 TopLeft3 => throw new NotImplementedException();
+
+                public Vector3 TopRight3 => throw new NotImplementedException();
+
+                public Vector3 BottomLeft3 => throw new NotImplementedException();
+
+                public Vector3 BottomRight3 => throw new NotImplementedException();
+
+                public float TopLeftHeight => throw new NotImplementedException();
+
+                public float TopRightHeight => throw new NotImplementedException();
+
+                public float BottomLeftHeight => throw new NotImplementedException();
+
+                public float BottomRightHeight => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
 
@@ -117,6 +145,10 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
+                public IEnumerable<Unit> GetAllUnits() {
+                    throw new NotImplementedException();
+                }
+
                 public StTile Save() {
                     throw new NotImplementedException();
                 }
@@ -125,11 +157,11 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
-                public void ChangeHeight(float heightDelta, bool signalNeighbours) {
+                public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours) {
                     throw new NotImplementedException();
                 }
 
-                public void SetHeight(float newHeight, bool signalNeighbours) {
+                public void SetTopLeftHeight(float newHeight, bool signalNeighbours) {
                     throw new NotImplementedException();
                 }
 
@@ -156,6 +188,9 @@ namespace NUnit.Tests {
             class NotPassableTestTile : ITile {
                 #region NOT USED IN TEST
                 public Unit Unit => throw new NotImplementedException();
+                IReadOnlyList<Unit> ITile.PassingUnits => PassingUnits;
+
+                public Building Building => throw new NotImplementedException();
 
                 public List<Unit> PassingUnits => throw new NotImplementedException();
 
@@ -165,10 +200,36 @@ namespace NUnit.Tests {
 
                 public IntRect MapArea => throw new NotImplementedException();
 
+                public IntVector2 MapLocation => throw new NotImplementedException();
+
+                public IntVector2 TopLeft => throw new NotImplementedException();
+
+                public IntVector2 TopRight => throw new NotImplementedException();
+
+                public IntVector2 BottomLeft => throw new NotImplementedException();
+
+                public IntVector2 BottomRight => throw new NotImplementedException();
+
 
                 public Vector2 Center => throw new NotImplementedException();
 
                 public Vector3 Center3 => throw new NotImplementedException();
+
+                public Vector3 TopLeft3 => throw new NotImplementedException();
+
+                public Vector3 TopRight3 => throw new NotImplementedException();
+
+                public Vector3 BottomLeft3 => throw new NotImplementedException();
+
+                public Vector3 BottomRight3 => throw new NotImplementedException();
+
+                public float TopLeftHeight => throw new NotImplementedException();
+
+                public float TopRightHeight => throw new NotImplementedException();
+
+                public float BottomLeftHeight => throw new NotImplementedException();
+
+                public float BottomRightHeight => throw new NotImplementedException();
 
                 public float Height => throw new NotImplementedException();
 
@@ -201,6 +262,10 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
+                public IEnumerable<Unit> GetAllUnits() {
+                    throw new NotImplementedException();
+                }
+
                 public StTile Save() {
                     throw new NotImplementedException();
                 }
@@ -209,11 +274,11 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
-                public void ChangeHeight(float heightDelta, bool signalNeighbours) {
+                public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours) {
                     throw new NotImplementedException();
                 }
 
-                public void SetHeight(float newHeight, bool signalNeighbours) {
+                public void SetTopLeftHeight(float newHeight, bool signalNeighbours) {
                     throw new NotImplementedException();
                 }
 
@@ -241,6 +306,9 @@ namespace NUnit.Tests {
 
             #region NOT USED IN TEST
 
+            public bool IsInside(Vector3 point) {
+                throw new NotImplementedException();
+            }
 
             public bool IsXInside(int x) {
                 throw new NotImplementedException();
@@ -271,6 +339,46 @@ namespace NUnit.Tests {
             }
 
             public int WhereIsY(IntVector2 vector) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByMapLocation(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByMapLocation(IntVector2 mapLocation) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByTopLeftCorner(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByTopLeftCorner(IntVector2 topLeftCorner) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByTopRightCorner(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByTopRightCorner(IntVector2 topRightCorner) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByBottomLeftCorner(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByBottomLeftCorner(IntVector2 bottomLeftCorner) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByBottomRightCorner(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner) {
                 throw new NotImplementedException();
             }
 
@@ -306,6 +414,14 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public void HighlightArea(ITile center, IntVector2 size, HighlightMode mode, Color color) {
+                throw new NotImplementedException();
+            }
+
+            public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, HighlightMode mode, Color color) {
+                throw new NotImplementedException();
+            }
+
             public void HighlightArea(ITile center, IntVector2 size) {
                 throw new NotImplementedException();
             }
@@ -334,9 +450,20 @@ namespace NUnit.Tests {
             public int Top => TopLeft.Y;
 
             public int Bottom => BottomRight.Y;
+            public bool IsInside(int x, int y) {
+                throw new NotImplementedException();
+            }
+
+            public bool IsInside(float x, float y) {
+                throw new NotImplementedException();
+            }
 
             public bool IsInside(IntVector2 point) {
                 return point.X >= Left && point.X <= Right && point.Y >= Top && point.Y <= Bottom;
+            }
+
+            public bool IsInside(Vector2 point) {
+                throw new NotImplementedException();
             }
 
             public ITile GetTile(int x, int y) {

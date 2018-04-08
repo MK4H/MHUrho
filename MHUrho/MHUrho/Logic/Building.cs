@@ -111,7 +111,7 @@ namespace MHUrho.Logic
 
             for (int y = 0; y < type.Size.Y; y++) {
                 for (int x = 0; x < type.Size.X; x++) {
-                    tiles[GetTileIndex(x,y)] = level.Map.GetTile(topLeftCorner.X + x, topLeftCorner.Y + y);
+                    tiles[GetTileIndex(x,y)] = level.Map.GetTileByTopLeftCorner(topLeftCorner.X + x, topLeftCorner.Y + y);
                 }
             }
         }

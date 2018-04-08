@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Packaging;
+using MHUrho.Helpers;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 using Urho;
@@ -56,16 +57,38 @@ namespace MHUrho.Logic
         public IntRect MapArea { get; private set; }
 
 
+        public IntVector2 MapLocation => TopLeft;
+
         /// <summary>
         /// Location in the Map matrix
         /// </summary>
-        public IntVector2 Location => new IntVector2(MapArea.Left,MapArea.Top); 
+        public IntVector2 TopLeft => new IntVector2(MapArea.Left,MapArea.Top);
 
-        public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
+        public IntVector2 TopRight => new IntVector2(MapArea.Right, MapArea.Top);
+
+        public IntVector2 BottomLeft => new IntVector2(MapArea.Left, MapArea.Bottom);
+
+        public IntVector2 BottomRight => new IntVector2(MapArea.Right, MapArea.Bottom);
+
+        public Vector2 Center => new Vector2(TopLeft.X + 0.5f, TopLeft.Y + 0.5f);
 
         public Vector3 Center3 => new Vector3(Center.X, Map.GetHeightAt(Center), Center.Y);
 
-        public float Height { get; private set; }
+        public Vector3 TopLeft3 => new Vector3(MapArea.Left, Map.GetHeightAt(MapArea.Left, MapArea.Top), MapArea.Top);
+
+        public Vector3 TopRight3 => new Vector3(MapArea.Right, Map.GetHeightAt(MapArea.Right, MapArea.Top), MapArea.Top);
+
+        public Vector3 BottomLeft3 => new Vector3(MapArea.Left, Map.GetHeightAt(MapArea.Left, MapArea.Bottom), MapArea.Bottom);
+
+        public Vector3 BottomRight3 => new Vector3(MapArea.Right, Map.GetHeightAt(MapArea.Right, MapArea.Bottom), MapArea.Bottom);
+
+        public float TopLeftHeight { get; private set; }
+
+        public float TopRightHeight => Map.GetHeightAt(MapArea.Left + 1, MapArea.Top);
+
+        public float BottomLeftHeight => Map.GetHeightAt(MapArea.Left, MapArea.Top + 1);
+
+        public float BottomRightHeight => Map.GetHeightAt(MapArea.Left + 1, MapArea.Top + 1);
 
         public Map Map { get; private set; }
 
@@ -80,8 +103,8 @@ namespace MHUrho.Logic
         public StTile Save() {
             var storedTile = new StTile();
             storedTile.UnitID = Unit?.ID ?? 0;
-            storedTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y};
-            storedTile.Height = Height;
+            storedTile.TopLeftPosition = TopLeft.ToStIntVector2();
+            storedTile.Height = TopLeftHeight;
             storedTile.TileTypeID = Type.ID;
 
             var storedPassingUnits = storedTile.PassingUnitIDs;
@@ -128,8 +151,11 @@ namespace MHUrho.Logic
 
         protected Tile(StTile storedTile, Map map) {
             this.storage = storedTile;
-            this.MapArea = new IntRect(storedTile.Position.X, storedTile.Position.Y, storedTile.Position.X + 1, storedTile.Position.Y + 1);
-            this.Height = storedTile.Height;
+            this.MapArea = new IntRect(storedTile.TopLeftPosition.X, 
+                                       storedTile.TopLeftPosition.Y, 
+                                       storedTile.TopLeftPosition.X + 1, 
+                                       storedTile.TopLeftPosition.Y + 1);
+            this.TopLeftHeight = storedTile.Height;
             this.Map = map;
             passingUnits = new List<Unit>();
         }
@@ -139,7 +165,7 @@ namespace MHUrho.Logic
             passingUnits = new List<Unit>();
             Unit = null;
             this.Type = tileType;
-            this.Height = 0;
+            this.TopLeftHeight = 0;
             this.Map = map;
         }
 
@@ -202,15 +228,15 @@ namespace MHUrho.Logic
         /// If you want to change height, go through <see cref="Map.ChangeTileHeight(ITile, float)"/>
         /// </summary>
         /// <param name="heightDelta"></param>
-        /// <param name="signalNeighbours">If <see cref="ChangeHeight(float, bool)"/> should signal neighbours automatically
+        /// <param name="signalNeighbours">If <see cref="ChangeTopLeftHeight"/> should signal neighbours automatically
         /// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-        public void ChangeHeight(float heightDelta, bool signalNeighbours = true) {
-            Height += heightDelta;
+        public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true) {
+            TopLeftHeight += heightDelta;
             // For rectangle changing height goes through every tile 4 times, which is slow
             // So if i want to speed it up, i can just call CornerHeightChange for the whole
             // rectangle just once per tile
             if (signalNeighbours) {
-                Map.ForEachAroundCorner(Location, (tile) => { tile.CornerHeightChange(); });
+                Map.ForEachAroundCorner(TopLeft, (tile) => { tile.CornerHeightChange(); });
             }
             
         }
@@ -219,15 +245,15 @@ namespace MHUrho.Logic
         /// Sets the height of the top left corner of the tile to <paramref name="newHeight"/>
         /// </summary>
         /// <param name="newHeight">the height to set</param>
-        /// <param name="signalNeighbours">If <see cref="SetHeight(float, bool)"/> should signal neighbours automatically
+        /// <param name="signalNeighbours">If <see cref="SetTopLeftHeight"/> should signal neighbours automatically
         /// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-        public void SetHeight(float newHeight, bool signalNeighbours = true) {
-            Height = newHeight;
+        public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true) {
+            TopLeftHeight = newHeight;
             // For rectangle changing height goes through every tile 4 times, which is slow
             // So if i want to speed it up, i can just call CornerHeightChange for the whole
             // rectangle just once per tile
             if (signalNeighbours) {
-                Map.ForEachAroundCorner(Location, (tile) => { tile.CornerHeightChange(); });
+                Map.ForEachAroundCorner(TopLeft, (tile) => { tile.CornerHeightChange(); });
             }
         }
 

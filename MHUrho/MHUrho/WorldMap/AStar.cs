@@ -136,7 +136,7 @@ namespace MHUrho.WorldMap {
 
             
             Dictionary<IntVector2, Node> touchedNodes = new Dictionary<IntVector2, Node>();
-            IntVector2 startPos = unit.Tile.Location;
+            IntVector2 startPos = unit.Tile.MapLocation;
 
             Node startNode = new Node(  position: startPos,
                                         previousNode: null,
@@ -210,7 +210,7 @@ namespace MHUrho.WorldMap {
                     }
                     else {
                         // Get the next tile from the map
-                        var newTile = map.GetTile(newPosition);
+                        var newTile = map.GetTileByMapLocation(newPosition);
                         // Compute the heuristic for the new tile
                         float heuristic = Heuristic(newPosition, target);
 

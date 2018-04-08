@@ -17,12 +17,17 @@ namespace NUnit.Tests {
         private class HeightTestTile : ITile {
             #region NOT USED IN TESTS
             public Unit Unit => throw new NotImplementedException();
+            IReadOnlyList<Unit> ITile.PassingUnits => PassingUnits;
+
+            public Building Building => throw new NotImplementedException();
 
             public List<Unit> PassingUnits => throw new NotImplementedException();
 
             public float MovementSpeedModifier => throw new NotImplementedException();
 
             public TileType Type => throw new NotImplementedException();
+
+            public float BottomRightHeight => throw new NotImplementedException();
 
             public Map Map => throw new NotImplementedException();
 
@@ -50,6 +55,10 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
+            public IEnumerable<Unit> GetAllUnits() {
+                throw new NotImplementedException();
+            }
+
             public StTile Save() {
                 throw new NotImplementedException();
             }
@@ -58,11 +67,11 @@ namespace NUnit.Tests {
                 throw new NotImplementedException();
             }
 
-            public void ChangeHeight(float heightDelta, bool signalNeighbours) {
+            public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours) {
                 throw new NotImplementedException();
             }
 
-            public void SetHeight(float newHeight, bool signalNeighbours) {
+            public void SetTopLeftHeight(float newHeight, bool signalNeighbours) {
                 throw new NotImplementedException();
             }
 
@@ -78,6 +87,16 @@ namespace NUnit.Tests {
 
             public IntRect MapArea { get; private set; }
 
+            public IntVector2 MapLocation => throw new NotImplementedException();
+
+            public IntVector2 TopLeft => throw new NotImplementedException();
+
+            public IntVector2 TopRight => throw new NotImplementedException();
+
+            public IntVector2 BottomLeft => throw new NotImplementedException();
+
+            public IntVector2 BottomRight => throw new NotImplementedException();
+
             /// <summary>
             /// Location in the Map matrix
             /// </summary>
@@ -86,6 +105,20 @@ namespace NUnit.Tests {
             public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
             public Vector3 Center3 => throw new NotImplementedException();
+
+            public Vector3 TopLeft3 => throw new NotImplementedException();
+
+            public Vector3 TopRight3 => throw new NotImplementedException();
+
+            public Vector3 BottomLeft3 => throw new NotImplementedException();
+
+            public Vector3 BottomRight3 => throw new NotImplementedException();
+
+            public float TopLeftHeight => throw new NotImplementedException();
+
+            public float TopRightHeight => throw new NotImplementedException();
+
+            public float BottomLeftHeight => throw new NotImplementedException();
 
             public float Height { get; private set; }
 
@@ -109,7 +142,7 @@ namespace NUnit.Tests {
                 }
             }
 
-            slopedInX10x10 = Map.CreateTestMap(testTiles, new IntVector2(10, 10));
+            slopedInX10x10 = null; //Map.CreateTestMap(testTiles, new IntVector2(10, 10));
 
             testTiles = new ITile[10 * 10];
             for (int y = 0; y < 10; y++) {
@@ -118,7 +151,7 @@ namespace NUnit.Tests {
                 }
             }
 
-            slopedInY10x10 = Map.CreateTestMap(testTiles, new IntVector2(10, 10));
+            slopedInY10x10 = null; //Map.CreateTestMap(testTiles, new IntVector2(10, 10));
 
             testTiles = new ITile[10 * 10];
             for (int y = 0; y < 10; y++) {
@@ -127,7 +160,7 @@ namespace NUnit.Tests {
                 }
             }
 
-            cone10x10 = Map.CreateTestMap(testTiles, new IntVector2(10, 10));
+            cone10x10 = null; //Map.CreateTestMap(testTiles, new IntVector2(10, 10));
 
             rand = new Random();
         }

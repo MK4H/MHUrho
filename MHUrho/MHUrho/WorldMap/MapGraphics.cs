@@ -11,6 +11,8 @@ using MHUrho.Storage;
 
 namespace MHUrho.WorldMap
 {
+    public enum HighlightMode { None, Borders, Full }
+
     public partial class Map {
 
         private enum BorderType { None, Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight }
@@ -18,6 +20,9 @@ namespace MHUrho.WorldMap
         private class MapGraphics : IDisposable {
 
             private const float HighlightHeightAboveTerain = 0.005f;
+
+            private static Vector3 HighlightAboveTerrainOffset = new Vector3(0, HighlightHeightAboveTerain, 0);
+
 
             [StructLayout(LayoutKind.Sequential)]
             struct TileVertex {
@@ -48,60 +53,22 @@ namespace MHUrho.WorldMap
                     BottomRight.TexCoords = rect.Max;
                 }
 
-                private TileInVB(ITile tile) {
-                    TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, 0, tile.MapArea.Top),
+                public TileInVB(ITile tile) {
+                    TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, tile.TopLeftHeight, tile.MapArea.Top),
                                              new Vector3(0, 1, 0),
                                              new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
-                    TopRight = new TileVertex(new Vector3(tile.MapArea.Right, 0, tile.MapArea.Top),
-                                                new Vector3(0, 1, 0),
-                                                new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
-                    BottomLeft = new TileVertex(new Vector3(tile.MapArea.Left, 0, tile.MapArea.Bottom),
-                                                new Vector3(0, 1, 0),
-                                                new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
-                    BottomRight = new TileVertex(new Vector3(tile.MapArea.Right, 0, tile.MapArea.Bottom),
-                                                 new Vector3(0, 1, 0),
-                                                 new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
-                }
-
-                private TileInVB(ITile tile,
-                                 float topLeftHeight,
-                                 float topRightHeight,
-                                 float botLeftHeight,
-                                 float botRightHeight) {
-
-                    TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, topLeftHeight, tile.MapArea.Top),
-                                             new Vector3(0, 1, 0),
-                                             new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
-                    TopRight = new TileVertex(new Vector3(tile.MapArea.Right, topRightHeight, tile.MapArea.Top),
+                    TopRight = new TileVertex(new Vector3(tile.MapArea.Right, tile.TopRightHeight, tile.MapArea.Top),
                                               new Vector3(0, 1, 0),
                                               new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
-                    BottomLeft = new TileVertex(new Vector3(tile.MapArea.Left, botLeftHeight, tile.MapArea.Bottom),
+                    BottomLeft = new TileVertex(new Vector3(tile.MapArea.Left, tile.BottomLeftHeight, tile.MapArea.Bottom),
                                                 new Vector3(0, 1, 0),
                                                 new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
-                    BottomRight = new TileVertex(new Vector3(tile.MapArea.Right, botRightHeight, tile.MapArea.Bottom),
+                    BottomRight = new TileVertex(new Vector3(tile.MapArea.Right, tile.BottomRightHeight, tile.MapArea.Bottom),
                                                  new Vector3(0, 1, 0),
                                                  new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
-
                     CalculateLocalNormals();
                 }
-
-                public static TileInVB InnerTile(ITile[] tiles, int index, int rowSize) {
-                    return new TileInVB(tile: tiles[index],
-                                        topLeftHeight: tiles[index].Height,
-                                        topRightHeight: tiles[index + 1].Height,
-                                        botLeftHeight: tiles[index + rowSize].Height,
-                                        botRightHeight: tiles[index + rowSize + 1].Height);
-                }
-
-                public static TileInVB BorderTile(BorderTile borderTile) {
-                    return new TileInVB(tile: borderTile,
-                                        topLeftHeight: borderTile.TopLeftHeight,
-                                        topRightHeight: borderTile.TopRightHeight,
-                                        botLeftHeight: borderTile.BotLeftHeight,
-                                        botRightHeight: borderTile.BotRightHeight);
-                }
-
-                
+           
 
                 /// <summary>
                 /// Creates normals just from this tile, disregarding the angle of surrounding tiles
@@ -310,13 +277,13 @@ namespace MHUrho.WorldMap
             private IndexBuffer mapIndexBuffer;
 
             private Material material;
+
+            private HighlightMode highlightMode;
             private CustomGeometry highlight;
 
             private readonly Map map;
             //TODO: Probably split map into more parts to speed up raycasts and drawing
             private readonly Node mapNode;
-
-            private bool smoothing;
 
             public static MapGraphics Build(Node mapNode,
                                             Map map,
@@ -353,8 +320,8 @@ namespace MHUrho.WorldMap
 
             public ITile RaycastToTile(RayQueryResult rayQueryResult) {
                 return rayQueryResult.Node == mapNode
-                           ? map.GetTile((int) Math.Floor(rayQueryResult.Position.X),
-                                         (int) Math.Floor(rayQueryResult.Position.Z))
+                           ? map.GetTileByTopLeftCorner((int) Math.Floor(rayQueryResult.Position.X),
+                                                        (int) Math.Floor(rayQueryResult.Position.Z))
                            : null;
             }
 
@@ -518,7 +485,7 @@ namespace MHUrho.WorldMap
                 mapIndexBuffer.Unlock();
             }
 
-            public void HighlightArea(IntRect rectangle) {
+            public void HighlightArea(IntRect rectangle, HighlightMode mode, Color color) {
 
                 if (highlight == null) {
                     highlight = mapNode.CreateComponent<CustomGeometry>();
@@ -528,31 +495,21 @@ namespace MHUrho.WorldMap
                 }
                 highlight.Enabled = true;
 
-                highlight.BeginGeometry(0, PrimitiveType.LineStrip);
 
-                //Top side
-                for (int x = rectangle.Left; x <= rectangle.Right; x++) {
-                    highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
-                    highlight.DefineColor(Color.Green);
+                switch (mode) {
+                    case HighlightMode.None:
+                        DisableHighlight();
+                        break;
+                    case HighlightMode.Borders:
+                        HighlightBorder(rectangle, color);
+                        break;
+                    case HighlightMode.Full:
+                        HighlightFullRectangle(rectangle, color);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown Highlight mode");
                 }
 
-                //Right side
-                for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
-                    highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
-                    highlight.DefineColor(Color.Green);
-                }
-
-                //Bottom side
-                for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
-                    highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
-                    highlight.DefineColor(Color.Green);
-                }
-
-                //Left side
-                for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
-                    highlight.DefineVertex(new Vector3(rectangle.Left, map.GetHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
-                    highlight.DefineColor(Color.Green);
-                }
 
                 highlight.Commit();
             }
@@ -640,33 +597,18 @@ namespace MHUrho.WorldMap
                     TileInIB* inBuff = (TileInIB*)ibPointer.ToPointer();
 
                     int vertexIndex = 0;
-                    for (int i = 0; i < tiles.Length; i++) {
-
-
-                        ITile tile = tiles[i];
-                        TileInVB val;
-
-                        if (map.IsBorder(tile.Location.X, tile.Location.Y)) {
-                            var borderTile = (BorderTile)tile;
-                            if (borderTile.BorderType == BorderType.None) {
-                                throw new Exception("Implementation error, value should not be None");
-                            }
-
-                            val = TileInVB.BorderTile(borderTile);
-                        }
-                        else {
-                            val = TileInVB.InnerTile(tiles, i, map.WidthWithBorders);
-                        }
+                    foreach (var tile in tiles) {
+                        var tileInVB = new TileInVB(tile);
 
                         //Create verticies
-                        *(verBuff++) = val;
+                        * (verBuff++) = tileInVB;
 
                         //Connect verticies to triangles        
                         *(inBuff++) = new TileInIB((short) (vertexIndex + 0),
                                                    (short) (vertexIndex + 1),
                                                    (short) (vertexIndex + 2),
                                                    (short) (vertexIndex + 3),
-                                                   ref val);
+                                                   ref tileInVB);
 
                         vertexIndex += TileInVB.VerticiesPerTile;
                     }
@@ -720,8 +662,80 @@ namespace MHUrho.WorldMap
                 changedCorners.Add(cornerTiles);
             }
 
+            private void HighlightBorder(IntRect rectangle, Color color) {
+                highlight.BeginGeometry(0, PrimitiveType.LineStrip);
 
-            
+                //Top side
+                for (int x = rectangle.Left; x <= rectangle.Right; x++) {
+                    highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
+                    highlight.DefineColor(color);
+                }
+
+                //Right side
+                for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
+                    highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
+                    highlight.DefineColor(color);
+                }
+
+                //Bottom side
+                for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
+                    highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
+                    highlight.DefineColor(color);
+                }
+
+                //Left side
+                for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
+                    highlight.DefineVertex(new Vector3(rectangle.Left, map.GetHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
+                    highlight.DefineColor(color);
+                }
+            }
+
+            private void HighlightFullRectangle(IntRect rectangle, Color color) {
+                //I need triangle list because the tiles can be split in two different ways
+                // topLeft to bottomRight or topRight to bottomLeft
+                highlight.BeginGeometry(0, PrimitiveType.TriangleList);
+
+                map.ForEachInRectangle(rectangle, (tile) => {
+                                                      if (map.IsTileSplitFromTopLeftToBottomRight(tile)) {
+                                                          DefineTopLeftBotRightSplitTile(highlight, tile, color);
+                                                      }
+                                                      else {
+                                                          DefineTopRightBotLeftSplitTile(highlight, tile, color);
+                                                      }
+                                                  });
+            }
+
+            private void DefineTopLeftBotRightSplitTile(CustomGeometry geometry, ITile tile, Color color) {
+                geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.BottomRight3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+
+                geometry.DefineVertex(tile.BottomRight3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+            }
+
+            private void DefineTopRightBotLeftSplitTile(CustomGeometry geometry, ITile tile, Color color) {
+                geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+
+                geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.BottomRight3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+                geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
+                geometry.DefineColor(color);
+            }
         }
 
     }

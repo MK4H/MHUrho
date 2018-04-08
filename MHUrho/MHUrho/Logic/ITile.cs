@@ -48,11 +48,18 @@ namespace MHUrho.Logic
         /// </summary>
         IntRect MapArea { get; }
 
-
         /// <summary>
-        /// Location in the Map matrix
+        /// Index into map matrix
         /// </summary>
-        IntVector2 Location { get; }
+        IntVector2 MapLocation { get; }
+
+        IntVector2 TopLeft { get; }
+
+        IntVector2 TopRight { get; }
+
+        IntVector2 BottomLeft { get; }
+
+        IntVector2 BottomRight { get; }
 
         /// <summary>
         /// Coords of the center of the tile
@@ -64,12 +71,25 @@ namespace MHUrho.Logic
         /// </summary>
         Vector3 Center3 { get; }
 
+        Vector3 TopLeft3 { get; }
+
+        Vector3 TopRight3 { get; }
+
+        Vector3 BottomLeft3 { get; }
+
+        Vector3 BottomRight3 { get; }
 
         //TODO: Maybe height for every corner
         /// <summary>
         /// Heigth of the top left corner of the tile
         /// </summary>
-        float Height { get; }
+        float TopLeftHeight { get; }
+
+        float TopRightHeight { get; }
+
+        float BottomLeftHeight { get; }
+
+        float BottomRightHeight { get; }
 
         Map Map { get; }
 
@@ -111,17 +131,17 @@ namespace MHUrho.Logic
         /// If you want to change height, go through <see cref="Map.ChangeTileHeight(ITile, float)"/>
         /// </summary>
         /// <param name="heightDelta"></param>
-        /// <param name="signalNeighbours">If <see cref="ChangeHeight(float, bool)"/> should signal neighbours automatically
+        /// <param name="signalNeighbours">If <see cref="ChangeTopLeftHeight"/> should signal neighbours automatically
         /// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-        void ChangeHeight(float heightDelta, bool signalNeighbours = true);
+        void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true);
 
         /// <summary>
         /// Sets the height of the top left corner of the tile to <paramref name="newHeight"/>
         /// </summary>
         /// <param name="newHeight">the height to set</param>
-        /// <param name="signalNeighbours">If <see cref="SetHeight(float, bool)"/> should signal neighbours automatically
+        /// <param name="signalNeighbours">If <see cref="SetTopLeftHeight"/> should signal neighbours automatically
         /// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-        void SetHeight(float newHeight, bool signalNeighbours = true);
+        void SetTopLeftHeight(float newHeight, bool signalNeighbours = true);
 
         /// <summary>
         /// Is called every time any of the 4 corners of the tile change height

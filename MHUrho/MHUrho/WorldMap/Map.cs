@@ -55,14 +55,30 @@ namespace MHUrho.WorldMap
 
             public IntRect MapArea { get; private set; }
 
+            public IntVector2 MapLocation => TopLeft;
+
             /// <summary>
             /// Location in the Map matrix
             /// </summary>
-            public IntVector2 Location => new IntVector2(MapArea.Left, MapArea.Top);
+            public IntVector2 TopLeft => new IntVector2(MapArea.Left, MapArea.Top);
 
-            public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
+            public IntVector2 TopRight => new IntVector2(MapArea.Right, MapArea.Top);
+
+            public IntVector2 BottomLeft => new IntVector2(MapArea.Left, MapArea.Bottom);
+
+            public IntVector2 BottomRight => new IntVector2(MapArea.Right, MapArea.Bottom);
+
+            public Vector2 Center => new Vector2(MapArea.Left + 0.5f, MapArea.Top + 0.5f);
 
             public Vector3 Center3 => new Vector3(Center.X, Map.GetHeightAt(Center), Center.Y);
+
+            public Vector3 TopLeft3 => new Vector3(MapArea.Left, Map.GetHeightAt(MapArea.Left, MapArea.Top), MapArea.Top);
+
+            public Vector3 TopRight3 => new Vector3(MapArea.Right, Map.GetHeightAt(MapArea.Right, MapArea.Top), MapArea.Top);
+
+            public Vector3 BottomLeft3 => new Vector3(MapArea.Left, Map.GetHeightAt(MapArea.Left, MapArea.Bottom), MapArea.Bottom);
+
+            public Vector3 BottomRight3 => new Vector3(MapArea.Right, Map.GetHeightAt(MapArea.Right, MapArea.Bottom), MapArea.Bottom);
 
             public Map Map { get; private set; }
 
@@ -74,8 +90,8 @@ namespace MHUrho.WorldMap
             //TODO: WHEN SETTING THESE CORNERHEIGHTCHANGE is NOT called
             public float TopLeftHeight { get; set; }
             public float TopRightHeight { get; set; }
-            public float BotLeftHeight { get; set; }
-            public float BotRightHeight { get; set; }
+            public float BottomLeftHeight { get; set; }
+            public float BottomRightHeight { get; set; }
 
             public BorderType BorderType { get; private set; }
 
@@ -113,12 +129,12 @@ namespace MHUrho.WorldMap
 
             public StBorderTile Save() {
                 var stBorderTile = new StBorderTile();
-                stBorderTile.Position = new StIntVector2 { X = Location.X, Y = Location.Y };
+                stBorderTile.TopLeftPosition = TopLeft.ToStIntVector2();
                 stBorderTile.TileTypeID = Type.ID;
                 stBorderTile.TopLeftHeight = TopLeftHeight;
                 stBorderTile.TopRightHeight = TopRightHeight;
-                stBorderTile.BotLeftHeight = BotLeftHeight;
-                stBorderTile.BotRightHeight = BotRightHeight;
+                stBorderTile.BotLeftHeight = BottomLeftHeight;
+                stBorderTile.BotRightHeight = BottomRightHeight;
 
                 return stBorderTile;
             }
@@ -127,17 +143,17 @@ namespace MHUrho.WorldMap
                 Type = newType;
             }
 
-            public void ChangeHeight(float heightDelta, bool signalNeighbours = true) {
+            public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true) {
                 Height += heightDelta;
                 if (signalNeighbours) {
-                    Map.ForEachAroundCorner(Location, (tile) => { tile.CornerHeightChange(); });
+                    Map.ForEachAroundCorner(MapLocation, (tile) => { tile.CornerHeightChange(); });
                 }
             }
 
-            public void SetHeight(float newHeight, bool signalNeighbours = true) {
+            public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true) {
                 Height = newHeight;
                 if (signalNeighbours) {
-                    Map.ForEachAroundCorner(Location, (tile) => { tile.CornerHeightChange(); });
+                    Map.ForEachAroundCorner(MapLocation, (tile) => { tile.CornerHeightChange(); });
                 }
             }
 
@@ -151,13 +167,16 @@ namespace MHUrho.WorldMap
 
             public BorderTile(StBorderTile stBorderTile, Map map) {
                 this.storage = stBorderTile;
-                this.MapArea = new IntRect(stBorderTile.Position.X, stBorderTile.Position.Y, stBorderTile.Position.X + 1, stBorderTile.Position.Y + 1);
+                this.MapArea = new IntRect(stBorderTile.TopLeftPosition.X, 
+                                           stBorderTile.TopLeftPosition.Y, 
+                                           stBorderTile.TopLeftPosition.X + 1, 
+                                           stBorderTile.TopLeftPosition.Y + 1);
                 this.TopLeftHeight = stBorderTile.TopLeftHeight;
                 this.TopRightHeight = stBorderTile.TopRightHeight;
-                this.BotLeftHeight = stBorderTile.BotLeftHeight;
-                this.BotRightHeight = stBorderTile.BotRightHeight;
+                this.BottomLeftHeight = stBorderTile.BotLeftHeight;
+                this.BottomRightHeight = stBorderTile.BotRightHeight;
                 this.Map = map;
-                BorderType = map.GetBorderType(this.Location);
+                BorderType = map.GetBorderType(this.MapLocation);
             }
 
             public BorderTile(int x, int y, TileType tileType, BorderType borderType, Map map) {
@@ -166,8 +185,8 @@ namespace MHUrho.WorldMap
                 this.BorderType = borderType;
                 this.TopLeftHeight = 0;
                 this.TopRightHeight = 0;
-                this.BotLeftHeight = 0;
-                this.BotRightHeight = 0;
+                this.BottomLeftHeight = 0;
+                this.BottomRightHeight = 0;
                 this.Map = map;
             }
         }
@@ -351,7 +370,7 @@ namespace MHUrho.WorldMap
             var storedBorderTiles = storedMap.BorderTiles;
 
             foreach (var tile in tiles) {
-                if (IsBorder(tile.Location)) {
+                if (IsBorder(tile.MapLocation)) {
                     storedBorderTiles.Add(((BorderTile)tile).Save());
                 }
                 else {
@@ -380,61 +399,6 @@ namespace MHUrho.WorldMap
 
             this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
             this.pathFind = new AStar(this);
-        }
-
-        internal static Map CreateTestMap(ITile[] newTiles, IntVector2 size) {
-            return new Map(newTiles, size);
-        }
-
-        //TODO: THIS, ITS STILL BROKEN
-        private Map(ITile[] tiles, IntVector2 size) {
-            this.tiles = new ITile[size.X + 2 + size.Y + 2];
-            this.TopLeft = new IntVector2(1, 1);
-            this.BottomRight = new IntVector2(size.X - 1, size.Y - 1);
-
-            Array.Copy(tiles, 0, this.tiles, GetTileIndex(TopLeft), tiles.Length);
-
-
-            for (int x = LeftWithBorders + 1; x < RightWithBorders; x++) {
-
-                tiles[GetTileIndex(x, TopWithBorders)] =
-                    new BorderTile(x, TopWithBorders, null, BorderType.None, this) 
-                    {
-                        BotLeftHeight = GetHeightAt(x, TopWithBorders + 1),
-                        BotRightHeight = GetHeightAt(x + 1, TopWithBorders + 1)
-                                                                                 
-                    };
-
-            }
-
-            for (int y = TopWithBorders + 1; y < BottomWithBorders; y++) {
-                tiles[GetTileIndex(LeftWithBorders, y)] =
-                    new BorderTile(LeftWithBorders, y, null, BorderType.None, this) 
-                    {
-                        TopRightHeight = GetHeightAt(LeftWithBorders + 1, y),
-                        BotRightHeight = GetHeightAt(LeftWithBorders + 1, y + 1)
-                    };
-            }
-
-            for (int y = TopWithBorders + 1; y < BottomWithBorders; y++) {
-                tiles[GetTileIndex(RightWithBorders, y)] =
-                    new BorderTile(RightWithBorders, y, null, BorderType.None, this) 
-                    {
-                        TopLeftHeight = GetHeightAt(RightWithBorders,y),
-                        BotLeftHeight = GetHeightAt(RightWithBorders,y + 1)
-                    };
-            }
-
-            for (int x = LeftWithBorders + 1; x < RightWithBorders; x++) {
-
-                tiles[GetTileIndex(x, BottomWithBorders)] =
-                    new BorderTile(x, BottomWithBorders, null, BorderType.None, this) 
-                    {
-                        TopLeftHeight = GetHeightAt(x, BottomWithBorders),
-                        TopRightHeight = GetHeightAt(x + 1, BottomWithBorders)
-
-                    };
-            }
         }
 
         public bool IsInside(int x, int y) {
@@ -541,26 +505,44 @@ namespace MHUrho.WorldMap
             return WhereIsY(vector.Y);
         }
 
-        /// <summary>
-        /// Gets tile at the coordinates [x,y] or null if [x,y] are outside the playfield
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns>the tile at [x,y] or null if [x,y] are out of the playfield</returns>
-        public ITile GetTile(int x, int y) {
-            if (IsInside(x, y)) {
-                return tiles[GetTileIndex(x, y)];
-            }
-            return null;
+        public ITile GetTileByMapLocation(int x, int y) {
+            return GetTileByTopLeftCorner(x, y);
         }
 
-        /// <summary>
-        /// Gets tile at the coordinates [x,y] or null if [x,y] are outside the playfield
-        /// </summary>
-        /// <param name="coordinates"></param>
-        /// <returns>the tile at [x,y] or null if [x,y] are out of the playfield</returns>
-        public ITile GetTile(IntVector2 coordinates) {
-            return GetTile(coordinates.X, coordinates.Y);
+        public ITile GetTileByMapLocation(IntVector2 mapLocation) {
+            return GetTileByTopLeftCorner(mapLocation);
+        }
+
+        public ITile GetTileByTopLeftCorner(int x, int y) {
+            return IsInside(x, y) ? tiles[GetTileIndex(x, y)] : null;
+        }
+
+        public ITile GetTileByTopLeftCorner(IntVector2 topLeftCorner) {
+            return GetTileByTopLeftCorner(topLeftCorner.X, topLeftCorner.Y);
+        }
+
+        public ITile GetTileByTopRightCorner(int x, int y) {
+            return GetTileByTopLeftCorner(x - 1, y);
+        }
+
+        public ITile GetTileByTopRightCorner(IntVector2 topRightCorner) {
+            return GetTileByTopRightCorner(topRightCorner.X, topRightCorner.Y);
+        }
+
+        public ITile GetTileByBottomLeftCorner(int x, int y) {
+            return GetTileByTopLeftCorner(x, y - 1);
+        }
+
+        public ITile GetTileByBottomLeftCorner(IntVector2 bottomLeftCorner) {
+            return GetTileByBottomLeftCorner(bottomLeftCorner.X, bottomLeftCorner.Y);
+        }
+
+        public ITile GetTileByBottomRightCorner(int x, int y) {
+            return GetTileByTopLeftCorner(x - 1, y - 1);
+        }
+
+        public ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner) {
+            return GetTileByBottomRightCorner(bottomRightCorner.X, bottomRightCorner.Y);
         }
 
         /// <summary>
@@ -679,15 +661,15 @@ namespace MHUrho.WorldMap
             while (true) {
                 for (int dx = -dist; dx < dist + 1; dx++) {
                     for (int dy = -dist; dy < dist + 1; dy++) {
-                        IntVector2 pos = closestTo.Location;
+                        IntVector2 pos = closestTo.MapLocation;
                         pos.X += dx;
                         pos.Y += dy;
                         if (!IsInside(pos)) {
                             continue;
                         }
 
-                        if (GetTile(pos).Unit == null) {
-                            return GetTile(pos);
+                        if (GetTileByTopLeftCorner(pos).Unit == null) {
+                            return GetTileByTopLeftCorner(pos);
                         }
                     }
                 }
@@ -748,11 +730,11 @@ namespace MHUrho.WorldMap
             }
 
             tile.ChangeType(newType);
-            graphics.ChangeTileType(tile.Location, newType);
+            graphics.ChangeTileType(tile.MapLocation, newType);
         }
 
         public void ChangeTileType(ITile centerTile, IntVector2 rectangleSize, TileType newType) {
-            IntVector2 topLeft = centerTile.Location - (rectangleSize / 2);
+            IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
             IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1,1));
             SquishToMap(ref topLeft, ref bottomRight);
 
@@ -771,7 +753,7 @@ namespace MHUrho.WorldMap
         /// <param name="rectangleSize">Size of the rectangle in which the height changes</param>
         /// <param name="heightDelta">By how much should the hight change</param>
         public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, float heightDelta) {
-            IntVector2 topLeft = centerTile.Location - (rectangleSize / 2);
+            IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
             IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1, 1));
             SquishToMap(ref topLeft, ref bottomRight);
 
@@ -788,7 +770,7 @@ namespace MHUrho.WorldMap
                             if (x == topLeft.X) {
                                 if (y == topLeft.Y) {
                                     //Top left corner tile 
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight += heightDelta;
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight += heightDelta;
 
                                 }
                                 else if (y == bottomRight.Y) {
@@ -798,13 +780,13 @@ namespace MHUrho.WorldMap
                                 else {
                                     //left side tile
                                     ((BorderTile)GetTileWithBorders(x, y)).TopRightHeight += heightDelta;
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight += heightDelta;
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight += heightDelta;
                                 }
                             }
                             else if (x == bottomRight.X) {
                                 if (y == topLeft.Y) {
                                     //top right corner tile
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight += heightDelta;
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight += heightDelta;
                                 }
                                 else if (y == bottomRight.Y) {
                                     //bottom right corner tile
@@ -813,13 +795,13 @@ namespace MHUrho.WorldMap
                                 else {
                                     //right side tile
                                     ((BorderTile)GetTileWithBorders(x, y)).TopLeftHeight += heightDelta;
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight += heightDelta;
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight += heightDelta;
                                 }
                             }
                             else if (y == topLeft.Y) {
                                 //top side tile
-                                ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight += heightDelta;
-                                ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight += heightDelta;
+                                ((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight += heightDelta;
+                                ((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight += heightDelta;
                             }
                             else if (y == bottomRight.Y) {
                                 //bottom side tile
@@ -835,13 +817,13 @@ namespace MHUrho.WorldMap
                                  (y == bottomRight.Y && x != topLeft.X)) {
                             //Only the right side tiles need to change on the border if they are normal inner tiles
                             // excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
-                            GetTile(x, y).ChangeHeight(heightDelta, false);
+                            GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta, false);
                         } 
                     }
                     else {
                         //inner tile
                         Debug.Assert(!IsBorder(x, y));
-                        GetTile(x, y).ChangeHeight(heightDelta, false);
+                        GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta, false);
                     }
                 }
             }
@@ -857,7 +839,7 @@ namespace MHUrho.WorldMap
                                      ChangeTileHeightDelegate newHeightFunction) {
 
             //COPYING IS FREQUENT SOURCE OF ERRORS
-            IntVector2 topLeft = centerTile.Location - (rectangleSize / 2);
+            IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
             IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1, 1));
             SquishToMap(ref topLeft, ref bottomRight);
 
@@ -874,8 +856,8 @@ namespace MHUrho.WorldMap
                             if (x == topLeft.X) {
                                 if (y == topLeft.Y) {
                                     //Top left corner tile 
-                                    ((BorderTile) GetTileWithBorders(x, y)).BotRightHeight =
-                                        newHeightFunction(((BorderTile) GetTileWithBorders(x, y)).BotRightHeight, 
+                                    ((BorderTile) GetTileWithBorders(x, y)).BottomRightHeight =
+                                        newHeightFunction(((BorderTile) GetTileWithBorders(x, y)).BottomRightHeight, 
                                                           x + 1,
                                                           y + 1);
 
@@ -893,8 +875,8 @@ namespace MHUrho.WorldMap
                                         newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopRightHeight,
                                                           x + 1,
                                                           y);
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight =
-                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotRightHeight,
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight =
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight,
                                                           x + 1,
                                                           y + 1);
                                 }
@@ -902,8 +884,8 @@ namespace MHUrho.WorldMap
                             else if (x == bottomRight.X) {
                                 if (y == topLeft.Y) {
                                     //top right corner tile
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight = 
-                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight,
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight = 
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight,
                                                           x,
                                                           y - 1);
                                 }
@@ -920,20 +902,20 @@ namespace MHUrho.WorldMap
                                         newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).TopLeftHeight,
                                                           x,
                                                           y);
-                                    ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight =
-                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight,
+                                    ((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight =
+                                        newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight,
                                                           x,
                                                           y - 1);
                                 }
                             }
                             else if (y == topLeft.Y) {
                                 //top side tile
-                                ((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight =
-                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotLeftHeight,
+                                ((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight =
+                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BottomLeftHeight,
                                                       x,
                                                       y - 1);
-                                ((BorderTile)GetTileWithBorders(x, y)).BotRightHeight =
-                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BotRightHeight,
+                                ((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight =
+                                    newHeightFunction(((BorderTile)GetTileWithBorders(x, y)).BottomRightHeight,
                                                       x + 1,
                                                       y + 1);
                             }
@@ -957,15 +939,15 @@ namespace MHUrho.WorldMap
                                  (y == bottomRight.Y && x != topLeft.X)) {
                             //Only the right side tiles need to change on the border if they are normal inner tiles
                             // excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
-                            ITile tile = GetTile(x, y);
-                            tile.SetHeight(newHeightFunction(tile.Height, x, y), false);
+                            ITile tile = GetTileByTopLeftCorner(x, y);
+                            tile.SetTopLeftHeight(newHeightFunction(tile.TopLeftHeight, x, y), false);
                         }
                     }
                     else {
                         //inner tile
                         Debug.Assert(!IsBorder(x, y));
-                        ITile tile = GetTile(x, y);
-                        tile.SetHeight(newHeightFunction(tile.Height, x, y), false);
+                        ITile tile = GetTileByTopLeftCorner(x, y);
+                        tile.SetTopLeftHeight(newHeightFunction(tile.TopLeftHeight, x, y), false);
                     }
                 }
             }
@@ -979,7 +961,7 @@ namespace MHUrho.WorldMap
         public float GetHeightAt(int x, int y) {
             ITile tile;
             if ((tile = GetTileWithBorders(x,y)) != null) {
-                return tile.Height;
+                return tile.TopLeftHeight;
             }
 
             BorderTile bTile;
@@ -988,11 +970,11 @@ namespace MHUrho.WorldMap
             }
 
             if ((bTile = (BorderTile)TileByBottomLeftCorner(new IntVector2(x, y), true)) != null) {
-                return bTile.BotLeftHeight;
+                return bTile.BottomLeftHeight;
             }
 
             if ((bTile = (BorderTile)TileByBottomRightCorner(new IntVector2(x, y), true)) != null) {
-                return bTile.BotRightHeight;
+                return bTile.BottomRightHeight;
             }
 
             throw new ArgumentOutOfRangeException($"Point [{x},{y}] is not inside the map, even with borders");
@@ -1100,15 +1082,15 @@ namespace MHUrho.WorldMap
             }
         } 
 
-        public void HighlightArea(ITile center, IntVector2 size) {
-            IntVector2 topLeft = center.Location - (size / 2);
-            IntVector2 bottomRight = center.Location + (size / 2);
-            HighlightArea(topLeft, bottomRight);
+        public void HighlightArea(ITile center, IntVector2 size, HighlightMode mode, Color color) {
+            IntVector2 topLeft = center.TopLeft - (size / 2);
+            IntVector2 bottomRight = center.TopLeft + (size / 2);
+            HighlightArea(topLeft, bottomRight, mode, color);
         }
 
-        public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight) {
+        public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, HighlightMode mode, Color color) {
             SquishToMap(ref topLeft, ref bottomRight);
-            graphics.HighlightArea(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y));
+            graphics.HighlightArea(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), mode, color);
         }
 
         public void DisableHighlight() {
@@ -1120,21 +1102,21 @@ namespace MHUrho.WorldMap
             foreach (var tileCorner in tileCorners) {
                 if (!IsBorderCorner(tileCorner)) {
                     //Just need to change one value in the tile with this corner as topLeft corner
-                    ITile tile = GetTile(tileCorner);
+                    ITile tile = GetTileByTopLeftCorner(tileCorner);
 
                     Debug.Assert(tile != null, "tile corner was in the list while being outside the map");
-                    tile?.ChangeHeight(heightDelta);
+                    tile?.ChangeTopLeftHeight(heightDelta);
                 }
                 else {
                     //Change the height of all 4 tiles containing this corner
                     ITile tile = TileByBottomRightCorner(tileCorner, true);
                     if (tile != null && IsBorder(tile)) {
-                        ((BorderTile) tile).BotRightHeight += heightDelta;
+                        ((BorderTile) tile).BottomRightHeight += heightDelta;
                     }
 
                     tile = TileByBottomLeftCorner(tileCorner, true);
                     if (tile != null && IsBorder(tile)) {
-                        ((BorderTile) tile).BotLeftHeight += heightDelta;
+                        ((BorderTile) tile).BottomLeftHeight += heightDelta;
                     }
 
                     tile = TileByTopRightCorner(tileCorner, true);
@@ -1145,7 +1127,7 @@ namespace MHUrho.WorldMap
                     tile = TileByTopLeftCorner(tileCorner, true);
                     //Because normal tiles contain height of their top left corner, we can just use 
                     // the default changeHeight method
-                    tile?.ChangeHeight(heightDelta);
+                    tile?.ChangeTopLeftHeight(heightDelta);
                 }
             }
 
@@ -1173,17 +1155,17 @@ namespace MHUrho.WorldMap
         public ITile GetContainingTile(Vector2 point) {
             int topLeftX = (int)Math.Floor(point.X);
             int topLeftZ = (int)Math.Floor(point.Y);
-            return GetTile(topLeftX, topLeftZ);
+            return GetTileByTopLeftCorner(topLeftX, topLeftZ);
         }
 
         public Path GetPath(Unit forUnit, ITile to) {
-            return new Path(pathFind.FindPath(forUnit, to.Location), to);
+            return new Path(pathFind.FindPath(forUnit, to.MapLocation), to);
         }
 
         public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
             for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
                 for (int x = topLeft.X; x <= bottomRight.X; x++) {
-                    var tile = GetTile(x, y);
+                    var tile = GetTileByTopLeftCorner(x, y);
                     if (tile != null) {
                         action(tile);
                     }
@@ -1236,7 +1218,7 @@ namespace MHUrho.WorldMap
         }
 
         private int GetTileIndex(ITile tile) {
-            return GetTileIndex(tile.Location);
+            return GetTileIndex(tile.MapLocation);
         }
 
      
@@ -1253,7 +1235,7 @@ namespace MHUrho.WorldMap
         }
 
         private bool IsBorder(ITile tile) {
-            return IsBorder(tile.Location);
+            return IsBorder(tile.MapLocation);
         }
 
         private BorderType GetBorderType(int x, int y) {
@@ -1325,7 +1307,12 @@ namespace MHUrho.WorldMap
         private bool IsRightBorder(IntVector2 location) {
             return IsRightBorder(location.X, location.Y);
         }
-
+        /// <summary>
+        /// Gets tile by topLeft corner coordinates
+        /// </summary>
+        /// <param name="x">top left corner X coord</param>
+        /// <param name="y">top left corner Y coord</param>
+        /// <returns></returns>
         private ITile GetTileWithBorders(int x, int y) {
             if (LeftWithBorders <= x &&
                 x <= RightWithBorders &&
@@ -1342,21 +1329,21 @@ namespace MHUrho.WorldMap
         }
 
         private ITile TileByTopLeftCorner(IntVector2 topLeftCorner, bool withBorders) {
-            return withBorders ? GetTileWithBorders(topLeftCorner) : GetTile(topLeftCorner);
+            return withBorders ? GetTileWithBorders(topLeftCorner) : GetTileByTopLeftCorner(topLeftCorner);
         }
 
         private ITile TileByTopRightCorner(IntVector2 topRightCorner, bool withBorders) {
             IntVector2 topLeft = topRightCorner + new IntVector2(-1, 0);
-            return withBorders ? GetTileWithBorders(topLeft) : GetTile(topLeft);
+            return withBorders ? GetTileWithBorders(topLeft) : GetTileByTopLeftCorner(topLeft);
         }
 
         private ITile TileByBottomLeftCorner(IntVector2 bottomLeftCorner, bool withBorders) {
             IntVector2 topLeft = bottomLeftCorner + new IntVector2(0, -1);
-            return withBorders ? GetTileWithBorders(topLeft) : GetTile(topLeft);
+            return withBorders ? GetTileWithBorders(topLeft) : GetTileByTopLeftCorner(topLeft);
         }
         private ITile TileByBottomRightCorner(IntVector2 bottomRightCorner, bool withBorders) {
             IntVector2 topLeft = bottomRightCorner + new IntVector2(-1, -1);
-            return withBorders ? GetTileWithBorders(topLeft) : GetTile(topLeft);
+            return withBorders ? GetTileWithBorders(topLeft) : GetTileByTopLeftCorner(topLeft);
         }
 
         private bool IsBorderCorner(int x, int y) {
@@ -1375,6 +1362,13 @@ namespace MHUrho.WorldMap
                                                          float bottomLeftHeight,
                                                          float bottomRightHeight) {
             return topLeftHeight + bottomRightHeight >= topRightHeight + bottomLeftHeight;
+        }
+
+        private bool IsTileSplitFromTopLeftToBottomRight(ITile tile) {
+            return IsTileSplitFromTopLeftToBottomRight(tile.TopLeftHeight,
+                                                       tile.TopRightHeight,
+                                                       tile.BottomLeftHeight,
+                                                       tile.BottomRightHeight);
         }
     }
 }

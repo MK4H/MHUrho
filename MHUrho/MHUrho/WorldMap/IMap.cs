@@ -38,12 +38,20 @@ namespace MHUrho.WorldMap {
         /// </summary>
         int Bottom { get; }
 
+        bool IsInside(int x, int y);
+
+        bool IsInside(float x, float y);
+
         /// <summary>
         /// Checks if the point is inside the map, which means it could be used for indexing into the map
         /// </summary>
         /// <param name="point">the point to check</param>
         /// <returns>True if it is inside, False if not</returns>
         bool IsInside(IntVector2 point);
+
+        bool IsInside(Vector2 point);
+
+        bool IsInside(Vector3 point);
 
         bool IsXInside(int x);
         bool IsXInside(IntVector2 vector);
@@ -78,20 +86,25 @@ namespace MHUrho.WorldMap {
         /// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
         int WhereIsY(IntVector2 vector);
 
-        /// <summary>
-        /// Gets tile at the coordinates [x,y]
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns>the tile at [x,y]</returns>
-        ITile GetTile(int x, int y);
+        ITile GetTileByMapLocation(int x, int y);
 
-        /// <summary>
-        /// Gets tile at the coordinates
-        /// </summary>
-        /// <param name="coordinates"></param>
-        /// <returns>the tile at [X,Y]</returns>
-        ITile GetTile(IntVector2 coordinates);
+        ITile GetTileByMapLocation(IntVector2 mapLocation);
+
+        ITile GetTileByTopLeftCorner(int x, int y);
+
+        ITile GetTileByTopLeftCorner(IntVector2 topLeftCorner);
+
+        ITile GetTileByTopRightCorner(int x, int y);
+
+        ITile GetTileByTopRightCorner(IntVector2 topRightCorner);
+
+        ITile GetTileByBottomLeftCorner(int x, int y);
+
+        ITile GetTileByBottomLeftCorner(IntVector2 bottomLeftCorner);
+
+        ITile GetTileByBottomRightCorner(int x, int y);
+
+        ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner);
 
         /// <summary>
         /// Moves the rectangle defined by topLeft and bottomRight corners so that
@@ -122,10 +135,12 @@ namespace MHUrho.WorldMap {
         /// </summary>
         /// <param name="center">Tile at the center of the rectangle</param>
         /// <param name="size">Size of the highlighted rectangle</param>
-        void HighlightArea(ITile center, IntVector2 size);
+        void HighlightArea(ITile center, IntVector2 size, HighlightMode mode, Color color);
+
+        void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, HighlightMode mode, Color color);
 
         /// <summary>
-        /// Hides highlight displayed by HighlightArea <see cref="HighlightArea(ITile, IntVector2)"/>
+        /// Hides highlight displayed by HighlightArea <see cref="HighlightArea(IntVector2, IntVector2, HighlightMode, Color)"/> or <see cref="HighlightArea(ITile, IntVector2, HighlightMode, Color)"/>
         /// </summary>
         void DisableHighlight();
 

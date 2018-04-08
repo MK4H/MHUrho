@@ -61,7 +61,7 @@ namespace MHUrho.UnitComponents
             ITile target = null;
             if (activated) {
                 path = indexedData.Get<Path>(2);
-                target = level.Map.GetTile(indexedData.Get<IntVector2>(3));
+                target = level.Map.GetTileByMapLocation(indexedData.Get<IntVector2>(3));
             }
 
             return new WorldWalker(level, activated, path, target);
@@ -73,7 +73,7 @@ namespace MHUrho.UnitComponents
                 storageData.Store(1, true);
 
                 storageData.Store(2, path);
-                storageData.Store(3, nextTile.Location);
+                storageData.Store(3, nextTile.MapLocation);
             }
             else {
                 storageData.Store(1, false);
@@ -93,7 +93,7 @@ namespace MHUrho.UnitComponents
                 throw new ArgumentException("Given path could not be enumerated");
             }
 
-            nextTile = map.GetTile(path.Current);
+            nextTile = map.GetTileByMapLocation(path.Current);
             nextWaypoint = nextTile.Center3;
 
             nextWaypoint = GetNextWaypoint();
@@ -112,7 +112,7 @@ namespace MHUrho.UnitComponents
         }
 
         public bool GoTo(IntVector2 location) {
-            return GoTo(map.GetTile(location));
+            return GoTo(map.GetTileByMapLocation(location));
         }
 
 
@@ -219,7 +219,7 @@ namespace MHUrho.UnitComponents
                     return new Vector3();
                 }
 
-                nextTile = map.GetTile(path.Current);
+                nextTile = map.GetTileByMapLocation(path.Current);
                 var nextWaypointXZ = (nextWaypoint.XZ2() + nextTile.Center) / 2;
 
                 return new Vector3(nextWaypointXZ.X, map.GetHeightAt(nextWaypointXZ), nextWaypointXZ.Y);

@@ -71,8 +71,8 @@ namespace MHUrho.EditorTools
             var tile = input.GetTileUnderCursor();
             //TODO: Raycast into a plane and get point even outside the map
             if (tile != null) {
-                mouseDownPos = tile.Location;
-                lastMousePos = tile.Location;
+                mouseDownPos = tile.MapLocation;
+                lastMousePos = tile.MapLocation;
                 validMouseDown = true;
                 rectangle = false;
             }
@@ -92,7 +92,7 @@ namespace MHUrho.EditorTools
             else {
                 IntVector2 topLeft, bottomRight;
                 if (tile != null) {
-                    var endTilePos = tile.Location;
+                    var endTilePos = tile.MapLocation;
                     topLeft = new IntVector2(Math.Min(mouseDownPos.X, endTilePos.X),
                                                  Math.Min(mouseDownPos.Y, endTilePos.Y));
                     bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
@@ -127,15 +127,15 @@ namespace MHUrho.EditorTools
             }
 
            
-            if (validMouseDown && tile.Location != mouseDownPos) {
-                var endTilePos = tile.Location;
+            if (validMouseDown && tile.MapLocation != mouseDownPos) {
+                var endTilePos = tile.MapLocation;
                 var topLeft = new IntVector2(Math.Min(mouseDownPos.X, endTilePos.X),
                                              Math.Min(mouseDownPos.Y, endTilePos.Y));
                 var bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
                                                  Math.Max(mouseDownPos.Y, endTilePos.Y));
 
-                map.HighlightArea(topLeft, bottomRight);
-                lastMousePos = tile.Location;
+                map.HighlightArea(topLeft, bottomRight,WorldMap.HighlightMode.Full, Color.Green);
+                lastMousePos = tile.MapLocation;
                 rectangle = true;
             }
         }

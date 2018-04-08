@@ -98,8 +98,8 @@ namespace MHUrho.EditorTools
             if (selected != null) {
                 var tile = input.GetTileUnderCursor();
                 //TODO: Rectangle
-                if (tile != null && buildingTypeButtons[selected].CanBuildAt(tile.Location)) {
-                    LevelManager.CurrentLevel.BuildBuilding(buildingTypeButtons[selected], tile.Location, input.Player);
+                if (tile != null && buildingTypeButtons[selected].CanBuildAt(tile.MapLocation)) {
+                    LevelManager.CurrentLevel.BuildBuilding(buildingTypeButtons[selected], tile.MapLocation, input.Player);
                 }
                 else {
                     //TODO: Change cursor

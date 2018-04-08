@@ -34,45 +34,45 @@ namespace MHUrho.Storage {
             "dG9yYWdlLlN0RW50aXR5VHlwZRIzCg1idWlsZGluZ1R5cGVzGAQgAygLMhwu",
             "TUhVcmhvLlN0b3JhZ2UuU3RFbnRpdHlUeXBlEjUKD3Byb2plY3RpbGVUeXBl",
             "cxgFIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0RW50aXR5VHlwZSIlCglTdFBh",
-            "Y2thZ2USCgoCSUQYASABKAUSDAoEbmFtZRgCIAEoCSKcAQoGU3RUaWxlEg4K",
+            "Y2thZ2USCgoCSUQYASABKAUSDAoEbmFtZRgCIAEoCSKjAQoGU3RUaWxlEg4K",
             "BnVuaXRJRBgBIAEoBRIWCg5wYXNzaW5nVW5pdElEcxgCIAMoBRISCgp0aWxl",
-            "VHlwZUlEGAMgASgFEi4KCHBvc2l0aW9uGAQgASgLMhwuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RJbnRWZWN0b3IyEg4KBmhlaWdodBgFIAEoAhIWCg5zcGxpdERpcmVj",
-            "dGlvbhgGIAEoCCLIAQoMU3RCb3JkZXJUaWxlEhIKCnRpbGVUeXBlSUQYASAB",
-            "KAUSLgoIcG9zaXRpb24YAiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZl",
-            "Y3RvcjISFQoNdG9wTGVmdEhlaWdodBgDIAEoAhIWCg50b3BSaWdodEhlaWdo",
-            "dBgEIAEoAhIVCg1ib3RMZWZ0SGVpZ2h0GAUgASgCEhYKDmJvdFJpZ2h0SGVp",
-            "Z2h0GAYgASgCEhYKDnNwbGl0RGlyZWN0aW9uGAcgASgIItICCgZTdFVuaXQS",
-            "CgoCaWQYASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgL",
-            "MhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgF",
-            "EhQKDHRhcmdldFVuaXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhou",
-            "TUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50",
-            "RGF0YRgHIAMoCzIwLk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29t",
-            "cG9uZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkS",
-            "CwoDa2V5GAEgASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2Uu",
-            "UGx1Z2luRGF0YToCOAEixwIKClN0QnVpbGRpbmcSCgoCaWQYASABKAUSDgoG",
-            "dHlwZUlEGAIgASgFEi4KCGxvY2F0aW9uGAMgASgLMhwuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RJbnRWZWN0b3IyEhAKCHBsYXllcklEGAQgASgFEi4KCnVzZXJQbHVn",
-            "aW4YBiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhElIKFGRlZmF1",
-            "bHRDb21wb25lbnREYXRhGAcgAygLMjQuTUhVcmhvLlN0b3JhZ2UuU3RCdWls",
-            "ZGluZy5EZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21w",
-            "b25lbnREYXRhRW50cnkSCwoDa2V5GAEgASgFEikKBXZhbHVlGAIgASgLMhou",
-            "TUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YToCOAEiWwoIU3RQbGF5ZXISEAoI",
-            "cGxheWVySUQYASABKAUSDwoHdW5pdElEcxgCIAMoBRITCgtidWlsZGluZ0lE",
-            "cxgDIAMoBRIXCg9mcmllbmRQbGF5ZXJJRHMYBCADKAUijQEKBVN0TWFwEioK",
-            "BHNpemUYASABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISJQoF",
-            "dGlsZXMYAiADKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFRpbGUSMQoLYm9yZGVy",
-            "VGlsZXMYAyADKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEJvcmRlclRpbGUiPwoM",
-            "U3RFbnRpdHlUeXBlEhEKCXBhY2thZ2VJRBgBIAEoBRIOCgZ0eXBlSUQYAiAB",
-            "KAUSDAoEbmFtZRgDIAEoCWIGcHJvdG8z"));
+            "VHlwZUlEGAMgASgFEjUKD3RvcExlZnRQb3NpdGlvbhgEIAEoCzIcLk1IVXJo",
+            "by5TdG9yYWdlLlN0SW50VmVjdG9yMhIOCgZoZWlnaHQYBSABKAISFgoOc3Bs",
+            "aXREaXJlY3Rpb24YBiABKAgizwEKDFN0Qm9yZGVyVGlsZRISCgp0aWxlVHlw",
+            "ZUlEGAEgASgFEjUKD3RvcExlZnRQb3NpdGlvbhgCIAEoCzIcLk1IVXJoby5T",
+            "dG9yYWdlLlN0SW50VmVjdG9yMhIVCg10b3BMZWZ0SGVpZ2h0GAMgASgCEhYK",
+            "DnRvcFJpZ2h0SGVpZ2h0GAQgASgCEhUKDWJvdExlZnRIZWlnaHQYBSABKAIS",
+            "FgoOYm90UmlnaHRIZWlnaHQYBiABKAISFgoOc3BsaXREaXJlY3Rpb24YByAB",
+            "KAgi0gIKBlN0VW5pdBIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSKwoI",
+            "cG9zaXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMSEAoI",
+            "cGxheWVySUQYBCABKAUSFAoMdGFyZ2V0VW5pdElEGAUgASgFEi4KCnVzZXJQ",
+            "bHVnaW4YBiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhEk4KFGRl",
+            "ZmF1bHRDb21wb25lbnREYXRhGAcgAygLMjAuTUhVcmhvLlN0b3JhZ2UuU3RV",
+            "bml0LkRlZmF1bHRDb21wb25lbnREYXRhRW50cnkaVwoZRGVmYXVsdENvbXBv",
+            "bmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoFdmFsdWUYAiABKAsyGi5N",
+            "SFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASLHAgoKU3RCdWlsZGluZxIK",
+            "CgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSLgoIbG9jYXRpb24YAyABKAsy",
+            "HC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISEAoIcGxheWVySUQYBCAB",
+            "KAUSLgoKdXNlclBsdWdpbhgGIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdp",
+            "bkRhdGESUgoUZGVmYXVsdENvbXBvbmVudERhdGEYByADKAsyNC5NSFVyaG8u",
+            "U3RvcmFnZS5TdEJ1aWxkaW5nLkRlZmF1bHRDb21wb25lbnREYXRhRW50cnka",
+            "VwoZRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoF",
+            "dmFsdWUYAiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASJb",
+            "CghTdFBsYXllchIQCghwbGF5ZXJJRBgBIAEoBRIPCgd1bml0SURzGAIgAygF",
+            "EhMKC2J1aWxkaW5nSURzGAMgAygFEhcKD2ZyaWVuZFBsYXllcklEcxgEIAMo",
+            "BSKNAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0",
+            "SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIWLk1IVXJoby5TdG9yYWdlLlN0",
+            "VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0",
+            "Qm9yZGVyVGlsZSI/CgxTdEVudGl0eVR5cGUSEQoJcGFja2FnZUlEGAEgASgF",
+            "Eg4KBnR5cGVJRBgCIAEoBRIMCgRuYW1lGAMgASgJYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Players", "GameSpeed", "Packages" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackages), global::MHUrho.Storage.StPackages.Parser, new[]{ "Packages", "TileTypes", "UnitTypes", "BuildingTypes", "ProjectileTypes" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPackage), global::MHUrho.Storage.StPackage.Parser, new[]{ "ID", "Name" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "Position", "Height", "SplitDirection" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "Position", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "TopLeftPosition", "Height", "SplitDirection" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "PlayerID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs" }, null, null, null),
@@ -670,7 +670,7 @@ namespace MHUrho.Storage {
       unitID_ = other.unitID_;
       passingUnitIDs_ = other.passingUnitIDs_.Clone();
       tileTypeID_ = other.tileTypeID_;
-      Position = other.position_ != null ? other.Position.Clone() : null;
+      TopLeftPosition = other.topLeftPosition_ != null ? other.TopLeftPosition.Clone() : null;
       height_ = other.height_;
       splitDirection_ = other.splitDirection_;
     }
@@ -712,14 +712,14 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "position" field.</summary>
-    public const int PositionFieldNumber = 4;
-    private global::MHUrho.Storage.StIntVector2 position_;
+    /// <summary>Field number for the "topLeftPosition" field.</summary>
+    public const int TopLeftPositionFieldNumber = 4;
+    private global::MHUrho.Storage.StIntVector2 topLeftPosition_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::MHUrho.Storage.StIntVector2 Position {
-      get { return position_; }
+    public global::MHUrho.Storage.StIntVector2 TopLeftPosition {
+      get { return topLeftPosition_; }
       set {
-        position_ = value;
+        topLeftPosition_ = value;
       }
     }
 
@@ -761,7 +761,7 @@ namespace MHUrho.Storage {
       if (UnitID != other.UnitID) return false;
       if(!passingUnitIDs_.Equals(other.passingUnitIDs_)) return false;
       if (TileTypeID != other.TileTypeID) return false;
-      if (!object.Equals(Position, other.Position)) return false;
+      if (!object.Equals(TopLeftPosition, other.TopLeftPosition)) return false;
       if (Height != other.Height) return false;
       if (SplitDirection != other.SplitDirection) return false;
       return true;
@@ -773,7 +773,7 @@ namespace MHUrho.Storage {
       if (UnitID != 0) hash ^= UnitID.GetHashCode();
       hash ^= passingUnitIDs_.GetHashCode();
       if (TileTypeID != 0) hash ^= TileTypeID.GetHashCode();
-      if (position_ != null) hash ^= Position.GetHashCode();
+      if (topLeftPosition_ != null) hash ^= TopLeftPosition.GetHashCode();
       if (Height != 0F) hash ^= Height.GetHashCode();
       if (SplitDirection != false) hash ^= SplitDirection.GetHashCode();
       return hash;
@@ -795,9 +795,9 @@ namespace MHUrho.Storage {
         output.WriteRawTag(24);
         output.WriteInt32(TileTypeID);
       }
-      if (position_ != null) {
+      if (topLeftPosition_ != null) {
         output.WriteRawTag(34);
-        output.WriteMessage(Position);
+        output.WriteMessage(TopLeftPosition);
       }
       if (Height != 0F) {
         output.WriteRawTag(45);
@@ -819,8 +819,8 @@ namespace MHUrho.Storage {
       if (TileTypeID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TileTypeID);
       }
-      if (position_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      if (topLeftPosition_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(TopLeftPosition);
       }
       if (Height != 0F) {
         size += 1 + 4;
@@ -843,11 +843,11 @@ namespace MHUrho.Storage {
       if (other.TileTypeID != 0) {
         TileTypeID = other.TileTypeID;
       }
-      if (other.position_ != null) {
-        if (position_ == null) {
-          position_ = new global::MHUrho.Storage.StIntVector2();
+      if (other.topLeftPosition_ != null) {
+        if (topLeftPosition_ == null) {
+          topLeftPosition_ = new global::MHUrho.Storage.StIntVector2();
         }
-        Position.MergeFrom(other.Position);
+        TopLeftPosition.MergeFrom(other.TopLeftPosition);
       }
       if (other.Height != 0F) {
         Height = other.Height;
@@ -879,10 +879,10 @@ namespace MHUrho.Storage {
             break;
           }
           case 34: {
-            if (position_ == null) {
-              position_ = new global::MHUrho.Storage.StIntVector2();
+            if (topLeftPosition_ == null) {
+              topLeftPosition_ = new global::MHUrho.Storage.StIntVector2();
             }
-            input.ReadMessage(position_);
+            input.ReadMessage(topLeftPosition_);
             break;
           }
           case 45: {
@@ -924,7 +924,7 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StBorderTile(StBorderTile other) : this() {
       tileTypeID_ = other.tileTypeID_;
-      Position = other.position_ != null ? other.Position.Clone() : null;
+      TopLeftPosition = other.topLeftPosition_ != null ? other.TopLeftPosition.Clone() : null;
       topLeftHeight_ = other.topLeftHeight_;
       topRightHeight_ = other.topRightHeight_;
       botLeftHeight_ = other.botLeftHeight_;
@@ -948,14 +948,14 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "position" field.</summary>
-    public const int PositionFieldNumber = 2;
-    private global::MHUrho.Storage.StIntVector2 position_;
+    /// <summary>Field number for the "topLeftPosition" field.</summary>
+    public const int TopLeftPositionFieldNumber = 2;
+    private global::MHUrho.Storage.StIntVector2 topLeftPosition_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::MHUrho.Storage.StIntVector2 Position {
-      get { return position_; }
+    public global::MHUrho.Storage.StIntVector2 TopLeftPosition {
+      get { return topLeftPosition_; }
       set {
-        position_ = value;
+        topLeftPosition_ = value;
       }
     }
 
@@ -1028,7 +1028,7 @@ namespace MHUrho.Storage {
         return true;
       }
       if (TileTypeID != other.TileTypeID) return false;
-      if (!object.Equals(Position, other.Position)) return false;
+      if (!object.Equals(TopLeftPosition, other.TopLeftPosition)) return false;
       if (TopLeftHeight != other.TopLeftHeight) return false;
       if (TopRightHeight != other.TopRightHeight) return false;
       if (BotLeftHeight != other.BotLeftHeight) return false;
@@ -1041,7 +1041,7 @@ namespace MHUrho.Storage {
     public override int GetHashCode() {
       int hash = 1;
       if (TileTypeID != 0) hash ^= TileTypeID.GetHashCode();
-      if (position_ != null) hash ^= Position.GetHashCode();
+      if (topLeftPosition_ != null) hash ^= TopLeftPosition.GetHashCode();
       if (TopLeftHeight != 0F) hash ^= TopLeftHeight.GetHashCode();
       if (TopRightHeight != 0F) hash ^= TopRightHeight.GetHashCode();
       if (BotLeftHeight != 0F) hash ^= BotLeftHeight.GetHashCode();
@@ -1061,9 +1061,9 @@ namespace MHUrho.Storage {
         output.WriteRawTag(8);
         output.WriteInt32(TileTypeID);
       }
-      if (position_ != null) {
+      if (topLeftPosition_ != null) {
         output.WriteRawTag(18);
-        output.WriteMessage(Position);
+        output.WriteMessage(TopLeftPosition);
       }
       if (TopLeftHeight != 0F) {
         output.WriteRawTag(29);
@@ -1093,8 +1093,8 @@ namespace MHUrho.Storage {
       if (TileTypeID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TileTypeID);
       }
-      if (position_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      if (topLeftPosition_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(TopLeftPosition);
       }
       if (TopLeftHeight != 0F) {
         size += 1 + 4;
@@ -1122,11 +1122,11 @@ namespace MHUrho.Storage {
       if (other.TileTypeID != 0) {
         TileTypeID = other.TileTypeID;
       }
-      if (other.position_ != null) {
-        if (position_ == null) {
-          position_ = new global::MHUrho.Storage.StIntVector2();
+      if (other.topLeftPosition_ != null) {
+        if (topLeftPosition_ == null) {
+          topLeftPosition_ = new global::MHUrho.Storage.StIntVector2();
         }
-        Position.MergeFrom(other.Position);
+        TopLeftPosition.MergeFrom(other.TopLeftPosition);
       }
       if (other.TopLeftHeight != 0F) {
         TopLeftHeight = other.TopLeftHeight;
@@ -1158,10 +1158,10 @@ namespace MHUrho.Storage {
             break;
           }
           case 18: {
-            if (position_ == null) {
-              position_ = new global::MHUrho.Storage.StIntVector2();
+            if (topLeftPosition_ == null) {
+              topLeftPosition_ = new global::MHUrho.Storage.StIntVector2();
             }
-            input.ReadMessage(position_);
+            input.ReadMessage(topLeftPosition_);
             break;
           }
           case 29: {
