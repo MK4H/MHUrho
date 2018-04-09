@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
         private Dictionary<Button, TileType> tileTypeButtons;
 
         private GameMandKController input;
-        private Map map;
+        private Map Map => input.LevelManager.Map;
         private StaticRectangleToolMandK highlight;
 
         private Button selected;
@@ -26,12 +26,11 @@ namespace MHUrho.EditorTools
         private bool mouseButtonDown;
         private bool enabled;
 
-        public TileTypeToolMandK(GameMandKController input, Map map) {
+        public TileTypeToolMandK(GameMandKController input) {
 
             this.input = input;
-            this.map = map;
             this.tileTypeButtons = new Dictionary<Button, TileType>();
-            this.highlight = new StaticRectangleToolMandK(input, map, new IntVector2(3,3));
+            this.highlight = new StaticRectangleToolMandK(input, new IntVector2(3,3));
 
             foreach (var tileType in PackageManager.Instance.TileTypes) {
                 var tileImage = tileType.GetImage().ConvertToRGBA();
@@ -39,7 +38,7 @@ namespace MHUrho.EditorTools
                 var buttonTexture = new Texture2D();
                 buttonTexture.FilterMode = TextureFilterMode.Nearest;
                 buttonTexture.SetNumLevels(1);
-                buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
+                buttonTexture.SetSize(tileImage.Width, tileImage.Height, Graphics.RGBAFormat, TextureUsage.Static);
                 buttonTexture.SetData(tileImage);
 
 
@@ -118,7 +117,7 @@ namespace MHUrho.EditorTools
                 centerTile = input.GetTileUnderCursor();
                 //TODO: Rectangle
                 if (centerTile != null) {
-                    map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
+                    Map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
                 }
                 mouseButtonDown = true;
             }
@@ -135,7 +134,7 @@ namespace MHUrho.EditorTools
                 var newCenterTile = input.GetTileUnderCursor();
                 if (newCenterTile != null && newCenterTile != centerTile) {
                     centerTile = newCenterTile;
-                    map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
+                    Map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
                 }
             }
         }

@@ -15,6 +15,6 @@ namespace MHUrho.Input
 
         void Disable();
 
-        IGameController GetGameController(CameraController cameraController, LevelManager levelManager, Player player);
+        IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player);
     }
 }

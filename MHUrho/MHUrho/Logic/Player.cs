@@ -62,7 +62,7 @@ namespace MHUrho.Logic
             return storedPlayer;
         }
 
-        public void ConnectReferences(LevelManager level) {
+        public void ConnectReferences(ILevelManager level) {
             foreach (var unitID in storedPlayer.UnitIDs) {
                 AddUnit(level.GetUnit(unitID));
             }

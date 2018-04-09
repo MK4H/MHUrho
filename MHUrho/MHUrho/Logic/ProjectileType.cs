@@ -15,6 +15,7 @@ namespace MHUrho.Logic
     public class ProjectileType : IEntityType, IDisposable {
         private const string NameAttribute = "name";
         private const string ModelPathElement = "modelPath";
+        private const string MaterialPathElement = "materialPath";
         private const string SpeedElement = "speed";
         private const string AssemblyPathElement = "assemblyPath";
 
@@ -34,24 +35,14 @@ namespace MHUrho.Logic
 
         }
 
-        protected ProjectileType(string name,
-                                 float projectileSpeed,
-                                 Model model,
-                                 ResourcePack package) {
-            this.Name = name;
-            this.ProjectileSpeed = projectileSpeed;
-            this.Package = package;
-            this.model = model;
-            this.material = null;
-        }
 
         public void Load(XElement xml, int newID, ResourcePack package) {
             ID = newID;
             Name = xml.Attribute(NameAttribute).Value;
             ProjectileSpeed = XmlHelpers.GetFloat(xml, SpeedElement);
             model = LoadModel(xml, package.XmlDirectoryPath);
-            Package = package;
-            //TODO: Material  
+            material = LoadMaterial(xml, package.XmlDirectoryPath);
+            Package = package; 
         }
 
         //TODO: PROJECTILE POOLING
@@ -97,6 +88,12 @@ namespace MHUrho.Logic
             string fullPath = XmlHelpers.GetFullPath(projectileTypeXml, ModelPathElement, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetModel(fullPath);
+        }
+
+        private static Material LoadMaterial(XElement projectileTypeXml, string pathToPackageXmlDir) {
+            string materialPath = XmlHelpers.GetFullPath(projectileTypeXml, MaterialPathElement, pathToPackageXmlDir);
+
+            return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
         }
     }
 }

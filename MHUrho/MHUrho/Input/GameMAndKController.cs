@@ -69,11 +69,13 @@ namespace MHUrho.Input
 
         public bool UIHovering { get; set; }
 
+        public ILevelManager LevelManager { get; private set; }
+
         public event OnMouseMove MouseMove;
         public event OnMouseDown MouseDown;
         public event OnMouseUp MouseUp;
 
-        private readonly LevelManager levelManager;
+        
         private readonly CameraController cameraController;
         private readonly Octree octree;
 
@@ -94,13 +96,13 @@ namespace MHUrho.Input
         /// </summary>
         private ITile cachedTileUnderCursor;
 
-        public GameMandKController(MyGame game, LevelManager levelManager, Player player, CameraController cameraController) : base(game) {
+        public GameMandKController(MyGame game, ILevelManager levelManager, IPlayer player, CameraController cameraController) : base(game) {
             this.CameraScrollSensitivity = 20f;
             this.CameraRotationSensitivity = 15f;
             this.cameraType = CameraMovementType.Fixed;
             this.cameraController = cameraController;
             this.octree = levelManager.Scene.GetComponent<Octree>();
-            this.levelManager = levelManager;
+            this.LevelManager = levelManager;
             this.DoOnlySingleRaycasts = true;
             this.Player = player;
             this.UIManager = new MandKUI(game, this);
@@ -114,14 +116,13 @@ namespace MHUrho.Input
 
             Enable();
 
-            UIManager.AddTool(new VertexHeightToolMandK(this, levelManager.Map));
-            UIManager.AddTool(new TileTypeToolMandK(this, levelManager.Map));
-            UIManager.AddTool(new TileHeightToolMandK(this, levelManager.Map));
-            UIManager.AddTool(new UnitSelectorToolMandK(this, levelManager.Map));
-            UIManager.AddTool(new UnitSpawningToolMandK(this, levelManager.Map));
+            UIManager.AddTool(new VertexHeightToolMandK(this));
+            UIManager.AddTool(new TileTypeToolMandK(this));
+            UIManager.AddTool(new TileHeightToolMandK(this));
+            UIManager.AddTool(new UnitSelectorToolMandK(this));
+            UIManager.AddTool(new UnitSpawningToolMandK(this));
+            UIManager.AddTool(new BuildingBuilderToolMandK(this));
 
-            //TODO: Create some toggling for drawing highlight
-            //cameraController.OnFixedMove += (float timeStep) => { DrawHighlight(); };
         }
 
         public void Dispose() {
@@ -152,7 +153,7 @@ namespace MHUrho.Input
         /// </summary>
         /// <returns></returns>
         public IntVector2? GetClosestTileCorner() {
-            return levelManager.Map.RaycastToVertex(CursorRaycast());
+            return LevelManager.Map.RaycastToVertex(CursorRaycast());
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace MHUrho.Input
         /// </summary>
         /// <returns></returns>
         public Vector3? GetClosestTileCornerPosition() {
-            return levelManager.Map.RaycastToVertexPosition(CursorRaycast());
+            return LevelManager.Map.RaycastToVertexPosition(CursorRaycast());
         }
 
         /// <summary>
@@ -174,7 +175,7 @@ namespace MHUrho.Input
                 return cachedTileUnderCursor;
             }
             var raycast = CursorRaycast();
-            return (cachedTileUnderCursor = levelManager.Map.RaycastToTile(raycast));
+            return (cachedTileUnderCursor = LevelManager.Map.RaycastToTile(raycast));
         }
 
         public void HideCursor() {
@@ -468,7 +469,7 @@ namespace MHUrho.Input
                 cameraController.SwitchToFree();
                 cameraType = CameraMovementType.FreeFloat;
                 UI.Cursor.Visible = false;
-                levelManager.Map.DisableHighlight();
+                LevelManager.Map.DisableHighlight();
             }
         }
 

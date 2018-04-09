@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 
         //private List<Button> buttons;
         private GameMandKController input;
-        private Map map;
+        private Map Map => input.LevelManager.Map;
         private StaticRectangleToolMandK highlight;
 
         private bool enabled;
@@ -25,10 +25,9 @@ namespace MHUrho.EditorTools
 
         private ITile centerTile;
 
-        public TileHeightToolMandK(GameMandKController input, Map map) {
+        public TileHeightToolMandK(GameMandKController input) {
             this.input = input;
-            this.map = map;
-            highlight = new StaticRectangleToolMandK(input, map, new Urho.IntVector2(3, 3));
+            highlight = new StaticRectangleToolMandK(input, new IntVector2(3, 3));
         }
 
         public void Enable() {
@@ -68,7 +67,7 @@ namespace MHUrho.EditorTools
 
         private void MouseUp(MouseButtonUpEventArgs e) {
             if (centerTile != null) {
-                input.ShowCursor(new Vector3(centerTile.Center.X, map.GetHeightAt(centerTile.Center), centerTile.Center.Y));
+                input.ShowCursor(new Vector3(centerTile.Center.X, Map.GetHeightAt(centerTile.Center), centerTile.Center.Y));
                 mouseButtonDown = false;
                 centerTile = null;
                 highlight.FreeHighlight();
@@ -77,7 +76,7 @@ namespace MHUrho.EditorTools
 
         private void MouseMove(MouseMovedEventArgs e) {
             if (mouseButtonDown) {
-                map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
+                Map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
             }
         }
 

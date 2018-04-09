@@ -58,8 +58,8 @@ namespace MHUrho.WorldMap {
 
             public Node PreviousNode { get; private set; }
 
-            //Tile at the map[X][Y] coordinates
-            private readonly ITile tile;
+            public ITile Tile { get; private set; }
+
             private readonly Unit unit;
 
             private static readonly float fsqrt2 = (float)Math.Sqrt(2);
@@ -84,8 +84,8 @@ namespace MHUrho.WorldMap {
                 float halfRawDistance =
                     (position.X == newPreviousNode.position.X || position.Y == newPreviousNode.position.Y) ? half : fsqrt2d2;
                 float newDistance =
-                    halfRawDistance * unit.MovementSpeed(tile) +
-                    halfRawDistance * unit.MovementSpeed(newPreviousNode.tile) +
+                    halfRawDistance * unit.MovementSpeed(Tile) +
+                    halfRawDistance * unit.MovementSpeed(newPreviousNode.Tile) +
                     newPreviousNode.Distance;
 
                 if (newDistance > Distance) return false;
@@ -100,17 +100,16 @@ namespace MHUrho.WorldMap {
                 return string.Format("X={0}, Y={1}, Dist={2}, Heur={3}", X, Y, Distance, Heuristic);
             }
 
-            public Node(
-                IntVector2 position,
-                Node previousNode,
-                ITile tile,
-                float heuristic,
-                Unit unit,
-                NodeState state = NodeState.Opened
-                ) {
+            public Node(IntVector2 position,
+                        Node previousNode,
+                        ITile tile,
+                        float heuristic,
+                        Unit unit,
+                        NodeState state = NodeState.Opened) {
+
                 this.position = position;
                 PreviousNode = previousNode;
-                this.tile = tile;
+                this.Tile = tile;
                 this.unit = unit;
                 Heuristic = heuristic;
                 State = state;
@@ -214,7 +213,7 @@ namespace MHUrho.WorldMap {
                         // Compute the heuristic for the new tile
                         float heuristic = Heuristic(newPosition, target);
 
-                        if (!unit.CanPass(newTile)) {
+                        if (!unit.CanGoFromTo(sourceNode.Tile, newTile)) {
                             //Unit cannot pass this tile
                             touchedNodes.Add(
                                 newPosition,

@@ -99,7 +99,7 @@ namespace MHUrho.WorldMap
 
             private StBorderTile storage;
 
-            public void ConnectReferences(LevelManager level) {
+            public void ConnectReferences(ILevelManager level) {
                 Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
             }
 
@@ -117,6 +117,14 @@ namespace MHUrho.WorldMap
 
             void ITile.RemoveUnit(Unit unit) {
                 throw new InvalidOperationException("Cannot remove unit from Border tile");
+            }
+
+            public void AddBuilding(Building building) {
+                throw new InvalidOperationException("Cannot add building to Border tile");
+            }
+
+            public void RemoveBuilding(Building building) {
+                throw new InvalidOperationException("Cannot remove building from Border tile");
             }
 
             IEnumerable<Unit> ITile.GetAllUnits() {
@@ -342,7 +350,7 @@ namespace MHUrho.WorldMap
             return newMap;
         }
 
-        public void ConnectReferences(LevelManager level) {
+        public void ConnectReferences(ILevelManager level) {
             foreach (var tile in tiles) {
                 tile.ConnectReferences(level);
             }
@@ -1091,6 +1099,10 @@ namespace MHUrho.WorldMap
         public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, HighlightMode mode, Color color) {
             SquishToMap(ref topLeft, ref bottomRight);
             graphics.HighlightArea(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), mode, color);
+        }
+
+        public void HighlightArea(IntRect rectangle, HighlightMode mode, Color color) {
+            HighlightArea(rectangle.TopLeft(), rectangle.BottomRight(), mode, color);
         }
 
         public void DisableHighlight() {

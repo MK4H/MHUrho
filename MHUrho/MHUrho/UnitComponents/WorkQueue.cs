@@ -126,11 +126,11 @@ namespace MHUrho.UnitComponents
 
         private readonly Queue<IWorkTask> workQueue;
 
-        public WorkQueue(Building building) {
+        public WorkQueue() {
             workQueue = new Queue<IWorkTask>();
         }
 
-        public static WorkQueue Load(LevelManager level, PluginData pluginData) {
+        public static WorkQueue Load(ILevelManager level, PluginData pluginData) {
             throw new NotImplementedException();
         }
 

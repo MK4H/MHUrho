@@ -18,7 +18,7 @@ namespace MHUrho.Plugins
         /// <param name="level">level in which the building is created</param>
         /// <param name="building">building Plugin class</param>
         /// <returns>New instance in default state</returns>
-        IBuildingInstancePlugin CreateNewInstance(LevelManager level, Building building);
+        IBuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building);
 
 
 
@@ -28,7 +28,7 @@ namespace MHUrho.Plugins
         /// <returns>New instance, that will be loaded in the next step</returns>
         IBuildingInstancePlugin GetInstanceForLoading();
 
-        bool CanBuildAt(IntVector2 centerLocation);
+        bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
 
         void PopulateUI(MandKUI mouseAndKeyboardUI);
 

@@ -9,7 +9,7 @@ namespace MHUrho.Logic {
 
         StPlayer Save();
 
-        void ConnectReferences(LevelManager level);
+        void ConnectReferences(ILevelManager level);
 
         void FinishLoading();
 

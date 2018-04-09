@@ -26,7 +26,7 @@ namespace MHUrho.Input
 
         private readonly CameraController cameraController;
         private readonly Octree octree;
-        private readonly LevelManager levelManager;
+        private readonly ILevelManager levelManager;
 
         private CameraMovementType movementType;
 
@@ -35,7 +35,7 @@ namespace MHUrho.Input
 
         
 
-        public GameTouchController(MyGame game, LevelManager levelManager, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
+        public GameTouchController(MyGame game, ILevelManager levelManager, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
             this.cameraController = cameraController;
             this.Sensitivity = sensitivity;
             this.levelManager = levelManager;

@@ -33,14 +33,14 @@ namespace MHUrho.UnitComponents
         public event UnitOrderedToBuildingDelegate OrderedToBuilding;
 
         private Unit unit;
-        private readonly LevelManager level;
+        private readonly ILevelManager level;
 
 
-        public UnitSelector(LevelManager level) {
+        public UnitSelector(ILevelManager level) {
             this.level = level;
         }
 
-        public static UnitSelector Load(LevelManager level, PluginData data) {
+        public static UnitSelector Load(ILevelManager level, PluginData data) {
             var sequentialData = new SequentialPluginDataReader(data);
             return new UnitSelector(level);
         }

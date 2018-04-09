@@ -28,6 +28,10 @@ namespace MHUrho.Helpers
             return new IntVector2(rectangle.Right, rectangle.Bottom);
         }
 
+        public static Vector2 Center(this IntRect rectangle) {
+            return new Vector2((rectangle.Left + rectangle.Right) / 2f, (rectangle.Top + rectangle.Bottom) / 2f);
+        }
+
         public static IntVector2 Size(this IntRect rectangle) {
             return new IntVector2(Width(rectangle), Height(rectangle));
         }
@@ -39,5 +43,7 @@ namespace MHUrho.Helpers
         public static int Height(this IntRect rectangle) {
             return rectangle.Bottom - rectangle.Top;
         }
+
+
     }
 }

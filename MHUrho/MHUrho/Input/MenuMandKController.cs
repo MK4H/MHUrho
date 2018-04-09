@@ -60,7 +60,7 @@ namespace MHUrho.Input
 
         }
 
-        public IGameController GetGameController(CameraController cameraController, LevelManager levelManager, Player player) {
+        public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player) {
             return new GameMandKController(Game, levelManager, player, cameraController);
         }
 

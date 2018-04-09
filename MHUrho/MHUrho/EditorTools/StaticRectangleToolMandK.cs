@@ -17,15 +17,14 @@ namespace MHUrho.EditorTools
         public IntVector2 Size { get; set; }
 
         private GameMandKController input;
-        private Map map;
+        private Map Map => input.LevelManager.Map;
 
         private bool enabled;
 
         private ITile fixedCenter;
 
-        public StaticRectangleToolMandK(GameMandKController input, Map map, IntVector2 size) {
+        public StaticRectangleToolMandK(GameMandKController input, IntVector2 size) {
             this.input = input;
-            this.map = map;
             this.Size = size;
         }
 
@@ -45,7 +44,7 @@ namespace MHUrho.EditorTools
             if (!enabled) return;
 
             input.MouseMove -= OnMouseMove;
-            map.DisableHighlight();
+            Map.DisableHighlight();
             enabled = false;
         }
 
@@ -59,13 +58,13 @@ namespace MHUrho.EditorTools
 
         private void OnMouseMove(MouseMovedEventArgs e) {
             if (fixedCenter != null) {
-                map.HighlightArea(fixedCenter, Size, WorldMap.HighlightMode.Full, Color.Green);
+                Map.HighlightArea(fixedCenter, Size, WorldMap.HighlightMode.Full, Color.Green);
                 return;
             }
 
             var centerTile = input.GetTileUnderCursor();
             if (centerTile != null) {
-                map.HighlightArea(centerTile, Size, WorldMap.HighlightMode.Full, Color.Green);
+                Map.HighlightArea(centerTile, Size, WorldMap.HighlightMode.Full, Color.Green);
             }
 
         }

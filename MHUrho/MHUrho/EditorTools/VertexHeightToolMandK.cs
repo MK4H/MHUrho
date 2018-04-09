@@ -25,14 +25,14 @@ namespace MHUrho.EditorTools {
         private List<Button> buttons;
         private Mode mode;
         private GameMandKController input;
-        private Map map;
+        private Map Map => input.LevelManager.Map;
 
         private List<IntVector2> verticies;
         private Vector3 mainPoint;
 
         private bool enabled;
 
-        public VertexHeightToolMandK(GameMandKController input, Map map) {
+        public VertexHeightToolMandK(GameMandKController input) {
 
             //var buttonTexture = new Texture2D();
             //buttonTexture.FilterMode = TextureFilterMode.Nearest;
@@ -41,7 +41,6 @@ namespace MHUrho.EditorTools {
             //buttonTexture.SetData(tileType.GetImage());
             this.buttons = new List<Button>();
             this.input = input;
-            this.map = map;
             this.verticies = new List<IntVector2>();
 
 
@@ -112,13 +111,13 @@ namespace MHUrho.EditorTools {
 
         private void OnMouseMove(MouseMovedEventArgs e) {
             if (mode == Mode.Moving) {
-                map.ChangeHeight(verticies, -e.DY * Sensitivity);
+                Map.ChangeHeight(verticies, -e.DY * Sensitivity);
             }
         }
 
         private void MouseDownSelect(MouseButtonDownEventArgs e) {
             var raycastResult = input.CursorRaycast();
-            var vertex = map.RaycastToVertex(raycastResult);
+            var vertex = Map.RaycastToVertex(raycastResult);
             if (vertex.HasValue) {
                 //TODO: this is slow, make it faster
                 if (verticies.Contains(vertex.Value)) {

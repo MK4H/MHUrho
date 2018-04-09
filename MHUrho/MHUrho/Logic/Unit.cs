@@ -89,6 +89,8 @@ namespace MHUrho.Logic
             this.storage = storedUnit;
             this.ID = storedUnit.Id;
             this.UnitType = type;
+
+            ReceiveSceneUpdates = true;
         }
 
         /// <summary>
@@ -105,6 +107,8 @@ namespace MHUrho.Logic
             this.Tile = tile;
             this.Player = player;
             this.UnitType = type;
+
+            ReceiveSceneUpdates = true;
         }
 
         #endregion
@@ -120,7 +124,7 @@ namespace MHUrho.Logic
         /// <param name="node">scene node of the unit</param>
         /// <param name="storedUnit">stored unit</param>
         /// <returns>Loaded unit component, already added to the node</returns>
-        public static Unit Load(LevelManager level, PackageManager packageManager, Node node, StUnit storedUnit) {
+        public static Unit Load(ILevelManager level, PackageManager packageManager, Node node, StUnit storedUnit) {
             var type = packageManager.GetUnitType(storedUnit.TypeID);
             if (type == null) {
                 throw new ArgumentException("Type of this unit was not loaded");
@@ -137,7 +141,7 @@ namespace MHUrho.Logic
         /// <param name="node"></param>
         /// <param name="storedUnit"></param>
         /// <returns>Loaded unit component, already added to the node</returns>
-        public static Unit Load(LevelManager level, UnitType type, Node node, StUnit storedUnit) {
+        public static Unit Load(ILevelManager level, UnitType type, Node node, StUnit storedUnit) {
             //TODO: Check arguments - node cant have more than one Unit component
             if (type.ID != storedUnit.TypeID) {
                 throw new ArgumentException("provided type is not the type of the stored unit",nameof(type));
@@ -164,7 +168,7 @@ namespace MHUrho.Logic
         /// <param name="tile">tile where the unit will spawn</param>
         /// <param name="player">owner of the unit</param>
         /// <returns>the unit component, already added to the node</returns>
-        public static Unit CreateNew(int id, Node unitNode, UnitType type, LevelManager level, ITile tile, IPlayer player) {
+        public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
             //TODO: Check if there is already a Unit component on this node, if there is, throw exception
             var unit = new Unit(id, type, tile, player);
             unitNode.AddComponent(unit);
@@ -209,7 +213,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Continues loading by connecting references and loading components
         /// </summary>
-        public void ConnectReferences(LevelManager level) {
+        public void ConnectReferences(ILevelManager level) {
             Player = level.GetPlayer(storage.PlayerID);
             Tile = level.Map.GetContainingTile(Position);
             //TODO: Connect other things
@@ -225,12 +229,8 @@ namespace MHUrho.Logic
             storage = null;
         }
         
-        //TODO: Link CanPass to TileType loaded from XML description
-        //TODO: Load Passable terrain types from XML unit description
-        public bool CanPass(ITile tile)
-        {
-            //TODO: This
-            return true;
+        public bool CanGoFromTo(ITile fromTile, ITile toTile) {
+            return Plugin.CanGoFromTo(fromTile, toTile);
         }
 
         /// <summary>
@@ -288,7 +288,16 @@ namespace MHUrho.Logic
         }
         #endregion
 
+        #region Protected Methods
 
+        protected override void OnUpdate(float timeStep) {
+            base.OnUpdate(timeStep);
+            if (!Enabled) return;
+
+            Plugin.OnUpdate(timeStep);
+        }
+
+        #endregion
 
         #region Private Methods
 
@@ -308,7 +317,7 @@ namespace MHUrho.Logic
                 return true;
             }
             //New tile, but cant pass
-            if (!CanPass(newTile)) {
+            if (!CanGoFromTo(Tile,newTile)) {
                 return false;
             }
 

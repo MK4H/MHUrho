@@ -130,7 +130,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Continues loading by connecting references
         /// </summary>
-        public void ConnectReferences(LevelManager level) {
+        public void ConnectReferences(ILevelManager level) {
             Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
 
             if (storage.UnitID != 0) {
@@ -206,6 +206,22 @@ namespace MHUrho.Logic
             {
                 passingUnits.Remove(unit);
             }
+        }
+
+        public void AddBuilding(Building building) {
+            if (Building != null) {
+                throw new InvalidOperationException("Adding building to a tile that already has a building");
+            }
+
+            Building = building;
+        }
+
+        public void RemoveBuilding(Building building) {
+            if (Building != building) {
+                throw new ArgumentException("Removing building that is not on this tile");
+            }
+
+            Building = null;
         }
 
         public IEnumerable<Unit> GetAllUnits() {

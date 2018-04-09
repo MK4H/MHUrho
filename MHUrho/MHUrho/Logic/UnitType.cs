@@ -19,6 +19,7 @@ namespace MHUrho.Logic
         //XML ELEMENTS AND ATTRIBUTES
         private const string NameAttribute = "name";
         private const string ModelPathElement = "modelPath";
+        private const string MaterialPathElement = "materialPath";
         private const string IconPathElement = "iconPath";
         private const string AssemblyPathElement = "assemblyPath";
 
@@ -30,21 +31,13 @@ namespace MHUrho.Logic
 
         public Model Model { get; private set; }
 
-        public Image Icon { get; private set; }
+        public Material Material { get; private set; }
 
-        HashSet<TileType> passableTileTypes;
+        public Image Icon { get; private set; }
 
         private IUnitTypePlugin unitTypeLogic;
 
         //TODO: More loaded properties
-
-        protected UnitType(string name, Model model, IUnitTypePlugin unitPlugin, Image icon, ResourcePack package) {
-            this.Name = name;
-            this.Model = model;
-            this.unitTypeLogic = unitPlugin;
-            this.Package = package;
-            this.Icon = icon;
-        }
 
         /// <summary>
         /// Data has to be loaded after constructor by <see cref="Load(XElement, int, ResourcePack)"/>
@@ -82,6 +75,7 @@ namespace MHUrho.Logic
             var data = unitTypeLogic.TypeData;
 
             Model = LoadModel(xml, package.XmlDirectoryPath);
+            Material = LoadMaterial(xml, package.XmlDirectoryPath);
             Icon = LoadIcon(xml, package.XmlDirectoryPath);
             
             unitTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
@@ -96,11 +90,6 @@ namespace MHUrho.Logic
             };
 
             return storedUnitType;
-        }
-
-        public bool CanPass(TileType tileType)
-        {
-            return passableTileTypes.Contains(tileType);
         }
 
         public bool CanSpawnAt(ITile tile) {
@@ -118,7 +107,7 @@ namespace MHUrho.Logic
         /// <returns>New unit of this type</returns>
         public Unit CreateNewUnit(int unitID, 
                                   Node unitNode, 
-                                  LevelManager level, 
+                                  ILevelManager level, 
                                   ITile tile, 
                                   IPlayer player) {
             var unit = Unit.CreateNew(unitID, unitNode, this, level, tile, player);
@@ -139,13 +128,13 @@ namespace MHUrho.Logic
         /// <param name="storedUnit"></param>
         /// <returns>Unit in first stage of loading, needs to be followed by <see cref="Unit.ConnectReferences"/> and
         /// <see cref="Unit.FinishLoading"/></returns>
-        public Unit LoadUnit(LevelManager level, Node unitNode, StUnit storedUnit) {
+        public Unit LoadUnit(ILevelManager level, Node unitNode, StUnit storedUnit) {
             var unit = Unit.Load(level, this, unitNode, storedUnit);
             AddComponents(unitNode);
             return unit;
         }
 
-        public IUnitInstancePlugin GetNewInstancePlugin(Unit unit, LevelManager level) {
+        public IUnitInstancePlugin GetNewInstancePlugin(Unit unit, ILevelManager level) {
             return unitTypeLogic.CreateNewInstance(level, unit);
         }
 
@@ -167,8 +156,9 @@ namespace MHUrho.Logic
             //TODO: Animated model
             var staticModel = unitNode.CreateComponent<StaticModel>();
             staticModel.Model = Model;
+            staticModel.Material = Material;
             staticModel.CastShadows = true;
-
+            
 
             //TODO: Add needed components
         }
@@ -181,11 +171,19 @@ namespace MHUrho.Logic
             return PackageManager.Instance.ResourceCache.GetModel(modelPath);
         }
 
+        private static Material LoadMaterial(XElement unitTypeXml, string pathToPackageXmlDir) {
+            string materialPath = XmlHelpers.GetFullPath(unitTypeXml, MaterialPathElement, pathToPackageXmlDir);
+
+            return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
+        }
+
         private static Image LoadIcon(XElement unitTypeXml, string pathToPackageXmlDir) {
             string iconPath = XmlHelpers.GetFullPath(unitTypeXml, IconPathElement, pathToPackageXmlDir);
 
             //TODO: Find a way to not need RGBA conversion
             return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
         }
+
+
     }
 }

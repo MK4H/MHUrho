@@ -22,7 +22,7 @@ namespace MHUrho.EditorTools
         public event HandleSingleClick SingleClickHandler;
 
         private readonly GameMandKController input;
-        private readonly Map map;
+        private Map Map => input.LevelManager.Map;
 
         private IntVector2 mouseDownPos;
         private IntVector2 lastMousePos;
@@ -32,9 +32,8 @@ namespace MHUrho.EditorTools
 
         private bool enabled;
 
-        public DynamicRectangleToolMandK(GameMandKController input, Map map) {
+        public DynamicRectangleToolMandK(GameMandKController input) {
             this.input = input;
-            this.map = map;
         }
 
         public void Enable() {
@@ -107,7 +106,7 @@ namespace MHUrho.EditorTools
 
                 SelectionHandler?.Invoke(topLeft, bottomRight);
                 //TODO: Different highlight
-                map.DisableHighlight();
+                Map.DisableHighlight();
             }
           
 
@@ -134,7 +133,7 @@ namespace MHUrho.EditorTools
                 var bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
                                                  Math.Max(mouseDownPos.Y, endTilePos.Y));
 
-                map.HighlightArea(topLeft, bottomRight,WorldMap.HighlightMode.Full, Color.Green);
+                Map.HighlightArea(topLeft, bottomRight,WorldMap.HighlightMode.Full, Color.Green);
                 lastMousePos = tile.MapLocation;
                 rectangle = true;
             }

@@ -26,7 +26,7 @@ namespace DefaultPackage
 
         
 
-        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Unit unit) {
+        public IUnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
             var unitNode = unit.Node;
             unitNode.AddComponent(new WorldWalker(level));
             unitNode.AddComponent(new UnitSelector(level));
@@ -60,7 +60,7 @@ namespace DefaultPackage
 
     public class TestUnitInstance : IUnitInstancePlugin
     {
-        private LevelManager level;
+        private ILevelManager level;
         private Node unitNode;
         private Unit unit;
         private WorldWalker walker;
@@ -69,7 +69,7 @@ namespace DefaultPackage
 
         }
 
-        public TestUnitInstance(LevelManager level, Unit unit) {
+        public TestUnitInstance(ILevelManager level, Unit unit) {
             this.level = level;
             this.unitNode = unit.Node;
             this.unit = unit;
@@ -90,13 +90,17 @@ namespace DefaultPackage
 
         }
 
-        public void LoadState(LevelManager level,Unit unit, PluginDataWrapper pluginData) {
+        public void LoadState(ILevelManager level,Unit unit, PluginDataWrapper pluginData) {
             this.level = level;
             this.unit = unit;
             this.unitNode = unit.Node;
             walker = unitNode.GetComponent<WorldWalker>();
             var selector = unitNode.GetComponent<UnitSelector>();
             selector.OrderedToTile += SelectorOrderedToTile;
+        }
+
+        public bool CanGoFromTo(ITile fromTile, ITile toTile) {
+            return toTile.Building == null;
         }
     }
 }

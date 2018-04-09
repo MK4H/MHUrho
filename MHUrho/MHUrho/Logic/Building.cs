@@ -46,14 +46,22 @@ namespace MHUrho.Logic
         /// <param name="buildingNode"></param>
         /// <param name="level"></param>
         /// <returns>Null if it is not possible to build the building there, new Building if it is possible</returns>
-        public static Building BuildAt(IntVector2 topLeftCorner, BuildingType type, Node buildingNode,  LevelManager level) {
-            if (!type.CanBuildAt(topLeftCorner)) {
+        public static Building BuildAt(int id, 
+                                       IntVector2 topLeftCorner, 
+                                       BuildingType type, 
+                                       Node buildingNode, 
+                                       IPlayer player,  
+                                       ILevelManager level) {
+            if (!type.CanBuildIn(type.GetBuildingTilesRectangle(topLeftCorner), level)) {
                 return null;
             }
 
-            var newBuilding = new Building(topLeftCorner, type, level);
+            var newBuilding = new Building(id, topLeftCorner, type, player, level);
             buildingNode.AddComponent(newBuilding);
 
+            var center = newBuilding.Rectangle.Center();
+
+            buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
             AddRigidBody(buildingNode);
 
             newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
@@ -68,20 +76,18 @@ namespace MHUrho.Logic
             return newBuilding;
         }
 
-        public static Building Load(LevelManager level, BuildingType type, Node buildingNode, StBuilding storedBuilding) {
+        public static Building Load(ILevelManager level, BuildingType type, Node buildingNode, StBuilding storedBuilding) {
             //TODO: Check arguments - node cant have more than one Building component
             if (type.ID != storedBuilding.TypeID) {
                 throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
             }
 
-            var building = new Building(storedBuilding.Location.ToIntVector2(), type, level);
+            var building = new Building(type, level.Map, storedBuilding);
             buildingNode.AddComponent(building);
-            Vector2 positionXZ =
-                new Vector2(building.Location.X + building.Size.X / 2, building.Location.Y + building.Size.Y / 2);
-            
-            //TODO: LEVEL THE GROUND
-            float height = level.Map.GetHeightAt(positionXZ);
-            buildingNode.Position = new Vector3(positionXZ.X, height, positionXZ.Y);
+
+            var center = building.Rectangle.Center();
+
+            buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
 
             AddRigidBody(buildingNode);
 
@@ -89,7 +95,7 @@ namespace MHUrho.Logic
             return building;
         }
 
-        public static Building Load(LevelManager level, 
+        public static Building Load(ILevelManager level, 
                                     PackageManager packageManager, 
                                     Node node,
                                     StBuilding storedBuilding) {
@@ -101,22 +107,29 @@ namespace MHUrho.Logic
             return type.LoadBuilding();
         }
 
-        protected Building(IntVector2 topLeftCorner, BuildingType type, LevelManager level) {
+        protected Building(int id,IntVector2 topLeftCorner, BuildingType type, IPlayer player, ILevelManager level) {
+            this.ID = id;
             this.BuildingType = type;
+            this.Player = player;
             this.Rectangle = new IntRect(topLeftCorner.X,
                                          topLeftCorner.Y,
-                                         topLeftCorner.X + type.Size.X - 1,
-                                         topLeftCorner.Y + type.Size.Y - 1);
-            this.tiles = new ITile[type.Size.X * type.Size.Y];
-
-            for (int y = 0; y < type.Size.Y; y++) {
-                for (int x = 0; x < type.Size.X; x++) {
-                    tiles[GetTileIndex(x,y)] = level.Map.GetTileByTopLeftCorner(topLeftCorner.X + x, topLeftCorner.Y + y);
-                }
-            }
+                                         topLeftCorner.X + type.Size.X,
+                                         topLeftCorner.Y + type.Size.Y);
+            this.tiles = GetTiles(level.Map, type, topLeftCorner);
         }
 
-        public void ConnectReferences(LevelManager level) {
+        protected Building(BuildingType buildingType, Map map, StBuilding storedBuilding) {
+            this.ID = storedBuilding.Id;
+            this.BuildingType = buildingType;
+            var topLeft = storedBuilding.Location.ToIntVector2();
+            this.Rectangle = new IntRect(topLeft.X,
+                                         topLeft.Y,
+                                         topLeft.X + buildingType.Size.X,
+                                         topLeft.Y + buildingType.Size.Y);
+            this.tiles = GetTiles(map, buildingType, Location); 
+        }
+
+        public void ConnectReferences(ILevelManager level) {
             Player = level.GetPlayer(storedBuilding.PlayerID);
             //TODO: Tiles
 
@@ -129,17 +142,11 @@ namespace MHUrho.Logic
             Plugin.LoadState(level, this, new PluginDataWrapper(storedBuilding.UserPlugin));
         }
 
-        /// <summary>
-        /// Provides a target tile that the worker unit should go to
-        /// </summary>
-        /// <param name="unit">Worker unit of the building</param>
-        /// <returns>Target tile</returns>
-        public ITile GetExchangeTile(Unit unit) {
-            return Plugin.GetExchangeTile(unit);
-        }
 
         public void Destroy() {
-
+            foreach (var tile in tiles) {
+                tile.RemoveBuilding(this);
+            }
         }
 
         protected override void OnUpdate(float timeStep) {
@@ -161,6 +168,20 @@ namespace MHUrho.Logic
             rigidBody.Kinematic = true;
             rigidBody.Mass = 1;
             rigidBody.UseGravity = false;
+        }
+
+        private ITile[] GetTiles(Map map, BuildingType type, IntVector2 topLeft) {
+            var newTiles = new ITile[type.Size.X * type.Size.Y];
+
+            for (int y = 0; y < type.Size.Y; y++) {
+                for (int x = 0; x < type.Size.X; x++) {
+                    var tile = map.GetTileByTopLeftCorner(topLeft.X + x, topLeft.Y + y);
+                    newTiles[GetTileIndex(x, y)] = tile;
+                    tile.AddBuilding(this);
+                }
+            }
+
+            return newTiles;
         }
     }
 }

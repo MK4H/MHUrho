@@ -18,7 +18,7 @@ namespace DefaultPackage
             return typeName == "TestWorker";
         }
 
-        public IUnitInstancePlugin CreateNewInstance(LevelManager level, Unit unit) {
+        public IUnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
             var unitNode = unit.Node;
             unitNode.AddComponent(new WorldWalker(level));
             return new TestWorkerInstance(level, unit);
@@ -42,8 +42,11 @@ namespace DefaultPackage
     public class TestWorkerInstance : IUnitInstancePlugin {
         public TestBuildingInstance WorkedBuilding { get; set; }
 
-        public TestWorkerInstance(LevelManager level, Unit unit) {
+        private WorldWalker walker;
+        private bool homeGoing = false;
 
+        public TestWorkerInstance(ILevelManager level, Unit unit) {
+            walker = unit.Node.GetComponent<WorldWalker>();
         }
 
         public TestWorkerInstance() {
@@ -55,17 +58,31 @@ namespace DefaultPackage
                 throw new InvalidOperationException("TestWorker has no building");
             }
 
-
+            if (homeGoing && walker.MovementFinished) {
+                walker.GoTo(new IntVector2(20,20));
+                homeGoing = !homeGoing;
+            }
+            else if (!homeGoing && walker.MovementFinished) {
+                walker.GoTo(WorkedBuilding.GetInterfaceTile(this));
+                homeGoing = !homeGoing;
+            }
         }
 
         public void SaveState(PluginDataWrapper pluginData) {
             var indexedData = pluginData.GetWriterForWrappedIndexedData();
             indexedData.Store(1, WorkedBuilding.Building.ID);
+            indexedData.Store(2, homeGoing);
         }
 
-        public void LoadState(LevelManager level, Unit unit, PluginDataWrapper pluginData) {
+        public void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData) {
             var indexedData = pluginData.GetReaderForWrappedIndexedData();
             WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).Plugin;
+            homeGoing = indexedData.Get<bool>(2);
+            walker = unit.GetComponent<WorldWalker>();
+        }
+
+        public bool CanGoFromTo(ITile fromTile, ITile toTile) {
+            return toTile.Building == null;
         }
     }
 }

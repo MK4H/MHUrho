@@ -27,7 +27,10 @@ namespace MHUrho.Plugins
         /// <param name="unit"></param>
         /// <param name="pluginData">stored state of the unit plugin</param>
         /// <returns>Instance loaded into saved state</returns>
-        void LoadState(LevelManager level, Unit unit, PluginDataWrapper pluginData);
+        void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData);
+
+        //TODO: Move this to AStar as a delegate argument, dont force this onto anyone
+        bool CanGoFromTo(ITile fromTile, ITile toTile);
         //TODO: Expand this
     }
 }

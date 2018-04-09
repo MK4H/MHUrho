@@ -31,7 +31,7 @@ namespace MHUrho.EditorTools
         public IEnumerable<Button> Buttons => buttons.Keys;
 
         private readonly GameMandKController input;
-        private readonly Map map;
+        private Map Map => input.LevelManager.Map;
         private readonly FormationController formation;
 
         private readonly DynamicRectangleToolMandK dynamicHighlight;
@@ -43,14 +43,13 @@ namespace MHUrho.EditorTools
         private bool enabled;
 
 
-        public UnitSelectorToolMandK(GameMandKController input, Map map) {
+        public UnitSelectorToolMandK(GameMandKController input) {
             this.input = input;
-            this.map = map;
             this.selected = new Dictionary<UnitType, SelectedInfo>();
             this.buttons = new Dictionary<Button, UnitType>();
 
-            this.formation = new FormationController(map);
-            this.dynamicHighlight = new DynamicRectangleToolMandK(input, map);
+            this.formation = new FormationController(Map);
+            this.dynamicHighlight = new DynamicRectangleToolMandK(input);
         }
 
         public void Enable() {
@@ -84,7 +83,7 @@ namespace MHUrho.EditorTools
         }
 
         private void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
-            map.ForEachInRectangle(topLeft, bottomRight, SelectUnitsInTile);
+            Map.ForEachInRectangle(topLeft, bottomRight, SelectUnitsInTile);
         }
 
         private void HandleSingleClick(MouseButtonUpEventArgs e) {
@@ -107,7 +106,7 @@ namespace MHUrho.EditorTools
 
                 //TODO: Target
 
-                var tile = map.RaycastToTile(result);
+                var tile = Map.RaycastToTile(result);
                 if (tile != null) {
                     formation.MoveToFormation(GetAllSelectedUnitSelectors(), tile);
                 }

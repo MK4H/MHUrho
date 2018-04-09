@@ -128,6 +128,10 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
+                public void ConnectReferences(ILevelManager level) {
+                    throw new NotImplementedException();
+                }
+
                 public void FinishLoading() {
                     throw new NotImplementedException();
                 }
@@ -142,6 +146,14 @@ namespace NUnit.Tests {
                 }
 
                 public void RemoveUnit(Unit unit) {
+                    throw new NotImplementedException();
+                }
+
+                public void AddBuilding(Building building) {
+                    throw new NotImplementedException();
+                }
+
+                public void RemoveBuilding(Building building) {
                     throw new NotImplementedException();
                 }
 
@@ -242,6 +254,10 @@ namespace NUnit.Tests {
                     throw new NotImplementedException();
                 }
 
+                public void ConnectReferences(ILevelManager level) {
+                    throw new NotImplementedException();
+                }
+
                 public void FinishLoading() {
                     throw new NotImplementedException();
                 }
@@ -259,6 +275,14 @@ namespace NUnit.Tests {
                 }
 
                 public void RemoveUnit(Unit unit) {
+                    throw new NotImplementedException();
+                }
+
+                public void AddBuilding(Building building) {
+                    throw new NotImplementedException();
+                }
+
+                public void RemoveBuilding(Building building) {
                     throw new NotImplementedException();
                 }
 

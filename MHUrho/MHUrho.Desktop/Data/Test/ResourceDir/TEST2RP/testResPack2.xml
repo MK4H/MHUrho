@@ -11,6 +11,7 @@
     <unitType name="TestUnit">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
+      <materialPath>Green.xml</materialPath>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
         <projectileType>testRP2/TestProjectile</projectileType>
@@ -19,12 +20,14 @@
     <unitType name="TestWorker">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
+      <materialPath>StoneMaterial.xml</materialPath>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </unitType>
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile">
       <modelPath>Box.mdl</modelPath>
+      <materialPath>StoneMaterial.xml</materialPath>
       <speed>30</speed>
       <size x="1" y="0.5"/>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
@@ -34,10 +37,12 @@
     <buildingType name="TestBuilding">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
+      <materialPath>StoneMaterial.xml</materialPath>
       <size x="3" y="3"/>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
         <workerType>testRP2/TestWorker</workerType>
+        <tileType>testRP2/Sand</tileType>
       </extension>
     </buildingType>
   </buildingTypes>

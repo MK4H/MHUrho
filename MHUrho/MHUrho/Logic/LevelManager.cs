@@ -15,7 +15,9 @@ using MHUrho.WorldMap;
 namespace MHUrho.Logic
 {
 
-    public class LevelManager
+    public delegate void OnUpdateDelegate(float timeStep);
+
+    internal class LevelManager : Component, ILevelManager
     {
         /// <summary>
         /// Currently running level, CANNOT BE USED DURING LOADING
@@ -26,11 +28,11 @@ namespace MHUrho.Logic
 
         public Map Map { get; private set; }
 
-        public Scene Scene { get; private set; }
-
         public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
         public PackageManager PackageManager => PackageManager.Instance;
+
+        public event OnUpdateDelegate Update;
 
         private CameraController cameraController;
         private IGameController inputController;
@@ -53,7 +55,7 @@ namespace MHUrho.Logic
             Node mapNode = scene.CreateChild("MapNode");
             var map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(map, scene, cameraController);
+            LevelManager level = new LevelManager(map, cameraController);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
@@ -136,7 +138,7 @@ namespace MHUrho.Logic
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
 
 
-            CurrentLevel = new LevelManager(map, scene, cameraController);
+            CurrentLevel = new LevelManager(map, cameraController);
 
 
             //TODO: Temporary player
@@ -183,10 +185,8 @@ namespace MHUrho.Logic
         }
 
         protected LevelManager(Map map, 
-                               Scene scene, 
                                CameraController cameraController)
         {
-            this.Scene = scene;
             this.units = new Dictionary<int, Unit>();
             this.players = new Dictionary<int, Player>();
             this.buildings = new Dictionary<int, Building>();
@@ -225,17 +225,17 @@ namespace MHUrho.Logic
         /// 
         /// </summary>
         /// <param name="buildingType"></param>
-        /// <param name="centerTileLocation"></param>
+        /// <param name="topLeft"></param>
         /// <param name="player"></param>
         /// <returns>The new building if building was built, or null if the building could not be built</returns>
-        public Building BuildBuilding(BuildingType buildingType, IntVector2 centerTileLocation, IPlayer player) {
-            if (!buildingType.CanBuildAt(centerTileLocation)) {
+        public Building BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player) {
+            if (!buildingType.CanBuildIn(buildingType.GetBuildingTilesRectangle(topLeft), this)) {
                 return null;
             }
 
             Node buildingNode = Scene.CreateChild("Building");
 
-            var newBuilding = buildingType.BuildNewBuilding(GetNewID(buildings), buildingNode, this, centerTileLocation, player);
+            var newBuilding = buildingType.BuildNewBuilding(GetNewID(buildings), buildingNode, this, topLeft, player);
             buildings.Add(newBuilding.ID,newBuilding);
             player.AddBuilding(newBuilding);
 
@@ -264,31 +264,10 @@ namespace MHUrho.Logic
             return player;
         }
 
-        public void GetClicked(List<RayQueryResult> rayquery) {
-            rayquery.Sort((a, b) => {
-                              if (a.Distance < b.Distance) {
-                                  return -1;
-                              }
-                              else if (a.Distance > b.Distance) {
-                                  return 1;
-                              }
-                              else {
-                                  return 0;
-                              }
-                          });
+        protected override void OnUpdate(float timeStep) {
+            base.OnUpdate(timeStep);
 
-            foreach (var result in rayquery) {
-                switch (result.Node.Name) {
-                    case "Unit":
-
-                        break;
-                    case "Map":
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException("Unknown node type");
-                }
-            }          
-
+            Update?.Invoke(timeStep);
         }
 
         private static async void LoadSceneParts(MyGame game, Scene scene) {

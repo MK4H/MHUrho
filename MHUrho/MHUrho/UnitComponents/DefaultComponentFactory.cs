@@ -8,7 +8,7 @@ namespace MHUrho.UnitComponents
 {
     public class DefaultComponentFactory
     {
-        public delegate DefaultComponent LoadComponentDelegate(LevelManager level, PluginData storedData);
+        public delegate DefaultComponent LoadComponentDelegate(ILevelManager level, PluginData storedData);
 
         private readonly Dictionary<DefaultComponents, LoadComponentDelegate> loaders;
 
@@ -25,15 +25,15 @@ namespace MHUrho.UnitComponents
 
 
 
-        public DefaultComponent LoadComponent(string name, PluginData storedComponent, LevelManager level) {
+        public DefaultComponent LoadComponent(string name, PluginData storedComponent, ILevelManager level) {
             return LoadComponent(nameToID[name], storedComponent, level);
         }
 
-        public DefaultComponent LoadComponent(int ID, PluginData storedComponent, LevelManager level) {
+        public DefaultComponent LoadComponent(int ID, PluginData storedComponent, ILevelManager level) {
             return LoadComponent((DefaultComponents) ID, storedComponent, level);
         }
 
-        public DefaultComponent LoadComponent(DefaultComponents ID, PluginData storedComponent, LevelManager level) {
+        public DefaultComponent LoadComponent(DefaultComponents ID, PluginData storedComponent, ILevelManager level) {
             return loaders[ID].Invoke(level, storedComponent);
         }
 

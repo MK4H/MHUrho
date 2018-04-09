@@ -17,16 +17,15 @@ namespace MHUrho.EditorTools
         private Dictionary<Button, UnitType> unitTypeButtons;
 
         private GameMandKController input;
-        private Map map;
+        private Map Map => input.LevelManager.Map;
 
         private Button selected;
 
         private bool enabled;
 
-        public UnitSpawningToolMandK(GameMandKController input, Map map) {
+        public UnitSpawningToolMandK(GameMandKController input) {
 
             this.input = input;
-            this.map = map;
             this.unitTypeButtons = new Dictionary<Button, UnitType>();
 
             foreach (var unitType in PackageManager.Instance.UnitTypes) {

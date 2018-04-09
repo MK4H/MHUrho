@@ -63,7 +63,7 @@ namespace MHUrho.UnitComponents
             ReceiveSceneUpdates = true;
         }
 
-        public static DirectShooter Load(LevelManager level, PluginData storedData) {
+        public static DirectShooter Load(ILevelManager level, PluginData storedData) {
             var sequentialDataReader = new SequentialPluginDataReader(storedData);
             sequentialDataReader.MoveNext();
             var rateOfFire = sequentialDataReader.GetCurrent<float>();

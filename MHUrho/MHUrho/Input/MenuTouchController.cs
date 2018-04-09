@@ -47,7 +47,7 @@ namespace MHUrho.Input
             button.SetColor(Color.Red);
         }
 
-        public IGameController GetGameController(CameraController cameraController, LevelManager levelManager, Player player) {
+        public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player) {
             return new GameTouchController(Game, levelManager, player, cameraController);
         }
 

@@ -9,6 +9,7 @@ using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using MHUrho.UserInterface;
+using MHUrho.WorldMap;
 using Urho;
 using WorkQueue = MHUrho.UnitComponents.WorkQueue;
 
@@ -17,6 +18,7 @@ namespace DefaultPackage
     public class TestBuildingType : IBuildingTypePlugin
     {
         private UnitType workerType;
+        private TileType tileType;
 
         public TestBuildingType() {
 
@@ -26,16 +28,12 @@ namespace DefaultPackage
             return typeName == "TestBuilding";
         }
 
-        public IBuildingInstancePlugin CreateNewInstance(LevelManager level, Building building) {
-            Unit[] workers = new Unit[2];
-            workers[0] = level.SpawnUnit(workerType, 
-                                         level.Map.GetTile(building.Rectangle.TopLeft() + new IntVector2(1, 0)),
+        public IBuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building) {
+            Unit[] workers = new Unit[1];
+            workers[0] = level.SpawnUnit(workerType,
+                                         level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
                                          building.Player);
-            workers[0].Node.AddComponent(new WorkQueue(building));
-            workers[1] = level.SpawnUnit(workerType,
-                                         level.Map.GetTile(building.Rectangle.TopLeft() + new IntVector2(0, 1)),
-                                         building.Player);
-            workers[1].Node.AddComponent(new WorkQueue(building));
+            workers[0].Node.AddComponent(new WorkQueue());
 
             return new TestBuildingInstance(level, building, workers);
         }
@@ -45,9 +43,28 @@ namespace DefaultPackage
         }
 
 
-        public bool CanBuildAt(IntVector2 topLeftLocation) {
-            throw new NotImplementedException();
+        public bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level) {
+            bool empty = true;
+            int rightTileTypeCount = 0;
+            level.Map.ForEachInRectangle(topLeftTileIndex, 
+                                         bottomRightTileIndex, 
+                                         (tile) => {
+
+                                                        if (tile.Unit != null ||
+                                                            tile.PassingUnits.Count != 0 ||
+                                                            tile.Building != null) {
+
+                                                            empty = false;
+
+                                                        }
+
+                                                        if (tile.Type == tileType) {
+                                                            rightTileTypeCount++;
+                                                        }
+                                                    });
+            return empty && rightTileTypeCount > 5;
         }
+
 
         public void PopulateUI(MandKUI mouseAndKeyboardUI) {
             throw new NotImplementedException();
@@ -77,6 +94,7 @@ namespace DefaultPackage
             workerType = PackageManager.Instance
                                        .LoadUnitType(XmlHelpers.GetString(extensionElement,
                                                                           "workerType"));
+            tileType = PackageManager.Instance.LoadTileType(XmlHelpers.GetString(extensionElement, "tileType"));
         }
     }
 
@@ -84,7 +102,7 @@ namespace DefaultPackage
 
         public Building Building { get; private set; }
 
-        private LevelManager level;
+        private ILevelManager level;
         private TestWorkerInstance[] workers;
 
         private int resources;
@@ -97,7 +115,7 @@ namespace DefaultPackage
 
         }
 
-        public TestBuildingInstance(LevelManager level, Building building, Unit[] workers) {
+        public TestBuildingInstance(ILevelManager level, Building building, Unit[] workers) {
             this.level = level;
 
             this.Building = building;
@@ -107,10 +125,6 @@ namespace DefaultPackage
                 this.workers[i] = (TestWorkerInstance)workers[i].Plugin;
                 this.workers[i].WorkedBuilding = this;
             }
-        }
-
-        public ITile GetExchangeTile(Unit unit) {
-            return level.Map.GetTile(Building.Location + new IntVector2(1, 0));
         }
 
         public void OnUpdate(float timeStep) {
@@ -128,8 +142,18 @@ namespace DefaultPackage
             
         }
 
-        public void LoadState(LevelManager level, Building building, PluginDataWrapper pluginData) {
+        public void LoadState(ILevelManager level, Building building, PluginDataWrapper pluginData) {
             
+        }
+
+        public ITile GetInterfaceTile(TestWorkerInstance testWorker) {
+            for (int i = 0; i < workers.Length; i++) {
+                if (testWorker == workers[i]) {
+                    return level.Map.GetTileByBottomRightCorner(Building.Rectangle.TopLeft() +
+                                                                new IntVector2(0, i % 4));
+                }
+            }
+            return null;
         }
 
         //private void StartWorker(WorkQueue worker) {

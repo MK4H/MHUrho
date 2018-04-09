@@ -28,8 +28,10 @@ namespace MHUrho.UnitComponents
         public event MovementEndedDelegate OnMovementEnded;
         public event MovementFailedDelegate OnMovementFailed;
 
+        public bool MovementFinished => path == null;
+
         private readonly Map map;
-        private LevelManager level;
+        private ILevelManager level;
         private Unit unit;
 
         private Path path;
@@ -37,14 +39,14 @@ namespace MHUrho.UnitComponents
         private ITile nextTile;
         private Vector3 nextWaypoint;
 
-        public WorldWalker(LevelManager level) {
+        public WorldWalker(ILevelManager level) {
             ReceiveSceneUpdates = true;
             this.level = level;
             this.map = level.Map;
             Enabled = false;
         }
 
-        protected WorldWalker(LevelManager level, bool activated, Path path, ITile target) {
+        protected WorldWalker(ILevelManager level, bool activated, Path path, ITile target) {
 
             ReceiveSceneUpdates = true;
             this.level = level;
@@ -54,7 +56,7 @@ namespace MHUrho.UnitComponents
             this.Enabled = activated;
         }
 
-        public static WorldWalker Load(LevelManager level, PluginData data) {
+        public static WorldWalker Load(ILevelManager level, PluginData data) {
             var indexedData = new IndexedPluginDataReader(data);
             var activated = indexedData.Get<bool>(1);
             Path path = null;
@@ -62,6 +64,7 @@ namespace MHUrho.UnitComponents
             if (activated) {
                 path = indexedData.Get<Path>(2);
                 target = level.Map.GetTileByMapLocation(indexedData.Get<IntVector2>(3));
+                
             }
 
             return new WorldWalker(level, activated, path, target);
@@ -97,7 +100,6 @@ namespace MHUrho.UnitComponents
             nextWaypoint = nextTile.Center3;
 
             nextWaypoint = GetNextWaypoint();
-
             Enabled = true;
         }
 
@@ -206,7 +208,11 @@ namespace MHUrho.UnitComponents
         }
 
         private bool ReachedPoint(Vector3 currentPosition, Vector3 nextPosition, Vector3 point) {
-            return Vector3.Distance(currentPosition, point) < Vector3.Distance(nextPosition, point);
+            var currDiff = point - currentPosition;
+            var nextDiff = point - nextPosition;
+            return !(Math.Sign(currDiff.X) == Math.Sign(nextDiff.X) &&
+                     Math.Sign(currDiff.Y) == Math.Sign(nextDiff.Y) &&
+                     Math.Sign(currDiff.Z) == Math.Sign(nextDiff.Z));
         }
 
         private Vector3 GetNextWaypoint() {
@@ -231,6 +237,7 @@ namespace MHUrho.UnitComponents
 
         private void ReachedDestination() {
             path.Dispose();
+            path = null;
             nextTile = null;
             nextWaypoint = new Vector3();
             Enabled = false;

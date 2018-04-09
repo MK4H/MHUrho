@@ -13,20 +13,21 @@ namespace MHUrho.EditorTools
 {
     class BuildingBuilderToolMandK : BuildingBuilderTool, IMandKTool
     {
-        public IEnumerable<Button> Buttons => throw new NotImplementedException();
+        public IEnumerable<Button> Buttons => buildingTypeButtons.Keys;
 
         private Dictionary<Button, BuildingType> buildingTypeButtons;
 
         private GameMandKController input;
-        private Map map;
+
+        private ILevelManager Level => input.LevelManager;
+        private Map Map => Level.Map;
 
         private Button selected;
 
         private bool enabled;
 
-        public BuildingBuilderToolMandK(GameMandKController input, Map map) {
+        public BuildingBuilderToolMandK(GameMandKController input) {
             this.input = input;
-            this.map = map;
             this.buildingTypeButtons = new Dictionary<Button, BuildingType>();
 
             foreach (var buildingType in PackageManager.Instance.BuildingTypes) {
@@ -49,6 +50,8 @@ namespace MHUrho.EditorTools
                 button.MaxSize = new IntVector2(100, 100);
                 button.MinSize = new IntVector2(100, 100);
                 button.Visible = false;
+
+                buildingTypeButtons.Add(button, buildingType);
             }
         }
 
@@ -56,6 +59,8 @@ namespace MHUrho.EditorTools
             if (enabled) return;
 
             input.UIManager.SelectionBarShowButtons(buildingTypeButtons.Keys);
+            input.MouseDown += OnMouseDown;
+            input.MouseMove += OnMouseMove;
             enabled = true;
         }
 
@@ -69,6 +74,9 @@ namespace MHUrho.EditorTools
 
             input.UIManager.SelectionBarClearButtons();
             input.MouseDown -= OnMouseDown;
+            input.MouseMove -= OnMouseMove;
+
+            Map.DisableHighlight();
             enabled = false;
         }
 
@@ -85,30 +93,47 @@ namespace MHUrho.EditorTools
             if (selected == e.Element) {
                 input.UIManager.Deselect();
                 selected = null;
-                input.MouseDown -= OnMouseDown;
             }
             else {
                 input.UIManager.SelectButton((Button)e.Element);
                 selected = (Button)e.Element;
-                input.MouseDown += OnMouseDown;
             }
         }
 
         private void OnMouseDown(MouseButtonDownEventArgs e) {
-            if (selected != null) {
-                var tile = input.GetTileUnderCursor();
-                //TODO: Rectangle
-                if (tile != null && buildingTypeButtons[selected].CanBuildAt(tile.MapLocation)) {
-                    LevelManager.CurrentLevel.BuildBuilding(buildingTypeButtons[selected], tile.MapLocation, input.Player);
-                }
-                else {
-                    //TODO: Change cursor
-                }
+            if (selected == null) return;
+
+
+            var tile = input.GetTileUnderCursor();
+            if (tile == null) return;
+
+            var buildingType = buildingTypeButtons[selected];
+
+            GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
+
+            if (buildingType.CanBuildIn(topLeft, bottomRight, Level)) {
+                LevelManager.CurrentLevel.BuildBuilding(buildingTypeButtons[selected], topLeft, input.Player);
             }
         }
 
         private void OnMouseMove(MouseMovedEventArgs e) {
+            if (selected == null) return;
 
+            var tile = input.GetTileUnderCursor();
+            if (tile == null) return;
+
+            var buildingType = buildingTypeButtons[selected];
+
+            GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
+
+            Color color = buildingType.CanBuildIn(topLeft, bottomRight, Level) ? Color.Green : Color.Red;
+            Map.HighlightArea(topLeft, bottomRight, WorldMap.HighlightMode.Full, color);
+        }
+
+        private void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
+            topLeft = centerTile.TopLeft - buildingType.Size / 2;
+            bottomRight = topLeft + buildingType.Size - new IntVector2(1,1);
+            Map.SnapToMap(ref topLeft, ref bottomRight);
         }
     }
 }

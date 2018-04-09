@@ -96,7 +96,7 @@ namespace MHUrho.Logic
         /// <summary>
         /// Continues loading by connecting references
         /// </summary>
-        void ConnectReferences(LevelManager level);
+        void ConnectReferences(ILevelManager level);
 
         void FinishLoading();
 
@@ -114,6 +114,10 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="unit">the unit to remove</param>
         void RemoveUnit(Unit unit);
+
+        void AddBuilding(Building building);
+
+        void RemoveBuilding(Building building);
 
         IEnumerable<Unit> GetAllUnits();
 

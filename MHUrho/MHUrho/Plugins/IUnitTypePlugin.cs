@@ -25,7 +25,7 @@ namespace MHUrho.Plugins
         /// <param name="level"></param>
         /// <param name="unit"></param>
         /// <returns></returns>
-        IUnitInstancePlugin CreateNewInstance(LevelManager level, Unit unit);
+        IUnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit);
 
 
         /// <summary>

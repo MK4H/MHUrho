@@ -481,12 +481,14 @@ namespace MHUrho.Packaging
             //Delete package from previously active
             currentlyLoaded.Remove(package.ID);
             package.AddToByID(ID, newLoaded);
+            ResourceCache.AddResourceDir(package.XmlDirectoryPath, 1);
             return package;
         }
 
 
         private void UnloadPackages(IEnumerable<ResourcePack> packages) {
             foreach (var package in packages) {
+                ResourceCache.RemoveResourceDir(package.XmlDirectoryPath);
                 package.UnLoad(activeTileTypes, activeUnitTypes);
             }
         }
@@ -512,9 +514,11 @@ namespace MHUrho.Packaging
         private void StartLoadingPackage(ResourcePack package) {
             if (loadingPackages == null && !activePackages.ContainsValue(package)) {
                  package.AddToByID(GetNewID(activePackages), activePackages);
+                ResourceCache.AddResourceDir(package.XmlDirectoryPath, 1);
             }
             else if (loadingPackages != null && !loadingPackages.ContainsValue(package)) {
                 package.AddToByID(GetNewID(loadingPackages), loadingPackages);
+                ResourceCache.AddResourceDir(package.XmlDirectoryPath, 1);
             }
         }
 
