@@ -58,7 +58,7 @@ namespace MHUrho.Logic
             LevelManager level = new LevelManager(map, cameraController);
             scene.AddComponent(level);
 
-            PackageManager.Instance.LoadPackages(storedLevel.Packages);
+            PackageManager.Instance.LoadPackage(storedLevel.PackageName);
 
             foreach (var unit in storedLevel.Units) {
                 //TODO: Group units under one node
@@ -120,8 +120,8 @@ namespace MHUrho.Logic
         /// <param name="mapSize">Size of the map to create</param>
         /// <param name="packages">packages to load</param>
         /// <returns>Loaded default level</returns>
-        public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, IEnumerable<string> packages) {
-            PackageManager.Instance.LoadWholePackages(packages);
+        public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName) {
+            PackageManager.Instance.LoadPackage(gamePackageName);
 
             var scene = new Scene(game.Context);
             scene.CreateComponent<Octree>();
@@ -154,7 +154,7 @@ namespace MHUrho.Logic
             StLevel level = new StLevel() {
                 GameSpeed = this.GameSpeed,
                 Map = this.Map.Save(),
-                Packages = PackageManager.Instance.Save()
+                PackageName = PackageManager.Instance.ActiveGame.Name
             };
 
 

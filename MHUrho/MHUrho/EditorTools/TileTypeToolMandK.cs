@@ -32,7 +32,7 @@ namespace MHUrho.EditorTools
             this.tileTypeButtons = new Dictionary<Button, TileType>();
             this.highlight = new StaticRectangleToolMandK(input, new IntVector2(3,3));
 
-            foreach (var tileType in PackageManager.Instance.TileTypes) {
+            foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
                 var tileImage = tileType.GetImage().ConvertToRGBA();
 
                 var buttonTexture = new Texture2D();

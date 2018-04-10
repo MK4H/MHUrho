@@ -53,8 +53,9 @@ namespace DefaultPackage
 
         public void Initialize(XElement extensionElement, PackageManager packageManager) {
             projectileType = PackageManager.Instance
-                                           .LoadProjectileType(XmlHelpers.GetString(extensionElement, 
-                                                                                    "projectileType"));
+                                           .ActiveGame
+                                           .GetProjectileType(XmlHelpers.GetString(extensionElement, 
+                                                                                   "projectileType"));
         }
     }
 

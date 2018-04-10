@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
-<resourcePack xmlns="http://www.MobileHold.cz/ResourcePack.xsd" name="testRP2">
+<resourcePack xmlns="http://www.MobileHold.cz/GamePack.xsd" name="testRP2">
   <description>Second test pack to test multiple resource packs</description>
   <tileTypes>
     <tileType name="Sand">

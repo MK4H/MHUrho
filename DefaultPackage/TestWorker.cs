@@ -30,7 +30,7 @@ namespace DefaultPackage
 
 
         public bool CanSpawnAt(ITile centerTile) {
-            return centerTile.Type != PackageManager.Instance.DefaultTileType &&
+            return centerTile.Type != PackageManager.Instance.ActiveGame.DefaultTileType &&
                    centerTile.Building == null;
         }
 

@@ -7,23 +7,14 @@ import "PluginStorage.proto";
 message StLevel {
 	StMap map = 1;
 	repeated StUnit units = 2;
-	repeated StPlayer players = 3;
-	float gameSpeed = 4;
-	StPackages packages = 5;
+	repeated StBuilding buildings = 3;
+	repeated StPlayer players = 4;
+	repeated StProjectile projectiles = 5;
+	float gameSpeed = 6;
+	string packageName = 7;
 }
 
-message StPackages {
-	repeated StPackage packages = 1;
-	repeated StEntityType tileTypes = 2;
-	repeated StEntityType unitTypes = 3;
-	repeated StEntityType buildingTypes = 4;
-	repeated StEntityType projectileTypes = 5;
-}
 
-message StPackage {
-	int32 ID = 1;
-	string name = 2;
-}
 
 message StTile {
 	int32 unitID = 1;
@@ -86,11 +77,5 @@ message StMap {
 	repeated StBorderTile borderTiles = 3;
 }
 
-message StEntityType {
-	int32 packageID = 1;
-	//Global across all entities of the kind (for example tile types) in this level
-	int32 typeID = 2;
-	string name = 3;
-}
 
 

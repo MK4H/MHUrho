@@ -13,6 +13,10 @@ namespace MHUrho.Helpers
             return XmlHelpers.GetInt(xElement, childElementName);
         }
 
+        public static int GetIntFromAttribute(this XElement xElement, string attributeName) {
+            return XmlHelpers.GetIntAttribute(xElement, attributeName);
+        }
+
         public static float GetFloatFromChild(this XElement xElement, string childElementName) {
             return XmlHelpers.GetFloat(xElement, childElementName);
         }

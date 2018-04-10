@@ -15,7 +15,7 @@ namespace MHUrho.Plugins
         public string AnimationPath = null;
 
         /// <summary>
-        /// Contains the full name (ResourcePack/Resource) of resource as key and amount as value
+        /// Contains the full name (GamePack/Resource) of resource as key and amount as value
         /// </summary>
         public Dictionary<string, int> ResourcesNeeded = null;
     }

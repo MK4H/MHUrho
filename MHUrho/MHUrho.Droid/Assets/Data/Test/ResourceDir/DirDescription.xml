@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<resourcePackDirectory xmlns="http://www.MobileHold.cz/ResourcePack.xsd">
+<resourcePackDirectory xmlns="http://www.MobileHold.cz/GamePack.xsd">
   <resourcePack name="Default">
     <description>Default package present in every copy of the game</description>
     <pathToXml>default/default.xml</pathToXml>

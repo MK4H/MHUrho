@@ -56,7 +56,7 @@ namespace MHUrho.UserInterface
             selectionBar.ClipChildren = true;
             selectionBar.HoverBegin += SelectionBar_HoverBegin;
 
-            foreach (var tileType in PackageManager.Instance.TileTypes) {
+            foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
                 var tileImage = tileType.GetImage().ConvertToRGBA();
 
                 var buttonTexture = new Texture2D();

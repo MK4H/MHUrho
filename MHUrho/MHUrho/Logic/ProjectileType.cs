@@ -14,6 +14,7 @@ namespace MHUrho.Logic
 {
     //TODO: Make this an arrow type
     public class ProjectileType : IEntityType, IDisposable {
+        private const string IDAttributeName = "ID";
         private const string NameAttributeName = "name";
         private const string ModelPathElementName = "modelPath";
         private const string MaterialPathElementName = "materialPath";
@@ -27,7 +28,7 @@ namespace MHUrho.Logic
 
         public string Name { get; private set; }
 
-        public ResourcePack Package { get; private set; }
+        public GamePack Package { get; private set; }
 
         public object Plugin => typePlugin;
 
@@ -44,8 +45,8 @@ namespace MHUrho.Logic
         }
 
 
-        public void Load(XElement xml, int newID, ResourcePack package) {
-            ID = newID;
+        public void Load(XElement xml, GamePack package) {
+            ID = xml.GetIntFromAttribute(IDAttributeName);
             Name = xml.Attribute(NameAttributeName).Value;
             ProjectileSpeed = XmlHelpers.GetFloat(xml, SpeedElementName);
             model = LoadModel(xml, package.XmlDirectoryPath);
@@ -95,14 +96,6 @@ namespace MHUrho.Logic
             collider.SetBox(new Vector3(0.2f, 0.2f, 0.8f), new Vector3(-0.1f, -0.1f, -0.4f), Quaternion.Identity);
 
             return projectile;
-        }
-
-        public StEntityType Save() {
-            return new StEntityType {
-                                        Name = Name,
-                                        TypeID = ID,
-                                        PackageID = Package.ID
-                                    };
         }
 
         public IProjectileInstancePlugin GetNewInstancePlugin(Projectile projectile, ILevelManager levelManager) {

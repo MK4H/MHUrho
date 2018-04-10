@@ -31,6 +31,10 @@ namespace MHUrho.Helpers
             return int.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
         }
 
+        public static int GetIntAttribute(XElement element, string attributeName) {
+            return int.Parse(element.Attribute(attributeName).Value);
+        }
+
         public static float GetFloat(XElement typeXmlElement, string childElementName) {
             return float.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
         }

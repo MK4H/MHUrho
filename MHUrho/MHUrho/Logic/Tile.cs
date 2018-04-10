@@ -131,7 +131,7 @@ namespace MHUrho.Logic
         /// Continues loading by connecting references
         /// </summary>
         public void ConnectReferences(ILevelManager level) {
-            Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
+            Type = PackageManager.Instance.ActiveGame.GetTileType(storage.TileTypeID);
 
             if (storage.UnitID != 0) {
                 Unit = level.GetUnit(storage.UnitID);

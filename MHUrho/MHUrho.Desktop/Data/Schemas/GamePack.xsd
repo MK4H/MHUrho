@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="ResourcePackDirectory"
-    targetNamespace="http://www.MobileHold.cz/ResourcePack.xsd"
+    targetNamespace="http://www.MobileHold.cz/GamePack.xsd"
     elementFormDefault="qualified"
-    xmlns="http://www.MobileHold.cz/ResourcePack.xsd"
+    xmlns="http://www.MobileHold.cz/GamePack.xsd"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
-  <xs:element name="resourcePackDirectory">
+  <xs:element name="gamePackDirectory">
     <xs:complexType>
       <xs:sequence minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="resourcePack" type="resourcePackDirEntry"/>
+        <xs:element name="gamePack" type="gamePackDirEntry"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="resourcePack" type="resourcePackFull"/>
+  <xs:element name="gamePack" type="gamePackFull"/>
     
   
-  <xs:complexType name="resourcePackBase">
+  <xs:complexType name="gamePackBase">
     <xs:sequence>
       <xs:element name="description" type="xs:string" minOccurs="0"/>
       <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
@@ -24,9 +24,9 @@
     <xs:attribute name="name" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="resourcePackDirEntry">
+  <xs:complexType name="gamePackDirEntry">
     <xs:complexContent>
-      <xs:extension base="resourcePackBase">
+      <xs:extension base="gamePackBase">
         <xs:sequence>
           <xs:element name="pathToXml" type="xs:string"/>
         </xs:sequence>
@@ -34,9 +34,9 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="resourcePackFull">
+  <xs:complexType name="gamePackFull">
     <xs:complexContent>
-      <xs:extension base="resourcePackBase">
+      <xs:extension base="gamePackBase">
         <xs:sequence>
           <xs:element name="resourceTypes" minOccurs="0" maxOccurs="1">
             <xs:complexType>
@@ -48,6 +48,7 @@
           <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:sequence>
+                <xs:element name="defaultTileType" type="tileTypeType" minOccurs="1" maxOccurs="1"/>
                 <xs:element name="tileType" type="tileTypeType" minOccurs="0" maxOccurs="unbounded"/>
               </xs:sequence>
             </xs:complexType>
@@ -90,7 +91,8 @@
       <xs:element name="texturePath" type="xs:string"/>
       <xs:element name="movementSpeed" type="xs:float"/>
     </xs:sequence>
-    <xs:attribute use="required" name="name" type="xs:string"/>
+    <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attribute name="ID" use="required" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="unitTypeType">
@@ -101,7 +103,8 @@
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute use="required" name="name" type="xs:string"/>
+    <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attribute name="ID" use="required" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="buildingTypeType">
@@ -113,7 +116,8 @@
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute use="required" name="name" type="xs:string"/>
+    <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attribute name="ID" use="required" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="playerTypeType">
@@ -123,6 +127,7 @@
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attribute name="ID" use="required" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="projectileTypeType">
@@ -134,7 +139,8 @@
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute use="required" name="name" type="xs:string"/>
+    <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attribute name="ID" use="required" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="extensionType">

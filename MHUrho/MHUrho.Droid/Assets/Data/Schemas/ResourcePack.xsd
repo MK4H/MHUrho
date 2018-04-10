@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema id="ResourcePackDirectory"
-    targetNamespace="http://www.MobileHold.cz/ResourcePack.xsd"
+<xs:schema id="GamePackDirectory"
+    targetNamespace="http://www.MobileHold.cz/GamePack.xsd"
     elementFormDefault="qualified"
-    xmlns="http://www.MobileHold.cz/ResourcePack.xsd"
+    xmlns="http://www.MobileHold.cz/GamePack.xsd"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
   <xs:element name="resourcePackDirectory">

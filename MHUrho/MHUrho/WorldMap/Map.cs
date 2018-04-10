@@ -100,7 +100,7 @@ namespace MHUrho.WorldMap
             private StBorderTile storage;
 
             public void ConnectReferences(ILevelManager level) {
-                Type = PackageManager.Instance.GetTileType(storage.TileTypeID);
+                Type = PackageManager.Instance.ActiveGame.GetTileType(storage.TileTypeID);
             }
 
             public void FinishLoading() {
@@ -271,7 +271,7 @@ namespace MHUrho.WorldMap
         public static Map CreateDefaultMap(Node mapNode, IntVector2 size) {
             Map newMap = new Map(mapNode, size.X, size.Y);
 
-            TileType defaultTileType = PackageManager.Instance.DefaultTileType;
+            TileType defaultTileType = PackageManager.Instance.ActiveGame.DefaultTileType;
 
             for (int i = 0; i < newMap.tiles.Length; i++) {
                 IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.LengthWithBorders);

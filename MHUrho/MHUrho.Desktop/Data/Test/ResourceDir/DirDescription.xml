@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<resourcePackDirectory xmlns="http://www.MobileHold.cz/ResourcePack.xsd">
-  <resourcePack name="Default">
+<gamePackDirectory xmlns="http://www.MobileHold.cz/GamePack.xsd">
+  <gamePack name="Default">
     <description>Default package present in every copy of the game</description>
     <pathToXml>default/default.xml</pathToXml>
-  </resourcePack>
-  <resourcePack name="testRP2">
+  </gamePack>
+  <gamePack name="testRP2">
     <description>Second test pack to test multiple resource packs</description>
     <pathToXml>TEST2RP/testResPack2.xml</pathToXml>
-  </resourcePack>
+  </gamePack>
 
-</resourcePackDirectory>
+</gamePackDirectory>

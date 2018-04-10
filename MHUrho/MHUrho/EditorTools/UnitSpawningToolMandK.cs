@@ -28,7 +28,7 @@ namespace MHUrho.EditorTools
             this.input = input;
             this.unitTypeButtons = new Dictionary<Button, UnitType>();
 
-            foreach (var unitType in PackageManager.Instance.UnitTypes) {
+            foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
                 var unitIcon = unitType.Icon;
 
                 var buttonTexture = new Texture2D();

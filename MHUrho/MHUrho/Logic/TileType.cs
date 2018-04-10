@@ -12,6 +12,7 @@ using MHUrho.Packaging;
 namespace MHUrho.Logic
 {
     public class TileType : IEntityType {
+        private const string IDAttributeName = "ID";
         private const string NameAttributeName = "name";
         private const string TexturePathElementName = "texturePath";
         private const string MovementSpeedElementName = "movementSpeed";
@@ -22,7 +23,7 @@ namespace MHUrho.Logic
 
         public string Name { get; private set; }
 
-        public ResourcePack Package { get; private set; }
+        public GamePack Package { get; private set; }
 
         //TODO: Check that texture is null
         public Rect TextureCoords { get; private set; }
@@ -33,24 +34,15 @@ namespace MHUrho.Logic
             return tileTypeElement.Attribute("name").Value;
         }
 
-        public void Load(XElement xml, int newID, ResourcePack package) {
+        public void Load(XElement xml, GamePack package) {
             //TODO: Check for errors
-            ID = newID;
+            ID = xml.GetIntFromAttribute(IDAttributeName);
             Name = xml.Attribute(NameAttributeName).Value;
             imagePath = XmlHelpers.GetFullPath(xml, TexturePathElementName, package.XmlDirectoryPath);
             MovementSpeedModifier = XmlHelpers.GetFloat(xml, MovementSpeedElementName);
             Package = package;
         }
 
-        public StEntityType Save() {
-            var storedTileType = new StEntityType {
-                Name = Name,
-                TypeID = ID,
-                PackageID = Package.ID
-            };
-
-            return storedTileType;
-        }
 
         public TileType() {
             ID = 0;

@@ -527,7 +527,7 @@ namespace MHUrho.WorldMap
 
             private void CreateMaterial() {
                 //Count for output image size
-                int tileTypeCount = PackageManager.Instance.TileTypeCount;
+                int tileTypeCount = PackageManager.Instance.ActiveGame.TileTypeCount;
 
                 //TODO: Context
                 Image mapImage = new Image();
@@ -541,8 +541,17 @@ namespace MHUrho.WorldMap
                 int mapImageHeight = Tile.ImageHeight;
 
                 IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
-                foreach (var tileType in PackageManager.Instance.TileTypes) {
-                    var tileTypeImage = tileType.GetImage().ConvertToRGBA();
+                foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
+                    var tileTypeImage = tileType.GetImage();
+
+                    if (tileTypeImage.Compressed) {
+                        throw new
+                            NotImplementedException("UrhoSharp does not implement Urho3D decompression of compressed textures");
+                    }
+                    else {
+                        tileTypeImage = tileTypeImage.ConvertToRGBA();
+                    }
+                    
                     if (!mapImage.SetSubimage(tileTypeImage, subimageRect)) {
                         //TODO: Error;
                         throw new Exception("Could not copy tileType image to the map texture image");

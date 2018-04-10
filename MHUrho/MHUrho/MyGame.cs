@@ -31,12 +31,12 @@ namespace MHUrho
 
         static MyGame()
         {
-            UnhandledException += (s, e) =>
-            {
-                if (Debugger.IsAttached)
-                    Debugger.Break();
-                e.Handled = true;
-            };
+            //UnhandledException += (s, e) =>
+            //{
+            //    if (Debugger.IsAttached)
+            //        Debugger.Break();
+            //    e.Handled = true;
+            //};
         }
 
         protected override void Start() {

@@ -1,14 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
-<resourcePack xmlns="http://www.MobileHold.cz/ResourcePack.xsd" name="testRP2">
+<gamePack xmlns="http://www.MobileHold.cz/GamePack.xsd" name="testRP2">
   <description>Second test pack to test multiple resource packs</description>
   <tileTypes>
-    <tileType name="Sand">
+    <defaultTileType name="Default" ID="1">
+      <texturePath>xamarin.png</texturePath>
+      <movementSpeed>1</movementSpeed>
+    </defaultTileType>
+    <tileType name="Sand" ID="2">
       <texturePath>sand.jpg</texturePath>
       <movementSpeed>0.5</movementSpeed>
     </tileType>
   </tileTypes>
   <unitTypes>
-    <unitType name="TestUnit">
+    <unitType name="TestUnit" ID="1">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
       <materialPath>Green.xml</materialPath>
@@ -17,7 +21,7 @@
         <projectileType>testRP2/TestProjectile</projectileType>
       </extension>
     </unitType>
-    <unitType name="TestWorker">
+    <unitType name="TestWorker" ID="9">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
       <materialPath>StoneMaterial.xml</materialPath>
@@ -25,7 +29,7 @@
     </unitType>
   </unitTypes>
   <projectileTypes>
-    <projectileType name="TestProjectile">
+    <projectileType name="TestProjectile" ID="1">
       <modelPath>Box.mdl</modelPath>
       <materialPath>StoneMaterial.xml</materialPath>
       <speed>30</speed>
@@ -34,7 +38,7 @@
     </projectileType>
   </projectileTypes>
   <buildingTypes>
-    <buildingType name="TestBuilding">
+    <buildingType name="TestBuilding" ID="1">
       <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
       <materialPath>StoneMaterial.xml</materialPath>
@@ -46,4 +50,4 @@
       </extension>
     </buildingType>
   </buildingTypes>
-</resourcePack>
+</gamePack>

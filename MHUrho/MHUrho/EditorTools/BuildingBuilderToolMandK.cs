@@ -30,7 +30,7 @@ namespace MHUrho.EditorTools
             this.input = input;
             this.buildingTypeButtons = new Dictionary<Button, BuildingType>();
 
-            foreach (var buildingType in PackageManager.Instance.BuildingTypes) {
+            foreach (var buildingType in PackageManager.Instance.ActiveGame.BuildingTypes) {
                 var buildingIcon = buildingType.Icon;
 
                 var buttonTexture = new Texture2D();

@@ -17,6 +17,7 @@ namespace MHUrho.Logic
     public class UnitType : IEntityType, IDisposable
     {
         //XML ELEMENTS AND ATTRIBUTES
+        private const string IDAttributeName = "ID";
         private const string NameAttributeName = "name";
         private const string ModelPathElementName = "modelPath";
         private const string MaterialPathElementName = "materialPath";
@@ -27,7 +28,7 @@ namespace MHUrho.Logic
 
         public string Name { get; private set; }
 
-        public ResourcePack Package { get; private set; }
+        public GamePack Package { get; private set; }
 
         public Model Model { get; private set; }
 
@@ -42,7 +43,7 @@ namespace MHUrho.Logic
         //TODO: More loaded properties
 
         /// <summary>
-        /// Data has to be loaded after constructor by <see cref="Load(XElement, int, ResourcePack)"/>
+        /// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
         /// It is done this way to allow cyclic references during the Load method, so anything 
         /// that references this unitType back can get the reference during the loading of this instance
         /// </summary>
@@ -56,15 +57,15 @@ namespace MHUrho.Logic
         /// THE STANDARD DATA cannot reference any other types, it would cause infinite cycles
         /// 
         /// After this loading, you should register this type so it can be referenced, and then call
-        /// <see cref="UnitType.ParseExtensionData(XElement, ResourcePack)"/>
+        /// <see cref="UnitType.ParseExtensionData(XElement, GamePack)"/>
         /// </summary>
         /// <param name="xml">xml element describing the type, according to <see cref="PackageManager.XMLNamespace"/> schema</param>
         /// <param name="newID">ID of this type in the current game</param>
         /// <param name="package">Package this unitType belongs to</param>
         /// <returns>UnitType with filled standard members</returns>
-        public void Load(XElement xml, int newID, ResourcePack package) {
+        public void Load(XElement xml, GamePack package) {
             //TODO: Check for errors
-            ID = newID;
+            ID = xml.GetIntFromAttribute(IDAttributeName);
             Name = xml.Attribute(NameAttributeName).Value;
             Package = package;
 
@@ -84,15 +85,6 @@ namespace MHUrho.Logic
                                      package.PackageManager);
         }
 
-        public StEntityType Save() {
-            var storedUnitType = new StEntityType {
-                Name = Name,
-                TypeID = ID,
-                PackageID = Package.ID
-            };
-
-            return storedUnitType;
-        }
 
         public bool CanSpawnAt(ITile tile) {
             return unitTypeLogic.CanSpawnAt(tile);

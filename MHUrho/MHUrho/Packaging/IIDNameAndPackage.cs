@@ -8,7 +8,6 @@ namespace MHUrho.Packaging
     {
         int ID { get; set; }
         string Name { get; }
-
-        ResourcePack Package { get; }
+        GamePack Package { get; }
     }
 }

@@ -79,7 +79,7 @@ namespace MHUrho.UnitComponents
             var projectileTypeID = sequentialDataReader.GetCurrent<int>();
             return new DirectShooter(level,
                                      target,
-                                     level.PackageManager.GetProjectileType(projectileTypeID),
+                                     level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
                                      rateOfFire,
                                      horizontalOffset,
                                      verticalOffset);

@@ -96,9 +96,10 @@ namespace DefaultPackage
 
         public void Initialize(XElement extensionElement, PackageManager packageManager) {
             workerType = PackageManager.Instance
-                                       .LoadUnitType(XmlHelpers.GetString(extensionElement,
+                                       .ActiveGame
+                                       .GetUnitType(XmlHelpers.GetString(extensionElement,
                                                                           "workerType"));
-            tileType = PackageManager.Instance.LoadTileType(XmlHelpers.GetString(extensionElement, "tileType"));
+            tileType = PackageManager.Instance.ActiveGame.GetTileType(XmlHelpers.GetString(extensionElement, "tileType"));
         }
     }
 

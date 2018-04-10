@@ -7,8 +7,6 @@ using MHUrho.Storage;
 namespace MHUrho.Packaging
 {
     public interface IEntityType : IIDNameAndPackage {
-        void Load(XElement xml, int newID, ResourcePack package);
-
-        StEntityType Save();
+        void Load(XElement xml, GamePack package);
     }
 }

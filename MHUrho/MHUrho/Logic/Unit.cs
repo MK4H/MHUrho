@@ -127,7 +127,7 @@ namespace MHUrho.Logic
         /// <param name="storedUnit">stored unit</param>
         /// <returns>Loaded unit component, already added to the node</returns>
         public static Unit Load(ILevelManager level, PackageManager packageManager, Node node, StUnit storedUnit) {
-            var type = packageManager.GetUnitType(storedUnit.TypeID);
+            var type = packageManager.ActiveGame.GetUnitType(storedUnit.TypeID);
             if (type == null) {
                 throw new ArgumentException("Type of this unit was not loaded");
             }

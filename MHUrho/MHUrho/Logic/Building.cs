@@ -126,7 +126,7 @@ namespace MHUrho.Logic
                                     PackageManager packageManager, 
                                     Node node,
                                     StBuilding storedBuilding) {
-            var type = packageManager.GetBuildingType(storedBuilding.TypeID);
+            var type = packageManager.ActiveGame.GetBuildingType(storedBuilding.TypeID);
             if (type == null) {
                 throw new ArgumentException("Type of this building was not loaded");
             }

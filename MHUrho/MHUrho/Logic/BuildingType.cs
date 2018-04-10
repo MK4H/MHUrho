@@ -15,6 +15,7 @@ namespace MHUrho.Logic
     public class BuildingType : IEntityType, IDisposable
     {
         //XML ELEMENTS AND ATTRIBUTES
+        private const string IDAttributeName = "ID";
         private const string NameAttributeName = "name";
         private const string ModelPathElementName = "modelPath";
         private const string MaterialPathElementName = "materialPath";
@@ -27,7 +28,7 @@ namespace MHUrho.Logic
 
         public string Name { get; private set; }
 
-        public ResourcePack Package { get; private set; }
+        public GamePack Package { get; private set; }
 
         public Model Model { get; private set; }
 
@@ -43,7 +44,7 @@ namespace MHUrho.Logic
 
 
         /// <summary>
-        /// Data has to be loaded after constructor by <see cref="Load(XElement, int, ResourcePack)"/>
+        /// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
         /// It is done this way to allow cyclic references during the Load method, so anything 
         /// that references this buildingType back can get the reference during the loading of this instance
         /// </summary>
@@ -51,8 +52,8 @@ namespace MHUrho.Logic
 
         }
 
-        public void Load(XElement xml, int newID, ResourcePack package) {
-            ID = newID;
+        public void Load(XElement xml, GamePack package) {
+            ID = xml.GetIntFromAttribute(IDAttributeName);
             Name = xml.Attribute(NameAttributeName).Value;
             //TODO: Join the implementations from all the 
             Model = LoadModel(xml, package.XmlDirectoryPath);
@@ -66,14 +67,6 @@ namespace MHUrho.Logic
                                                                                Name);
             buildingTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + ExtensionElementName),
                                                     package.PackageManager);
-        }
-
-        public StEntityType Save() {
-            return new StEntityType {
-                                          Name = Name,
-                                          TypeID = ID,
-                                          PackageID = Package.ID
-                                      };
         }
 
         public Building BuildNewBuilding(int buildingID, 
