@@ -17,11 +17,11 @@ namespace MHUrho.Logic
     public class UnitType : IEntityType, IDisposable
     {
         //XML ELEMENTS AND ATTRIBUTES
-        private const string NameAttribute = "name";
-        private const string ModelPathElement = "modelPath";
-        private const string MaterialPathElement = "materialPath";
-        private const string IconPathElement = "iconPath";
-        private const string AssemblyPathElement = "assemblyPath";
+        private const string NameAttributeName = "name";
+        private const string ModelPathElementName = "modelPath";
+        private const string MaterialPathElementName = "materialPath";
+        private const string IconPathElementName = "iconPath";
+        private const string AssemblyPathElementName = "assemblyPath";
 
         public int ID { get; set; }
 
@@ -34,6 +34,8 @@ namespace MHUrho.Logic
         public Material Material { get; private set; }
 
         public Image Icon { get; private set; }
+
+        public object Plugin => unitTypeLogic;
 
         private IUnitTypePlugin unitTypeLogic;
 
@@ -63,12 +65,12 @@ namespace MHUrho.Logic
         public void Load(XElement xml, int newID, ResourcePack package) {
             //TODO: Check for errors
             ID = newID;
-            Name = xml.Attribute(NameAttribute).Value;
+            Name = xml.Attribute(NameAttributeName).Value;
             Package = package;
 
             unitTypeLogic =
                 XmlHelpers.LoadTypePlugin<IUnitTypePlugin>(xml,
-                                                           AssemblyPathElement,
+                                                           AssemblyPathElementName,
                                                            package.XmlDirectoryPath,
                                                            Name);
 
@@ -166,19 +168,19 @@ namespace MHUrho.Logic
         private static Model LoadModel(XElement unitTypeXml, string pathToPackageXmlDir) {
             //TODO: Check for errors
 
-            string modelPath = XmlHelpers.GetFullPath(unitTypeXml, ModelPathElement, pathToPackageXmlDir);
+            string modelPath = XmlHelpers.GetFullPath(unitTypeXml, ModelPathElementName, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetModel(modelPath);
         }
 
         private static Material LoadMaterial(XElement unitTypeXml, string pathToPackageXmlDir) {
-            string materialPath = XmlHelpers.GetFullPath(unitTypeXml, MaterialPathElement, pathToPackageXmlDir);
+            string materialPath = XmlHelpers.GetFullPath(unitTypeXml, MaterialPathElementName, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
         }
 
         private static Image LoadIcon(XElement unitTypeXml, string pathToPackageXmlDir) {
-            string iconPath = XmlHelpers.GetFullPath(unitTypeXml, IconPathElement, pathToPackageXmlDir);
+            string iconPath = XmlHelpers.GetFullPath(unitTypeXml, IconPathElementName, pathToPackageXmlDir);
 
             //TODO: Find a way to not need RGBA conversion
             return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();

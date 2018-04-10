@@ -29,11 +29,15 @@ namespace DefaultPackage
         }
 
         public IBuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building) {
-            Unit[] workers = new Unit[1];
+            Unit[] workers = new Unit[2];
             workers[0] = level.SpawnUnit(workerType,
                                          level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
                                          building.Player);
             workers[0].Node.AddComponent(new WorkQueue());
+            workers[1] = level.SpawnUnit(workerType,
+                                         level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(-1, 0)),
+                                         building.Player);
+            workers[1].Node.AddComponent(new WorkQueue());
 
             return new TestBuildingInstance(level, building, workers);
         }

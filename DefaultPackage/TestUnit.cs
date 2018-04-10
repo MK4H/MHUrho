@@ -30,7 +30,7 @@ namespace DefaultPackage
             var unitNode = unit.Node;
             unitNode.AddComponent(new WorldWalker(level));
             unitNode.AddComponent(new UnitSelector(level));
-            unitNode.AddComponent(new DirectShooter(level.Map,
+            unitNode.AddComponent(new DirectShooter(level,
                                                     unitNode.Position +
                                                     new Vector3(0,
                                                                 0,

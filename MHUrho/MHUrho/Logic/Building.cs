@@ -8,6 +8,7 @@ using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 using Urho.Physics;
 
@@ -29,14 +30,40 @@ namespace MHUrho.Logic
 
         public IPlayer Player { get; private set; }
 
-        public IBuildingInstancePlugin Plugin { get; private set; }
+        public object Plugin => plugin;
 
         private ITile[] tiles;
+
+        private IBuildingInstancePlugin plugin;
 
         /// <summary>
         /// Used to store the reference to storedBuilding between Load and ConnectReferences calls
         /// </summary>
         private StBuilding storedBuilding;
+
+        protected Building(int id, IntVector2 topLeftCorner, BuildingType type, IPlayer player, ILevelManager level) {
+            this.ID = id;
+            this.BuildingType = type;
+            this.Player = player;
+            this.Rectangle = new IntRect(topLeftCorner.X,
+                                         topLeftCorner.Y,
+                                         topLeftCorner.X + type.Size.X,
+                                         topLeftCorner.Y + type.Size.Y);
+            this.tiles = GetTiles(level.Map, type, topLeftCorner);
+        }
+
+        protected Building(BuildingType buildingType, Map map, StBuilding storedBuilding) {
+            this.ID = storedBuilding.Id;
+            this.BuildingType = buildingType;
+            var topLeft = storedBuilding.Location.ToIntVector2();
+            this.Rectangle = new IntRect(topLeft.X,
+                                         topLeft.Y,
+                                         topLeft.X + buildingType.Size.X,
+                                         topLeft.Y + buildingType.Size.Y);
+            this.tiles = GetTiles(map, buildingType, Location);
+        }
+
+
 
         /// <summary>
         /// Builds the building at <paramref name="topLeftCorner"/> if its possible
@@ -64,7 +91,7 @@ namespace MHUrho.Logic
             buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
             AddRigidBody(buildingNode);
 
-            newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
+            newBuilding.plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 
 
 
@@ -91,7 +118,7 @@ namespace MHUrho.Logic
 
             AddRigidBody(buildingNode);
 
-            building.Plugin = type.GetInstancePluginForLoading();
+            building.plugin = type.GetInstancePluginForLoading();
             return building;
         }
 
@@ -107,27 +134,6 @@ namespace MHUrho.Logic
             return type.LoadBuilding();
         }
 
-        protected Building(int id,IntVector2 topLeftCorner, BuildingType type, IPlayer player, ILevelManager level) {
-            this.ID = id;
-            this.BuildingType = type;
-            this.Player = player;
-            this.Rectangle = new IntRect(topLeftCorner.X,
-                                         topLeftCorner.Y,
-                                         topLeftCorner.X + type.Size.X,
-                                         topLeftCorner.Y + type.Size.Y);
-            this.tiles = GetTiles(level.Map, type, topLeftCorner);
-        }
-
-        protected Building(BuildingType buildingType, Map map, StBuilding storedBuilding) {
-            this.ID = storedBuilding.Id;
-            this.BuildingType = buildingType;
-            var topLeft = storedBuilding.Location.ToIntVector2();
-            this.Rectangle = new IntRect(topLeft.X,
-                                         topLeft.Y,
-                                         topLeft.X + buildingType.Size.X,
-                                         topLeft.Y + buildingType.Size.Y);
-            this.tiles = GetTiles(map, buildingType, Location); 
-        }
 
         public void ConnectReferences(ILevelManager level) {
             Player = level.GetPlayer(storedBuilding.PlayerID);
@@ -139,7 +145,25 @@ namespace MHUrho.Logic
                                                                               level));
             }
 
-            Plugin.LoadState(level, this, new PluginDataWrapper(storedBuilding.UserPlugin));
+            plugin.LoadState(level, this, new PluginDataWrapper(storedBuilding.UserPlugin));
+        }
+
+        public StBuilding Save() {
+            var stBuilding = new StBuilding();
+            stBuilding.Id = ID;
+            stBuilding.TypeID = BuildingType.ID;
+            stBuilding.PlayerID = Player.ID;
+            stBuilding.Location = Location.ToStIntVector2();
+            plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
+
+            foreach (var component in Node.Components) {
+                var defaultComponent = component as DefaultComponent;
+                if (defaultComponent != null) {
+                    stBuilding.DefaultComponentData.Add((int)defaultComponent.ID, defaultComponent.SaveState());
+                }
+            }
+
+            return stBuilding;
         }
 
 
@@ -147,10 +171,14 @@ namespace MHUrho.Logic
             foreach (var tile in tiles) {
                 tile.RemoveBuilding(this);
             }
+
+            Node.Remove();
         }
 
         protected override void OnUpdate(float timeStep) {
-            Plugin.OnUpdate(timeStep);
+            if (!EnabledEffective) return;
+
+            plugin.OnUpdate(timeStep);
         }
 
         private int GetTileIndex(int x, int y) {

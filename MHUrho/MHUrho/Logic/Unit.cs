@@ -61,13 +61,15 @@ namespace MHUrho.Logic
         /// </summary>
         public IPlayer Player { get; private set; }
 
-        public IUnitInstancePlugin Plugin { get; private set; }
+        public object Plugin => plugin;
 
         public bool AlwaysVertical { get; set; } = false;
 
         #endregion
 
         #region Private members
+
+        private IUnitInstancePlugin plugin;
 
         /// <summary>
         /// Holds the image of this unit between the steps of loading
@@ -154,7 +156,7 @@ namespace MHUrho.Logic
             // to this class, and for that i need to set the Position here
             node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);            
             
-            unit.Plugin = type.GetInstancePluginForLoading();
+            unit.plugin = type.GetInstancePluginForLoading();
             return unit;
         }
 
@@ -177,7 +179,7 @@ namespace MHUrho.Logic
             AddRigidBody(unitNode);
 
 
-            unit.Plugin = type.GetNewInstancePlugin(unit, level);
+            unit.plugin = type.GetNewInstancePlugin(unit, level);
 
             //TODO: Move collisionShape to plugin
 
@@ -198,7 +200,7 @@ namespace MHUrho.Logic
 
 
             storedUnit.UserPlugin = new PluginData();
-            Plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
+            plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
@@ -222,7 +224,7 @@ namespace MHUrho.Logic
                 Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level));
             }
 
-            Plugin.LoadState(level, this, new PluginDataWrapper(storage.UserPlugin));
+            plugin.LoadState(level, this, new PluginDataWrapper(storage.UserPlugin));
         }
 
         public void FinishLoading() {
@@ -230,7 +232,7 @@ namespace MHUrho.Logic
         }
         
         public bool CanGoFromTo(ITile fromTile, ITile toTile) {
-            return Plugin.CanGoFromTo(fromTile, toTile);
+            return plugin.CanGoFromTo(fromTile, toTile);
         }
 
         /// <summary>
@@ -294,7 +296,7 @@ namespace MHUrho.Logic
             base.OnUpdate(timeStep);
             if (!Enabled) return;
 
-            Plugin.OnUpdate(timeStep);
+            plugin.OnUpdate(timeStep);
         }
 
         #endregion
@@ -317,7 +319,7 @@ namespace MHUrho.Logic
                 return true;
             }
             //New tile, but cant pass
-            if (!CanGoFromTo(Tile,newTile)) {
+            if (!CanGoFromTo(Tile,newTile) && !IsTileCorner(newPosition)) {
                 return false;
             }
 
@@ -329,7 +331,11 @@ namespace MHUrho.Logic
             return true;
         }
 
-
+        private bool IsTileCorner(Vector3 position) {
+            var x = position.X - (float) Math.Floor(position.X);
+            var z = position.Z - (float) Math.Floor(position.Z);
+            return (x < 0.05f || 0.95f < x) && (z < 0.05f || 0.95f < z);
+        }
 
         #endregion
 

@@ -96,11 +96,13 @@ namespace MHUrho.UnitComponents
                 throw new ArgumentException("Given path could not be enumerated");
             }
 
+            Enabled = true;
+
             nextTile = map.GetTileByMapLocation(path.Current);
             nextWaypoint = nextTile.Center3;
 
             nextWaypoint = GetNextWaypoint();
-            Enabled = true;
+            
         }
 
         public bool GoTo(ITile tile) {
@@ -146,8 +148,8 @@ namespace MHUrho.UnitComponents
 
         protected override void OnUpdate(float timeStep) {
             base.OnUpdate(timeStep);
-            //TODO: WHY DO I HAVE TO CHECK THIS MANUALLY ?
-            if (EnabledEffective == false) return;
+
+            if (!EnabledEffective) return;
             Debug.Assert(nextTile != null, "Target was null with scene updates enabled");
 
 

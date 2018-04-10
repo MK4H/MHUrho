@@ -54,6 +54,15 @@ message StUnit {
 	map<int32 ,PluginData> defaultComponentData = 7;
 }
 
+message StProjectile {
+	int32 typeID = 2;
+	StVector3 position = 3;
+	int32 playerID = 4;
+	StVector3 movement = 5;
+	float baseTimeToDespawn = 6;
+	PluginData userPlugin = 7;
+}
+
 message StBuilding {
 	int32 id = 1;
 	int32 typeID = 2;

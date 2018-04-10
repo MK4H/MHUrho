@@ -76,7 +76,7 @@ namespace MHUrho.Helpers
 
             if (pluginInstance == null) {
                 //TODO: Exception
-                throw new Exception("Type plugin loading failed, could not load plugin");
+                throw new Exception($"Type plugin loading failed, could not load plugin for type {typeName}");
             }
 
             return pluginInstance;

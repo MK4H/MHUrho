@@ -45,15 +45,17 @@ namespace MHUrho.UnitComponents
         /// </summary>
         private readonly float verticalOffset;
 
-        private Map map;
+        private ILevelManager level;
 
-        public DirectShooter(Map map,
+        private Map Map => level.Map;
+
+        public DirectShooter(ILevelManager level,
                              Vector3 target,
                              ProjectileType projectileType,
                              float rateOfFire,
                              float horizontalOffset,
                              float verticalOffset) {
-            this.map = map;
+            this.level = level;
             this.target = target;
             this.projectileType = projectileType;
             this.RateOfFire = rateOfFire;
@@ -75,7 +77,7 @@ namespace MHUrho.UnitComponents
             var verticalOffset = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
             var projectileTypeID = sequentialDataReader.GetCurrent<int>();
-            return new DirectShooter(level.Map,
+            return new DirectShooter(level,
                                      target,
                                      level.PackageManager.GetProjectileType(projectileTypeID),
                                      rateOfFire,
@@ -123,10 +125,9 @@ namespace MHUrho.UnitComponents
                                   out float highTime,
                                   out Vector3 highVector)) {
 
-                var arrow = Node.Scene.CreateChild("Arrow");
-                projectileType.SpawnProjectile(map,arrow, Node.Position + offset, lowVector);
-                arrow = Node.Scene.CreateChild("Arrow");
-                projectileType.SpawnProjectile(map,arrow, Node.Position + offset, highVector);
+                projectileType.SpawnProjectile(level,level.Scene, Node.Position + offset, lowVector);
+
+                projectileType.SpawnProjectile(level, level.Scene, Node.Position + offset, highVector);
 
                 ShotFired?.Invoke(this);
             }

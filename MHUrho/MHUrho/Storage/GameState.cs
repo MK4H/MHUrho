@@ -50,21 +50,26 @@ namespace MHUrho.Storage {
             "ZmF1bHRDb21wb25lbnREYXRhGAcgAygLMjAuTUhVcmhvLlN0b3JhZ2UuU3RV",
             "bml0LkRlZmF1bHRDb21wb25lbnREYXRhRW50cnkaVwoZRGVmYXVsdENvbXBv",
             "bmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoFdmFsdWUYAiABKAsyGi5N",
-            "SFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASLHAgoKU3RCdWlsZGluZxIK",
-            "CgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSLgoIbG9jYXRpb24YAyABKAsy",
-            "HC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISEAoIcGxheWVySUQYBCAB",
-            "KAUSLgoKdXNlclBsdWdpbhgGIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdp",
-            "bkRhdGESUgoUZGVmYXVsdENvbXBvbmVudERhdGEYByADKAsyNC5NSFVyaG8u",
-            "U3RvcmFnZS5TdEJ1aWxkaW5nLkRlZmF1bHRDb21wb25lbnREYXRhRW50cnka",
-            "VwoZRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoF",
-            "dmFsdWUYAiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASJb",
-            "CghTdFBsYXllchIQCghwbGF5ZXJJRBgBIAEoBRIPCgd1bml0SURzGAIgAygF",
-            "EhMKC2J1aWxkaW5nSURzGAMgAygFEhcKD2ZyaWVuZFBsYXllcklEcxgEIAMo",
-            "BSKNAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0",
-            "SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIWLk1IVXJoby5TdG9yYWdlLlN0",
-            "VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0",
-            "Qm9yZGVyVGlsZSI/CgxTdEVudGl0eVR5cGUSEQoJcGFja2FnZUlEGAEgASgF",
-            "Eg4KBnR5cGVJRBgCIAEoBRIMCgRuYW1lGAMgASgJYgZwcm90bzM="));
+            "SFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASLVAQoMU3RQcm9qZWN0aWxl",
+            "Eg4KBnR5cGVJRBgCIAEoBRIrCghwb3NpdGlvbhgDIAEoCzIZLk1IVXJoby5T",
+            "dG9yYWdlLlN0VmVjdG9yMxIQCghwbGF5ZXJJRBgEIAEoBRIrCghtb3ZlbWVu",
+            "dBgFIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMxIZChFiYXNlVGlt",
+            "ZVRvRGVzcGF3bhgGIAEoAhIuCgp1c2VyUGx1Z2luGAcgASgLMhouTUhVcmhv",
+            "LlN0b3JhZ2UuUGx1Z2luRGF0YSLHAgoKU3RCdWlsZGluZxIKCgJpZBgBIAEo",
+            "BRIOCgZ0eXBlSUQYAiABKAUSLgoIbG9jYXRpb24YAyABKAsyHC5NSFVyaG8u",
+            "U3RvcmFnZS5TdEludFZlY3RvcjISEAoIcGxheWVySUQYBCABKAUSLgoKdXNl",
+            "clBsdWdpbhgGIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGESUgoU",
+            "ZGVmYXVsdENvbXBvbmVudERhdGEYByADKAsyNC5NSFVyaG8uU3RvcmFnZS5T",
+            "dEJ1aWxkaW5nLkRlZmF1bHRDb21wb25lbnREYXRhRW50cnkaVwoZRGVmYXVs",
+            "dENvbXBvbmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoFdmFsdWUYAiAB",
+            "KAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASJbCghTdFBsYXll",
+            "chIQCghwbGF5ZXJJRBgBIAEoBRIPCgd1bml0SURzGAIgAygFEhMKC2J1aWxk",
+            "aW5nSURzGAMgAygFEhcKD2ZyaWVuZFBsYXllcklEcxgEIAMoBSKNAQoFU3RN",
+            "YXASKgoEc2l6ZRgBIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9y",
+            "MhIlCgV0aWxlcxgCIAMoCzIWLk1IVXJoby5TdG9yYWdlLlN0VGlsZRIxCgti",
+            "b3JkZXJUaWxlcxgDIAMoCzIcLk1IVXJoby5TdG9yYWdlLlN0Qm9yZGVyVGls",
+            "ZSI/CgxTdEVudGl0eVR5cGUSEQoJcGFja2FnZUlEGAEgASgFEg4KBnR5cGVJ",
+            "RBgCIAEoBRIMCgRuYW1lGAMgASgJYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -74,6 +79,7 @@ namespace MHUrho.Storage {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "TopLeftPosition", "Height", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "TypeID", "Position", "PlayerID", "Movement", "BaseTimeToDespawn", "UserPlugin" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "PlayerID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles" }, null, null, null),
@@ -1479,6 +1485,281 @@ namespace MHUrho.Storage {
 
   }
 
+  public sealed partial class StProjectile : pb::IMessage<StProjectile> {
+    private static readonly pb::MessageParser<StProjectile> _parser = new pb::MessageParser<StProjectile>(() => new StProjectile());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StProjectile> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[6]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StProjectile() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StProjectile(StProjectile other) : this() {
+      typeID_ = other.typeID_;
+      Position = other.position_ != null ? other.Position.Clone() : null;
+      playerID_ = other.playerID_;
+      Movement = other.movement_ != null ? other.Movement.Clone() : null;
+      baseTimeToDespawn_ = other.baseTimeToDespawn_;
+      UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StProjectile Clone() {
+      return new StProjectile(this);
+    }
+
+    /// <summary>Field number for the "typeID" field.</summary>
+    public const int TypeIDFieldNumber = 2;
+    private int typeID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int TypeID {
+      get { return typeID_; }
+      set {
+        typeID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "position" field.</summary>
+    public const int PositionFieldNumber = 3;
+    private global::MHUrho.Storage.StVector3 position_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Position {
+      get { return position_; }
+      set {
+        position_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "playerID" field.</summary>
+    public const int PlayerIDFieldNumber = 4;
+    private int playerID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int PlayerID {
+      get { return playerID_; }
+      set {
+        playerID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "movement" field.</summary>
+    public const int MovementFieldNumber = 5;
+    private global::MHUrho.Storage.StVector3 movement_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Movement {
+      get { return movement_; }
+      set {
+        movement_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "baseTimeToDespawn" field.</summary>
+    public const int BaseTimeToDespawnFieldNumber = 6;
+    private float baseTimeToDespawn_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float BaseTimeToDespawn {
+      get { return baseTimeToDespawn_; }
+      set {
+        baseTimeToDespawn_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "userPlugin" field.</summary>
+    public const int UserPluginFieldNumber = 7;
+    private global::MHUrho.Storage.PluginData userPlugin_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.PluginData UserPlugin {
+      get { return userPlugin_; }
+      set {
+        userPlugin_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StProjectile);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StProjectile other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (TypeID != other.TypeID) return false;
+      if (!object.Equals(Position, other.Position)) return false;
+      if (PlayerID != other.PlayerID) return false;
+      if (!object.Equals(Movement, other.Movement)) return false;
+      if (BaseTimeToDespawn != other.BaseTimeToDespawn) return false;
+      if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (TypeID != 0) hash ^= TypeID.GetHashCode();
+      if (position_ != null) hash ^= Position.GetHashCode();
+      if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
+      if (movement_ != null) hash ^= Movement.GetHashCode();
+      if (BaseTimeToDespawn != 0F) hash ^= BaseTimeToDespawn.GetHashCode();
+      if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (TypeID != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(TypeID);
+      }
+      if (position_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Position);
+      }
+      if (PlayerID != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(PlayerID);
+      }
+      if (movement_ != null) {
+        output.WriteRawTag(42);
+        output.WriteMessage(Movement);
+      }
+      if (BaseTimeToDespawn != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(BaseTimeToDespawn);
+      }
+      if (userPlugin_ != null) {
+        output.WriteRawTag(58);
+        output.WriteMessage(UserPlugin);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (TypeID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeID);
+      }
+      if (position_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      }
+      if (PlayerID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerID);
+      }
+      if (movement_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Movement);
+      }
+      if (BaseTimeToDespawn != 0F) {
+        size += 1 + 4;
+      }
+      if (userPlugin_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StProjectile other) {
+      if (other == null) {
+        return;
+      }
+      if (other.TypeID != 0) {
+        TypeID = other.TypeID;
+      }
+      if (other.position_ != null) {
+        if (position_ == null) {
+          position_ = new global::MHUrho.Storage.StVector3();
+        }
+        Position.MergeFrom(other.Position);
+      }
+      if (other.PlayerID != 0) {
+        PlayerID = other.PlayerID;
+      }
+      if (other.movement_ != null) {
+        if (movement_ == null) {
+          movement_ = new global::MHUrho.Storage.StVector3();
+        }
+        Movement.MergeFrom(other.Movement);
+      }
+      if (other.BaseTimeToDespawn != 0F) {
+        BaseTimeToDespawn = other.BaseTimeToDespawn;
+      }
+      if (other.userPlugin_ != null) {
+        if (userPlugin_ == null) {
+          userPlugin_ = new global::MHUrho.Storage.PluginData();
+        }
+        UserPlugin.MergeFrom(other.UserPlugin);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 16: {
+            TypeID = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            if (position_ == null) {
+              position_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(position_);
+            break;
+          }
+          case 32: {
+            PlayerID = input.ReadInt32();
+            break;
+          }
+          case 42: {
+            if (movement_ == null) {
+              movement_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(movement_);
+            break;
+          }
+          case 53: {
+            BaseTimeToDespawn = input.ReadFloat();
+            break;
+          }
+          case 58: {
+            if (userPlugin_ == null) {
+              userPlugin_ = new global::MHUrho.Storage.PluginData();
+            }
+            input.ReadMessage(userPlugin_);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class StBuilding : pb::IMessage<StBuilding> {
     private static readonly pb::MessageParser<StBuilding> _parser = new pb::MessageParser<StBuilding>(() => new StBuilding());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1486,7 +1767,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[6]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1747,7 +2028,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[7]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1930,7 +2211,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[8]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2093,7 +2374,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[9]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[10]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

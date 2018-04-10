@@ -15,12 +15,13 @@ namespace MHUrho.Logic
     public class BuildingType : IEntityType, IDisposable
     {
         //XML ELEMENTS AND ATTRIBUTES
-        private const string NameAttribute = "name";
-        private const string ModelPathElement = "modelPath";
-        private const string MaterialPathElement = "materialPath";
-        private const string IconPathElement = "iconPath";
-        private const string AssemblyPathElement = "assemblyPath";
-        private const string SizeElement = "size";
+        private const string NameAttributeName = "name";
+        private const string ModelPathElementName = "modelPath";
+        private const string MaterialPathElementName = "materialPath";
+        private const string IconPathElementName = "iconPath";
+        private const string AssemblyPathElementName = "assemblyPath";
+        private const string SizeElementName = "size";
+        private const string ExtensionElementName = "extension";
 
         public int ID { get; set; }
 
@@ -36,6 +37,8 @@ namespace MHUrho.Logic
 
         public IntVector2 Size { get; private set; }
 
+        public object Plugin => buildingTypeLogic;
+
         private IBuildingTypePlugin buildingTypeLogic;
 
 
@@ -50,18 +53,18 @@ namespace MHUrho.Logic
 
         public void Load(XElement xml, int newID, ResourcePack package) {
             ID = newID;
-            Name = xml.Attribute(NameAttribute).Value;
+            Name = xml.Attribute(NameAttributeName).Value;
             //TODO: Join the implementations from all the 
             Model = LoadModel(xml, package.XmlDirectoryPath);
             Material = LoadMaterial(xml, package.XmlDirectoryPath);
             Icon = LoadIcon(xml, package.XmlDirectoryPath);
             Package = package;
-            Size = XmlHelpers.GetIntVector2(xml, SizeElement);
+            Size = XmlHelpers.GetIntVector2(xml, SizeElementName);
             buildingTypeLogic = XmlHelpers.LoadTypePlugin<IBuildingTypePlugin>(xml,
-                                                                               AssemblyPathElement,
+                                                                               AssemblyPathElementName,
                                                                                package.XmlDirectoryPath,
                                                                                Name);
-            buildingTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
+            buildingTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + ExtensionElementName),
                                                     package.PackageManager);
         }
 
@@ -122,17 +125,17 @@ namespace MHUrho.Logic
         }
 
         private static Model LoadModel(XElement buildingTypeXml, string pathToPackageXmlDir) {
-            string modelPath = XmlHelpers.GetFullPath(buildingTypeXml, ModelPathElement, pathToPackageXmlDir); 
+            string modelPath = XmlHelpers.GetFullPath(buildingTypeXml, ModelPathElementName, pathToPackageXmlDir); 
             return PackageManager.Instance.ResourceCache.GetModel(modelPath);
         }
 
         private static Material LoadMaterial(XElement buildingTypeXml, string pathToPackageXmlDir) {
-            string materialPath = XmlHelpers.GetFullPath(buildingTypeXml, MaterialPathElement, pathToPackageXmlDir);
+            string materialPath = XmlHelpers.GetFullPath(buildingTypeXml, MaterialPathElementName, pathToPackageXmlDir);
             return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
         }
 
         private static Image LoadIcon(XElement buildingTypeXml, string pathToPackageXmlDir) {
-            string iconPath = XmlHelpers.GetFullPath(buildingTypeXml, IconPathElement, pathToPackageXmlDir);
+            string iconPath = XmlHelpers.GetFullPath(buildingTypeXml, IconPathElementName, pathToPackageXmlDir);
             return PackageManager.Instance.ResourceCache.GetImage(iconPath);
         }
 

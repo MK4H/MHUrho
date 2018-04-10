@@ -56,6 +56,7 @@ namespace MHUrho.Logic
             var map = Map.StartLoading(mapNode, storedLevel.Map);
 
             LevelManager level = new LevelManager(map, cameraController);
+            scene.AddComponent(level);
 
             PackageManager.Instance.LoadPackages(storedLevel.Packages);
 
@@ -139,7 +140,7 @@ namespace MHUrho.Logic
 
 
             CurrentLevel = new LevelManager(map, cameraController);
-
+            scene.AddComponent(CurrentLevel);
 
             //TODO: Temporary player
             var player = new Player(CurrentLevel.GetNewID(CurrentLevel.players));

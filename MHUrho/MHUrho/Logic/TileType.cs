@@ -12,9 +12,9 @@ using MHUrho.Packaging;
 namespace MHUrho.Logic
 {
     public class TileType : IEntityType {
-        private const string NameAttribute = "name";
-        private const string TexturePathElement = "texturePath";
-        private const string MovementSpeedElement = "movementSpeed";
+        private const string NameAttributeName = "name";
+        private const string TexturePathElementName = "texturePath";
+        private const string MovementSpeedElementName = "movementSpeed";
 
         public int ID { get; set; }
 
@@ -36,9 +36,9 @@ namespace MHUrho.Logic
         public void Load(XElement xml, int newID, ResourcePack package) {
             //TODO: Check for errors
             ID = newID;
-            Name = xml.Attribute(NameAttribute).Value;
-            imagePath = XmlHelpers.GetFullPath(xml, TexturePathElement, package.XmlDirectoryPath);
-            MovementSpeedModifier = XmlHelpers.GetFloat(xml, MovementSpeedElement);
+            Name = xml.Attribute(NameAttributeName).Value;
+            imagePath = XmlHelpers.GetFullPath(xml, TexturePathElementName, package.XmlDirectoryPath);
+            MovementSpeedModifier = XmlHelpers.GetFloat(xml, MovementSpeedElementName);
             Package = package;
         }
 
