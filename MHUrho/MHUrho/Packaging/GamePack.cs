@@ -13,19 +13,25 @@ namespace MHUrho.Packaging {
     public class GamePack {
         private const string defaultThumbnailPath = "Textures/xamarin.png";
 
-        public delegate int GenerateID();
+        private const string TileTypeGroupName = "tileTypes";
+        private const string TileTypeItemName = "tileType";
+        private const string UnitTypeGroupName = "unitTypes";
+        private const string UnitTypeItemName = "unitType";
+        private const string BuildingTypeGroupName = "buildingTypes";
+        private const string BuildingTypeItemName = "buildingType";
+        private const string ProjectileTypeGroupName = "projectileTypes";
+        private const string ProjectileTypeItemName = "projectileType";
+        private const string ResourceTypeGroupName = "resourceTypes";
+        private const string ResourceTypeItemName = "resourceType";
 
         public string Name { get; private set; }
-        
-        public int ID { get; private set; }
+      
 
         public string Description { get; private set; }
 
         public Image Thumbnail { get; private set; }
 
         public bool FullyLoaded { get; private set; }
-
-        public bool IsActive => ID != 0;
 
         public string XmlDirectoryPath => System.IO.Path.GetDirectoryName(pathToXml);
 
@@ -126,121 +132,158 @@ namespace MHUrho.Packaging {
             FullyLoaded = !deleted;
         }
 
-        public TileType GetTileType(string name) {
+        public TileType GetTileType(string name, bool load = false) {
             if (name == null) {
                 throw new ArgumentNullException("Name of the tileType cannot be null");
             }
 
-            return tileTypesByName.TryGetValue(name,out TileType value) ? value : null;
+            var found = tileTypesByName.TryGetValue(name, out TileType value);
+
+            if (load && !found) {
+                return LoadType(name, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        public TileType GetTileType(int ID) {
-            return tileTypesByID[ID];
+        public TileType GetTileType(int ID, bool load = false) {
+            var found = tileTypesByID.TryGetValue(ID, out TileType value);
+
+            if (load && !found) {
+                return LoadType(ID, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        //public TileType LoadTileType(string name, int newID) {
-        //    CheckIfLoading();
-
-        //    if (name == null) {
-        //        throw new ArgumentNullException("Name of the tileType cannot be null");
-        //    }
-
-        //    var tileTypeElement = GetXmlTypeDescription(typeName: name,
-        //                                                groupName: "tileTypes",
-        //                                                itemName: "tileType");
-
-           
-        //    return LoadType<TileType>(tileTypeElement, newID, tileTypesByName);
-        //}
-
-        public UnitType GetUnitType(string name) {
+        public UnitType GetUnitType(string name, bool load = false) {
             if (name == null) {
                 throw new ArgumentNullException("Name of the unitType cannot be null");
             }
 
-            return unitTypesByName.TryGetValue(name, out UnitType value) ? value : null;
+            var found = unitTypesByName.TryGetValue(name, out UnitType value);
+
+            if (load && !found) {
+                return LoadType(name, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        public UnitType GetUnitType(int ID) {
-            return unitTypesByID[ID];
+        public UnitType GetUnitType(int ID, bool load = false) {
+            var found = unitTypesByID.TryGetValue(ID, out UnitType value);
+
+            if (load && !found) {
+                return LoadType(ID, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        //public UnitType LoadUnitType(string name) {
-        //    CheckIfLoading();
-
-        //    if (name == null) {
-        //        throw new ArgumentNullException("Name of the unit type cannot be null");
-        //    }
-
-        //    var unitTypeElement = GetXmlTypeDescription(typeName: name,
-        //                                                groupName: "unitTypes",
-        //                                                itemName: "unitType");
-
-        //    return LoadType<UnitType>(unitTypeElement, newID, unitTypesByName);
-        //}
-
-        public BuildingType GetBuildingType(string name) {
+        public BuildingType GetBuildingType(string name, bool load = false) {
             if (name == null) {
                 throw new ArgumentNullException("Name of the buildingType cannot be null");
             }
 
-            return buildingTypesByName.TryGetValue(name, out BuildingType value) ? value : null;
+            var found =  buildingTypesByName.TryGetValue(name, out BuildingType value);
+
+            if (load && !found) {
+                return LoadType(name, 
+                                BuildingTypeGroupName, 
+                                BuildingTypeItemName, 
+                                buildingTypesByName,
+                                buildingTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        public BuildingType GetBuildingType(int ID) {
-            return buildingTypesByID[ID];
+        public BuildingType GetBuildingType(int ID, bool load = false) {
+            var found = buildingTypesByID.TryGetValue(ID, out BuildingType value);
+
+            if (load && !found) {
+                return LoadType(ID,
+                                BuildingTypeGroupName,
+                                BuildingTypeItemName,
+                                buildingTypesByName,
+                                buildingTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        //public BuildingType LoadBuildingType(string name, int newID) {
-        //    CheckIfLoading();
-
-        //    if (name == null) {
-        //        throw new ArgumentNullException("Name of the building type cannot be null");
-        //    }
-
-        //    var buildingTypeElement = GetXmlTypeDescription(typeName: name,
-        //                                                    groupName: "buildingTypes",
-        //                                                    itemName: "buildingType");
-
-        //    return LoadType<BuildingType>(buildingTypeElement, newID, buildingTypesByName);
-        //}
-
-        public ProjectileType GetProjectileType(string name) {
+        public ProjectileType GetProjectileType(string name, bool load = false) {
             if (name == null) {
                 throw new ArgumentNullException("Name of the projectileType cannot be null");
             }
 
-            return projectileTypesByName.TryGetValue(name, out ProjectileType value) ? value : null;
+            var found = projectileTypesByName.TryGetValue(name, out ProjectileType value);
+
+            if (load && !found) {
+                return LoadType(name,
+                                ProjectileTypeGroupName,
+                                ProjectileTypeItemName,
+                                projectileTypesByName,
+                                projectileTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        public ProjectileType GetProjectileType(int ID) {
-            return projectileTypesByID[ID];
+        public ProjectileType GetProjectileType(int ID, bool load = false) {
+            var found = projectileTypesByID.TryGetValue(ID, out ProjectileType value);
+
+            if (load && !found) {
+                return LoadType(ID,
+                                ProjectileTypeGroupName,
+                                ProjectileTypeItemName,
+                                projectileTypesByName,
+                                projectileTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        //public ProjectileType LoadProjectileType(string name) {
-        //    CheckIfLoading();
-
-        //    if (name == null) {
-        //        throw new ArgumentNullException("Name of the projectile type cannot be null");
-        //    }
-
-        //    var projectileTypeElement = GetXmlTypeDescription(typeName: name,
-        //                                                      groupName: "projectileTypes",
-        //                                                      itemName: "projectileType");
-
-        //    return LoadType<ProjectileType>(projectileTypeElement, newID, projectileTypesByName);
-        //}
-
-        public ResourceType GetResourceType(string name) {
+        public ResourceType GetResourceType(string name, bool load = false) {
             if (name == null) {
                 throw new ArgumentNullException("Name of the ResourceType cannot be null");
             }
 
-            return resourceTypesByName.TryGetValue(name, out ResourceType value) ? value : null;
+            var found = resourceTypesByName.TryGetValue(name, out ResourceType value);
+
+            if (load && !found) {
+                return LoadType(name,
+                                ResourceTypeGroupName,
+                                ResourceTypeItemName,
+                                resourceTypesByName,
+                                resourceTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
-        public ResourceType GetResourceType(int ID) {
-            return resourceTypesByID[ID];
+        public ResourceType GetResourceType(int ID, bool load = false) {
+            var found = resourceTypesByID.TryGetValue(ID, out ResourceType value);
+
+            if (load && !found) {
+                return LoadType(ID,
+                                ResourceTypeGroupName,
+                                ResourceTypeItemName,
+                                resourceTypesByName,
+                                resourceTypesByID);
+            }
+            else {
+                return value;
+            }
         }
 
         public void Load(XmlSchemaSet schemas) {
@@ -396,26 +439,39 @@ namespace MHUrho.Packaging {
 
         private XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName) {
             //Load from file
-            var projectileTypeElements = (from element in data
-                                                          .Root.Element(PackageManager.XMLNamespace + groupName)
-                                                          .Elements(PackageManager.XMLNamespace + itemName)
+            var typeElements = (from element in data.Root
+                                                    .Element(PackageManager.XMLNamespace + groupName)
+                                                    .Elements(PackageManager.XMLNamespace + itemName)
                                           where GetTypeName(element) == typeName
                                           select element).GetEnumerator();
 
-            if (!projectileTypeElements.MoveNext()) {
+            return GetXmlTypeDescription(typeElements);
+        }
+
+        private XElement GetXmlTypeDescription(int typeID, string groupName, string itemName) {
+            var typeElements = (from element in data.Root
+                                                    .Element(PackageManager.XMLNamespace + groupName)
+                                                    .Elements(PackageManager.XMLNamespace + itemName)
+                                where GetTypeID(element) == typeID
+                                select element).GetEnumerator();
+            return GetXmlTypeDescription(typeElements);
+        }
+
+        private XElement GetXmlTypeDescription(IEnumerator<XElement> typeElements) {
+            if (!typeElements.MoveNext()) {
                 throw new ArgumentException("type of that name does not exist in this package");
             }
 
-            var projectileTypeElement = projectileTypeElements.Current;
+            var typeElement = typeElements.Current;
 
-            if (projectileTypeElements.MoveNext()) {
+            if (typeElements.MoveNext()) {
                 //TODO: Exception
                 throw new Exception("Duplicate type names");
             }
 
-            projectileTypeElements.Dispose();
+            typeElements.Dispose();
 
-            return projectileTypeElement;
+            return typeElement;
         }
 
         private void CheckIfLoading() {
@@ -424,9 +480,18 @@ namespace MHUrho.Packaging {
             }
         }
 
-        private T LoadType<T>(XElement typeElement, IDictionary<string,T> typesByName, IDictionary<int, T> typesByID)
-            where T : IEntityType,new()
-        {
+        
+
+        private static string GetTypeName(XElement typeElement) {
+            return typeElement.Attribute("name").Value;
+        }
+
+        private static int GetTypeID(XElement typeElement) {
+            return XmlHelpers.GetIntAttribute(typeElement, "ID");
+        }
+
+        private T LoadType<T>(XElement typeElement, IDictionary<string, T> typesByName, IDictionary<int, T> typesByID)
+            where T : IEntityType, new() {
             string name = GetTypeName(typeElement);
             int ID = GetTypeID(typeElement);
 
@@ -461,12 +526,41 @@ namespace MHUrho.Packaging {
 
         }
 
-        private static string GetTypeName(XElement typeElement) {
-            return typeElement.Attribute("name").Value;
+        private T LoadType<T>(int ID,
+                              string groupName,
+                              string itemName,
+                              IDictionary<string, T> typesByName,
+                              IDictionary<int, T> typesByID)
+            where T : IEntityType, new()
+        {
+            CheckIfLoading();
+
+            var typeElement = GetXmlTypeDescription(ID,
+                                                    groupName,
+                                                    itemName);
+
+            return LoadType(typeElement, typesByName, typesByID);
         }
 
-        private static int GetTypeID(XElement typeElement) {
-            return XmlHelpers.GetIntAttribute(typeElement, "ID");
+        private T LoadType<T>(string name,
+                              string groupName,
+                              string itemName,
+                              IDictionary<string, T> typesByName,
+                              IDictionary<int, T> typesByID) 
+            where T: IEntityType, new()
+        {
+            CheckIfLoading();
+
+            if (name == null) {
+                throw new ArgumentNullException("Name of the type cannot be null");
+            }
+
+            var typeElement = GetXmlTypeDescription(name,
+                                                    groupName,
+                                                    itemName);
+
+            return LoadType<T>(typeElement, typesByName, typesByID);
         }
+
     }
 }

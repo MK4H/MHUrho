@@ -55,7 +55,8 @@ namespace DefaultPackage
             projectileType = PackageManager.Instance
                                            .ActiveGame
                                            .GetProjectileType(XmlHelpers.GetString(extensionElement, 
-                                                                                   "projectileType"));
+                                                                                   "projectileType"),
+                                                              true);
         }
     }
 
@@ -81,6 +82,7 @@ namespace DefaultPackage
 
         private void SelectorOrderedToTile(Unit unit, ITile targetTile, OrderArgs orderArgs) {
             orderArgs.Executed = walker.GoTo(targetTile);
+            walker.OnMovementEnded += (finishedUnit) => { finishedUnit.AlwaysVertical = true; };
         }
 
         public void OnUpdate(float timeStep) {

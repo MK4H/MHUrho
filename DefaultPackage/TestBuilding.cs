@@ -33,11 +33,9 @@ namespace DefaultPackage
             workers[0] = level.SpawnUnit(workerType,
                                          level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
                                          building.Player);
-            workers[0].Node.AddComponent(new WorkQueue());
             workers[1] = level.SpawnUnit(workerType,
                                          level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(-1, 0)),
                                          building.Player);
-            workers[1].Node.AddComponent(new WorkQueue());
 
             return new TestBuildingInstance(level, building, workers);
         }
@@ -98,8 +96,9 @@ namespace DefaultPackage
             workerType = PackageManager.Instance
                                        .ActiveGame
                                        .GetUnitType(XmlHelpers.GetString(extensionElement,
-                                                                          "workerType"));
-            tileType = PackageManager.Instance.ActiveGame.GetTileType(XmlHelpers.GetString(extensionElement, "tileType"));
+                                                                          "workerType"),
+                                                    true);
+            tileType = PackageManager.Instance.ActiveGame.GetTileType(XmlHelpers.GetString(extensionElement, "tileType"), true);
         }
     }
 

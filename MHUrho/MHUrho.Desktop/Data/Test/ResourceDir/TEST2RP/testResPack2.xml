@@ -18,7 +18,7 @@
       <materialPath>Green.xml</materialPath>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
-        <projectileType>testRP2/TestProjectile</projectileType>
+        <projectileType>TestProjectile</projectileType>
       </extension>
     </unitType>
     <unitType name="TestWorker" ID="9">
@@ -45,8 +45,8 @@
       <size x="3" y="3"/>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
-        <workerType>testRP2/TestWorker</workerType>
-        <tileType>testRP2/Sand</tileType>
+        <workerType>TestWorker</workerType>
+        <tileType>Sand</tileType>
       </extension>
     </buildingType>
   </buildingTypes>
