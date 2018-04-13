@@ -34,7 +34,7 @@ namespace MHUrho.Logic
 
         private ITile[] tiles;
 
-        private IBuildingInstancePlugin plugin;
+        private BuildingInstancePluginBase plugin;
 
         /// <summary>
         /// Used to store the reference to storedBuilding between Load and ConnectReferences calls

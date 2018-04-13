@@ -38,7 +38,7 @@ namespace MHUrho.Logic
 
         private readonly Queue<Projectile> projectilePool;
 
-        private IProjectileTypePlugin typePlugin;
+        private ProjectileTypePluginBase typePlugin;
 
         public ProjectileType() {
             projectilePool = new Queue<Projectile>();
@@ -53,7 +53,7 @@ namespace MHUrho.Logic
             material = LoadMaterial(xml, package.XmlDirectoryPath);
             Package = package;
 
-            typePlugin = XmlHelpers.LoadTypePlugin<IProjectileTypePlugin>(xml,
+            typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePluginBase>(xml,
                                                                           AssemblyPathElementName,
                                                                           package.XmlDirectoryPath,
                                                                           Name);
@@ -98,11 +98,11 @@ namespace MHUrho.Logic
             return projectile;
         }
 
-        public IProjectileInstancePlugin GetNewInstancePlugin(Projectile projectile, ILevelManager levelManager) {
+        public ProjectileInstancePluginBase GetNewInstancePlugin(Projectile projectile, ILevelManager levelManager) {
             return typePlugin.CreateNewInstance(levelManager, projectile);
         }
 
-        public IProjectileInstancePlugin GetInstancePluginForLoading() {
+        public ProjectileInstancePluginBase GetInstancePluginForLoading() {
             return typePlugin.GetInstanceForLoading();
         }
 

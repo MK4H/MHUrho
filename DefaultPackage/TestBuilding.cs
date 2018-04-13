@@ -15,7 +15,7 @@ using WorkQueue = MHUrho.UnitComponents.WorkQueue;
 
 namespace DefaultPackage
 {
-    public class TestBuildingType : IBuildingTypePlugin
+    public class TestBuildingType : BuildingTypePluginBase
     {
         private UnitType workerType;
         private TileType tileType;
@@ -24,11 +24,11 @@ namespace DefaultPackage
 
         }
 
-        public bool IsMyType(string typeName) {
+        public override bool IsMyType(string typeName) {
             return typeName == "TestBuilding";
         }
 
-        public IBuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building) {
+        public override BuildingInstancePluginBase CreateNewInstance(ILevelManager level, Building building) {
             Unit[] workers = new Unit[2];
             workers[0] = level.SpawnUnit(workerType,
                                          level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
@@ -40,12 +40,12 @@ namespace DefaultPackage
             return new TestBuildingInstance(level, building, workers);
         }
 
-        public IBuildingInstancePlugin GetInstanceForLoading() {
+        public override BuildingInstancePluginBase GetInstanceForLoading() {
             return new TestBuildingInstance();
         }
 
 
-        public bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level) {
+        public override bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level) {
             bool empty = true;
             int rightTileTypeCount = 0;
             level.Map.ForEachInRectangle(topLeftTileIndex, 
@@ -68,31 +68,31 @@ namespace DefaultPackage
         }
 
 
-        public void PopulateUI(MandKUI mouseAndKeyboardUI) {
+        public override void PopulateUI(MandKUI mouseAndKeyboardUI) {
             throw new NotImplementedException();
         }
 
-        public void ClearUI(MandKUI mouseAndKeyboardUI) {
+        public override void ClearUI(MandKUI mouseAndKeyboardUI) {
             throw new NotImplementedException();
         }
 
-        public void PopulateUI(TouchUI touchUI) {
+        public override void PopulateUI(TouchUI touchUI) {
             throw new NotImplementedException();
         }
 
-        public void ClearUI(TouchUI touchUI) {
+        public override void ClearUI(TouchUI touchUI) {
             throw new NotImplementedException();
         }
 
-        public void AddSelected(IBuildingInstancePlugin buildingInstance) {
+        public override void AddSelected(BuildingInstancePluginBase buildingInstance) {
             throw new NotImplementedException();
         }
 
-        public void RemoveSelected(IBuildingInstancePlugin buildingInstance) {
+        public override void RemoveSelected(BuildingInstancePluginBase buildingInstance) {
             throw new NotImplementedException();
         }
 
-        public void Initialize(XElement extensionElement, PackageManager packageManager) {
+        public override void Initialize(XElement extensionElement, PackageManager packageManager) {
             workerType = PackageManager.Instance
                                        .ActiveGame
                                        .GetUnitType(XmlHelpers.GetString(extensionElement,
@@ -102,7 +102,7 @@ namespace DefaultPackage
         }
     }
 
-    public class TestBuildingInstance : IBuildingInstancePlugin {
+    public class TestBuildingInstance : BuildingInstancePluginBase {
 
         public Building Building { get; private set; }
 
@@ -131,7 +131,7 @@ namespace DefaultPackage
             }
         }
 
-        public void OnUpdate(float timeStep) {
+        public override void OnUpdate(float timeStep) {
             timeToNextResource -= timeStep;
             if (timeToNextResource < 0) {
                 resources++;
@@ -142,11 +142,11 @@ namespace DefaultPackage
             }
         }
 
-        public void SaveState(PluginDataWrapper pluginData) {
+        public override void SaveState(PluginDataWrapper pluginData) {
             
         }
 
-        public void LoadState(ILevelManager level, Building building, PluginDataWrapper pluginData) {
+        public override void LoadState(ILevelManager level, Building building, PluginDataWrapper pluginData) {
             
         }
 

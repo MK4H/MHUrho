@@ -69,7 +69,7 @@ namespace MHUrho.Logic
 
         #region Private members
 
-        private IUnitInstancePlugin plugin;
+        private UnitInstancePluginBase plugin;
 
         /// <summary>
         /// Holds the image of this unit between the steps of loading

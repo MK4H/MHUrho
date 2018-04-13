@@ -10,13 +10,13 @@ using Urho;
 
 namespace DefaultPackage
 {
-    public class TestUnitType : IUnitTypePlugin {
+    public class TestUnitType : UnitTypePluginBase {
 
         public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
         private ProjectileType projectileType;
 
-        public bool IsMyType(string unitTypeName) {
+        public override bool IsMyType(string unitTypeName) {
             return unitTypeName == "TestUnit";
         }
 
@@ -26,11 +26,11 @@ namespace DefaultPackage
 
         
 
-        public IUnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
+        public override UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit) {
             var unitNode = unit.Node;
             unitNode.AddComponent(new WorldWalker(level));
             unitNode.AddComponent(new UnitSelector(level));
-            unitNode.AddComponent(new DirectShooter(level,
+            unitNode.AddComponent(new Shooter(level,
                                                     unitNode.Position +
                                                     new Vector3(0,
                                                                 0,
@@ -42,16 +42,16 @@ namespace DefaultPackage
             return new TestUnitInstance(level, unit);
         }
 
-        public IUnitInstancePlugin GetInstanceForLoading() {
+        public override UnitInstancePluginBase GetInstanceForLoading() {
             return new TestUnitInstance();
         }
 
 
-        public bool CanSpawnAt(ITile centerTile) {
+        public override bool CanSpawnAt(ITile centerTile) {
             return true;
         }
 
-        public void Initialize(XElement extensionElement, PackageManager packageManager) {
+        public override void Initialize(XElement extensionElement, PackageManager packageManager) {
             projectileType = PackageManager.Instance
                                            .ActiveGame
                                            .GetProjectileType(XmlHelpers.GetString(extensionElement, 
@@ -60,7 +60,7 @@ namespace DefaultPackage
         }
     }
 
-    public class TestUnitInstance : IUnitInstancePlugin
+    public class TestUnitInstance : UnitInstancePluginBase
     {
         private ILevelManager level;
         private Node unitNode;
@@ -82,18 +82,13 @@ namespace DefaultPackage
 
         private void SelectorOrderedToTile(Unit unit, ITile targetTile, OrderArgs orderArgs) {
             orderArgs.Executed = walker.GoTo(targetTile);
-            walker.OnMovementEnded += (finishedUnit) => { finishedUnit.AlwaysVertical = true; };
         }
 
-        public void OnUpdate(float timeStep) {
-            
-        }
-
-        public void SaveState(PluginDataWrapper pluginDataStorage) {
+        public override void SaveState(PluginDataWrapper pluginDataStorage) {
 
         }
 
-        public void LoadState(ILevelManager level,Unit unit, PluginDataWrapper pluginData) {
+        public override void LoadState(ILevelManager level,Unit unit, PluginDataWrapper pluginData) {
             this.level = level;
             this.unit = unit;
             this.unitNode = unit.Node;
@@ -102,7 +97,7 @@ namespace DefaultPackage
             selector.OrderedToTile += SelectorOrderedToTile;
         }
 
-        public bool CanGoFromTo(ITile fromTile, ITile toTile) {
+        public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
             return toTile.Building == null;
         }
     }

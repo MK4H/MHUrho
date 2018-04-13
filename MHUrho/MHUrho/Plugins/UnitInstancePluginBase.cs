@@ -9,10 +9,12 @@ namespace MHUrho.Plugins
 {
     //TODO: Either make one instance of this for every unit,
     // OR make just it a singleton, where all the data will be stored in Unit class
-    public interface IUnitInstancePlugin {
-        void OnUpdate(float timeStep);
+    public abstract class UnitInstancePluginBase {
+        public virtual void OnUpdate(float timeStep) {
+            //NOTHING
+        }
 
-        void SaveState(PluginDataWrapper pluginData);
+        public abstract void SaveState(PluginDataWrapper pluginData);
 
         /// <summary>
         /// Loads instance into the state saved in <paramref name="pluginData"/>
@@ -27,10 +29,10 @@ namespace MHUrho.Plugins
         /// <param name="unit"></param>
         /// <param name="pluginData">stored state of the unit plugin</param>
         /// <returns>Instance loaded into saved state</returns>
-        void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData);
+        public abstract void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData);
 
         //TODO: Move this to AStar as a delegate argument, dont force this onto anyone
-        bool CanGoFromTo(ITile fromTile, ITile toTile);
+        public abstract bool CanGoFromTo(ITile fromTile, ITile toTile);
         //TODO: Expand this
     }
 }

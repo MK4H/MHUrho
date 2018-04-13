@@ -38,7 +38,7 @@ namespace MHUrho.Logic
 
         public object Plugin => unitTypeLogic;
 
-        private IUnitTypePlugin unitTypeLogic;
+        private UnitTypePluginBase unitTypeLogic;
 
         //TODO: More loaded properties
 
@@ -70,7 +70,7 @@ namespace MHUrho.Logic
             Package = package;
 
             unitTypeLogic =
-                XmlHelpers.LoadTypePlugin<IUnitTypePlugin>(xml,
+                XmlHelpers.LoadTypePlugin<UnitTypePluginBase>(xml,
                                                            AssemblyPathElementName,
                                                            package.XmlDirectoryPath,
                                                            Name);
@@ -128,11 +128,11 @@ namespace MHUrho.Logic
             return unit;
         }
 
-        public IUnitInstancePlugin GetNewInstancePlugin(Unit unit, ILevelManager level) {
+        public UnitInstancePluginBase GetNewInstancePlugin(Unit unit, ILevelManager level) {
             return unitTypeLogic.CreateNewInstance(level, unit);
         }
 
-        public IUnitInstancePlugin GetInstancePluginForLoading() {
+        public UnitInstancePluginBase GetInstancePluginForLoading() {
             return unitTypeLogic.GetInstanceForLoading();
         }
 

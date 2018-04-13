@@ -10,25 +10,25 @@ using MHUrho.Storage;
 
 namespace DefaultPackage
 {
-    public class TestProjectileType : IProjectileTypePlugin {
-        public bool IsMyType(string typeName) {
+    public class TestProjectileType : ProjectileTypePluginBase {
+        public override bool IsMyType(string typeName) {
             return typeName == "TestProjectile";
         }
 
-        public IProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile) {
+        public override ProjectileInstancePluginBase CreateNewInstance(ILevelManager level, Projectile projectile) {
             return new TestProjectileInstance(level, projectile);
         }
 
-        public IProjectileInstancePlugin GetInstanceForLoading() {
+        public override ProjectileInstancePluginBase GetInstanceForLoading() {
             throw new NotImplementedException();
         }
 
-        public void Initialize(XElement extensionElement, PackageManager packageManager) {
+        public override void Initialize(XElement extensionElement, PackageManager packageManager) {
             
         }
     }
 
-    public class TestProjectileInstance : IProjectileInstancePlugin 
+    public class TestProjectileInstance : ProjectileInstancePluginBase 
     {
         private const float baseTimeToSplit = 0.5f;
         private float timeToSplit = baseTimeToSplit;
@@ -46,7 +46,7 @@ namespace DefaultPackage
             this.rng = new Random();
         }
 
-        public void OnUpdate(float timeStep) {
+        public override void OnUpdate(float timeStep) {
             timeToSplit -= timeStep;
             if (timeToSplit > 0) return;
 
@@ -69,15 +69,15 @@ namespace DefaultPackage
             
         }
 
-        public void SaveState(PluginDataWrapper pluginData) {
+        public override void SaveState(PluginDataWrapper pluginData) {
             throw new NotImplementedException();
         }
 
-        public void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData) {
+        public override void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData) {
             throw new NotImplementedException();
         }
 
-        public void ReInitialize(ILevelManager level) {
+        public override void ReInitialize(ILevelManager level) {
             timeToSplit = baseTimeToSplit;
             splits = 10;
         }

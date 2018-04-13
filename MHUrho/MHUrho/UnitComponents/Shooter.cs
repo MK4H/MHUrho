@@ -9,14 +9,14 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
-    public delegate void HostileTargetAquiredDelegate(DirectShooter shooter, Unit targetUnit);
-    public delegate void ShotReloadedDelegate(DirectShooter shooter);
-    public delegate void ShotFiredDelegate(DirectShooter shooter);
+    public delegate void HostileTargetAquiredDelegate(Shooter shooter, Unit targetUnit);
+    public delegate void ShotReloadedDelegate(Shooter shooter);
+    public delegate void ShotFiredDelegate(Shooter shooter);
 
-    public class DirectShooter : DefaultComponent
+    public class Shooter : DefaultComponent
     {
 
-        public static string ComponentName = nameof(DirectShooter);
+        public static string ComponentName = nameof(Shooter);
         public static DefaultComponents ComponentID = DefaultComponents.DirectShooter;
         public override string Name => ComponentName;
         public override DefaultComponents ID => ComponentID;
@@ -49,7 +49,7 @@ namespace MHUrho.UnitComponents
 
         private Map Map => level.Map;
 
-        public DirectShooter(ILevelManager level,
+        public Shooter(ILevelManager level,
                              Vector3 target,
                              ProjectileType projectileType,
                              float rateOfFire,
@@ -65,7 +65,7 @@ namespace MHUrho.UnitComponents
             ReceiveSceneUpdates = true;
         }
 
-        public static DirectShooter Load(ILevelManager level, PluginData storedData) {
+        public static Shooter Load(ILevelManager level, PluginData storedData) {
             var sequentialDataReader = new SequentialPluginDataReader(storedData);
             sequentialDataReader.MoveNext();
             var rateOfFire = sequentialDataReader.GetCurrent<float>();
@@ -77,12 +77,74 @@ namespace MHUrho.UnitComponents
             var verticalOffset = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
             var projectileTypeID = sequentialDataReader.GetCurrent<int>();
-            return new DirectShooter(level,
+            return new Shooter(level,
                                      target,
                                      level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
                                      rateOfFire,
                                      horizontalOffset,
                                      verticalOffset);
+        }
+
+        /// <summary>
+        /// Calculates the movement vectors for projectile with initial speed <paramref name="projectileSpeed"/>, to go from <paramref name="sourcePosition"/> to <paramref name="targetPosition"/>
+        /// 
+        /// </summary>
+        /// <param name="targetPosition"></param>
+        /// <param name="sourcePosition"></param>
+        /// <param name="projectileSpeed"></param>
+        /// <param name="lowTime"></param>
+        /// <param name="lowVector"></param>
+        /// <param name="highTime"></param>
+        /// <param name="highVector"></param>
+        /// <returns>True if it is possible to hit the <paramref name="targetPosition"/> with the given <paramref name="projectileSpeed"/>,
+        /// and the out parameters are valid, or false if it is not possible and the out params are invalid</returns>
+        public static bool GetTimesAndAngles(Vector3 targetPosition, Vector3 sourcePosition, float projectileSpeed, out float lowTime, out Vector3 lowVector, out float highTime, out Vector3 highVector) {
+            //Source https://blog.forrestthewoods.com/solving-ballistic-trajectories-b0165523348c
+            // https://en.wikipedia.org/wiki/Projectile_motion
+
+            //TODO: Try this https://gamedev.stackexchange.com/questions/114522/how-can-i-launch-a-gameobject-at-a-target-if-i-am-given-everything-except-for-it
+
+            var diff = targetPosition - sourcePosition;
+            Vector3 directionXZ = diff.XZ();
+            directionXZ.Normalize();
+
+
+            var v2 = projectileSpeed * projectileSpeed;
+            var v4 = projectileSpeed * projectileSpeed * projectileSpeed * projectileSpeed;
+
+            var y = diff.Y;
+            var x = diff.XZ2().Length;
+
+            var g = 10f; //TODO: Set gravity
+
+            var root = v4 - g * (g * x * x + 2 * y * v2);
+
+            if (root < 0) {
+                //TODO: No solution, cant do
+                lowTime = 0;
+                lowVector = Vector3.Zero;
+                highTime = 0;
+                highVector = Vector3.Zero;
+                return false;
+            }
+
+            root = (float)Math.Sqrt(root);
+
+            float lowAngle = (float)Math.Atan2(v2 - root, g * x);
+            float highAngle = (float)Math.Atan2(v2 + root, g * x);
+
+
+            lowVector = (directionXZ * (float)Math.Cos(lowAngle) +
+                         Vector3.UnitY * (float)Math.Sin(lowAngle)) * projectileSpeed;
+
+            highVector = (directionXZ * (float)Math.Cos(highAngle) +
+                          Vector3.UnitY * (float)Math.Sin(highAngle)) * projectileSpeed;
+
+            lowTime = x / lowVector.XZ2().Length;
+            highTime = x / highVector.XZ2().Length;
+
+
+            return true;
         }
 
         public override PluginData SaveState() {
@@ -135,53 +197,6 @@ namespace MHUrho.UnitComponents
             delay = 60 / RateOfFire;
         }
 
-        private bool GetTimesAndAngles(Vector3 targetPosition, Vector3 sourcePosition, float projectileSpeed, out float lowTime, out Vector3 lowVector, out float highTime, out Vector3 highVector) {
-            //Source https://blog.forrestthewoods.com/solving-ballistic-trajectories-b0165523348c
-            // https://en.wikipedia.org/wiki/Projectile_motion
-
-            //TODO: Try this https://gamedev.stackexchange.com/questions/114522/how-can-i-launch-a-gameobject-at-a-target-if-i-am-given-everything-except-for-it
-            
-            var diff = targetPosition - sourcePosition;
-            Vector3 directionXZ = diff.XZ();
-            directionXZ.Normalize();
-
-
-            var v2 = projectileSpeed * projectileSpeed;
-            var v4 = projectileSpeed * projectileSpeed * projectileSpeed * projectileSpeed;
-
-            var y = diff.Y;
-            var x = diff.XZ2().Length;
-
-            var g = 10f; //TODO: Set gravity
-
-            var root = v4 - g * (g * x * x + 2 * y * v2);
-
-            if (root < 0) {
-                //TODO: No solution, cant do
-                lowTime = 0;
-                lowVector = Vector3.Zero;
-                highTime = 0;
-                highVector = Vector3.Zero;
-                return false;
-            }
-
-            root = (float)Math.Sqrt(root);
-
-            float lowAngle = (float)Math.Atan2(v2 - root, g * x);
-            float highAngle = (float) Math.Atan2(v2 + root, g * x);
-
-
-            lowVector = (directionXZ * (float) Math.Cos(lowAngle) +
-                                Vector3.UnitY * (float) Math.Sin(lowAngle)) * projectileSpeed;
-
-            highVector = (directionXZ * (float)Math.Cos(highAngle) +
-                                  Vector3.UnitY * (float)Math.Sin(highAngle)) * projectileSpeed;
-
-            lowTime = x / lowVector.XZ2().Length;
-            highTime = x / highVector.XZ2().Length;
-
-
-            return true;
-        }
+        
     }
 }

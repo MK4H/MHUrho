@@ -41,7 +41,7 @@ namespace MHUrho.UnitComponents
             //TODO: Maybe reflection
             loaders.Add(UnitSelector.ComponentID, UnitSelector.Load);
             loaders.Add(WorldWalker.ComponentID, WorldWalker.Load);
-            loaders.Add(DirectShooter.ComponentID, DirectShooter.Load);
+            loaders.Add(Shooter.ComponentID, Shooter.Load);
             loaders.Add(WorkQueue.ComponentID, WorkQueue.Load);
             //TODO: Add other components
         }
@@ -49,7 +49,7 @@ namespace MHUrho.UnitComponents
         private static void AddNameToIDMap(IDictionary<string, DefaultComponents> map) {
             map.Add(UnitSelector.ComponentName, UnitSelector.ComponentID);
             map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
-            map.Add(DirectShooter.ComponentName, DirectShooter.ComponentID);
+            map.Add(Shooter.ComponentName, Shooter.ComponentID);
             map.Add(WorkQueue.ComponentName, WorkQueue.ComponentID);
 
         }

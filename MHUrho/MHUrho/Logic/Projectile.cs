@@ -17,8 +17,8 @@ namespace MHUrho.Logic
         public ProjectileType ProjectileType { get; private set; }
 
         /// <summary>
-        /// Cast it to your own type, the one returned by <see cref="IProjectileTypePlugin.CreateNewInstance(ILevelManager, Projectile)"/>
-        /// for this type with name <see cref="IProjectileTypePlugin.IsMyType(string)"/>
+        /// Cast it to your own type, the one returned by <see cref="ProjectileTypePluginBase.CreateNewInstance(ILevelManager, Projectile)"/>
+        /// for this type with name <see cref="ProjectileTypePluginBase.IsMyType(string)"/>
         /// </summary>
         public object Plugin => plugin;
         
@@ -33,7 +33,7 @@ namespace MHUrho.Logic
         private float timeToDespawn;
 
         private OnDespawn onDespawn;
-        private IProjectileInstancePlugin plugin;
+        private ProjectileInstancePluginBase plugin;
 
         private StProjectile storedProjectile;
 
@@ -134,7 +134,6 @@ namespace MHUrho.Logic
         }
 
         protected override void OnUpdate(float timeStep) {
-            base.OnUpdate(timeStep);
 
             if (!EnabledEffective) return;
 

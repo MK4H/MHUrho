@@ -40,7 +40,7 @@ namespace MHUrho.Logic
 
         public object Plugin => buildingTypeLogic;
 
-        private IBuildingTypePlugin buildingTypeLogic;
+        private BuildingTypePluginBase buildingTypeLogic;
 
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace MHUrho.Logic
             Icon = LoadIcon(xml, package.XmlDirectoryPath);
             Package = package;
             Size = XmlHelpers.GetIntVector2(xml, SizeElementName);
-            buildingTypeLogic = XmlHelpers.LoadTypePlugin<IBuildingTypePlugin>(xml,
+            buildingTypeLogic = XmlHelpers.LoadTypePlugin<BuildingTypePluginBase>(xml,
                                                                                AssemblyPathElementName,
                                                                                package.XmlDirectoryPath,
                                                                                Name);
@@ -96,11 +96,11 @@ namespace MHUrho.Logic
             return CanBuildIn(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), level);
         }
  
-        public IBuildingInstancePlugin GetNewInstancePlugin(Building building, ILevelManager level) {
+        public BuildingInstancePluginBase GetNewInstancePlugin(Building building, ILevelManager level) {
             return buildingTypeLogic.CreateNewInstance(level, building);
         }
 
-        public IBuildingInstancePlugin GetInstancePluginForLoading() {
+        public BuildingInstancePluginBase GetInstancePluginForLoading() {
             return buildingTypeLogic.GetInstanceForLoading();
         }
 

@@ -10,11 +10,6 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    public delegate void MovementStartedDelegate(Unit unit);
-
-    public delegate void MovementEndedDelegate(Unit unit);
-
-    public delegate void MovementFailedDelegate(Unit unit);
 
     public class WorldWalker : DefaultComponent {
 
@@ -24,11 +19,9 @@ namespace MHUrho.UnitComponents
         public override string Name => ComponentName;
         public override DefaultComponents ID => ComponentID;
 
-        public event MovementStartedDelegate OnMovementStarted;
-        public event MovementEndedDelegate OnMovementEnded;
-        public event MovementFailedDelegate OnMovementFailed;
-
-        public bool MovementFinished => path == null;
+        public bool MovementStarted { get; private set; }
+        public bool MovementFinished { get; private set; }
+        public bool MovementFailed { get; private set; }
 
         private readonly Map map;
         private ILevelManager level;
@@ -87,7 +80,9 @@ namespace MHUrho.UnitComponents
 
         public void GoAlong(Path path) {
             if (this.path == null) {
-                OnMovementStarted?.Invoke(unit);
+                MovementStarted = true;
+                MovementFailed = false;
+                MovementFinished = false;
             }
 
             this.path = path;
@@ -108,7 +103,8 @@ namespace MHUrho.UnitComponents
         public bool GoTo(ITile tile) {
             var newPath = map.GetPath(unit, tile);
             if (newPath == null) {
-                OnMovementFailed?.Invoke(unit);
+                MovementStarted = true;
+                MovementFailed = true;
                 return false;
             }
             GoAlong(newPath);
@@ -120,20 +116,20 @@ namespace MHUrho.UnitComponents
         }
 
 
-        public WorldWalker OnMovementStartedCall(MovementStartedDelegate handler) {
-            OnMovementStarted += handler;
-            return this;
-        }
+        //public WorldWalker OnMovementStartedCall(MovementStartedDelegate handler) {
+        //    OnMovementStarted += handler;
+        //    return this;
+        //}
 
-        public WorldWalker OnMovementFinishedCall(MovementEndedDelegate handler) {
-            OnMovementEnded += handler;
-            return this;
-        }
+        //public WorldWalker OnMovementFinishedCall(MovementEndedDelegate handler) {
+        //    OnMovementEnded += handler;
+        //    return this;
+        //}
 
-        public WorldWalker OnMovementFailedCall(MovementFailedDelegate handler) {
-            OnMovementFailed += handler;
-            return this;
-        }
+        //public WorldWalker OnMovementFailedCall(MovementFailedDelegate handler) {
+        //    OnMovementFailed += handler;
+        //    return this;
+        //}
 
         public override void OnAttachedToNode(Node node) {
             base.OnAttachedToNode(node);
@@ -186,7 +182,7 @@ namespace MHUrho.UnitComponents
             var newPath = map.GetPath(unit, path.Target);
             if (newPath == null || !newPath.MoveNext()) {
                 //Cant get there
-                OnMovementFailed?.Invoke(unit);
+                MovementFailed = true;
                 newPath?.Dispose();
                 ReachedDestination();
             }
@@ -222,7 +218,6 @@ namespace MHUrho.UnitComponents
                 if (!path.MoveNext()) {
                     //Reached destination
 
-                    OnMovementEnded?.Invoke(unit);
                     ReachedDestination();
                     return new Vector3();
                 }
@@ -238,6 +233,7 @@ namespace MHUrho.UnitComponents
         }
 
         private void ReachedDestination() {
+            MovementFinished = true;
             path.Dispose();
             path = null;
             nextTile = null;
