@@ -106,17 +106,16 @@ namespace MHUrho.Logic
             return units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
         }
 
-
         public bool RemoveBuilding(Building building) {
             return buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
         }
 
-        public IEnumerable<Unit> GetUnitsOfType(UnitType type) {
-            return units.TryGetValue(type, out List<Unit> unitList) ? Enumerable.Empty<Unit>() : unitList;
+        public IReadOnlyList<Unit> GetUnitsOfType(UnitType type) {
+            return units.TryGetValue(type, out List<Unit> unitList) ? new List<Unit>() : unitList;
         }
 
-        public IEnumerable<Building> GetBuildingsOfType(BuildingType type) {
-            return buildings.TryGetValue(type, out var buildingList) ? Enumerable.Empty<Building>() : buildingList;
+        public IReadOnlyList<Building> GetBuildingsOfType(BuildingType type) {
+            return buildings.TryGetValue(type, out var buildingList) ? new List<Building>() : buildingList;
         }
 
         public int GetResourcesOfType(ResourceType type) {

@@ -11,6 +11,12 @@ using Urho;
 namespace MHUrho.UnitComponents
 {
 
+    internal delegate void MovementStartedDelegate(WorldWalker walker);
+
+    internal delegate void MovementEndedDelegate(WorldWalker walker);
+
+    internal delegate void MovementFailedDelegate(WorldWalker walker);
+
     public class WorldWalker : DefaultComponent {
 
         public static string ComponentName = nameof(WorldWalker);
@@ -23,9 +29,16 @@ namespace MHUrho.UnitComponents
         public bool MovementFinished { get; private set; }
         public bool MovementFailed { get; private set; }
 
+        internal event MovementStartedDelegate OnMovementStarted;
+        internal event MovementEndedDelegate OnMovementEnded;
+        internal event MovementFailedDelegate OnMovementFailed;
+
+
+        public Unit Unit { get; private set; }
+
         private readonly Map map;
         private ILevelManager level;
-        private Unit unit;
+       
 
         private Path path;
 
@@ -83,6 +96,8 @@ namespace MHUrho.UnitComponents
                 MovementStarted = true;
                 MovementFailed = false;
                 MovementFinished = false;
+
+                OnMovementStarted?.Invoke(this);
             }
 
             this.path = path;
@@ -101,10 +116,12 @@ namespace MHUrho.UnitComponents
         }
 
         public bool GoTo(ITile tile) {
-            var newPath = map.GetPath(unit, tile);
+            var newPath = map.GetPath(Unit, tile);
             if (newPath == null) {
                 MovementStarted = true;
+                OnMovementStarted?.Invoke(this);
                 MovementFailed = true;
+                OnMovementFailed?.Invoke(this);
                 return false;
             }
             GoAlong(newPath);
@@ -115,30 +132,14 @@ namespace MHUrho.UnitComponents
             return GoTo(map.GetTileByMapLocation(location));
         }
 
-
-        //public WorldWalker OnMovementStartedCall(MovementStartedDelegate handler) {
-        //    OnMovementStarted += handler;
-        //    return this;
-        //}
-
-        //public WorldWalker OnMovementFinishedCall(MovementEndedDelegate handler) {
-        //    OnMovementEnded += handler;
-        //    return this;
-        //}
-
-        //public WorldWalker OnMovementFailedCall(MovementFailedDelegate handler) {
-        //    OnMovementFailed += handler;
-        //    return this;
-        //}
-
         public override void OnAttachedToNode(Node node) {
             base.OnAttachedToNode(node);
 
-            unit = Node.GetComponent<Unit>();
+            Unit = Node.GetComponent<Unit>();
 
-            if (unit == null) {
+            if (Unit == null) {
                 throw new
-                    InvalidOperationException($"Cannot attach {nameof(WorldWalker)} to a node that does not have {nameof(Unit)} component");
+                    InvalidOperationException($"Cannot attach {nameof(WorldWalker)} to a node that does not have {nameof(Logic.Unit)} component");
             }
         }
 
@@ -166,23 +167,24 @@ namespace MHUrho.UnitComponents
         private bool MoveTowards(Vector3 point ,float timeStep) {
             bool reachedPoint = false;
 
-            Vector3 newPosition = unit.Position + GetMoveVector(point, timeStep);
+            Vector3 newPosition = Unit.Position + GetMoveVector(point, timeStep);
             if (ReachedPoint(Node.Position, newPosition, point)) {
                 newPosition = point;
                 reachedPoint = true;
             }
 
-            if (unit.MoveTo(newPosition)) {
+            if (Unit.MoveTo(newPosition)) {
                 //Unit could move
                 return reachedPoint;
             }
             //Unit couldnt move to newPosition
 
             //Recalculate path
-            var newPath = map.GetPath(unit, path.Target);
+            var newPath = map.GetPath(Unit, path.Target);
             if (newPath == null || !newPath.MoveNext()) {
                 //Cant get there
                 MovementFailed = true;
+                OnMovementFailed?.Invoke(this);
                 newPath?.Dispose();
                 ReachedDestination();
             }
@@ -200,7 +202,7 @@ namespace MHUrho.UnitComponents
         /// <param name="timeStep"> How many seconds passed since the last update</param>
         /// <returns></returns>
         private Vector3 GetMoveVector(Vector3 destination, float timeStep) {
-            Vector3 movementDirection = destination - unit.Position;
+            Vector3 movementDirection = destination - Unit.Position;
             movementDirection.Normalize();
             return movementDirection * LevelManager.CurrentLevel.GameSpeed * timeStep;
         }
@@ -239,6 +241,7 @@ namespace MHUrho.UnitComponents
             nextTile = null;
             nextWaypoint = new Vector3();
             Enabled = false;
+            OnMovementEnded?.Invoke(this);
         }
     }
 }

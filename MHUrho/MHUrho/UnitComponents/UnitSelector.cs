@@ -56,30 +56,30 @@ namespace MHUrho.UnitComponents
         public override bool Order(ITile targetTile) {
             //TODO: EventArgs to get if the event was handled
             var orderArgs = new OrderArgs();
-            OrderedToTile?.Invoke(unit, targetTile, orderArgs);
+            OrderedToTile?.Invoke(this, targetTile, orderArgs);
             return orderArgs.Executed;
         }
 
         public override bool Order(Unit targetUnit) {
             var orderArgs = new OrderArgs();
-            OrderedToUnit?.Invoke(unit, targetUnit, orderArgs);
+            OrderedToUnit?.Invoke(this, targetUnit, orderArgs);
             return orderArgs.Executed;
         }
 
         public override bool Order(Building targetBuilding) {
             var orderArgs = new OrderArgs();
-            OrderedToBuilding?.Invoke(unit, targetBuilding, orderArgs);
+            OrderedToBuilding?.Invoke(this, targetBuilding, orderArgs);
             return orderArgs.Executed;
         }
 
         public override void Select() {
             Selected = true;
-            UnitSelected?.Invoke(unit);
+            UnitSelected?.Invoke(this);
         }
 
         public override void Deselect() {
             Selected = false;
-            UnitDeselected?.Invoke(unit);
+            UnitDeselected?.Invoke(this);
         }
 
         //TODO: Hook up a reaction to unit death to deselect it from all tools

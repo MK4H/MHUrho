@@ -7,16 +7,10 @@ namespace MHUrho.Logic {
         
         int ID { get; }
 
-        StPlayer Save();
+        IReadOnlyList<Unit> GetUnitsOfType(UnitType type);
 
-        void ConnectReferences(ILevelManager level);
+        IReadOnlyList<Building> GetBuildingsOfType(BuildingType type);
 
-        void FinishLoading();
-
-        void AddUnit(Unit unit);
-
-        void AddBuilding(Building building);
-
-        bool RemoveUnit(Unit unit);
+        int GetResourcesOfType(ResourceType type);
     }
 }

@@ -216,7 +216,7 @@ namespace MHUrho.Logic
 
             var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, this, tile, player);
             units.Add(newUnit.ID,newUnit);
-            player.AddUnit(newUnit);
+            players[player.ID].AddUnit(newUnit);
             tile.AddPassingUnit(newUnit);
 
             return newUnit;
@@ -238,7 +238,7 @@ namespace MHUrho.Logic
 
             var newBuilding = buildingType.BuildNewBuilding(GetNewID(buildings), buildingNode, this, topLeft, player);
             buildings.Add(newBuilding.ID,newBuilding);
-            player.AddBuilding(newBuilding);
+            players[player.ID].AddBuilding(newBuilding);
 
             return newBuilding;
         }
