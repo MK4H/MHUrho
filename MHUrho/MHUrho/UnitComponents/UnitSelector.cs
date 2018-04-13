@@ -9,11 +9,11 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    public delegate void UnitSelectedDelegate(Unit unit);
-    public delegate void UnitDeselectedDelegate(Unit unit);
-    public delegate void UnitOrderedToTileDelegate(Unit unit, ITile targetTile, OrderArgs orderArgs);
-    public delegate void UnitOrderedToUnitDelegate(Unit unit, Unit targetUnit, OrderArgs orderArgs);
-    public delegate void UnitOrderedToBuildingDelegate(Unit unit, Building targetBuilding, OrderArgs orderArgs);
+    internal delegate void UnitSelectedDelegate(UnitSelector unitSelector);
+    internal delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
+    internal delegate void UnitOrderedToTileDelegate(UnitSelector unitSelector, ITile targetTile, OrderArgs orderArgs);
+    internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, Unit targetUnit, OrderArgs orderArgs);
+    internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, Building targetBuilding, OrderArgs orderArgs);
 
 
     public class UnitSelector : Selector {
@@ -26,11 +26,11 @@ namespace MHUrho.UnitComponents
 
         public override IPlayer Player => unit.Player;
 
-        public event UnitSelectedDelegate UnitSelected;
-        public event UnitDeselectedDelegate UnitDeselected;
-        public event UnitOrderedToTileDelegate OrderedToTile;
-        public event UnitOrderedToUnitDelegate OrderedToUnit;
-        public event UnitOrderedToBuildingDelegate OrderedToBuilding;
+        internal event UnitSelectedDelegate UnitSelected;
+        internal event UnitDeselectedDelegate UnitDeselected;
+        internal event UnitOrderedToTileDelegate OrderedToTile;
+        internal event UnitOrderedToUnitDelegate OrderedToUnit;
+        internal event UnitOrderedToBuildingDelegate OrderedToBuilding;
 
         private Unit unit;
         private readonly ILevelManager level;

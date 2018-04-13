@@ -42,7 +42,7 @@ namespace MHUrho.UnitComponents
             loaders.Add(UnitSelector.ComponentID, UnitSelector.Load);
             loaders.Add(WorldWalker.ComponentID, WorldWalker.Load);
             loaders.Add(Shooter.ComponentID, Shooter.Load);
-            loaders.Add(WorkQueue.ComponentID, WorkQueue.Load);
+            loaders.Add(ActionQueue.ComponentID, ActionQueue.Load);
             //TODO: Add other components
         }
 
@@ -50,7 +50,7 @@ namespace MHUrho.UnitComponents
             map.Add(UnitSelector.ComponentName, UnitSelector.ComponentID);
             map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
             map.Add(Shooter.ComponentName, Shooter.ComponentID);
-            map.Add(WorkQueue.ComponentName, WorkQueue.ComponentID);
+            map.Add(ActionQueue.ComponentName, ActionQueue.ComponentID);
 
         }
 

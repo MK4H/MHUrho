@@ -11,7 +11,6 @@ using MHUrho.UnitComponents;
 using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
-using WorkQueue = MHUrho.UnitComponents.WorkQueue;
 
 namespace DefaultPackage
 {
@@ -160,9 +159,9 @@ namespace DefaultPackage
             return null;
         }
 
-        //private void StartWorker(WorkQueue worker) {
+        //private void StartWorker(ActionQueue worker) {
          
-        //    worker.EnqueueTask(new WorkQueue.DelegatedWorkTask()
+        //    worker.EnqueueTask(new ActionQueue.DelegatedWorkTask()
         //                           .OnTaskStarted((unit, task) => {
         //                                              unit.GetComponent<WorldWalker>()
         //                                                  .OnMovementFinishedCall((_) => task.Finish())
@@ -170,9 +169,9 @@ namespace DefaultPackage
         //                                                  .GoTo(new IntVector2(10, 10));
         //                                          }));
 
-        //    worker.EnqueueTask(new WorkQueue.TimedWorkTask(5));
+        //    worker.EnqueueTask(new ActionQueue.TimedWorkTask(5));
 
-        //    worker.EnqueueTask(new WorkQueue.DelegatedWorkTask()
+        //    worker.EnqueueTask(new ActionQueue.DelegatedWorkTask()
         //                           .OnTaskStarted((unit, task) => {
         //                                              unit.GetComponent<WorldWalker>()
         //                                                  .OnMovementFinishedCall((_) => task.Finish())

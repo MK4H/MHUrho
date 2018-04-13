@@ -4,6 +4,7 @@ using System.Text;
 using Urho;
 using MHUrho.Logic;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 
 namespace MHUrho.Plugins
 {
@@ -31,8 +32,73 @@ namespace MHUrho.Plugins
         /// <returns>Instance loaded into saved state</returns>
         public abstract void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData);
 
-        //TODO: Move this to AStar as a delegate argument, dont force this onto anyone
-        public abstract bool CanGoFromTo(ITile fromTile, ITile toTile);
+        public virtual bool CanGoFromTo(ITile fromTile, ITile toTile) {
+            throw new NotImplementedException("You need to override CanGoFromTo to use WordlWalker");
+        }
+
+        public virtual void OnMovementStarted(WorldWalker walker, int tag) {
+            //NOTHING
+        }
+
+        public virtual void OnMovementFinished(WorldWalker walker, int tag) {
+            //NOTHING
+        }
+
+        public virtual void OnMovementFailed(WorldWalker walker, int tag) {
+            //NOTHING
+        }
+
+        public virtual void OnUnitHit() {
+            //NOTHING
+        }
+
+        public virtual void OnTaskStarted(ActionQueue queue, ActionQueue.WorkTask task) {
+            //NOTHING
+        }
+
+        public virtual void OnTaskFinished(ActionQueue queue, ActionQueue.WorkTask task) {
+            //NOTHING
+        }
+
+        public virtual void OnTaskCancelled(ActionQueue queue, ActionQueue.WorkTask task) {
+            //NOTHING
+        }
+
+        public virtual void OnTargetAcquired(Shooter shooter) {
+            //NOTHING
+        }
+
+        public virtual void OnShotFired(Shooter shooter) {
+            //NOTHING
+        }
+
+        public virtual void OnUnitSelected(UnitSelector selector) {
+            //NOTHING
+        }
+
+        public virtual void OnUnitDeselected(UnitSelector selector) {
+            //NOTHING
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <param name="targetTile"></param>
+        /// <returns>True if the unit executed the order, false if the unit was not able to execute the order</returns>
+        public virtual bool OnUnitOrderedToTile(UnitSelector selector, ITile targetTile) {
+            return false;
+        }
+
+        public virtual bool OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit) {
+            return false;
+        }
+
+        public virtual bool OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding) {
+            return false;
+        }
+
+
         //TODO: Expand this
     }
 }
