@@ -61,6 +61,7 @@ namespace MHUrho.EditorTools
             input.UIManager.SelectionBarShowButtons(buildingTypeButtons.Keys);
             input.MouseDown += OnMouseDown;
             input.MouseMove += OnMouseMove;
+            Level.Update += OnUpdate;
             enabled = true;
         }
 
@@ -75,6 +76,7 @@ namespace MHUrho.EditorTools
             input.UIManager.SelectionBarClearButtons();
             input.MouseDown -= OnMouseDown;
             input.MouseMove -= OnMouseMove;
+            Level.Update -= OnUpdate;
 
             Map.DisableHighlight();
             enabled = false;
@@ -117,6 +119,20 @@ namespace MHUrho.EditorTools
         }
 
         private void OnMouseMove(MouseMovedEventArgs e) {
+            HighlightBuildingRectangle();
+        }
+
+        private void OnUpdate(float timeStep) {
+            HighlightBuildingRectangle();
+        }
+
+        private void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
+            topLeft = centerTile.TopLeft - buildingType.Size / 2;
+            bottomRight = topLeft + buildingType.Size - new IntVector2(1,1);
+            Map.SnapToMap(ref topLeft, ref bottomRight);
+        }
+
+        private void HighlightBuildingRectangle() {
             if (selected == null) return;
 
             var tile = input.GetTileUnderCursor();
@@ -128,12 +144,6 @@ namespace MHUrho.EditorTools
 
             Color color = buildingType.CanBuildIn(topLeft, bottomRight, Level) ? Color.Green : Color.Red;
             Map.HighlightArea(topLeft, bottomRight, WorldMap.HighlightMode.Full, color);
-        }
-
-        private void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
-            topLeft = centerTile.TopLeft - buildingType.Size / 2;
-            bottomRight = topLeft + buildingType.Size - new IntVector2(1,1);
-            Map.SnapToMap(ref topLeft, ref bottomRight);
         }
     }
 }
