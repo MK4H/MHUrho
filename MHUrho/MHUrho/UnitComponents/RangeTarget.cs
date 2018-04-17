@@ -8,13 +8,45 @@ using MHUrho.Storage;
 
 namespace MHUrho.UnitComponents
 {
-    public abstract class RangeTarget : DefaultComponent
-    {
+    public abstract class RangeTarget : DefaultComponent {
+        public interface IShooter {
+            void OnTargetDestroy(RangeTarget target);
+        }
+
+        public int InstanceID;
+
         public abstract bool Moving { get; }
 
+        protected List<IShooter> shooters;
 
         public abstract Vector3 GetPositionAfter(float time);
 
+        /// <summary>
+        /// Adds a shooter to be notified when this target dies
+        /// 
+        /// IT IS RESET WITH LOAD, you need to add again when loading
+        /// you can get this target by its <see cref="InstanceID"/> from <see cref="ILevelManager.GetTarget(int targetID)"/>
+        /// </summary>
+        /// <param name="shooter">the shooter to notify</param>
+        public void AddShooter(IShooter shooter) {
+            shooters.Add(shooter);
+        }
+
+        public void RemoveShooter(IShooter shooter) {
+            shooters.Remove(shooter);
+        }
+
+        protected RangeTarget(int instanceID) {
+            this.InstanceID = instanceID;
+        }
+
+        protected override void OnDeleted() {
+            base.OnDeleted();
+
+            foreach (var shooter in shooters) {
+                shooter.OnTargetDestroy(this);
+            }
+        }
 
     }
 
@@ -26,31 +58,29 @@ namespace MHUrho.UnitComponents
 
         public static string ComponentName = nameof(StaticRangeTarget);
         public static DefaultComponents ComponentID = DefaultComponents.StaticRangeTarget;
-        public override string Name => ComponentName;
-        public override DefaultComponents ID => ComponentID;
+        public override string ComponentTypeName => ComponentName;
+        public override DefaultComponents ComponentTypeID => ComponentID;
 
         public override bool Moving => false;
 
         public Vector3 Position { get; private set; }
 
-        protected StaticRangeTarget(ILevelManager level, Vector3 position) {
+        protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position)
+            : base(instanceID)
+        {
             this.Position = position;
         }
 
-        public static RangeTarget CreateNewStaticTarget<T>(T instancePlugin, ILevelManager level, Vector3 position)
+        public static RangeTarget CreateNewStaticTarget<T>(T instancePlugin, int targetID, ILevelManager level, Vector3 position)
             where T : InstancePluginBase, INotificationReceiver {
 
             if (instancePlugin == null) {
                 throw new ArgumentNullException(nameof(instancePlugin));
             }
 
-            return new StaticRangeTarget(level, position);
+            return new StaticRangeTarget(targetID, level, position);
         }
 
-        //For map targets
-        internal static StaticRangeTarget CreateNew(ILevelManager level,Vector3 position) {
-            return new StaticRangeTarget(level, position);
-        }
 
         public override Vector3 GetPositionAfter(float time) {
             return Position;
@@ -58,6 +88,21 @@ namespace MHUrho.UnitComponents
 
         public override PluginData SaveState() {
             throw new NotImplementedException();
+        }
+    }
+
+    internal class MapRangeTarget : RangeTarget {
+        public static string ComponentName = nameof(StaticRangeTarget);
+        public static DefaultComponents ComponentID = DefaultComponents.StaticRangeTarget;
+
+        public override string ComponentTypeName => ComponentName;
+        public override DefaultComponents ComponentTypeID => ComponentID;
+
+        public override bool Moving => false;
+
+        protected MapRangeTarget(int instanceID, ILevelManager level, Vector3 position)
+            : base(instanceID) {
+            this.Position = position;
         }
     }
 
@@ -70,21 +115,27 @@ namespace MHUrho.UnitComponents
 
         public static string ComponentName = nameof(MovingRangeTarget);
         public static DefaultComponents ComponentID = DefaultComponents.MovingRangeTarget;
-        public override string Name => ComponentName;
-        public override DefaultComponents ID => ComponentID;
+        public override string ComponentTypeName => ComponentName;
+        public override DefaultComponents ComponentTypeID => ComponentID;
 
         public override bool Moving => true;
 
         private INotificationReceiver notificationReceiver;
 
-        public static RangeTarget CreateNew<T>(T instancePlugin, ILevelManager level)
+        public MovingRangeTarget(int targetID, ILevelManager level, INotificationReceiver notificationReceiver)
+            : base(targetID) 
+        {
+            this.notificationReceiver = notificationReceiver;
+        }
+
+        public static RangeTarget CreateNew<T>(T instancePlugin, int targetID, ILevelManager level)
             where T : InstancePluginBase, INotificationReceiver {
 
             if (instancePlugin == null) {
                 throw new ArgumentNullException(nameof(instancePlugin));
             }
 
-            return new MovingRangeTarget();
+            return new MovingRangeTarget(targetID, level, instancePlugin);
         }
 
         public override Vector3 GetPositionAfter(float time) {
@@ -94,5 +145,8 @@ namespace MHUrho.UnitComponents
         public override PluginData SaveState() {
             throw new NotImplementedException();
         }
+
+ 
     }
+
 }

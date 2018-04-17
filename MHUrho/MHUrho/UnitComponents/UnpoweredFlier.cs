@@ -22,9 +22,9 @@ namespace MHUrho.UnitComponents
         public static DefaultComponents ComponentID = DefaultComponents.UnpoweredFlier;
         public static string ComponentName = nameof(UnpoweredFlier);
 
-        public override DefaultComponents ID => ComponentID;
+        public override DefaultComponents ComponentTypeID => ComponentID;
 
-        public override string Name => ComponentName;
+        public override string ComponentTypeName => ComponentName;
 
         public Vector3 Movement { get; private set; }
 

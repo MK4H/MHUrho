@@ -14,10 +14,8 @@ using Urho.Physics;
 
 namespace MHUrho.Logic
 {
-    public class Building : Component
+    public class Building : Entity
     {
-        public new int ID { get; private set; }
-
         public IntRect Rectangle { get; private set; }
 
         public IntVector2 Location => Rectangle.TopLeft();
@@ -27,8 +25,6 @@ namespace MHUrho.Logic
         public BuildingType BuildingType { get; private set; }
 
         public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
-
-        public IPlayer Player { get; private set; }
 
         public object Plugin => plugin;
 
@@ -41,8 +37,10 @@ namespace MHUrho.Logic
         /// </summary>
         private StBuilding storedBuilding;
 
-        protected Building(int id, IntVector2 topLeftCorner, BuildingType type, IPlayer player, ILevelManager level) {
-            this.ID = id;
+        protected Building(int id, ILevelManager level, IntVector2 topLeftCorner, BuildingType type, IPlayer player) 
+            :base(id, level)
+        {
+
             this.BuildingType = type;
             this.Player = player;
             this.Rectangle = new IntRect(topLeftCorner.X,
@@ -52,15 +50,16 @@ namespace MHUrho.Logic
             this.tiles = GetTiles(level.Map, type, topLeftCorner);
         }
 
-        protected Building(BuildingType buildingType, Map map, StBuilding storedBuilding) {
-            this.ID = storedBuilding.Id;
+        protected Building(ILevelManager level, BuildingType buildingType, StBuilding storedBuilding) 
+            :base(storedBuilding.Id, level)
+        {
             this.BuildingType = buildingType;
             var topLeft = storedBuilding.Location.ToIntVector2();
             this.Rectangle = new IntRect(topLeft.X,
                                          topLeft.Y,
                                          topLeft.X + buildingType.Size.X,
                                          topLeft.Y + buildingType.Size.Y);
-            this.tiles = GetTiles(map, buildingType, Location);
+            this.tiles = GetTiles(Map, buildingType, Location);
         }
 
 
@@ -83,7 +82,7 @@ namespace MHUrho.Logic
                 return null;
             }
 
-            var newBuilding = new Building(id, topLeftCorner, type, player, level);
+            var newBuilding = new Building(id, level, topLeftCorner, type, player);
             buildingNode.AddComponent(newBuilding);
 
             var center = newBuilding.Rectangle.Center();
@@ -109,7 +108,7 @@ namespace MHUrho.Logic
                 throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
             }
 
-            var building = new Building(type, level.Map, storedBuilding);
+            var building = new Building(level, type, storedBuilding);
             buildingNode.AddComponent(building);
 
             var center = building.Rectangle.Center();
@@ -160,7 +159,7 @@ namespace MHUrho.Logic
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
                 if (defaultComponent != null) {
-                    stBuilding.DefaultComponentData.Add((int)defaultComponent.ID, defaultComponent.SaveState());
+                    stBuilding.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
                 }
             }
 

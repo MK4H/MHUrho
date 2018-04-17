@@ -84,8 +84,8 @@ namespace MHUrho.UnitComponents
         public static string ComponentName = nameof(ActionQueue);
         public static DefaultComponents ComponentID = DefaultComponents.WorkQueue;
 
-        public override string Name => ComponentName;
-        public override DefaultComponents ID => ComponentID;
+        public override string ComponentTypeName => ComponentName;
+        public override DefaultComponents ComponentTypeID => ComponentID;
 
         internal event TaskStartedDelegate OnTaskStarted;
         internal event TaskFinishedDelegate OnTaskFinished;

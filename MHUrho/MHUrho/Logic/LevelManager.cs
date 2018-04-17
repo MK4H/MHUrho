@@ -46,6 +46,11 @@ namespace MHUrho.Logic
         private readonly Dictionary<int, Unit> units;
         private readonly Dictionary<int, Player> players;
         private readonly Dictionary<int, Building> buildings;
+        private readonly Dictionary<int, Projectile> projectiles;
+
+        private readonly Dictionary<int, Entity> entities;
+
+        private readonly Dictionary<int, RangeTarget> rangeTargets;
 
         private readonly Random rng;
 
@@ -218,7 +223,8 @@ namespace MHUrho.Logic
 
             Node unitNode = Scene.CreateChild("Unit");
 
-            var newUnit = unitType.CreateNewUnit(GetNewID(units),unitNode, this, tile, player);
+            var newUnit = unitType.CreateNewUnit(GetNewID(entities),unitNode, this, tile, player);
+            entities.Add(newUnit.ID, newUnit);
             units.Add(newUnit.ID,newUnit);
             players[player.ID].AddUnit(newUnit);
             tile.AddPassingUnit(newUnit);
@@ -240,11 +246,21 @@ namespace MHUrho.Logic
 
             Node buildingNode = Scene.CreateChild("Building");
 
-            var newBuilding = buildingType.BuildNewBuilding(GetNewID(buildings), buildingNode, this, topLeft, player);
+            var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), buildingNode, this, topLeft, player);
+            entities.Add(newBuilding.ID, newBuilding);
             buildings.Add(newBuilding.ID,newBuilding);
             players[player.ID].AddBuilding(newBuilding);
 
             return newBuilding;
+        }
+
+        public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, RangeTarget target) {
+
+            var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, target);
+            entities.Add(newProjectile.ID, newProjectile);
+            projectiles.Add(newProjectile.ID, newProjectile);
+
+            return newProjectile;
         }
 
         public Unit GetUnit(int ID) {
@@ -267,6 +283,27 @@ namespace MHUrho.Logic
             }
 
             return player;
+        }
+
+        public Projectile GetProjectile(int ID) {
+            if (!projectiles.TryGetValue(ID, out Projectile value)) {
+                throw new ArgumentOutOfRangeException("Projectile with this ID does not exist in the current level");
+            }
+            return value;
+        }
+
+        public Entity GetEntity(int ID) {
+            if (!entities.TryGetValue(ID, out Entity value)) {
+                throw new ArgumentOutOfRangeException("Entity with this ID does not exist in the current level");
+            }
+            return value;
+        }
+
+        public RangeTarget GetRangeTarget(int ID) {
+            if (!rangeTargets.TryGetValue(ID, out RangeTarget value)) {
+                throw new ArgumentOutOfRangeException("RangeTarget with this ID does not exist in the current level");
+            }
+            return value;
         }
 
         protected override void OnUpdate(float timeStep) {

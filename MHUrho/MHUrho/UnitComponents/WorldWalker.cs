@@ -33,8 +33,8 @@ namespace MHUrho.UnitComponents
         public static string ComponentName = nameof(WorldWalker);
         public static DefaultComponents ComponentID = DefaultComponents.WorldWalker;
 
-        public override string Name => ComponentName;
-        public override DefaultComponents ID => ComponentID;
+        public override string ComponentTypeName => ComponentName;
+        public override DefaultComponents ComponentTypeID => ComponentID;
 
         public bool MovementStarted { get; private set; }
         public bool MovementFinished { get; private set; }

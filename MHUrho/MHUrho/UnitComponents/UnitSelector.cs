@@ -41,8 +41,8 @@ namespace MHUrho.UnitComponents
         public static string ComponentName = nameof(UnitSelector);
         public static DefaultComponents ComponentID = DefaultComponents.UnitSelector;
 
-        public override string Name => ComponentName;
-        public override DefaultComponents ID => ComponentID;
+        public override string ComponentTypeName => ComponentName;
+        public override DefaultComponents ComponentTypeID => ComponentID;
 
         public override IPlayer Player => Unit.Player;
 

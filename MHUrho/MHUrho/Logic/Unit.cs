@@ -20,7 +20,7 @@ namespace MHUrho.Logic
     /// <summary>
     /// Class representing unit, every action you want to do with the unit should go through this class
     /// </summary>
-    public class Unit : Component
+    public class Unit : Entity
     {
         #region Public members
 
@@ -56,11 +56,6 @@ namespace MHUrho.Logic
         /// </summary>
         public ITile Tile { get; private set; }
 
-        /// <summary>
-        /// Player owning this unit
-        /// </summary>
-        public IPlayer Player { get; private set; }
-
         public UnitInstancePluginBase Plugin { get; private set; }
 
         public bool AlwaysVertical { get; set; } = false;
@@ -85,9 +80,10 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="type">type of the loading unit</param>
         /// <param name="storedUnit">Image of the unit</param>
-        protected Unit(UnitType type, StUnit storedUnit) {
+        protected Unit(ILevelManager level, UnitType type, StUnit storedUnit)
+            :base(storedUnit.Id, level)
+        {
             this.storage = storedUnit;
-            this.ID = storedUnit.Id;
             this.UnitType = type;
 
             ReceiveSceneUpdates = true;
@@ -102,8 +98,9 @@ namespace MHUrho.Logic
         /// <param name="type">the type of the unit</param>
         /// <param name="tile">Tile where the unit spawned</param>
         /// <param name="player">Owner of the unit</param>
-        protected Unit(int id, UnitType type, ITile tile, IPlayer player) {
-            this.ID = id;
+        protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player) 
+            : base(id, level)
+        {
             this.Tile = tile;
             this.Player = player;
             this.UnitType = type;
@@ -147,7 +144,7 @@ namespace MHUrho.Logic
                 throw new ArgumentException("provided type is not the type of the stored unit",nameof(type));
             }
 
-            var unit = new Unit(type, storedUnit);
+            var unit = new Unit(level, type, storedUnit);
             node.AddComponent(unit);
 
             //This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
@@ -170,7 +167,7 @@ namespace MHUrho.Logic
         /// <returns>the unit component, already added to the node</returns>
         public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
             //TODO: Check if there is already a Unit component on this node, if there is, throw exception
-            var unit = new Unit(id, type, tile, player);
+            var unit = new Unit(id, level, type, tile, player);
             unitNode.AddComponent(unit);
             unitNode.Position = tile.Center3;
 
@@ -203,7 +200,7 @@ namespace MHUrho.Logic
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
                 if (defaultComponent != null) {
-                    storedUnit.DefaultComponentData.Add((int)defaultComponent.ID, defaultComponent.SaveState());
+                    storedUnit.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
                 }
             }
 

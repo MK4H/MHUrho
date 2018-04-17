@@ -62,16 +62,16 @@ namespace MHUrho.Logic
                                   package.PackageManager);
         }
 
-        public Projectile ShootProjectile(ILevelManager level, IPlayer player, Vector3 position, Vector3 target) {
-            var projectile = GetProjectile(level, player, position);
+        public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, Vector3 target) {
+            var projectile = GetProjectile(newID, level, player, position);
 
             projectile.Plugin.ShootProjectile(target);
 
             return projectile;
         }
 
-        public Projectile ShootProjectile(ILevelManager level, IPlayer player, Vector3 position, RangeTarget target) {
-            var projectile = GetProjectile(level, player, position);
+        public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, RangeTarget target) {
+            var projectile = GetProjectile(newID, level, player, position);
 
             projectile.Plugin.ShootProjectile(target);
 
@@ -120,19 +120,20 @@ namespace MHUrho.Logic
             return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
         }
 
-        private Projectile GetProjectile(ILevelManager level, IPlayer player, Vector3 position) {
+        private Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position) {
             Projectile projectile = null;
 
             if (projectilePool.Count != 0) {
                 //TODO: Some clever algorithm to manage projectile count
                 var pooledProjectile = projectilePool.Dequeue();
-                pooledProjectile.ReInitialize(level, player, position);
+                pooledProjectile.ReInitialize(newID, level, player, position);
 
             }
             else {
                 //Projectile node has to be a child of the scene directly for physics to work correctly
                 var projectileNode = level.Scene.CreateChild("Projectile");
-                projectile = Projectile.SpawnNew(level,
+                projectile = Projectile.SpawnNew(newID,
+                                                 level,
                                                  player,
                                                  position,
                                                  this,

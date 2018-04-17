@@ -35,5 +35,9 @@ namespace MHUrho.Logic {
         Building GetBuilding(int ID);
 
         Player GetPlayer(int ID);
+
+        Entity GetEntity(int ID);
+
+        RangeTarget GetRangeTarget(int ID);
     }
 }

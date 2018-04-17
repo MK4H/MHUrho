@@ -11,7 +11,7 @@ using MHUrho.Storage;
 
 namespace MHUrho.Logic
 {
-    public class Projectile : EntityInstanceBase {
+    public class Projectile : Entity {
         public delegate bool OnDespawn(Projectile projectile);
 
         public ProjectileType ProjectileType { get; private set; }
@@ -25,18 +25,19 @@ namespace MHUrho.Logic
         private StProjectile storedProjectile;
 
         
-        protected Projectile(ILevelManager level, ProjectileType type, IPlayer player)
-            :base(level)
+        protected Projectile(int ID, ILevelManager level, ProjectileType type, IPlayer player)
+            :base(ID,level)
         {
             ReceiveSceneUpdates = true;
             this.Player = player;
             this.ProjectileType = type;
         }
 
-        protected Projectile(ILevelManager level,
+        protected Projectile(int ID,
+                             ILevelManager level,
                              ProjectileType type,
                              StProjectile storedProjectile)
-            : base(level)
+            : base(ID,level)
         {
             ReceiveSceneUpdates = true;
             this.ProjectileType = type;
@@ -54,20 +55,23 @@ namespace MHUrho.Logic
                 throw new ArgumentException("provided type is not the type of the stored projectile");
             }
 
+            var instanceID = storedProjectile.Id;
+
             node.Position = storedProjectile.Position.ToVector3();
 
-            var projectile = new Projectile(level, type, storedProjectile);
+            var projectile = new Projectile(instanceID, level, type, storedProjectile);
 
             return projectile;
         }
 
-        internal static Projectile SpawnNew(ILevelManager level,
+        internal static Projectile SpawnNew(int ID,
+                                            ILevelManager level,
                                             IPlayer player,
                                             Vector3 position,
                                             ProjectileType type,
                                             Node node) {
             node.Position = position;
-            var projectile = new Projectile(level, type, player);
+            var projectile = new Projectile(ID, level, type, player);
             node.AddComponent(projectile);
 
             projectile.Plugin = type.GetNewInstancePlugin(projectile, level);

@@ -22,9 +22,9 @@ namespace MHUrho.UnitComponents
 
     public abstract class DefaultComponent : Component {
 
-        public new abstract DefaultComponents ID{ get; }
+        public new abstract DefaultComponents ComponentTypeID{ get; }
 
-        public abstract string Name { get; }
+        public abstract string ComponentTypeName { get; }
 
         public abstract PluginData SaveState();
     }
