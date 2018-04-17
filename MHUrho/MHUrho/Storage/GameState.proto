@@ -49,9 +49,7 @@ message StProjectile {
 	int32 typeID = 2;
 	StVector3 position = 3;
 	int32 playerID = 4;
-	StVector3 movement = 5;
-	float baseTimeToDespawn = 6;
-	PluginData userPlugin = 7;
+	PluginData userPlugin = 5;
 }
 
 message StBuilding {

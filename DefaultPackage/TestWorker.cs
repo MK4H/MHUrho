@@ -19,8 +19,6 @@ namespace DefaultPackage
         }
 
         public override UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit) {
-            var unitNode = unit.Node;
-            unitNode.AddComponent(new WorldWalker(level));
             return new TestWorkerInstance(level, unit);
         }
 
@@ -39,14 +37,14 @@ namespace DefaultPackage
         }
     }
 
-    public class TestWorkerInstance : UnitInstancePluginBase {
+    public class TestWorkerInstance : UnitInstancePluginBase, WorldWalker.INotificationReciever {
         public TestBuildingInstance WorkedBuilding { get; set; }
 
         private WorldWalker walker;
         private bool homeGoing = false;
 
-        public TestWorkerInstance(ILevelManager level, Unit unit) {
-            walker = unit.Node.GetComponent<WorldWalker>();
+        public TestWorkerInstance(ILevelManager level, Unit unit) : base(level, unit) {
+            walker = WorldWalker.GetInstanceFor(this, level);
         }
 
         public TestWorkerInstance() {
@@ -58,14 +56,7 @@ namespace DefaultPackage
                 throw new InvalidOperationException("TestWorker has no building");
             }
 
-            if (homeGoing && walker.MovementFinished) {
-                walker.GoTo(new IntVector2(20,20));
-                homeGoing = !homeGoing;
-            }
-            else if (!homeGoing && walker.MovementFinished) {
-                walker.GoTo(WorkedBuilding.GetInterfaceTile(this));
-                homeGoing = !homeGoing;
-            }
+            
         }
 
         public override void SaveState(PluginDataWrapper pluginData) {
@@ -83,6 +74,25 @@ namespace DefaultPackage
 
         public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
             return toTile.Building == null;
+        }
+
+        public void OnMovementStarted(WorldWalker walker) {
+
+        }
+
+        public void OnMovementFinished(WorldWalker walker) {
+            if (homeGoing) {
+                walker.GoTo(new IntVector2(20, 20));
+                homeGoing = !homeGoing;
+            }
+            else if (!homeGoing) {
+                walker.GoTo(WorkedBuilding.GetInterfaceTile(this));
+                homeGoing = !homeGoing;
+            }
+        }
+
+        public void OnMovementFailed(WorldWalker walker) {
+
         }
     }
 }

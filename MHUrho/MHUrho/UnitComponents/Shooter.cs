@@ -1,23 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.Plugins;
 using MHUrho.WorldMap;
+using Urho.Physics;
 
 namespace MHUrho.UnitComponents
 {
     internal delegate void HostileTargetAquiredDelegate(Shooter shooter, Unit targetUnit);
     internal delegate void ShotReloadedDelegate(Shooter shooter);
-    internal delegate void ShotFiredDelegate(Shooter shooter);
+    internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
 
     public class Shooter : DefaultComponent
     {
 
+        public interface INotificationReciever {
+            void OnTargetAcquired(Shooter shooter, Unit targetUnit);
+
+            void OnShotFired(Shooter shooter, Projectile projectile);
+
+            void OnShotReloaded(Shooter shooter);
+        }
+
         public static string ComponentName = nameof(Shooter);
-        public static DefaultComponents ComponentID = DefaultComponents.DirectShooter;
+        public static DefaultComponents ComponentID = DefaultComponents.Shooter;
         public override string Name => ComponentName;
         public override DefaultComponents ID => ComponentID;
 
@@ -26,11 +37,14 @@ namespace MHUrho.UnitComponents
         /// </summary>
         public float RateOfFire { get; set; }
 
+        public bool SearchForTarget { get; set; }
+
         internal event HostileTargetAquiredDelegate OnTargetAcquired;
         internal event ShotReloadedDelegate OnShotReloaded;
         internal event ShotFiredDelegate OnShotFired;
 
-        private Vector3 target; //TODO: Change to Target component
+        //TODO: Change to Target component
+        private RangeTarget target;
 
         private float delay;
 
@@ -47,16 +61,22 @@ namespace MHUrho.UnitComponents
 
         private ILevelManager level;
 
+        private IPlayer player;
+
+        private INotificationReciever notificationReciever;
+
         private Map Map => level.Map;
 
-        public Shooter(ILevelManager level,
-                             Vector3 target,
-                             ProjectileType projectileType,
-                             float rateOfFire,
-                             float horizontalOffset,
-                             float verticalOffset) {
+        protected Shooter(ILevelManager level,
+                          INotificationReciever notificationReciever,
+                          IPlayer player,
+                          ProjectileType projectileType,
+                          float rateOfFire,
+                          float horizontalOffset,
+                          float verticalOffset) {
+            this.notificationReciever = notificationReciever;
             this.level = level;
-            this.target = target;
+            this.player = player;
             this.projectileType = projectileType;
             this.RateOfFire = rateOfFire;
             this.horizontalOffset = horizontalOffset;
@@ -65,12 +85,40 @@ namespace MHUrho.UnitComponents
             ReceiveSceneUpdates = true;
         }
 
-        public static Shooter Load(ILevelManager level, PluginData storedData) {
+        public static Shooter CreateNew<T>(T instancePlugin, 
+                                           ILevelManager level,
+                                           IPlayer player,
+                                           ProjectileType projectileType,
+                                           float rateOfFire,
+                                           float horizontalOffset,
+                                           float verticalOffset)
+            where T : InstancePluginBase, INotificationReciever {
+
+            if (instancePlugin == null) {
+                throw new ArgumentNullException(nameof(instancePlugin));
+            }
+
+            return new Shooter(level, 
+                               instancePlugin, 
+                               player,
+                               projectileType, 
+                               rateOfFire, 
+                               horizontalOffset,
+                               verticalOffset);
+        }
+
+        internal static Shooter Load(ILevelManager level, InstancePluginBase plugin, PluginData storedData) {
+            var notificationReciever = plugin as INotificationReciever;
+            if (notificationReciever == null) {
+                throw new
+                    ArgumentException($"provided plugin does not implement the {nameof(INotificationReciever)} interface", nameof(plugin));
+            }
+
             var sequentialDataReader = new SequentialPluginDataReader(storedData);
             sequentialDataReader.MoveNext();
-            var rateOfFire = sequentialDataReader.GetCurrent<float>();
+            var playerID = sequentialDataReader.GetCurrent<int>();
             sequentialDataReader.MoveNext();
-            var target = sequentialDataReader.GetCurrent<Vector3>();
+            var rateOfFire = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
             var horizontalOffset = sequentialDataReader.GetCurrent<float>();
             sequentialDataReader.MoveNext();
@@ -78,81 +126,21 @@ namespace MHUrho.UnitComponents
             sequentialDataReader.MoveNext();
             var projectileTypeID = sequentialDataReader.GetCurrent<int>();
             return new Shooter(level,
-                                     target,
-                                     level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-                                     rateOfFire,
-                                     horizontalOffset,
-                                     verticalOffset);
+                               notificationReciever,
+                               level.GetPlayer(playerID),
+                               level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
+                               rateOfFire,
+                               horizontalOffset,
+                               verticalOffset);
         }
 
-        /// <summary>
-        /// Calculates the movement vectors for projectile with initial speed <paramref name="projectileSpeed"/>, to go from <paramref name="sourcePosition"/> to <paramref name="targetPosition"/>
-        /// 
-        /// </summary>
-        /// <param name="targetPosition"></param>
-        /// <param name="sourcePosition"></param>
-        /// <param name="projectileSpeed"></param>
-        /// <param name="lowTime"></param>
-        /// <param name="lowVector"></param>
-        /// <param name="highTime"></param>
-        /// <param name="highVector"></param>
-        /// <returns>True if it is possible to hit the <paramref name="targetPosition"/> with the given <paramref name="projectileSpeed"/>,
-        /// and the out parameters are valid, or false if it is not possible and the out params are invalid</returns>
-        public static bool GetTimesAndAngles(Vector3 targetPosition, Vector3 sourcePosition, float projectileSpeed, out float lowTime, out Vector3 lowVector, out float highTime, out Vector3 highVector) {
-            //Source https://blog.forrestthewoods.com/solving-ballistic-trajectories-b0165523348c
-            // https://en.wikipedia.org/wiki/Projectile_motion
 
-            //TODO: Try this https://gamedev.stackexchange.com/questions/114522/how-can-i-launch-a-gameobject-at-a-target-if-i-am-given-everything-except-for-it
-
-            var diff = targetPosition - sourcePosition;
-            Vector3 directionXZ = diff.XZ();
-            directionXZ.Normalize();
-
-
-            var v2 = projectileSpeed * projectileSpeed;
-            var v4 = projectileSpeed * projectileSpeed * projectileSpeed * projectileSpeed;
-
-            var y = diff.Y;
-            var x = diff.XZ2().Length;
-
-            var g = 10f; //TODO: Set gravity
-
-            var root = v4 - g * (g * x * x + 2 * y * v2);
-
-            if (root < 0) {
-                //TODO: No solution, cant do
-                lowTime = 0;
-                lowVector = Vector3.Zero;
-                highTime = 0;
-                highVector = Vector3.Zero;
-                return false;
-            }
-
-            root = (float)Math.Sqrt(root);
-
-            float lowAngle = (float)Math.Atan2(v2 - root, g * x);
-            float highAngle = (float)Math.Atan2(v2 + root, g * x);
-
-
-            lowVector = (directionXZ * (float)Math.Cos(lowAngle) +
-                         Vector3.UnitY * (float)Math.Sin(lowAngle)) * projectileSpeed;
-
-            highVector = (directionXZ * (float)Math.Cos(highAngle) +
-                          Vector3.UnitY * (float)Math.Sin(highAngle)) * projectileSpeed;
-
-            lowTime = x / lowVector.XZ2().Length;
-            highTime = x / highVector.XZ2().Length;
-
-
-            return true;
-        }
 
         public override PluginData SaveState() {
             var sequentialData = new SequentialPluginDataWriter();
 
-
+            sequentialData.StoreNext<int>(player.ID);
             sequentialData.StoreNext<float>(RateOfFire);
-            sequentialData.StoreNext<Vector3>(target);
             sequentialData.StoreNext<float>(horizontalOffset);
             sequentialData.StoreNext<float>(verticalOffset);
             sequentialData.StoreNext<int>(projectileType.ID);
@@ -160,7 +148,13 @@ namespace MHUrho.UnitComponents
             return sequentialData.PluginData;
         }
 
+        public override void OnAttachedToNode(Node node) {
+            base.OnAttachedToNode(node);
 
+            OnShotFired += notificationReciever.OnShotFired;
+            OnTargetAcquired += notificationReciever.OnTargetAcquired;
+            OnShotReloaded += notificationReciever.OnShotReloaded;
+        }
 
         protected override void OnUpdate(float timeStep) {
             base.OnUpdate(timeStep);
@@ -174,27 +168,32 @@ namespace MHUrho.UnitComponents
 
             OnShotReloaded?.Invoke(this);
 
-            //if (target == null) {
-            //    //Check for target in range
-            //}
-            var directionXZ = Vector3.Normalize(target.XZ() - Node.Position.XZ());
+            if (target == null) {
+                //Check for target in range
+                var possibleTargets = player.GetEnemyPlayers()
+                                            .SelectMany(enemy => enemy.GetAllUnits())
+                                            .AsParallel()
+                                            .Where(unit => projectileType.IsInRange(Node.Position, unit.Position))
+                                            .OrderBy(unit => Vector3.Distance(Node.Position, unit.Position));
 
-            var offset = directionXZ * horizontalOffset + Vector3.UnitY * verticalOffset;
-            if (GetTimesAndAngles(target,
-                                  Node.Position + offset,
-                                  projectileType.ProjectileSpeed, 
-                                  out float lowTime, 
-                                  out Vector3 lowVector, 
-                                  out float highTime,
-                                  out Vector3 highVector)) {
 
-                OnShotFired?.Invoke(this);
+                foreach (var possibleTarget in possibleTargets) {
+                    var newTarget = possibleTarget.GetComponent<RangeTarget>();
+                    if (newTarget == null || !projectileType.IsInRange(Node.Position, newTarget)) {
+                        continue;
+                    }
 
-                projectileType.SpawnProjectile(level,level.Scene, Node.Position + offset, lowVector);
+                    target = newTarget;
+                    break;
+                }
 
-                projectileType.SpawnProjectile(level, level.Scene, Node.Position + offset, highVector);
-
+                if (target == null) {
+                    return;
+                }
             }
+
+            var projectile = projectileType.ShootProjectile(level, player, Node.Position, target );
+            OnShotFired?.Invoke(this, projectile);
 
             delay = 60 / RateOfFire;
         }

@@ -50,7 +50,7 @@ namespace MHUrho.Helpers
             return typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value.Trim();
         }
 
-        public static T LoadTypePlugin<T>(XElement typeXml, string assemblyPathElementName, string pathToPackageXmlDir, string typeName) where T: class, ITypePlugin {
+        public static T LoadTypePlugin<T>(XElement typeXml, string assemblyPathElementName, string pathToPackageXmlDir, string typeName) where T: TypePluginBase {
             if (!System.IO.Path.IsPathRooted(pathToPackageXmlDir)) {
                 pathToPackageXmlDir = System.IO.Path.Combine(MyGame.Config.DynamicDirPath, pathToPackageXmlDir);
             }

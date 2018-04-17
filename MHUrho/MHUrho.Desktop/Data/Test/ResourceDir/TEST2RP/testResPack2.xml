@@ -27,6 +27,12 @@
       <materialPath>StoneMaterial.xml</materialPath>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
     </unitType>
+    <unitType name="Chicken" ID="3">
+      <iconPath>Chicken/ChickenIcon.png</iconPath>
+      <modelPath>Chicken/Chicken.mdl</modelPath>
+      <materialPath>Chicken/Chicken.xml</materialPath>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </unitType>
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile" ID="1">

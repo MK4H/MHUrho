@@ -34,11 +34,15 @@ namespace MHUrho.Logic
 
         public Material Material { get; private set; }
 
+        public IReadOnlyDictionary<int, Animation> Animations => animations;
+
         public Image Icon { get; private set; }
 
         public object Plugin => unitTypeLogic;
 
         private UnitTypePluginBase unitTypeLogic;
+
+        private Dictionary<int, Animation> animations;
 
         //TODO: More loaded properties
 
@@ -139,6 +143,12 @@ namespace MHUrho.Logic
         public void Dispose() {
             //TODO: Release all disposable resources
             Model.Dispose();
+            Material.Dispose();
+            Icon.Dispose();
+
+            foreach (var animation in animations.Values) {
+                animation.Dispose();
+            }
         }
 
         /// <summary>
@@ -148,7 +158,7 @@ namespace MHUrho.Logic
         private void AddComponents(Node unitNode) {
             //TODO: READ FROM XML
             //TODO: Animated model
-            var staticModel = unitNode.CreateComponent<StaticModel>();
+            var staticModel = unitNode.CreateComponent<AnimatedModel>();
             staticModel.Model = Model;
             staticModel.Material = Material;
             staticModel.CastShadows = true;

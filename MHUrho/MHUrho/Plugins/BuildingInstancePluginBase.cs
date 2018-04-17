@@ -8,14 +8,17 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class BuildingInstancePluginBase
-    {
+    public abstract class BuildingInstancePluginBase : InstancePluginBase {
+        public Building Building { get; protected set; }
 
-        public virtual void OnUpdate(float timeStep) {
-            //NOTHING
+        protected BuildingInstancePluginBase(ILevelManager level, Building building) 
+            :base (level) {
+            this.Building = building;
         }
 
-        public abstract void SaveState(PluginDataWrapper pluginData);
+        protected BuildingInstancePluginBase() {
+
+        }
 
         /// <summary>
         /// Loads instance into the state saved in <paramref name="pluginData"/>

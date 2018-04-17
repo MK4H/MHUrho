@@ -142,7 +142,8 @@ namespace MHUrho.Logic
             foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
                 Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
                                                                               defaultComponent.Value, 
-                                                                              level));
+                                                                              level,
+                                                                              plugin));
             }
 
             plugin.LoadState(level, this, new PluginDataWrapper(storedBuilding.UserPlugin));

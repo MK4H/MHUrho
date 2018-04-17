@@ -20,6 +20,12 @@ namespace MHUrho.Logic {
 
         event OnUpdateDelegate Update;
 
+        IEnumerable<Unit> Units { get; }
+
+        IEnumerable<Player> Players { get; }
+
+        IEnumerable<Building> Buildings { get; }
+
         Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
 
         Building BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player);

@@ -100,6 +100,7 @@
       <xs:element name="iconPath" type="xs:string"/>
       <xs:element name="modelPath" type="xs:string"/>
       <xs:element name="materialPath" type="xs:string"/>
+      <xs:element name="animations" type="animationsType" minOccurs="0"/>
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
@@ -146,6 +147,20 @@
   <xs:complexType name="extensionType">
     <xs:sequence>
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="animationsType">
+    <xs:sequence>
+      <xs:element name="animation">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="ID" type="xs:int"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
 

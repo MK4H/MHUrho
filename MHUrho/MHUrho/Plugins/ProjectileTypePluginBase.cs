@@ -5,13 +5,13 @@ using System.Xml.Linq;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
+using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class ProjectileTypePluginBase : ITypePlugin
+    public abstract class ProjectileTypePluginBase : TypePluginBase
     {
-        public abstract bool IsMyType(string typeName);
-
         /// <summary>
         /// Creates new instance from scratch
         /// </summary>
@@ -28,6 +28,10 @@ namespace MHUrho.Plugins
         /// <returns>New instance, that will be loaded in the next step</returns>
         public abstract ProjectileInstancePluginBase GetInstanceForLoading();
 
-        public abstract void Initialize(XElement extensionElement, PackageManager packageManager);
+        public abstract bool IsInRange(Vector3 source, RangeTarget target);
+
+        public abstract bool IsInRange(Vector3 source, Vector3 target);
+
+
     }
 }

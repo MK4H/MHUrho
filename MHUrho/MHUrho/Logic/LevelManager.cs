@@ -34,6 +34,12 @@ namespace MHUrho.Logic
 
         public event OnUpdateDelegate Update;
 
+        public IEnumerable<Unit> Units => units.Values;
+
+        public IEnumerable<Player> Players => players.Values;
+
+        public IEnumerable<Building> Buildings => buildings.Values;
+
         private CameraController cameraController;
         private IGameController inputController;
 
@@ -70,7 +76,7 @@ namespace MHUrho.Logic
             Player firstPlayer = null;
 
             foreach (var player in storedLevel.Players) {
-                var loadedPlayer = Player.Load(player);
+                var loadedPlayer = Player.Load(level, player);
                 //TODO: If player needs controller, give him
                 if (firstPlayer == null) {
                     firstPlayer = loadedPlayer;
@@ -129,7 +135,6 @@ namespace MHUrho.Logic
             //TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
             physics.Enabled = true;
             
-
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
 
@@ -138,12 +143,11 @@ namespace MHUrho.Logic
 
             Map map = Map.CreateDefaultMap(mapNode, mapSize);
 
-
             CurrentLevel = new LevelManager(map, cameraController);
             scene.AddComponent(CurrentLevel);
 
             //TODO: Temporary player
-            var player = new Player(CurrentLevel.GetNewID(CurrentLevel.players));
+            var player = new Player(CurrentLevel, CurrentLevel.GetNewID(CurrentLevel.players));
             CurrentLevel.players.Add(player.ID, player);
             CurrentLevel.inputController = game.menuController.GetGameController(cameraController, CurrentLevel, player);
 

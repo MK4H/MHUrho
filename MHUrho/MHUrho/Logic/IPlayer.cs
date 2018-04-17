@@ -7,10 +7,16 @@ namespace MHUrho.Logic {
         
         int ID { get; }
 
+        IEnumerable<Unit> GetAllUnits();
+
         IReadOnlyList<Unit> GetUnitsOfType(UnitType type);
+
+        IEnumerable<Building> GetAllBuildings();
 
         IReadOnlyList<Building> GetBuildingsOfType(BuildingType type);
 
         int GetResourcesOfType(ResourceType type);
+
+        IEnumerable<IPlayer> GetEnemyPlayers();
     }
 }

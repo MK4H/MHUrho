@@ -7,6 +7,7 @@ using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 
 namespace DefaultPackage
 {
@@ -23,41 +24,58 @@ namespace DefaultPackage
             throw new NotImplementedException();
         }
 
+        public override bool IsInRange(Vector3 source, RangeTarget target) {
+            return false;
+        }
+
+        public override bool IsInRange(Vector3 source, Vector3 target) {
+            return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target,
+                                                                       source,
+                                                                       30,
+                                                                       out var lowTime,
+                                                                       out var lowVector,
+                                                                       out var highTime,
+                                                                       out var highVector);
+        }
+
         public override void Initialize(XElement extensionElement, PackageManager packageManager) {
             
         }
+
     }
 
-    public class TestProjectileInstance : ProjectileInstancePluginBase 
+    public class TestProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReciever 
     {
+        private UnpoweredFlier flier;
+
         private const float baseTimeToSplit = 0.5f;
         private float timeToSplit = baseTimeToSplit;
-
-        private ILevelManager level;
-        private Projectile projectile;
 
         private Random rng;
 
         private int splits = 10;
 
-        public TestProjectileInstance(ILevelManager level, Projectile projectile) {
-            this.level = level;
-            this.projectile = projectile;
+        public TestProjectileInstance(ILevelManager level, Projectile projectile)
+            :base (level, projectile)
+        {
             this.rng = new Random();
+            flier = UnpoweredFlier.GetInstanceFor(this, level);
+            projectile.Node.AddComponent(flier);
         }
 
         public override void OnUpdate(float timeStep) {
+
             timeToSplit -= timeStep;
             if (timeToSplit > 0) return;
 
             timeToSplit = baseTimeToSplit;
 
             for (int i = 0; i < splits; i++) {
-                var movement = projectile.Movement;
+                var movement = flier.Movement;
 
                 movement = new Quaternion((float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5) * movement;
 
-                var newProjectile = projectile.ProjectileType.SpawnProjectile(level, level.Scene, projectile.Node.Position, movement);
+                var newProjectile = projectile.ProjectileType.ShootProjectile(Level, projectile.Player, projectile.Node.Position, movement);
                 ((TestProjectileInstance) newProjectile.Plugin).splits = 0;
                 
             }
@@ -80,6 +98,14 @@ namespace DefaultPackage
         public override void ReInitialize(ILevelManager level) {
             timeToSplit = baseTimeToSplit;
             splits = 10;
+        }
+
+        public void OnMovementStarted(UnpoweredFlier flier) {
+            
+        }
+
+        public void OnGroundHit(UnpoweredFlier flier) {
+            
         }
     }
 }

@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
+using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class ProjectileInstancePluginBase
+    public abstract class ProjectileInstancePluginBase : InstancePluginBase
     {
-        public virtual void OnUpdate(float timeStep) {
-            //NOTHING
+        protected Projectile projectile;
+
+        protected ProjectileInstancePluginBase(ILevelManager level, Projectile projectile) 
+            :base(level)
+        {
+            this.projectile = projectile;
         }
 
-        public abstract void SaveState(PluginDataWrapper pluginData);
+        protected ProjectileInstancePluginBase() {
+
+        }
 
         /// <summary>
         /// Loads instance into the state saved in <paramref name="pluginData"/>
@@ -29,8 +37,13 @@ namespace MHUrho.Plugins
         /// <param name="level">LevelManager to connect to other things</param>
         public abstract void ReInitialize(ILevelManager level);
 
-        public virtual void OnGroundHit() {
-
+        public virtual bool ShootProjectile(RangeTarget target) {
+            return false;
         }
+
+        public virtual bool ShootProjectile(Vector3 target) {
+            return false;
+        }
+
     }
 }

@@ -8,14 +8,20 @@ using MHUrho.UnitComponents;
 
 namespace MHUrho.Plugins
 {
-    //TODO: Either make one instance of this for every unit,
-    // OR make just it a singleton, where all the data will be stored in Unit class
-    public abstract class UnitInstancePluginBase {
-        public virtual void OnUpdate(float timeStep) {
-            //NOTHING
+
+    public abstract class UnitInstancePluginBase : InstancePluginBase {
+
+        public Unit Unit { get; protected set; }
+
+        protected UnitInstancePluginBase(ILevelManager level, Unit unit) 
+            :base(level)
+        {
+            this.Unit = unit;
         }
 
-        public abstract void SaveState(PluginDataWrapper pluginData);
+        protected UnitInstancePluginBase() {
+
+        }
 
         /// <summary>
         /// Loads instance into the state saved in <paramref name="pluginData"/>
@@ -32,21 +38,7 @@ namespace MHUrho.Plugins
         /// <returns>Instance loaded into saved state</returns>
         public abstract void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData);
 
-        public virtual bool CanGoFromTo(ITile fromTile, ITile toTile) {
-            throw new NotImplementedException("You need to override CanGoFromTo to use WordlWalker");
-        }
-
-        public virtual void OnMovementStarted(WorldWalker walker, int tag) {
-            //NOTHING
-        }
-
-        public virtual void OnMovementFinished(WorldWalker walker, int tag) {
-            //NOTHING
-        }
-
-        public virtual void OnMovementFailed(WorldWalker walker, int tag) {
-            //NOTHING
-        }
+        public abstract bool CanGoFromTo(ITile fromTile, ITile toTile);
 
         public virtual void OnUnitHit() {
             //NOTHING
@@ -64,39 +56,9 @@ namespace MHUrho.Plugins
             //NOTHING
         }
 
-        public virtual void OnTargetAcquired(Shooter shooter) {
-            //NOTHING
-        }
 
-        public virtual void OnShotFired(Shooter shooter) {
-            //NOTHING
-        }
 
-        public virtual void OnUnitSelected(UnitSelector selector) {
-            //NOTHING
-        }
 
-        public virtual void OnUnitDeselected(UnitSelector selector) {
-            //NOTHING
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="selector"></param>
-        /// <param name="targetTile"></param>
-        /// <returns>True if the unit executed the order, false if the unit was not able to execute the order</returns>
-        public virtual bool OnUnitOrderedToTile(UnitSelector selector, ITile targetTile) {
-            return false;
-        }
-
-        public virtual bool OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit) {
-            return false;
-        }
-
-        public virtual bool OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding) {
-            return false;
-        }
 
 
         //TODO: Expand this

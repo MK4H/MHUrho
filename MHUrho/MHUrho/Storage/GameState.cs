@@ -45,26 +45,23 @@ namespace MHUrho.Storage {
             "bXBvbmVudERhdGEYByADKAsyMC5NSFVyaG8uU3RvcmFnZS5TdFVuaXQuRGVm",
             "YXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0",
             "YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5T",
-            "dG9yYWdlLlBsdWdpbkRhdGE6AjgBItUBCgxTdFByb2plY3RpbGUSDgoGdHlw",
+            "dG9yYWdlLlBsdWdpbkRhdGE6AjgBIo0BCgxTdFByb2plY3RpbGUSDgoGdHlw",
             "ZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0b3JhZ2Uu",
-            "U3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEisKCG1vdmVtZW50GAUgASgL",
-            "MhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhkKEWJhc2VUaW1lVG9EZXNw",
-            "YXduGAYgASgCEi4KCnVzZXJQbHVnaW4YByABKAsyGi5NSFVyaG8uU3RvcmFn",
-            "ZS5QbHVnaW5EYXRhIscCCgpTdEJ1aWxkaW5nEgoKAmlkGAEgASgFEg4KBnR5",
-            "cGVJRBgCIAEoBRIuCghsb2NhdGlvbhgDIAEoCzIcLk1IVXJoby5TdG9yYWdl",
-            "LlN0SW50VmVjdG9yMhIQCghwbGF5ZXJJRBgEIAEoBRIuCgp1c2VyUGx1Z2lu",
-            "GAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJSChRkZWZhdWx0",
-            "Q29tcG9uZW50RGF0YRgHIAMoCzI0Lk1IVXJoby5TdG9yYWdlLlN0QnVpbGRp",
-            "bmcuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9u",
-            "ZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1I",
-            "VXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIlsKCFN0UGxheWVyEhAKCHBs",
-            "YXllcklEGAEgASgFEg8KB3VuaXRJRHMYAiADKAUSEwoLYnVpbGRpbmdJRHMY",
-            "AyADKAUSFwoPZnJpZW5kUGxheWVySURzGAQgAygFIo0BCgVTdE1hcBIqCgRz",
-            "aXplGAEgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEiUKBXRp",
-            "bGVzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2UuU3RUaWxlEjEKC2JvcmRlclRp",
-            "bGVzGAMgAygLMhwuTUhVcmhvLlN0b3JhZ2UuU3RCb3JkZXJUaWxlIiwKDFN0",
-            "RW50aXR5VHlwZRIOCgZ0eXBlSUQYAiABKAUSDAoEbmFtZRgDIAEoCWIGcHJv",
-            "dG8z"));
+            "U3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEi4KCnVzZXJQbHVnaW4YBSAB",
+            "KAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhIscCCgpTdEJ1aWxkaW5n",
+            "EgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIuCghsb2NhdGlvbhgDIAEo",
+            "CzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIQCghwbGF5ZXJJRBgE",
+            "IAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1",
+            "Z2luRGF0YRJSChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzI0Lk1IVXJo",
+            "by5TdG9yYWdlLlN0QnVpbGRpbmcuRGVmYXVsdENvbXBvbmVudERhdGFFbnRy",
+            "eRpXChlEZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIp",
+            "CgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgB",
+            "IlsKCFN0UGxheWVyEhAKCHBsYXllcklEGAEgASgFEg8KB3VuaXRJRHMYAiAD",
+            "KAUSEwoLYnVpbGRpbmdJRHMYAyADKAUSFwoPZnJpZW5kUGxheWVySURzGAQg",
+            "AygFIo0BCgVTdE1hcBIqCgRzaXplGAEgASgLMhwuTUhVcmhvLlN0b3JhZ2Uu",
+            "U3RJbnRWZWN0b3IyEiUKBXRpbGVzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2Uu",
+            "U3RUaWxlEjEKC2JvcmRlclRpbGVzGAMgAygLMhwuTUhVcmhvLlN0b3JhZ2Uu",
+            "U3RCb3JkZXJUaWxlYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -72,11 +69,10 @@ namespace MHUrho.Storage {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "TopLeftPosition", "Height", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "TypeID", "Position", "PlayerID", "Movement", "BaseTimeToDespawn", "UserPlugin" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "TypeID", "Position", "PlayerID", "UserPlugin" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "PlayerID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StEntityType), global::MHUrho.Storage.StEntityType.Parser, new[]{ "TypeID", "Name" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles" }, null, null, null)
           }));
     }
     #endregion
@@ -1205,8 +1201,6 @@ namespace MHUrho.Storage {
       typeID_ = other.typeID_;
       Position = other.position_ != null ? other.Position.Clone() : null;
       playerID_ = other.playerID_;
-      Movement = other.movement_ != null ? other.Movement.Clone() : null;
-      baseTimeToDespawn_ = other.baseTimeToDespawn_;
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
     }
 
@@ -1248,30 +1242,8 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "movement" field.</summary>
-    public const int MovementFieldNumber = 5;
-    private global::MHUrho.Storage.StVector3 movement_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::MHUrho.Storage.StVector3 Movement {
-      get { return movement_; }
-      set {
-        movement_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "baseTimeToDespawn" field.</summary>
-    public const int BaseTimeToDespawnFieldNumber = 6;
-    private float baseTimeToDespawn_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public float BaseTimeToDespawn {
-      get { return baseTimeToDespawn_; }
-      set {
-        baseTimeToDespawn_ = value;
-      }
-    }
-
     /// <summary>Field number for the "userPlugin" field.</summary>
-    public const int UserPluginFieldNumber = 7;
+    public const int UserPluginFieldNumber = 5;
     private global::MHUrho.Storage.PluginData userPlugin_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::MHUrho.Storage.PluginData UserPlugin {
@@ -1297,8 +1269,6 @@ namespace MHUrho.Storage {
       if (TypeID != other.TypeID) return false;
       if (!object.Equals(Position, other.Position)) return false;
       if (PlayerID != other.PlayerID) return false;
-      if (!object.Equals(Movement, other.Movement)) return false;
-      if (BaseTimeToDespawn != other.BaseTimeToDespawn) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
       return true;
     }
@@ -1309,8 +1279,6 @@ namespace MHUrho.Storage {
       if (TypeID != 0) hash ^= TypeID.GetHashCode();
       if (position_ != null) hash ^= Position.GetHashCode();
       if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
-      if (movement_ != null) hash ^= Movement.GetHashCode();
-      if (BaseTimeToDespawn != 0F) hash ^= BaseTimeToDespawn.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
       return hash;
     }
@@ -1334,16 +1302,8 @@ namespace MHUrho.Storage {
         output.WriteRawTag(32);
         output.WriteInt32(PlayerID);
       }
-      if (movement_ != null) {
-        output.WriteRawTag(42);
-        output.WriteMessage(Movement);
-      }
-      if (BaseTimeToDespawn != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(BaseTimeToDespawn);
-      }
       if (userPlugin_ != null) {
-        output.WriteRawTag(58);
+        output.WriteRawTag(42);
         output.WriteMessage(UserPlugin);
       }
     }
@@ -1359,12 +1319,6 @@ namespace MHUrho.Storage {
       }
       if (PlayerID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerID);
-      }
-      if (movement_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Movement);
-      }
-      if (BaseTimeToDespawn != 0F) {
-        size += 1 + 4;
       }
       if (userPlugin_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
@@ -1388,15 +1342,6 @@ namespace MHUrho.Storage {
       }
       if (other.PlayerID != 0) {
         PlayerID = other.PlayerID;
-      }
-      if (other.movement_ != null) {
-        if (movement_ == null) {
-          movement_ = new global::MHUrho.Storage.StVector3();
-        }
-        Movement.MergeFrom(other.Movement);
-      }
-      if (other.BaseTimeToDespawn != 0F) {
-        BaseTimeToDespawn = other.BaseTimeToDespawn;
       }
       if (other.userPlugin_ != null) {
         if (userPlugin_ == null) {
@@ -1430,17 +1375,6 @@ namespace MHUrho.Storage {
             break;
           }
           case 42: {
-            if (movement_ == null) {
-              movement_ = new global::MHUrho.Storage.StVector3();
-            }
-            input.ReadMessage(movement_);
-            break;
-          }
-          case 53: {
-            BaseTimeToDespawn = input.ReadFloat();
-            break;
-          }
-          case 58: {
             if (userPlugin_ == null) {
               userPlugin_ = new global::MHUrho.Storage.PluginData();
             }
@@ -2052,154 +1986,6 @@ namespace MHUrho.Storage {
           }
           case 26: {
             borderTiles_.AddEntriesFrom(input, _repeated_borderTiles_codec);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
-  public sealed partial class StEntityType : pb::IMessage<StEntityType> {
-    private static readonly pb::MessageParser<StEntityType> _parser = new pb::MessageParser<StEntityType>(() => new StEntityType());
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<StEntityType> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[8]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StEntityType() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StEntityType(StEntityType other) : this() {
-      typeID_ = other.typeID_;
-      name_ = other.name_;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public StEntityType Clone() {
-      return new StEntityType(this);
-    }
-
-    /// <summary>Field number for the "typeID" field.</summary>
-    public const int TypeIDFieldNumber = 2;
-    private int typeID_;
-    /// <summary>
-    ///Global across all entities of the kind (for example tile types) in this level
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TypeID {
-      get { return typeID_; }
-      set {
-        typeID_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 3;
-    private string name_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Name {
-      get { return name_; }
-      set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as StEntityType);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(StEntityType other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (TypeID != other.TypeID) return false;
-      if (Name != other.Name) return false;
-      return true;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (TypeID != 0) hash ^= TypeID.GetHashCode();
-      if (Name.Length != 0) hash ^= Name.GetHashCode();
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (TypeID != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(TypeID);
-      }
-      if (Name.Length != 0) {
-        output.WriteRawTag(26);
-        output.WriteString(Name);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (TypeID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeID);
-      }
-      if (Name.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(StEntityType other) {
-      if (other == null) {
-        return;
-      }
-      if (other.TypeID != 0) {
-        TypeID = other.TypeID;
-      }
-      if (other.Name.Length != 0) {
-        Name = other.Name;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            input.SkipLastField();
-            break;
-          case 16: {
-            TypeID = input.ReadInt32();
-            break;
-          }
-          case 26: {
-            Name = input.ReadString();
             break;
           }
         }

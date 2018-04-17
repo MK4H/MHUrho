@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 using Urho;
@@ -18,13 +19,34 @@ namespace MHUrho.UnitComponents
 
     public class UnitSelector : Selector {
 
+        public interface INotificationReciever {
+            void OnUnitSelected(UnitSelector selector);
+
+            void OnUnitDeselected(UnitSelector selector);
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="selector"></param>
+            /// <param name="targetTile"></param>
+            /// <param name="orderArgs">Contains an Executed flag, which is true if some method before consumed the command, and false if it did not
+            /// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
+            void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, OrderArgs orderArgs);
+
+            void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, OrderArgs orderArgs);
+
+            void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, OrderArgs orderArgs);
+        }
+
         public static string ComponentName = nameof(UnitSelector);
         public static DefaultComponents ComponentID = DefaultComponents.UnitSelector;
 
         public override string Name => ComponentName;
         public override DefaultComponents ID => ComponentID;
 
-        public override IPlayer Player => unit.Player;
+        public override IPlayer Player => Unit.Player;
+
+        public Unit Unit { get; private set; }
 
         internal event UnitSelectedDelegate UnitSelected;
         internal event UnitDeselectedDelegate UnitDeselected;
@@ -32,17 +54,35 @@ namespace MHUrho.UnitComponents
         internal event UnitOrderedToUnitDelegate OrderedToUnit;
         internal event UnitOrderedToBuildingDelegate OrderedToBuilding;
 
-        private Unit unit;
+        
         private readonly ILevelManager level;
+        private readonly INotificationReciever notificationReciever;
 
 
-        public UnitSelector(ILevelManager level) {
+        protected UnitSelector(INotificationReciever notificationReciever,ILevelManager level) {
+            this.notificationReciever = notificationReciever;
             this.level = level;
         }
 
-        public static UnitSelector Load(ILevelManager level, PluginData data) {
+        public static UnitSelector CreateNew<T>(T instancePlugin, ILevelManager level)
+            where T: UnitInstancePluginBase, INotificationReciever {
+
+            if (instancePlugin == null) {
+                throw new ArgumentNullException(nameof(instancePlugin));
+            }
+
+            return new UnitSelector(instancePlugin, level);
+        }
+
+        internal static UnitSelector Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
+            var notificationReciever = plugin as INotificationReciever;
+            if (notificationReciever == null) {
+                throw new
+                    ArgumentException($"provided plugin does not implement the {nameof(INotificationReciever)} interface", nameof(plugin));
+            }
+
             var sequentialData = new SequentialPluginDataReader(data);
-            return new UnitSelector(level);
+            return new UnitSelector(notificationReciever, level);
         }
 
         /// <summary>
@@ -92,12 +132,19 @@ namespace MHUrho.UnitComponents
         public override void OnAttachedToNode(Node node) {
             base.OnAttachedToNode(node);
 
-            unit = Node.GetComponent<Unit>();
+            Unit = Node.GetComponent<Unit>();
 
-            if (unit == null) {
+            if (Unit == null) {
                 throw new
-                    InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Unit)} component");
+                    InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Logic.Unit)} component");
             }
+
+            UnitSelected += notificationReciever.OnUnitSelected;
+            UnitDeselected += notificationReciever.OnUnitDeselected;
+            OrderedToTile += notificationReciever.OnUnitOrderedToTile;
+            OrderedToUnit += notificationReciever.OnUnitOrderedToUnit;
+            OrderedToBuilding += notificationReciever.OnUnitOrderedToBuilding;
         }
+
     }
 }

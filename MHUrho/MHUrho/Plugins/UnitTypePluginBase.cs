@@ -9,9 +9,8 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class UnitTypePluginBase : ITypePlugin
+    public abstract class UnitTypePluginBase : TypePluginBase
     {
-        public abstract bool IsMyType(string typeName);
 
         /// <summary>
         /// Data overriding or superseding the XML data describing the type
@@ -44,11 +43,5 @@ namespace MHUrho.Plugins
         /// <returns>true if can, false if cannot</returns>
         public abstract bool CanSpawnAt(ITile centerTile);
 
-        /// <summary>
-        /// Called to initialize the instance
-        /// </summary>
-        /// <param name="extensionElement">extension element of the unitType xml description or null if there is none</param>
-        /// <param name="packageManager">package manager for connecting to other entityTypes</param>
-        public abstract void Initialize(XElement extensionElement, PackageManager packageManager);
     }
 }

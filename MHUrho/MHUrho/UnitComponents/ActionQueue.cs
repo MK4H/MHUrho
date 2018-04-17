@@ -2,14 +2,22 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
+using MHUrho.Plugins;
 using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    
+    internal delegate void TaskStartedDelegate(ActionQueue queue, ActionQueue.WorkTask workTask);
+    internal delegate void TaskFinishedDelegate(ActionQueue queue, ActionQueue.WorkTask workTask);
 
     public class ActionQueue : DefaultComponent {
+
+        public interface INotificationReciver {
+            void OnWorkTaskStarted(ActionQueue queue, WorkTask workTask);
+
+            void OnWorkTaskFinished(ActionQueue queue, WorkTask workTask);
+        }
 
         private interface IWorkTask {
             bool IsFinished();
@@ -28,7 +36,7 @@ namespace MHUrho.UnitComponents
             }
 
             void IWorkTask.OnUpdate(float timeStep) {
-                throw new NotImplementedException();
+                OnUpdate(timeStep);
             }
 
             protected abstract bool IsFinished();
@@ -79,13 +87,29 @@ namespace MHUrho.UnitComponents
         public override string Name => ComponentName;
         public override DefaultComponents ID => ComponentID;
 
+        internal event TaskStartedDelegate OnTaskStarted;
+        internal event TaskFinishedDelegate OnTaskFinished;
+
         private readonly Queue<IWorkTask> workQueue;
 
-        public ActionQueue() {
+        private INotificationReciver notificationReciver;
+
+        public ActionQueue CreateNew<T>(T instancePlugin)
+            where T : InstancePluginBase, INotificationReciver {
+
+            if (instancePlugin == null) {
+                throw new ArgumentNullException(nameof(instancePlugin));
+            }
+
+            return new ActionQueue(instancePlugin);
+        }
+
+        protected ActionQueue(INotificationReciver notificationReciver) {
+            this.notificationReciver = notificationReciver;
             workQueue = new Queue<IWorkTask>();
         }
 
-        public static ActionQueue Load(ILevelManager level, PluginData pluginData) {
+        public static ActionQueue Load(ILevelManager level, InstancePluginBase plugin, PluginData pluginData) {
             throw new NotImplementedException();
         }
 
@@ -95,6 +119,13 @@ namespace MHUrho.UnitComponents
 
         public void EnqueueTask(WorkTask task) {
             workQueue.Enqueue(task);
+        }
+
+        public override void OnAttachedToNode(Node node) {
+            base.OnAttachedToNode(node);
+
+            OnTaskStarted += notificationReciver.OnWorkTaskStarted;
+            OnTaskFinished += notificationReciver.OnWorkTaskFinished;
         }
 
         protected override void OnUpdate(float timeStep) {
@@ -110,14 +141,14 @@ namespace MHUrho.UnitComponents
             currentTask.OnUpdate(timeStep);
 
             if (currentTask.IsFinished()) {
-                currentTask.InvokeTaskFinished(this);
+                OnTaskFinished?.Invoke(this, (WorkTask)currentTask);
             }
 
             workQueue.Dequeue();
 
             if (workQueue.Count == 0) return;
 
-            workQueue.Peek().InvokeTaskStarted(this);
+            OnTaskStarted?.Invoke(this, (WorkTask) currentTask);
         }
 
         

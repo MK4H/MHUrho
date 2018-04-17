@@ -25,21 +25,24 @@ namespace MHUrho.Logic
 
         private StPlayer storedPlayer;
 
-        public Player(int ID) {
+        private ILevelManager level;
+
+        public Player(ILevelManager level, int ID) {
             this.ID = ID;
             units = new Dictionary<UnitType, List<Unit>>();
             buildings = new Dictionary<BuildingType, List<Building>>();
             resources = new Dictionary<ResourceType, int>();
             friends = new List<IPlayer>();
+            this.level = level;
         }
 
-        protected Player(StPlayer storedPlayer) 
-            : this(storedPlayer.PlayerID) {
+        protected Player(ILevelManager level, StPlayer storedPlayer) 
+            : this(level, storedPlayer.PlayerID) {
             this.storedPlayer = storedPlayer;
         }
 
-        public static Player Load(StPlayer storedPlayer) {
-            var newPlayer = new Player(storedPlayer);
+        public static Player Load(ILevelManager level, StPlayer storedPlayer) {
+            var newPlayer = new Player(level, storedPlayer);
             return newPlayer;
         }
 
@@ -110,8 +113,20 @@ namespace MHUrho.Logic
             return buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
         }
 
+        public IEnumerable<Unit> GetAllUnits() {
+            return from unitList in units.Values
+                   from unit in unitList
+                   select unit;
+        }
+
         public IReadOnlyList<Unit> GetUnitsOfType(UnitType type) {
             return units.TryGetValue(type, out List<Unit> unitList) ? new List<Unit>() : unitList;
+        }
+
+        public IEnumerable<Building> GetAllBuildings() {
+            return from buildingList in buildings.Values
+                   from building in buildingList
+                   select building;
         }
 
         public IReadOnlyList<Building> GetBuildingsOfType(BuildingType type) {
@@ -120,6 +135,13 @@ namespace MHUrho.Logic
 
         public int GetResourcesOfType(ResourceType type) {
             return resources.TryGetValue(type, out int count) ? 0 : count;
+        }
+
+        public IEnumerable<IPlayer> GetEnemyPlayers() {
+            return from player in level.Players
+                   where !friends.Contains(player)
+                   select player;
+
         }
 
         protected override void OnUpdate(float timeStep) {

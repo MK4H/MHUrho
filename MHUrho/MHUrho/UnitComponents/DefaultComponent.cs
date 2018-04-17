@@ -8,13 +8,16 @@ using MHUrho.Storage;
 namespace MHUrho.UnitComponents
 {
     public enum DefaultComponents {
-        DirectShooter,
+        Shooter,
         Meele,
         ResourceCarrier,
         UnitSelector,
         WallClimber,
         WorkQueue,
-        WorldWalker
+        WorldWalker,
+        UnpoweredFlier,
+        StaticRangeTarget,
+        MovingRangeTarget
     }
 
     public abstract class DefaultComponent : Component {

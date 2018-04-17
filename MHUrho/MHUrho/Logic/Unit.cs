@@ -61,15 +61,13 @@ namespace MHUrho.Logic
         /// </summary>
         public IPlayer Player { get; private set; }
 
-        public object Plugin => plugin;
+        public UnitInstancePluginBase Plugin { get; private set; }
 
         public bool AlwaysVertical { get; set; } = false;
 
         #endregion
 
         #region Private members
-
-        private UnitInstancePluginBase plugin;
 
         /// <summary>
         /// Holds the image of this unit between the steps of loading
@@ -156,7 +154,7 @@ namespace MHUrho.Logic
             // to this class, and for that i need to set the Position here
             node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);            
             
-            unit.plugin = type.GetInstancePluginForLoading();
+            unit.Plugin = type.GetInstancePluginForLoading();
             return unit;
         }
 
@@ -179,7 +177,7 @@ namespace MHUrho.Logic
             AddRigidBody(unitNode);
 
 
-            unit.plugin = type.GetNewInstancePlugin(unit, level);
+            unit.Plugin = type.GetNewInstancePlugin(unit, level);
 
             //TODO: Move collisionShape to plugin
 
@@ -200,7 +198,7 @@ namespace MHUrho.Logic
 
 
             storedUnit.UserPlugin = new PluginData();
-            plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
+            Plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
             foreach (var component in Node.Components) {
                 var defaultComponent = component as DefaultComponent;
@@ -221,10 +219,10 @@ namespace MHUrho.Logic
             //TODO: Connect other things
 
             foreach (var defaultComponent in storage.DefaultComponentData) {
-                Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level));
+                Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key, defaultComponent.Value, level, Plugin));
             }
 
-            plugin.LoadState(level, this, new PluginDataWrapper(storage.UserPlugin));
+            Plugin.LoadState(level, this, new PluginDataWrapper(storage.UserPlugin));
         }
 
         public void FinishLoading() {
@@ -232,7 +230,7 @@ namespace MHUrho.Logic
         }
         
         public bool CanGoFromTo(ITile fromTile, ITile toTile) {
-            return plugin.CanGoFromTo(fromTile, toTile);
+            return Plugin.CanGoFromTo(fromTile, toTile);
         }
 
         /// <summary>
@@ -296,7 +294,7 @@ namespace MHUrho.Logic
             base.OnUpdate(timeStep);
             if (!Enabled) return;
 
-            plugin.OnUpdate(timeStep);
+            Plugin.OnUpdate(timeStep);
         }
 
         #endregion

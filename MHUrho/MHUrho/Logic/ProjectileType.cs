@@ -6,6 +6,7 @@ using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
@@ -61,39 +62,18 @@ namespace MHUrho.Logic
                                   package.PackageManager);
         }
 
-        //TODO: PROJECTILE POOLING
-        public Projectile SpawnProjectile(ILevelManager level, Scene sceneNode, Vector3 position, Vector3 projectileMovement) {
+        public Projectile ShootProjectile(ILevelManager level, IPlayer player, Vector3 position, Vector3 target) {
+            var projectile = GetProjectile(level, player, position);
 
-            if (projectilePool.Count != 0) {
-                //TODO: Some clever algorithm to manage projectile count
-                var pooledProjectile = projectilePool.Dequeue();
-                pooledProjectile.ReInitialize(level, position ,projectileMovement);
-                return pooledProjectile;
-            }
+            projectile.Plugin.ShootProjectile(target);
 
-            var projectileNode = sceneNode.CreateChild("Projectile");
-            var projectile = Projectile.SpawnNew(projectileMovement, 
-                                                 position, 
-                                                 level, 
-                                                 this, 
-                                                 projectileNode,
-                                                 OnProjectileDespawn);
+            return projectile;
+        }
 
-            var staticModel = projectileNode.CreateComponent<StaticModel>();
-            staticModel.Model = model;
-            staticModel.Material = material;
+        public Projectile ShootProjectile(ILevelManager level, IPlayer player, Vector3 position, RangeTarget target) {
+            var projectile = GetProjectile(level, player, position);
 
-            projectileNode.Scale = new Vector3(0.2f, 0.2f, 0.8f);
-
-            var rigidBody = projectileNode.CreateComponent<RigidBody>();
-            rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
-            rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
-            rigidBody.Kinematic = true;
-            rigidBody.Mass = 1;
-            rigidBody.UseGravity = false;
-
-            var collider = projectileNode.CreateComponent<CollisionShape>();
-            collider.SetBox(new Vector3(0.2f, 0.2f, 0.8f), new Vector3(-0.1f, -0.1f, -0.4f), Quaternion.Identity);
+            projectile.Plugin.ShootProjectile(target);
 
             return projectile;
         }
@@ -106,22 +86,26 @@ namespace MHUrho.Logic
             return typePlugin.GetInstanceForLoading();
         }
 
+        public bool IsInRange(Vector3 source, Vector3 target) {
+            return typePlugin.IsInRange(source, target);
+        }
+
+        public bool IsInRange(Vector3 source, RangeTarget target) {
+            return typePlugin.IsInRange(source, target);
+        }
+
         public void Dispose() {
             model?.Dispose();
             material?.Dispose();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="projectile"></param>
-        /// <returns>True if the projectile was pooled, false if it should destroy itself</returns>
-        private bool OnProjectileDespawn(Projectile projectile) {
+        internal bool ProjectileDespawn(Projectile projectile) {
             if (projectilePool.Count >= 124) return false;
 
             projectilePool.Enqueue(projectile);
             return true;
         }
+
 
         private static Model LoadModel(XElement projectileTypeXml, string pathToPackageXmlDir) {
 
@@ -134,6 +118,45 @@ namespace MHUrho.Logic
             string materialPath = XmlHelpers.GetFullPath(projectileTypeXml, MaterialPathElementName, pathToPackageXmlDir);
 
             return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
+        }
+
+        private Projectile GetProjectile(ILevelManager level, IPlayer player, Vector3 position) {
+            Projectile projectile = null;
+
+            if (projectilePool.Count != 0) {
+                //TODO: Some clever algorithm to manage projectile count
+                var pooledProjectile = projectilePool.Dequeue();
+                pooledProjectile.ReInitialize(level, player, position);
+
+            }
+            else {
+                //Projectile node has to be a child of the scene directly for physics to work correctly
+                var projectileNode = level.Scene.CreateChild("Projectile");
+                projectile = Projectile.SpawnNew(level,
+                                                 player,
+                                                 position,
+                                                 this,
+                                                 projectileNode);
+
+                var staticModel = projectileNode.CreateComponent<StaticModel>();
+                staticModel.Model = model;
+                staticModel.Material = material;
+
+                projectileNode.Scale = new Vector3(0.2f, 0.2f, 0.8f);
+
+                var rigidBody = projectileNode.CreateComponent<RigidBody>();
+                rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
+                rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
+                rigidBody.Kinematic = true;
+                rigidBody.Mass = 1;
+                rigidBody.UseGravity = false;
+
+                //TODO: Move collider to plugin
+                var collider = projectileNode.CreateComponent<CollisionShape>();
+                collider.SetBox(new Vector3(0.2f, 0.2f, 0.8f), new Vector3(-0.1f, -0.1f, -0.4f), Quaternion.Identity);
+            }
+
+            return projectile;
         }
     }
 }

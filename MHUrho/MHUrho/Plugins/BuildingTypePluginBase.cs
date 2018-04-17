@@ -10,9 +10,7 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class BuildingTypePluginBase : ITypePlugin {
-
-        public abstract bool IsMyType(string typeName);
+    public abstract class BuildingTypePluginBase : TypePluginBase {
 
         /// <summary>
         /// Creates new instance from scratch
@@ -21,8 +19,6 @@ namespace MHUrho.Plugins
         /// <param name="building">building Plugin class</param>
         /// <returns>New instance in default state</returns>
         public abstract BuildingInstancePluginBase CreateNewInstance(ILevelManager level, Building building);
-
-
 
         /// <summary>
         /// Creates instance of <see cref="BuildingInstancePluginBase"/> that will be loaded by <see cref="BuildingInstancePluginBase.LoadState(LevelManager, PluginDataWrapper)"/>
@@ -43,12 +39,5 @@ namespace MHUrho.Plugins
         public abstract void AddSelected(BuildingInstancePluginBase buildingInstance);
 
         public abstract void RemoveSelected(BuildingInstancePluginBase buildingInstance);
-
-        /// <summary>
-        /// Called to initialize the instance
-        /// </summary>
-        /// <param name="extensionElement">extension element of the unitType xml description or null if there is none</param>
-        /// <param name="packageManager">package manager for connecting to other entityTypes</param>
-        public abstract void Initialize(XElement extensionElement, PackageManager packageManager);
     }
 }
