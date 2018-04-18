@@ -10,7 +10,48 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Logic
 {
-    public class Player : Component, IPlayer {
+    public class Player : IPlayer {
+
+        internal class Loader : ILoader {
+
+            public Player Player { get; private set; }
+
+            private StPlayer storedPlayer;
+
+            protected Loader(StPlayer storedPlayer) {
+                this.storedPlayer = storedPlayer;
+            }
+
+            public static Loader StartLoading(LevelManager level, StPlayer storedPlayer) {
+
+                var loader = new Loader(storedPlayer);
+                loader.Load(level);
+
+                return loader;
+            }
+
+            public void ConnectReferences(LevelManager level) {
+                foreach (var unitID in storedPlayer.UnitIDs) {
+                    Player.AddUnit(level.GetUnit(unitID));
+                }
+
+                foreach (var buildingID in storedPlayer.BuildingIDs) {
+                    Player.AddBuilding(level.GetBuilding(buildingID));
+                }
+
+                foreach (var friendID in storedPlayer.FriendPlayerIDs) {
+                    Player.friends.Add(level.GetPlayer(friendID));
+                }
+            }
+
+            public void FinishLoading() {
+                storedPlayer = null;
+            }
+
+            private void Load(LevelManager level) {
+                Player = new Player(level, storedPlayer.PlayerID);
+            }
+        }
 
         public int ID { get; private set; }
 
@@ -23,8 +64,6 @@ namespace MHUrho.Logic
 
         private readonly Dictionary<ResourceType, int> resources;
 
-        private StPlayer storedPlayer;
-
         private ILevelManager level;
 
         public Player(ILevelManager level, int ID) {
@@ -36,14 +75,8 @@ namespace MHUrho.Logic
             this.level = level;
         }
 
-        protected Player(ILevelManager level, StPlayer storedPlayer) 
-            : this(level, storedPlayer.PlayerID) {
-            this.storedPlayer = storedPlayer;
-        }
-
-        public static Player Load(ILevelManager level, StPlayer storedPlayer) {
-            var newPlayer = new Player(level, storedPlayer);
-            return newPlayer;
+        protected Player(int id, ILevelManager level) 
+            : this(level, id) {
         }
 
         public StPlayer Save() {
@@ -65,23 +98,7 @@ namespace MHUrho.Logic
             return storedPlayer;
         }
 
-        public void ConnectReferences(ILevelManager level) {
-            foreach (var unitID in storedPlayer.UnitIDs) {
-                AddUnit(level.GetUnit(unitID));
-            }
 
-            foreach (var buildingID in storedPlayer.BuildingIDs) {
-                AddBuilding(level.GetBuilding(buildingID));
-            }
-
-            foreach (var friendID in storedPlayer.FriendPlayerIDs) {
-                friends.Add(level.GetPlayer(friendID));
-            }
-        }
-
-        public void FinishLoading() {
-            storedPlayer = null;
-        }
 
         /// <summary>
         /// Adds unit to players units
@@ -144,8 +161,8 @@ namespace MHUrho.Logic
 
         }
 
-        protected override void OnUpdate(float timeStep) {
+        //protected override void OnUpdate(float timeStep) {
             
-        }
+        //}
     }
 }

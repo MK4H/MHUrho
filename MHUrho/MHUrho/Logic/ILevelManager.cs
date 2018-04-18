@@ -38,6 +38,6 @@ namespace MHUrho.Logic {
 
         Entity GetEntity(int ID);
 
-        RangeTarget GetRangeTarget(int ID);
+        IRangeTarget GetRangeTarget(int ID);
     }
 }

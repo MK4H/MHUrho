@@ -50,7 +50,7 @@ namespace MHUrho.Logic
 
         private readonly Dictionary<int, Entity> entities;
 
-        private readonly Dictionary<int, RangeTarget> rangeTargets;
+        private readonly Dictionary<int, IRangeTarget> rangeTargets;
 
         private readonly Random rng;
 
@@ -62,55 +62,68 @@ namespace MHUrho.Logic
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
 
-            //Load data
-            Node mapNode = scene.CreateChild("MapNode");
-            var map = Map.StartLoading(mapNode, storedLevel.Map);
 
-            LevelManager level = new LevelManager(map, cameraController);
+
+            LevelManager level = new LevelManager(cameraController);
             scene.AddComponent(level);
 
             PackageManager.Instance.LoadPackage(storedLevel.PackageName);
 
+            List<ILoader> loaders = new List<ILoader>();
+
+            //Load data
+            Node mapNode = scene.CreateChild("MapNode");
+            var mapLoader = Map.Loader.StartLoading(level, mapNode, storedLevel.Map);
+            loaders.Add(mapLoader);
+            level.Map = mapLoader.Map;
+
             foreach (var unit in storedLevel.Units) {
-                //TODO: Group units under one node
-                var loadedUnit = Unit.Load(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
-                level.units.Add(loadedUnit.ID, loadedUnit);
+                var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
+                level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
+                loaders.Add(unitLoader);
             }
+
+            foreach (var building in storedLevel.Buildings) {
+                var buildingLoader =
+                    Building.Loader.StartLoading(level, 
+                                                 PackageManager.Instance, 
+                                                 scene.CreateChild("BuildingNode"),
+                                                 building);
+
+                level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building);
+                loaders.Add(buildingLoader);
+
+            }
+
 
             //TODO: Remove this
             Player firstPlayer = null;
 
             foreach (var player in storedLevel.Players) {
-                var loadedPlayer = Player.Load(level, player);
+                var playerLoader = Player.Loader.StartLoading(level, player);
                 //TODO: If player needs controller, give him
                 if (firstPlayer == null) {
-                    firstPlayer = loadedPlayer;
+                    firstPlayer = playerLoader.Player;
                 }
 
-                level.players.Add(loadedPlayer.ID, loadedPlayer);
+                level.players.Add(playerLoader.Player.ID, playerLoader.Player);
+                loaders.Add(playerLoader);
             }
             //TODO: Move this inside the foreach
             level.inputController = game.menuController.GetGameController(cameraController, level, firstPlayer);
             
             //Connect references
-            map.ConnectReferences(level);
-
-            foreach (var unit in level.units.Values) {
-                unit.ConnectReferences(level);
-            }
-
-            foreach (var player in level.players.Values) {
-                player.ConnectReferences(level);
+            foreach (var loader in loaders) {
+                loader.ConnectReferences(level);
             }
 
 
             //Build geometry and other things
 
-            map.FinishLoading();
-
-            foreach (var unit in level.units.Values) {
-                unit.FinishLoading();
+            foreach (var loader in loaders) {
+                loader.FinishLoading();
             }
+
 
             CurrentLevel = level;
             return level;
@@ -143,13 +156,13 @@ namespace MHUrho.Logic
             LoadSceneParts(game, scene);
             var cameraController = LoadCamera(game, scene);
 
+            CurrentLevel = new LevelManager(cameraController);
+            scene.AddComponent(CurrentLevel);
 
             Node mapNode = scene.CreateChild("MapNode");
 
-            Map map = Map.CreateDefaultMap(mapNode, mapSize);
-
-            CurrentLevel = new LevelManager(map, cameraController);
-            scene.AddComponent(CurrentLevel);
+            Map map = Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize);
+            CurrentLevel.Map = map;
 
             //TODO: Temporary player
             var player = new Player(CurrentLevel, CurrentLevel.GetNewID(CurrentLevel.players));
@@ -194,14 +207,12 @@ namespace MHUrho.Logic
             CurrentLevel = null;
         }
 
-        protected LevelManager(Map map, 
-                               CameraController cameraController)
+        protected LevelManager(CameraController cameraController)
         {
             this.units = new Dictionary<int, Unit>();
             this.players = new Dictionary<int, Player>();
             this.buildings = new Dictionary<int, Building>();
             this.rng = new Random();
-            this.Map = map;
 
             this.cameraController = cameraController;
             this.DefaultComponentFactory = new DefaultComponentFactory();
@@ -254,7 +265,7 @@ namespace MHUrho.Logic
             return newBuilding;
         }
 
-        public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, RangeTarget target) {
+        public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, RangeTargetComponent target) {
 
             var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, target);
             entities.Add(newProjectile.ID, newProjectile);
@@ -299,11 +310,29 @@ namespace MHUrho.Logic
             return value;
         }
 
-        public RangeTarget GetRangeTarget(int ID) {
-            if (!rangeTargets.TryGetValue(ID, out RangeTarget value)) {
+        public IRangeTarget GetRangeTarget(int ID) {
+            if (!rangeTargets.TryGetValue(ID, out IRangeTarget value)) {
                 throw new ArgumentOutOfRangeException("RangeTarget with this ID does not exist in the current level");
             }
             return value;
+        }
+
+        /// <summary>
+        /// Registers <paramref name="rangeTarget"/> to rangeTargets, assigns it a new ID and returns this new ID
+        /// 
+        /// Called by rangeTarget constructor
+        /// </summary>
+        /// <param name="rangeTarget">range target to register</param>
+        /// <returns>the new ID</returns>
+        public int RegisterRangeTarget(RangeTargetComponent rangeTarget) {
+            int newID = GetNewID(rangeTargets);
+            rangeTarget.InstanceID = newID;
+            rangeTargets.Add(rangeTarget.InstanceID, rangeTarget);
+            return newID;
+        }
+
+        public bool UnRegisterRangeTarget(int ID) {
+            return rangeTargets.Remove(ID);
         }
 
         protected override void OnUpdate(float timeStep) {

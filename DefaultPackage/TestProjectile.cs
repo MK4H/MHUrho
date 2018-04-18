@@ -24,7 +24,7 @@ namespace DefaultPackage
             throw new NotImplementedException();
         }
 
-        public override bool IsInRange(Vector3 source, RangeTarget target) {
+        public override bool IsInRange(Vector3 source, RangeTargetComponent target) {
             return false;
         }
 

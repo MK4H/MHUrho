@@ -109,8 +109,12 @@ namespace MHUrho.UnitComponents
             workQueue = new Queue<IWorkTask>();
         }
 
-        public static ActionQueue Load(ILevelManager level, InstancePluginBase plugin, PluginData pluginData) {
+        internal static ActionQueue Load(ILevelManager level, InstancePluginBase plugin, PluginData pluginData) {
             throw new NotImplementedException();
+        }
+
+        internal override void ConnectReferences(ILevelManager level) {
+            //NOTHING
         }
 
         public override PluginData SaveState() {

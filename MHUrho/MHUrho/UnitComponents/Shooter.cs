@@ -44,7 +44,7 @@ namespace MHUrho.UnitComponents
         internal event ShotFiredDelegate OnShotFired;
 
         //TODO: Change to Target component
-        private RangeTarget target;
+        private RangeTargetComponent target;
 
         private float delay;
 
@@ -134,7 +134,9 @@ namespace MHUrho.UnitComponents
                                verticalOffset);
         }
 
-
+        internal override void ConnectReferences(ILevelManager level) {
+            //NOTHING
+        }
 
         public override PluginData SaveState() {
             var sequentialData = new SequentialPluginDataWriter();
@@ -178,7 +180,7 @@ namespace MHUrho.UnitComponents
 
 
                 foreach (var possibleTarget in possibleTargets) {
-                    var newTarget = possibleTarget.GetComponent<RangeTarget>();
+                    var newTarget = possibleTarget.GetComponent<RangeTargetComponent>();
                     if (newTarget == null || !projectileType.IsInRange(Node.Position, newTarget)) {
                         continue;
                     }

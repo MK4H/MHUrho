@@ -16,6 +16,79 @@ namespace MHUrho.Logic
 {
     public class Building : Entity
     {
+        internal class Loader : ILoader {
+            public Building Building { get; private set; }
+            
+            /// <summary>
+            /// Used to store the reference to storedBuilding between Load and ConnectReferences calls
+            /// </summary>
+            private StBuilding storedBuilding;
+
+            private List<DefaultComponent> preloadedComponents;
+
+            protected Loader(StBuilding storedBuilding) {
+                this.storedBuilding = storedBuilding;
+                preloadedComponents = new List<DefaultComponent>();
+            }
+
+            public static Loader StartLoading(LevelManager level,
+                                              PackageManager packageManager,
+                                              Node node,
+                                              StBuilding storedBuilding) {
+                var type = packageManager.ActiveGame.GetBuildingType(storedBuilding.TypeID);
+                if (type == null) {
+                    throw new ArgumentException("Type of this building was not loaded");
+                }
+
+                var loader = new Loader(storedBuilding);
+                loader.Load(level, type, node);
+                return loader;
+            }
+
+
+            public void ConnectReferences(LevelManager level) {
+                Building.Player = level.GetPlayer(storedBuilding.PlayerID);
+                //TODO: Tiles
+
+                foreach (var preloadedComponent in preloadedComponents) {
+                    preloadedComponent.ConnectReferences(level);
+                }
+
+                Building.plugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
+            }
+
+            public void FinishLoading() {
+
+            }
+
+            private void Load(ILevelManager level, BuildingType type, Node buildingNode) {
+                //TODO: Check arguments - node cant have more than one Building component
+                if (type.ID != storedBuilding.TypeID) {
+                    throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
+                }
+
+                var building = new Building(level, type, storedBuilding);
+                buildingNode.AddComponent(building);
+
+                var center = building.Rectangle.Center();
+
+                buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
+
+                AddRigidBody(buildingNode);
+
+                building.plugin = type.GetInstancePluginForLoading();
+
+                foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
+                    var preloadedComponent = level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
+                                                                                         defaultComponent.Value,
+                                                                                         level,
+                                                                                         Building.plugin);
+                    preloadedComponents.Add(preloadedComponent);
+                    Building.Node.AddComponent(preloadedComponent);
+                }
+            }
+        }
+
         public IntRect Rectangle { get; private set; }
 
         public IntVector2 Location => Rectangle.TopLeft();
@@ -31,11 +104,6 @@ namespace MHUrho.Logic
         private ITile[] tiles;
 
         private BuildingInstancePluginBase plugin;
-
-        /// <summary>
-        /// Used to store the reference to storedBuilding between Load and ConnectReferences calls
-        /// </summary>
-        private StBuilding storedBuilding;
 
         protected Building(int id, ILevelManager level, IntVector2 topLeftCorner, BuildingType type, IPlayer player) 
             :base(id, level)
@@ -102,51 +170,9 @@ namespace MHUrho.Logic
             return newBuilding;
         }
 
-        public static Building Load(ILevelManager level, BuildingType type, Node buildingNode, StBuilding storedBuilding) {
-            //TODO: Check arguments - node cant have more than one Building component
-            if (type.ID != storedBuilding.TypeID) {
-                throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
-            }
-
-            var building = new Building(level, type, storedBuilding);
-            buildingNode.AddComponent(building);
-
-            var center = building.Rectangle.Center();
-
-            buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
-
-            AddRigidBody(buildingNode);
-
-            building.plugin = type.GetInstancePluginForLoading();
-            return building;
-        }
-
-        public static Building Load(ILevelManager level, 
-                                    PackageManager packageManager, 
-                                    Node node,
-                                    StBuilding storedBuilding) {
-            var type = packageManager.ActiveGame.GetBuildingType(storedBuilding.TypeID);
-            if (type == null) {
-                throw new ArgumentException("Type of this building was not loaded");
-            }
-
-            return type.LoadBuilding();
-        }
 
 
-        public void ConnectReferences(ILevelManager level) {
-            Player = level.GetPlayer(storedBuilding.PlayerID);
-            //TODO: Tiles
-
-            foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
-                Node.AddComponent(level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
-                                                                              defaultComponent.Value, 
-                                                                              level,
-                                                                              plugin));
-            }
-
-            plugin.LoadState(level, this, new PluginDataWrapper(storedBuilding.UserPlugin));
-        }
+     
 
         public StBuilding Save() {
             var stBuilding = new StBuilding();

@@ -70,7 +70,7 @@ namespace MHUrho.Logic
             return projectile;
         }
 
-        public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, RangeTarget target) {
+        public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, RangeTargetComponent target) {
             var projectile = GetProjectile(newID, level, player, position);
 
             projectile.Plugin.ShootProjectile(target);
@@ -90,7 +90,7 @@ namespace MHUrho.Logic
             return typePlugin.IsInRange(source, target);
         }
 
-        public bool IsInRange(Vector3 source, RangeTarget target) {
+        public bool IsInRange(Vector3 source, RangeTargetComponent target) {
             return typePlugin.IsInRange(source, target);
         }
 

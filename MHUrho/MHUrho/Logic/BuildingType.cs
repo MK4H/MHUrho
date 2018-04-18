@@ -83,7 +83,8 @@ namespace MHUrho.Logic
             return building;
         }
 
-        public Building LoadBuilding() {
+        internal void LoadComponentsForBuilding(LevelManager level, Node buildingNode) {
+            //TODO: THIS
             throw new NotImplementedException();
         }
 

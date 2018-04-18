@@ -28,7 +28,7 @@ namespace MHUrho.Plugins
         /// <returns>New instance, that will be loaded in the next step</returns>
         public abstract ProjectileInstancePluginBase GetInstanceForLoading();
 
-        public abstract bool IsInRange(Vector3 source, RangeTarget target);
+        public abstract bool IsInRange(Vector3 source, RangeTargetComponent target);
 
         public abstract bool IsInRange(Vector3 source, Vector3 target);
 

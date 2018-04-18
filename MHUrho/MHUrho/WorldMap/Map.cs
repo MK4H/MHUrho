@@ -10,6 +10,7 @@ using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.UnitComponents;
 
 
 namespace MHUrho.WorldMap
@@ -40,6 +41,93 @@ namespace MHUrho.WorldMap
         /// <param name="y">Y coord of the tile corner</param>
         /// <returns>New height of the tile top left corner</returns>
         public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
+
+        internal class Loader : ILoader {
+            
+            public Map Map { get; private set; }
+
+
+            /// <summary>
+            /// Loads map data from storedMap
+            /// 
+            /// After everything in the level Started loading,
+            /// Next step is to call ConnectReferences() to connect references
+            /// 
+            /// Last step is to FinishLoading, after all references are connected
+            /// </summary>
+            /// <param name="mapNode">Scene node of the map</param>
+            /// <param name="storedMap">Protocol Buffers class containing stored map</param>
+            /// <returns>Map with loaded data, but without connected references and without geometry</returns>
+            public static Loader StartLoading(LevelManager level, Node mapNode, StMap storedMap) {
+                var loader = new Loader();
+                loader.Load(level, mapNode, storedMap);
+                return loader;
+            }
+
+            public void ConnectReferences(LevelManager level) {
+                foreach (var tile in Map.tiles) {
+                    tile.ConnectReferences(level);
+                }
+            }
+
+            /// <summary>
+            /// Builds geometry and releases stored data
+            /// </summary>
+            public void FinishLoading() {
+                foreach (var tile in Map.tiles) {
+                    tile.FinishLoading();
+                }
+
+                Map.BuildGeometry();
+            }
+
+            private void Load(LevelManager level, Node mapNode, StMap storedMap) {
+                Map = new Map(mapNode, storedMap);
+                Map.levelManager = level;
+                var tiles = storedMap.Tiles.GetEnumerator();
+                var borderTiles = storedMap.BorderTiles.GetEnumerator();
+
+                try {
+
+                    for (int y = 0; y < Map.LengthWithBorders; y++) {
+                        for (int x = 0; x < Map.WidthWithBorders; x++) {
+                            ITile newTile;
+                            if (Map.IsBorder(x, y)) {
+                                if (!borderTiles.MoveNext()) {
+                                    //TODO: Exception
+                                    throw new Exception("Corrupted save file");
+                                }
+
+                                newTile = new BorderTile(borderTiles.Current, Map);
+                            }
+                            else {
+                                if (!tiles.MoveNext()) {
+                                    //TODO: Exception
+                                    throw new Exception("Corrupted save file");
+                                }
+
+                                newTile = Tile.StartLoading(tiles.Current, Map);
+                            }
+
+                            Map.tiles[Map.GetTileIndex(x, y)] = newTile;
+                        }
+                    }
+                }
+                catch (IndexOutOfRangeException e) {
+                    //TODO: Logging
+                    throw;
+                }
+                catch (NullReferenceException e) {
+                    //TODO: Logging
+                    throw;
+                }
+                finally {
+                    tiles?.Dispose();
+                    borderTiles?.Dispose();
+                }
+
+            }
+        }
 
         private class BorderTile : ITile {
             Building ITile.Building => throw new InvalidOperationException("Cannot add building to Border tile");
@@ -242,6 +330,8 @@ namespace MHUrho.WorldMap
 
         public IntRect? HighlightedArea { get; private set; }
 
+        public ILevelManager LevelManager => levelManager;
+
         private readonly Node node;
 
         private MapGraphics graphics;
@@ -262,14 +352,17 @@ namespace MHUrho.WorldMap
 
         private int BottomWithBorders => Bottom + 1;
 
+        private LevelManager levelManager;
+
         /// <summary>
         /// Creates default map at height 0 with all tiles with the default type
         /// </summary>
         /// <param name="mapNode">Node to connect the map to</param>
         /// <param name="size">Size of the playing field, excluding the borders</param>
         /// <returns>Fully created map</returns>
-        public static Map CreateDefaultMap(Node mapNode, IntVector2 size) {
+        internal static Map CreateDefaultMap(LevelManager level, Node mapNode, IntVector2 size) {
             Map newMap = new Map(mapNode, size.X, size.Y);
+            newMap.levelManager = level;
 
             TileType defaultTileType = PackageManager.Instance.ActiveGame.DefaultTileType;
 
@@ -290,81 +383,6 @@ namespace MHUrho.WorldMap
 
             newMap.BuildGeometry();
             return newMap;
-        }
-
-        /// <summary>
-        /// Loads map data from storedMap
-        /// 
-        /// After everything in the level Started loading,
-        /// Next step is to call ConnectReferences() to connect references
-        /// 
-        /// Last step is to FinishLoading, after all references are connected
-        /// </summary>
-        /// <param name="mapNode">Scene node of the map</param>
-        /// <param name="storedMap">Protocol Buffers class containing stored map</param>
-        /// <returns>Map with loaded data, but without connected references and without geometry</returns>
-        public static Map StartLoading(Node mapNode, StMap storedMap) {
-            var newMap = new Map(mapNode, storedMap);
-            var tiles = storedMap.Tiles.GetEnumerator();
-            var borderTiles = storedMap.BorderTiles.GetEnumerator();
-
-            try {
-                
-                for (int y = 0; y < newMap.LengthWithBorders; y++) {
-                    for (int x = 0; x < newMap.WidthWithBorders; x++) {
-                        ITile newTile;
-                        if (newMap.IsBorder(x, y)) {
-                            if (!borderTiles.MoveNext()) {
-                                //TODO: Exception
-                                throw new Exception("Corrupted save file");
-                            }
-
-                            newTile = new BorderTile(borderTiles.Current, newMap);
-                        }
-                        else {
-                            if (!tiles.MoveNext()) {
-                                //TODO: Exception
-                                throw new Exception("Corrupted save file");
-                            }
-
-                            newTile = Tile.StartLoading(tiles.Current, newMap);
-                        }
-
-                        newMap.tiles[newMap.GetTileIndex(x, y)] = newTile;
-                    }
-                }
-            }
-            catch (IndexOutOfRangeException e) {
-                //TODO: Logging
-                throw;
-            }
-            catch (NullReferenceException e) {
-                //TODO: Logging
-                throw;
-            }
-            finally {
-                tiles?.Dispose();
-                borderTiles?.Dispose();
-            }
-
-            return newMap;
-        }
-
-        public void ConnectReferences(ILevelManager level) {
-            foreach (var tile in tiles) {
-                tile.ConnectReferences(level);
-            }
-        }
-
-        /// <summary>
-        /// Builds geometry and releases stored data
-        /// </summary>
-        public void FinishLoading() {
-            foreach (var tile in tiles) {
-                tile.FinishLoading();
-            }
-
-            BuildGeometry();
         }
 
         public StMap Save() {
@@ -1207,6 +1225,10 @@ namespace MHUrho.WorldMap
             if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(-1, -1))) != null) {
                 action(tile);
             }
+        }
+
+        public IRangeTarget GetRangeTarget(Vector3 position) {
+            return 
         }
 
         public void Dispose() {

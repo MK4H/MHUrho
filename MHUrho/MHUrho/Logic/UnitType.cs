@@ -123,13 +123,9 @@ namespace MHUrho.Logic
         /// </summary>
         /// <param name="level"></param>
         /// <param name="unitNode">scene node representing the new unit</param>
-        /// <param name="storedUnit"></param>
-        /// <returns>Unit in first stage of loading, needs to be followed by <see cref="Unit.ConnectReferences"/> and
-        /// <see cref="Unit.FinishLoading"/></returns>
-        public Unit LoadUnit(ILevelManager level, Node unitNode, StUnit storedUnit) {
-            var unit = Unit.Load(level, this, unitNode, storedUnit);
+        /// <returns></returns>
+        internal void LoadComponentsForUnit(LevelManager level, Node unitNode) {
             AddComponents(unitNode);
-            return unit;
         }
 
         public UnitInstancePluginBase GetNewInstancePlugin(Unit unit, ILevelManager level) {

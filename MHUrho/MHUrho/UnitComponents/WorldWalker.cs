@@ -106,6 +106,10 @@ namespace MHUrho.UnitComponents
             return new WorldWalker(notificationReciever, level, activated, path, target);
         }
 
+        internal override void ConnectReferences(ILevelManager level) {
+            //NOTHING
+        }
+
         public override PluginData SaveState() {
             var storageData = new IndexedPluginDataWriter();
             if (Enabled) {

@@ -26,6 +26,8 @@ namespace MHUrho.UnitComponents
 
         public abstract string ComponentTypeName { get; }
 
+        internal abstract void ConnectReferences(ILevelManager level);
+
         public abstract PluginData SaveState();
     }
 }

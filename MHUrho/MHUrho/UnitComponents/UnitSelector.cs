@@ -85,6 +85,10 @@ namespace MHUrho.UnitComponents
             return new UnitSelector(notificationReciever, level);
         }
 
+        internal override void ConnectReferences(ILevelManager level) {
+            //NOTHING
+        }
+
         /// <summary>
         /// Orders this selected unit with target <paramref name="targetTile"/>
         /// 

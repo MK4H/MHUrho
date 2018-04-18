@@ -82,6 +82,10 @@ namespace MHUrho.UnitComponents
                                       enabled);
         }
 
+        internal override void ConnectReferences(ILevelManager level) {
+            //NOTHING
+        }
+
         /// <summary>
         /// Calculates the movement vectors for projectile with initial speed <paramref name="initialProjectileSpeed"/>, to go from <paramref name="sourcePosition"/> to <paramref name="targetPosition"/>
         /// 
