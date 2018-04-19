@@ -13,47 +13,57 @@
   </tileTypes>
   <unitTypes>
     <unitType name="TestUnit" ID="1">
-      <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
-      <materialPath>Green.xml</materialPath>
+      <material>
+				<materialPath>Green.xml</materialPath>
+			</material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
         <projectileType>TestProjectile</projectileType>
       </extension>
+	    <iconPath>sand.jpg</iconPath>
     </unitType>
     <unitType name="TestWorker" ID="9">
-      <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
-      <materialPath>StoneMaterial.xml</materialPath>
+      <material>
+				<materialPath>StoneMaterial.xml</materialPath>
+      </material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
+	    <iconPath>sand.jpg</iconPath>
     </unitType>
     <unitType name="Chicken" ID="3">
-      <iconPath>Chicken/ChickenIcon.png</iconPath>
       <modelPath>Chicken/Chicken.mdl</modelPath>
-      <materialPath>Chicken/Chicken.xml</materialPath>
+			<material>
+				<materialListPath>Chicken/Chicken.txt</materialListPath>
+			</material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
+	    <iconPath>Chicken/ChickenIcon.png</iconPath>
     </unitType>
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile" ID="1">
       <modelPath>Box.mdl</modelPath>
-      <materialPath>StoneMaterial.xml</materialPath>
-      <speed>30</speed>
-      <size x="1" y="0.5"/>
+      <material>
+				<materialPath>StoneMaterial.xml</materialPath>
+			</material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
+	    <speed>30</speed>
+	    <size x="1" y="0.5"/>
     </projectileType>
   </projectileTypes>
   <buildingTypes>
     <buildingType name="TestBuilding" ID="1">
-      <iconPath>sand.jpg</iconPath>
       <modelPath>Box.mdl</modelPath>
-      <materialPath>StoneMaterial.xml</materialPath>
-      <size x="3" y="3"/>
+      <material>
+				<materialPath>StoneMaterial.xml</materialPath>
+	    </material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
         <workerType>TestWorker</workerType>
         <tileType>Sand</tileType>
       </extension>
+	    <iconPath>sand.jpg</iconPath>
+	    <size x="3" y="3"/>
     </buildingType>
   </buildingTypes>
 </gamePack>

@@ -96,29 +96,23 @@
   </xs:complexType>
 
   <xs:complexType name="unitTypeType">
-    <xs:sequence>
-      <xs:element name="iconPath" type="xs:string"/>
-      <xs:element name="modelPath" type="xs:string"/>
-      <xs:element name="materialPath" type="xs:string"/>
-      <xs:element name="animations" type="animationsType" minOccurs="0"/>
-      <xs:element name="assemblyPath" type="xs:string"/>
-      <xs:element name="extension" type="extensionType" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="name" use="required" type="xs:string"/>
-    <xs:attribute name="ID" use="required" type="xs:int"/>
+	  <xs:complexContent>
+		  <xs:extension base="entityWithIconType">
+			  <xs:sequence>
+				  <xs:element name="animations" type="animationsType" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="buildingTypeType">
-    <xs:sequence>
-      <xs:element name="iconPath" type="xs:string"/>
-      <xs:element name="modelPath" type="xs:string"/>
-      <xs:element name="materialPath" type="xs:string"/>
-      <xs:element name="size" type="IntVector2"/>
-      <xs:element name="assemblyPath" type="xs:string"/>
-      <xs:element name="extension" type="extensionType" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="name" use="required" type="xs:string"/>
-    <xs:attribute name="ID" use="required" type="xs:int"/>
+		<xs:complexContent>
+			<xs:extension base="entityWithIconType">
+				<xs:sequence>
+					<xs:element name="size" type="IntVector2"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="playerTypeType">
@@ -132,16 +126,14 @@
   </xs:complexType>
 
   <xs:complexType name="projectileTypeType">
-    <xs:sequence>
-      <xs:element name="modelPath" type="xs:string"/>
-      <xs:element name="materialPath" type="xs:string"/>
-      <xs:element name="speed" type="xs:float"/>
-      <xs:element name="size" type="Vector2"/>
-      <xs:element name="assemblyPath" type="xs:string"/>
-      <xs:element name="extension" type="extensionType" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="name" use="required" type="xs:string"/>
-    <xs:attribute name="ID" use="required" type="xs:int"/>
+		<xs:complexContent>
+			<xs:extension base="entityType">
+				<xs:sequence>
+					<xs:element name="speed" type="xs:float"/>
+					<xs:element name="size" type="Vector2"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="extensionType">
@@ -149,6 +141,31 @@
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
     </xs:sequence>
   </xs:complexType>
+
+	<xs:complexType name="entityType">
+		<xs:sequence>
+			<xs:element name="modelPath" type="xs:string"/>
+			<xs:element name="material" type="materialType"/>
+			<xs:element name="assemblyPath" type="xs:string"/>
+			<xs:element name="extension" type="extensionType" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="identifiers"/>
+	</xs:complexType>
+
+	<xs:complexType name="entityWithIconType">
+		<xs:complexContent>
+			<xs:extension base="entityType">
+				<xs:sequence>
+					<xs:element name="iconPath" type="xs:string"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:attributeGroup name="identifiers">
+		<xs:attribute name="name" use="required" type="xs:string"/>
+		<xs:attribute name="ID" use="required" type="xs:int"/>
+	</xs:attributeGroup>
 
   <xs:complexType name="animationsType">
     <xs:sequence>
@@ -163,6 +180,13 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+
+	<xs:complexType name="materialType">
+		<xs:choice>
+			<xs:element name="materialPath" type="xs:string"/>
+			<xs:element name="materialListPath" type="xs:string"/>
+		</xs:choice>
+	</xs:complexType>
 
   <xs:complexType name="IntVector2">
     <xs:attribute name="x" use="required" type="xs:int"/>

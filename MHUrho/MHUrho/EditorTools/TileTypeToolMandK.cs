@@ -12,7 +12,7 @@ using Urho.Urho2D;
 namespace MHUrho.EditorTools
 {
 	class TileTypeToolMandK : TileTypeTool, IMandKTool {
-		public IEnumerable<Button> Buttons => tileTypeButtons.Keys;
+		public override IEnumerable<Button> Buttons => tileTypeButtons.Keys;
 
 		private Dictionary<Button, TileType> tileTypeButtons;
 
@@ -59,7 +59,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 
@@ -68,7 +68,7 @@ namespace MHUrho.EditorTools
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			if (selected != null) {

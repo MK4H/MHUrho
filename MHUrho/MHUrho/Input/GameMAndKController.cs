@@ -57,6 +57,8 @@ namespace MHUrho.Input
 
 		public IPlayer Player { get; set; }
 
+		UIManager IGameController.UIManager => UIManager;
+
 		public MandKUI UIManager { get; private set; }
 
 		public bool DoOnlySingleRaycasts { get; set; }

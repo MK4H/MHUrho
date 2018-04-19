@@ -37,7 +37,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestWorkerInstance : UnitInstancePluginBase, WorldWalker.INotificationReciever {
+	public class TestWorkerInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver {
 		public TestBuildingInstance WorkedBuilding { get; set; }
 
 		private WorldWalker walker;
@@ -73,6 +73,10 @@ namespace DefaultPackage
 		}
 
 		public override void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData) {
+			this.Level = level;
+			this.Unit = unit;
+			this.started = true;
+
 			var indexedData = pluginData.GetReaderForWrappedIndexedData();
 			WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).Plugin;
 			homeGoing = indexedData.Get<bool>(2);

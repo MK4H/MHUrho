@@ -12,14 +12,14 @@ namespace MHUrho.UnitComponents
 {
 	internal delegate void UnitSelectedDelegate(UnitSelector unitSelector);
 	internal delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
-	internal delegate void UnitOrderedToTileDelegate(UnitSelector unitSelector, ITile targetTile, OrderArgs orderArgs);
-	internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, Unit targetUnit, OrderArgs orderArgs);
-	internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, Building targetBuilding, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToTileDelegate(UnitSelector unitSelector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs);
 
 
 	public class UnitSelector : Selector {
 
-		public interface INotificationReciever {
+		public interface INotificationReceiver {
 			void OnUnitSelected(UnitSelector selector);
 
 			void OnUnitDeselected(UnitSelector selector);
@@ -31,11 +31,11 @@ namespace MHUrho.UnitComponents
 			/// <param name="targetTile"></param>
 			/// <param name="orderArgs">Contains an Executed flag, which is true if some method before consumed the command, and false if it did not
 			/// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
-			void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, OrderArgs orderArgs);
+			void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs);
 
-			void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, OrderArgs orderArgs);
+			void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs);
 
-			void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, OrderArgs orderArgs);
+			void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs);
 		}
 
 		public static string ComponentName = nameof(UnitSelector);
@@ -56,16 +56,16 @@ namespace MHUrho.UnitComponents
 
 		
 		private readonly ILevelManager level;
-		private readonly INotificationReciever notificationReciever;
+		private readonly INotificationReceiver notificationReceiver;
 
 
-		protected UnitSelector(INotificationReciever notificationReciever,ILevelManager level) {
-			this.notificationReciever = notificationReciever;
+		protected UnitSelector(INotificationReceiver notificationReceiver,ILevelManager level) {
+			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 		}
 
 		public static UnitSelector CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T: UnitInstancePluginBase, INotificationReciever {
+			where T: UnitInstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
@@ -75,14 +75,14 @@ namespace MHUrho.UnitComponents
 		}
 
 		internal static UnitSelector Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
-			var notificationReciever = plugin as INotificationReciever;
-			if (notificationReciever == null) {
+			var notificationReceiver = plugin as INotificationReceiver;
+			if (notificationReceiver == null) {
 				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReciever)} interface", nameof(plugin));
+					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 			}
 
 			var sequentialData = new SequentialPluginDataReader(data);
-			return new UnitSelector(notificationReciever, level);
+			return new UnitSelector(notificationReceiver, level);
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
@@ -97,22 +97,22 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		/// <param name="targetTile">target tile</param>
 		/// <returns>True if unit was given order, False if there is nothing the unit can do</returns>
-		public override bool Order(ITile targetTile) {
+		public override bool Order(ITile targetTile, int buttons, int qualifiers) {
 			//TODO: EventArgs to get if the event was handled
 			var orderArgs = new OrderArgs();
-			OrderedToTile?.Invoke(this, targetTile, orderArgs);
+			OrderedToTile?.Invoke(this, targetTile, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 
-		public override bool Order(Unit targetUnit) {
+		public override bool Order(Unit targetUnit, int buttons, int qualifiers) {
 			var orderArgs = new OrderArgs();
-			OrderedToUnit?.Invoke(this, targetUnit, orderArgs);
+			OrderedToUnit?.Invoke(this, targetUnit, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 
-		public override bool Order(Building targetBuilding) {
+		public override bool Order(Building targetBuilding, int buttons, int qualifiers) {
 			var orderArgs = new OrderArgs();
-			OrderedToBuilding?.Invoke(this, targetBuilding, orderArgs);
+			OrderedToBuilding?.Invoke(this, targetBuilding, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 
@@ -143,11 +143,11 @@ namespace MHUrho.UnitComponents
 					InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Logic.Unit)} component");
 			}
 
-			UnitSelected += notificationReciever.OnUnitSelected;
-			UnitDeselected += notificationReciever.OnUnitDeselected;
-			OrderedToTile += notificationReciever.OnUnitOrderedToTile;
-			OrderedToUnit += notificationReciever.OnUnitOrderedToUnit;
-			OrderedToBuilding += notificationReciever.OnUnitOrderedToBuilding;
+			UnitSelected += notificationReceiver.OnUnitSelected;
+			UnitDeselected += notificationReceiver.OnUnitDeselected;
+			OrderedToTile += notificationReceiver.OnUnitOrderedToTile;
+			OrderedToUnit += notificationReceiver.OnUnitOrderedToUnit;
+			OrderedToBuilding += notificationReceiver.OnUnitOrderedToBuilding;
 		}
 
 	}

@@ -4,11 +4,14 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using Urho;
+using MHUrho.UserInterface;
 
 namespace MHUrho.Input
 { 
 	public interface IGameController : IDisposable
 	{
+		UIManager UIManager { get; }
+
 		IPlayer Player { get; set; }
 
 		bool Enabled { get; }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Control;
+using MHUrho.EditorTools;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -11,16 +12,12 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-	public class TouchUI : IDisposable {
+	public class TouchUI : UIManager,IDisposable {
 
-		private readonly MyGame game;
+
 		private readonly GameTouchController touchInputCtl;
 
-		private Urho.Gui.UI UI => game.UI;
-
 		private IPlayer player => touchInputCtl.Player;
-
-		private Urho.Input Input => game.Input;
 
 		private UIElement selectionBar;
 
@@ -28,8 +25,9 @@ namespace MHUrho.UserInterface
 		private UIElement selected;
 
 
-		public TouchUI(MyGame game, GameTouchController gameTouchController) {
-			this.game = game;
+		public TouchUI(MyGame game, GameTouchController gameTouchController)
+			:base(game)
+		{
 			this.touchInputCtl = gameTouchController;
 
 			DisplayTileTypes();
@@ -101,6 +99,22 @@ namespace MHUrho.UserInterface
 
 		private void UI_Pressed(PressedEventArgs e) {
 			touchInputCtl.UIPressed = true;
+		}
+
+		public override void AddTool(Tool tool) {
+			throw new NotImplementedException();
+		}
+
+		public override void RemoveTool(Tool tool) {
+			throw new NotImplementedException();
+		}
+
+		public override void AddPlayer(IPlayer player) {
+			throw new NotImplementedException();
+		}
+
+		public override void RemovePlayer(IPlayer player) {
+			throw new NotImplementedException();
 		}
 	}
 }

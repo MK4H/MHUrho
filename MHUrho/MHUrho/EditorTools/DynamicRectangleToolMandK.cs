@@ -16,7 +16,7 @@ namespace MHUrho.EditorTools
 
 		public delegate void HandleSingleClick(MouseButtonUpEventArgs e);
 
-		public IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
+		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
 
 		public event HandleSelectedRectangle SelectionHandler;
 		public event HandleSingleClick SingleClickHandler;
@@ -36,7 +36,7 @@ namespace MHUrho.EditorTools
 			this.input = input;
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			if (SelectionHandler == null) {
@@ -51,7 +51,7 @@ namespace MHUrho.EditorTools
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			input.MouseDown -= MouseDown;

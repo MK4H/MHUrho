@@ -19,7 +19,7 @@ namespace MHUrho.UnitComponents
 	public class Shooter : DefaultComponent
 	{
 
-		public interface INotificationReciever {
+		public interface INotificationReceiver {
 			void OnTargetAcquired(Shooter shooter, Unit targetUnit);
 
 			void OnShotFired(Shooter shooter, Projectile projectile);
@@ -66,20 +66,36 @@ namespace MHUrho.UnitComponents
 
 		private IPlayer player;
 
-		private INotificationReciever notificationReciever;
+		private INotificationReceiver notificationReceiver;
 
 		private Map Map => level.Map;
 
+		//TODO: Move to loader class
+		private int playerID;
+
 		protected Shooter(ILevelManager level,
-						  INotificationReciever notificationReciever,
+						  INotificationReceiver notificationReceiver,
 						  IPlayer player,
 						  ProjectileType projectileType,
 						  float rateOfFire,
 						  float horizontalOffset,
-						  float verticalOffset) {
-			this.notificationReciever = notificationReciever;
-			this.level = level;
+						  float verticalOffset) 
+			: this(level,notificationReceiver, projectileType, rateOfFire, horizontalOffset, verticalOffset) 
+		{
 			this.player = player;
+
+		}
+
+		protected Shooter(	ILevelManager level,
+							INotificationReceiver notificationReceiver,
+							ProjectileType projectileType,
+							float rateOfFire,
+							float horizontalOffset,
+							float verticalOffset) {
+
+			this.notificationReceiver = notificationReceiver;
+			this.level = level;
+
 			this.projectileType = projectileType;
 			this.RateOfFire = rateOfFire;
 			this.horizontalOffset = horizontalOffset;
@@ -96,7 +112,7 @@ namespace MHUrho.UnitComponents
 										   float rateOfFire,
 										   float horizontalOffset,
 										   float verticalOffset)
-			where T : InstancePluginBase, INotificationReciever {
+			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
@@ -112,10 +128,10 @@ namespace MHUrho.UnitComponents
 		}
 
 		internal static Shooter Load(ILevelManager level, InstancePluginBase plugin, PluginData storedData) {
-			var notificationReciever = plugin as INotificationReciever;
-			if (notificationReciever == null) {
+			var notificationReceiver = plugin as INotificationReceiver;
+			if (notificationReceiver == null) {
 				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReciever)} interface", nameof(plugin));
+					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 			}
 
 			var sequentialDataReader = new SequentialPluginDataReader(storedData);
@@ -129,17 +145,20 @@ namespace MHUrho.UnitComponents
 			var verticalOffset = sequentialDataReader.GetCurrent<float>();
 			sequentialDataReader.MoveNext();
 			var projectileTypeID = sequentialDataReader.GetCurrent<int>();
-			return new Shooter(level,
-							   notificationReciever,
-							   level.GetPlayer(playerID),
-							   level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-							   rateOfFire,
-							   horizontalOffset,
-							   verticalOffset);
+
+			var shooter = new Shooter(level,
+									 notificationReceiver,
+									 level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
+									 rateOfFire,
+									 horizontalOffset,
+									 verticalOffset);
+
+			shooter.playerID = playerID;
+			return shooter;
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
-			//NOTHING
+			player = level.GetPlayer(playerID);
 		}
 
 		public override PluginData SaveState() {
@@ -157,9 +176,9 @@ namespace MHUrho.UnitComponents
 		public override void OnAttachedToNode(Node node) {
 			base.OnAttachedToNode(node);
 
-			OnShotFired += notificationReciever.OnShotFired;
-			OnTargetAcquired += notificationReciever.OnTargetAcquired;
-			OnShotReloaded += notificationReciever.OnShotReloaded;
+			OnShotFired += notificationReceiver.OnShotFired;
+			OnTargetAcquired += notificationReceiver.OnTargetAcquired;
+			OnShotReloaded += notificationReceiver.OnShotReloaded;
 		}
 
 		protected override void OnUpdate(float timeStep) {

@@ -12,7 +12,7 @@ namespace MHUrho.EditorTools
 {
 	class StaticRectangleToolMandK : StaticRectangleTool, IMandKTool
 	{
-		public IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
+		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
 
 		public IntVector2 Size { get; set; }
 
@@ -32,7 +32,7 @@ namespace MHUrho.EditorTools
 
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			input.MouseMove += OnMouseMove;
@@ -40,7 +40,7 @@ namespace MHUrho.EditorTools
 			
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			input.MouseMove -= OnMouseMove;

@@ -13,7 +13,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-	public class MandKUI : IDisposable {
+	public class MandKUI : UIManager, IDisposable {
 		private static Color selectedColor = Color.Gray;
 		private static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
@@ -21,30 +21,29 @@ namespace MHUrho.UserInterface
 			PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
 
-		private readonly MyGame game;
-		private readonly GameMandKController inputCtl;
 
-		private UI UI => game.UI;
+		private readonly GameMandKController inputCtl;
 
 		private IPlayer player => inputCtl.Player;
 
-		private Urho.Input Input => game.Input;
-
-
+		
 		private readonly UIElement toolSelection;
-		private readonly  UIElement selectionBar;
+		private readonly UIElement selectionBar;
+		private readonly UIElement playerSelection;
 
-		private Dictionary<UIElement, IMandKTool> tools;
 
 		private UIElement selectionBarSelected;
 		private UIElement toolSelected;
+		
 
 		private int hovering = 0;
 
-		public MandKUI(MyGame game, GameMandKController inputCtl) {
-			this.game = game;
+		public MandKUI(MyGame game, GameMandKController inputCtl) 
+			:base(game)
+		{
 			this.inputCtl = inputCtl;
-			this.tools = new Dictionary<UIElement, IMandKTool>();
+			this.tools = new Dictionary<UIElement, Tool>();
+			this.players = new Dictionary<UIElement, IPlayer>();
 
 			selectionBar = UI.Root.CreateWindow();
 			selectionBar.SetStyle("windowStyle");
@@ -53,7 +52,7 @@ namespace MHUrho.UserInterface
 			selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
 			selectionBar.Position = new IntVector2(50, UI.Root.Height - 100);
 			selectionBar.Height = 100;
-			selectionBar.SetFixedWidth(UI.Root.Width - 50);
+			selectionBar.SetFixedWidth(UI.Root.Width - 100);
 			selectionBar.SetColor(Color.Yellow);
 			selectionBar.FocusMode = FocusMode.NotFocusable;
 			selectionBar.ClipChildren = true;
@@ -74,6 +73,21 @@ namespace MHUrho.UserInterface
 			toolSelection.ClipChildren = true;
 			toolSelection.HoverBegin += UIHoverBegin;
 			toolSelection.HoverEnd += UIHoverEnd;
+
+			playerSelection = UI.Root.CreateWindow();
+			playerSelection.LayoutMode = LayoutMode.Vertical;
+			playerSelection.LayoutSpacing = 0;
+			playerSelection.HorizontalAlignment = HorizontalAlignment.Right;
+			playerSelection.VerticalAlignment = VerticalAlignment.Bottom;
+			playerSelection.Position = new IntVector2(UI.Root.Width - 50, 0);
+			playerSelection.Height = UI.Root.Height;
+			playerSelection.SetFixedWidth(50);
+			playerSelection.SetColor(Color.Blue);
+			playerSelection.FocusMode = FocusMode.NotFocusable;
+			playerSelection.ClipChildren = true;
+			playerSelection.HoverBegin += UIHoverBegin;
+			playerSelection.HoverEnd += UIHoverEnd;
+
 		}
 
 		public void Dispose() {
@@ -84,6 +98,9 @@ namespace MHUrho.UserInterface
 			toolSelection.RemoveAllChildren();
 			toolSelection.Remove();
 			toolSelection.Dispose();
+			playerSelection.RemoveAllChildren();
+			playerSelection.Remove();
+			playerSelection.Dispose();
 
 			Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
 		}
@@ -91,22 +108,28 @@ namespace MHUrho.UserInterface
 		public void EnableUI() {
 			selectionBar.Enabled = true;
 			toolSelection.Enabled = true;
+			playerSelection.Enabled = true;
 		}
 
 		public void DisableUI() {
 			selectionBar.Enabled = false;
 			toolSelection.Enabled = false;
-		}
-
-		public void HideUI() {
-			selectionBar.Visible = false;
-			toolSelection.Visible = false;
+			playerSelection.Enabled = false;
 		}
 
 		public void ShowUI() {
 			selectionBar.Visible = true;
 			toolSelection.Visible = true;
+			playerSelection.Visible = true;
 		}
+
+		public void HideUI() {
+			selectionBar.Visible = false;
+			toolSelection.Visible = false;
+			playerSelection.Visible = false;
+		}
+
+		
 
 		public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
 
@@ -175,7 +198,7 @@ namespace MHUrho.UserInterface
 			selectionBarSelected.SetColor(Color.Gray);
 		}
 
-		public void AddTool(IMandKTool tool) {
+		public override void AddTool(Tool tool) {
 			var button = toolSelection.CreateButton();
 			button.SetStyle("toolButton");
 			button.Size = new IntVector2(50, 50);
@@ -197,7 +220,28 @@ namespace MHUrho.UserInterface
 
 		}
 
-		public void RemoveTool(IMandKTool tool) {
+		public override void RemoveTool(Tool tool) {
+			throw new NotImplementedException();
+		}
+
+		public override void AddPlayer(IPlayer player) {
+			var button = playerSelection.CreateButton();
+			button.SetStyle("playerButton");
+			button.Size = new IntVector2(50, 50);
+			button.HorizontalAlignment = HorizontalAlignment.Center;
+			button.VerticalAlignment = VerticalAlignment.Center;
+			button.Pressed += PlayerSwitchButtonPress;
+			button.HoverBegin += UIHoverBegin;
+			button.HoverEnd += UIHoverEnd;
+			button.FocusMode = FocusMode.ResetFocus;
+			button.MaxSize = new IntVector2(50, 50);
+			button.MinSize = new IntVector2(50, 50);
+			button.Texture = /*IPlayer.Icon ??*/ DefaultButtonTexture;
+
+			players.Add(button, player);
+		}
+
+		public override void RemovePlayer(IPlayer player) {
 			throw new NotImplementedException();
 		}
 
@@ -256,6 +300,15 @@ namespace MHUrho.UserInterface
 
 			toolSelected = e.Element;
 			tools[toolSelected].Enable();
+		}
+
+		private void PlayerSwitchButtonPress(PressedEventArgs e) {
+			if (player == players[e.Element]) {
+				//TODO: Neutral player
+			}
+			else {
+				inputCtl.Player = player;
+			}
 		}
 
 	}

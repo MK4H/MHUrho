@@ -81,6 +81,7 @@
     <Content Include="Data\Test\ResourceDir\DirDescription.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Chicken.txt" />
     <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Chicken.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -130,7 +131,46 @@
     <Content Include="Data\Test\ResourceDir\TEST2RP\Box.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\BeginPecking.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Chicken.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Dying.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Eating.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\EndPecking.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Idle.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Idle1.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Idle2.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Pecking1.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Pecking2.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Pecking3.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Stand.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\StopPecking.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Chicken\Walk.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

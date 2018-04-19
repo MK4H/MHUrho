@@ -16,13 +16,7 @@ namespace MHUrho.Logic
 {
 	public class UnitType : IEntityType, IDisposable
 	{
-		//XML ELEMENTS AND ATTRIBUTES
-		private const string IDAttributeName = "ID";
-		private const string NameAttributeName = "name";
-		private const string ModelPathElementName = "modelPath";
-		private const string MaterialPathElementName = "materialPath";
-		private const string IconPathElementName = "iconPath";
-		private const string AssemblyPathElementName = "assemblyPath";
+
 
 		public int ID { get; set; }
 
@@ -32,7 +26,7 @@ namespace MHUrho.Logic
 
 		public Model Model { get; private set; }
 
-		public Material Material { get; private set; }
+		public MaterialWrapper Material { get; private set; }
 
 		public IReadOnlyDictionary<int, Animation> Animations => animations;
 
@@ -52,7 +46,7 @@ namespace MHUrho.Logic
 		/// that references this unitType back can get the reference during the loading of this instance
 		/// </summary>
 		public UnitType() {
-
+			animations = new Dictionary<int, Animation>();
 		}
 
 		/// <summary>
@@ -69,23 +63,22 @@ namespace MHUrho.Logic
 		/// <returns>UnitType with filled standard members</returns>
 		public void Load(XElement xml, GamePack package) {
 			//TODO: Check for errors
-			ID = xml.GetIntFromAttribute(IDAttributeName);
-			Name = xml.Attribute(NameAttributeName).Value;
+			ID = XmlHelpers.GetID(xml);
+			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
 			unitTypeLogic =
 				XmlHelpers.LoadTypePlugin<UnitTypePluginBase>(xml,
-														   AssemblyPathElementName,
-														   package.XmlDirectoryPath,
-														   Name);
+															 package.XmlDirectoryPath,
+															 Name);
 
 			var data = unitTypeLogic.TypeData;
 
-			Model = LoadModel(xml, package.XmlDirectoryPath);
-			Material = LoadMaterial(xml, package.XmlDirectoryPath);
-			Icon = LoadIcon(xml, package.XmlDirectoryPath);
+			Model = XmlHelpers.GetModel(xml, package.XmlDirectoryPath);
+			Material = XmlHelpers.GetMaterial(xml, package.XmlDirectoryPath);
+			Icon = XmlHelpers.GetIcon(xml, package.XmlDirectoryPath);
 			
-			unitTypeLogic.Initialize(xml.Element(PackageManager.XMLNamespace + "extension"),
+			unitTypeLogic.Initialize(XmlHelpers.GetExtensionElement(xml),
 									 package.PackageManager);
 		}
 
@@ -156,32 +149,10 @@ namespace MHUrho.Logic
 			//TODO: Animated model
 			var staticModel = unitNode.CreateComponent<AnimatedModel>();
 			staticModel.Model = Model;
-			staticModel.Material = Material;
+			Material.ApplyMaterial(staticModel);
 			staticModel.CastShadows = true;
-			
 
 			//TODO: Add needed components
-		}
-
-		private static Model LoadModel(XElement unitTypeXml, string pathToPackageXmlDir) {
-			//TODO: Check for errors
-
-			string modelPath = XmlHelpers.GetFullPath(unitTypeXml, ModelPathElementName, pathToPackageXmlDir);
-
-			return PackageManager.Instance.ResourceCache.GetModel(modelPath);
-		}
-
-		private static Material LoadMaterial(XElement unitTypeXml, string pathToPackageXmlDir) {
-			string materialPath = XmlHelpers.GetFullPath(unitTypeXml, MaterialPathElementName, pathToPackageXmlDir);
-
-			return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
-		}
-
-		private static Image LoadIcon(XElement unitTypeXml, string pathToPackageXmlDir) {
-			string iconPath = XmlHelpers.GetFullPath(unitTypeXml, IconPathElementName, pathToPackageXmlDir);
-
-			//TODO: Find a way to not need RGBA conversion
-			return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
 		}
 
 

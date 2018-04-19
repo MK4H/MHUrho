@@ -105,6 +105,14 @@ namespace MHUrho.Packaging {
 			this.PackageManager = packageManager;
 			this.FullyLoaded = false;
 
+
+		}
+
+		public void StartLoading(XmlSchemaSet schemas) {
+			data = XDocument.Load(MyGame.Config.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
+			//TODO: Handler and signal that resource pack is in invalid state
+			data.Validate(schemas, null);
+
 			tileTypesByName = new Dictionary<string, TileType>();
 			unitTypesByName = new Dictionary<string, UnitType>();
 			buildingTypesByName = new Dictionary<string, BuildingType>();
@@ -116,12 +124,7 @@ namespace MHUrho.Packaging {
 			buildingTypesByID = new Dictionary<int, BuildingType>();
 			projectileTypesByID = new Dictionary<int, ProjectileType>();
 			resourceTypesByID = new Dictionary<int, ResourceType>();
-		}
 
-		public void StartLoading(XmlSchemaSet schemas) {
-			data = XDocument.Load(MyGame.Config.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
-			//TODO: Handler and signal that resource pack is in invalid state
-			data.Validate(schemas, null);
 		}
 
 		public void FinishLoading() {

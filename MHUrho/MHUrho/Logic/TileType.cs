@@ -38,7 +38,7 @@ namespace MHUrho.Logic
 			//TODO: Check for errors
 			ID = xml.GetIntFromAttribute(IDAttributeName);
 			Name = xml.Attribute(NameAttributeName).Value;
-			imagePath = XmlHelpers.GetFullPath(xml, TexturePathElementName, package.XmlDirectoryPath);
+			imagePath = XmlHelpers.GetFullPathFromChild(xml, TexturePathElementName, package.XmlDirectoryPath);
 			MovementSpeedModifier = XmlHelpers.GetFloat(xml, MovementSpeedElementName);
 			Package = package;
 		}

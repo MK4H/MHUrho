@@ -28,7 +28,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public IEnumerable<Button> Buttons => buttons.Keys;
+		public override IEnumerable<Button> Buttons => buttons.Keys;
 
 		private readonly GameMandKController input;
 		private Map Map => input.LevelManager.Map;
@@ -52,7 +52,7 @@ namespace MHUrho.EditorTools
 			this.dynamicHighlight = new DynamicRectangleToolMandK(input);
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			dynamicHighlight.SelectionHandler += HandleSelection;
@@ -65,7 +65,7 @@ namespace MHUrho.EditorTools
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			dynamicHighlight.SelectionHandler -= HandleSelection;
@@ -89,27 +89,36 @@ namespace MHUrho.EditorTools
 		private void HandleSingleClick(MouseButtonUpEventArgs e) {
 			//TODO: Check that the raycastResults are ordered by distance
 			foreach (var result in input.CursorRaycast()) {
-				var selector = result.Node.GetComponent<Selector>();
-				if (selector != null && selector.Player == input.Player) {
-					var unitSelector = selector as UnitSelector;
-					if (unitSelector != null && !unitSelector.Selected) {
-						unitSelector.Select();
-						AddUnit(unitSelector);
-						return;
-					}
-					else if (unitSelector != null && unitSelector.Selected) {
-						unitSelector.Deselect();
-						RemoveUnit(unitSelector);
-						return;
-					}
-				}
+
+				
 
 				//TODO: Target
+				var entity = result.Node.GetComponent<Entity>();
+
+				if (entity != null) {
+					if (entity.GetType() == typeof(Unit)) {
+						var handled = HandleUnitClick((Unit) entity, e);
+						//TODO: react to handle failed
+						return;
+					}
+					else if (entity.GetType() == typeof(Building)) {
+						//TODO:
+						return;
+					}
+					else if (entity.GetType() == typeof(Projectile)) {
+						continue;
+					}
+					else {
+						throw new InvalidOperationException("There is an entity type clicked that i dont know");
+					}
+				}
+				
 
 				var tile = Map.RaycastToTile(result);
 				if (tile != null) {
 					formation.MoveToFormation(GetAllSelectedUnitSelectors(), tile);
 				}
+				return;
 				
 			}
 		}
@@ -202,6 +211,41 @@ namespace MHUrho.EditorTools
 					yield return unitSelector;
 				}
 			}
+		}
+
+		private bool HandleUnitClick(Unit unit, MouseButtonUpEventArgs e) {
+			var selector = unit.GetComponent<UnitSelector>();
+			//If the unit is selectable and owned by the clicking player
+			if (selector != null && selector.Player == input.Player) {
+				//Select if not selected, deselect if selected
+				if (!selector.Selected) {
+					selector.Select();
+					AddUnit(selector);
+					//Executed an action, stop handling click
+					return true;
+				}
+				else {
+					selector.Deselect();
+					RemoveUnit(selector);
+					//Executed an action, stop handling click
+					return true;
+				}
+			}
+			else {
+				//Either not selectable or enemy unit
+				var executed = false;
+
+				foreach (var selectedType in selected) {
+					foreach (var selectedEntity in selectedType.Value.UnitSelectors) {
+						executed |= selectedEntity.Order(unit, e.Buttons, e.Qualifiers);
+					}
+				}
+				return executed;
+			}
+		}
+
+		private bool HandleBuildingClick() {
+			return false;
 		}
 	}
 }

@@ -61,22 +61,24 @@ namespace MHUrho.Logic
 
 			}
 
-			private void Load(ILevelManager level, BuildingType type, Node buildingNode) {
+			private void Load(LevelManager level, BuildingType type, Node buildingNode) {
 				//TODO: Check arguments - node cant have more than one Building component
 				if (type.ID != storedBuilding.TypeID) {
 					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
 				}
 
-				var building = new Building(level, type, storedBuilding);
-				buildingNode.AddComponent(building);
+				type.LoadComponentsForBuilding(level, buildingNode);
 
-				var center = building.Rectangle.Center();
+				Building = new Building(level, type, storedBuilding);
+				buildingNode.AddComponent(Building);
+
+				var center = Building.Rectangle.Center();
 
 				buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
 
 				AddRigidBody(buildingNode);
 
-				building.plugin = type.GetInstancePluginForLoading();
+				Building.plugin = type.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
 					var preloadedComponent = level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
@@ -175,11 +177,13 @@ namespace MHUrho.Logic
 	 
 
 		public StBuilding Save() {
-			var stBuilding = new StBuilding();
-			stBuilding.Id = ID;
-			stBuilding.TypeID = BuildingType.ID;
-			stBuilding.PlayerID = Player.ID;
-			stBuilding.Location = Location.ToStIntVector2();
+			var stBuilding = new StBuilding {
+												Id = ID,
+												TypeID = BuildingType.ID,
+												PlayerID = Player.ID,
+												Location = Location.ToStIntVector2(),
+												UserPlugin = new PluginData()
+											};
 			plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
 
 			foreach (var component in Node.Components) {

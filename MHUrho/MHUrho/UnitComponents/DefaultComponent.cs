@@ -17,7 +17,8 @@ namespace MHUrho.UnitComponents
 		WorldWalker,
 		UnpoweredFlier,
 		StaticRangeTarget,
-		MovingRangeTarget
+		MovingRangeTarget,
+		Clicker
 	}
 
 	public abstract class DefaultComponent : Component {

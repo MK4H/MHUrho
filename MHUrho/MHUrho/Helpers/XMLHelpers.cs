@@ -5,11 +5,23 @@ using System.Xml.Linq;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using Urho;
+using Urho.Resources;
 
 namespace MHUrho.Helpers
 {
-	public static class XmlHelpers
-	{
+	public static class XmlHelpers {
+
+		//XML ELEMENTS AND ATTRIBUTES
+		public static readonly XName IDAttributeName = "ID";
+		public static readonly XName NameAttributeName = "name";
+		public static readonly XName ModelPathElementName = PackageManager.XMLNamespace + "modelPath";
+		public static readonly XName MaterialElementName = PackageManager.XMLNamespace + "material";
+		public static readonly XName MaterialPathElementName = PackageManager.XMLNamespace + "materialPath";
+		public static readonly XName MaterialListElementName = PackageManager.XMLNamespace + "materialListPath";
+		public static readonly XName IconPathElementName = PackageManager.XMLNamespace + "iconPath";
+		public static readonly XName AssemblyPathElementName = PackageManager.XMLNamespace + "assemblyPath";
+		public static readonly XName ExtensionElementName = PackageManager.XMLNamespace + "extension";
+
 		/// <summary>
 		/// Gets ful path from <paramref name="pathToPackageXmlDir"/> and path contained in the child of <paramref name="xmlElement"/> of name <paramref name="childElementName"/>
 		/// 
@@ -19,43 +31,76 @@ namespace MHUrho.Helpers
 		/// <param name="childElementName">name of the child of the <paramref name="xmlElement"/> which contains the relative path</param>
 		/// <param name="pathToPackageXmlDir">the absolute path of the containing xml file</param>
 		/// <returns>the full path combined from the <paramref name="pathToPackageXmlDir"/> and the relative path contained in the child <paramref name="childElementName"/> of <paramref name="xmlElement"/></returns>
-		public static string GetFullPath(XElement typeXmlElement, string childElementName, string pathToPackageXmlDir) {
+		public static string GetFullPathFromChild(XElement typeXmlElement, string childElementName,
+												string pathToPackageXmlDir) {
 			return System.IO.Path.Combine(pathToPackageXmlDir,
-										  FileManager.CorrectRelativePath(typeXmlElement.Element(PackageManager.XMLNamespace + 
-																							 childElementName)
-																					.Value
-																					.Trim()));
+										 FileManager.CorrectRelativePath(typeXmlElement.Element(PackageManager.XMLNamespace +
+																								childElementName)
+																						.Value
+																						.Trim()));
 		}
 
-		public static int GetInt(XElement typeXmlElement, string childElementName) {
-			return int.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
+		public static string GetFullPath(XElement xmlElement, string pathToPackageXmlDir) {
+			return System.IO.Path.Combine(pathToPackageXmlDir,
+										 FileManager.CorrectRelativePath(xmlElement.Value.Trim()));
 		}
 
-		public static int GetIntAttribute(XElement element, string attributeName) {
-			return int.Parse(element.Attribute(attributeName).Value);
+		public static int GetID(XElement typeXmlElement) {
+			return GetIntAttribute(typeXmlElement, IDAttributeName);
 		}
 
-		public static float GetFloat(XElement typeXmlElement, string childElementName) {
-			return float.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
+		public static string GetName(XElement typeXmlElement) {
+			return typeXmlElement.Attribute(NameAttributeName).Value.Trim();
 		}
 
-		public static IntVector2 GetIntVector2(XElement typeXmlElement, string childElementName) {
-			var vectorElement = typeXmlElement.Element(PackageManager.XMLNamespace + childElementName);
-			int x = int.Parse(vectorElement.Attribute("x").Value);
-			int y = int.Parse(vectorElement.Attribute("y").Value);
-			return new IntVector2(x, y);
+		public static Model GetModel(XElement typeXmlElement, string pathToPackageXmlDir) {
+			XElement modelElement = typeXmlElement.Element(ModelPathElementName);
+
+			string modelPath = GetFullPath(modelElement, pathToPackageXmlDir);
+
+			return PackageManager.Instance.ResourceCache.GetModel(modelPath);
 		}
 
-		public static string GetString(XElement typeXmlElement, string childElementName) {
-			return typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value.Trim();
+		public static MaterialWrapper GetMaterial(XElement typeXmlElement, string pathToPackageXmlDir) {
+			var materialElement = typeXmlElement.Element(MaterialElementName);
+
+			XElement materialPathElement = materialElement.Element(MaterialPathElementName);
+			XElement materialListPathElement = materialElement.Element(MaterialListElementName);
+
+			if (materialPathElement != null) {
+				string path = GetFullPath(materialPathElement, pathToPackageXmlDir);
+				return new SimpleMaterial(PackageManager.Instance.ResourceCache.GetMaterial(path));
+			}
+			else if (materialListPathElement != null) {
+				string path = GetFullPath(materialListPathElement, pathToPackageXmlDir);
+				return new MaterialList(path);
+			}
+			else {
+				throw new InvalidOperationException("Xml Schema validator did not catch a missing choice member");
+			}
 		}
 
-		public static T LoadTypePlugin<T>(XElement typeXml, string assemblyPathElementName, string pathToPackageXmlDir, string typeName) where T: TypePluginBase {
+		public static Image GetIcon(XElement typeXmlElement, string pathToPackagageXmlDir) {
+			XElement iconElement = typeXmlElement.Element(IconPathElementName);
+
+			string iconPath = GetFullPath(iconElement, pathToPackagageXmlDir);
+
+			//TODO: Find a way to not need RGBA conversion
+			return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
+		}
+
+		public static XElement GetExtensionElement(XElement typeXmlElement) {
+			return typeXmlElement.Element(ExtensionElementName);
+		}
+
+		public static T LoadTypePlugin<T>(XElement typeXml, string pathToPackageXmlDir, string typeName) where T: TypePluginBase {
 			if (!System.IO.Path.IsPathRooted(pathToPackageXmlDir)) {
 				pathToPackageXmlDir = System.IO.Path.Combine(MyGame.Config.DynamicDirPath, pathToPackageXmlDir);
 			}
 
-			string assemblyPath = GetFullPath(typeXml, assemblyPathElementName, pathToPackageXmlDir);
+			XElement assemblyPathElement = typeXml.Element(AssemblyPathElementName);
+
+			string assemblyPath = GetFullPath(assemblyPathElement, pathToPackageXmlDir);
 
 			var assembly = Assembly.LoadFile(assemblyPath);
 			T pluginInstance = null;
@@ -75,7 +120,7 @@ namespace MHUrho.Helpers
 			catch (ReflectionTypeLoadException e) {
 				Urho.IO.Log.Write(LogLevel.Error, $"Could not get types from the assembly {assembly}");
 				//TODO: Exception
-				throw new Exception("Type plugin loading failed, could not load plugin");
+				throw new Exception("Type plugin loading failed, could not load plugin",e);
 			}
 
 			if (pluginInstance == null) {
@@ -85,5 +130,34 @@ namespace MHUrho.Helpers
 
 			return pluginInstance;
 		}
+
+
+		public static int GetInt(XElement typeXmlElement, string childElementName) {
+			return int.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
+		}
+
+		public static int GetIntAttribute(XElement element, string attributeName) {
+			return GetIntAttribute(element, (XName)attributeName);
+		}
+
+		public static int GetIntAttribute(XElement element, XName attributeName) {
+			return int.Parse(element.Attribute(attributeName).Value);
+		}
+
+		public static float GetFloat(XElement typeXmlElement, string childElementName) {
+			return float.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
+		}
+
+		public static IntVector2 GetIntVector2(XElement typeXmlElement, string childElementName) {
+			var vectorElement = typeXmlElement.Element(PackageManager.XMLNamespace + childElementName);
+			int x = int.Parse(vectorElement.Attribute("x").Value);
+			int y = int.Parse(vectorElement.Attribute("y").Value);
+			return new IntVector2(x, y);
+		}
+
+		public static string GetString(XElement typeXmlElement, string childElementName) {
+			return typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value.Trim();
+		}
+
 	}
 }

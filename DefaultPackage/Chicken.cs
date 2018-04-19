@@ -45,7 +45,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class ChickenInstance : UnitInstancePluginBase, WorldWalker.INotificationReciever, UnitSelector.INotificationReciever {
+	public class ChickenInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver {
 
 
 		public ChickenInstance() {
@@ -91,15 +91,15 @@ namespace DefaultPackage
 
 		}
 
-		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, OrderArgs orderArgs) {
+		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, OrderArgs orderArgs) {
+		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, OrderArgs orderArgs) {
+		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 

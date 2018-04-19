@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.Control;
 using MHUrho.Packaging;
+using MHUrho.UserInterface;
 using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
@@ -14,6 +15,10 @@ namespace MHUrho.Input
 	{
 		private enum CameraMovementType { Horizontal, Vertical, FreeFloat }
 
+
+		UIManager IGameController.UIManager => UIManager;
+
+		public TouchUI UIManager { get; private set; }
 
 		public IPlayer Player { get; set; }
 

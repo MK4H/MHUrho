@@ -65,7 +65,7 @@ namespace MHUrho.Logic
 
 			this.cameraController = cameraController;
 			this.DefaultComponentFactory = new DefaultComponentFactory();
-
+			ReceiveSceneUpdates = true;
 		}
 
 		public static LevelManager Load(MyGame game, StLevel storedLevel) {
@@ -183,6 +183,11 @@ namespace MHUrho.Logic
 			CurrentLevel.players.Add(player.ID, player);
 			CurrentLevel.inputController = game.menuController.GetGameController(cameraController, CurrentLevel, player);
 
+			CurrentLevel.inputController.UIManager.AddPlayer(player);
+
+			player = new Player(CurrentLevel, CurrentLevel.GetNewID(CurrentLevel.players));
+			CurrentLevel.inputController.UIManager.AddPlayer(player);
+
 			return CurrentLevel;
 		}
 
@@ -194,14 +199,22 @@ namespace MHUrho.Logic
 			};
 
 
-			var stUnits = level.Units;
-			foreach (var unit in units) {
-				stUnits.Add(unit.Value.Save());
+
+			foreach (var unit in units.Values) {
+				level.Units.Add(unit.Save());
 			}
 
-			var stPlayers = level.Players;
+			foreach (var building in buildings.Values) {
+				level.Buildings.Add(building.Save());
+			}
+
+			foreach (var projectile in projectiles.Values) {
+				level.Projectiles.Add(projectile.Save());
+			}
+
+
 			foreach (var player in players.Values) {
-				stPlayers.Add(player.Save());
+				level.Players.Add(player.Save());
 			}
 
 			return level;

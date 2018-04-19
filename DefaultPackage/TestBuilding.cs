@@ -142,11 +142,34 @@ namespace DefaultPackage
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData) {
-			
+			var sequentialData = pluginData.GetWriterForWrappedSequentialData();
+			sequentialData.StoreNext(workers.Length);
+			foreach (var worker in workers) {
+				sequentialData.StoreNext(worker.Unit.ID);
+			}
+
+			sequentialData.StoreNext(resources);
+			sequentialData.StoreNext(timeToNextResource);
 		}
 
 		public override void LoadState(ILevelManager level, Building building, PluginDataWrapper pluginData) {
-			
+			this.level = level;
+			this.Building = building;
+
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			reader.MoveNext();
+			workers = new TestWorkerInstance[reader.GetCurrent<int>()];
+			reader.MoveNext();
+			for (int i = 0; i < workers.Length; i++) {
+				workers[i] = (TestWorkerInstance)level.GetUnit(reader.GetCurrent<int>()).Plugin;
+				reader.MoveNext();
+			}
+
+			resources = reader.GetCurrent<int>();
+			reader.MoveNext();
+			timeToNextResource = reader.GetCurrent<float>();
+			reader.MoveNext();
+
 		}
 
 		public ITile GetInterfaceTile(TestWorkerInstance testWorker) {

@@ -15,13 +15,9 @@ namespace MHUrho.Logic
 {
 	//TODO: Make this an arrow type
 	public class ProjectileType : IEntityType, IDisposable {
-		private const string IDAttributeName = "ID";
-		private const string NameAttributeName = "name";
-		private const string ModelPathElementName = "modelPath";
-		private const string MaterialPathElementName = "materialPath";
+
 		private const string SpeedElementName = "speed";
-		private const string AssemblyPathElementName = "assemblyPath";
-		private const string ExtensionElementName = "extension";
+
 
 		public float ProjectileSpeed { get; private set; }
 
@@ -35,7 +31,7 @@ namespace MHUrho.Logic
 
 		private Model model;
 
-		private Material material;
+		private MaterialWrapper material;
 
 		private readonly Queue<Projectile> projectilePool;
 
@@ -47,18 +43,17 @@ namespace MHUrho.Logic
 
 
 		public void Load(XElement xml, GamePack package) {
-			ID = xml.GetIntFromAttribute(IDAttributeName);
-			Name = xml.Attribute(NameAttributeName).Value;
+			ID = XmlHelpers.GetID(xml);
+			Name = XmlHelpers.GetName(xml);
 			ProjectileSpeed = XmlHelpers.GetFloat(xml, SpeedElementName);
-			model = LoadModel(xml, package.XmlDirectoryPath);
-			material = LoadMaterial(xml, package.XmlDirectoryPath);
+			model = XmlHelpers.GetModel(xml, package.XmlDirectoryPath);
+			material = XmlHelpers.GetMaterial(xml, package.XmlDirectoryPath);
 			Package = package;
 
 			typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePluginBase>(xml,
-																		  AssemblyPathElementName,
 																		  package.XmlDirectoryPath,
 																		  Name);
-			typePlugin.Initialize(xml.Element(PackageManager.XMLNamespace + ExtensionElementName),
+			typePlugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 								  package.PackageManager);
 		}
 
@@ -116,18 +111,6 @@ namespace MHUrho.Logic
 		}
 
 
-		private static Model LoadModel(XElement projectileTypeXml, string pathToPackageXmlDir) {
-
-			string fullPath = XmlHelpers.GetFullPath(projectileTypeXml, ModelPathElementName, pathToPackageXmlDir);
-
-			return PackageManager.Instance.ResourceCache.GetModel(fullPath);
-		}
-
-		private static Material LoadMaterial(XElement projectileTypeXml, string pathToPackageXmlDir) {
-			string materialPath = XmlHelpers.GetFullPath(projectileTypeXml, MaterialPathElementName, pathToPackageXmlDir);
-
-			return PackageManager.Instance.ResourceCache.GetMaterial(materialPath);
-		}
 
 		private Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position) {
 			Projectile projectile = null;
@@ -150,7 +133,7 @@ namespace MHUrho.Logic
 
 				var staticModel = projectileNode.CreateComponent<StaticModel>();
 				staticModel.Model = model;
-				staticModel.Material = material;
+				material.ApplyMaterial(staticModel);
 
 				projectileNode.Scale = new Vector3(0.2f, 0.2f, 0.8f);
 

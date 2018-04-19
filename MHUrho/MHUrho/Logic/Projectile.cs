@@ -102,7 +102,8 @@ namespace MHUrho.Logic
 			var stProjectile = new StProjectile {
 				Position = Node.Position.ToStVector3(),
 				PlayerID = Player.ID,
-				TypeID = ProjectileType.ID
+				TypeID = ProjectileType.ID,
+				UserPlugin = new PluginData()
 			};
 			Plugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin));
 

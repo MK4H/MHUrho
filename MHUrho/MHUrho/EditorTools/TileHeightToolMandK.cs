@@ -11,7 +11,7 @@ namespace MHUrho.EditorTools
 {
 	class TileHeightToolMandK : TileHeightTool, IMandKTool {
 
-		public IEnumerable<Button> Buttons => new Button[0];
+		public override IEnumerable<Button> Buttons => new Button[0];
 
 		private const float Sensitivity = 0.01f;
 
@@ -30,7 +30,7 @@ namespace MHUrho.EditorTools
 			highlight = new StaticRectangleToolMandK(input, new IntVector2(3, 3));
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			
@@ -42,7 +42,7 @@ namespace MHUrho.EditorTools
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			input.MouseDown -= MouseDown;

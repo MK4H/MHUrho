@@ -12,7 +12,7 @@ namespace MHUrho.UnitComponents
 {
 	public class UnpoweredFlier : DefaultComponent
 	{
-		public interface INotificationReciever {
+		public interface INotificationReceiver {
 
 			void OnMovementStarted(UnpoweredFlier flier);
 
@@ -28,24 +28,24 @@ namespace MHUrho.UnitComponents
 
 		public Vector3 Movement { get; private set; }
 
-		private INotificationReciever notificationReciever;
+		private INotificationReceiver notificationReceiver;
 
 		private ILevelManager level;
 		private Map Map => level.Map;
 
-		protected UnpoweredFlier(INotificationReciever notificationReciever,
+		protected UnpoweredFlier(INotificationReceiver notificationReceiver,
 							  ILevelManager level) {
 			ReceiveSceneUpdates = true;
-			this.notificationReciever = notificationReciever;
+			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 		}
 
-		protected UnpoweredFlier(INotificationReciever notificationReciever,
+		protected UnpoweredFlier(INotificationReceiver notificationReceiver,
 								 ILevelManager level,
 								 Vector3 movement,
 								 bool enabled) {
 			ReceiveSceneUpdates = true;
-			this.notificationReciever = notificationReciever;
+			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 			this.Movement = movement;
 			this.Enabled = enabled;
@@ -53,7 +53,7 @@ namespace MHUrho.UnitComponents
 
 		public static UnpoweredFlier GetInstanceFor<T>(T instancePlugin, 
 													   ILevelManager level)
-			where T : InstancePluginBase, INotificationReciever
+			where T : InstancePluginBase, INotificationReceiver
 		{
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
@@ -64,10 +64,10 @@ namespace MHUrho.UnitComponents
 
 		internal static UnpoweredFlier Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
 
-			var notificationReciever = plugin as INotificationReciever;
-			if (notificationReciever == null) {
+			var notificationReceiver = plugin as INotificationReceiver;
+			if (notificationReceiver == null) {
 				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReciever)} interface", nameof(plugin));
+					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 			}
 
 			var sequentialData = new SequentialPluginDataReader(data);
@@ -76,7 +76,7 @@ namespace MHUrho.UnitComponents
 			var enabled = sequentialData.GetCurrent<bool>();
 			sequentialData.MoveNext();
 
-			return new UnpoweredFlier(notificationReciever,
+			return new UnpoweredFlier(notificationReceiver,
 									  level,
 									  movement,
 									  enabled);
@@ -181,7 +181,7 @@ namespace MHUrho.UnitComponents
 			else {
 				//Stop movement
 				Movement = Vector3.Zero;
-				notificationReciever.OnGroundHit(this);
+				notificationReceiver.OnGroundHit(this);
 			}
 		}
 	}

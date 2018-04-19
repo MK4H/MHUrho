@@ -13,7 +13,7 @@ namespace MHUrho.EditorTools
 {
 	class BuildingBuilderToolMandK : BuildingBuilderTool, IMandKTool
 	{
-		public IEnumerable<Button> Buttons => buildingTypeButtons.Keys;
+		public override IEnumerable<Button> Buttons => buildingTypeButtons.Keys;
 
 		private Dictionary<Button, BuildingType> buildingTypeButtons;
 
@@ -55,7 +55,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			input.UIManager.SelectionBarShowButtons(buildingTypeButtons.Keys);
@@ -65,7 +65,7 @@ namespace MHUrho.EditorTools
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			if (selected != null) {

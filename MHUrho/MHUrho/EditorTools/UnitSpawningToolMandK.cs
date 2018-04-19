@@ -12,7 +12,7 @@ using Urho.Urho2D;
 namespace MHUrho.EditorTools
 {
 	class UnitSpawningToolMandK : UnitSpawningTool, IMandKTool {
-		public IEnumerable<Button> Buttons => unitTypeButtons.Keys;
+		public override IEnumerable<Button> Buttons => unitTypeButtons.Keys;
 
 		private Dictionary<Button, UnitType> unitTypeButtons;
 
@@ -55,14 +55,14 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			input.UIManager.SelectionBarShowButtons(unitTypeButtons.Keys);
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			if (selected != null) {

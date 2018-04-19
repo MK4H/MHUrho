@@ -12,7 +12,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools {
 	class VertexHeightToolMandK : VertexHeightTool, IMandKTool {
-		public IEnumerable<Button> Buttons => buttons;
+		public override IEnumerable<Button> Buttons => buttons;
 
 		private const float Sensitivity = 0.01f;
 
@@ -74,7 +74,7 @@ namespace MHUrho.EditorTools {
 
 		}
 
-		public void Enable() {
+		public override void Enable() {
 			if (enabled) return;
 
 			input.UIManager.SelectionBarShowButtons(buttons);
@@ -82,7 +82,7 @@ namespace MHUrho.EditorTools {
 			enabled = true;
 		}
 
-		public void Disable() {
+		public override void Disable() {
 			if (!enabled) return;
 
 			if (mode != Mode.None) {

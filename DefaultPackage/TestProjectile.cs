@@ -44,7 +44,7 @@ namespace DefaultPackage
 
 	}
 
-	public class TestProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReciever 
+	public class TestProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReceiver 
 	{
 		private UnpoweredFlier flier;
 

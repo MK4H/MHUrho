@@ -20,7 +20,7 @@ namespace MHUrho.UnitComponents
 
 	public class WorldWalker : DefaultComponent {
 
-		public interface INotificationReciever {
+		public interface INotificationReceiver {
 			bool CanGoFromTo(ITile fromTile, ITile toTile);
 
 			void OnMovementStarted(WorldWalker walker);
@@ -49,7 +49,7 @@ namespace MHUrho.UnitComponents
 
 		private readonly Map map;
 		private ILevelManager level;
-		private INotificationReciever notificationReciever;
+		private INotificationReceiver notificationReceiver;
 
 		private Path path;
 
@@ -57,7 +57,7 @@ namespace MHUrho.UnitComponents
 		private Vector3 nextWaypoint;
 
 		public static WorldWalker GetInstanceFor<T>(T instancePlugin, ILevelManager level)
-			where T : UnitInstancePluginBase, INotificationReciever {
+			where T : UnitInstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
@@ -66,18 +66,18 @@ namespace MHUrho.UnitComponents
 			return new WorldWalker(instancePlugin, level);
 		}
 
-		protected WorldWalker(INotificationReciever notificationReciever,ILevelManager level) {
+		protected WorldWalker(INotificationReceiver notificationReceiver,ILevelManager level) {
 			ReceiveSceneUpdates = true;
-			this.notificationReciever = notificationReciever;
+			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 			this.map = level.Map;
 			Enabled = false;
 		}
 
-		protected WorldWalker(INotificationReciever notificationReciever, ILevelManager level, bool activated, Path path, ITile target) {
+		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path, ITile target) {
 
 			ReceiveSceneUpdates = true;
-			this.notificationReciever = notificationReciever;
+			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 			this.map = level.Map;
 			this.path = path;
@@ -87,10 +87,10 @@ namespace MHUrho.UnitComponents
 
 		internal static WorldWalker Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
 
-			var notificationReciever = plugin as INotificationReciever;
-			if (notificationReciever == null) {
+			var notificationReceiver = plugin as INotificationReceiver;
+			if (notificationReceiver == null) {
 				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReciever)} interface", nameof(plugin));
+					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 			}
 
 			var indexedData = new IndexedPluginDataReader(data);
@@ -103,11 +103,12 @@ namespace MHUrho.UnitComponents
 				
 			}
 
-			return new WorldWalker(notificationReciever, level, activated, path, target);
+			return new WorldWalker(notificationReceiver, level, activated, path, target);
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
-			//NOTHING
+			nextWaypoint = Node.Position;
+			nextWaypoint = GetNextWaypoint();
 		}
 
 		public override PluginData SaveState() {
@@ -176,9 +177,9 @@ namespace MHUrho.UnitComponents
 					InvalidOperationException($"Cannot attach {nameof(WorldWalker)} to a node that does not have {nameof(Logic.Unit)} component");
 			}
 
-			this.OnMovementStarted += notificationReciever.OnMovementStarted;
-			this.OnMovementEnded += notificationReciever.OnMovementFinished;
-			this.OnMovementFailed += notificationReciever.OnMovementFailed;
+			this.OnMovementStarted += notificationReceiver.OnMovementStarted;
+			this.OnMovementEnded += notificationReceiver.OnMovementFinished;
+			this.OnMovementFailed += notificationReceiver.OnMovementFailed;
 		}
 
 		protected override void OnUpdate(float timeStep) {

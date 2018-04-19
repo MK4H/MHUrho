@@ -48,7 +48,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestUnitInstance : UnitInstancePluginBase, WorldWalker.INotificationReciever, UnitSelector.INotificationReciever, Shooter.INotificationReciever
+	public class TestUnitInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
 	{
 		private ILevelManager level;
 		private Node unitNode;
@@ -113,15 +113,15 @@ namespace DefaultPackage
 
 		}
 
-		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, OrderArgs orderArgs) {
+		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = walker.GoTo(targetTile);
 		}
 
-		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, OrderArgs orderArgs) {
+		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, OrderArgs orderArgs) {
+		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
