@@ -6,14 +6,14 @@ using System.IO;
 
 namespace MHUrho.Desktop
 {
-    class Program
-    {
-        static void Main(string[] args) {
+	class Program
+	{
+		static void Main(string[] args) {
 
-            MyGame.Config = FileManagerDesktop.LoadConfig();
-            MyGame.Config.CopyStaticToDynamic(Path.Combine("Data","Test"));
+			MyGame.Config = FileManagerDesktop.LoadConfig();
+			MyGame.Config.CopyStaticToDynamic(Path.Combine("Data","Test"));
 
-            new MyGame(new ApplicationOptions("Data")).Run();
-        }
-    }
+			new MyGame(new ApplicationOptions("Data")).Run();
+		}
+	}
 }

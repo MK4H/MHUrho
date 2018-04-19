@@ -17,91 +17,91 @@ using System.Diagnostics;
 using Urho;
 
 namespace MHUrho.Droid {
-    public class FileManagerDroid : FileManager {
+	public class FileManagerDroid : FileManager {
 
-        private readonly AssetManager assetManager;
+		private readonly AssetManager assetManager;
 
-        public override Stream OpenStaticFileRO(string relativePath) {
-            try {
-                return assetManager.Open(relativePath);
-            }
-            catch (Exception e) {
-                Urho.IO.Log.Write(LogLevel.Error, $"Could not open file {relativePath}, error: {e}");
-                return null;
-            }
-        }
+		public override Stream OpenStaticFileRO(string relativePath) {
+			try {
+				return assetManager.Open(relativePath);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error, $"Could not open file {relativePath}, error: {e}");
+				return null;
+			}
+		}
 
-        public override Stream OpenStaticFileRW(string relativePath) {
-            if (System.IO.File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
-                return OpenDynamicFile(relativePath, FileMode.Open, FileAccess.ReadWrite);
-            }
+		public override Stream OpenStaticFileRW(string relativePath) {
+			if (System.IO.File.Exists(Path.Combine(DynamicDirPath, relativePath))) {
+				return OpenDynamicFile(relativePath, FileMode.Open, FileAccess.ReadWrite);
+			}
 
-            CopyStaticToDynamic(relativePath);
-            return OpenDynamicFile(relativePath, FileMode.Open, FileAccess.ReadWrite);
-        }
+			CopyStaticToDynamic(relativePath);
+			return OpenDynamicFile(relativePath, FileMode.Open, FileAccess.ReadWrite);
+		}
 
-        public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
-            return new FileStream(Path.Combine(DynamicDirPath, relativePath), fileMode, fileAccess);
-        }
+		public override Stream OpenDynamicFile(string relativePath, FileMode fileMode, FileAccess fileAccess) {
+			return new FileStream(Path.Combine(DynamicDirPath, relativePath), fileMode, fileAccess);
+		}
 
-        public override void CopyStaticToDynamic(string srcRelativePath) {
-            try {
-                string[] subassets = assetManager.List(srcRelativePath);
-                if (subassets.Length == 0) {
-                    CopyFile(srcRelativePath);
-                }
-                else {
-                    var dir = new Java.IO.File(Path.Combine(DynamicDirPath, srcRelativePath));
-                    if (!dir.Exists()) {
-                        dir.Mkdirs();
-                    }
+		public override void CopyStaticToDynamic(string srcRelativePath) {
+			try {
+				string[] subassets = assetManager.List(srcRelativePath);
+				if (subassets.Length == 0) {
+					CopyFile(srcRelativePath);
+				}
+				else {
+					var dir = new Java.IO.File(Path.Combine(DynamicDirPath, srcRelativePath));
+					if (!dir.Exists()) {
+						dir.Mkdirs();
+					}
 
-                    foreach (var file in subassets) {
-                        CopyStaticToDynamic(Path.Combine(srcRelativePath, file));
-                    }
-                }
-            }
-            catch (System.IO.IOException e) {
-                Urho.IO.Log.Write(Urho.LogLevel.Error, $"Copy of static file to dynamic directory failed: {e}");
-                if (Debugger.IsAttached) Debugger.Break();
-            }
-            catch (Java.IO.IOException e) {
-                Urho.IO.Log.Write(Urho.LogLevel.Error, $"Copy of static file to dynamic directory failed: {e}");
-                if (Debugger.IsAttached) Debugger.Break();
-            }
-        }
+					foreach (var file in subassets) {
+						CopyStaticToDynamic(Path.Combine(srcRelativePath, file));
+					}
+				}
+			}
+			catch (System.IO.IOException e) {
+				Urho.IO.Log.Write(Urho.LogLevel.Error, $"Copy of static file to dynamic directory failed: {e}");
+				if (Debugger.IsAttached) Debugger.Break();
+			}
+			catch (Java.IO.IOException e) {
+				Urho.IO.Log.Write(Urho.LogLevel.Error, $"Copy of static file to dynamic directory failed: {e}");
+				if (Debugger.IsAttached) Debugger.Break();
+			}
+		}
 
-        public static FileManagerDroid LoadConfig(AssetManager assetManager) {
-            //TODO: Load config files
-            return new FileManagerDroid(
-                new List<string>()
-                {
-                    Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
-                },
-                assetManager);
-        }
+		public static FileManagerDroid LoadConfig(AssetManager assetManager) {
+			//TODO: Load config files
+			return new FileManagerDroid(
+				new List<string>()
+				{
+					Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
+				},
+				assetManager);
+		}
 
-        protected FileManagerDroid(List<string> packagePaths, AssetManager assetManager)
-            : base( packagePaths,
-                    "TODO",
-                    "TODO",
-                    "/apk",
-                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),
-                    System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log")){
-            PackagePaths = packagePaths;
-            this.assetManager = assetManager;
-        }
+		protected FileManagerDroid(List<string> packagePaths, AssetManager assetManager)
+			: base( packagePaths,
+					"TODO",
+					"TODO",
+					"/apk",
+					System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),
+					System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log")){
+			PackagePaths = packagePaths;
+			this.assetManager = assetManager;
+		}
 
-        private void CopyFile(string srcRelativePath) {
-            //TODO: Exceptions
-            string path = Path.Combine(DynamicDirPath, srcRelativePath);
+		private void CopyFile(string srcRelativePath) {
+			//TODO: Exceptions
+			string path = Path.Combine(DynamicDirPath, srcRelativePath);
 
-            using (var srcFile = assetManager.Open(srcRelativePath)) {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-                using (var dstFile = System.IO.File.Create(path)){
-                    srcFile.CopyTo(dstFile);
-                }
-            }
-        }
-    }
+			using (var srcFile = assetManager.Open(srcRelativePath)) {
+				Directory.CreateDirectory(Path.GetDirectoryName(path));
+				using (var dstFile = System.IO.File.Create(path)){
+					srcFile.CopyTo(dstFile);
+				}
+			}
+		}
+	}
 }
