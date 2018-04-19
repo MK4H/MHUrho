@@ -63,8 +63,10 @@ namespace DefaultPackage
             this.level = level;
             this.unitNode = unit.Node;
             this.unit = unit;
+			this.walker = WorldWalker.GetInstanceFor(this, level);
 
-            unitNode.AddComponent(WorldWalker.GetInstanceFor(this, level));
+
+			unitNode.AddComponent(walker);
             unitNode.AddComponent(UnitSelector.CreateNew(this, level));
             unitNode.AddComponent(Shooter.CreateNew(this,
                                                     level,

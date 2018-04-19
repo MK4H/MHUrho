@@ -4,11 +4,11 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
-    [Flags]
-    enum CollisionLayer {
-        Unit = 1,
-        Building = 2,
-        Projectile = 4
-    }
-    
+	[Flags]
+	enum CollisionLayer {
+		Unit = 1,
+		Building = 2,
+		Projectile = 4
+	}
+	
 }

@@ -191,13 +191,16 @@ namespace MHUrho.UnitComponents {
 
 		protected List<RangeTargetComponent.IShooter> shooters;
 
-		protected MapRangeTarget(int instanceID, ILevelManager level, Vector3 position) {
-			this.InstanceID = instanceID;
+		protected MapRangeTarget(ILevelManager level, Vector3 position) {
+
 			this.Position = position;
 		}
 
-		public static MapRangeTarget CreateNew(int instanceID, ILevelManager level, Vector3 position) {
-
+		public static MapRangeTarget CreateNew(LevelManager level, Vector3 position) {
+			
+			var mapTarget = new MapRangeTarget(level, position);
+			level.RegisterRangeTarget(mapTarget);
+			return mapTarget;
 		}
 
 		public Vector3 GetPositionAfter(float time) {

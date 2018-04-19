@@ -7,14 +7,14 @@ using Urho;
 
 namespace MHUrho.Input
 {
-    public interface IMenuController
-    {
-        bool Enabled { get; }
+	public interface IMenuController
+	{
+		bool Enabled { get; }
 
-        void Enable();
+		void Enable();
 
-        void Disable();
+		void Disable();
 
-        IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player);
-    }
+		IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player);
+	}
 }

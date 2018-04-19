@@ -9,34 +9,34 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-    public class ResourceType : IEntityType, IDisposable {
-        private const string IDAttributeName = "ID";
-        private const string NameAttribute = "name";
-        private const string IconPathElement = "iconPath";
+	public class ResourceType : IEntityType, IDisposable {
+		private const string IDAttributeName = "ID";
+		private const string NameAttribute = "name";
+		private const string IconPathElement = "iconPath";
 
-        public int ID { get; set; }
+		public int ID { get; set; }
 
-        public string Name { get; private set; }
+		public string Name { get; private set; }
 
 
-        public GamePack Package { get; private set; }
-    
-        public Image Icon { get; private set; }
+		public GamePack Package { get; private set; }
+	
+		public Image Icon { get; private set; }
 
-        public void Load(XElement xml, GamePack package) {
-            ID = xml.GetIntFromAttribute(IDAttributeName);
-            Name = xml.Attribute(NameAttribute).Value;
-            Icon = LoadIcon(xml, package);
-            Package = package;
-        }
+		public void Load(XElement xml, GamePack package) {
+			ID = xml.GetIntFromAttribute(IDAttributeName);
+			Name = xml.Attribute(NameAttribute).Value;
+			Icon = LoadIcon(xml, package);
+			Package = package;
+		}
 
-        public void Dispose() {
-            Icon?.Dispose();
-        }
+		public void Dispose() {
+			Icon?.Dispose();
+		}
 
-        private Image LoadIcon(XElement typeElement, GamePack package) {
-            string iconPath = XmlHelpers.GetFullPath(typeElement, IconPathElement, package.XmlDirectoryPath);
-            return PackageManager.Instance.ResourceCache.GetImage(iconPath);
-        }
-    }
+		private Image LoadIcon(XElement typeElement, GamePack package) {
+			string iconPath = XmlHelpers.GetFullPath(typeElement, IconPathElement, package.XmlDirectoryPath);
+			return PackageManager.Instance.ResourceCache.GetImage(iconPath);
+		}
+	}
 }

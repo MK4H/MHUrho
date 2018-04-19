@@ -3,20 +3,20 @@ using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.Logic {
-    public interface IPlayer {
-        
-        int ID { get; }
+	public interface IPlayer {
+		
+		int ID { get; }
 
-        IEnumerable<Unit> GetAllUnits();
+		IEnumerable<Unit> GetAllUnits();
 
-        IReadOnlyList<Unit> GetUnitsOfType(UnitType type);
+		IReadOnlyList<Unit> GetUnitsOfType(UnitType type);
 
-        IEnumerable<Building> GetAllBuildings();
+		IEnumerable<Building> GetAllBuildings();
 
-        IReadOnlyList<Building> GetBuildingsOfType(BuildingType type);
+		IReadOnlyList<Building> GetBuildingsOfType(BuildingType type);
 
-        int GetResourcesOfType(ResourceType type);
+		int GetResourcesOfType(ResourceType type);
 
-        IEnumerable<IPlayer> GetEnemyPlayers();
-    }
+		IEnumerable<IPlayer> GetEnemyPlayers();
+	}
 }

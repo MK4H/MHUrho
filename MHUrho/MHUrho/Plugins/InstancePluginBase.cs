@@ -7,24 +7,24 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Plugins
 {
-    public abstract class InstancePluginBase
-    {
-        public ILevelManager Level { get; protected set; }
+	public abstract class InstancePluginBase
+	{
+		public ILevelManager Level { get; protected set; }
 
-        public Map Map => Level.Map;
+		public Map Map => Level.Map;
 
-        protected InstancePluginBase(ILevelManager level) {
-            this.Level = level;
-        }
+		protected InstancePluginBase(ILevelManager level) {
+			this.Level = level;
+		}
 
-        protected InstancePluginBase() {
+		protected InstancePluginBase() {
 
-        }
+		}
 
-        public virtual void OnUpdate(float timeStep) {
-            //NOTHING
-        }
+		public virtual void OnUpdate(float timeStep) {
+			//NOTHING
+		}
 
-        public abstract void SaveState(PluginDataWrapper pluginData);
-    }
+		public abstract void SaveState(PluginDataWrapper pluginData);
+	}
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.EditorTools
 {
-    abstract class UnitSelectorTool : Tool
-    {
-    }
+	abstract class UnitSelectorTool : Tool
+	{
+	}
 }

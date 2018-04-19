@@ -4,8 +4,8 @@ using System.Text;
 
 namespace MHUrho.EditorTools
 {
-    abstract class StaticRectangleTool : Tool
-    {
+	abstract class StaticRectangleTool : Tool
+	{
 
-    }
+	}
 }

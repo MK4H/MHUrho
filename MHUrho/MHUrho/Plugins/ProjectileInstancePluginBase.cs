@@ -8,42 +8,42 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class ProjectileInstancePluginBase : InstancePluginBase
-    {
-        protected Projectile projectile;
+	public abstract class ProjectileInstancePluginBase : InstancePluginBase
+	{
+		protected Projectile projectile;
 
-        protected ProjectileInstancePluginBase(ILevelManager level, Projectile projectile) 
-            :base(level)
-        {
-            this.projectile = projectile;
-        }
+		protected ProjectileInstancePluginBase(ILevelManager level, Projectile projectile) 
+			:base(level)
+		{
+			this.projectile = projectile;
+		}
 
-        protected ProjectileInstancePluginBase() {
+		protected ProjectileInstancePluginBase() {
 
-        }
+		}
 
-        /// <summary>
-        /// Loads instance into the state saved in <paramref name="pluginData"/>
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="projectile"></param>
-        /// <param name="pluginData">stored state of the building plugin</param>
-        /// <returns>Instance loaded into saved state</returns>
-        public abstract void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData);
+		/// <summary>
+		/// Loads instance into the state saved in <paramref name="pluginData"/>
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="projectile"></param>
+		/// <param name="pluginData">stored state of the building plugin</param>
+		/// <returns>Instance loaded into saved state</returns>
+		public abstract void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData);
 
-        /// <summary>
-        /// Reinitializes this instance into default state, to allow for projectile pooling
-        /// </summary>
-        /// <param name="level">LevelManager to connect to other things</param>
-        public abstract void ReInitialize(ILevelManager level);
+		/// <summary>
+		/// Reinitializes this instance into default state, to allow for projectile pooling
+		/// </summary>
+		/// <param name="level">LevelManager to connect to other things</param>
+		public abstract void ReInitialize(ILevelManager level);
 
-        public virtual bool ShootProjectile(RangeTargetComponent target) {
-            return false;
-        }
+		public virtual bool ShootProjectile(IRangeTarget target) {
+			return false;
+		}
 
-        public virtual bool ShootProjectile(Vector3 target) {
-            return false;
-        }
+		public virtual bool ShootProjectile(Vector3 movement) {
+			return false;
+		}
 
-    }
+	}
 }

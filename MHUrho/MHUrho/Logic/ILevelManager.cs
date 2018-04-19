@@ -7,37 +7,41 @@ using MHUrho.WorldMap;
 using Urho;
 
 namespace MHUrho.Logic {
-    public interface ILevelManager {
-        float GameSpeed { get; set; }
+	public interface ILevelManager {
+		float GameSpeed { get; set; }
 
-        Map Map { get; }
+		Map Map { get; }
 
-        Scene Scene { get; }
+		Scene Scene { get; }
 
-        DefaultComponentFactory DefaultComponentFactory { get; }
+		DefaultComponentFactory DefaultComponentFactory { get; }
 
-        PackageManager PackageManager { get; }
+		PackageManager PackageManager { get; }
 
-        event OnUpdateDelegate Update;
+		event OnUpdateDelegate Update;
 
-        IEnumerable<Unit> Units { get; }
+		IEnumerable<Unit> Units { get; }
 
-        IEnumerable<Player> Players { get; }
+		IEnumerable<Player> Players { get; }
 
-        IEnumerable<Building> Buildings { get; }
+		IEnumerable<Building> Buildings { get; }
 
-        Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
+		Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
 
-        Building BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player);
+		Building BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player);
 
-        Unit GetUnit(int ID);
+		Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target);
 
-        Building GetBuilding(int ID);
+		Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement);
 
-        Player GetPlayer(int ID);
+		Unit GetUnit(int ID);
 
-        Entity GetEntity(int ID);
+		Building GetBuilding(int ID);
 
-        IRangeTarget GetRangeTarget(int ID);
-    }
+		Player GetPlayer(int ID);
+
+		Entity GetEntity(int ID);
+
+		IRangeTarget GetRangeTarget(int ID);
+	}
 }

@@ -10,34 +10,34 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-    public abstract class BuildingTypePluginBase : TypePluginBase {
+	public abstract class BuildingTypePluginBase : TypePluginBase {
 
-        /// <summary>
-        /// Creates new instance from scratch
-        /// </summary>
-        /// <param name="level">level in which the building is created</param>
-        /// <param name="building">building Plugin class</param>
-        /// <returns>New instance in default state</returns>
-        public abstract BuildingInstancePluginBase CreateNewInstance(ILevelManager level, Building building);
+		/// <summary>
+		/// Creates new instance from scratch
+		/// </summary>
+		/// <param name="level">level in which the building is created</param>
+		/// <param name="building">building Plugin class</param>
+		/// <returns>New instance in default state</returns>
+		public abstract BuildingInstancePluginBase CreateNewInstance(ILevelManager level, Building building);
 
-        /// <summary>
-        /// Creates instance of <see cref="BuildingInstancePluginBase"/> that will be loaded by <see cref="BuildingInstancePluginBase.LoadState(LevelManager, PluginDataWrapper)"/>
-        /// </summary>
-        /// <returns>New instance, that will be loaded in the next step</returns>
-        public abstract BuildingInstancePluginBase GetInstanceForLoading();
+		/// <summary>
+		/// Creates instance of <see cref="BuildingInstancePluginBase"/> that will be loaded by <see cref="BuildingInstancePluginBase.LoadState(LevelManager, PluginDataWrapper)"/>
+		/// </summary>
+		/// <returns>New instance, that will be loaded in the next step</returns>
+		public abstract BuildingInstancePluginBase GetInstanceForLoading();
 
-        public abstract bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
+		public abstract bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
 
-        public abstract void PopulateUI(MandKUI mouseAndKeyboardUI);
+		public abstract void PopulateUI(MandKUI mouseAndKeyboardUI);
 
-        public abstract void ClearUI(MandKUI mouseAndKeyboardUI);
+		public abstract void ClearUI(MandKUI mouseAndKeyboardUI);
 
-        public abstract void PopulateUI(TouchUI touchUI);
+		public abstract void PopulateUI(TouchUI touchUI);
 
-        public abstract void ClearUI(TouchUI touchUI);
+		public abstract void ClearUI(TouchUI touchUI);
 
-        public abstract void AddSelected(BuildingInstancePluginBase buildingInstance);
+		public abstract void AddSelected(BuildingInstancePluginBase buildingInstance);
 
-        public abstract void RemoveSelected(BuildingInstancePluginBase buildingInstance);
-    }
+		public abstract void RemoveSelected(BuildingInstancePluginBase buildingInstance);
+	}
 }

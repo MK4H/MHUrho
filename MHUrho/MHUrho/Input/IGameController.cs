@@ -7,17 +7,17 @@ using Urho;
 
 namespace MHUrho.Input
 { 
-    public interface IGameController : IDisposable
-    {
-        IPlayer Player { get; set; }
+	public interface IGameController : IDisposable
+	{
+		IPlayer Player { get; set; }
 
-        bool Enabled { get; }
+		bool Enabled { get; }
 
-        bool DoOnlySingleRaycasts { get; set; }
+		bool DoOnlySingleRaycasts { get; set; }
 
-        void Enable();
+		void Enable();
 
-        void Disable();
+		void Disable();
 
-    }
+	}
 }

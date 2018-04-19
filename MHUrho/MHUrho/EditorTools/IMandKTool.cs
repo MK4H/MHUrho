@@ -7,15 +7,15 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
-    public interface IMandKTool {
-        Texture2D Icon { get; }
+	public interface IMandKTool {
+		Texture2D Icon { get; }
 
-        IEnumerable<Button> Buttons { get; }
+		IEnumerable<Button> Buttons { get; }
 
-        void Enable();
+		void Enable();
 
-        void Disable();
+		void Disable();
 
-        
-    }
+		
+	}
 }

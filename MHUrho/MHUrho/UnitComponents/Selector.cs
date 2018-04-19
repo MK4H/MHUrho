@@ -7,23 +7,23 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    public class OrderArgs {
-        public bool Executed { get; set; }
-    }
+	public class OrderArgs {
+		public bool Executed { get; set; }
+	}
 
-    public abstract class Selector : DefaultComponent {
-        public virtual IPlayer Player { get; }
+	public abstract class Selector : DefaultComponent {
+		public virtual IPlayer Player { get; }
 
-        public virtual bool Selected { get; protected set; }
+		public virtual bool Selected { get; protected set; }
 
-        public abstract bool Order(ITile tile);
+		public abstract bool Order(ITile tile);
 
-        public abstract bool Order(Unit unit);
+		public abstract bool Order(Unit unit);
 
-        public abstract bool Order(Building unit);
+		public abstract bool Order(Building unit);
 
-        public abstract void Select();
+		public abstract void Select();
 
-        public abstract void Deselect();
-    }
+		public abstract void Deselect();
+	}
 }

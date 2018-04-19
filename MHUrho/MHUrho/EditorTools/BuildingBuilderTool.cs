@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.EditorTools
 {
-    abstract class BuildingBuilderTool : Tool
-    {
-    }
+	abstract class BuildingBuilderTool : Tool
+	{
+	}
 }

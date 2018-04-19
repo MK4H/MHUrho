@@ -7,27 +7,27 @@ using MHUrho.Storage;
 
 namespace MHUrho.UnitComponents
 {
-    public enum DefaultComponents {
-        Shooter,
-        Meele,
-        ResourceCarrier,
-        UnitSelector,
-        WallClimber,
-        WorkQueue,
-        WorldWalker,
-        UnpoweredFlier,
-        StaticRangeTarget,
-        MovingRangeTarget
-    }
+	public enum DefaultComponents {
+		Shooter,
+		Meele,
+		ResourceCarrier,
+		UnitSelector,
+		WallClimber,
+		WorkQueue,
+		WorldWalker,
+		UnpoweredFlier,
+		StaticRangeTarget,
+		MovingRangeTarget
+	}
 
-    public abstract class DefaultComponent : Component {
+	public abstract class DefaultComponent : Component {
 
-        public new abstract DefaultComponents ComponentTypeID{ get; }
+		public new abstract DefaultComponents ComponentTypeID{ get; }
 
-        public abstract string ComponentTypeName { get; }
+		public abstract string ComponentTypeName { get; }
 
-        internal abstract void ConnectReferences(ILevelManager level);
+		internal abstract void ConnectReferences(ILevelManager level);
 
-        public abstract PluginData SaveState();
-    }
+		public abstract PluginData SaveState();
+	}
 }

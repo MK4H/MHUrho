@@ -10,63 +10,63 @@ using Urho.Gui;
 
 namespace MHUrho.EditorTools
 {
-    class StaticRectangleToolMandK : StaticRectangleTool, IMandKTool
-    {
-        public IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
+	class StaticRectangleToolMandK : StaticRectangleTool, IMandKTool
+	{
+		public IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
 
-        public IntVector2 Size { get; set; }
+		public IntVector2 Size { get; set; }
 
-        private GameMandKController input;
-        private Map Map => input.LevelManager.Map;
+		private GameMandKController input;
+		private Map Map => input.LevelManager.Map;
 
-        private bool enabled;
+		private bool enabled;
 
-        private ITile fixedCenter;
+		private ITile fixedCenter;
 
-        public StaticRectangleToolMandK(GameMandKController input, IntVector2 size) {
-            this.input = input;
-            this.Size = size;
-        }
+		public StaticRectangleToolMandK(GameMandKController input, IntVector2 size) {
+			this.input = input;
+			this.Size = size;
+		}
 
-        public override void Dispose() {
+		public override void Dispose() {
 
-        }
+		}
 
-        public void Enable() {
-            if (enabled) return;
+		public void Enable() {
+			if (enabled) return;
 
-            input.MouseMove += OnMouseMove;
-            enabled = true;
-            
-        }
+			input.MouseMove += OnMouseMove;
+			enabled = true;
+			
+		}
 
-        public void Disable() {
-            if (!enabled) return;
+		public void Disable() {
+			if (!enabled) return;
 
-            input.MouseMove -= OnMouseMove;
-            Map.DisableHighlight();
-            enabled = false;
-        }
+			input.MouseMove -= OnMouseMove;
+			Map.DisableHighlight();
+			enabled = false;
+		}
 
-        public void FixHighlight(ITile centerTile) {
-            fixedCenter = centerTile;
-        }
+		public void FixHighlight(ITile centerTile) {
+			fixedCenter = centerTile;
+		}
 
-        public void FreeHighlight() {
-            fixedCenter = null;
-        }
+		public void FreeHighlight() {
+			fixedCenter = null;
+		}
 
-        private void OnMouseMove(MouseMovedEventArgs e) {
-            if (fixedCenter != null) {
-                Map.HighlightArea(fixedCenter, Size, WorldMap.HighlightMode.Full, Color.Green);
-                return;
-            }
+		private void OnMouseMove(MouseMovedEventArgs e) {
+			if (fixedCenter != null) {
+				Map.HighlightArea(fixedCenter, Size, WorldMap.HighlightMode.Full, Color.Green);
+				return;
+			}
 
-            var centerTile = input.GetTileUnderCursor();
-            if (centerTile != null) {
-                Map.HighlightArea(centerTile, Size, WorldMap.HighlightMode.Full, Color.Green);
-            }
+			var centerTile = input.GetTileUnderCursor();
+			if (centerTile != null) {
+				Map.HighlightArea(centerTile, Size, WorldMap.HighlightMode.Full, Color.Green);
+			}
 
-        }
-    }
+		}
+	}
 }

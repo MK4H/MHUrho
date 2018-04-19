@@ -42,10 +42,13 @@ namespace DefaultPackage
 
         private WorldWalker walker;
         private bool homeGoing = false;
+		private bool started = false;
 
         public TestWorkerInstance(ILevelManager level, Unit unit) : base(level, unit) {
             walker = WorldWalker.GetInstanceFor(this, level);
-        }
+			unit.Node.AddComponent(walker);
+
+		}
 
         public TestWorkerInstance() {
 
@@ -56,6 +59,10 @@ namespace DefaultPackage
                 throw new InvalidOperationException("TestWorker has no building");
             }
 
+			if (!started) {
+				started = true;
+				OnMovementFinished(walker);
+			}
             
         }
 
@@ -82,12 +89,14 @@ namespace DefaultPackage
 
         public void OnMovementFinished(WorldWalker walker) {
             if (homeGoing) {
-                walker.GoTo(new IntVector2(20, 20));
-                homeGoing = !homeGoing;
+				homeGoing = !homeGoing;
+				walker.GoTo(new IntVector2(20, 20));
+                
             }
             else if (!homeGoing) {
-                walker.GoTo(WorkedBuilding.GetInterfaceTile(this));
-                homeGoing = !homeGoing;
+				homeGoing = !homeGoing;
+				walker.GoTo(WorkedBuilding.GetInterfaceTile(this));
+                
             }
         }
 

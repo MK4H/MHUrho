@@ -6,13 +6,13 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
-    abstract class Tool : IDisposable {
-        public Texture2D Icon { get; protected set; }
+	abstract class Tool : IDisposable {
+		public Texture2D Icon { get; protected set; }
 
-        public abstract void Dispose();
+		public abstract void Dispose();
 
-        protected Tool() {
-            Icon = null;
-        }
-    }
+		protected Tool() {
+			Icon = null;
+		}
+	}
 }

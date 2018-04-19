@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.EditorTools
 {
-    abstract class UnitSpawningTool :Tool
-    {
-    }
+	abstract class UnitSpawningTool :Tool
+	{
+	}
 }

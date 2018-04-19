@@ -8,153 +8,153 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    internal delegate void TaskStartedDelegate(ActionQueue queue, ActionQueue.WorkTask workTask);
-    internal delegate void TaskFinishedDelegate(ActionQueue queue, ActionQueue.WorkTask workTask);
+	internal delegate void TaskStartedDelegate(ActionQueue queue, ActionQueue.WorkTask workTask);
+	internal delegate void TaskFinishedDelegate(ActionQueue queue, ActionQueue.WorkTask workTask);
 
-    public class ActionQueue : DefaultComponent {
+	public class ActionQueue : DefaultComponent {
 
-        public interface INotificationReciver {
-            void OnWorkTaskStarted(ActionQueue queue, WorkTask workTask);
+		public interface INotificationReciver {
+			void OnWorkTaskStarted(ActionQueue queue, WorkTask workTask);
 
-            void OnWorkTaskFinished(ActionQueue queue, WorkTask workTask);
-        }
+			void OnWorkTaskFinished(ActionQueue queue, WorkTask workTask);
+		}
 
-        private interface IWorkTask {
-            bool IsFinished();
-            void OnUpdate(float timeStep);            
-        }
+		private interface IWorkTask {
+			bool IsFinished();
+			void OnUpdate(float timeStep);            
+		}
 
-        public abstract class WorkTask : IWorkTask {
-            public int Tag { get; private set; }
+		public abstract class WorkTask : IWorkTask {
+			public int Tag { get; private set; }
 
-            protected WorkTask(int tag) {
-                this.Tag = tag;
-            }
+			protected WorkTask(int tag) {
+				this.Tag = tag;
+			}
 
-            bool IWorkTask.IsFinished() {
-                return IsFinished();
-            }
+			bool IWorkTask.IsFinished() {
+				return IsFinished();
+			}
 
-            void IWorkTask.OnUpdate(float timeStep) {
-                OnUpdate(timeStep);
-            }
+			void IWorkTask.OnUpdate(float timeStep) {
+				OnUpdate(timeStep);
+			}
 
-            protected abstract bool IsFinished();
+			protected abstract bool IsFinished();
 
-            protected virtual void OnUpdate(float timeStep) {
-                //NOTHING
-            }
+			protected virtual void OnUpdate(float timeStep) {
+				//NOTHING
+			}
 
-        }
+		}
 
-        public class TimedWorkTask : WorkTask {
-            
-            private float duration;
+		public class TimedWorkTask : WorkTask {
+			
+			private float duration;
 
-            public TimedWorkTask(float duration, int tag) : base(tag) {
-                this.duration = duration;
-            }
+			public TimedWorkTask(float duration, int tag) : base(tag) {
+				this.duration = duration;
+			}
 
-            protected override bool IsFinished() {
-                return duration <= 0;
-            }
+			protected override bool IsFinished() {
+				return duration <= 0;
+			}
 
-            protected override void OnUpdate(float timeStep) {
-                duration -= timeStep;
-            }
-        }
+			protected override void OnUpdate(float timeStep) {
+				duration -= timeStep;
+			}
+		}
 
-        public class DelegatedWorkTask : WorkTask {
+		public class DelegatedWorkTask : WorkTask {
 
-            private bool finished = false;
+			private bool finished = false;
 
-            public DelegatedWorkTask(int tag) : base(tag) {
+			public DelegatedWorkTask(int tag) : base(tag) {
 
-            }
+			}
 
-            public void Finish() {
-                finished = true;
-            }
+			public void Finish() {
+				finished = true;
+			}
 
-            protected override bool IsFinished() {
-                return finished;
-            }
-        }
+			protected override bool IsFinished() {
+				return finished;
+			}
+		}
 
-        public static string ComponentName = nameof(ActionQueue);
-        public static DefaultComponents ComponentID = DefaultComponents.WorkQueue;
+		public static string ComponentName = nameof(ActionQueue);
+		public static DefaultComponents ComponentID = DefaultComponents.WorkQueue;
 
-        public override string ComponentTypeName => ComponentName;
-        public override DefaultComponents ComponentTypeID => ComponentID;
+		public override string ComponentTypeName => ComponentName;
+		public override DefaultComponents ComponentTypeID => ComponentID;
 
-        internal event TaskStartedDelegate OnTaskStarted;
-        internal event TaskFinishedDelegate OnTaskFinished;
+		internal event TaskStartedDelegate OnTaskStarted;
+		internal event TaskFinishedDelegate OnTaskFinished;
 
-        private readonly Queue<IWorkTask> workQueue;
+		private readonly Queue<IWorkTask> workQueue;
 
-        private INotificationReciver notificationReciver;
+		private INotificationReciver notificationReciver;
 
-        public ActionQueue CreateNew<T>(T instancePlugin)
-            where T : InstancePluginBase, INotificationReciver {
+		public ActionQueue CreateNew<T>(T instancePlugin)
+			where T : InstancePluginBase, INotificationReciver {
 
-            if (instancePlugin == null) {
-                throw new ArgumentNullException(nameof(instancePlugin));
-            }
+			if (instancePlugin == null) {
+				throw new ArgumentNullException(nameof(instancePlugin));
+			}
 
-            return new ActionQueue(instancePlugin);
-        }
+			return new ActionQueue(instancePlugin);
+		}
 
-        protected ActionQueue(INotificationReciver notificationReciver) {
-            this.notificationReciver = notificationReciver;
-            workQueue = new Queue<IWorkTask>();
-        }
+		protected ActionQueue(INotificationReciver notificationReciver) {
+			this.notificationReciver = notificationReciver;
+			workQueue = new Queue<IWorkTask>();
+		}
 
-        internal static ActionQueue Load(ILevelManager level, InstancePluginBase plugin, PluginData pluginData) {
-            throw new NotImplementedException();
-        }
+		internal static ActionQueue Load(ILevelManager level, InstancePluginBase plugin, PluginData pluginData) {
+			throw new NotImplementedException();
+		}
 
-        internal override void ConnectReferences(ILevelManager level) {
-            //NOTHING
-        }
+		internal override void ConnectReferences(ILevelManager level) {
+			//NOTHING
+		}
 
-        public override PluginData SaveState() {
-            throw new NotImplementedException();
-        }
+		public override PluginData SaveState() {
+			throw new NotImplementedException();
+		}
 
-        public void EnqueueTask(WorkTask task) {
-            workQueue.Enqueue(task);
-        }
+		public void EnqueueTask(WorkTask task) {
+			workQueue.Enqueue(task);
+		}
 
-        public override void OnAttachedToNode(Node node) {
-            base.OnAttachedToNode(node);
+		public override void OnAttachedToNode(Node node) {
+			base.OnAttachedToNode(node);
 
-            OnTaskStarted += notificationReciver.OnWorkTaskStarted;
-            OnTaskFinished += notificationReciver.OnWorkTaskFinished;
-        }
+			OnTaskStarted += notificationReciver.OnWorkTaskStarted;
+			OnTaskFinished += notificationReciver.OnWorkTaskFinished;
+		}
 
-        protected override void OnUpdate(float timeStep) {
-            base.OnUpdate(timeStep);
+		protected override void OnUpdate(float timeStep) {
+			base.OnUpdate(timeStep);
 
-            if (!EnabledEffective) return;
+			if (!EnabledEffective) return;
 
-            if (workQueue.Count == 0) {
-                return;
-            }
+			if (workQueue.Count == 0) {
+				return;
+			}
 
-            var currentTask = workQueue.Peek();
-            currentTask.OnUpdate(timeStep);
+			var currentTask = workQueue.Peek();
+			currentTask.OnUpdate(timeStep);
 
-            if (currentTask.IsFinished()) {
-                OnTaskFinished?.Invoke(this, (WorkTask)currentTask);
-            }
+			if (currentTask.IsFinished()) {
+				OnTaskFinished?.Invoke(this, (WorkTask)currentTask);
+			}
 
-            workQueue.Dequeue();
+			workQueue.Dequeue();
 
-            if (workQueue.Count == 0) return;
+			if (workQueue.Count == 0) return;
 
-            OnTaskStarted?.Invoke(this, (WorkTask) currentTask);
-        }
+			OnTaskStarted?.Invoke(this, (WorkTask) currentTask);
+		}
 
-        
-    }
+		
+	}
 }

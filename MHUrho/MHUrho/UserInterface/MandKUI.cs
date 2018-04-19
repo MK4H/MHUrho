@@ -13,250 +13,250 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-    public class MandKUI : IDisposable {
-        private static Color selectedColor = Color.Gray;
-        private static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
+	public class MandKUI : IDisposable {
+		private static Color selectedColor = Color.Gray;
+		private static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
-        private static Texture2D DefaultButtonTexture =
-            PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
-
-
-        private readonly MyGame game;
-        private readonly GameMandKController inputCtl;
-
-        private UI UI => game.UI;
-
-        private IPlayer player => inputCtl.Player;
-
-        private Urho.Input Input => game.Input;
+		private static Texture2D DefaultButtonTexture =
+			PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
 
-        private readonly UIElement toolSelection;
-        private readonly  UIElement selectionBar;
+		private readonly MyGame game;
+		private readonly GameMandKController inputCtl;
 
-        private Dictionary<UIElement, IMandKTool> tools;
+		private UI UI => game.UI;
 
-        private UIElement selectionBarSelected;
-        private UIElement toolSelected;
+		private IPlayer player => inputCtl.Player;
 
-        private int hovering = 0;
-
-        public MandKUI(MyGame game, GameMandKController inputCtl) {
-            this.game = game;
-            this.inputCtl = inputCtl;
-            this.tools = new Dictionary<UIElement, IMandKTool>();
-
-            selectionBar = UI.Root.CreateWindow();
-            selectionBar.SetStyle("windowStyle");
-            selectionBar.LayoutMode = LayoutMode.Horizontal;
-            selectionBar.LayoutSpacing = 10;
-            selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
-            selectionBar.Position = new IntVector2(50, UI.Root.Height - 100);
-            selectionBar.Height = 100;
-            selectionBar.SetFixedWidth(UI.Root.Width - 50);
-            selectionBar.SetColor(Color.Yellow);
-            selectionBar.FocusMode = FocusMode.NotFocusable;
-            selectionBar.ClipChildren = true;
-            selectionBar.HoverBegin += UIHoverBegin;
-            selectionBar.HoverEnd += UIHoverEnd;
+		private Urho.Input Input => game.Input;
 
 
-            toolSelection = UI.Root.CreateWindow();
-            toolSelection.LayoutMode = LayoutMode.Vertical;
-            toolSelection.LayoutSpacing = 0;
-            toolSelection.HorizontalAlignment = HorizontalAlignment.Left;
-            toolSelection.VerticalAlignment = VerticalAlignment.Bottom;
-            toolSelection.Position = new IntVector2(0, 0);
-            toolSelection.Height = UI.Root.Height;
-            toolSelection.SetFixedWidth(50);
-            toolSelection.SetColor(Color.Blue);
-            toolSelection.FocusMode = FocusMode.NotFocusable;
-            toolSelection.ClipChildren = true;
-            toolSelection.HoverBegin += UIHoverBegin;
-            toolSelection.HoverEnd += UIHoverEnd;
-        }
+		private readonly UIElement toolSelection;
+		private readonly  UIElement selectionBar;
 
-        public void Dispose() {
-            ClearDelegates();
-            selectionBar.RemoveAllChildren();
-            selectionBar.Remove();
-            selectionBar.Dispose();
-            toolSelection.RemoveAllChildren();
-            toolSelection.Remove();
-            toolSelection.Dispose();
+		private Dictionary<UIElement, IMandKTool> tools;
 
-            Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
-        }
+		private UIElement selectionBarSelected;
+		private UIElement toolSelected;
 
-        public void EnableUI() {
-            selectionBar.Enabled = true;
-            toolSelection.Enabled = true;
-        }
+		private int hovering = 0;
 
-        public void DisableUI() {
-            selectionBar.Enabled = false;
-            toolSelection.Enabled = false;
-        }
+		public MandKUI(MyGame game, GameMandKController inputCtl) {
+			this.game = game;
+			this.inputCtl = inputCtl;
+			this.tools = new Dictionary<UIElement, IMandKTool>();
 
-        public void HideUI() {
-            selectionBar.Visible = false;
-            toolSelection.Visible = false;
-        }
+			selectionBar = UI.Root.CreateWindow();
+			selectionBar.SetStyle("windowStyle");
+			selectionBar.LayoutMode = LayoutMode.Horizontal;
+			selectionBar.LayoutSpacing = 10;
+			selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
+			selectionBar.Position = new IntVector2(50, UI.Root.Height - 100);
+			selectionBar.Height = 100;
+			selectionBar.SetFixedWidth(UI.Root.Width - 50);
+			selectionBar.SetColor(Color.Yellow);
+			selectionBar.FocusMode = FocusMode.NotFocusable;
+			selectionBar.ClipChildren = true;
+			selectionBar.HoverBegin += UIHoverBegin;
+			selectionBar.HoverEnd += UIHoverEnd;
 
-        public void ShowUI() {
-            selectionBar.Visible = true;
-            toolSelection.Visible = true;
-        }
 
-        public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
+			toolSelection = UI.Root.CreateWindow();
+			toolSelection.LayoutMode = LayoutMode.Vertical;
+			toolSelection.LayoutSpacing = 0;
+			toolSelection.HorizontalAlignment = HorizontalAlignment.Left;
+			toolSelection.VerticalAlignment = VerticalAlignment.Bottom;
+			toolSelection.Position = new IntVector2(0, 0);
+			toolSelection.Height = UI.Root.Height;
+			toolSelection.SetFixedWidth(50);
+			toolSelection.SetColor(Color.Blue);
+			toolSelection.FocusMode = FocusMode.NotFocusable;
+			toolSelection.ClipChildren = true;
+			toolSelection.HoverBegin += UIHoverBegin;
+			toolSelection.HoverEnd += UIHoverEnd;
+		}
 
-            foreach (var button in buttons) {
-                SelectionBarShowButton(button);
-            }
-        }
+		public void Dispose() {
+			ClearDelegates();
+			selectionBar.RemoveAllChildren();
+			selectionBar.Remove();
+			selectionBar.Dispose();
+			toolSelection.RemoveAllChildren();
+			toolSelection.Remove();
+			toolSelection.Dispose();
 
-        public void SelectionBarShowButton(Button button) {
-            if (selectionBar.FindChild(button) == uint.MaxValue) {
-                throw new ArgumentException("button is not a child of the selectionBar");
-            }
+			Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
+		}
 
-            button.HoverBegin += Button_HoverBegin;
-            button.HoverBegin += UIHoverBegin;
-            button.HoverEnd += Button_HoverEnd;
-            button.HoverEnd += UIHoverEnd;
-            button.Visible = true;
-        }
+		public void EnableUI() {
+			selectionBar.Enabled = true;
+			toolSelection.Enabled = true;
+		}
 
-        public void SelectionBarAddButton(Button button) {
-            selectionBar.AddChild(button);
-        }
+		public void DisableUI() {
+			selectionBar.Enabled = false;
+			toolSelection.Enabled = false;
+		}
 
-        public void SelectionBarHideButton(Button button) {
-            if (selectionBar.FindChild(button) == uint.MaxValue) {
-                throw new ArgumentException("button is not a child of the selectionBar");
-            }
+		public void HideUI() {
+			selectionBar.Visible = false;
+			toolSelection.Visible = false;
+		}
 
-            if (!button.Visible) {
-                throw new ArgumentException("Hiding already hidden button");
-            }
+		public void ShowUI() {
+			selectionBar.Visible = true;
+			toolSelection.Visible = true;
+		}
 
-            button.HoverBegin -= Button_HoverBegin;
-            button.HoverBegin -= UIHoverBegin;
-            button.HoverEnd -= Button_HoverEnd;
-            button.HoverEnd -= UIHoverEnd;
-            button.Visible = false;
-        }
+		public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
 
-        /// <summary>
-        /// Deactivates buttons and hides them
-        /// </summary>
-        public void SelectionBarClearButtons() {
-            selectionBarSelected = null;
+			foreach (var button in buttons) {
+				SelectionBarShowButton(button);
+			}
+		}
 
-            foreach (Button button in selectionBar.Children) {
-                if (button.Visible) {
-                    button.HoverBegin -= Button_HoverBegin;
-                    button.HoverBegin -= UIHoverBegin;
-                    button.HoverEnd -= Button_HoverEnd;
-                    button.HoverEnd -= UIHoverEnd;
-                    button.Visible = false;
-                }
-            }
-        }
+		public void SelectionBarShowButton(Button button) {
+			if (selectionBar.FindChild(button) == uint.MaxValue) {
+				throw new ArgumentException("button is not a child of the selectionBar");
+			}
 
-        public void Deselect() {
-            selectionBarSelected.SetColor(Color.White);
-            selectionBarSelected = null;
-        }
+			button.HoverBegin += Button_HoverBegin;
+			button.HoverBegin += UIHoverBegin;
+			button.HoverEnd += Button_HoverEnd;
+			button.HoverEnd += UIHoverEnd;
+			button.Visible = true;
+		}
 
-        public void SelectButton(Button button) {
-            selectionBarSelected?.SetColor(Color.White);
-            selectionBarSelected = button;
-            selectionBarSelected.SetColor(Color.Gray);
-        }
+		public void SelectionBarAddButton(Button button) {
+			selectionBar.AddChild(button);
+		}
 
-        public void AddTool(IMandKTool tool) {
-            var button = toolSelection.CreateButton();
-            button.SetStyle("toolButton");
-            button.Size = new IntVector2(50, 50);
-            button.HorizontalAlignment = HorizontalAlignment.Center;
-            button.VerticalAlignment = VerticalAlignment.Center;
-            button.Pressed += ToolSwitchbuttonPress;
-            button.HoverBegin += UIHoverBegin;
-            button.HoverEnd += UIHoverEnd;
-            button.FocusMode = FocusMode.ResetFocus;
-            button.MaxSize = new IntVector2(50, 50);
-            button.MinSize = new IntVector2(50, 50);
-            button.Texture = tool.Icon ?? DefaultButtonTexture;
+		public void SelectionBarHideButton(Button button) {
+			if (selectionBar.FindChild(button) == uint.MaxValue) {
+				throw new ArgumentException("button is not a child of the selectionBar");
+			}
 
-            tools.Add(button, tool);
+			if (!button.Visible) {
+				throw new ArgumentException("Hiding already hidden button");
+			}
 
-            foreach (var toolButton in tool.Buttons) {
-                selectionBar.AddChild(toolButton);
-            }
+			button.HoverBegin -= Button_HoverBegin;
+			button.HoverBegin -= UIHoverBegin;
+			button.HoverEnd -= Button_HoverEnd;
+			button.HoverEnd -= UIHoverEnd;
+			button.Visible = false;
+		}
 
-        }
+		/// <summary>
+		/// Deactivates buttons and hides them
+		/// </summary>
+		public void SelectionBarClearButtons() {
+			selectionBarSelected = null;
 
-        public void RemoveTool(IMandKTool tool) {
-            throw new NotImplementedException();
-        }
+			foreach (Button button in selectionBar.Children) {
+				if (button.Visible) {
+					button.HoverBegin -= Button_HoverBegin;
+					button.HoverBegin -= UIHoverBegin;
+					button.HoverEnd -= Button_HoverEnd;
+					button.HoverEnd -= UIHoverEnd;
+					button.Visible = false;
+				}
+			}
+		}
 
-        private void Button_HoverBegin(HoverBeginEventArgs e) {
-            if (e.Element != selectionBarSelected) {
-                e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
-            }
-        }
+		public void Deselect() {
+			selectionBarSelected.SetColor(Color.White);
+			selectionBarSelected = null;
+		}
 
-        private void Button_HoverEnd(HoverEndEventArgs e) {
-            if (e.Element != selectionBarSelected) {
-                e.Element.SetColor(Color.White);
-            }
-        }
+		public void SelectButton(Button button) {
+			selectionBarSelected?.SetColor(Color.White);
+			selectionBarSelected = button;
+			selectionBarSelected.SetColor(Color.Gray);
+		}
 
-        private void UIHoverBegin(HoverBeginEventArgs e) {
-            hovering++;
-            inputCtl.UIHovering = true;
+		public void AddTool(IMandKTool tool) {
+			var button = toolSelection.CreateButton();
+			button.SetStyle("toolButton");
+			button.Size = new IntVector2(50, 50);
+			button.HorizontalAlignment = HorizontalAlignment.Center;
+			button.VerticalAlignment = VerticalAlignment.Center;
+			button.Pressed += ToolSwitchbuttonPress;
+			button.HoverBegin += UIHoverBegin;
+			button.HoverEnd += UIHoverEnd;
+			button.FocusMode = FocusMode.ResetFocus;
+			button.MaxSize = new IntVector2(50, 50);
+			button.MinSize = new IntVector2(50, 50);
+			button.Texture = tool.Icon ?? DefaultButtonTexture;
 
-            Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
-        }
+			tools.Add(button, tool);
 
-        private void UIHoverEnd(HoverEndEventArgs e) {
-            if (--hovering == 0) {
-                inputCtl.UIHovering = false;
-            }
+			foreach (var toolButton in tool.Buttons) {
+				selectionBar.AddChild(toolButton);
+			}
 
-            Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
-        }
+		}
 
-        private void ClearDelegates() {
-            selectionBar.HoverBegin -= UIHoverBegin;
-            selectionBar.HoverEnd -= UIHoverEnd;
-            toolSelection.HoverBegin -= UIHoverBegin;
-            toolSelection.HoverEnd -= UIHoverEnd;
+		public void RemoveTool(IMandKTool tool) {
+			throw new NotImplementedException();
+		}
 
-            foreach (var button in selectionBar.Children) {
-                button.HoverBegin -= Button_HoverBegin;
-                button.HoverBegin -= UIHoverBegin;
-                button.HoverEnd -= Button_HoverEnd;
-                button.HoverEnd -= UIHoverEnd;
-            }
+		private void Button_HoverBegin(HoverBeginEventArgs e) {
+			if (e.Element != selectionBarSelected) {
+				e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
+			}
+		}
 
-            foreach (var button in toolSelection.Children) {
-                button.HoverBegin -= Button_HoverBegin;
-                button.HoverBegin -= UIHoverBegin;
-                button.HoverEnd -= Button_HoverEnd;
-                button.HoverEnd -= UIHoverEnd;
-            }
-        }
+		private void Button_HoverEnd(HoverEndEventArgs e) {
+			if (e.Element != selectionBarSelected) {
+				e.Element.SetColor(Color.White);
+			}
+		}
 
-        private void ToolSwitchbuttonPress(PressedEventArgs e) {
-            if (toolSelected != null) {
-                tools[toolSelected].Disable();
-            }
+		private void UIHoverBegin(HoverBeginEventArgs e) {
+			hovering++;
+			inputCtl.UIHovering = true;
 
-            toolSelected = e.Element;
-            tools[toolSelected].Enable();
-        }
+			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
+		}
 
-    }
+		private void UIHoverEnd(HoverEndEventArgs e) {
+			if (--hovering == 0) {
+				inputCtl.UIHovering = false;
+			}
+
+			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
+		}
+
+		private void ClearDelegates() {
+			selectionBar.HoverBegin -= UIHoverBegin;
+			selectionBar.HoverEnd -= UIHoverEnd;
+			toolSelection.HoverBegin -= UIHoverBegin;
+			toolSelection.HoverEnd -= UIHoverEnd;
+
+			foreach (var button in selectionBar.Children) {
+				button.HoverBegin -= Button_HoverBegin;
+				button.HoverBegin -= UIHoverBegin;
+				button.HoverEnd -= Button_HoverEnd;
+				button.HoverEnd -= UIHoverEnd;
+			}
+
+			foreach (var button in toolSelection.Children) {
+				button.HoverBegin -= Button_HoverBegin;
+				button.HoverBegin -= UIHoverBegin;
+				button.HoverEnd -= Button_HoverEnd;
+				button.HoverEnd -= UIHoverEnd;
+			}
+		}
+
+		private void ToolSwitchbuttonPress(PressedEventArgs e) {
+			if (toolSelected != null) {
+				tools[toolSelected].Disable();
+			}
+
+			toolSelected = e.Element;
+			tools[toolSelected].Enable();
+		}
+
+	}
 }

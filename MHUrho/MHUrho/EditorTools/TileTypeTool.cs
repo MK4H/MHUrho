@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.EditorTools
 {
-    abstract class TileTypeTool : Tool
-    {
-    }
+	abstract class TileTypeTool : Tool
+	{
+	}
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.UnitComponents
 {
-    class Meele
-    {
-    }
+	class Meele
+	{
+	}
 }
