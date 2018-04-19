@@ -34,15 +34,17 @@ namespace MHUrho.Helpers
 		public static string GetFullPathFromChild(XElement typeXmlElement, string childElementName,
 												string pathToPackageXmlDir) {
 			return System.IO.Path.Combine(pathToPackageXmlDir,
-										 FileManager.CorrectRelativePath(typeXmlElement.Element(PackageManager.XMLNamespace +
-																								childElementName)
-																						.Value
-																						.Trim()));
+										 GetPath(typeXmlElement.Element(PackageManager.XMLNamespace +
+																		childElementName)));
 		}
 
 		public static string GetFullPath(XElement xmlElement, string pathToPackageXmlDir) {
 			return System.IO.Path.Combine(pathToPackageXmlDir,
-										 FileManager.CorrectRelativePath(xmlElement.Value.Trim()));
+										 GetPath(xmlElement));
+		}
+
+		public static string GetPath(XElement xmlElement) {
+			return FileManager.CorrectRelativePath(xmlElement.Value.Trim());
 		}
 
 		public static int GetID(XElement typeXmlElement) {
@@ -53,40 +55,34 @@ namespace MHUrho.Helpers
 			return typeXmlElement.Attribute(NameAttributeName).Value.Trim();
 		}
 
-		public static Model GetModel(XElement typeXmlElement, string pathToPackageXmlDir) {
+		public static Model GetModel(XElement typeXmlElement) {
 			XElement modelElement = typeXmlElement.Element(ModelPathElementName);
 
-			string modelPath = GetFullPath(modelElement, pathToPackageXmlDir);
-
-			return PackageManager.Instance.ResourceCache.GetModel(modelPath);
+			return PackageManager.Instance.ResourceCache.GetModel(GetPath(modelElement));
 		}
 
-		public static MaterialWrapper GetMaterial(XElement typeXmlElement, string pathToPackageXmlDir) {
+		public static MaterialWrapper GetMaterial(XElement typeXmlElement) {
 			var materialElement = typeXmlElement.Element(MaterialElementName);
 
 			XElement materialPathElement = materialElement.Element(MaterialPathElementName);
 			XElement materialListPathElement = materialElement.Element(MaterialListElementName);
 
 			if (materialPathElement != null) {
-				string path = GetFullPath(materialPathElement, pathToPackageXmlDir);
-				return new SimpleMaterial(PackageManager.Instance.ResourceCache.GetMaterial(path));
+				return new SimpleMaterial(PackageManager.Instance.ResourceCache.GetMaterial(GetPath(materialPathElement)));
 			}
 			else if (materialListPathElement != null) {
-				string path = GetFullPath(materialListPathElement, pathToPackageXmlDir);
-				return new MaterialList(path);
+				return new MaterialList(GetPath(materialListPathElement));
 			}
 			else {
 				throw new InvalidOperationException("Xml Schema validator did not catch a missing choice member");
 			}
 		}
 
-		public static Image GetIcon(XElement typeXmlElement, string pathToPackagageXmlDir) {
+		public static Image GetIcon(XElement typeXmlElement) {
 			XElement iconElement = typeXmlElement.Element(IconPathElementName);
 
-			string iconPath = GetFullPath(iconElement, pathToPackagageXmlDir);
-
 			//TODO: Find a way to not need RGBA conversion
-			return PackageManager.Instance.ResourceCache.GetImage(iconPath).ConvertToRGBA();
+			return PackageManager.Instance.ResourceCache.GetImage(GetPath(iconElement)).ConvertToRGBA();
 		}
 
 		public static XElement GetExtensionElement(XElement typeXmlElement) {

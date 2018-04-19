@@ -108,7 +108,9 @@ namespace MHUrho.UnitComponents
 
 		internal override void ConnectReferences(ILevelManager level) {
 			nextWaypoint = Node.Position;
-			nextWaypoint = GetNextWaypoint();
+			if (nextTile != null) {
+				nextWaypoint = GetNextWaypoint();
+			}
 		}
 
 		public override PluginData SaveState() {

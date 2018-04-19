@@ -50,9 +50,9 @@ namespace MHUrho.Logic
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
 			//TODO: Join the implementations from all the 
-			Model = XmlHelpers.GetModel(xml,package.XmlDirectoryPath);
-			Material = XmlHelpers.GetMaterial(xml, package.XmlDirectoryPath);
-			Icon = XmlHelpers.GetIcon(xml, package.XmlDirectoryPath);
+			Model = XmlHelpers.GetModel(xml);
+			Material = XmlHelpers.GetMaterial(xml);
+			Icon = XmlHelpers.GetIcon(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml, SizeElementName);
 			buildingTypeLogic = XmlHelpers.LoadTypePlugin<BuildingTypePluginBase>(xml,

@@ -74,9 +74,9 @@ namespace MHUrho.Logic
 
 			var data = unitTypeLogic.TypeData;
 
-			Model = XmlHelpers.GetModel(xml, package.XmlDirectoryPath);
-			Material = XmlHelpers.GetMaterial(xml, package.XmlDirectoryPath);
-			Icon = XmlHelpers.GetIcon(xml, package.XmlDirectoryPath);
+			Model = XmlHelpers.GetModel(xml);
+			Material = XmlHelpers.GetMaterial(xml);
+			Icon = XmlHelpers.GetIcon(xml);
 			
 			unitTypeLogic.Initialize(XmlHelpers.GetExtensionElement(xml),
 									 package.PackageManager);

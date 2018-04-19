@@ -46,8 +46,8 @@ namespace MHUrho.Logic
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
 			ProjectileSpeed = XmlHelpers.GetFloat(xml, SpeedElementName);
-			model = XmlHelpers.GetModel(xml, package.XmlDirectoryPath);
-			material = XmlHelpers.GetMaterial(xml, package.XmlDirectoryPath);
+			model = XmlHelpers.GetModel(xml);
+			material = XmlHelpers.GetMaterial(xml);
 			Package = package;
 
 			typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePluginBase>(xml,
