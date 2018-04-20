@@ -169,6 +169,11 @@ namespace MHUrho.Logic
 
 		public IntVector2 Location => Rectangle.TopLeft();
 
+		public override Vector3 Position {
+			get => Node.Position;
+			protected set => Node.Position = value;
+		}
+
 		public Vector3 Center => Node.Position;
 
 		public BuildingType BuildingType { get; private set; }

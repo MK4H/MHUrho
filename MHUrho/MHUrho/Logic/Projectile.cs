@@ -22,6 +22,13 @@ namespace MHUrho.Logic
 		/// </summary>
 		public ProjectileInstancePluginBase Plugin { get; private set; }
 
+
+		public override Vector3 Position {
+			get => Node.Position;
+			protected set => Node.Position = value;
+		}
+
+
 		private StProjectile storedProjectile;
 
 		

@@ -107,7 +107,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
-			nextWaypoint = Node.Position;
+			nextWaypoint = Unit.Position;
 			if (nextTile != null) {
 				nextWaypoint = GetNextWaypoint();
 			}
@@ -209,7 +209,7 @@ namespace MHUrho.UnitComponents
 			bool reachedPoint = false;
 
 			Vector3 newPosition = Unit.Position + GetMoveVector(point, timeStep);
-			if (ReachedPoint(Node.Position, newPosition, point)) {
+			if (ReachedPoint(Unit.Position, newPosition, point)) {
 				newPosition = point;
 				reachedPoint = true;
 			}

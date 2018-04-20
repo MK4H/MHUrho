@@ -52,20 +52,15 @@ namespace MHUrho.Logic
 			/// <returns>the unit component, already added to the node</returns>
 			public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
 				//TODO: Check if there is already a Unit component on this node, if there is, throw exception
-				var unit = new Unit(id, level, type, tile, player);
-				unitNode.AddComponent(unit);
+
+				var centerNode = CreateBasicNodeStructure(unitNode, type);
+
 				unitNode.Position = tile.Center3;
-
-				AddRigidBody(unitNode);
-				AddModel(unitNode, type);
-
+				var unit = new Unit(id, level, type, tile, player, unitNode);
+				centerNode.AddComponent(unit);
+				
 
 				unit.Plugin = type.GetNewInstancePlugin(unit, level);
-
-				//TODO: Move collisionShape to plugin
-
-				var collider = unitNode.CreateComponent<CollisionShape>();
-				collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
 
 				return unit;
 			}
@@ -129,13 +124,12 @@ namespace MHUrho.Logic
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}
 
-				AddRigidBody(legNode);
-				AddModel(legNode, type);
+				var centerNode = CreateBasicNodeStructure(legNode, type);
 
 				var unitID = storedUnit.Id;
 
-				Unit = new Unit(unitID, level, type);
-				legNode.AddComponent(Unit);
+				Unit = new Unit(unitID, level, type, legNode);
+				centerNode.AddComponent(Unit);
 
 				//This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
 				// to this class, and for that i need to set the Position here
@@ -150,7 +144,7 @@ namespace MHUrho.Logic
 																	level,
 																	Unit.Plugin);
 					preloadedComponents.Add(preloadedComponent);
-					legNode.AddComponent(preloadedComponent);
+					centerNode.AddComponent(preloadedComponent);
 				}
 			}
 
@@ -173,6 +167,21 @@ namespace MHUrho.Logic
 
 			}
 
+			private static Node CreateBasicNodeStructure(Node legNode, UnitType type) {
+				var centerNode = legNode.CreateChild("UnitCenter");
+
+				AddRigidBody(centerNode);
+				var model = AddModel(centerNode, type);
+
+				centerNode.Position = new Vector3(0, model.BoundingBox.HalfSize.Y * centerNode.Scale.Y, 0);
+
+				//TODO: Move collisionShape to plugin
+				var collider = centerNode.CreateComponent<CollisionShape>();
+				collider.SetBox(model.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
+
+				return centerNode;
+			}
+
 			private static void AddRigidBody(Node node) {
 				var rigidBody = node.CreateComponent<RigidBody>();
 				rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
@@ -182,10 +191,11 @@ namespace MHUrho.Logic
 				rigidBody.UseGravity = false;
 			}
 
-			private static void AddModel(Node node, UnitType type) {
+			private static StaticModel AddModel(Node node, UnitType type) {
 				var animatedModel = type.Model.AddModel(node);
 				type.Material.ApplyMaterial(animatedModel);
 				animatedModel.CastShadows = false;
+				return animatedModel;
 			}
 
 		}
@@ -195,17 +205,22 @@ namespace MHUrho.Logic
 
 		public UnitType UnitType { get; private set;}
 
+		public override Vector3 Position {
+			get => LegNode.Position;
+			protected set => LegNode.Position = value;
+		}
+
 		/// <summary>
 		/// Position in the level
 		/// </summary>
 		public Vector2 XZPosition {
 			get {
-				Debug.Assert(Node != null, nameof(Node) + " != null");
-				return Node.Position.XZ2();
+				Debug.Assert(LegNode != null, nameof(LegNode) + " != null");
+				return LegNode.Position.XZ2();
 			}
 			private set {
-				Debug.Assert(Node != null, nameof(Node) + " != null");
-				Node.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetHeightAt(value), value.Y);
+				Debug.Assert(LegNode != null, nameof(LegNode) + " != null");
+				LegNode.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetHeightAt(value), value.Y);
 			}
 		}
 
@@ -218,6 +233,16 @@ namespace MHUrho.Logic
 		public UnitInstancePluginBase Plugin { get; private set; }
 
 		public bool AlwaysVertical { get; set; } = false;
+
+		/// <summary>
+		/// Node used for movement and collisions with the terrain and buildings
+		/// </summary>
+		public Node LegNode { get; private set; }
+
+		/// <summary>
+		/// Node used for model, collisions with projectiles and logic
+		/// </summary>
+		public Node CenterNode => Node;
 
 		#endregion
 
@@ -233,11 +258,11 @@ namespace MHUrho.Logic
 		/// Initializes everything apart from the things referenced by their ID or position
 		/// </summary>
 		/// <param name="type">type of the loading unit</param>
-		/// <param name="storedUnit">Image of the unit</param>
-		protected Unit(int id, ILevelManager level, UnitType type)
+		protected Unit(int id, ILevelManager level, UnitType type, Node legNode)
 			:base(id, level)
 		{
 			this.UnitType = type;
+			this.LegNode = legNode;
 
 			ReceiveSceneUpdates = true;
 		}
@@ -251,12 +276,13 @@ namespace MHUrho.Logic
 		/// <param name="type">the type of the unit</param>
 		/// <param name="tile">Tile where the unit spawned</param>
 		/// <param name="player">Owner of the unit</param>
-		protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player) 
+		protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player, Node legNode) 
 			: base(id, level)
 		{
 			this.Tile = tile;
 			this.Player = player;
 			this.UnitType = type;
+			this.LegNode = legNode;
 
 			ReceiveSceneUpdates = true;
 		}
@@ -264,9 +290,6 @@ namespace MHUrho.Logic
 		#endregion
 
 		#region Public methods
-
-
-
 		public StUnit Save() {
 			return Loader.Save(this);
 		}
@@ -287,11 +310,11 @@ namespace MHUrho.Logic
 
 
 		public void SetHeight(float newHeight) {
-			Node.Position = new Vector3(Node.Position.X, newHeight, Node.Position.Z);
+			Position = new Vector3(Position.X, newHeight, Position.Z);
 		}
 
 		public bool MoveBy(Vector3 moveBy) {
-			var newPosition = Node.Position + moveBy;
+			var newPosition = Position + moveBy;
 
 			return MoveTo(newPosition);
 		}
@@ -303,7 +326,7 @@ namespace MHUrho.Logic
 			}
 
 			FaceTowards(newPosition);
-			Node.Position = newPosition;
+			Position = newPosition;
 			return true;
 		}
 
@@ -313,19 +336,22 @@ namespace MHUrho.Logic
 		}
 
 		/// <summary>
-		/// Rotates the unit to face towards the <paramref name="position"/>, either directly if <see cref="AlwaysVertical"/> is false and
+		/// Rotates the unit to face towards the <paramref name="lookPosition"/>, either directly if <see cref="AlwaysVertical"/> is false and
 		/// <paramref name="rotateAroundY"/> is false, or to its projection into current the XZ plane of the Node if either of those two are true
 		/// </summary>
-		/// <param name="position">position to look towards</param>
+		/// <param name="lookPosition">position to look towards</param>
 		/// <param name="rotateAroundY">If <see cref="AlwaysVertical"/> is false, controls if the rotation will be only around the Y axis
 		/// if <see cref="AlwaysVertical"/> is true, has no effect</param>
-		public void FaceTowards(Vector3 position, bool rotateAroundY = false) {
+		public void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false) {
 			if (AlwaysVertical || rotateAroundY) {
 				//Only rotate around Y
-				Node.LookAt(new Vector3(position.X, Node.Position.Y, position.Z), Node.Up);
+				LegNode.LookAt(new Vector3(lookPosition.X, Position.Y, lookPosition.Z), Node.Up);
 			}
 			else {
-				Node.LookAt(position, Tile.Map.GetUpDirectionAt(Node.Position.XZ2()));
+				LegNode.LookAt(lookPosition, Tile.Map.GetUpDirectionAt(Position.XZ2()));
+				if (LegNode.Up.Y < 0) {
+					Tile.Map.GetUpDirectionAt(Position.XZ2());
+				}
 			}
 		}
 		#endregion

@@ -23,7 +23,7 @@ namespace MHUrho.Logic
 
 		public Map Map => Level.Map;
 
-		public Vector3 Position => Node.Position;
+		public abstract Vector3 Position { get; protected set; }
 
 		protected Entity(int ID, ILevelManager level) {
 			this.ID = ID;
