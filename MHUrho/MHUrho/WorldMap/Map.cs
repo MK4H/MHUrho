@@ -1094,7 +1094,7 @@ namespace MHUrho.WorldMap
 			if (IsTileSplitFromTopLeftToBottomRight(topLeft.Y, topRight.Y, botLeft.Y, botRight.Y)) {
 				if ((topRight.XZ2() - position).LengthSquared < (botLeft.XZ2() - position).LengthSquared) {
 					//point is in the topRight triangle
-					return Vector3.Cross(botRight - topRight, topLeft - topRight);
+					return Vector3.Cross(topLeft - topRight, botRight - topRight);
 				}
 				else {
 					//point is in the bottomLeft triangle
@@ -1104,7 +1104,7 @@ namespace MHUrho.WorldMap
 			else {
 				if ((topLeft.XZ2() - position).LengthSquared < (botRight.XZ2() - position).LengthSquared) {
 					//point is in topLeft triangle
-					return Vector3.Cross(topRight - topLeft, botLeft - topLeft);
+					return Vector3.Cross(botLeft - topLeft, topRight - topLeft);
 				}
 				else {
 					//point is in the bottomRight triangle
