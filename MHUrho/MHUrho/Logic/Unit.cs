@@ -41,6 +41,59 @@ namespace MHUrho.Logic
 			}
 
 			/// <summary>
+			/// Creates new instance of the <see cref="Unit"/> component and ads it to the <paramref name="unitNode"/>
+			/// Also adds the unit as PassingUnit to <paramref name="tile"/>
+			/// </summary>
+			/// <param name="id">The unique identifier of the unit, must be unique among other units</param>
+			/// <param name="unitNode">Scene node of the unit</param>
+			/// <param name="type">type of the unit</param>
+			/// <param name="tile">tile where the unit will spawn</param>
+			/// <param name="player">owner of the unit</param>
+			/// <returns>the unit component, already added to the node</returns>
+			public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
+				//TODO: Check if there is already a Unit component on this node, if there is, throw exception
+				var unit = new Unit(id, level, type, tile, player);
+				unitNode.AddComponent(unit);
+				unitNode.Position = tile.Center3;
+
+				AddRigidBody(unitNode);
+				AddModel(unitNode, type);
+
+
+				unit.Plugin = type.GetNewInstancePlugin(unit, level);
+
+				//TODO: Move collisionShape to plugin
+
+				var collider = unitNode.CreateComponent<CollisionShape>();
+				collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
+
+				return unit;
+			}
+
+			public static StUnit Save(Unit unit) {
+				var storedUnit = new StUnit();
+				storedUnit.Id = unit.ID;
+				storedUnit.Position = new StVector3 { X = unit.XZPosition.X, Y = unit.Node.Position.Y, Z = unit.XZPosition.Y };
+				storedUnit.PlayerID = unit.Player.ID;
+				//storedUnit.Path = path.Save();
+				//storedUnit.TargetUnitID = target.UnitID;
+				storedUnit.TypeID = unit.UnitType.ID;
+
+
+				storedUnit.UserPlugin = new PluginData();
+				unit.Plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
+
+				foreach (var component in unit.Node.Components) {
+					var defaultComponent = component as DefaultComponent;
+					if (defaultComponent != null) {
+						storedUnit.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
+					}
+				}
+
+				return storedUnit;
+			}
+
+			/// <summary>
 			/// Loads unit component from <paramref name="storedUnit"/> and all other needed components
 			///  and adds them to the <paramref name="node"/>
 			/// </summary>
@@ -61,30 +114,32 @@ namespace MHUrho.Logic
 				return unitLoader;
 			}
 
+			
 			/// <summary>
-			/// Loads ONLY the unit component of <paramref name="type"/> from <paramref name="storedUnit"/> and adds it to the <paramref name="node"/> 
+			/// Loads ONLY the unit component of <paramref name="type"/> from <paramref name="storedUnit"/> and adds it to the <paramref name="legNode"/> 
 			/// If you use this, you still need to add Model, Materials and other behavior to the unit
 			/// </summary>
 			/// <param name="type"></param>
-			/// <param name="node"></param>
+			/// <param name="legNode"></param>
 			/// <param name="storedUnit"></param>
 			/// <returns>Loaded unit component, already added to the node</returns>
-			private void Load(LevelManager level, UnitType type, Node node) {
+			private void Load(LevelManager level, UnitType type, Node legNode) {
 				//TODO: Check arguments - node cant have more than one Unit component
 				if (type.ID != storedUnit.TypeID) {
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}
 
-				type.LoadComponentsForUnit(level, node);
+				AddRigidBody(legNode);
+				AddModel(legNode, type);
 
 				var unitID = storedUnit.Id;
 
 				Unit = new Unit(unitID, level, type);
-				node.AddComponent(Unit);
+				legNode.AddComponent(Unit);
 
 				//This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
 				// to this class, and for that i need to set the Position here
-				node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
+				legNode.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
 
 				Unit.Plugin = type.GetInstancePluginForLoading();
 
@@ -95,7 +150,7 @@ namespace MHUrho.Logic
 																	level,
 																	Unit.Plugin);
 					preloadedComponents.Add(preloadedComponent);
-					node.AddComponent(preloadedComponent);
+					legNode.AddComponent(preloadedComponent);
 				}
 			}
 
@@ -117,6 +172,22 @@ namespace MHUrho.Logic
 			public void FinishLoading() {
 
 			}
+
+			private static void AddRigidBody(Node node) {
+				var rigidBody = node.CreateComponent<RigidBody>();
+				rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
+				rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
+				rigidBody.Kinematic = true;
+				rigidBody.Mass = 1;
+				rigidBody.UseGravity = false;
+			}
+
+			private static void AddModel(Node node, UnitType type) {
+				var animatedModel = type.Model.AddModel(node);
+				type.Material.ApplyMaterial(animatedModel);
+				animatedModel.CastShadows = false;
+			}
+
 		}
 
 		#region Public members
@@ -137,8 +208,6 @@ namespace MHUrho.Logic
 				Node.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetHeightAt(value), value.Y);
 			}
 		}
-
-		public Vector3 Position => Node.Position;
 
 		/// <summary>
 		/// Tile this unit is standing on
@@ -196,56 +265,10 @@ namespace MHUrho.Logic
 
 		#region Public methods
 
-		/// <summary>
-		/// Creates new instance of the <see cref="Unit"/> component and ads it to the <paramref name="unitNode"/>
-		/// Also adds the unit as PassingUnit to <paramref name="tile"/>
-		/// </summary>
-		/// <param name="id">The unique identifier of the unit, must be unique among other units</param>
-		/// <param name="unitNode">Scene node of the unit</param>
-		/// <param name="type">type of the unit</param>
-		/// <param name="tile">tile where the unit will spawn</param>
-		/// <param name="player">owner of the unit</param>
-		/// <returns>the unit component, already added to the node</returns>
-		public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
-			//TODO: Check if there is already a Unit component on this node, if there is, throw exception
-			var unit = new Unit(id, level, type, tile, player);
-			unitNode.AddComponent(unit);
-			unitNode.Position = tile.Center3;
 
-			AddRigidBody(unitNode);
-
-
-			unit.Plugin = type.GetNewInstancePlugin(unit, level);
-
-			//TODO: Move collisionShape to plugin
-
-			var collider = unitNode.CreateComponent<CollisionShape>();
-			collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
-
-			return unit;
-		}
 
 		public StUnit Save() {
-			var storedUnit = new StUnit();
-			storedUnit.Id = ID;
-			storedUnit.Position = new StVector3 {X = XZPosition.X, Y = Node.Position.Y, Z = XZPosition.Y};
-			storedUnit.PlayerID = Player.ID;
-			//storedUnit.Path = path.Save();
-			//storedUnit.TargetUnitID = target.UnitID;
-			storedUnit.TypeID = UnitType.ID;
-
-
-			storedUnit.UserPlugin = new PluginData();
-			Plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
-
-			foreach (var component in Node.Components) {
-				var defaultComponent = component as DefaultComponent;
-				if (defaultComponent != null) {
-					storedUnit.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
-				}
-			}
-
-			return storedUnit;
+			return Loader.Save(this);
 		}
 		
 		public bool CanGoFromTo(ITile fromTile, ITile toTile) {
@@ -320,14 +343,7 @@ namespace MHUrho.Logic
 
 		#region Private Methods
 
-		private static void AddRigidBody(Node node) {
-			var rigidBody = node.CreateComponent<RigidBody>();
-			rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
-			rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
-			rigidBody.Kinematic = true;
-			rigidBody.Mass = 1;
-			rigidBody.UseGravity = false;
-		}
+
 
 		private bool CheckTile(Vector3 newPosition) {
 			ITile newTile;

@@ -31,6 +31,66 @@ namespace MHUrho.Logic
 				preloadedComponents = new List<DefaultComponent>();
 			}
 
+			/// <summary>
+			/// Builds the building at <paramref name="topLeftCorner"/> if its possible
+			/// </summary>
+			/// <param name="topLeftCorner"></param>
+			/// <param name="type"></param>
+			/// <param name="buildingNode"></param>
+			/// <param name="level"></param>
+			/// <returns>Null if it is not possible to build the building there, new Building if it is possible</returns>
+			public static Building CreateNew(int id,
+											IntVector2 topLeftCorner,
+											BuildingType type,
+											Node buildingNode,
+											IPlayer player,
+											ILevelManager level) {
+				if (!type.CanBuildIn(type.GetBuildingTilesRectangle(topLeftCorner), level)) {
+					return null;
+				}
+
+				AddRigidBody(buildingNode);
+				AddModel(buildingNode, type);
+
+				var newBuilding = new Building(id, level, topLeftCorner, type, player);
+				buildingNode.AddComponent(newBuilding);
+
+				var center = newBuilding.Rectangle.Center();
+
+				buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
+
+				newBuilding.plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
+
+
+
+				var collider = buildingNode.CreateComponent<CollisionShape>();
+				//TODO: Move collisionShape to plugin
+				collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
+
+
+				return newBuilding;
+			}
+
+			public static StBuilding Save(Building building) {
+				var stBuilding = new StBuilding {
+													Id = building.ID,
+													TypeID = building.BuildingType.ID,
+													PlayerID = building.Player.ID,
+													Location = building.Location.ToStIntVector2(),
+													UserPlugin = new PluginData()
+												};
+				building.plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
+
+				foreach (var component in building.Node.Components) {
+					var defaultComponent = component as DefaultComponent;
+					if (defaultComponent != null) {
+						stBuilding.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
+					}
+				}
+
+				return stBuilding;
+			}
+
 			public static Loader StartLoading(LevelManager level,
 											  PackageManager packageManager,
 											  Node node,
@@ -67,7 +127,8 @@ namespace MHUrho.Logic
 					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
 				}
 
-				type.LoadComponentsForBuilding(level, buildingNode);
+				AddRigidBody(buildingNode);
+				AddModel(buildingNode, type);
 
 				Building = new Building(level, type, storedBuilding);
 				buildingNode.AddComponent(Building);
@@ -75,8 +136,6 @@ namespace MHUrho.Logic
 				var center = Building.Rectangle.Center();
 
 				buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
-
-				AddRigidBody(buildingNode);
 
 				Building.plugin = type.GetInstancePluginForLoading();
 
@@ -88,6 +147,21 @@ namespace MHUrho.Logic
 					preloadedComponents.Add(preloadedComponent);
 					Building.Node.AddComponent(preloadedComponent);
 				}
+			}
+
+			private static void AddRigidBody(Node node) {
+				var rigidBody = node.CreateComponent<RigidBody>();
+				rigidBody.CollisionLayer = (int)CollisionLayer.Building;
+				rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
+				rigidBody.Kinematic = true;
+				rigidBody.Mass = 1;
+				rigidBody.UseGravity = false;
+			}
+
+			private static void AddModel(Node node, BuildingType type) {
+				var model = type.Model.AddModel(node);
+				type.Material.ApplyMaterial(model);
+				model.CastShadows = false;
 			}
 		}
 
@@ -133,67 +207,8 @@ namespace MHUrho.Logic
 		}
 
 
-
-		/// <summary>
-		/// Builds the building at <paramref name="topLeftCorner"/> if its possible
-		/// </summary>
-		/// <param name="topLeftCorner"></param>
-		/// <param name="type"></param>
-		/// <param name="buildingNode"></param>
-		/// <param name="level"></param>
-		/// <returns>Null if it is not possible to build the building there, new Building if it is possible</returns>
-		public static Building BuildAt(int id, 
-									   IntVector2 topLeftCorner, 
-									   BuildingType type, 
-									   Node buildingNode, 
-									   IPlayer player,  
-									   ILevelManager level) {
-			if (!type.CanBuildIn(type.GetBuildingTilesRectangle(topLeftCorner), level)) {
-				return null;
-			}
-
-			var newBuilding = new Building(id, level, topLeftCorner, type, player);
-			buildingNode.AddComponent(newBuilding);
-
-			var center = newBuilding.Rectangle.Center();
-
-			buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
-			AddRigidBody(buildingNode);
-
-			newBuilding.plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
-
-
-
-			var collider = buildingNode.CreateComponent<CollisionShape>();
-			//TODO: Move collisionShape to plugin
-			collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
-
-
-			return newBuilding;
-		}
-
-
-
-	 
-
 		public StBuilding Save() {
-			var stBuilding = new StBuilding {
-												Id = ID,
-												TypeID = BuildingType.ID,
-												PlayerID = Player.ID,
-												Location = Location.ToStIntVector2(),
-												UserPlugin = new PluginData()
-											};
-			plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
-
-			foreach (var component in Node.Components) {
-				var defaultComponent = component as DefaultComponent;
-				if (defaultComponent != null) {
-					stBuilding.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
-				}
-			}
-
-			return stBuilding;
+			return Loader.Save(this);
 		}
 
 
@@ -219,14 +234,6 @@ namespace MHUrho.Logic
 			return GetTileIndex(location.X, location.Y);
 		}
 
-		private static void AddRigidBody(Node node) {
-			var rigidBody = node.CreateComponent<RigidBody>();
-			rigidBody.CollisionLayer = (int)CollisionLayer.Building;
-			rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
-			rigidBody.Kinematic = true;
-			rigidBody.Mass = 1;
-			rigidBody.UseGravity = false;
-		}
 
 		private ITile[] GetTiles(Map map, BuildingType type, IntVector2 topLeft) {
 			var newTiles = new ITile[type.Size.X * type.Size.Y];

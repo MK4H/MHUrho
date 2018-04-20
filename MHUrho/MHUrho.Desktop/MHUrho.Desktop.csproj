@@ -81,7 +81,9 @@
     <Content Include="Data\Test\ResourceDir\DirDescription.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Chicken.txt" />
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Chicken.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Chicken.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

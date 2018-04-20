@@ -88,6 +88,12 @@ with a generic check for interface implementation when constructing the default 
 
 missing mapping for both PhysicsWorld.GetRigidBodies() and Octree.GetDrawables()
 
+added animations
+
+streamlined XML representation, XSD schema and things
+
+added support for material list
+- material list API is weird, if it does not find the material list file, it just does not assign textures, need to check the existence of the file
 
 TODO:
 

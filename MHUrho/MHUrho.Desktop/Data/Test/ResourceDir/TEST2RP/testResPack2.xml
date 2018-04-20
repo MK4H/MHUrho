@@ -13,7 +13,10 @@
   </tileTypes>
   <unitTypes>
     <unitType name="TestUnit" ID="1">
-      <modelPath>Box.mdl</modelPath>
+      <model>
+				<modelPath>Box.mdl</modelPath>
+	      <scale x="1" y="1" z="1"/>
+	    </model>
       <material>
 				<materialPath>Green.xml</materialPath>
 			</material>
@@ -24,7 +27,10 @@
 	    <iconPath>sand.jpg</iconPath>
     </unitType>
     <unitType name="TestWorker" ID="9">
-      <modelPath>Box.mdl</modelPath>
+      <model>
+				<modelPath>Box.mdl</modelPath>
+	      <scale x="1" y="0.5" z="1"/>
+      </model>
       <material>
 				<materialPath>StoneMaterial.xml</materialPath>
       </material>
@@ -32,7 +38,10 @@
 	    <iconPath>sand.jpg</iconPath>
     </unitType>
     <unitType name="Chicken" ID="3">
-      <modelPath>Chicken/Chicken.mdl</modelPath>
+      <model>
+				<modelPath>Chicken/Chicken.mdl</modelPath>
+	      <scale x="0.1" y="0.1" z="0.1"/>
+      </model>
 			<material>
 				<materialListPath>Chicken/Chicken.txt</materialListPath>
 			</material>
@@ -42,7 +51,10 @@
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile" ID="1">
-      <modelPath>Box.mdl</modelPath>
+      <model>
+				<modelPath>Box.mdl</modelPath>
+	      <scale x="0.2" y="0.2" z="0.8"/> 
+      </model>
       <material>
 				<materialPath>StoneMaterial.xml</materialPath>
 			</material>
@@ -53,7 +65,10 @@
   </projectileTypes>
   <buildingTypes>
     <buildingType name="TestBuilding" ID="1">
-      <modelPath>Box.mdl</modelPath>
+      <model>
+				<modelPath>Box.mdl</modelPath>
+	      <scale x="3" y="3" z="3"/>
+      </model>
       <material>
 				<materialPath>StoneMaterial.xml</materialPath>
 	    </material>

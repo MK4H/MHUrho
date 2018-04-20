@@ -24,7 +24,7 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		public Model Model { get; private set; }
+		public ModelWrapper Model { get; private set; }
 
 		public MaterialWrapper Material { get; private set; }
 
@@ -96,30 +96,17 @@ namespace MHUrho.Logic
 		/// <param name="tile">tile where the unit will spawn</param>
 		/// <param name="player">owner of the unit</param>
 		/// <returns>New unit of this type</returns>
-		public Unit CreateNewUnit(int unitID, 
-								  Node unitNode, 
-								  ILevelManager level, 
-								  ITile tile, 
-								  IPlayer player) {
-			var unit = Unit.CreateNew(unitID, unitNode, this, level, tile, player);
-			AddComponents(unitNode);
+		public Unit CreateNewUnit(int unitID,
+								Node unitNode,
+								ILevelManager level,
+								ITile tile,
+								IPlayer player) {
 
-			return unit;
+
+			return Unit.Loader.CreateNew(unitID, unitNode, this, level, tile, player);
 		}
 
-		/// <summary>
-		/// Does first stage of loading a new instance of <see cref="Unit"/> from <paramref name="storedUnit"/> and adds it
-		/// to the <paramref name="unitNode"/>
-		/// 
-		/// Also adds all other components needed by this <see cref="UnitType"/>
-		/// Needs to be followed by <see cref="Unit.ConnectReferences"/> and then <see cref="Unit.FinishLoading"/>
-		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="unitNode">scene node representing the new unit</param>
-		/// <returns></returns>
-		internal void LoadComponentsForUnit(LevelManager level, Node unitNode) {
-			AddComponents(unitNode);
-		}
+
 
 		public UnitInstancePluginBase GetNewInstancePlugin(Unit unit, ILevelManager level) {
 			return unitTypeLogic.CreateNewInstance(level, unit);
@@ -140,20 +127,7 @@ namespace MHUrho.Logic
 			}
 		}
 
-		/// <summary>
-		/// Adds components according to the XML file
-		/// </summary>
-		/// <param name="unitNode"></param>
-		private void AddComponents(Node unitNode) {
-			//TODO: READ FROM XML
-			//TODO: Animated model
-			var staticModel = unitNode.CreateComponent<AnimatedModel>();
-			staticModel.Model = Model;
-			Material.ApplyMaterial(staticModel);
-			staticModel.CastShadows = true;
 
-			//TODO: Add needed components
-		}
 
 
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
@@ -14,7 +15,9 @@ namespace MHUrho.Helpers
 		//XML ELEMENTS AND ATTRIBUTES
 		public static readonly XName IDAttributeName = "ID";
 		public static readonly XName NameAttributeName = "name";
+		public static readonly XName ModelElementName = PackageManager.XMLNamespace + "model";
 		public static readonly XName ModelPathElementName = PackageManager.XMLNamespace + "modelPath";
+		public static readonly XName ModelScaleElementName = PackageManager.XMLNamespace + "scale";
 		public static readonly XName MaterialElementName = PackageManager.XMLNamespace + "material";
 		public static readonly XName MaterialPathElementName = PackageManager.XMLNamespace + "materialPath";
 		public static readonly XName MaterialListElementName = PackageManager.XMLNamespace + "materialListPath";
@@ -38,9 +41,9 @@ namespace MHUrho.Helpers
 																		childElementName)));
 		}
 
-		public static string GetFullPath(XElement xmlElement, string pathToPackageXmlDir) {
+		public static string GetFullPath(XElement element, string pathToPackageXmlDir) {
 			return System.IO.Path.Combine(pathToPackageXmlDir,
-										 GetPath(xmlElement));
+										 GetPath(element));
 		}
 
 		public static string GetPath(XElement xmlElement) {
@@ -55,10 +58,18 @@ namespace MHUrho.Helpers
 			return typeXmlElement.Attribute(NameAttributeName).Value.Trim();
 		}
 
-		public static Model GetModel(XElement typeXmlElement) {
-			XElement modelElement = typeXmlElement.Element(ModelPathElementName);
+		public static ModelWrapper GetModel(XElement typeXmlElement) {
+			XElement modelElement = typeXmlElement.Element(ModelElementName);
 
-			return PackageManager.Instance.ResourceCache.GetModel(GetPath(modelElement));
+			XElement modelPathElement = modelElement.Element(ModelPathElementName);
+			XElement modelScaleElement = modelElement.Element(ModelScaleElementName);
+
+			if (modelScaleElement != null) {
+				return new ModelWrapper(PackageManager.Instance.ResourceCache.GetModel(GetPath(modelPathElement)),
+										GetVector3(modelScaleElement));
+			}
+
+			return new ModelWrapper(PackageManager.Instance.ResourceCache.GetModel(GetPath(modelPathElement)));
 		}
 
 		public static MaterialWrapper GetMaterial(XElement typeXmlElement) {
@@ -71,7 +82,11 @@ namespace MHUrho.Helpers
 				return new SimpleMaterial(PackageManager.Instance.ResourceCache.GetMaterial(GetPath(materialPathElement)));
 			}
 			else if (materialListPathElement != null) {
-				return new MaterialList(GetPath(materialListPathElement));
+				var path = GetPath(materialListPathElement);
+				if (!PackageManager.Instance.ResourceCache.Exists(path)) {
+					throw new FileNotFoundException("Material list file not found",path);
+				}
+				return new MaterialList(path);
 			}
 			else {
 				throw new InvalidOperationException("Xml Schema validator did not catch a missing choice member");
@@ -128,8 +143,16 @@ namespace MHUrho.Helpers
 		}
 
 
-		public static int GetInt(XElement typeXmlElement, string childElementName) {
-			return int.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
+		public static XElement GetChild(XElement ofElement, string childName) {
+			return GetChild(ofElement, PackageManager.XMLNamespace + childName);
+		}
+
+		public static XElement GetChild(XElement ofElement, XName childName) {
+			return ofElement.Element(childName);
+		}
+
+		public static int GetInt(XElement element) {
+			return int.Parse(element.Value);
 		}
 
 		public static int GetIntAttribute(XElement element, string attributeName) {
@@ -140,19 +163,27 @@ namespace MHUrho.Helpers
 			return int.Parse(element.Attribute(attributeName).Value);
 		}
 
-		public static float GetFloat(XElement typeXmlElement, string childElementName) {
-			return float.Parse(typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value);
+		public static float GetFloatAttribute(XElement element, XName attributeName) {
+			return float.Parse(element.Attribute(attributeName).Value);
 		}
 
-		public static IntVector2 GetIntVector2(XElement typeXmlElement, string childElementName) {
-			var vectorElement = typeXmlElement.Element(PackageManager.XMLNamespace + childElementName);
-			int x = int.Parse(vectorElement.Attribute("x").Value);
-			int y = int.Parse(vectorElement.Attribute("y").Value);
-			return new IntVector2(x, y);
+		public static float GetFloat(XElement element) {
+			return float.Parse(element.Value);
 		}
 
-		public static string GetString(XElement typeXmlElement, string childElementName) {
-			return typeXmlElement.Element(PackageManager.XMLNamespace + childElementName).Value.Trim();
+		public static IntVector2 GetIntVector2(XElement element) {
+			return new IntVector2(	GetIntAttribute(element,"x"), 
+									GetIntAttribute(element,"y"));
+		}
+
+		public static Vector3 GetVector3(XElement xmlElement) {
+			return new Vector3(	GetFloatAttribute(xmlElement, "x"),
+								GetFloatAttribute(xmlElement, "y"),
+								GetFloatAttribute(xmlElement, "z"));
+		}
+
+		public static string GetString(XElement element) {
+			return element.Value.Trim();
 		}
 
 	}

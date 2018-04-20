@@ -12,10 +12,10 @@ using MHUrho.Packaging;
 namespace MHUrho.Logic
 {
 	public class TileType : IEntityType {
-		private const string IDAttributeName = "ID";
-		private const string NameAttributeName = "name";
-		private const string TexturePathElementName = "texturePath";
-		private const string MovementSpeedElementName = "movementSpeed";
+		private static readonly string IDAttributeName = "ID";
+		private static readonly string NameAttributeName = "name";
+		private static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";
+		private static readonly XName MovementSpeedElementName = PackageManager.XMLNamespace + "movementSpeed";
 
 		public int ID { get; set; }
 
@@ -38,8 +38,8 @@ namespace MHUrho.Logic
 			//TODO: Check for errors
 			ID = xml.GetIntFromAttribute(IDAttributeName);
 			Name = xml.Attribute(NameAttributeName).Value;
-			imagePath = XmlHelpers.GetFullPathFromChild(xml, TexturePathElementName, package.XmlDirectoryPath);
-			MovementSpeedModifier = XmlHelpers.GetFloat(xml, MovementSpeedElementName);
+			imagePath = XmlHelpers.GetPath(xml.Element(TexturePathElementName));
+			MovementSpeedModifier = XmlHelpers.GetFloat(xml.Element(MovementSpeedElementName));
 			Package = package;
 		}
 

@@ -15,7 +15,7 @@ namespace MHUrho.Logic
 	public class BuildingType : IEntityType, IDisposable
 	{
 		//XML ELEMENTS AND ATTRIBUTES
-		private const string SizeElementName = "size";
+		private static readonly XName SizeElementName = PackageManager.XMLNamespace + "size";
 
 
 		public int ID { get; set; }
@@ -24,7 +24,7 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		public Model Model { get; private set; }
+		public ModelWrapper Model { get; private set; }
 
 		public MaterialWrapper Material { get; private set; }
 
@@ -54,7 +54,7 @@ namespace MHUrho.Logic
 			Material = XmlHelpers.GetMaterial(xml);
 			Icon = XmlHelpers.GetIcon(xml);
 			Package = package;
-			Size = XmlHelpers.GetIntVector2(xml, SizeElementName);
+			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
 			buildingTypeLogic = XmlHelpers.LoadTypePlugin<BuildingTypePluginBase>(xml,
 																				 package.XmlDirectoryPath,
 																				 Name);
@@ -67,20 +67,9 @@ namespace MHUrho.Logic
 										 ILevelManager level, 
 										 IntVector2 topLeft, 
 										 IPlayer player) {
-			buildingNode.Scale = new Vector3(Size.X, 3, Size.Y);
-			var building = Building.BuildAt(buildingID, topLeft, this, buildingNode, player, level);
 
-			//TODO: Probably add animatedModel before creating building instance, and pass the model to the BuildAt method to control the animations from plugin
-			AddComponents(buildingNode);
-
-			return building;
+			return Building.Loader.CreateNew(buildingID, topLeft, this, buildingNode, player, level);
 		}
-
-		internal void LoadComponentsForBuilding(LevelManager level, Node buildingNode) {
-			buildingNode.Scale = new Vector3(Size.X, 3, Size.Y);
-			AddComponents(buildingNode);
-		}
-
 
 		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
 			return buildingTypeLogic.CanBuildIn(topLeft, bottomRight, level);
@@ -111,12 +100,7 @@ namespace MHUrho.Logic
 			Icon?.Dispose();
 		}
 
-		private void AddComponents(Node buildingNode) {
-			var staticModel = buildingNode.CreateComponent<StaticModel>();
-			staticModel.Model = Model;
-			Material.ApplyMaterial(staticModel);
-			staticModel.CastShadows = true;
-		}
+
 
 	}
 }

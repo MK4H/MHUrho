@@ -94,10 +94,9 @@ namespace DefaultPackage
 		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
 			workerType = PackageManager.Instance
 									   .ActiveGame
-									   .GetUnitType(XmlHelpers.GetString(extensionElement,
-																		  "workerType"),
+									   .GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")),
 													true);
-			tileType = PackageManager.Instance.ActiveGame.GetTileType(XmlHelpers.GetString(extensionElement, "tileType"), true);
+			tileType = PackageManager.Instance.ActiveGame.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")), true);
 		}
 	}
 

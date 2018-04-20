@@ -16,7 +16,7 @@ namespace MHUrho.Logic
 	//TODO: Make this an arrow type
 	public class ProjectileType : IEntityType, IDisposable {
 
-		private const string SpeedElementName = "speed";
+		private static readonly XName SpeedElementName = PackageManager.XMLNamespace + "speed";
 
 
 		public float ProjectileSpeed { get; private set; }
@@ -29,7 +29,7 @@ namespace MHUrho.Logic
 
 		public object Plugin => typePlugin;
 
-		private Model model;
+		private ModelWrapper model;
 
 		private MaterialWrapper material;
 
@@ -45,7 +45,7 @@ namespace MHUrho.Logic
 		public void Load(XElement xml, GamePack package) {
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
-			ProjectileSpeed = XmlHelpers.GetFloat(xml, SpeedElementName);
+			ProjectileSpeed = XmlHelpers.GetFloat(xml.Element(SpeedElementName));
 			model = XmlHelpers.GetModel(xml);
 			material = XmlHelpers.GetMaterial(xml);
 			Package = package;
@@ -131,8 +131,7 @@ namespace MHUrho.Logic
 												 this,
 												 projectileNode);
 
-				var staticModel = projectileNode.CreateComponent<StaticModel>();
-				staticModel.Model = model;
+				var staticModel = model.AddModel(projectileNode);
 				material.ApplyMaterial(staticModel);
 
 				projectileNode.Scale = new Vector3(0.2f, 0.2f, 0.8f);

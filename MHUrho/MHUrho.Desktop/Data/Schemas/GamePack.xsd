@@ -144,7 +144,7 @@
 
 	<xs:complexType name="entityType">
 		<xs:sequence>
-			<xs:element name="modelPath" type="xs:string"/>
+			<xs:element name="model" type="modelType"/>
 			<xs:element name="material" type="materialType"/>
 			<xs:element name="assemblyPath" type="xs:string"/>
 			<xs:element name="extension" type="extensionType" minOccurs="0"/>
@@ -181,6 +181,13 @@
     </xs:sequence>
   </xs:complexType>
 
+	<xs:complexType name="modelType">
+		<xs:sequence>
+			<xs:element name="modelPath" type="xs:string"/>
+			<xs:element name="scale" type="Vector3" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:complexType name="materialType">
 		<xs:choice>
 			<xs:element name="materialPath" type="xs:string"/>
@@ -197,4 +204,10 @@
     <xs:attribute name="x" use="required" type="xs:float"/>
     <xs:attribute name="y" use="required" type="xs:float"/>
   </xs:complexType>
+
+	<xs:complexType name="Vector3">
+		<xs:attribute name="x" use="required" type="xs:float"/>
+		<xs:attribute name="y" use="required" type="xs:float"/>
+		<xs:attribute name="z" use="required" type="xs:float"/>
+	</xs:complexType>
 </xs:schema>

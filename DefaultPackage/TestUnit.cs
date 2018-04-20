@@ -42,8 +42,7 @@ namespace DefaultPackage
 		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
 			projectileType = PackageManager.Instance
 										   .ActiveGame
-										   .GetProjectileType(XmlHelpers.GetString(extensionElement, 
-																				   "projectileType"),
+										   .GetProjectileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "projectileType")),
 															  true);
 		}
 	}
