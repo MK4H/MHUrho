@@ -50,14 +50,16 @@ namespace MHUrho.Logic
 				}
 
 				AddRigidBody(buildingNode);
-				AddModel(buildingNode, type);
+				StaticModel model = AddModel(buildingNode, type);
 
 				var newBuilding = new Building(id, level, topLeftCorner, type, player);
 				buildingNode.AddComponent(newBuilding);
 
 				var center = newBuilding.Rectangle.Center();
 
-				buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
+				buildingNode.Position = new Vector3(center.X,
+													level.Map.GetHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y,
+													center.Y);
 
 				newBuilding.plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 
@@ -65,7 +67,9 @@ namespace MHUrho.Logic
 
 				var collider = buildingNode.CreateComponent<CollisionShape>();
 				//TODO: Move collisionShape to plugin
-				collider.SetBox(new Vector3(1, 1, 1), new Vector3(-0.5f, -0.5f, -0.5f), Quaternion.Identity);
+				collider.SetBox(model.BoundingBox.Size,
+								Vector3.Zero, 
+								Quaternion.Identity);
 
 
 				return newBuilding;
@@ -128,14 +132,21 @@ namespace MHUrho.Logic
 				}
 
 				AddRigidBody(buildingNode);
-				AddModel(buildingNode, type);
+				StaticModel model = AddModel(buildingNode, type);
 
 				Building = new Building(level, type, storedBuilding);
 				buildingNode.AddComponent(Building);
 
 				var center = Building.Rectangle.Center();
 
-				buildingNode.Position = new Vector3(center.X, level.Map.GetHeightAt(center), center.Y);
+				buildingNode.Position = new Vector3(center.X, 
+													level.Map.GetHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y, 
+													center.Y);
+
+				var collider = buildingNode.CreateComponent<CollisionShape>();
+				collider.SetBox(model.BoundingBox.Size,
+								Vector3.Zero,
+								Quaternion.Identity);
 
 				Building.plugin = type.GetInstancePluginForLoading();
 
@@ -158,10 +169,11 @@ namespace MHUrho.Logic
 				rigidBody.UseGravity = false;
 			}
 
-			private static void AddModel(Node node, BuildingType type) {
+			private static StaticModel AddModel(Node node, BuildingType type) {
 				var model = type.Model.AddModel(node);
 				type.Material.ApplyMaterial(model);
 				model.CastShadows = false;
+				return model;
 			}
 		}
 

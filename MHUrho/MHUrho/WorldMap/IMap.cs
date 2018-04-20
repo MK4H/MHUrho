@@ -15,6 +15,10 @@ namespace MHUrho.WorldMap {
 		/// </summary>
 		IntVector2 BottomRight { get; }
 
+		IntVector2 TopRight { get; }
+
+		IntVector2 BottomLeft { get; }
+
 		int Width { get; }
 		int Length { get; }
 

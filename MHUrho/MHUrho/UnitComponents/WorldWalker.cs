@@ -23,6 +23,8 @@ namespace MHUrho.UnitComponents
 		public interface INotificationReceiver {
 			bool CanGoFromTo(ITile fromTile, ITile toTile);
 
+			float GetMovementSpeed(ITile onTile);
+
 			void OnMovementStarted(WorldWalker walker);
 
 			void OnMovementFinished(WorldWalker walker);
@@ -153,7 +155,11 @@ namespace MHUrho.UnitComponents
 		}
 
 		public bool GoTo(ITile tile) {
-			var newPath = map.GetPath(Unit, tile);
+			var newPath = Path.FromTo(Unit.Tile, 
+									tile, 
+									map, 
+									notificationReceiver.CanGoFromTo,
+									notificationReceiver.GetMovementSpeed);
 			if (newPath == null) {
 				MovementStarted = true;
 				OnMovementStarted?.Invoke(this);
@@ -221,7 +227,11 @@ namespace MHUrho.UnitComponents
 			//Unit couldnt move to newPosition
 
 			//Recalculate path
-			var newPath = map.GetPath(Unit, path.Target);
+			var newPath = Path.FromTo(Unit.Tile,
+									path.Target,
+									map,
+									notificationReceiver.CanGoFromTo,
+									notificationReceiver.GetMovementSpeed);
 			if (newPath == null || !newPath.MoveNext()) {
 				//Cant get there
 				MovementFailed = true;

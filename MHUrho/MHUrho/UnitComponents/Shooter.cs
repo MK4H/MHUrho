@@ -199,7 +199,7 @@ namespace MHUrho.UnitComponents
 				//Check for target in range
 				var possibleTargets = player.GetEnemyPlayers()
 											.SelectMany(enemy => enemy.GetAllUnits())
-											.AsParallel()
+											//.AsParallel()
 											.Where(unit => projectileType.IsInRange(Node.Position, unit.Position))
 											.OrderBy(unit => Vector3.Distance(Node.Position, unit.Position));
 

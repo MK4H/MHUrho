@@ -287,8 +287,8 @@ namespace MHUrho.WorldMap
 			}
 		}
 
-		private readonly ITile[] tiles;
-		private readonly IPathFindAlg pathFind;
+
+		public IPathFindAlg PathFinding { get; private set; }
 
 		/// <summary>
 		/// Coordinates of the top left tile of the playing map
@@ -300,6 +300,10 @@ namespace MHUrho.WorldMap
 		/// Coordinates of the bottom right tile of the playing map
 		/// </summary>
 		public IntVector2 BottomRight { get; private set; }
+
+		public IntVector2 TopRight => new IntVector2(Right, Top);
+
+		public IntVector2 BottomLeft => new IntVector2(Left, Bottom);
 
 		/// <summary>
 		/// Width of the whole playing field
@@ -331,6 +335,8 @@ namespace MHUrho.WorldMap
 		public IntRect? HighlightedArea { get; private set; }
 
 		public ILevelManager LevelManager => levelManager;
+
+		private readonly ITile[] tiles;
 
 		private readonly Node node;
 
@@ -429,7 +435,7 @@ namespace MHUrho.WorldMap
 			this.BottomRight = TopLeft + new IntVector2(width - 1, length - 1);
 
 			this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
-			this.pathFind = new AStar(this);
+			this.PathFinding = new AStar(this);
 		}
 
 		public bool IsInside(int x, int y) {
@@ -1193,9 +1199,6 @@ namespace MHUrho.WorldMap
 			return GetTileByTopLeftCorner(topLeftX, topLeftZ);
 		}
 
-		public Path GetPath(Unit forUnit, ITile to) {
-			return new Path(pathFind.FindPath(forUnit, to.MapLocation), to);
-		}
 
 		public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) {
 			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {

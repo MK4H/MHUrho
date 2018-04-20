@@ -71,6 +71,10 @@ namespace DefaultPackage
 			return toTile.Building == null;
 		}
 
+		public float GetMovementSpeed(ITile tile) {
+			return 1;
+		}
+
 		public void OnMovementStarted(WorldWalker walker) {
 
 		}

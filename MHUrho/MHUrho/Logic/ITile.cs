@@ -152,7 +152,6 @@ namespace MHUrho.Logic
 		/// </summary>
 		void CornerHeightChange();
 
-		Path GetPath(Unit forUnit);
 
 	}
 }

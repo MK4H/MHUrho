@@ -10,12 +10,18 @@ using Priority_Queue;
 
 
 namespace MHUrho.WorldMap {
-	internal class AStar : IPathFindAlg {
-		private readonly IMap map;
 
+	/// <summary>
+	/// Predicate, if it is possible to go from source to the NEIGHBOURING target
+	/// </summary>
+	/// <param name="source">source tile</param>
+	/// <param name="target">NEIGHBOUR of source</param>
+	/// <returns>if it is possible to go from source to target</returns>
+	public delegate bool CanGoToNeighbour(ITile source, ITile target);
 
-		private enum NodeState { Opened, Closed };
+	public delegate float GetMovementSpeed(ITile tile);
 
+	public class AStar : IPathFindAlg {
 		private class Node : FastPriorityQueueNode {
 			private IntVector2 position;
 
@@ -60,7 +66,8 @@ namespace MHUrho.WorldMap {
 
 			public ITile Tile { get; private set; }
 
-			private readonly Unit unit;
+
+			private GetMovementSpeed getMovementSpeed;
 
 			private static readonly float fsqrt2 = (float)Math.Sqrt(2);
 			private static readonly double dsqrt2 = Math.Sqrt(2);
@@ -84,8 +91,8 @@ namespace MHUrho.WorldMap {
 				float halfRawDistance =
 					(position.X == newPreviousNode.position.X || position.Y == newPreviousNode.position.Y) ? half : fsqrt2d2;
 				float newDistance =
-					halfRawDistance * unit.MovementSpeed(Tile) +
-					halfRawDistance * unit.MovementSpeed(newPreviousNode.Tile) +
+					halfRawDistance * getMovementSpeed(Tile) +
+					halfRawDistance * getMovementSpeed(newPreviousNode.Tile) +
 					newPreviousNode.Distance;
 
 				if (newDistance > Distance) return false;
@@ -104,13 +111,13 @@ namespace MHUrho.WorldMap {
 						Node previousNode,
 						ITile tile,
 						float heuristic,
-						Unit unit,
+						GetMovementSpeed getMovementSpeed,
 						NodeState state = NodeState.Opened) {
 
 				this.position = position;
 				PreviousNode = previousNode;
 				this.Tile = tile;
-				this.unit = unit;
+				this.getMovementSpeed = getMovementSpeed;
 				Heuristic = heuristic;
 				State = state;
 				if (previousNode != null) {
@@ -125,23 +132,53 @@ namespace MHUrho.WorldMap {
 
 		}
 
+
+		private enum NodeState { Opened, Closed };
+
+		private readonly IMap map;
+
+		public AStar(IMap map) {
+			this.map = map;
+		}
+
+		public List<IntVector2> FindPath(IntVector2 sourceCoords, 
+										IntVector2 targetCoords, 
+										CanGoToNeighbour canPassTo,
+										GetMovementSpeed getMovementSpeed) {
+			return FindPath(map.GetTileByMapLocation(sourceCoords), targetCoords, canPassTo, getMovementSpeed);
+		}
+
+		public List<IntVector2> FindPath(IntVector2 sourceCoords,
+										ITile target,
+										CanGoToNeighbour canPassTo,
+										GetMovementSpeed getMovementSpeed) {
+			return FindPath(map.GetTileByMapLocation(sourceCoords), target.MapLocation, canPassTo, getMovementSpeed);
+		}
+
+		public List<IntVector2> FindPath(ITile source,
+										ITile target,
+										CanGoToNeighbour canPassTo,
+										GetMovementSpeed getMovementSpeed) {
+			return FindPath(source, target.MapLocation, canPassTo, getMovementSpeed);
+		}
+
 		/// <summary>
 		/// Finds the fastest path through the map from units current possition to target
 		/// </summary>
 		/// <param name="unit">The unit to find the path for, used for checking speed through tile types</param>
-		/// <param name="target">Target coordinates</param>
+		/// <param name="targetCoords">Target coordinates</param>
 		/// <returns>List of IntVector2s the unit should pass through</returns>
-		public List<IntVector2> FindPath(Unit unit, IntVector2 target) {
+		public List<IntVector2> FindPath(ITile source, IntVector2 targetCoords, CanGoToNeighbour canPassTo, GetMovementSpeed getMovementSpeed) {
 
 			
 			Dictionary<IntVector2, Node> touchedNodes = new Dictionary<IntVector2, Node>();
-			IntVector2 startPos = unit.Tile.MapLocation;
+			IntVector2 startPos = source.MapLocation;
 
 			Node startNode = new Node(  position: startPos,
 										previousNode: null,
-										tile: unit.Tile,
-										heuristic: Heuristic(startPos, target),
-										unit: unit);
+										tile: source,
+										getMovementSpeed: getMovementSpeed,
+										heuristic: Heuristic(startPos, targetCoords));
 
 			FastPriorityQueue<Node> priorityQueue = new FastPriorityQueue<Node>(32 + (int)Math.Ceiling(startNode.Heuristic) * 4);
 
@@ -155,12 +192,12 @@ namespace MHUrho.WorldMap {
 				Node sourceNode = priorityQueue.Dequeue();
 
 				//If we hit the target, finish and return path
-				if (sourceNode.Position == target) {
+				if (sourceNode.Position == targetCoords) {
 					return MakePath(sourceNode);
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				AddNeighbours(priorityQueue, touchedNodes, sourceNode, target, unit);
+				AddNeighbours(priorityQueue, touchedNodes, sourceNode, targetCoords, canPassTo, getMovementSpeed);
 
 				sourceNode.State = NodeState.Closed;
 			}
@@ -183,7 +220,9 @@ namespace MHUrho.WorldMap {
 			Dictionary<IntVector2, Node> touchedNodes,
 			Node sourceNode,
 			IntVector2 target,
-			Unit unit) {
+			CanGoToNeighbour canPassTo,
+			GetMovementSpeed getMovementSpeed) {
+
 			for (int dx = -1; dx < 2; dx++) {
 				for (int dy = -1; dy < 2; dy++) {
 					//Dont try adding source node again
@@ -213,7 +252,7 @@ namespace MHUrho.WorldMap {
 						// Compute the heuristic for the new tile
 						float heuristic = Heuristic(newPosition, target);
 
-						if (!unit.CanGoFromTo(sourceNode.Tile, newTile)) {
+						if (!canPassTo(sourceNode.Tile, newTile)) {
 							//Unit cannot pass this tile
 							touchedNodes.Add(
 								newPosition,
@@ -222,14 +261,14 @@ namespace MHUrho.WorldMap {
 									sourceNode,
 									newTile,
 									heuristic,
-									unit,
+									getMovementSpeed,
 									NodeState.Closed
 									)
 								);
 						}
 						else {
 							//Unit can pass through this tile, enqueue it
-							Node newNode = new Node(newPosition, sourceNode, newTile, heuristic, unit);
+							Node newNode = new Node(newPosition, sourceNode, newTile, heuristic, getMovementSpeed);
 							if (queue.Count == queue.MaxSize) {
 								queue.Resize(queue.MaxSize * 2);
 							}
@@ -263,8 +302,6 @@ namespace MHUrho.WorldMap {
 
 
 
-		public AStar(IMap map) {
-			this.map = map;
-		}
+
 	}
 }

@@ -68,7 +68,7 @@ namespace MHUrho.Logic
 			public static StUnit Save(Unit unit) {
 				var storedUnit = new StUnit();
 				storedUnit.Id = unit.ID;
-				storedUnit.Position = new StVector3 { X = unit.XZPosition.X, Y = unit.Node.Position.Y, Z = unit.XZPosition.Y };
+				storedUnit.Position = unit.Position.ToStVector3();
 				storedUnit.PlayerID = unit.Player.ID;
 				//storedUnit.Path = path.Save();
 				//storedUnit.TargetUnitID = target.UnitID;

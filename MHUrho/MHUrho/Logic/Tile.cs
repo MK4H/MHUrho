@@ -282,9 +282,5 @@ namespace MHUrho.Logic
 				unit.SetHeight(Map.GetHeightAt(unit.XZPosition));
 			}
 		}
-
-		public Path GetPath(Unit forUnit) {
-			return Map.GetPath(forUnit, this);
-		}
 	} 
 }

@@ -6,6 +6,7 @@ using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using MHUrho.Storage;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace DefaultPackage
@@ -89,7 +90,23 @@ namespace DefaultPackage
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
-			return toTile.Building == null;
+			var diff = toTile.MapLocation - fromTile.MapLocation;
+
+			if (diff.X == 0 || diff.Y == 0) {
+				return toTile.Building == null;
+			}
+			else {
+				//Diagonal
+				var tile1 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(diff.X, 0));
+				var tile2 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(0, diff.Y));
+
+				return tile1.Building == null && tile2.Building == null;
+			}
+			
+		}
+
+		public float GetMovementSpeed(ITile tile) {
+			return 1;
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {
