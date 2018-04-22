@@ -25,5 +25,13 @@ namespace MHUrho.UnitComponents
 		public abstract void Select();
 
 		public abstract void Deselect();
+
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(Selector), entityDefaultComponents);
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(Selector), entityDefaultComponents);
+		}
 	}
 }

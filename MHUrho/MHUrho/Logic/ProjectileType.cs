@@ -94,7 +94,7 @@ namespace MHUrho.Logic
 			return typePlugin.IsInRange(source, target);
 		}
 
-		public bool IsInRange(Vector3 source, RangeTargetComponent target) {
+		public bool IsInRange(Vector3 source, IRangeTarget target) {
 			return typePlugin.IsInRange(source, target);
 		}
 

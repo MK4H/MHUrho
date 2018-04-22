@@ -45,8 +45,8 @@ namespace MHUrho.UnitComponents
 		internal event ShotReloadedDelegate OnShotReloaded;
 		internal event ShotFiredDelegate OnShotFired;
 
-		//TODO: Change to Target component
-		private RangeTargetComponent target;
+
+		private IRangeTarget target;
 
 		private float shotDelay;
 		private float searchDelay;
@@ -62,39 +62,28 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		private readonly float verticalOffset;
 
-		private ILevelManager level;
 
-		private IPlayer player;
+
+		private Entity entity;
 
 		private INotificationReceiver notificationReceiver;
 
-		private Map Map => level.Map;
+		private IPlayer Player => entity.Player;
 
-		//TODO: Move to loader class
-		private int playerID;
+		private ILevelManager Level => entity.Level;
+
+		private Map Map => Level.Map;
+
+		private int entityID;
 
 		protected Shooter(ILevelManager level,
-						  INotificationReceiver notificationReceiver,
-						  IPlayer player,
-						  ProjectileType projectileType,
-						  float rateOfFire,
-						  float horizontalOffset,
-						  float verticalOffset) 
-			: this(level,notificationReceiver, projectileType, rateOfFire, horizontalOffset, verticalOffset) 
-		{
-			this.player = player;
-
-		}
-
-		protected Shooter(	ILevelManager level,
-							INotificationReceiver notificationReceiver,
-							ProjectileType projectileType,
-							float rateOfFire,
-							float horizontalOffset,
-							float verticalOffset) {
-
+						INotificationReceiver notificationReceiver,
+						ProjectileType projectileType,
+						float rateOfFire,
+						float horizontalOffset,
+						float verticalOffset) {
 			this.notificationReceiver = notificationReceiver;
-			this.level = level;
+
 
 			this.projectileType = projectileType;
 			this.RateOfFire = rateOfFire;
@@ -105,9 +94,20 @@ namespace MHUrho.UnitComponents
 			ReceiveSceneUpdates = true;
 		}
 
+		protected Shooter(	ILevelManager level,
+							int entityID,
+							INotificationReceiver notificationReceiver,
+							ProjectileType projectileType,
+							float rateOfFire,
+							float horizontalOffset,
+							float verticalOffset)
+			:this(level, notificationReceiver, projectileType, rateOfFire, horizontalOffset, verticalOffset)
+		{
+			this.entityID = entityID;
+		}
+
 		public static Shooter CreateNew<T>(T instancePlugin, 
 										   ILevelManager level,
-										   IPlayer player,
 										   ProjectileType projectileType,
 										   float rateOfFire,
 										   float horizontalOffset,
@@ -120,7 +120,6 @@ namespace MHUrho.UnitComponents
 
 			return new Shooter(level, 
 							   instancePlugin, 
-							   player,
 							   projectileType, 
 							   rateOfFire, 
 							   horizontalOffset,
@@ -136,7 +135,7 @@ namespace MHUrho.UnitComponents
 
 			var sequentialDataReader = new SequentialPluginDataReader(storedData);
 			sequentialDataReader.MoveNext();
-			var playerID = sequentialDataReader.GetCurrent<int>();
+			var entityID = sequentialDataReader.GetCurrent<int>();
 			sequentialDataReader.MoveNext();
 			var rateOfFire = sequentialDataReader.GetCurrent<float>();
 			sequentialDataReader.MoveNext();
@@ -147,24 +146,24 @@ namespace MHUrho.UnitComponents
 			var projectileTypeID = sequentialDataReader.GetCurrent<int>();
 
 			var shooter = new Shooter(level,
-									 notificationReceiver,
-									 level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-									 rateOfFire,
-									 horizontalOffset,
-									 verticalOffset);
+									entityID,
+									notificationReceiver,
+									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
+									rateOfFire,
+									horizontalOffset,
+									verticalOffset);
 
-			shooter.playerID = playerID;
 			return shooter;
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
-			player = level.GetPlayer(playerID);
+			entity = level.GetEntity(entityID);
 		}
 
 		public override PluginData SaveState() {
 			var sequentialData = new SequentialPluginDataWriter();
 
-			sequentialData.StoreNext<int>(player.ID);
+			sequentialData.StoreNext<int>(entity.ID);
 			sequentialData.StoreNext<float>(RateOfFire);
 			sequentialData.StoreNext<float>(horizontalOffset);
 			sequentialData.StoreNext<float>(verticalOffset);
@@ -176,9 +175,18 @@ namespace MHUrho.UnitComponents
 		public override void OnAttachedToNode(Node node) {
 			base.OnAttachedToNode(node);
 
+			entity = node.GetComponent<Entity>();
+
 			OnShotFired += notificationReceiver.OnShotFired;
 			OnTargetAcquired += notificationReceiver.OnTargetAcquired;
 			OnShotReloaded += notificationReceiver.OnShotReloaded;
+		}
+
+		public bool ShootAt(IRangeTarget newTarget) {
+			if (!projectileType.IsInRange(entity.Position, newTarget)) return false;
+
+			target = newTarget;
+			return true;
 		}
 
 		protected override void OnUpdate(float timeStep) {
@@ -193,11 +201,11 @@ namespace MHUrho.UnitComponents
 
 			OnShotReloaded?.Invoke(this);
 
-			if (target == null && searchDelay < 0) {
+			if (SearchForTarget && target == null && searchDelay < 0) {
 				searchDelay = TargetSearchDelay;
 
 				//Check for target in range
-				var possibleTargets = player.GetEnemyPlayers()
+				var possibleTargets = Player.GetEnemyPlayers()
 											.SelectMany(enemy => enemy.GetAllUnits())
 											//.AsParallel()
 											.Where(unit => projectileType.IsInRange(Node.Position, unit.Position))
@@ -205,7 +213,8 @@ namespace MHUrho.UnitComponents
 
 
 				foreach (var possibleTarget in possibleTargets) {
-					var newTarget = possibleTarget.GetComponent<RangeTargetComponent>();
+
+					var newTarget = possibleTarget.GetDefaultComponent<RangeTargetComponent>();
 					if (newTarget == null || !projectileType.IsInRange(Node.Position, newTarget)) {
 						continue;
 					}
@@ -223,12 +232,25 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			var projectile = level.SpawnProjectile(projectileType, Node.Position, player, target);
-			OnShotFired?.Invoke(this, projectile);
+			if (target != null) {
+				var projectile = Level.SpawnProjectile(projectileType, Node.Position, Player, target);
+				OnShotFired?.Invoke(this, projectile);
 
-			shotDelay = 60 / RateOfFire;
+				shotDelay = 60 / RateOfFire;
+			}
+
+			
 		}
 
-		
+
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(Shooter), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(Shooter), entityDefaultComponents);
+		}
+
 	}
 }

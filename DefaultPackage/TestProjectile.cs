@@ -24,8 +24,18 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
-		public override bool IsInRange(Vector3 source, RangeTargetComponent target) {
-			return false;
+		public override bool IsInRange(Vector3 source, IRangeTarget target) {
+			if (target.Moving) {
+				return false;
+			}
+			else {
+				return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.GetPositionAfter(0),
+																			source, 30,
+																			out var loweTime,
+																			out var lowVector,
+																			out var highTime,
+																			out var highVector);
+			}
 		}
 
 		public override bool IsInRange(Vector3 source, Vector3 target) {

@@ -46,7 +46,7 @@ namespace DefaultPackage
 
 		public TestWorkerInstance(ILevelManager level, Unit unit) : base(level, unit) {
 			walker = WorldWalker.GetInstanceFor(this, level);
-			unit.Node.AddComponent(walker);
+			unit.AddComponent(walker);
 
 		}
 

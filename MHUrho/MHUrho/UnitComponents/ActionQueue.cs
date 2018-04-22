@@ -155,6 +155,13 @@ namespace MHUrho.UnitComponents
 			OnTaskStarted?.Invoke(this, (WorkTask) currentTask);
 		}
 
-		
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(ActionQueue), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(ActionQueue), entityDefaultComponents);
+		}
 	}
 }

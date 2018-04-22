@@ -59,6 +59,15 @@ namespace MHUrho.UnitComponents {
 			}
 		}
 
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(RangeTargetComponent), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(RangeTargetComponent), entityDefaultComponents);
+		}
+
 	}
 
 	public class StaticRangeTarget : RangeTargetComponent {
@@ -119,7 +128,19 @@ namespace MHUrho.UnitComponents {
 		public override PluginData SaveState() {
 			throw new NotImplementedException();
 		}
+
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+			AddedToEntity(typeof(StaticRangeTarget), entityDefaultComponents);
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.RemovedFromEntity(entityDefaultComponents);
+			return RemovedFromEntity(typeof(StaticRangeTarget), entityDefaultComponents);
+		}
 	}
+
+
 
 	public class MovingRangeTarget : RangeTargetComponent {
 		public interface INotificationReceiver {
@@ -179,7 +200,15 @@ namespace MHUrho.UnitComponents {
 			throw new NotImplementedException();
 		}
 
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+			AddedToEntity(typeof(MovingRangeTarget), entityDefaultComponents);
+		}
 
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.RemovedFromEntity(entityDefaultComponents);
+			return RemovedFromEntity(typeof(MovingRangeTarget), entityDefaultComponents);
+		}
 	}
 
 	internal class MapRangeTarget : IRangeTarget {

@@ -11,6 +11,8 @@ namespace MHUrho.UnitComponents
 	{
 		public delegate DefaultComponent LoadComponentDelegate(ILevelManager level, InstancePluginBase unitPlugin, PluginData storedData);
 
+		public static readonly Dictionary<Type, DefaultComponents> typeToComponentID;
+
 		private readonly Dictionary<DefaultComponents, LoadComponentDelegate> loaders;
 
 		private readonly Dictionary<string, DefaultComponents> nameToID;
@@ -24,7 +26,11 @@ namespace MHUrho.UnitComponents
 
 		}
 
+		static DefaultComponentFactory() {
+			typeToComponentID = new Dictionary<Type, DefaultComponents>();
 
+			FillTypeToIDMap();
+		}
 
 		public DefaultComponent LoadComponent(string name, PluginData storedComponent, ILevelManager level, InstancePluginBase plugin) {
 			return LoadComponent(nameToID[name], storedComponent, level, plugin);
@@ -38,7 +44,7 @@ namespace MHUrho.UnitComponents
 			return loaders[ID].Invoke(level, plugin, storedComponent);
 		}
 
-		private static void AddLoaders(IDictionary<DefaultComponents, LoadComponentDelegate> loaders) {
+		private void AddLoaders(IDictionary<DefaultComponents, LoadComponentDelegate> loaders) {
 			//TODO: Maybe reflection
 			loaders.Add(UnitSelector.ComponentID, UnitSelector.Load);
 			loaders.Add(WorldWalker.ComponentID, WorldWalker.Load);
@@ -48,7 +54,7 @@ namespace MHUrho.UnitComponents
 			//TODO: Add other components
 		}
 
-		private static void AddNameToIDMap(IDictionary<string, DefaultComponents> map) {
+		private void AddNameToIDMap(IDictionary<string, DefaultComponents> map) {
 			map.Add(UnitSelector.ComponentName, UnitSelector.ComponentID);
 			map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
 			map.Add(Shooter.ComponentName, Shooter.ComponentID);
@@ -57,5 +63,12 @@ namespace MHUrho.UnitComponents
 
 		}
 
+		private static void FillTypeToIDMap() {
+			typeToComponentID.Add(typeof(UnitSelector), UnitSelector.ComponentID);
+			typeToComponentID.Add(typeof(WorldWalker), WorldWalker.ComponentID);
+			typeToComponentID.Add(typeof(Shooter), Shooter.ComponentID);
+			typeToComponentID.Add(typeof(ActionQueue), ActionQueue.ComponentID);
+			typeToComponentID.Add(typeof(UnpoweredFlier), UnpoweredFlier.ComponentID);
+		}
 	}
 }

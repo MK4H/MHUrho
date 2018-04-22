@@ -205,6 +205,14 @@ namespace MHUrho.UnitComponents
 			nextWaypoint = GetNextWaypoint();
 		}
 
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(WorldWalker), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(WorldWalker), entityDefaultComponents);
+		}
 
 		/// <summary>
 		/// Moves unit towards the <paramref name="point"/>

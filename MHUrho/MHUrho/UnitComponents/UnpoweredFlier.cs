@@ -184,5 +184,14 @@ namespace MHUrho.UnitComponents
 				notificationReceiver.OnGroundHit(this);
 			}
 		}
+
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(UnpoweredFlier), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(UnpoweredFlier), entityDefaultComponents);
+		}
 	}
 }

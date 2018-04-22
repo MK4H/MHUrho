@@ -66,15 +66,14 @@ namespace DefaultPackage
 			this.walker = WorldWalker.GetInstanceFor(this, level);
 
 
-			unitNode.AddComponent(walker);
-			unitNode.AddComponent(UnitSelector.CreateNew(this, level));
-			unitNode.AddComponent(Shooter.CreateNew(this,
-													level,
-													unit.Player,
-													projectileType,
-													10,
-													1,
-													1));
+			unit.AddComponent(walker);
+			unit.AddComponent(UnitSelector.CreateNew(this, level));
+			unit.AddComponent(Shooter.CreateNew(this,
+												level,
+												projectileType,
+												10,
+												1,
+												1));
 
 		}
 
@@ -86,7 +85,7 @@ namespace DefaultPackage
 			this.level = level;
 			this.unit = unit;
 			this.unitNode = unit.Node;
-			walker = unitNode.GetComponent<WorldWalker>();
+			walker = unit.GetComponent<WorldWalker>();
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {

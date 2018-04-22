@@ -150,5 +150,16 @@ namespace MHUrho.UnitComponents
 			OrderedToBuilding += notificationReceiver.OnUnitOrderedToBuilding;
 		}
 
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+			AddedToEntity(typeof(UnitSelector), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+			return RemovedFromEntity(typeof(UnitSelector), entityDefaultComponents);
+		}
+
 	}
 }

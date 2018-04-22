@@ -17,4 +17,8 @@
   <PropertyGroup>
     <ProtoIncludes>.;Storage</ProtoIncludes>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 </Project>

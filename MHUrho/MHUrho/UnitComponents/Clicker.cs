@@ -58,6 +58,14 @@ namespace MHUrho.UnitComponents
 			notificationReceiver.Clicked(this, button, qualifiers);
 		}
 
-		
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(typeof(Clicker), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(typeof(Clicker), entityDefaultComponents);
+		}
+
 	}
 }

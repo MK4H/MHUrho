@@ -16,13 +16,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHUrho.Desktop", "MHUrho\MHUrho.Desktop\MHUrho.Desktop.csproj", "{ECC350C2-88BF-4905-B4CB-8FAEC47DFF8C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{054FD144-14A7-4596-B205-8FBCA2D83CBB} = {054FD144-14A7-4596-B205-8FBCA2D83CBB}
+		{07735EB1-4754-4FC5-874F-E6CABFE97B2D} = {07735EB1-4754-4FC5-874F-E6CABFE97B2D}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MHUrho", "MHUrho\MHUrho\MHUrho.csproj", "{054FD144-14A7-4596-B205-8FBCA2D83CBB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit.Tests", "NUnit.Tests\NUnit.Tests.csproj", "{8EDF4429-251A-416D-BB68-93F227191BCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefaultPackage", "DefaultPackage\DefaultPackage.csproj", "{07735EB1-4754-4FC5-874F-E6CABFE97B2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DefaultPackage", "DefaultPackage\DefaultPackage.csproj", "{07735EB1-4754-4FC5-874F-E6CABFE97B2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -21,14 +21,52 @@ namespace MHUrho.UnitComponents
 		Clicker
 	}
 
-	public abstract class DefaultComponent : Component {
+	//TODO: Rename this
+	internal interface IByTypeQueryable {
+		void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
 
-		public new abstract DefaultComponents ComponentTypeID{ get; }
+		bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+	}
+
+	public abstract class DefaultComponent : Component, IByTypeQueryable {
+
+		public abstract DefaultComponents ComponentTypeID{ get; }
 
 		public abstract string ComponentTypeName { get; }
 
 		internal abstract void ConnectReferences(ILevelManager level);
 
 		public abstract PluginData SaveState();
+
+		void IByTypeQueryable.AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			AddedToEntity(entityDefaultComponents);
+		}
+
+		bool IByTypeQueryable.RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			return RemovedFromEntity(entityDefaultComponents);
+		}
+
+		protected abstract void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+
+		protected abstract bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+
+		protected void AddedToEntity(Type type, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			if (entityDefaultComponents.TryGetValue(type, out var componentsOfType)) {
+				componentsOfType.Add(this);
+			}
+			else {
+				entityDefaultComponents.Add(type, new List<DefaultComponent> { this });
+			}
+		}
+
+		protected bool RemovedFromEntity(Type type, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			if (!entityDefaultComponents.TryGetValue(type, out var componentsOfType)) return false;
+
+			bool removed = componentsOfType.Remove(this);
+			if (componentsOfType.Count == 0) {
+				entityDefaultComponents.Remove(type);
+			}
+			return removed;
+		}
 	}
 }
