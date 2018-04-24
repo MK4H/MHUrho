@@ -282,20 +282,41 @@ namespace MHUrho.Logic
 			return newBuilding;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="projectileType"></param>
+		/// <param name="position"></param>
+		/// <param name="player"></param>
+		/// <param name="target"></param>
+		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
 		public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target) {
 
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, target);
-			entities.Add(newProjectile.ID, newProjectile);
-			projectiles.Add(newProjectile.ID, newProjectile);
 
+			if (newProjectile != null) {
+				entities.Add(newProjectile.ID, newProjectile);
+				projectiles.Add(newProjectile.ID, newProjectile);
+			}
+			
 			return newProjectile;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="projectileType"></param>
+		/// <param name="position"></param>
+		/// <param name="player"></param>
+		/// <param name="movement"></param>
+		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
 		public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement) {
 
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, movement);
-			entities.Add(newProjectile.ID, newProjectile);
-			projectiles.Add(newProjectile.ID, newProjectile);
+			if (newProjectile != null) {
+				entities.Add(newProjectile.ID, newProjectile);
+				projectiles.Add(newProjectile.ID, newProjectile);
+			}
 
 			return newProjectile;
 
@@ -304,21 +325,21 @@ namespace MHUrho.Logic
 
 		public Unit GetUnit(int ID) {
 			if (!units.TryGetValue(ID, out Unit value)) {
-				throw new ArgumentOutOfRangeException("Unit with this ID does not exist in the current level");
+				throw new ArgumentOutOfRangeException(nameof(ID), "Unit with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
 		public Building GetBuilding(int ID) {
 			if (!buildings.TryGetValue(ID, out Building value)) {
-				throw new ArgumentOutOfRangeException("Building with this ID does not exist in the current level");
+				throw new ArgumentOutOfRangeException(nameof(ID), "Building with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
 		public Player GetPlayer(int ID) {
 			if (!players.TryGetValue(ID, out Player player)) {
-				throw new ArgumentOutOfRangeException("Player with this ID does not exist in the current level");
+				throw new ArgumentOutOfRangeException(nameof(ID), "Player with this ID does not exist in the current level");
 			}
 
 			return player;
@@ -326,21 +347,21 @@ namespace MHUrho.Logic
 
 		public Projectile GetProjectile(int ID) {
 			if (!projectiles.TryGetValue(ID, out Projectile value)) {
-				throw new ArgumentOutOfRangeException("Projectile with this ID does not exist in the current level");
+				throw new ArgumentOutOfRangeException(nameof(ID), "Projectile with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
 		public Entity GetEntity(int ID) {
 			if (!entities.TryGetValue(ID, out Entity value)) {
-				throw new ArgumentOutOfRangeException("Entity with this ID does not exist in the current level");
+				throw new ArgumentOutOfRangeException(nameof(ID), "Entity with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
 		public IRangeTarget GetRangeTarget(int ID) {
 			if (!rangeTargets.TryGetValue(ID, out IRangeTarget value)) {
-				throw new ArgumentOutOfRangeException("RangeTarget with this ID does not exist in the current level");
+				throw new ArgumentOutOfRangeException(nameof(ID),"RangeTarget with this ID does not exist in the current level");
 			}
 			return value;
 		}

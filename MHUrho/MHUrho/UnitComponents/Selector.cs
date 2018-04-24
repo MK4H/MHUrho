@@ -16,11 +16,11 @@ namespace MHUrho.UnitComponents
 
 		public virtual bool Selected { get; protected set; }
 
-		public abstract bool Order(ITile tile, int buttons, int qualifiers);
+		public abstract bool Order(ITile tile, MouseButton button, MouseButton buttons, int qualifiers);
 
-		public abstract bool Order(Unit unit, int buttons, int qualifiers);
+		public abstract bool Order(Unit unit, MouseButton button, MouseButton buttons, int qualifiers);
 
-		public abstract bool Order(Building unit, int buttons, int qualifiers);
+		public abstract bool Order(Building unit, MouseButton button, MouseButton buttons, int qualifiers);
 
 		public abstract void Select();
 

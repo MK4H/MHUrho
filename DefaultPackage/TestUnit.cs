@@ -50,30 +50,30 @@ namespace DefaultPackage
 
 	public class TestUnitInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
 	{
-		private ILevelManager level;
 		private Node unitNode;
 		private Unit unit;
 		private WorldWalker walker;
+		private Shooter shooter;
 
 		public TestUnitInstance() {
 
 		}
 
-		public TestUnitInstance(ILevelManager level, Unit unit, ProjectileType projectileType) {
-			this.level = level;
+		public TestUnitInstance(ILevelManager level, Unit unit, ProjectileType projectileType)
+			:base(level, unit)
+		{
 			this.unitNode = unit.Node;
 			this.unit = unit;
 			this.walker = WorldWalker.GetInstanceFor(this, level);
-
+			this.shooter = Shooter.CreateNew(this,
+											level,
+											projectileType,
+											10);
+			this.shooter.SearchForTarget = false;
 
 			unit.AddComponent(walker);
 			unit.AddComponent(UnitSelector.CreateNew(this, level));
-			unit.AddComponent(Shooter.CreateNew(this,
-												level,
-												projectileType,
-												10,
-												1,
-												1));
+			unit.AddComponent(shooter);
 
 		}
 
@@ -82,7 +82,7 @@ namespace DefaultPackage
 		}
 
 		public override void LoadState(ILevelManager level,Unit unit, PluginDataWrapper pluginData) {
-			this.level = level;
+			this.Level = level;
 			this.unit = unit;
 			this.unitNode = unit.Node;
 			walker = unit.GetComponent<WorldWalker>();
@@ -102,6 +102,10 @@ namespace DefaultPackage
 				return tile1.Building == null && tile2.Building == null;
 			}
 			
+		}
+
+		public override void OnUpdate(float timeStep) {
+
 		}
 
 		public float GetMovementSpeed(ITile tile) {
@@ -128,16 +132,28 @@ namespace DefaultPackage
 
 		}
 
-		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs) {
-			orderArgs.Executed = walker.GoTo(targetTile);
+		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
+			switch (button) {
+				case MouseButton.Left:
+					orderArgs.Executed = walker.GoTo(targetTile);
+					break;
+				case MouseButton.Right:
+					var rangeTarget = Map.GetRangeTarget(targetTile.Center3);
+					orderArgs.Executed = shooter.ShootAt(rangeTarget);
+					break;
+			}
 		}
 
-		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs) {
+		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs) {
+		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
+		}
+
+		public Vector3 GetSourceOffset(IRangeTarget target) {
+			return new Vector3(0, 1, 0);
 		}
 
 		public void OnTargetAcquired(Shooter shooter, Unit targetUnit) {

@@ -21,7 +21,7 @@ namespace MHUrho.UnitComponents {
 
 	public abstract class RangeTargetComponent : DefaultComponent, IRangeTarget {
 		public interface IShooter {
-			void OnTargetDestroy(RangeTargetComponent target);
+			void OnTargetDestroy(IRangeTarget target);
 		}
 
 		public int InstanceID { get; set; }
@@ -31,7 +31,7 @@ namespace MHUrho.UnitComponents {
 		protected List<IShooter> shooters;
 
 		public abstract Vector3 GetPositionAfter(float time);
-
+		
 		/// <summary>
 		/// Adds a shooter to be notified when this target dies
 		/// 
@@ -57,6 +57,8 @@ namespace MHUrho.UnitComponents {
 			foreach (var shooter in shooters) {
 				shooter.OnTargetDestroy(this);
 			}
+
+			
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
@@ -90,7 +92,7 @@ namespace MHUrho.UnitComponents {
 			this.Position = position;
 		}
 
-		public static RangeTargetComponent CreateNewStaticTarget<T>(T instancePlugin, int targetID, ILevelManager level, Vector3 position)
+		public static StaticRangeTarget CreateNewStaticTarget<T>(T instancePlugin, int targetID, ILevelManager level, Vector3 position)
 			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
@@ -100,7 +102,7 @@ namespace MHUrho.UnitComponents {
 			return new StaticRangeTarget(targetID, level, position);
 		}
 
-		internal static RangeTargetComponent Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
+		internal static StaticRangeTarget Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
 			var notificationReceiver = plugin as INotificationReceiver;
 			if (notificationReceiver == null) {
 				throw new
@@ -163,7 +165,7 @@ namespace MHUrho.UnitComponents {
 			this.notificationReceiver = notificationReceiver;
 		}
 
-		public static RangeTargetComponent CreateNew<T>(T instancePlugin, int targetID, ILevelManager level)
+		public static MovingRangeTarget CreateNew<T>(T instancePlugin, int targetID, ILevelManager level)
 			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
@@ -220,12 +222,15 @@ namespace MHUrho.UnitComponents {
 
 		protected List<RangeTargetComponent.IShooter> shooters;
 
-		protected MapRangeTarget(ILevelManager level, Vector3 position) {
+		private LevelManager level;
 
+		protected MapRangeTarget(LevelManager level, Vector3 position) {
+			this.level = level;
 			this.Position = position;
+			shooters = new List<RangeTargetComponent.IShooter>();
 		}
 
-		public static MapRangeTarget CreateNew(LevelManager level, Vector3 position) {
+		internal static MapRangeTarget CreateNew(LevelManager level, Vector3 position) {
 			
 			var mapTarget = new MapRangeTarget(level, position);
 			level.RegisterRangeTarget(mapTarget);
@@ -242,6 +247,11 @@ namespace MHUrho.UnitComponents {
 
 		public void RemoveShooter(RangeTargetComponent.IShooter shooter) {
 			shooters.Remove(shooter);
+
+			if (shooters.Count == 0) {
+				level.UnRegisterRangeTarget(InstanceID);
+				level.Map.RemoveRangeTarget(this);
+			}
 		}
 
 

@@ -433,6 +433,7 @@ namespace MHUrho.WorldMap
 			this.node = mapNode;
 			this.TopLeft = new IntVector2(1, 1);
 			this.BottomRight = TopLeft + new IntVector2(width - 1, length - 1);
+			this.mapRangeTargets = new Dictionary<Vector3, MapRangeTarget>();
 
 			this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
 			this.PathFinding = new AStar(this);
@@ -1242,6 +1243,11 @@ namespace MHUrho.WorldMap
 			}
 
 			return mapTarget;
+		}
+
+		internal void RemoveRangeTarget(MapRangeTarget mapRangeTarget) {
+			var removed = mapRangeTargets.Remove(mapRangeTarget.Position);
+			Debug.Assert(removed);
 		}
 
 		public void Dispose() {

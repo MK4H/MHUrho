@@ -12,9 +12,9 @@ namespace MHUrho.UnitComponents
 {
 	internal delegate void UnitSelectedDelegate(UnitSelector unitSelector);
 	internal delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
-	internal delegate void UnitOrderedToTileDelegate(UnitSelector unitSelector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs);
-	internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs);
-	internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToTileDelegate(UnitSelector unitSelector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 
 
 	public class UnitSelector : Selector {
@@ -31,11 +31,11 @@ namespace MHUrho.UnitComponents
 			/// <param name="targetTile"></param>
 			/// <param name="orderArgs">Contains an Executed flag, which is true if some method before consumed the command, and false if it did not
 			/// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
-			void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, int buttons, int qualifiers, OrderArgs orderArgs);
+			void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 
-			void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, int buttons, int qualifiers, OrderArgs orderArgs);
+			void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 
-			void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, int buttons, int qualifiers, OrderArgs orderArgs);
+			void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 		}
 
 		public static string ComponentName = nameof(UnitSelector);
@@ -97,22 +97,22 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		/// <param name="targetTile">target tile</param>
 		/// <returns>True if unit was given order, False if there is nothing the unit can do</returns>
-		public override bool Order(ITile targetTile, int buttons, int qualifiers) {
+		public override bool Order(ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers) {
 			//TODO: EventArgs to get if the event was handled
 			var orderArgs = new OrderArgs();
-			OrderedToTile?.Invoke(this, targetTile, buttons, qualifiers, orderArgs);
+			OrderedToTile?.Invoke(this, targetTile, button, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 
-		public override bool Order(Unit targetUnit, int buttons, int qualifiers) {
+		public override bool Order(Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers) {
 			var orderArgs = new OrderArgs();
-			OrderedToUnit?.Invoke(this, targetUnit, buttons, qualifiers, orderArgs);
+			OrderedToUnit?.Invoke(this, targetUnit, button, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 
-		public override bool Order(Building targetBuilding, int buttons, int qualifiers) {
+		public override bool Order(Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers) {
 			var orderArgs = new OrderArgs();
-			OrderedToBuilding?.Invoke(this, targetBuilding, buttons, qualifiers, orderArgs);
+			OrderedToBuilding?.Invoke(this, targetBuilding, button, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 

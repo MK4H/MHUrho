@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Linq;
 using MHUrho.Logic;
@@ -16,7 +17,7 @@ namespace MHUrho.UnitComponents
 	internal delegate void ShotReloadedDelegate(Shooter shooter);
 	internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
 
-	public class Shooter : DefaultComponent
+	public class Shooter : DefaultComponent, RangeTargetComponent.IShooter
 	{
 
 		public interface INotificationReceiver {
@@ -25,6 +26,8 @@ namespace MHUrho.UnitComponents
 			void OnShotFired(Shooter shooter, Projectile projectile);
 
 			void OnShotReloaded(Shooter shooter);
+
+			Vector3 GetSourceOffset(IRangeTarget target);
 		}
 
 		public static string ComponentName = nameof(Shooter);
@@ -53,16 +56,6 @@ namespace MHUrho.UnitComponents
 
 		private ProjectileType projectileType;
 
-		/// <summary>
-		/// Offset of the projectile source from Unit Node in the direction to the target
-		/// </summary>
-		private readonly float horizontalOffset;
-		/// <summary>
-		/// Offset of the projectile source from Unit Node vertically
-		/// </summary>
-		private readonly float verticalOffset;
-
-
 
 		private Entity entity;
 
@@ -79,16 +72,12 @@ namespace MHUrho.UnitComponents
 		protected Shooter(ILevelManager level,
 						INotificationReceiver notificationReceiver,
 						ProjectileType projectileType,
-						float rateOfFire,
-						float horizontalOffset,
-						float verticalOffset) {
+						float rateOfFire) {
 			this.notificationReceiver = notificationReceiver;
 
 
 			this.projectileType = projectileType;
 			this.RateOfFire = rateOfFire;
-			this.horizontalOffset = horizontalOffset;
-			this.verticalOffset = verticalOffset;
 			this.shotDelay = 60 / RateOfFire;
 			this.searchDelay = 0;
 			ReceiveSceneUpdates = true;
@@ -98,10 +87,8 @@ namespace MHUrho.UnitComponents
 							int entityID,
 							INotificationReceiver notificationReceiver,
 							ProjectileType projectileType,
-							float rateOfFire,
-							float horizontalOffset,
-							float verticalOffset)
-			:this(level, notificationReceiver, projectileType, rateOfFire, horizontalOffset, verticalOffset)
+							float rateOfFire)
+			:this(level, notificationReceiver, projectileType, rateOfFire)
 		{
 			this.entityID = entityID;
 		}
@@ -109,9 +96,7 @@ namespace MHUrho.UnitComponents
 		public static Shooter CreateNew<T>(T instancePlugin, 
 										   ILevelManager level,
 										   ProjectileType projectileType,
-										   float rateOfFire,
-										   float horizontalOffset,
-										   float verticalOffset)
+										   float rateOfFire)
 			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
@@ -121,9 +106,7 @@ namespace MHUrho.UnitComponents
 			return new Shooter(level, 
 							   instancePlugin, 
 							   projectileType, 
-							   rateOfFire, 
-							   horizontalOffset,
-							   verticalOffset);
+							   rateOfFire);
 		}
 
 		internal static Shooter Load(ILevelManager level, InstancePluginBase plugin, PluginData storedData) {
@@ -139,19 +122,13 @@ namespace MHUrho.UnitComponents
 			sequentialDataReader.MoveNext();
 			var rateOfFire = sequentialDataReader.GetCurrent<float>();
 			sequentialDataReader.MoveNext();
-			var horizontalOffset = sequentialDataReader.GetCurrent<float>();
-			sequentialDataReader.MoveNext();
-			var verticalOffset = sequentialDataReader.GetCurrent<float>();
-			sequentialDataReader.MoveNext();
 			var projectileTypeID = sequentialDataReader.GetCurrent<int>();
 
 			var shooter = new Shooter(level,
 									entityID,
 									notificationReceiver,
 									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-									rateOfFire,
-									horizontalOffset,
-									verticalOffset);
+									rateOfFire);
 
 			return shooter;
 		}
@@ -165,8 +142,6 @@ namespace MHUrho.UnitComponents
 
 			sequentialData.StoreNext<int>(entity.ID);
 			sequentialData.StoreNext<float>(RateOfFire);
-			sequentialData.StoreNext<float>(horizontalOffset);
-			sequentialData.StoreNext<float>(verticalOffset);
 			sequentialData.StoreNext<int>(projectileType.ID);
 
 			return sequentialData.PluginData;
@@ -183,10 +158,27 @@ namespace MHUrho.UnitComponents
 		}
 
 		public bool ShootAt(IRangeTarget newTarget) {
+			StopShooting();
+
 			if (!projectileType.IsInRange(entity.Position, newTarget)) return false;
 
 			target = newTarget;
+			newTarget.AddShooter(this);
 			return true;
+		}
+
+		public void StopShooting() {
+			target?.RemoveShooter(this);
+			target = null;
+		}
+
+		public void OnTargetDestroy(IRangeTarget target) {
+			Debug.Assert(this.target == target);
+			this.target = null;
+		}
+
+		protected override void OnDeleted() {
+			target?.RemoveShooter(this);
 		}
 
 		protected override void OnUpdate(float timeStep) {
@@ -233,7 +225,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			if (target != null) {
-				var projectile = Level.SpawnProjectile(projectileType, Node.Position, Player, target);
+				var projectile = Level.SpawnProjectile(projectileType, entity.Position + notificationReceiver.GetSourceOffset(target), Player, target);
 				OnShotFired?.Invoke(this, projectile);
 
 				shotDelay = 60 / RateOfFire;

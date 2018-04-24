@@ -132,9 +132,6 @@ namespace MHUrho.Logic
 			if (!EnabledEffective) return;
 
 			Plugin.OnUpdate(timeStep);
-
-
-			
 		}
 
 

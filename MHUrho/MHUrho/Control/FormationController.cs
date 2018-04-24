@@ -26,7 +26,7 @@ namespace MHUrho.Control
 			//TODO: Create cutoff if there is too many units, more than can fit the map
 			while (unitsLeft) { 
 				var targetTile = map.GetTileByTopLeftCorner(center + spiralCoords);
-				if (targetTile != null && unit.Current.Order(targetTile,0,0)) {
+				if (targetTile != null && unit.Current.Order(targetTile,MouseButton.Left,0,0)) {
 					//If the unit was ordered, try ordering the next unit
 					unitsLeft = unit.MoveNext();
 				}

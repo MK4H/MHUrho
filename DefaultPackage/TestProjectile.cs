@@ -54,8 +54,9 @@ namespace DefaultPackage
 
 	}
 
-	public class TestProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReceiver 
-	{
+	public class TestProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReceiver {
+		private static readonly Random seedRng = new Random();
+
 		private UnpoweredFlier flier;
 
 		private const float baseTimeToSplit = 0.5f;
@@ -65,15 +66,27 @@ namespace DefaultPackage
 
 		private int splits = 10;
 
+		private bool despawning;
+		private float timeToDespawn = 6;
+
 		public TestProjectileInstance(ILevelManager level, Projectile projectile)
 			:base (level, projectile)
 		{
-			this.rng = new Random();
+			this.rng = new Random(seedRng.Next());
 			flier = UnpoweredFlier.GetInstanceFor(this, level);
 			projectile.Node.AddComponent(flier);
 		}
 
 		public override void OnUpdate(float timeStep) {
+
+			if (despawning) {
+				timeToDespawn -= timeStep;
+
+				if (timeToDespawn < 0) {
+					projectile.Despawn();
+					return;
+				}
+			}
 
 			timeToSplit -= timeStep;
 			if (timeToSplit > 0) return;
@@ -85,7 +98,7 @@ namespace DefaultPackage
 
 				movement = new Quaternion((float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5) * movement;
 
-				var newProjectile = Level.SpawnProjectile(projectile.ProjectileType, projectile.Node.Position, projectile.Player,  movement);
+				var newProjectile = Level.SpawnProjectile(projectile.ProjectileType, projectile.Position, projectile.Player,  movement);
 				((TestProjectileInstance) newProjectile.Plugin).splits = 0;
 				
 			}
@@ -108,6 +121,29 @@ namespace DefaultPackage
 		public override void ReInitialize(ILevelManager level) {
 			timeToSplit = baseTimeToSplit;
 			splits = 10;
+			timeToDespawn = 6;
+			despawning = false;
+		}
+
+		public override bool ShootProjectile(IRangeTarget target) {
+			if (!target.Moving) {
+				if (UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.GetPositionAfter(0),
+																		projectile.Position,
+																		30,
+																		out var lowTime,
+																		out var lowVector,
+																		out var highTime,
+																		out var highVector)) {
+					flier.StartFlight(lowVector);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public override bool ShootProjectile(Vector3 movement) {
+			flier.StartFlight(movement);
+			return true;
 		}
 
 		public void OnMovementStarted(UnpoweredFlier flier) {
@@ -115,7 +151,7 @@ namespace DefaultPackage
 		}
 
 		public void OnGroundHit(UnpoweredFlier flier) {
-			
+			despawning = true;
 		}
 	}
 }

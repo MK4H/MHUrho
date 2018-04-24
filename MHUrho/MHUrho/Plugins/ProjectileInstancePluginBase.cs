@@ -37,13 +37,9 @@ namespace MHUrho.Plugins
 		/// <param name="level">LevelManager to connect to other things</param>
 		public abstract void ReInitialize(ILevelManager level);
 
-		public virtual bool ShootProjectile(IRangeTarget target) {
-			return false;
-		}
+		public abstract bool ShootProjectile(IRangeTarget target);
 
-		public virtual bool ShootProjectile(Vector3 movement) {
-			return false;
-		}
+		public abstract bool ShootProjectile(Vector3 movement);
 
 	}
 }

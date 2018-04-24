@@ -61,7 +61,10 @@ namespace MHUrho.Logic
 		public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, IRangeTarget target) {
 			var projectile = GetProjectile(newID, level, player, position);
 
-			projectile.Plugin.ShootProjectile(target);
+			if (!projectile.Plugin.ShootProjectile(target)) {
+				projectile.Despawn();
+				projectile = null;
+			}
 
 			return projectile;
 		}
@@ -117,8 +120,8 @@ namespace MHUrho.Logic
 
 			if (projectilePool.Count != 0) {
 				//TODO: Some clever algorithm to manage projectile count
-				var pooledProjectile = projectilePool.Dequeue();
-				pooledProjectile.ReInitialize(newID, level, player, position);
+				projectile = projectilePool.Dequeue();
+				projectile.ReInitialize(newID, level, player, position);
 
 			}
 			else {

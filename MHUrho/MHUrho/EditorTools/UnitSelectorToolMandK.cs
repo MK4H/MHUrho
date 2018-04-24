@@ -115,9 +115,21 @@ namespace MHUrho.EditorTools
 				
 
 				var tile = Map.RaycastToTile(result);
-				if (tile != null) {
-					formation.MoveToFormation(GetAllSelectedUnitSelectors(), tile);
+				if (tile == null) {
+					return;
 				}
+				//TODO: this
+				switch (e.Button) {
+					case (int)MouseButton.Left:
+						formation.MoveToFormation(GetAllSelectedUnitSelectors(), tile);
+						break;
+					case (int) MouseButton.Right:
+						foreach (var unit in GetAllSelectedUnitSelectors()) {
+							unit.Order(tile, (MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers);
+						}
+						break;
+				}
+
 				return;
 				
 			}
@@ -237,7 +249,7 @@ namespace MHUrho.EditorTools
 
 				foreach (var selectedType in selected) {
 					foreach (var selectedEntity in selectedType.Value.UnitSelectors) {
-						executed |= selectedEntity.Order(unit, e.Buttons, e.Qualifiers);
+						executed |= selectedEntity.Order(unit, (MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers);
 					}
 				}
 				return executed;

@@ -9,6 +9,7 @@ namespace MHUrho.Input
 {
 	public abstract class MandKController
 	{
+
 		public bool Enabled { get; private set; }
 
 		public float MouseSensitivity { get; set; }

@@ -44,23 +44,6 @@ namespace MHUrho.Plugins
 			//NOTHING
 		}
 
-		public virtual void OnTaskStarted(ActionQueue queue, ActionQueue.WorkTask task) {
-			//NOTHING
-		}
-
-		public virtual void OnTaskFinished(ActionQueue queue, ActionQueue.WorkTask task) {
-			//NOTHING
-		}
-
-		public virtual void OnTaskCancelled(ActionQueue queue, ActionQueue.WorkTask task) {
-			//NOTHING
-		}
-
-
-
-
-
-
 		//TODO: Expand this
 	}
 }

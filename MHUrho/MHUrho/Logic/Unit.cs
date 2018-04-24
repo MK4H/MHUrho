@@ -319,6 +319,11 @@ namespace MHUrho.Logic
 			return MoveTo(newPosition);
 		}
 
+		public bool MoveBy(Vector2 moveBy) {
+			var newLocation = new Vector2(Position.X + moveBy.X, Position.Z + moveBy.Y);
+			return MoveTo(newLocation);
+		}
+
 		public bool MoveTo(Vector3 newPosition) {
 			bool canMoveToTile = CheckTile(newPosition);
 			if (!canMoveToTile) {
@@ -328,6 +333,10 @@ namespace MHUrho.Logic
 			FaceTowards(newPosition);
 			Position = newPosition;
 			return true;
+		}
+
+		public bool MoveTo(Vector2 newLocation) {
+			return MoveTo(new Vector3(newLocation.X, Map.GetHeightAt(newLocation), newLocation.Y));
 		}
 
 		public void ChangeType(UnitType newType) {
@@ -353,6 +362,14 @@ namespace MHUrho.Logic
 					Tile.Map.GetUpDirectionAt(Position.XZ2());
 				}
 			}
+		}
+
+		public void RotateAroundFeet(float pitch, float yaw, float roll) {
+			LegNode.Rotate(new Quaternion(pitch, yaw, roll));
+		}
+
+		public void RotateAroundCenter(float pitch, float yaw, float roll) {
+			Node.Rotate(new Quaternion(pitch, yaw, roll));
 		}
 		#endregion
 

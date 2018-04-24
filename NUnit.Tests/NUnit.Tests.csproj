@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AStarTests.cs" />
     <Compile Include="MapTests.cs" />
+    <Compile Include="MathHelpersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
