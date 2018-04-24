@@ -39,11 +39,11 @@
     </unitType>
     <unitType name="Chicken" ID="3">
       <model>
-				<modelPath>Chicken/Chicken.mdl</modelPath>
+				<modelPath>Chicken/Models/Chicken.mdl</modelPath>
 	      <scale x="0.1" y="0.1" z="0.1"/>
       </model>
 			<material>
-				<materialListPath>Chicken/Chicken.txt</materialListPath>
+				<materialListPath>Chicken/Models/Chicken.txt</materialListPath>
 			</material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
 	    <iconPath>Chicken/ChickenIcon.png</iconPath>

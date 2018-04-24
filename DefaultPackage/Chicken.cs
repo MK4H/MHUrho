@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
 using MHUrho.Helpers;
@@ -47,15 +48,20 @@ namespace DefaultPackage
 
 	public class ChickenInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver {
 
+		private AnimationController animationController;
+		private WorldWalker walker;
 
 		public ChickenInstance() {
 
 		}
 
 		public ChickenInstance(ILevelManager level, Unit unit) 
-			:base(level,unit)
-		{
-
+			:base(level,unit) {
+			animationController = unit.Node.CreateComponent<AnimationController>();
+			walker = WorldWalker.GetInstanceFor(this,level);
+			unit.AddComponent(walker);
+			unit.AddComponent(UnitSelector.CreateNew(this, level));
+			unit.AlwaysVertical = true;
 		}
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage) {
@@ -65,6 +71,10 @@ namespace DefaultPackage
 		public override void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData) {
 			this.Level = level;
 			this.Unit = unit;
+			unit.AlwaysVertical = true;
+			animationController = unit.Node.CreateComponent<AnimationController>();
+			walker = unit.GetDefaultComponent<WorldWalker>();
+
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
@@ -76,19 +86,23 @@ namespace DefaultPackage
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {
-
+			animationController.Play("Chicken/Models/Walk.ani", 0, true);
+			animationController.SetSpeed("Chicken/Models/Walk.ani", 2);
 		}
 
 		public void OnMovementFinished(WorldWalker walker) {
-
+			animationController.Stop("Chicken/Models/Walk.ani");
 		}
 
 		public void OnMovementFailed(WorldWalker walker) {
-
+			animationController.Stop("Chicken/Models/Walk.ani");
 		}
 
 		public void OnUnitSelected(UnitSelector selector) {
-
+			if (!walker.MovementStarted) {
+				bool played = animationController.Play("Chicken/Models/Stand.ani", 0, true);
+				Debug.Assert(played);
+			}	
 		}
 
 		public void OnUnitDeselected(UnitSelector selector) {
@@ -96,7 +110,7 @@ namespace DefaultPackage
 		}
 
 		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
-			orderArgs.Executed = false;
+			orderArgs.Executed = walker.GoTo(targetTile);
 		}
 
 		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {

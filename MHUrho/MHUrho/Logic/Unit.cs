@@ -172,8 +172,9 @@ namespace MHUrho.Logic
 
 				AddRigidBody(centerNode);
 				var model = AddModel(centerNode, type);
+				AddAnimationController(centerNode);
 
-				centerNode.Position = new Vector3(0, model.BoundingBox.HalfSize.Y * centerNode.Scale.Y, 0);
+				centerNode.Position = new Vector3(0, 0, 0);
 
 				//TODO: Move collisionShape to plugin
 				var collider = centerNode.CreateComponent<CollisionShape>();
@@ -196,6 +197,10 @@ namespace MHUrho.Logic
 				type.Material.ApplyMaterial(animatedModel);
 				animatedModel.CastShadows = false;
 				return animatedModel;
+			}
+
+			private static void AddAnimationController(Node node) {
+				var animationController = node.CreateComponent<AnimationController>();
 			}
 
 		}
