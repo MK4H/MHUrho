@@ -17,6 +17,8 @@ namespace MHUrho.EditorTools
 
 		public abstract void Disable();
 
+		public abstract void ClearPlayerSpecificState();
+
 		protected Tool() {
 			Icon = null;
 		}

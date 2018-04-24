@@ -62,6 +62,10 @@ namespace MHUrho.EditorTools
 		}
 
 
+		public override void ClearPlayerSpecificState() {
+
+		}
+
 		public override void Dispose() {
 			Disable();
 		}

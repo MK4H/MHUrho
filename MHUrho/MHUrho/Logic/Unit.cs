@@ -249,6 +249,18 @@ namespace MHUrho.Logic
 		/// </summary>
 		public Node CenterNode => Node;
 
+		public Vector3 Forward => LegNode.WorldDirection;
+
+		public Vector3 Backward => -Forward;
+
+		public Vector3 Right => LegNode.WorldRight;
+
+		public Vector3 Left => -Right;
+
+		public Vector3 Up => LegNode.WorldUp;
+
+		public Vector3 Down => -Up;
+
 		#endregion
 
 		#region Private members

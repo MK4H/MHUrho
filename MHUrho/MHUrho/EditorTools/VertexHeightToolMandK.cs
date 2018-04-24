@@ -102,6 +102,10 @@ namespace MHUrho.EditorTools {
 			enabled = false;
 		}
 
+		public override void ClearPlayerSpecificState() {
+
+		}
+
 		public override void Dispose() {
 			Disable();
 			foreach (var button in buttons) {

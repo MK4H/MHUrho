@@ -8,16 +8,19 @@ using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
+using MHUrho.Helpers;
 
 namespace DefaultPackage
 {
 	public class TestProjectileType : ProjectileTypePluginBase {
+		public float Speed { get;private set; }
+
 		public override bool IsMyType(string typeName) {
 			return typeName == "TestProjectile";
 		}
 
 		public override ProjectileInstancePluginBase CreateNewInstance(ILevelManager level, Projectile projectile) {
-			return new TestProjectileInstance(level, projectile);
+			return new TestProjectileInstance(level, projectile, this);
 		}
 
 		public override ProjectileInstancePluginBase GetInstanceForLoading() {
@@ -25,31 +28,20 @@ namespace DefaultPackage
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
-			if (target.Moving) {
-				return false;
-			}
-			else {
-				return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.GetPositionAfter(0),
-																			source, 30,
-																			out var loweTime,
-																			out var lowVector,
-																			out var highTime,
-																			out var highVector);
-			}
-		}
 
-		public override bool IsInRange(Vector3 source, Vector3 target) {
-			return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target,
-																	   source,
-																	   30,
-																	   out var lowTime,
-																	   out var lowVector,
-																	   out var highTime,
-																	   out var highVector);
+			return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.CurrentPosition,
+																		source, 
+																		Speed,
+																		out var loweTime,
+																		out var lowVector,
+																		out var highTime,
+																		out var highVector);
+			
 		}
 
 		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
-			
+			var speedElement = XmlHelpers.GetChild(extensionElement, "speed");
+			Speed = XmlHelpers.GetFloat(speedElement);
 		}
 
 	}
@@ -58,6 +50,7 @@ namespace DefaultPackage
 		private static readonly Random seedRng = new Random();
 
 		private UnpoweredFlier flier;
+		private TestProjectileType myType;
 
 		private const float baseTimeToSplit = 0.5f;
 		private float timeToSplit = baseTimeToSplit;
@@ -69,12 +62,13 @@ namespace DefaultPackage
 		private bool despawning;
 		private float timeToDespawn = 6;
 
-		public TestProjectileInstance(ILevelManager level, Projectile projectile)
+		public TestProjectileInstance(ILevelManager level, Projectile projectile, TestProjectileType type)
 			:base (level, projectile)
 		{
 			this.rng = new Random(seedRng.Next());
 			flier = UnpoweredFlier.GetInstanceFor(this, level);
 			projectile.Node.AddComponent(flier);
+			myType = type;
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -126,18 +120,18 @@ namespace DefaultPackage
 		}
 
 		public override bool ShootProjectile(IRangeTarget target) {
-			if (!target.Moving) {
-				if (UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.GetPositionAfter(0),
-																		projectile.Position,
-																		30,
-																		out var lowTime,
-																		out var lowVector,
-																		out var highTime,
-																		out var highVector)) {
-					flier.StartFlight(lowVector);
-					return true;
-				}
+			
+			if (UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.CurrentPosition,
+																	projectile.Position,
+																	myType.Speed,
+																	out var lowTime,
+																	out var lowVector,
+																	out var highTime,
+																	out var highVector)) {
+				flier.StartFlight(lowVector);
+				return true;
 			}
+			
 			return false;
 		}
 

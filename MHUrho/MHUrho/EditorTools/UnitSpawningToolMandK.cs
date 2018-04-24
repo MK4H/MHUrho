@@ -76,6 +76,10 @@ namespace MHUrho.EditorTools
 
 		}
 
+		public override void ClearPlayerSpecificState() {
+
+		}
+
 		public override void Dispose() {
 			//TODO: Maybe dont disable, or change implementation of disable to not delete currently visible buttons
 			Disable();

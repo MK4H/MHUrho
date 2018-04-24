@@ -34,6 +34,7 @@ namespace MHUrho.UserInterface
 
 		private UIElement selectionBarSelected;
 		private UIElement toolSelected;
+		private UIElement playerSelected;
 		
 
 		private int hovering = 0;
@@ -65,7 +66,6 @@ namespace MHUrho.UserInterface
 			toolSelection.LayoutSpacing = 0;
 			toolSelection.HorizontalAlignment = HorizontalAlignment.Left;
 			toolSelection.VerticalAlignment = VerticalAlignment.Bottom;
-			toolSelection.Position = new IntVector2(0, 0);
 			toolSelection.Height = UI.Root.Height;
 			toolSelection.SetFixedWidth(50);
 			toolSelection.SetColor(Color.Blue);
@@ -79,7 +79,6 @@ namespace MHUrho.UserInterface
 			playerSelection.LayoutSpacing = 0;
 			playerSelection.HorizontalAlignment = HorizontalAlignment.Right;
 			playerSelection.VerticalAlignment = VerticalAlignment.Bottom;
-			playerSelection.Position = new IntVector2(UI.Root.Width - 50, 0);
 			playerSelection.Height = UI.Root.Height;
 			playerSelection.SetFixedWidth(50);
 			playerSelection.SetColor(Color.Blue);
@@ -105,25 +104,25 @@ namespace MHUrho.UserInterface
 			Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
 		}
 
-		public void EnableUI() {
+		public override void EnableUI() {
 			selectionBar.Enabled = true;
 			toolSelection.Enabled = true;
 			playerSelection.Enabled = true;
 		}
 
-		public void DisableUI() {
+		public override void DisableUI() {
 			selectionBar.Enabled = false;
 			toolSelection.Enabled = false;
 			playerSelection.Enabled = false;
 		}
 
-		public void ShowUI() {
+		public override void ShowUI() {
 			selectionBar.Visible = true;
 			toolSelection.Visible = true;
 			playerSelection.Visible = true;
 		}
 
-		public void HideUI() {
+		public override void HideUI() {
 			selectionBar.Visible = false;
 			toolSelection.Visible = false;
 			playerSelection.Visible = false;
@@ -303,11 +302,19 @@ namespace MHUrho.UserInterface
 		}
 
 		private void PlayerSwitchButtonPress(PressedEventArgs e) {
-			if (player == players[e.Element]) {
+			playerSelected?.SetColor(Color.White);
+
+			foreach (var tool in tools.Values) {
+				tool.ClearPlayerSpecificState();
+			}
+
+			if (e.Element == playerSelected) {
 				//TODO: Neutral player
 			}
 			else {
-				inputCtl.Player = player;
+				e.Element.SetColor(selectedColor);
+				playerSelected = e.Element;
+				inputCtl.Player = players[playerSelected];
 			}
 		}
 

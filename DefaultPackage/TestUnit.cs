@@ -156,11 +156,15 @@ namespace DefaultPackage
 			return new Vector3(0, 1, 0);
 		}
 
-		public void OnTargetAcquired(Shooter shooter, Unit targetUnit) {
+		public void OnTargetAcquired(Shooter shooter, RangeTargetComponent target) {
 
 		}
 
-		public void OnShotFired(Shooter shooter, Projectile projectile) {
+		public void BeforeShotFired(Shooter shooter, IRangeTarget target) {
+
+		}
+
+		public void AfterShotFired(Shooter shooter, Projectile projectile) {
 
 		}
 

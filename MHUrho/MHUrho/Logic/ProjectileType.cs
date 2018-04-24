@@ -16,9 +16,6 @@ namespace MHUrho.Logic
 	//TODO: Make this an arrow type
 	public class ProjectileType : IEntityType, IDisposable {
 
-		private static readonly XName SpeedElementName = PackageManager.XMLNamespace + "speed";
-
-
 		public float ProjectileSpeed { get; private set; }
 
 		public int ID { get; set; }
@@ -45,7 +42,6 @@ namespace MHUrho.Logic
 		public void Load(XElement xml, GamePack package) {
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
-			ProjectileSpeed = XmlHelpers.GetFloat(xml.Element(SpeedElementName));
 			model = XmlHelpers.GetModel(xml);
 			material = XmlHelpers.GetMaterial(xml);
 			Package = package;
@@ -93,11 +89,11 @@ namespace MHUrho.Logic
 			return typePlugin.GetInstanceForLoading();
 		}
 
-		public bool IsInRange(Vector3 source, Vector3 target) {
-			return typePlugin.IsInRange(source, target);
-		}
-
 		public bool IsInRange(Vector3 source, IRangeTarget target) {
+			if (target == null) {
+				return false;
+			}
+
 			return typePlugin.IsInRange(source, target);
 		}
 
@@ -137,8 +133,6 @@ namespace MHUrho.Logic
 				var staticModel = model.AddModel(projectileNode);
 				material.ApplyMaterial(staticModel);
 
-				projectileNode.Scale = new Vector3(0.2f, 0.2f, 0.8f);
-
 				var rigidBody = projectileNode.CreateComponent<RigidBody>();
 				rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
 				rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
@@ -148,7 +142,7 @@ namespace MHUrho.Logic
 
 				//TODO: Move collider to plugin
 				var collider = projectileNode.CreateComponent<CollisionShape>();
-				collider.SetBox(new Vector3(0.2f, 0.2f, 0.8f), new Vector3(-0.1f, -0.1f, -0.4f), Quaternion.Identity);
+				collider.SetBox(staticModel.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
 			}
 
 			return projectile;

@@ -52,10 +52,17 @@ namespace MHUrho.EditorTools
 			enabled = false;
 		}
 
+		public override void ClearPlayerSpecificState() {
+
+		}
+
 		public override void Dispose() {
 			Disable();
 			highlight?.Dispose();
 		}
+
+		
+
 		private void MouseDown(MouseButtonDownEventArgs e) {
 			centerTile = input.GetTileUnderCursor();
 			if (centerTile != null) {

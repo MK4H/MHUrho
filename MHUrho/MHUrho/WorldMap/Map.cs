@@ -1246,7 +1246,7 @@ namespace MHUrho.WorldMap
 		}
 
 		internal void RemoveRangeTarget(MapRangeTarget mapRangeTarget) {
-			var removed = mapRangeTargets.Remove(mapRangeTarget.Position);
+			var removed = mapRangeTargets.Remove(mapRangeTarget.CurrentPosition);
 			Debug.Assert(removed);
 		}
 

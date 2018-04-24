@@ -53,10 +53,7 @@ namespace MHUrho.UnitComponents
 		private ILevelManager level;
 		private INotificationReceiver notificationReceiver;
 
-		private Path path;
-
-		private ITile nextTile;
-		private Vector3 nextWaypoint;
+		private Path.PathEnumerator path;
 
 		public static WorldWalker GetInstanceFor<T>(T instancePlugin, ILevelManager level)
 			where T : UnitInstancePluginBase, INotificationReceiver {
@@ -76,14 +73,13 @@ namespace MHUrho.UnitComponents
 			Enabled = false;
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path, ITile target) {
+		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path.PathEnumerator path, ITile target) {
 
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 			this.map = level.Map;
 			this.path = path;
-			this.nextTile = target;
 			this.Enabled = activated;
 		}
 
@@ -97,10 +93,10 @@ namespace MHUrho.UnitComponents
 
 			var indexedData = new IndexedPluginDataReader(data);
 			var activated = indexedData.Get<bool>(1);
-			Path path = null;
+			Path.PathEnumerator path = null;
 			ITile target = null;
 			if (activated) {
-				path = indexedData.Get<Path>(2);
+				path = indexedData.Get<Path.PathEnumerator>(2);
 				target = level.Map.GetTileByMapLocation(indexedData.Get<IntVector2>(3));
 				
 			}
@@ -109,10 +105,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
-			nextWaypoint = Unit.Position;
-			if (nextTile != null) {
-				nextWaypoint = GetNextWaypoint();
-			}
+
 		}
 
 		public override PluginData SaveState() {
@@ -121,7 +114,6 @@ namespace MHUrho.UnitComponents
 				storageData.Store(1, true);
 
 				storageData.Store(2, path);
-				storageData.Store(3, nextTile.MapLocation);
 			}
 			else {
 				storageData.Store(1, false);
@@ -130,8 +122,8 @@ namespace MHUrho.UnitComponents
 			return storageData.PluginData;
 		}
 
-		public void GoAlong(Path path) {
-			if (this.path == null) {
+		public void GoAlong(Path newPath) {
+			if (path == null) {
 				MovementStarted = true;
 				MovementFailed = false;
 				MovementFinished = false;
@@ -139,19 +131,13 @@ namespace MHUrho.UnitComponents
 				OnMovementStarted?.Invoke(this);
 			}
 
-			this.path = path;
+			this.path = newPath.GetPathEnumerator();
 			if (!path.MoveNext()) {
 				//TODO: cannot enumerate path
 				throw new ArgumentException("Given path could not be enumerated");
 			}
 
-			Enabled = true;
-
-			nextTile = map.GetTileByMapLocation(path.Current);
-			nextWaypoint = nextTile.Center3;
-
-			nextWaypoint = GetNextWaypoint();
-			
+			Enabled = true;			
 		}
 
 		public bool GoTo(ITile tile) {
@@ -194,15 +180,16 @@ namespace MHUrho.UnitComponents
 			base.OnUpdate(timeStep);
 
 			if (!EnabledEffective) return;
-			Debug.Assert(nextTile != null, "Target was null with scene updates enabled");
+			Debug.Assert(path != null, "Target was null with scene updates enabled");
 
 
-			if (!MoveTowards(nextWaypoint,timeStep)) {
+			if (!MoveTowards(path.Current.Position,timeStep)) {
 				return;
 			}
 
-			//nextWaypoint was reached
-			nextWaypoint = GetNextWaypoint();
+			if (!path.MoveNext()) {
+				ReachedDestination();
+			}
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
@@ -236,10 +223,10 @@ namespace MHUrho.UnitComponents
 
 			//Recalculate path
 			var newPath = Path.FromTo(Unit.Tile,
-									path.Target,
+									path.Path.Target,
 									map,
 									notificationReceiver.CanGoFromTo,
-									notificationReceiver.GetMovementSpeed);
+									notificationReceiver.GetMovementSpeed).GetPathEnumerator();
 			if (newPath == null || !newPath.MoveNext()) {
 				//Cant get there
 				MovementFailed = true;
@@ -274,31 +261,12 @@ namespace MHUrho.UnitComponents
 					 Math.Sign(currDiff.Z) == Math.Sign(nextDiff.Z));
 		}
 
-		private Vector3 GetNextWaypoint() {
-			if (nextWaypoint == nextTile.Center3) {
-				if (!path.MoveNext()) {
-					//Reached destination
-
-					ReachedDestination();
-					return nextWaypoint;
-				}
-
-				nextTile = map.GetTileByMapLocation(path.Current);
-				var nextWaypointXZ = (nextWaypoint.XZ2() + nextTile.Center) / 2;
-
-				return new Vector3(nextWaypointXZ.X, map.GetHeightAt(nextWaypointXZ), nextWaypointXZ.Y);
-			}
-
-			return nextTile.Center3;
-
-		}
-
 		private void ReachedDestination() {
 			MovementFinished = true;
+			MovementStarted = false;
+			MovementFailed = false;
 			path.Dispose();
 			path = null;
-			nextTile = null;
-			nextWaypoint = new Vector3();
 			Enabled = false;
 			OnMovementEnded?.Invoke(this);
 		}

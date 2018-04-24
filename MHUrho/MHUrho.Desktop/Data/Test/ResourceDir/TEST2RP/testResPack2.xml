@@ -59,9 +59,23 @@
 				<materialPath>StoneMaterial.xml</materialPath>
 			</material>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
-	    <speed>30</speed>
-	    <size x="1" y="0.5"/>
+			<extension>
+				<speed>30</speed>
+			</extension>
     </projectileType>
+		<projectileType name="EggProjectile" ID="2">
+			<model>
+				<modelPath>Models/Sphere.mdl</modelPath>
+				<scale x="0.2" y="0.2" z="0.3"/>
+			</model>
+			<material>
+				<materialPath>StoneMaterial.xml</materialPath>
+			</material>
+			<assemblyPath>DefaultPackage.dll</assemblyPath>
+			<extension>
+				<speed>10</speed>
+			</extension>
+		</projectileType>
   </projectileTypes>
   <buildingTypes>
     <buildingType name="TestBuilding" ID="1">

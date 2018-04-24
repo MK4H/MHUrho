@@ -110,6 +110,16 @@ namespace MHUrho.WorldMap {
 
 		ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner);
 
+		ITile GetContainingTile(Vector3 point);
+
+		/// <summary>
+		/// Gets tile containing <paramref name="point"/> in the XZ plane
+		/// </summary>
+		/// <param name="point">The point in the XZ plane</param>
+		/// <returns>The tile containing <paramref name="point"/></returns>
+		ITile GetContainingTile(Vector2 point);
+
+
 		/// <summary>
 		/// Moves the rectangle defined by topLeft and bottomRight corners so that
 		/// the whole rectangle is inside the map

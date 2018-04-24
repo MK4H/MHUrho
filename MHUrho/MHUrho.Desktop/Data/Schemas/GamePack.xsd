@@ -129,8 +129,6 @@
 		<xs:complexContent>
 			<xs:extension base="entityType">
 				<xs:sequence>
-					<xs:element name="speed" type="xs:float"/>
-					<xs:element name="size" type="Vector2"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>

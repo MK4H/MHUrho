@@ -13,7 +13,7 @@ using Urho.Physics;
 
 namespace MHUrho.UnitComponents
 {
-	internal delegate void HostileTargetAquiredDelegate(Shooter shooter, Unit targetUnit);
+	internal delegate void HostileTargetAquiredDelegate(Shooter shooter, RangeTargetComponent target);
 	internal delegate void ShotReloadedDelegate(Shooter shooter);
 	internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
 
@@ -21,9 +21,11 @@ namespace MHUrho.UnitComponents
 	{
 
 		public interface INotificationReceiver {
-			void OnTargetAcquired(Shooter shooter, Unit targetUnit);
+			void OnTargetAcquired(Shooter shooter, RangeTargetComponent target);
 
-			void OnShotFired(Shooter shooter, Projectile projectile);
+			void BeforeShotFired(Shooter shooter, IRangeTarget target);
+
+			void AfterShotFired(Shooter shooter, Projectile projectile);
 
 			void OnShotReloaded(Shooter shooter);
 
@@ -152,7 +154,7 @@ namespace MHUrho.UnitComponents
 
 			entity = node.GetComponent<Entity>();
 
-			OnShotFired += notificationReceiver.OnShotFired;
+			OnShotFired += notificationReceiver.AfterShotFired;
 			OnTargetAcquired += notificationReceiver.OnTargetAcquired;
 			OnShotReloaded += notificationReceiver.OnShotReloaded;
 		}
@@ -200,18 +202,20 @@ namespace MHUrho.UnitComponents
 				var possibleTargets = Player.GetEnemyPlayers()
 											.SelectMany(enemy => enemy.GetAllUnits())
 											//.AsParallel()
-											.Where(unit => projectileType.IsInRange(Node.Position, unit.Position))
-											.OrderBy(unit => Vector3.Distance(Node.Position, unit.Position));
+											.Where(unit => projectileType.IsInRange(entity.Position, unit.GetDefaultComponent<RangeTargetComponent>()))
+											.OrderBy(unit => Vector3.Distance(entity.Position, unit.Position));
 
 
 				foreach (var possibleTarget in possibleTargets) {
 
 					var newTarget = possibleTarget.GetDefaultComponent<RangeTargetComponent>();
-					if (newTarget == null || !projectileType.IsInRange(Node.Position, newTarget)) {
+					if (!projectileType.IsInRange(entity.Position, newTarget)) {
 						continue;
 					}
 
 					target = newTarget;
+					target.AddShooter(this);
+					OnTargetAcquired?.Invoke(this, newTarget);
 					break;
 				}
 

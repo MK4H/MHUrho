@@ -155,7 +155,7 @@ namespace MHUrho.Logic
 
 		public IEnumerable<IPlayer> GetEnemyPlayers() {
 			return from player in level.Players
-				   where !friends.Contains(player)
+				   where player != this && !friends.Contains(player)
 				   select player;
 
 		}

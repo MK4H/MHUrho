@@ -7,12 +7,16 @@ using MHUrho.Plugins;
 using MHUrho.Storage;
 
 namespace MHUrho.UnitComponents {
+
+
 	public interface IRangeTarget {
 		int InstanceID { get; set; }
 
 		bool Moving { get; }
 
-		Vector3 GetPositionAfter(float time);
+		Vector3 CurrentPosition { get; }
+
+		IEnumerable<Waypoint> GetWaypoints();
 
 		void AddShooter(RangeTargetComponent.IShooter shooter);
 
@@ -28,10 +32,21 @@ namespace MHUrho.UnitComponents {
 
 		public abstract bool Moving { get; }
 
+		public abstract Vector3 CurrentPosition { get; }
+
 		protected List<IShooter> shooters;
 
-		public abstract Vector3 GetPositionAfter(float time);
-		
+		protected RangeTargetComponent() {
+			shooters = new List<IShooter>();
+		}
+
+		protected RangeTargetComponent(int ID) {
+			this.InstanceID = ID;
+			shooters = new List<IShooter>();
+		}
+
+		public abstract IEnumerable<Waypoint> GetWaypoints();
+
 		/// <summary>
 		/// Adds a shooter to be notified when this target dies
 		/// 
@@ -47,9 +62,7 @@ namespace MHUrho.UnitComponents {
 			shooters.Remove(shooter);
 		}
 
-		protected RangeTargetComponent(int instanceID) {
-			this.InstanceID = instanceID;
-		}
+
 
 		protected override void OnDeleted() {
 			base.OnDeleted();
@@ -85,21 +98,29 @@ namespace MHUrho.UnitComponents {
 
 		public override bool Moving => false;
 
-		public Vector3 Position { get; private set; }
+		public override Vector3 CurrentPosition { get; }
 
 		protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position)
 			: base(instanceID) {
-			this.Position = position;
+			this.CurrentPosition = position;
 		}
 
-		public static StaticRangeTarget CreateNewStaticTarget<T>(T instancePlugin, int targetID, ILevelManager level, Vector3 position)
+		protected StaticRangeTarget(ILevelManager level, Vector3 position) {
+			this.CurrentPosition = position;
+		}
+
+		public static StaticRangeTarget CreateNewStaticTarget<T>(T instancePlugin, ILevelManager level, Vector3 position)
 			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new StaticRangeTarget(targetID, level, position);
+			var newTarget = new StaticRangeTarget(level, position);
+
+			((LevelManager)level).RegisterRangeTarget(newTarget);
+
+			return newTarget;
 		}
 
 		internal static StaticRangeTarget Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
@@ -123,8 +144,8 @@ namespace MHUrho.UnitComponents {
 			//NOTHING
 		}
 
-		public override Vector3 GetPositionAfter(float time) {
-			return Position;
+		public override IEnumerable<Waypoint> GetWaypoints() {
+			yield return new Waypoint(CurrentPosition, 0);
 		}
 
 		public override PluginData SaveState() {
@@ -147,7 +168,9 @@ namespace MHUrho.UnitComponents {
 	public class MovingRangeTarget : RangeTargetComponent {
 		public interface INotificationReceiver {
 
-			Vector3 GetPositionAfter(float time);
+			IEnumerable<Waypoint> GetWaypoints();
+
+			Vector3 GetCurrentPosition();
 
 		}
 
@@ -158,24 +181,32 @@ namespace MHUrho.UnitComponents {
 
 		public override bool Moving => true;
 
+		public override Vector3 CurrentPosition => notificationReceiver.GetCurrentPosition();
+
 		private INotificationReceiver notificationReceiver;
 
-		public MovingRangeTarget(int targetID, ILevelManager level, INotificationReceiver notificationReceiver)
-			: base(targetID) {
+		protected MovingRangeTarget(ILevelManager level, INotificationReceiver notificationReceiver) {
 			this.notificationReceiver = notificationReceiver;
 		}
 
-		public static MovingRangeTarget CreateNew<T>(T instancePlugin, int targetID, ILevelManager level)
+		protected MovingRangeTarget(int ID, ILevelManager level, INotificationReceiver notificationReceiver) 
+			:base(ID) 
+		{
+			this.notificationReceiver = notificationReceiver;
+		}
+
+		public static MovingRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level)
 			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
-
-			return new MovingRangeTarget(targetID, level, instancePlugin);
+			var newTarget = new MovingRangeTarget(level, instancePlugin);
+			((LevelManager) level).RegisterRangeTarget(newTarget);
+			return newTarget;
 		}
 
-		internal static RangeTargetComponent Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
+		internal static RangeTargetComponent Load(LevelManager level, InstancePluginBase plugin, PluginData data) {
 			var notificationReceiver = plugin as INotificationReceiver;
 			if (notificationReceiver == null) {
 				throw new
@@ -194,8 +225,10 @@ namespace MHUrho.UnitComponents {
 			//NOTHING
 		}
 
-		public override Vector3 GetPositionAfter(float time) {
-			return notificationReceiver.GetPositionAfter(time);
+
+
+		public override IEnumerable<Waypoint> GetWaypoints() {
+			return notificationReceiver.GetWaypoints();
 		}
 
 		public override PluginData SaveState() {
@@ -218,7 +251,7 @@ namespace MHUrho.UnitComponents {
 
 		public bool Moving => false;
 
-		public Vector3 Position { get; private set; }
+		public Vector3 CurrentPosition { get; }
 
 		protected List<RangeTargetComponent.IShooter> shooters;
 
@@ -226,7 +259,7 @@ namespace MHUrho.UnitComponents {
 
 		protected MapRangeTarget(LevelManager level, Vector3 position) {
 			this.level = level;
-			this.Position = position;
+			this.CurrentPosition = position;
 			shooters = new List<RangeTargetComponent.IShooter>();
 		}
 
@@ -237,8 +270,8 @@ namespace MHUrho.UnitComponents {
 			return mapTarget;
 		}
 
-		public Vector3 GetPositionAfter(float time) {
-			return Position;
+		public IEnumerable<Waypoint> GetWaypoints() {
+			yield return new Waypoint(CurrentPosition, 0);
 		}
 
 		public void AddShooter(RangeTargetComponent.IShooter shooter) {

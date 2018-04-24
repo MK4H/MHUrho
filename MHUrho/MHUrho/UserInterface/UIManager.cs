@@ -29,6 +29,12 @@ namespace MHUrho.UserInterface
 
 		public abstract void RemovePlayer(IPlayer player);
 
+		public abstract void EnableUI();
 
+		public abstract void DisableUI();
+
+		public abstract void ShowUI();
+
+		public abstract void HideUI();
 	}
 }

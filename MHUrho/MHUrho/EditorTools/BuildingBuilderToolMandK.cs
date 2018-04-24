@@ -91,6 +91,10 @@ namespace MHUrho.EditorTools
 			buildingTypeButtons = null;
 		}
 
+		public override void ClearPlayerSpecificState() {
+
+		}
+
 		private void Button_Pressed(PressedEventArgs e) {
 			if (selected == e.Element) {
 				input.UIManager.Deselect();

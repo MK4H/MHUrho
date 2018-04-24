@@ -22,6 +22,14 @@ namespace MHUrho.EditorTools
 			public readonly List<UnitSelector> UnitSelectors;
 			public readonly Button Button;
 
+			public void DeselectAll() {
+				foreach (var unitSelector in UnitSelectors) {
+					unitSelector.Deselect();
+				}
+
+				UnitSelectors.Clear();
+			}
+
 			public SelectedInfo(Button button, List<UnitSelector> unitSelectors) {
 				Button = button;
 				UnitSelectors = unitSelectors;
@@ -75,6 +83,10 @@ namespace MHUrho.EditorTools
 			input.UIManager.SelectionBarClearButtons();
 
 			enabled = false;
+		}
+
+		public override void ClearPlayerSpecificState() {
+			DeselectAll();
 		}
 
 		public override void Dispose() {
@@ -139,9 +151,13 @@ namespace MHUrho.EditorTools
 		private void SelectUnitsInTile(ITile tile) {
 			//TODO: Maybe delete selector class, just search for unit
 			foreach (var unit in tile.GetAllUnits()) {
-				UnitSelector selector = unit.GetComponent<UnitSelector>();
+				UnitSelector selector = unit.GetDefaultComponent<UnitSelector>();
+
+				//Not owned by player
+				if (unit.Player != input.Player) continue;
+
 				//Not selectable
-				if (selector == null || selector.Selected) return;
+				if (selector == null || selector.Selected) continue;
 
 				selector.Select();
 				AddUnit(selector);
@@ -225,6 +241,13 @@ namespace MHUrho.EditorTools
 			}
 		}
 
+		private void DeselectAll() {
+			foreach (var unitType in selected.Values) {
+				unitType.DeselectAll();
+				input.UIManager.SelectionBarHideButton(unitType.Button);
+			}
+		}
+
 		private bool HandleUnitClick(Unit unit, MouseButtonUpEventArgs e) {
 			var selector = unit.GetComponent<UnitSelector>();
 			//If the unit is selectable and owned by the clicking player
@@ -247,10 +270,8 @@ namespace MHUrho.EditorTools
 				//Either not selectable or enemy unit
 				var executed = false;
 
-				foreach (var selectedType in selected) {
-					foreach (var selectedEntity in selectedType.Value.UnitSelectors) {
-						executed |= selectedEntity.Order(unit, (MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers);
-					}
+				foreach (var selectedUnit in GetAllSelectedUnitSelectors()) {
+					executed |= selectedUnit.Order(unit, (MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers);
 				}
 				return executed;
 			}
@@ -259,5 +280,6 @@ namespace MHUrho.EditorTools
 		private bool HandleBuildingClick() {
 			return false;
 		}
+
 	}
 }

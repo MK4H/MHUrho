@@ -186,6 +186,7 @@ namespace MHUrho.Logic
 			CurrentLevel.inputController.UIManager.AddPlayer(player);
 
 			player = new Player(CurrentLevel, CurrentLevel.GetNewID(CurrentLevel.players));
+			CurrentLevel.players.Add(player.ID, player);
 			CurrentLevel.inputController.UIManager.AddPlayer(player);
 
 			return CurrentLevel;

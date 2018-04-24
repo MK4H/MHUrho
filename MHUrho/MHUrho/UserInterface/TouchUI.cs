@@ -116,5 +116,21 @@ namespace MHUrho.UserInterface
 		public override void RemovePlayer(IPlayer player) {
 			throw new NotImplementedException();
 		}
+
+		public override void EnableUI() {
+			throw new NotImplementedException();
+		}
+
+		public override void DisableUI() {
+			throw new NotImplementedException();
+		}
+
+		public override void ShowUI() {
+			throw new NotImplementedException();
+		}
+
+		public override void HideUI() {
+			throw new NotImplementedException();
+		}
 	}
 }

@@ -17,6 +17,8 @@ namespace DefaultPackage
 
 		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
+		public ProjectileType ProjectileType { get; private set; }
+
 
 		public override bool IsMyType(string unitTypeName) {
 			return unitTypeName == "Chicken";
@@ -29,7 +31,7 @@ namespace DefaultPackage
 
 
 		public override UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit) {
-			return new ChickenInstance(level, unit);
+			return new ChickenInstance(level, unit, this);
 		}
 
 		public override UnitInstancePluginBase GetInstanceForLoading() {
@@ -42,25 +44,36 @@ namespace DefaultPackage
 		}
 
 		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
-
+			ProjectileType = packageManager.ActiveGame.GetProjectileType("EggProjectile", true);
 		}
 	}
 
-	public class ChickenInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver {
+	public class ChickenInstance : UnitInstancePluginBase, 
+									WorldWalker.INotificationReceiver, 
+									UnitSelector.INotificationReceiver, 
+									Shooter.INotificationReceiver,
+									MovingRangeTarget.INotificationReceiver{
 
 		private AnimationController animationController;
 		private WorldWalker walker;
+		private Shooter shooter;
 
 		public ChickenInstance() {
 
 		}
 
-		public ChickenInstance(ILevelManager level, Unit unit) 
+		public ChickenInstance(ILevelManager level, Unit unit, ChickenType type) 
 			:base(level,unit) {
 			animationController = unit.Node.CreateComponent<AnimationController>();
 			walker = WorldWalker.GetInstanceFor(this,level);
+			shooter = Shooter.CreateNew(this, level,type.ProjectileType, 20);
+			shooter.SearchForTarget = true;
+			shooter.TargetSearchDelay = 2;
 			unit.AddComponent(walker);
+			unit.AddComponent(shooter);
 			unit.AddComponent(UnitSelector.CreateNew(this, level));
+			unit.AddComponent(MovingRangeTarget.CreateNew(this, level));
+			
 			unit.AlwaysVertical = true;
 		}
 
@@ -86,7 +99,7 @@ namespace DefaultPackage
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {
-			animationController.Play("Chicken/Models/Walk.ani", 0, true);
+			animationController.PlayExclusive("Chicken/Models/Walk.ani", 0, true);
 			animationController.SetSpeed("Chicken/Models/Walk.ani", 2);
 		}
 
@@ -100,8 +113,7 @@ namespace DefaultPackage
 
 		public void OnUnitSelected(UnitSelector selector) {
 			if (!walker.MovementStarted) {
-				bool played = animationController.Play("Chicken/Models/Stand.ani", 0, true);
-				Debug.Assert(played);
+				animationController.Play("Chicken/Models/Idle.ani", 0, true);
 			}	
 		}
 
@@ -121,5 +133,41 @@ namespace DefaultPackage
 			orderArgs.Executed = false;
 		}
 
+		public void OnTargetAcquired(Shooter shooter, RangeTargetComponent target) {
+			var targetPos = target.CurrentPosition;
+
+			var diff = Unit.Position - targetPos;
+
+			Unit.FaceTowards(Unit.Position + diff);
+		}
+
+		public void BeforeShotFired(Shooter shooter, IRangeTarget target) {
+			var targetPos = target.CurrentPosition;
+
+			var diff = Unit.Position - targetPos;
+
+			Unit.FaceTowards(Unit.Position + diff);
+		}
+
+		public void AfterShotFired(Shooter shooter, Projectile projectile) {
+
+		}
+
+		public void OnShotReloaded(Shooter shooter) {
+
+		}
+
+		public Vector3 GetSourceOffset(IRangeTarget target) {
+
+
+			return Unit.Backward * 0.7f + new Vector3(0,0.7f,0);
+		}
+		public IEnumerable<Waypoint> GetWaypoints() {
+			throw new NotImplementedException();
+		}
+
+		public Vector3 GetCurrentPosition() {
+			return Unit.Position + new Vector3(0, 0.5f, 0);
+		}
 	}
 }
