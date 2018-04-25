@@ -13,7 +13,7 @@ namespace MHUrho.WorldMap
 					CanGoToNeighbour canPassTo,
 					GetMovementSpeed getMovementSpeed);
 
-		List<ITile> GetTileListPath(ITile source,
+		List<ITile> GetTileList(ITile source,
 									ITile target,
 									CanGoToNeighbour canPassTo,
 									GetMovementSpeed getMovementSpeed);

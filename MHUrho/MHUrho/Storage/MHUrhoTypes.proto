@@ -3,8 +3,16 @@ package MHUrho.Storage;
 
 import "UrhoTypes.proto";
 
+message StWaypoint {
+	StVector3 position = 1;
+	float time = 2;
+}
+
+message StPathEnumerator {
+	StPath path = 1;
+	int32 index = 2;
+}
+
 message StPath {
-	//TODO: Probably just store target and recompute the path when loading
-	repeated StIntVector2 pathPoints = 1;
-	int32 currentIndex = 2;
+	repeated StWaypoint waypoints = 1;
 }

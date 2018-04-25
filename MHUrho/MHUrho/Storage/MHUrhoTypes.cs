@@ -23,19 +23,325 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChFNSFVyaG9UeXBlcy5wcm90bxIOTUhVcmhvLlN0b3JhZ2UaD1VyaG9UeXBl",
-            "cy5wcm90byJQCgZTdFBhdGgSMAoKcGF0aFBvaW50cxgBIAMoCzIcLk1IVXJo",
-            "by5TdG9yYWdlLlN0SW50VmVjdG9yMhIUCgxjdXJyZW50SW5kZXgYAiABKAVi",
-            "BnByb3RvMw=="));
+            "cy5wcm90byJHCgpTdFdheXBvaW50EisKCHBvc2l0aW9uGAEgASgLMhkuTUhV",
+            "cmhvLlN0b3JhZ2UuU3RWZWN0b3IzEgwKBHRpbWUYAiABKAIiRwoQU3RQYXRo",
+            "RW51bWVyYXRvchIkCgRwYXRoGAEgASgLMhYuTUhVcmhvLlN0b3JhZ2UuU3RQ",
+            "YXRoEg0KBWluZGV4GAIgASgFIjcKBlN0UGF0aBItCgl3YXlwb2ludHMYASAD",
+            "KAsyGi5NSFVyaG8uU3RvcmFnZS5TdFdheXBvaW50YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPath), global::MHUrho.Storage.StPath.Parser, new[]{ "PathPoints", "CurrentIndex" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWaypoint), global::MHUrho.Storage.StWaypoint.Parser, new[]{ "Position", "Time" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPathEnumerator), global::MHUrho.Storage.StPathEnumerator.Parser, new[]{ "Path", "Index" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPath), global::MHUrho.Storage.StPath.Parser, new[]{ "Waypoints" }, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Messages
+  public sealed partial class StWaypoint : pb::IMessage<StWaypoint> {
+    private static readonly pb::MessageParser<StWaypoint> _parser = new pb::MessageParser<StWaypoint>(() => new StWaypoint());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StWaypoint> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[0]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StWaypoint() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StWaypoint(StWaypoint other) : this() {
+      Position = other.position_ != null ? other.Position.Clone() : null;
+      time_ = other.time_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StWaypoint Clone() {
+      return new StWaypoint(this);
+    }
+
+    /// <summary>Field number for the "position" field.</summary>
+    public const int PositionFieldNumber = 1;
+    private global::MHUrho.Storage.StVector3 position_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Position {
+      get { return position_; }
+      set {
+        position_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "time" field.</summary>
+    public const int TimeFieldNumber = 2;
+    private float time_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float Time {
+      get { return time_; }
+      set {
+        time_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StWaypoint);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StWaypoint other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Position, other.Position)) return false;
+      if (Time != other.Time) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (position_ != null) hash ^= Position.GetHashCode();
+      if (Time != 0F) hash ^= Time.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (position_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Position);
+      }
+      if (Time != 0F) {
+        output.WriteRawTag(21);
+        output.WriteFloat(Time);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (position_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      }
+      if (Time != 0F) {
+        size += 1 + 4;
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StWaypoint other) {
+      if (other == null) {
+        return;
+      }
+      if (other.position_ != null) {
+        if (position_ == null) {
+          position_ = new global::MHUrho.Storage.StVector3();
+        }
+        Position.MergeFrom(other.Position);
+      }
+      if (other.Time != 0F) {
+        Time = other.Time;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            if (position_ == null) {
+              position_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(position_);
+            break;
+          }
+          case 21: {
+            Time = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StPathEnumerator : pb::IMessage<StPathEnumerator> {
+    private static readonly pb::MessageParser<StPathEnumerator> _parser = new pb::MessageParser<StPathEnumerator>(() => new StPathEnumerator());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StPathEnumerator> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StPathEnumerator() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StPathEnumerator(StPathEnumerator other) : this() {
+      Path = other.path_ != null ? other.Path.Clone() : null;
+      index_ = other.index_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StPathEnumerator Clone() {
+      return new StPathEnumerator(this);
+    }
+
+    /// <summary>Field number for the "path" field.</summary>
+    public const int PathFieldNumber = 1;
+    private global::MHUrho.Storage.StPath path_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StPath Path {
+      get { return path_; }
+      set {
+        path_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "index" field.</summary>
+    public const int IndexFieldNumber = 2;
+    private int index_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Index {
+      get { return index_; }
+      set {
+        index_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StPathEnumerator);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StPathEnumerator other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Path, other.Path)) return false;
+      if (Index != other.Index) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (path_ != null) hash ^= Path.GetHashCode();
+      if (Index != 0) hash ^= Index.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (path_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Path);
+      }
+      if (Index != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Index);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (path_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Path);
+      }
+      if (Index != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Index);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StPathEnumerator other) {
+      if (other == null) {
+        return;
+      }
+      if (other.path_ != null) {
+        if (path_ == null) {
+          path_ = new global::MHUrho.Storage.StPath();
+        }
+        Path.MergeFrom(other.Path);
+      }
+      if (other.Index != 0) {
+        Index = other.Index;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            if (path_ == null) {
+              path_ = new global::MHUrho.Storage.StPath();
+            }
+            input.ReadMessage(path_);
+            break;
+          }
+          case 16: {
+            Index = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class StPath : pb::IMessage<StPath> {
     private static readonly pb::MessageParser<StPath> _parser = new pb::MessageParser<StPath>(() => new StPath());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -43,7 +349,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[0]; }
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -60,8 +366,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StPath(StPath other) : this() {
-      pathPoints_ = other.pathPoints_.Clone();
-      currentIndex_ = other.currentIndex_;
+      waypoints_ = other.waypoints_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -69,28 +374,14 @@ namespace MHUrho.Storage {
       return new StPath(this);
     }
 
-    /// <summary>Field number for the "pathPoints" field.</summary>
-    public const int PathPointsFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::MHUrho.Storage.StIntVector2> _repeated_pathPoints_codec
-        = pb::FieldCodec.ForMessage(10, global::MHUrho.Storage.StIntVector2.Parser);
-    private readonly pbc::RepeatedField<global::MHUrho.Storage.StIntVector2> pathPoints_ = new pbc::RepeatedField<global::MHUrho.Storage.StIntVector2>();
-    /// <summary>
-    ///TODO: Probably just store target and recompute the path when loading
-    /// </summary>
+    /// <summary>Field number for the "waypoints" field.</summary>
+    public const int WaypointsFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StWaypoint> _repeated_waypoints_codec
+        = pb::FieldCodec.ForMessage(10, global::MHUrho.Storage.StWaypoint.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StWaypoint> waypoints_ = new pbc::RepeatedField<global::MHUrho.Storage.StWaypoint>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::MHUrho.Storage.StIntVector2> PathPoints {
-      get { return pathPoints_; }
-    }
-
-    /// <summary>Field number for the "currentIndex" field.</summary>
-    public const int CurrentIndexFieldNumber = 2;
-    private int currentIndex_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CurrentIndex {
-      get { return currentIndex_; }
-      set {
-        currentIndex_ = value;
-      }
+    public pbc::RepeatedField<global::MHUrho.Storage.StWaypoint> Waypoints {
+      get { return waypoints_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -106,16 +397,14 @@ namespace MHUrho.Storage {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if(!pathPoints_.Equals(other.pathPoints_)) return false;
-      if (CurrentIndex != other.CurrentIndex) return false;
+      if(!waypoints_.Equals(other.waypoints_)) return false;
       return true;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      hash ^= pathPoints_.GetHashCode();
-      if (CurrentIndex != 0) hash ^= CurrentIndex.GetHashCode();
+      hash ^= waypoints_.GetHashCode();
       return hash;
     }
 
@@ -126,20 +415,13 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      pathPoints_.WriteTo(output, _repeated_pathPoints_codec);
-      if (CurrentIndex != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(CurrentIndex);
-      }
+      waypoints_.WriteTo(output, _repeated_waypoints_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      size += pathPoints_.CalculateSize(_repeated_pathPoints_codec);
-      if (CurrentIndex != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(CurrentIndex);
-      }
+      size += waypoints_.CalculateSize(_repeated_waypoints_codec);
       return size;
     }
 
@@ -148,10 +430,7 @@ namespace MHUrho.Storage {
       if (other == null) {
         return;
       }
-      pathPoints_.Add(other.pathPoints_);
-      if (other.CurrentIndex != 0) {
-        CurrentIndex = other.CurrentIndex;
-      }
+      waypoints_.Add(other.waypoints_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -163,11 +442,7 @@ namespace MHUrho.Storage {
             input.SkipLastField();
             break;
           case 10: {
-            pathPoints_.AddEntriesFrom(input, _repeated_pathPoints_codec);
-            break;
-          }
-          case 16: {
-            CurrentIndex = input.ReadInt32();
+            waypoints_.AddEntriesFrom(input, _repeated_waypoints_codec);
             break;
           }
         }

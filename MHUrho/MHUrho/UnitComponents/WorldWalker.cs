@@ -223,7 +223,7 @@ namespace MHUrho.UnitComponents
 
 			//Recalculate path
 			var newPath = Path.FromTo(Unit.Tile,
-									path.Path.Target,
+									path.Path.GetTarget(map),
 									map,
 									notificationReceiver.CanGoFromTo,
 									notificationReceiver.GetMovementSpeed).GetPathEnumerator();
@@ -249,6 +249,11 @@ namespace MHUrho.UnitComponents
 		/// <returns></returns>
 		private Vector3 GetMoveVector(Vector3 destination, float timeStep) {
 			Vector3 movementDirection = destination - Unit.Position;
+			//If the destination is exactly equal to Unit.Position, prevent NaN from normalization
+			// Reached point will proc and the returned value will be ignored, but cant be [0,0,0]
+			if (movementDirection == new Vector3(0, 0, 0)) {
+				return new Vector3(1, 0, 0);
+			}
 			movementDirection.Normalize();
 			return movementDirection * LevelManager.CurrentLevel.GameSpeed * timeStep;
 		}

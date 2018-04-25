@@ -156,7 +156,7 @@ namespace MHUrho.WorldMap {
 
 		}
 
-		public List<ITile> GetTileListPath(ITile source, 
+		public List<ITile> GetTileList(ITile source, 
 											ITile target,
 											CanGoToNeighbour canPassTo,
 											GetMovementSpeed getMovementSpeed) {
@@ -292,6 +292,13 @@ namespace MHUrho.WorldMap {
 		/// <returns>Path in correct order, from first point to the last point</returns>
 		private Path MakePath(Node target, GetMovementSpeed getMovementSpeed) {
 			List<Waypoint> reversedWaypoints = new List<Waypoint>();
+			//If the source is the target
+			if (target.PreviousNode == null) {
+				//TODO: Properly calculate time
+				reversedWaypoints.Add(new Waypoint(target.Tile.Center3, 0));
+				return Path.CreateFrom(reversedWaypoints);
+			}
+
 			while (target.PreviousNode != null) {
 				Waypoint tileCenter = new Waypoint(target.Tile.Center3, target.Distance);
 				reversedWaypoints.Add(tileCenter);
@@ -302,7 +309,7 @@ namespace MHUrho.WorldMap {
 			}
 
 			reversedWaypoints.Reverse();
-			return Path.CreateFrom(reversedWaypoints, map);
+			return Path.CreateFrom(reversedWaypoints);
 		}
 
 
@@ -317,10 +324,10 @@ namespace MHUrho.WorldMap {
 		}
 
 		private static Waypoint GetBorderWaypoint(Waypoint followingWaypoint, Node previousNode, GetMovementSpeed getMovementSpeed) {
-			Vector3 centersDiff = followingWaypoint.Position - previousNode.Tile.Center3;
-			Vector3 borderPosition = followingWaypoint.Position + centersDiff;
+			Vector3 toWaypoint = (followingWaypoint.Position - previousNode.Tile.Center3) / 2;
+			Vector3 borderPosition = previousNode.Tile.Center3 + toWaypoint;
 			return new Waypoint(borderPosition,
-								previousNode.Distance + getMovementSpeed(previousNode.Tile) * centersDiff.Length);
+								previousNode.Distance + getMovementSpeed(previousNode.Tile) * toWaypoint.Length);
 		}
 
 	}

@@ -7,6 +7,7 @@ using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.Control;
 using MHUrho.WorldMap;
+using MHUrho.Helpers;
 using Urho;
 
 namespace NUnit.Tests {
@@ -17,61 +18,7 @@ namespace NUnit.Tests {
 		private TestMap oneWithCross;
 		private TestMap randomWithCross;
 
-		class TestUnit : Unit {
-			#region NOT USED IN TEST
-
-			public int ID => throw new NotImplementedException();
-			public UnitType Type => throw new NotImplementedException();
-
-			public LevelManager Level => throw new NotImplementedException();
-
-			public IPlayer Player => throw new NotImplementedException();
-
-			public bool Select() {
-				throw new NotImplementedException();
-			}
-
-			public bool Order(ITile tile) {
-				throw new NotImplementedException();
-			}
-
-			public bool Order(Unit unit) {
-				throw new NotImplementedException();
-			}
-
-			public void Deselect() {
-				throw new NotImplementedException();
-			}
-
-			public void Update(TimeSpan gameTime) {
-				throw new NotImplementedException();
-			}
-
-			public StUnit Save() {
-				throw new NotImplementedException();
-			}
-			#endregion
-			public Vector2 Position { get; private set; }
-
-			public ITile Tile { get; private set; }
-
-			private readonly float defaultSpeed;
-
-			public bool CanPass(ITile tile) {
-				return true;
-			}
-
-			public float MovementSpeed(ITile tile) {
-				return tile.MovementSpeedModifier * defaultSpeed;
-			}
-
-			public TestUnit(float speed, ITile tile, Vector2 position): base(0, null, null, null, null,null) {
-				this.defaultSpeed = speed;
-				this.Tile = tile;
-				this.Position = position;
-			}
-		}
-
+		
 		class TestMap : IMap {
 
 			class PassableTestTile : ITile {
@@ -100,7 +47,7 @@ namespace NUnit.Tests {
 
 				public Vector2 Center => throw new NotImplementedException();
 
-				public Vector3 Center3 => throw new NotImplementedException();
+
 
 				public Vector3 TopLeft3 => throw new NotImplementedException();
 
@@ -187,6 +134,8 @@ namespace NUnit.Tests {
 
 				#endregion
 
+				public Vector3 Center3 => new Vector3(MapLocation.X + 0.5f, 0, MapLocation.Y + 0.5f);
+
 				public IntVector2 MapLocation { get; private set; }
 
 				public float MovementSpeedModifier { get; private set; }
@@ -194,6 +143,10 @@ namespace NUnit.Tests {
 				public PassableTestTile(float speedModifier, int x, int y) {
 					this.MovementSpeedModifier = speedModifier;
 					MapLocation = new IntVector2(x, y);
+				}
+
+				public override string ToString() {
+					return $"X: {MapLocation.X}, Y: {MapLocation.Y}";
 				}
 			}
 
@@ -224,8 +177,6 @@ namespace NUnit.Tests {
 
 
 				public Vector2 Center => throw new NotImplementedException();
-
-				public Vector3 Center3 => throw new NotImplementedException();
 
 				public Vector3 TopLeft3 => throw new NotImplementedException();
 
@@ -316,6 +267,9 @@ namespace NUnit.Tests {
 
 				#endregion
 
+
+				public Vector3 Center3 => new Vector3(MapLocation.X + 0.5f, 0, MapLocation.Y + 0.5f);
+
 				public IntVector2 Location { get; private set; }
 
 				//Should not call this if it is not passable
@@ -323,6 +277,10 @@ namespace NUnit.Tests {
 
 				public NotPassableTestTile(int x, int y) {
 					Location = new IntVector2(x, y);
+				}
+
+				public override string ToString() {
+					return $"X: {MapLocation.X}, Y: {MapLocation.Y}";
 				}
 			}
 
@@ -399,6 +357,14 @@ namespace NUnit.Tests {
 			}
 
 			public ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner) {
+				throw new NotImplementedException();
+			}
+
+			public ITile GetContainingTile(Vector3 point) {
+				throw new NotImplementedException();
+			}
+
+			public ITile GetContainingTile(Vector2 point) {
 				throw new NotImplementedException();
 			}
 
@@ -612,42 +578,96 @@ namespace NUnit.Tests {
 
 		[Test]
 
-		public void StraightCornerToCornerAllSpeedsOne() {
+		public void StraightCornerToCornerAllSpeedsOneGetTileList() {
 			var aStar = new AStar(allOneSpeed);
 
 			//Top
 			
-			List<IntVector2> path = aStar.FindPath(allOneSpeed.TopLeft, allOneSpeed.TopRight, (tile1, tile2) => true, (tile) => 1);
-			List<IntVector2> expected = new List<IntVector2>();
+			List<ITile> path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			List<ITile> expected = new List<ITile>();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
-				expected.Add(new IntVector2(i, 0));
+				expected.Add(allOneSpeed.GetTileByMapLocation(i,0));
 			}
 			CollectionAssert.AreEqual(expected, path,"Fail going from topLeft to the topRight");
 
-			path = aStar.FindPath(allOneSpeed.TopLeft, allOneSpeed.BottomLeft, (tile1, tile2) => true, (tile) => 1);
+			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			expected.Clear();
-			for (int i = 0; i <= allOneSpeed.Bottom; i++) {
-				expected.Add(new IntVector2(0, i));
+			for (int i = 0; i <= allOneSpeed.Right; i++) {
+				expected.Add(allOneSpeed.GetTileByMapLocation(0, i));
 			}
 			CollectionAssert.AreEqual(expected, path, "Fail going from topLeft to the bottomLeft");
 
-			
-			path = aStar.FindPath(allOneSpeed.BottomRight, allOneSpeed.BottomLeft, (tile1, tile2) => true, (tile) => 1);
+
+			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			expected.Clear();
 			for (int i = allOneSpeed.Right; i >= allOneSpeed.Left; i--) {
-				expected.Add(new IntVector2(i, allOneSpeed.Bottom));
+				expected.Add(allOneSpeed.GetTileByMapLocation(i, allOneSpeed.Bottom));
 			}
 			CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the bottomLeft");
 
-			path = aStar.FindPath(allOneSpeed.BottomRight, allOneSpeed.TopRight, (tile1, tile2) => true, (tile) => 1);
+			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			expected.Clear();
 			for (int i = allOneSpeed.Bottom; i >= allOneSpeed.Top; i--) {
-				expected.Add(new IntVector2(allOneSpeed.Right, i));
+				expected.Add(allOneSpeed.GetTileByMapLocation(allOneSpeed.Right, i));
 			}
 			CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the topRight");
 			Assert.Pass();
 		}
 
+
+		[Test]
+
+		public void StraightCornerToCornerAllSpeedsOneGetPath() {
+			var aStar = new AStar(allOneSpeed);
+
+			//Top
+
+			Path path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			var pathEnumerator = path.GetEnumerator();
+			Vector3 position = new Vector3(1f, 0, 0.5f);
+			for (int i = 0; i < allOneSpeed.Right * 2; i++) {
+				pathEnumerator.MoveNext();
+				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
+				position.X += 0.5f;
+			}
+
+			Assert.That(!pathEnumerator.MoveNext());
+
+			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			pathEnumerator = path.GetEnumerator();
+			position = new Vector3(0.5f, 0, 1f);
+			for (int i = 0; i < allOneSpeed.Bottom * 2; i++) {
+				pathEnumerator.MoveNext();
+				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
+				position.Z += 0.5f;
+			}
+
+			Assert.That(!pathEnumerator.MoveNext());
+
+
+			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			pathEnumerator = path.GetEnumerator();
+			position = new Vector3( allOneSpeed.Right, 0, allOneSpeed.Bottom + 0.5f);
+			for (int i = 0; i < allOneSpeed.Right * 2; i++) {
+				pathEnumerator.MoveNext();
+				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
+				position.X -= 0.5f;
+			}
+
+			Assert.That(!pathEnumerator.MoveNext());
+
+			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			pathEnumerator = path.GetEnumerator();
+			position = new Vector3(allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom);
+			for (int i = 0; i < allOneSpeed.Bottom * 2; i++) {
+				pathEnumerator.MoveNext();
+				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
+				position.Z -= 0.5f;
+			}
+
+			Assert.That(!pathEnumerator.MoveNext());
+			Assert.Pass();
+		}
 		//[Test]
 		//public void DiagonalCornerToCornerInSquare() {
 
@@ -669,16 +689,33 @@ namespace NUnit.Tests {
 
 		[Test]
 
-		public void StartIsFinish() {
+		public void StartIsFinishPath() {
 			var aStar = new AStar(allOneSpeed);
 
-
-
-			List<IntVector2> path = aStar.FindPath(new IntVector2(10,10), new IntVector2(10,10), (tile1, tile2) => true, (tile) => 1);
+			Path path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
 
 			Assert.IsNotNull(path);
-			CollectionAssert.AreEqual(new List<IntVector2>(){new IntVector2(10,10)}, path);
+			var enumerator = path.GetEnumerator();
+			Assert.That(enumerator.MoveNext());
+			Assert.That(enumerator.Current.Position.IsNear(new Vector3(10.5f, 0, 10.5f), 10E-9f));
+			Assert.That(!enumerator.MoveNext());
 			Assert.Pass();
+
+
+		}
+
+		[Test]
+
+		public void StartIsFinishTileList() {
+			var aStar = new AStar(allOneSpeed);
+
+			var path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
+
+			Assert.IsNotNull(path);
+			CollectionAssert.AreEqual(new List<ITile> {allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))}, path);
+			Assert.Pass();
+
+
 		}
 	}
 }

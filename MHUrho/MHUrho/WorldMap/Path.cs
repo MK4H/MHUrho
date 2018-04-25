@@ -64,31 +64,28 @@ namespace MHUrho.Logic
 			}
 
 			public StPathEnumerator Save() {
-
+				return new StPathEnumerator {Path = this.Path.Save(), Index = this.currentIndex};
 			}
 		}
 
-		List<Waypoint> waypoints;
+		private readonly List<Waypoint> waypoints;
 
-		//TODO: Range check
-		public ITile Target { get; private set; }
+
 
 		protected Path() {
 			this.waypoints = new List<Waypoint>();
 		}
 
-		protected Path(List<Waypoint> waypoints, IMap map) {
+		protected Path(List<Waypoint> waypoints) {
 			this.waypoints = waypoints;
-			this.Target = map.GetContainingTile(waypoints[waypoints.Count - 1].Position.XZ2());
 		}
 
 
 		public StPath Save() {
 			var storedPath = new StPath();
-			var storedPathPoints = storedPath.PathPoints;
 
 			foreach (var waypoint in waypoints) {
-				storedPathPoints.Add(waypoint.ToStWaypoint());
+				storedPath.Waypoints.Add(waypoint.ToStWaypoint());
 			}
 
 			return storedPath;
@@ -102,8 +99,8 @@ namespace MHUrho.Logic
 			return newPath;
 		}
 
-		public static Path CreateFrom(List<Waypoint> waypoints, IMap map) {
-			return new Path(waypoints, map);
+		public static Path CreateFrom(List<Waypoint> waypoints) {
+			return new Path(waypoints);
 		}
 
 
@@ -132,6 +129,8 @@ namespace MHUrho.Logic
 			return new PathEnumerator(this);
 		}
 
-		
+		public ITile GetTarget(IMap map) {
+			return map.GetContainingTile(waypoints[waypoints.Count - 1].Position);
+		}
 	}
 }
