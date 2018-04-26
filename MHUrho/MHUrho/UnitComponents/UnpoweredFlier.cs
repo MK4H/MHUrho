@@ -99,7 +99,7 @@ namespace MHUrho.UnitComponents
 		/// <param name="highVector"></param>
 		/// <returns>True if it is possible to hit the <paramref name="targetPosition"/> with the given <paramref name="initialProjectileSpeed"/>,
 		/// and the out parameters are valid, or false if it is not possible and the out params are invalid</returns>
-		public static bool GetUnpoweredProjectileTimesAndAngles(Vector3 targetPosition,
+		public static bool GetTimesAndAnglesForStaticTarget(Vector3 targetPosition,
 																Vector3 sourcePosition,
 																float initialProjectileSpeed,
 																out float lowTime,
@@ -152,6 +152,72 @@ namespace MHUrho.UnitComponents
 
 
 			return true;
+		}
+
+		public static int GetTimesAndAnglesForMovingTarget(Vector3 targetPosition,
+															Vector3 targetMovement,
+															Vector3 sourcePosition,
+															float initialProjectileSpeed,
+															out Vector3 lowVector,
+															out Vector3 highVector) {
+
+			lowVector = Vector3.Zero;
+			highVector = Vector3.Zero;
+
+
+			double G = 10;
+
+			double A = sourcePosition.X;
+			double B = sourcePosition.Y;
+			double C = sourcePosition.Z;
+			double M = targetPosition.X;
+			double N = targetPosition.Y;
+			double O = targetPosition.Z;
+			double P = targetMovement.X;
+			double Q = targetMovement.Y;
+			double R = targetMovement.Z;
+			double S = initialProjectileSpeed;
+
+			double H = M - A;
+			double J = O - C;
+			double K = N - B;
+			double L = -.5f * G;
+
+			// Quartic Coeffecients
+			double c0 = L * L;
+			double c1 = 2 * Q * L;
+			double c2 = Q * Q + 2 * K * L - S * S + P * P + R * R;
+			double c3 = 2 * K * Q + 2 * H * P + 2 * J * R;
+			double c4 = K * K + H * H + J * J;
+
+			// Solve quartic
+			double[] times = new double[4];
+			int numTimes = MathHelpers.SolveQuartic(c0, c1, c2, c3, c4, out times[0], out times[1], out times[2], out times[3]);
+
+			// Sort so faster collision is found first
+			Array.Sort(times);
+
+			// Plug quartic solutions into base equations
+			// There should never be more than 2 positive, real roots.
+			Vector3[] solutions = new Vector3[2];
+			int numSolutions = 0;
+
+			for (int i = 0; i < numTimes && numSolutions < 2; ++i) {
+				double t = times[i];
+				if (t <= 0)
+					continue;
+
+				solutions[numSolutions].X = (float)((H + P * t) / t);
+				solutions[numSolutions].Y = (float)((K + Q * t - L * t * t) / t);
+				solutions[numSolutions].Z = (float)((J + R * t) / t);
+				++numSolutions;
+			}
+
+			// Write out solutions
+			if (numSolutions > 0) lowVector = solutions[0];
+			if (numSolutions > 1) highVector = solutions[1];
+
+			return numSolutions;
 		}
 
 		public void StartFlight(Vector3 initialMovement) {

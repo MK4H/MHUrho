@@ -5,6 +5,7 @@ using Urho;
 using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents {
 

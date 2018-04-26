@@ -8,12 +8,12 @@ namespace MHUrho.WorldMap
 {
 	public interface IPathFindAlg {
 
-		Path FindPath(ITile source,
+		Path FindPath(Vector2 source,
 					ITile target,
 					CanGoToNeighbour canPassTo,
 					GetMovementSpeed getMovementSpeed);
 
-		List<ITile> GetTileList(ITile source,
+		List<ITile> GetTileList(Vector2 source,
 									ITile target,
 									CanGoToNeighbour canPassTo,
 									GetMovementSpeed getMovementSpeed);

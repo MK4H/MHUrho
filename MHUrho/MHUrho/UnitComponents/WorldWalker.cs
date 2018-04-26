@@ -53,7 +53,7 @@ namespace MHUrho.UnitComponents
 		private ILevelManager level;
 		private INotificationReceiver notificationReceiver;
 
-		private Path.PathEnumerator path;
+		private Path path;
 
 		public static WorldWalker GetInstanceFor<T>(T instancePlugin, ILevelManager level)
 			where T : UnitInstancePluginBase, INotificationReceiver {
@@ -73,7 +73,7 @@ namespace MHUrho.UnitComponents
 			Enabled = false;
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path.PathEnumerator path, ITile target) {
+		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path, ITile target) {
 
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
@@ -93,10 +93,10 @@ namespace MHUrho.UnitComponents
 
 			var indexedData = new IndexedPluginDataReader(data);
 			var activated = indexedData.Get<bool>(1);
-			Path.PathEnumerator path = null;
+			Path path = null;
 			ITile target = null;
 			if (activated) {
-				path = indexedData.Get<Path.PathEnumerator>(2);
+				path = indexedData.Get<Path>(2);
 				target = level.Map.GetTileByMapLocation(indexedData.Get<IntVector2>(3));
 				
 			}
@@ -131,17 +131,13 @@ namespace MHUrho.UnitComponents
 				OnMovementStarted?.Invoke(this);
 			}
 
-			this.path = newPath.GetPathEnumerator();
-			if (!path.MoveNext()) {
-				//TODO: cannot enumerate path
-				throw new ArgumentException("Given path could not be enumerated");
-			}
+			path = newPath;
 
 			Enabled = true;			
 		}
 
 		public bool GoTo(ITile tile) {
-			var newPath = Path.FromTo(Unit.Tile, 
+			var newPath = Path.FromTo(Unit.XZPosition, 
 									tile, 
 									map, 
 									notificationReceiver.CanGoFromTo,
@@ -176,6 +172,11 @@ namespace MHUrho.UnitComponents
 			this.OnMovementFailed += notificationReceiver.OnMovementFailed;
 		}
 
+		public IEnumerable<Waypoint> GetRestOfThePath()
+		{
+			return (IEnumerable<Waypoint>)path ?? new[] {new Waypoint(Unit.Position, 0)};
+		}
+
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
 
@@ -183,11 +184,12 @@ namespace MHUrho.UnitComponents
 			Debug.Assert(path != null, "Target was null with scene updates enabled");
 
 
-			if (!MoveTowards(path.Current.Position,timeStep)) {
+			if (!MoveTowards(path.TargetWaypoint.Position,timeStep)) {
+				path.Update(Unit.Position, timeStep);
 				return;
 			}
 
-			if (!path.MoveNext()) {
+			if (!path.TargetNextWaypoint()) {
 				ReachedDestination();
 			}
 		}
@@ -222,20 +224,18 @@ namespace MHUrho.UnitComponents
 			//Unit couldnt move to newPosition
 
 			//Recalculate path
-			var newPath = Path.FromTo(Unit.Tile,
-									path.Path.GetTarget(map),
+			var newPath = Path.FromTo(Unit.XZPosition,
+									path.GetTarget(map),
 									map,
 									notificationReceiver.CanGoFromTo,
-									notificationReceiver.GetMovementSpeed).GetPathEnumerator();
-			if (newPath == null || !newPath.MoveNext()) {
+									notificationReceiver.GetMovementSpeed);
+			if (newPath == null) {
 				//Cant get there
 				MovementFailed = true;
 				OnMovementFailed?.Invoke(this);
-				newPath?.Dispose();
 				ReachedDestination();
 			}
 			else {
-				path.Dispose();
 				path = newPath;
 			}
 			return false;
@@ -270,7 +270,6 @@ namespace MHUrho.UnitComponents
 			MovementFinished = true;
 			MovementStarted = false;
 			MovementFailed = false;
-			path.Dispose();
 			path = null;
 			Enabled = false;
 			OnMovementEnded?.Invoke(this);

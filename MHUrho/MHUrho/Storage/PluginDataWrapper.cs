@@ -4,6 +4,7 @@ using System.Text;
 using Urho;
 using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.WorldMap;
 
 namespace MHUrho.Storage
 {

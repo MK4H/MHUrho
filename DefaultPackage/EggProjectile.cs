@@ -9,6 +9,7 @@ using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
+using MHUrho.WorldMap;
 
 namespace DefaultPackage
 {
@@ -33,7 +34,7 @@ namespace DefaultPackage
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
-			return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.CurrentPosition,
+			return UnpoweredFlier.GetTimesAndAnglesForStaticTarget(target.CurrentPosition,
 																		source, 
 																		Speed,
 																		out var loweTime,
@@ -69,18 +70,11 @@ namespace DefaultPackage
 		}
 
 		public override bool ShootProjectile(IRangeTarget target) {
-			if (UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.CurrentPosition,
-																	projectile.Position,
-																	myType.Speed,
-																	out var lowTime,
-																	out var lowVector,
-																	out var highTime,
-																	out var highVector)) {
-				flier.StartFlight(lowVector);
-				return true;
+			if (target.Moving) {
+				return ShootMovingTarget(target);
 			}
 
-			return false;
+			return ShootStaticTarget(target);
 		}
 
 		public override bool ShootProjectile(Vector3 movement) {
@@ -93,6 +87,81 @@ namespace DefaultPackage
 
 		public void OnGroundHit(UnpoweredFlier flier) {
 			projectile.Despawn();
+		}
+
+		private bool ShootMovingTarget(IRangeTarget target) 
+		{
+			var waypoints = target.GetWaypoints().GetEnumerator();
+			if (!waypoints.MoveNext()) {
+				return false;
+			}
+
+			Waypoint current = waypoints.Current, next = null;
+			float timeToNextWaypoint = 0;
+			while (waypoints.MoveNext()) {
+
+				next = waypoints.Current;
+				timeToNextWaypoint += next.TimeToWaypoint;
+				if (!UnpoweredFlier.GetTimesAndAnglesForStaticTarget(
+																	 current.Position,
+																	 next.Position,
+																	 myType.Speed,
+																	 out float lowTime,
+																	 out Vector3 lowVector,
+																	 out float highTime,
+																	 out Vector3 highVector)) {
+					//Out of range
+					return false;
+				}
+
+				//Found the right two waypoints, that the projectile will hit
+				if (timeToNextWaypoint > lowTime) {
+					break;
+				}
+			}
+
+			waypoints.Dispose();
+			//Target is stationary
+			if (next == null) {
+				return ShootStaticTarget(target);
+			}
+
+			Vector3 targetMovement = (next.Position - current.Position) / next.TimeToWaypoint;
+
+			//A position simulating a linear movement of target, so it arrives at the proper time to the next waypoint
+			Vector3 fakePosition = next.Position - targetMovement * timeToNextWaypoint;
+
+			int numSolutions = UnpoweredFlier.GetTimesAndAnglesForMovingTarget(
+													fakePosition,
+													targetMovement,
+													projectile.Position,
+													myType.Speed,
+													out Vector3 finalLowVector,
+													out Vector3 finalHighVector);
+
+			if (numSolutions >= 1) {
+				flier.StartFlight(finalLowVector);
+				return true;
+			}
+
+			return false;
+		}
+
+		private bool ShootStaticTarget(IRangeTarget target) {
+			if (UnpoweredFlier.GetTimesAndAnglesForStaticTarget(
+									target.CurrentPosition,
+									projectile.Position,
+									myType.Speed,
+									out var lowTime,
+									out var lowVector,
+									out var highTime,
+									out var highVector)) {
+
+				flier.StartFlight(lowVector);
+				return true;
+			}
+
+			return false;
 		}
 	}
 

@@ -364,9 +364,7 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public ITile GetContainingTile(Vector2 point) {
-				throw new NotImplementedException();
-			}
+
 
 			public bool SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
 				throw new NotImplementedException();
@@ -392,9 +390,7 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public float GetHeightAt(Vector2 position) {
-				throw new NotImplementedException();
-			}
+			
 
 			public StMap Save() {
 				throw new NotImplementedException();
@@ -456,12 +452,23 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public ITile GetContainingTile(Vector2 point) {
+				int topLeftX = (int)Math.Floor(point.X);
+				int topLeftZ = (int)Math.Floor(point.Y);
+				return GetTileByMapLocation(topLeftX, topLeftZ);
+			}
+
 			public ITile GetTileByMapLocation(int x, int y) {
 				return map[x][y];
 			}
 
 			public ITile GetTileByMapLocation(IntVector2 mapLocation) {
 				return GetTileByMapLocation(mapLocation.X, mapLocation.Y);
+			}
+
+			public float GetHeightAt(Vector2 position)
+			{
+				return 0;
 			}
 
 			public static TestMap GetTestMapRandomSpeeds(int width, int height, Random rnd) {
@@ -583,14 +590,14 @@ namespace NUnit.Tests {
 
 			//Top
 			
-			List<ITile> path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			List<ITile> path = aStar.GetTileList(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			List<ITile> expected = new List<ITile>();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(i,0));
 			}
 			CollectionAssert.AreEqual(expected, path,"Fail going from topLeft to the topRight");
 
-			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.GetTileList(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			expected.Clear();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(0, i));
@@ -598,14 +605,14 @@ namespace NUnit.Tests {
 			CollectionAssert.AreEqual(expected, path, "Fail going from topLeft to the bottomLeft");
 
 
-			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.GetTileList(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			expected.Clear();
 			for (int i = allOneSpeed.Right; i >= allOneSpeed.Left; i--) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(i, allOneSpeed.Bottom));
 			}
 			CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the bottomLeft");
 
-			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.GetTileList(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			expected.Clear();
 			for (int i = allOneSpeed.Bottom; i >= allOneSpeed.Top; i--) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(allOneSpeed.Right, i));
@@ -622,7 +629,7 @@ namespace NUnit.Tests {
 
 			//Top
 
-			Path path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			Path path = aStar.FindPath(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			var pathEnumerator = path.GetEnumerator();
 			Vector3 position = new Vector3(1f, 0, 0.5f);
 			for (int i = 0; i < allOneSpeed.Right * 2; i++) {
@@ -633,7 +640,7 @@ namespace NUnit.Tests {
 
 			Assert.That(!pathEnumerator.MoveNext());
 
-			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.FindPath(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3(0.5f, 0, 1f);
 			for (int i = 0; i < allOneSpeed.Bottom * 2; i++) {
@@ -645,7 +652,7 @@ namespace NUnit.Tests {
 			Assert.That(!pathEnumerator.MoveNext());
 
 
-			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3( allOneSpeed.Right, 0, allOneSpeed.Bottom + 0.5f);
 			for (int i = 0; i < allOneSpeed.Right * 2; i++) {
@@ -656,7 +663,7 @@ namespace NUnit.Tests {
 
 			Assert.That(!pathEnumerator.MoveNext());
 
-			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3(allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom);
 			for (int i = 0; i < allOneSpeed.Bottom * 2; i++) {
@@ -692,7 +699,7 @@ namespace NUnit.Tests {
 		public void StartIsFinishPath() {
 			var aStar = new AStar(allOneSpeed);
 
-			Path path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
+			Path path = aStar.FindPath(new Vector2(10, 10), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
 
 			Assert.IsNotNull(path);
 			var enumerator = path.GetEnumerator();
@@ -709,7 +716,7 @@ namespace NUnit.Tests {
 		public void StartIsFinishTileList() {
 			var aStar = new AStar(allOneSpeed);
 
-			var path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
+			var path = aStar.GetTileList(new Vector2(10, 10), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
 
 			Assert.IsNotNull(path);
 			CollectionAssert.AreEqual(new List<ITile> {allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))}, path);

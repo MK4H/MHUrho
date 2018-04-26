@@ -3,81 +3,37 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using Urho;
 
 
-namespace MHUrho.Logic
+namespace MHUrho.WorldMap
 {
-	/// <summary>
-	/// Provides efficient storage of a path
-	/// </summary>
-
-	public class Path : IEnumerable<Waypoint>
-	{
-		public class PathEnumerator : IEnumerator<Waypoint> {
-			public Waypoint Current {
-				get {
-					if (current == null) {
-						//TODO: Exception text
-						throw new InvalidOperationException("Enumeration after enumerator returned false from MoveNext");
-					}
-
-					return current;
-				}
-				private set => current = value;
-			}
 
 
-			object IEnumerator.Current => Current;
+	public class Path : IEnumerable<Waypoint> {
 
-			public Path Path { get; private set; }
 
-			private int currentIndex;
+		public Waypoint TargetWaypoint => waypoints[targetWaypointIndex];
 
-			private Waypoint current;
-
-			public PathEnumerator(Path path) {
-				this.Path = path;
-				currentIndex = -1;
-			}
-
-			public bool MoveNext() {
-				currentIndex++;
-				if (currentIndex < Path.waypoints.Count) {
-					Current = Path.waypoints[currentIndex];
-					return true;
-				}
-
-				Current = null;
-				return false;
-			}
-
-			public void Reset() {
-				currentIndex = -1;
-			}
-
-			public void Dispose() {
-				
-			}
-
-			public StPathEnumerator Save() {
-				return new StPathEnumerator {Path = this.Path.Save(), Index = this.currentIndex};
-			}
-		}
+		public bool Finished => targetWaypointIndex == waypoints.Count;
 
 		private readonly List<Waypoint> waypoints;
 
+		private int targetWaypointIndex;
 
+		private Vector3 currentPosition;
 
 		protected Path() {
 			this.waypoints = new List<Waypoint>();
 		}
 
-		protected Path(List<Waypoint> waypoints) {
+		protected Path(Vector3 currentPosition, List<Waypoint> waypoints) {
 			this.waypoints = waypoints;
+			targetWaypointIndex = 0;
 		}
 
 
@@ -99,38 +55,79 @@ namespace MHUrho.Logic
 			return newPath;
 		}
 
-		public static Path CreateFrom(List<Waypoint> waypoints) {
-			return new Path(waypoints);
+		public static Path CreateFrom(Vector3 currentPosition,List<Waypoint> waypoints) {
+			return new Path(currentPosition, waypoints);
 		}
 
 
 
 		
 
-		public static Path FromTo(	ITile source, 
+		public static Path FromTo(	Vector2 source, 
 									ITile target, 
 									Map map, 
 									CanGoToNeighbour canPass,
-									GetMovementSpeed getMovementSpeed) {
+									GetMovementSpeed getMovementSpeed)
+		{
 
 			return map.PathFinding.FindPath(source, target, canPass, getMovementSpeed);
 		}
 
 
-		public IEnumerator<Waypoint> GetEnumerator() {
-			return new PathEnumerator(this);
+		public void Update(Vector3 newPosition, float secondsFromLastUpdate)
+		{
+			float speed = (newPosition - currentPosition).Length / secondsFromLastUpdate;
+			float distToTarget = (TargetWaypoint.Position - newPosition).Length;
+			TargetWaypoint.TimeToWaypoint = distToTarget / speed;
+
+			currentPosition = newPosition;
 		}
 
+		public bool IsWaypointReached()
+		{
+			return TargetWaypoint.TimeToWaypoint <= 0;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>If there was next waypoint to target, or this was the end</returns>
+		public bool TargetNextWaypoint()
+		{
+			TargetWaypoint.TimeToWaypoint = 0f;
+			if (targetWaypointIndex >= waypoints.Count - 1) {
+				targetWaypointIndex = waypoints.Count;
+				return false;
+			}
+
+			targetWaypointIndex++;
+			return true;
+		}
+
+		/// <summary>
+		/// Enumerates current position and the waypoints that were not yet reached
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerator<Waypoint> GetEnumerator()
+		{
+			yield return new Waypoint(currentPosition, 0);
+			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
+				yield return waypoints[i];
+			}
+		}
+
+		/// <summary>
+		/// Enumerates the waypoints that were not yet reached
+		/// </summary>
+		/// <returns></returns>
 		IEnumerator IEnumerable.GetEnumerator() {
 			return GetEnumerator();
 		}
 
-		public PathEnumerator GetPathEnumerator() {
-			return new PathEnumerator(this);
-		}
 
 		public ITile GetTarget(IMap map) {
 			return map.GetContainingTile(waypoints[waypoints.Count - 1].Position);
 		}
+
 	}
 }

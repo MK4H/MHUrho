@@ -209,9 +209,6 @@ namespace MHUrho.UnitComponents
 				foreach (var possibleTarget in possibleTargets) {
 
 					var newTarget = possibleTarget.GetDefaultComponent<RangeTargetComponent>();
-					if (!projectileType.IsInRange(entity.Position, newTarget)) {
-						continue;
-					}
 
 					target = newTarget;
 					target.AddShooter(this);
@@ -219,23 +216,28 @@ namespace MHUrho.UnitComponents
 					break;
 				}
 
-				if (target == null) {
-					return;
-				}
 			}
 			else if (searchDelay >= 0){
 				searchDelay -= timeStep;
 				return;
 			}
 
-			if (target != null) {
-				var projectile = Level.SpawnProjectile(projectileType, entity.Position + notificationReceiver.GetSourceOffset(target), Player, target);
-				OnShotFired?.Invoke(this, projectile);
-
-				shotDelay = 60 / RateOfFire;
+			if (target == null) {
+				return;
 			}
 
-			
+			var projectile = Level.SpawnProjectile(projectileType, entity.Position + notificationReceiver.GetSourceOffset(target), Player, target);
+			//Could not fire on the target
+			if (projectile == null) {
+				target.RemoveShooter(this);
+				target = null;
+				return;
+			}
+
+			OnShotFired?.Invoke(this, projectile);
+
+			shotDelay = 60 / RateOfFire;
+
 		}
 
 

@@ -29,7 +29,7 @@ namespace DefaultPackage
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
 
-			return UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.CurrentPosition,
+			return UnpoweredFlier.GetTimesAndAnglesForStaticTarget(target.CurrentPosition,
 																		source, 
 																		Speed,
 																		out var loweTime,
@@ -121,7 +121,7 @@ namespace DefaultPackage
 
 		public override bool ShootProjectile(IRangeTarget target) {
 			
-			if (UnpoweredFlier.GetUnpoweredProjectileTimesAndAngles(target.CurrentPosition,
+			if (UnpoweredFlier.GetTimesAndAnglesForStaticTarget(target.CurrentPosition,
 																	projectile.Position,
 																	myType.Speed,
 																	out var lowTime,

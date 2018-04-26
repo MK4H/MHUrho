@@ -5,12 +5,20 @@ using MHUrho.Helpers;
 using MHUrho.Storage;
 using Urho;
 
-namespace MHUrho.Logic
+namespace MHUrho.WorldMap
 {
-    public class Waypoint
+	public interface IPositionOnlyWaypoint {
+		Vector3 Position { get; }
+	}
+
+	public interface IReadOnlyWaypoint : IPositionOnlyWaypoint {
+		float TimeToWaypoint { get; }
+	}
+
+    public class Waypoint : IReadOnlyWaypoint
     {
 		public Vector3 Position { get; private set; }
-		public float TimeToWaypoint { get; private set; }
+		public float TimeToWaypoint { get; set; }
 
 		public Waypoint(Vector3 position, float timeToWaypoint) {
 			this.Position = position;

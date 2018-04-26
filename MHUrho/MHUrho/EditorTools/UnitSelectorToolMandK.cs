@@ -36,7 +36,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public override IEnumerable<Button> Buttons => buttons.Keys;
+		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
 
 		private readonly GameMandKController input;
 		private Map Map => input.LevelManager.Map;
@@ -243,8 +243,10 @@ namespace MHUrho.EditorTools
 
 		private void DeselectAll() {
 			foreach (var unitType in selected.Values) {
+				if (unitType.Count > 0) {
+					input.UIManager.SelectionBarHideButton(unitType.Button);
+				}
 				unitType.DeselectAll();
-				input.UIManager.SelectionBarHideButton(unitType.Button);
 			}
 		}
 

@@ -9,6 +9,7 @@ using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace DefaultPackage
@@ -168,6 +169,11 @@ namespace DefaultPackage
 
 		public Vector3 GetCurrentPosition() {
 			return Unit.Position + new Vector3(0, 0.5f, 0);
+		}
+
+		IEnumerable<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints()
+		{
+			return walker.GetRestOfThePath();
 		}
 	}
 }

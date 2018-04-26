@@ -8,8 +8,14 @@ namespace MHUrho.Helpers
 {
 	public static class IntVector2Extension
 	{
-		public static StIntVector2 ToStIntVector2(this IntVector2 intVector2) {
+		public static StIntVector2 ToStIntVector2(this IntVector2 intVector2) 
+		{
 			return new StIntVector2 {X = intVector2.X, Y = intVector2.Y};
+		}
+
+		public static Vector2 ToVector2(this IntVector2 intVector2)
+		{
+			return new Vector2(intVector2.X, intVector2.Y);
 		}
 	}
 }
