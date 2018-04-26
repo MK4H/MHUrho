@@ -17,7 +17,10 @@ namespace MHUrho.WorldMap
 	public class Path : IEnumerable<Waypoint> {
 
 
-		public Waypoint TargetWaypoint => waypoints[targetWaypointIndex];
+		public Waypoint TargetWaypoint {
+			get => waypoints[targetWaypointIndex];
+			set => waypoints[targetWaypointIndex] = value;
+		} 
 
 		public bool Finished => targetWaypointIndex == waypoints.Count;
 
@@ -34,6 +37,7 @@ namespace MHUrho.WorldMap
 		protected Path(Vector3 currentPosition, List<Waypoint> waypoints) {
 			this.waypoints = waypoints;
 			targetWaypointIndex = 0;
+			this.currentPosition = currentPosition;
 		}
 
 
@@ -78,7 +82,7 @@ namespace MHUrho.WorldMap
 		{
 			float speed = (newPosition - currentPosition).Length / secondsFromLastUpdate;
 			float distToTarget = (TargetWaypoint.Position - newPosition).Length;
-			TargetWaypoint.TimeToWaypoint = distToTarget / speed;
+			TargetWaypoint = new Waypoint(TargetWaypoint.Position, distToTarget / speed);
 
 			currentPosition = newPosition;
 		}
@@ -94,7 +98,7 @@ namespace MHUrho.WorldMap
 		/// <returns>If there was next waypoint to target, or this was the end</returns>
 		public bool TargetNextWaypoint()
 		{
-			TargetWaypoint.TimeToWaypoint = 0f;
+			TargetWaypoint = new Waypoint(TargetWaypoint.Position, 0f);
 			if (targetWaypointIndex >= waypoints.Count - 1) {
 				targetWaypointIndex = waypoints.Count;
 				return false;
@@ -113,6 +117,14 @@ namespace MHUrho.WorldMap
 			yield return new Waypoint(currentPosition, 0);
 			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
 				yield return waypoints[i];
+			}
+		}
+
+		public IEnumerator<Waypoint> GetEnumerator(Vector3 offset)
+		{
+			yield return new Waypoint(currentPosition + offset, 0);
+			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
+				yield return new Waypoint(waypoints[i].Position + offset,waypoints[i].TimeToWaypoint);
 			}
 		}
 

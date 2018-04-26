@@ -15,7 +15,7 @@ namespace MHUrho.WorldMap
 		float TimeToWaypoint { get; }
 	}
 
-    public class Waypoint : IReadOnlyWaypoint
+    public struct Waypoint : IReadOnlyWaypoint
     {
 		public Vector3 Position { get; private set; }
 		public float TimeToWaypoint { get; set; }

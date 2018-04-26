@@ -50,7 +50,7 @@ namespace MHUrho.UnitComponents
 			loaders.Add(WorldWalker.ComponentID, WorldWalker.Load);
 			loaders.Add(Shooter.ComponentID, Shooter.Load);
 			loaders.Add(ActionQueue.ComponentID, ActionQueue.Load);
-			loaders.Add(UnpoweredFlier.ComponentID, UnpoweredFlier.Load);
+			loaders.Add(BallisticProjectile.ComponentID, BallisticProjectile.Load);
 			//TODO: Add other components
 		}
 
@@ -59,7 +59,7 @@ namespace MHUrho.UnitComponents
 			map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
 			map.Add(Shooter.ComponentName, Shooter.ComponentID);
 			map.Add(ActionQueue.ComponentName, ActionQueue.ComponentID);
-			map.Add(UnpoweredFlier.ComponentName, UnpoweredFlier.ComponentID);
+			map.Add(BallisticProjectile.ComponentName, BallisticProjectile.ComponentID);
 
 		}
 
@@ -68,7 +68,7 @@ namespace MHUrho.UnitComponents
 			typeToComponentID.Add(typeof(WorldWalker), WorldWalker.ComponentID);
 			typeToComponentID.Add(typeof(Shooter), Shooter.ComponentID);
 			typeToComponentID.Add(typeof(ActionQueue), ActionQueue.ComponentID);
-			typeToComponentID.Add(typeof(UnpoweredFlier), UnpoweredFlier.ComponentID);
+			typeToComponentID.Add(typeof(BallisticProjectile), BallisticProjectile.ComponentID);
 		}
 	}
 }

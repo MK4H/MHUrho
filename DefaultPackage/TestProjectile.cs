@@ -29,7 +29,7 @@ namespace DefaultPackage
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
 
-			return UnpoweredFlier.GetTimesAndAnglesForStaticTarget(target.CurrentPosition,
+			return BallisticProjectile.GetTimesAndVectorsForStaticTarget(target.CurrentPosition,
 																		source, 
 																		Speed,
 																		out var loweTime,
@@ -46,10 +46,10 @@ namespace DefaultPackage
 
 	}
 
-	public class TestProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReceiver {
+	public class TestProjectileInstance : ProjectileInstancePluginBase, BallisticProjectile.INotificationReceiver {
 		private static readonly Random seedRng = new Random();
 
-		private UnpoweredFlier flier;
+		private BallisticProjectile flier;
 		private TestProjectileType myType;
 
 		private const float baseTimeToSplit = 0.5f;
@@ -66,7 +66,7 @@ namespace DefaultPackage
 			:base (level, projectile)
 		{
 			this.rng = new Random(seedRng.Next());
-			flier = UnpoweredFlier.GetInstanceFor(this, level);
+			flier = BallisticProjectile.GetInstanceFor(this, level);
 			projectile.Node.AddComponent(flier);
 			myType = type;
 		}
@@ -121,7 +121,7 @@ namespace DefaultPackage
 
 		public override bool ShootProjectile(IRangeTarget target) {
 			
-			if (UnpoweredFlier.GetTimesAndAnglesForStaticTarget(target.CurrentPosition,
+			if (BallisticProjectile.GetTimesAndVectorsForStaticTarget(target.CurrentPosition,
 																	projectile.Position,
 																	myType.Speed,
 																	out var lowTime,
@@ -140,11 +140,11 @@ namespace DefaultPackage
 			return true;
 		}
 
-		public void OnMovementStarted(UnpoweredFlier flier) {
+		public void OnMovementStarted(BallisticProjectile flier) {
 			
 		}
 
-		public void OnGroundHit(UnpoweredFlier flier) {
+		public void OnGroundHit(BallisticProjectile flier) {
 			despawning = true;
 		}
 	}

@@ -172,10 +172,22 @@ namespace MHUrho.UnitComponents
 			this.OnMovementFailed += notificationReceiver.OnMovementFailed;
 		}
 
-		public IEnumerable<Waypoint> GetRestOfThePath()
+		public IEnumerator<Waypoint> GetRestOfThePath()
 		{
-			return (IEnumerable<Waypoint>)path ?? new[] {new Waypoint(Unit.Position, 0)};
+			return GetRestOfThePath(new Vector3(0, 0, 0));
 		}
+
+		/// <summary>
+		/// Returns the current position and the part of the path that has not been reached yet
+		/// </summary>
+		/// <param name="offset">Offset from the unit feet position that every Waypoint position will be transfered by</param>
+		/// <returns>Returns the current position and the part of the path that has not been reached yet</returns>
+		public IEnumerator<Waypoint> GetRestOfThePath(Vector3 offset)
+		{
+			return path?.GetEnumerator(offset) ?? ((IEnumerable<Waypoint>)new [] {new Waypoint(Unit.Position + offset, 0)}).GetEnumerator();
+		}
+
+
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);

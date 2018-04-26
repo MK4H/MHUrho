@@ -171,9 +171,9 @@ namespace DefaultPackage
 			return Unit.Position + new Vector3(0, 0.5f, 0);
 		}
 
-		IEnumerable<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints()
+		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints()
 		{
-			return walker.GetRestOfThePath();
+			return walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
 	}
 }

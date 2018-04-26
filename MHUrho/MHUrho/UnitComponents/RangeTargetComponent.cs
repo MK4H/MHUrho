@@ -17,7 +17,7 @@ namespace MHUrho.UnitComponents {
 
 		Vector3 CurrentPosition { get; }
 
-		IEnumerable<Waypoint> GetWaypoints();
+		IEnumerator<Waypoint> GetWaypoints();
 
 		void AddShooter(RangeTargetComponent.IShooter shooter);
 
@@ -46,7 +46,7 @@ namespace MHUrho.UnitComponents {
 			shooters = new List<IShooter>();
 		}
 
-		public abstract IEnumerable<Waypoint> GetWaypoints();
+		public abstract IEnumerator<Waypoint> GetWaypoints();
 
 		/// <summary>
 		/// Adds a shooter to be notified when this target dies
@@ -145,7 +145,7 @@ namespace MHUrho.UnitComponents {
 			//NOTHING
 		}
 
-		public override IEnumerable<Waypoint> GetWaypoints() {
+		public override IEnumerator<Waypoint> GetWaypoints() {
 			yield return new Waypoint(CurrentPosition, 0);
 		}
 
@@ -169,7 +169,7 @@ namespace MHUrho.UnitComponents {
 	public class MovingRangeTarget : RangeTargetComponent {
 		public interface INotificationReceiver {
 
-			IEnumerable<Waypoint> GetWaypoints();
+			IEnumerator<Waypoint> GetWaypoints();
 
 			Vector3 GetCurrentPosition();
 
@@ -228,7 +228,7 @@ namespace MHUrho.UnitComponents {
 
 
 
-		public override IEnumerable<Waypoint> GetWaypoints() {
+		public override IEnumerator<Waypoint> GetWaypoints() {
 			return notificationReceiver.GetWaypoints();
 		}
 
@@ -271,7 +271,7 @@ namespace MHUrho.UnitComponents {
 			return mapTarget;
 		}
 
-		public IEnumerable<Waypoint> GetWaypoints() {
+		public IEnumerator<Waypoint> GetWaypoints() {
 			yield return new Waypoint(CurrentPosition, 0);
 		}
 

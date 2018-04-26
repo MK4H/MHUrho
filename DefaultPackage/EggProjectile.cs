@@ -34,7 +34,7 @@ namespace DefaultPackage
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
-			return UnpoweredFlier.GetTimesAndAnglesForStaticTarget(target.CurrentPosition,
+			return BallisticProjectile.GetTimesAndVectorsForStaticTarget(target.CurrentPosition,
 																		source, 
 																		Speed,
 																		out var loweTime,
@@ -44,16 +44,16 @@ namespace DefaultPackage
 		}
 	}
 
-	public class EggProjectileInstance : ProjectileInstancePluginBase, UnpoweredFlier.INotificationReceiver {
+	public class EggProjectileInstance : ProjectileInstancePluginBase, BallisticProjectile.INotificationReceiver {
 
-		private UnpoweredFlier flier;
+		private BallisticProjectile flier;
 		private EggProjectileType myType;
 
 		public EggProjectileInstance(ILevelManager level, Projectile projectile, EggProjectileType myType)
 			:base(level, projectile)
 		{
 			this.myType = myType;
-			this.flier = UnpoweredFlier.GetInstanceFor(this, level);
+			this.flier = BallisticProjectile.GetInstanceFor(this, level);
 			projectile.AddComponent(flier);
 		}
 
@@ -81,66 +81,24 @@ namespace DefaultPackage
 			return false;
 		}
 
-		public void OnMovementStarted(UnpoweredFlier flier) {
+		public void OnMovementStarted(BallisticProjectile flier) {
 			
 		}
 
-		public void OnGroundHit(UnpoweredFlier flier) {
+		public void OnGroundHit(BallisticProjectile flier) {
 			projectile.Despawn();
 		}
 
-		private bool ShootMovingTarget(IRangeTarget target) 
+		private bool ShootMovingTarget(IRangeTarget target)
 		{
-			var waypoints = target.GetWaypoints().GetEnumerator();
-			if (!waypoints.MoveNext()) {
-				return false;
-			}
-
-			Waypoint current = waypoints.Current, next = null;
-			float timeToNextWaypoint = 0;
-			while (waypoints.MoveNext()) {
-
-				next = waypoints.Current;
-				timeToNextWaypoint += next.TimeToWaypoint;
-				if (!UnpoweredFlier.GetTimesAndAnglesForStaticTarget(
-																	 current.Position,
-																	 next.Position,
-																	 myType.Speed,
-																	 out float lowTime,
-																	 out Vector3 lowVector,
-																	 out float highTime,
-																	 out Vector3 highVector)) {
-					//Out of range
-					return false;
-				}
-
-				//Found the right two waypoints, that the projectile will hit
-				if (timeToNextWaypoint > lowTime) {
-					break;
-				}
-			}
-
-			waypoints.Dispose();
-			//Target is stationary
-			if (next == null) {
-				return ShootStaticTarget(target);
-			}
-
-			Vector3 targetMovement = (next.Position - current.Position) / next.TimeToWaypoint;
-
-			//A position simulating a linear movement of target, so it arrives at the proper time to the next waypoint
-			Vector3 fakePosition = next.Position - targetMovement * timeToNextWaypoint;
-
-			int numSolutions = UnpoweredFlier.GetTimesAndAnglesForMovingTarget(
-													fakePosition,
-													targetMovement,
-													projectile.Position,
-													myType.Speed,
-													out Vector3 finalLowVector,
-													out Vector3 finalHighVector);
+			int numSolutions = BallisticProjectile.GetVectorsForMovingTarget(target,
+																			projectile.Position,
+																			myType.Speed,
+																			out Vector3 lowVector,
+																			out Vector3 highVector);
 
 			if (numSolutions >= 1) {
-				flier.StartFlight(finalLowVector);
+				flier.StartFlight(lowVector);
 				return true;
 			}
 
@@ -148,7 +106,7 @@ namespace DefaultPackage
 		}
 
 		private bool ShootStaticTarget(IRangeTarget target) {
-			if (UnpoweredFlier.GetTimesAndAnglesForStaticTarget(
+			if (BallisticProjectile.GetTimesAndVectorsForStaticTarget(
 									target.CurrentPosition,
 									projectile.Position,
 									myType.Speed,

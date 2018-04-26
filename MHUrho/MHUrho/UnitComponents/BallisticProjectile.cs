@@ -10,17 +10,17 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
-	public class UnpoweredFlier : DefaultComponent
+	public class BallisticProjectile : DefaultComponent
 	{
 		public interface INotificationReceiver {
 
-			void OnMovementStarted(UnpoweredFlier flier);
+			void OnMovementStarted(BallisticProjectile flier);
 
-			void OnGroundHit(UnpoweredFlier flier);
+			void OnGroundHit(BallisticProjectile flier);
 		}
 
 		public static DefaultComponents ComponentID = DefaultComponents.UnpoweredFlier;
-		public static string ComponentName = nameof(UnpoweredFlier);
+		public static string ComponentName = nameof(BallisticProjectile);
 
 		public override DefaultComponents ComponentTypeID => ComponentID;
 
@@ -33,14 +33,14 @@ namespace MHUrho.UnitComponents
 		private ILevelManager level;
 		private Map Map => level.Map;
 
-		protected UnpoweredFlier(INotificationReceiver notificationReceiver,
+		protected BallisticProjectile(INotificationReceiver notificationReceiver,
 							  ILevelManager level) {
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
 			this.level = level;
 		}
 
-		protected UnpoweredFlier(INotificationReceiver notificationReceiver,
+		protected BallisticProjectile(INotificationReceiver notificationReceiver,
 								 ILevelManager level,
 								 Vector3 movement,
 								 bool enabled) {
@@ -51,7 +51,7 @@ namespace MHUrho.UnitComponents
 			this.Enabled = enabled;
 		}
 
-		public static UnpoweredFlier GetInstanceFor<T>(T instancePlugin, 
+		public static BallisticProjectile GetInstanceFor<T>(T instancePlugin, 
 													   ILevelManager level)
 			where T : InstancePluginBase, INotificationReceiver
 		{
@@ -59,10 +59,10 @@ namespace MHUrho.UnitComponents
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new UnpoweredFlier(instancePlugin, level);
+			return new BallisticProjectile(instancePlugin, level);
 		}
 
-		internal static UnpoweredFlier Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
+		internal static BallisticProjectile Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
 
 			var notificationReceiver = plugin as INotificationReceiver;
 			if (notificationReceiver == null) {
@@ -76,7 +76,7 @@ namespace MHUrho.UnitComponents
 			var enabled = sequentialData.GetCurrent<bool>();
 			sequentialData.MoveNext();
 
-			return new UnpoweredFlier(notificationReceiver,
+			return new BallisticProjectile(notificationReceiver,
 									  level,
 									  movement,
 									  enabled);
@@ -99,7 +99,7 @@ namespace MHUrho.UnitComponents
 		/// <param name="highVector"></param>
 		/// <returns>True if it is possible to hit the <paramref name="targetPosition"/> with the given <paramref name="initialProjectileSpeed"/>,
 		/// and the out parameters are valid, or false if it is not possible and the out params are invalid</returns>
-		public static bool GetTimesAndAnglesForStaticTarget(Vector3 targetPosition,
+		public static bool GetTimesAndVectorsForStaticTarget(Vector3 targetPosition,
 																Vector3 sourcePosition,
 																float initialProjectileSpeed,
 																out float lowTime,
@@ -154,12 +154,12 @@ namespace MHUrho.UnitComponents
 			return true;
 		}
 
-		public static int GetTimesAndAnglesForMovingTarget(Vector3 targetPosition,
-															Vector3 targetMovement,
-															Vector3 sourcePosition,
-															float initialProjectileSpeed,
-															out Vector3 lowVector,
-															out Vector3 highVector) {
+		public static int GetVectorsForMovingTarget(Vector3 targetPosition,
+													Vector3 targetMovement,
+													Vector3 sourcePosition,
+													float initialProjectileSpeed,
+													out Vector3 lowVector,
+													out Vector3 highVector) {
 
 			lowVector = Vector3.Zero;
 			highVector = Vector3.Zero;
@@ -220,6 +220,91 @@ namespace MHUrho.UnitComponents
 			return numSolutions;
 		}
 
+		public static int GetVectorsForMovingTarget(IRangeTarget rangeTarget,
+													Vector3 sourcePosition,
+													float initialProjectileSpeed,
+													out Vector3 lowVector,
+													out Vector3 highVector)
+		{
+			if (!rangeTarget.Moving) {
+				if (GetTimesAndVectorsForStaticTarget(rangeTarget.CurrentPosition,
+													 sourcePosition,
+													 initialProjectileSpeed,
+													 out var lowTime,
+													 out lowVector,
+													 out var highTime,
+													 out highVector)) {
+					return 2;
+				}
+
+				return 0;
+			}
+
+
+			var waypoints = rangeTarget.GetWaypoints();
+			if (!waypoints.MoveNext()) {
+				lowVector = Vector3.Zero;
+				highVector = Vector3.Zero;
+				return 0;
+			}
+
+			Waypoint current = waypoints.Current;
+			Waypoint? next = null;
+			float timeToNextWaypoint = 0;
+			while (waypoints.MoveNext()) {
+
+				next = waypoints.Current;
+				timeToNextWaypoint += next.Value.TimeToWaypoint;
+				if (!GetTimesAndVectorsForStaticTarget(
+						current.Position,
+						next.Value.Position,
+						initialProjectileSpeed,
+						out float lowTime,
+						out Vector3 dontCare1,
+						out float dontCare2,
+						out Vector3 dontCare3)) {
+					
+					//Out of range
+					lowVector = Vector3.Zero;
+					highVector = Vector3.Zero;
+					return 0;
+				}
+
+				//Found the right two waypoints, that the projectile will hit
+				if (timeToNextWaypoint > lowTime) {
+					break;
+				}
+			}
+
+			waypoints.Dispose();
+			//Target is stationary
+			if (!next.HasValue) {
+				if (GetTimesAndVectorsForStaticTarget(current.Position,
+													sourcePosition,
+													initialProjectileSpeed,
+													out var lowTime,
+													out lowVector,
+													out var highTime,
+													out highVector)) {
+					return 2;
+				}
+
+				return 0;
+			}
+
+			Vector3 targetMovement = (next.Value.Position - current.Position) / next.Value.TimeToWaypoint;
+
+			//A position simulating a linear movement of target, so it arrives at the proper time to the next waypoint
+			Vector3 fakePosition = next.Value.Position - targetMovement * timeToNextWaypoint;
+
+			return GetVectorsForMovingTarget(fakePosition,
+											targetMovement,
+											sourcePosition,
+											initialProjectileSpeed,
+											out lowVector,
+											out highVector);
+		}
+
 		public void StartFlight(Vector3 initialMovement) {
 			Enabled = true;
 
@@ -252,12 +337,12 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			AddedToEntity(typeof(UnpoweredFlier), entityDefaultComponents);
+			AddedToEntity(typeof(BallisticProjectile), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(UnpoweredFlier), entityDefaultComponents);
+			return RemovedFromEntity(typeof(BallisticProjectile), entityDefaultComponents);
 		}
 	}
 }

@@ -629,10 +629,10 @@ namespace NUnit.Tests {
 
 			//Top
 
-			Path path = aStar.FindPath(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			Path path = aStar.FindPath(new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			var pathEnumerator = path.GetEnumerator();
-			Vector3 position = new Vector3(1f, 0, 0.5f);
-			for (int i = 0; i < allOneSpeed.Right * 2; i++) {
+			Vector3 position = new Vector3(0.5f, 0, 0.5f);
+			for (int i = 0; i < allOneSpeed.Right * 2 + 1; i++) {
 				pathEnumerator.MoveNext();
 				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
 				position.X += 0.5f;
@@ -640,10 +640,10 @@ namespace NUnit.Tests {
 
 			Assert.That(!pathEnumerator.MoveNext());
 
-			path = aStar.FindPath(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.FindPath(new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			pathEnumerator = path.GetEnumerator();
-			position = new Vector3(0.5f, 0, 1f);
-			for (int i = 0; i < allOneSpeed.Bottom * 2; i++) {
+			position = new Vector3(0.5f, 0, 0.5f);
+			for (int i = 0; i < allOneSpeed.Bottom * 2 + 1; i++) {
 				pathEnumerator.MoveNext();
 				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
 				position.Z += 0.5f;
@@ -652,10 +652,10 @@ namespace NUnit.Tests {
 			Assert.That(!pathEnumerator.MoveNext());
 
 
-			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2() + new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile) => 1);
 			pathEnumerator = path.GetEnumerator();
-			position = new Vector3( allOneSpeed.Right, 0, allOneSpeed.Bottom + 0.5f);
-			for (int i = 0; i < allOneSpeed.Right * 2; i++) {
+			position = new Vector3( allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom + 0.5f);
+			for (int i = 0; i < allOneSpeed.Right * 2 + 1; i++) {
 				pathEnumerator.MoveNext();
 				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
 				position.X -= 0.5f;
@@ -663,10 +663,10 @@ namespace NUnit.Tests {
 
 			Assert.That(!pathEnumerator.MoveNext());
 
-			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
+			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2() + new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile) => 1);
 			pathEnumerator = path.GetEnumerator();
-			position = new Vector3(allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom);
-			for (int i = 0; i < allOneSpeed.Bottom * 2; i++) {
+			position = new Vector3(allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom + 0.5f);
+			for (int i = 0; i < allOneSpeed.Bottom * 2 + 1; i++) {
 				pathEnumerator.MoveNext();
 				Assert.That(pathEnumerator.Current.Position.IsNear(position, 10E-9f));
 				position.Z -= 0.5f;
@@ -699,10 +699,14 @@ namespace NUnit.Tests {
 		public void StartIsFinishPath() {
 			var aStar = new AStar(allOneSpeed);
 
-			Path path = aStar.FindPath(new Vector2(10, 10), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
+			Path path = aStar.FindPath(new Vector2(10.5f, 10.5f), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile) => 1);
 
 			Assert.IsNotNull(path);
 			var enumerator = path.GetEnumerator();
+			Assert.That(enumerator.MoveNext());
+			//Current position
+			Assert.That(enumerator.Current.Position.IsNear(new Vector3(10.5f, 0, 10.5f), 10E-9f));
+			//Target position
 			Assert.That(enumerator.MoveNext());
 			Assert.That(enumerator.Current.Position.IsNear(new Vector3(10.5f, 0, 10.5f), 10E-9f));
 			Assert.That(!enumerator.MoveNext());
