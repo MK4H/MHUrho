@@ -26,14 +26,14 @@ namespace MHUrho.Logic
 		   
 			public Unit Unit;
 
-			private List<DefaultComponent> preloadedComponents;
+			List<DefaultComponent> preloadedComponents;
 
 			/// <summary>
 			/// Holds the image of this unit between the steps of loading
 			/// After the last step, is set to null to free the resources
 			/// In game is null
 			/// </summary>
-			private StUnit storedUnit;
+			StUnit storedUnit;
 
 			protected Loader(StUnit storedUnit) {
 				this.storedUnit = storedUnit;
@@ -70,8 +70,6 @@ namespace MHUrho.Logic
 				storedUnit.Id = unit.ID;
 				storedUnit.Position = unit.Position.ToStVector3();
 				storedUnit.PlayerID = unit.Player.ID;
-				//storedUnit.Path = path.Save();
-				//storedUnit.TargetUnitID = target.UnitID;
 				storedUnit.TypeID = unit.UnitType.ID;
 
 
@@ -118,7 +116,7 @@ namespace MHUrho.Logic
 			/// <param name="legNode"></param>
 			/// <param name="storedUnit"></param>
 			/// <returns>Loaded unit component, already added to the node</returns>
-			private void Load(LevelManager level, UnitType type, Node legNode) {
+			void Load(LevelManager level, UnitType type, Node legNode) {
 				//TODO: Check arguments - node cant have more than one Unit component
 				if (type.ID != storedUnit.TypeID) {
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
@@ -144,7 +142,7 @@ namespace MHUrho.Logic
 																	level,
 																	Unit.Plugin);
 					preloadedComponents.Add(preloadedComponent);
-					centerNode.AddComponent(preloadedComponent);
+					Unit.AddComponent(preloadedComponent);
 				}
 			}
 
@@ -387,6 +385,13 @@ namespace MHUrho.Logic
 
 		public void RotateAroundCenter(float pitch, float yaw, float roll) {
 			Node.Rotate(new Quaternion(pitch, yaw, roll));
+		}
+
+		public void Kill()
+		{
+			Tile.RemoveUnit(this);
+			Node.Remove();
+			Level.RemoveUnit(this);
 		}
 		#endregion
 

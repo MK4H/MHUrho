@@ -11,8 +11,6 @@ namespace MHUrho.UnitComponents
 	{
 		public delegate DefaultComponent LoadComponentDelegate(ILevelManager level, InstancePluginBase unitPlugin, PluginData storedData);
 
-		public static readonly Dictionary<Type, DefaultComponents> typeToComponentID;
-
 		private readonly Dictionary<DefaultComponents, LoadComponentDelegate> loaders;
 
 		private readonly Dictionary<string, DefaultComponents> nameToID;
@@ -27,9 +25,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		static DefaultComponentFactory() {
-			typeToComponentID = new Dictionary<Type, DefaultComponents>();
 
-			FillTypeToIDMap();
 		}
 
 		public DefaultComponent LoadComponent(string name, PluginData storedComponent, ILevelManager level, InstancePluginBase plugin) {
@@ -44,31 +40,28 @@ namespace MHUrho.UnitComponents
 			return loaders[ID].Invoke(level, plugin, storedComponent);
 		}
 
-		private void AddLoaders(IDictionary<DefaultComponents, LoadComponentDelegate> loaders) {
+		void AddLoaders(IDictionary<DefaultComponents, LoadComponentDelegate> loaders) {
 			//TODO: Maybe reflection
 			loaders.Add(UnitSelector.ComponentID, UnitSelector.Load);
 			loaders.Add(WorldWalker.ComponentID, WorldWalker.Load);
 			loaders.Add(Shooter.ComponentID, Shooter.Load);
 			loaders.Add(ActionQueue.ComponentID, ActionQueue.Load);
 			loaders.Add(BallisticProjectile.ComponentID, BallisticProjectile.Load);
+			loaders.Add(StaticRangeTarget.ComponentID, StaticRangeTarget.Load);
+			loaders.Add(MovingRangeTarget.ComponentID, MovingRangeTarget.Load);
+
 			//TODO: Add other components
 		}
 
-		private void AddNameToIDMap(IDictionary<string, DefaultComponents> map) {
+		void AddNameToIDMap(IDictionary<string, DefaultComponents> map) {
 			map.Add(UnitSelector.ComponentName, UnitSelector.ComponentID);
 			map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
 			map.Add(Shooter.ComponentName, Shooter.ComponentID);
 			map.Add(ActionQueue.ComponentName, ActionQueue.ComponentID);
 			map.Add(BallisticProjectile.ComponentName, BallisticProjectile.ComponentID);
-
+			map.Add(StaticRangeTarget.ComponentName, StaticRangeTarget.ComponentID);
+			map.Add(MovingRangeTarget.ComponentName, MovingRangeTarget.ComponentID);
 		}
 
-		private static void FillTypeToIDMap() {
-			typeToComponentID.Add(typeof(UnitSelector), UnitSelector.ComponentID);
-			typeToComponentID.Add(typeof(WorldWalker), WorldWalker.ComponentID);
-			typeToComponentID.Add(typeof(Shooter), Shooter.ComponentID);
-			typeToComponentID.Add(typeof(ActionQueue), ActionQueue.ComponentID);
-			typeToComponentID.Add(typeof(BallisticProjectile), BallisticProjectile.ComponentID);
-		}
 	}
 }

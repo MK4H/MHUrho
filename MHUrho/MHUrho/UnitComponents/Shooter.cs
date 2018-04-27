@@ -13,7 +13,7 @@ using Urho.Physics;
 
 namespace MHUrho.UnitComponents
 {
-	internal delegate void HostileTargetAquiredDelegate(Shooter shooter, RangeTargetComponent target);
+	internal delegate void HostileTargetAquiredDelegate(Shooter shooter);
 	internal delegate void ShotReloadedDelegate(Shooter shooter);
 	internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
 
@@ -21,15 +21,15 @@ namespace MHUrho.UnitComponents
 	{
 
 		public interface INotificationReceiver {
-			void OnTargetAcquired(Shooter shooter, RangeTargetComponent target);
+			void OnTargetAcquired(Shooter shooter);
 
-			void BeforeShotFired(Shooter shooter, IRangeTarget target);
+			void BeforeShotFired(Shooter shooter);
 
 			void AfterShotFired(Shooter shooter, Projectile projectile);
 
 			void OnShotReloaded(Shooter shooter);
 
-			Vector3 GetSourceOffset(IRangeTarget target);
+			Vector3 GetSourceOffset(Shooter shooter);
 		}
 
 		public static string ComponentName = nameof(Shooter);
@@ -46,30 +46,30 @@ namespace MHUrho.UnitComponents
 
 		public float TargetSearchDelay { get; set; }
 
+		public IRangeTarget Target { get; private set; }
+
 		internal event HostileTargetAquiredDelegate OnTargetAcquired;
 		internal event ShotReloadedDelegate OnShotReloaded;
 		internal event ShotFiredDelegate OnShotFired;
 
 
-		private IRangeTarget target;
+		
 
-		private float shotDelay;
-		private float searchDelay;
+		float shotDelay;
+		float searchDelay;
 
-		private ProjectileType projectileType;
+		ProjectileType projectileType;
 
 
-		private Entity entity;
+		Entity entity;
 
-		private INotificationReceiver notificationReceiver;
+		INotificationReceiver notificationReceiver;
 
-		private IPlayer Player => entity.Player;
+		IPlayer Player => entity.Player;
 
-		private ILevelManager Level => entity.Level;
+		ILevelManager Level => entity.Level;
 
-		private Map Map => Level.Map;
-
-		private int entityID;
+		Map Map => Level.Map;
 
 		protected Shooter(ILevelManager level,
 						INotificationReceiver notificationReceiver,
@@ -83,16 +83,6 @@ namespace MHUrho.UnitComponents
 			this.shotDelay = 60 / RateOfFire;
 			this.searchDelay = 0;
 			ReceiveSceneUpdates = true;
-		}
-
-		protected Shooter(	ILevelManager level,
-							int entityID,
-							INotificationReceiver notificationReceiver,
-							ProjectileType projectileType,
-							float rateOfFire)
-			:this(level, notificationReceiver, projectileType, rateOfFire)
-		{
-			this.entityID = entityID;
 		}
 
 		public static Shooter CreateNew<T>(T instancePlugin, 
@@ -119,32 +109,36 @@ namespace MHUrho.UnitComponents
 			}
 
 			var sequentialDataReader = new SequentialPluginDataReader(storedData);
-			sequentialDataReader.MoveNext();
-			var entityID = sequentialDataReader.GetCurrent<int>();
-			sequentialDataReader.MoveNext();
-			var rateOfFire = sequentialDataReader.GetCurrent<float>();
-			sequentialDataReader.MoveNext();
-			var projectileTypeID = sequentialDataReader.GetCurrent<int>();
+			var rateOfFire = sequentialDataReader.GetNext<float>();
+			var projectileTypeID = sequentialDataReader.GetNext<int>();
 
 			var shooter = new Shooter(level,
-									entityID,
 									notificationReceiver,
 									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
 									rateOfFire);
+
+			shooter.SearchForTarget = sequentialDataReader.GetNext<bool>();
+			shooter.TargetSearchDelay = sequentialDataReader.GetNext<float>();
+			
+
 
 			return shooter;
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
-			entity = level.GetEntity(entityID);
+
 		}
 
 		public override PluginData SaveState() {
 			var sequentialData = new SequentialPluginDataWriter();
 
-			sequentialData.StoreNext<int>(entity.ID);
 			sequentialData.StoreNext<float>(RateOfFire);
 			sequentialData.StoreNext<int>(projectileType.ID);
+			sequentialData.StoreNext<bool>(SearchForTarget);
+			sequentialData.StoreNext<float>(TargetSearchDelay);
+			sequentialData.StoreNext<int>(Target.InstanceID);
+			sequentialData.StoreNext<float>(shotDelay);
+			sequentialData.StoreNext<float>(searchDelay);
 
 			return sequentialData.PluginData;
 		}
@@ -164,27 +158,30 @@ namespace MHUrho.UnitComponents
 
 			if (!projectileType.IsInRange(entity.Position, newTarget)) return false;
 
-			target = newTarget;
+			Target = newTarget;
 			newTarget.AddShooter(this);
 			return true;
 		}
 
 		public void StopShooting() {
-			target?.RemoveShooter(this);
-			target = null;
+			Target?.RemoveShooter(this);
+			Target = null;
 		}
 
 		public void OnTargetDestroy(IRangeTarget target) {
-			Debug.Assert(this.target == target);
-			this.target = null;
+			Debug.Assert(this.Target == target);
+			this.Target = null;
 		}
 
 		protected override void OnDeleted() {
-			target?.RemoveShooter(this);
+			Target?.RemoveShooter(this);
+			base.OnDeleted();
 		}
 
-		protected override void OnUpdate(float timeStep) {
+		protected override void OnUpdate(float timeStep)
+		{
 			base.OnUpdate(timeStep);
+
 			if (!EnabledEffective) return;
 
 
@@ -195,7 +192,7 @@ namespace MHUrho.UnitComponents
 
 			OnShotReloaded?.Invoke(this);
 
-			if (SearchForTarget && target == null && searchDelay < 0) {
+			if (SearchForTarget && Target == null && searchDelay < 0) {
 				searchDelay = TargetSearchDelay;
 
 				//Check for target in range
@@ -210,9 +207,9 @@ namespace MHUrho.UnitComponents
 
 					var newTarget = possibleTarget.GetDefaultComponent<RangeTargetComponent>();
 
-					target = newTarget;
-					target.AddShooter(this);
-					OnTargetAcquired?.Invoke(this, newTarget);
+					Target = newTarget;
+					Target.AddShooter(this);
+					OnTargetAcquired?.Invoke(this);
 					break;
 				}
 
@@ -222,15 +219,17 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			if (target == null) {
+			if (Target == null) {
 				return;
 			}
+			//TODO: Delegate
+			notificationReceiver.BeforeShotFired(this);
 
-			var projectile = Level.SpawnProjectile(projectileType, entity.Position + notificationReceiver.GetSourceOffset(target), Player, target);
+			var projectile = Level.SpawnProjectile(projectileType, entity.Position + notificationReceiver.GetSourceOffset(this), Player, Target);
 			//Could not fire on the target
 			if (projectile == null) {
-				target.RemoveShooter(this);
-				target = null;
+				Target.RemoveShooter(this);
+				Target = null;
 				return;
 			}
 

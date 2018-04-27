@@ -34,7 +34,9 @@ namespace MHUrho.Storage
 
 	public class SequentialPluginDataReader : SequentialPluginDataWrapper {
 
-		private IEnumerator<Data> dataEnumerator;
+		public bool Finished { get; private set; }
+
+		IEnumerator<Data> dataEnumerator;
 
 		public bool MoveNext() {
 			return dataEnumerator.MoveNext();
@@ -42,6 +44,18 @@ namespace MHUrho.Storage
 
 		public T GetCurrent<T>() {
 			return(T) FromDataConvertors[typeof(T)](dataEnumerator.Current);
+		}
+
+		/// <summary>
+		/// Moves the enumerator to next value and returns it,
+		/// if there is no next value, returns default(T) and sets Finished to true
+		/// </summary>
+		/// <typeparam name="T">Type of the stored value</typeparam>
+		/// <returns>Next stored value, or default(T) if <see cref="Finished"/> is true</returns>
+		public T GetNext<T>()
+		{
+			Finished = !MoveNext();
+			return Finished ? default(T) : GetCurrent<T>();
 		}
 
 		public void Reset() {

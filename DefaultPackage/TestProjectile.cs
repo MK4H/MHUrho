@@ -23,8 +23,9 @@ namespace DefaultPackage
 			return new TestProjectileInstance(level, projectile, this);
 		}
 
-		public override ProjectileInstancePluginBase GetInstanceForLoading() {
-			throw new NotImplementedException();
+		public override ProjectileInstancePluginBase GetInstanceForLoading()
+		{
+			return new TestProjectileInstance(this);
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
@@ -61,6 +62,12 @@ namespace DefaultPackage
 
 		private bool despawning;
 		private float timeToDespawn = 6;
+
+		public TestProjectileInstance(TestProjectileType type)
+		{
+			this.myType = type;
+			this.rng = new Random(seedRng.Next());
+		}
 
 		public TestProjectileInstance(ILevelManager level, Projectile projectile, TestProjectileType type)
 			:base (level, projectile)
@@ -104,12 +111,30 @@ namespace DefaultPackage
 			
 		}
 
-		public override void SaveState(PluginDataWrapper pluginData) {
-			throw new NotImplementedException();
+		public override void SaveState(PluginDataWrapper pluginData)
+		{
+			var sequential = pluginData.GetWriterForWrappedSequentialData();
+			sequential.StoreNext(timeToSplit);
+			sequential.StoreNext(splits);
+			sequential.StoreNext(despawning);
+			sequential.StoreNext(timeToDespawn);
 		}
 
 		public override void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData) {
-			throw new NotImplementedException();
+			this.Level = level;
+			this.projectile = projectile;
+			this.flier = projectile.GetDefaultComponent<BallisticProjectile>();
+
+			var sequential = pluginData.GetReaderForWrappedSequentialData();
+			sequential.MoveNext();
+			timeToSplit = sequential.GetCurrent<float>();
+			sequential.MoveNext();
+			splits = sequential.GetCurrent<int>();
+			sequential.MoveNext();
+			despawning = sequential.GetCurrent<bool>();
+			sequential.MoveNext();
+			timeToDespawn = sequential.GetCurrent<float>();
+			sequential.MoveNext();
 		}
 
 		public override void ReInitialize(ILevelManager level) {

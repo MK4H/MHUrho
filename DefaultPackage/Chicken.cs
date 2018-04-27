@@ -88,11 +88,22 @@ namespace DefaultPackage
 			unit.AlwaysVertical = true;
 			animationController = unit.Node.CreateComponent<AnimationController>();
 			walker = unit.GetDefaultComponent<WorldWalker>();
+			shooter = unit.GetDefaultComponent<Shooter>();
 
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
 			return toTile.Building == null;
+		}
+
+		public override void OnUpdate(float timeStep) {
+			if (shooter.Target != null) {
+				var targetPos = shooter.Target.CurrentPosition;
+
+				var diff = Unit.Position - targetPos;
+
+				Unit.FaceTowards(Unit.Position + diff);
+			}
 		}
 
 		public float GetMovementSpeed(ITile tile) {
@@ -102,14 +113,19 @@ namespace DefaultPackage
 		public void OnMovementStarted(WorldWalker walker) {
 			animationController.PlayExclusive("Chicken/Models/Walk.ani", 0, true);
 			animationController.SetSpeed("Chicken/Models/Walk.ani", 2);
+
+			shooter.StopShooting();
+			shooter.SearchForTarget = false;
 		}
 
 		public void OnMovementFinished(WorldWalker walker) {
 			animationController.Stop("Chicken/Models/Walk.ani");
+			shooter.SearchForTarget = true;
 		}
 
 		public void OnMovementFailed(WorldWalker walker) {
 			animationController.Stop("Chicken/Models/Walk.ani");
+			shooter.SearchForTarget = true;
 		}
 
 		public void OnUnitSelected(UnitSelector selector) {
@@ -126,7 +142,14 @@ namespace DefaultPackage
 			orderArgs.Executed = walker.GoTo(targetTile);
 		}
 
-		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
+		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs)
+		{
+			IRangeTarget rangeTarget;
+			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTargetComponent>()) != null)) {
+				orderArgs.Executed = shooter.ShootAt(rangeTarget);
+				return;
+			}
+
 			orderArgs.Executed = false;
 		}
 
@@ -134,16 +157,16 @@ namespace DefaultPackage
 			orderArgs.Executed = false;
 		}
 
-		public void OnTargetAcquired(Shooter shooter, RangeTargetComponent target) {
-			var targetPos = target.CurrentPosition;
+		public void OnTargetAcquired(Shooter shooter) {
+			var targetPos = shooter.Target.CurrentPosition;
 
 			var diff = Unit.Position - targetPos;
 
 			Unit.FaceTowards(Unit.Position + diff);
 		}
 
-		public void BeforeShotFired(Shooter shooter, IRangeTarget target) {
-			var targetPos = target.CurrentPosition;
+		public void BeforeShotFired(Shooter shooter) {
+			var targetPos = shooter.Target.CurrentPosition;
 
 			var diff = Unit.Position - targetPos;
 
@@ -158,20 +181,16 @@ namespace DefaultPackage
 
 		}
 
-		public Vector3 GetSourceOffset(IRangeTarget target) {
-
-
+		public Vector3 GetSourceOffset(Shooter forShooter) 
+		{
 			return Unit.Backward * 0.7f + new Vector3(0,0.7f,0);
 		}
-		public IEnumerable<Waypoint> GetWaypoints() {
-			throw new NotImplementedException();
-		}
 
-		public Vector3 GetCurrentPosition() {
+		public Vector3 GetCurrentPosition(MovingRangeTarget movingRangeTarget) {
 			return Unit.Position + new Vector3(0, 0.5f, 0);
 		}
 
-		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints()
+		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints(MovingRangeTarget movingRangeTarget)
 		{
 			return walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}

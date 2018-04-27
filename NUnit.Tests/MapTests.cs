@@ -146,33 +146,28 @@ namespace NUnit.Tests {
 		private Random rand;
 
 		[OneTimeSetUp]
-		public void TestSetup() {
-			ITile[] testTiles = new ITile[10 * 10];
-			for (int y = 0; y < 10; y++) {
-				for (int x = 0; x < 10; x++) {
-					testTiles[x + y * 10] = new HeightTestTile(new IntVector2(x, y), x);
-				}
-			}
+		public void TestSetup()
+		{
 
-			slopedInX10x10 = null; //Map.CreateTestMap(testTiles, new IntVector2(10, 10));
 
-			testTiles = new ITile[10 * 10];
-			for (int y = 0; y < 10; y++) {
-				for (int x = 0; x < 10; x++) {
-					testTiles[x + y * 10] = new HeightTestTile(new IntVector2(x, y), y);
-				}
-			}
+			slopedInX10x10 = Map.CreateDefaultMap(null, null, new IntVector2(10, 10));
+			slopedInX10x10.ChangeTileHeight(slopedInX10x10.GetTileByMapLocation(5, 5),
+											new IntVector2(12, 12),
+											(cHeight, x, y) => x);
 
-			slopedInY10x10 = null; //Map.CreateTestMap(testTiles, new IntVector2(10, 10));
+			
 
-			testTiles = new ITile[10 * 10];
-			for (int y = 0; y < 10; y++) {
-				for (int x = 0; x < 10; x++) {
-					testTiles[x + y * 10] = new HeightTestTile(new IntVector2(x, y), Math.Max(Math.Abs(y - 5), Math.Abs(x - 5)));
-				}
-			}
+			slopedInY10x10 = Map.CreateDefaultMap(null, new Node(), new IntVector2(10, 10));
+			slopedInY10x10.ChangeTileHeight(slopedInX10x10.GetTileByMapLocation(5, 5),
+											new IntVector2(12, 12),
+											(cHeight, x, y) => y);
 
-			cone10x10 = null; //Map.CreateTestMap(testTiles, new IntVector2(10, 10));
+
+			
+			cone10x10 = Map.CreateDefaultMap(null, new Node(), new IntVector2(10, 10));
+			cone10x10.ChangeTileHeight(slopedInX10x10.GetTileByMapLocation(5, 5),
+										new IntVector2(12, 12),
+										(cHeight, x, y) => Math.Max(Math.Abs(y - 5), Math.Abs(x - 5)));
 
 			rand = new Random();
 		}

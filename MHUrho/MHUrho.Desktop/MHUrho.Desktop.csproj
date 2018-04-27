@@ -103,6 +103,9 @@
     <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Textures\UV-Texture.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\EggMaterial.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\Test\ResourceDir\TEST2RP\xamarin.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

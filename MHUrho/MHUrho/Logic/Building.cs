@@ -156,11 +156,11 @@ namespace MHUrho.Logic
 																						 level,
 																						 Building.plugin);
 					preloadedComponents.Add(preloadedComponent);
-					Building.Node.AddComponent(preloadedComponent);
+					Building.AddComponent(preloadedComponent);
 				}
 			}
 
-			private static void AddRigidBody(Node node) {
+			static void AddRigidBody(Node node) {
 				var rigidBody = node.CreateComponent<RigidBody>();
 				rigidBody.CollisionLayer = (int)CollisionLayer.Building;
 				rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
@@ -169,7 +169,7 @@ namespace MHUrho.Logic
 				rigidBody.UseGravity = false;
 			}
 
-			private static StaticModel AddModel(Node node, BuildingType type) {
+			static StaticModel AddModel(Node node, BuildingType type) {
 				var model = type.Model.AddModel(node);
 				type.Material.ApplyMaterial(model);
 				model.CastShadows = false;
@@ -229,15 +229,18 @@ namespace MHUrho.Logic
 		}
 
 
-		public void Destroy() {
+		public void Kill() {
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);
 			}
 
 			Node.Remove();
+			Level.RemoveBuilding(this);
 		}
 
-		protected override void OnUpdate(float timeStep) {
+		protected override void OnUpdate(float timeStep)
+		{
+			base.OnUpdate(timeStep);
 			if (!EnabledEffective) return;
 
 			plugin.OnUpdate(timeStep);

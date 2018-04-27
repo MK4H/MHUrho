@@ -29,8 +29,9 @@ namespace DefaultPackage
 			return new EggProjectileInstance(level, projectile, this);
 		}
 
-		public override ProjectileInstancePluginBase GetInstanceForLoading() {
-			throw new NotImplementedException();
+		public override ProjectileInstancePluginBase GetInstanceForLoading()
+		{
+			return new EggProjectileInstance(this);
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
@@ -46,8 +47,13 @@ namespace DefaultPackage
 
 	public class EggProjectileInstance : ProjectileInstancePluginBase, BallisticProjectile.INotificationReceiver {
 
-		private BallisticProjectile flier;
-		private EggProjectileType myType;
+		BallisticProjectile flier;
+		readonly EggProjectileType myType;
+
+		public EggProjectileInstance(EggProjectileType myType)
+		{
+			this.myType = myType;
+		}
 
 		public EggProjectileInstance(ILevelManager level, Projectile projectile, EggProjectileType myType)
 			:base(level, projectile)
@@ -57,12 +63,15 @@ namespace DefaultPackage
 			projectile.AddComponent(flier);
 		}
 
-		public override void SaveState(PluginDataWrapper pluginData) {
-			throw new NotImplementedException();
+		public override void SaveState(PluginDataWrapper pluginData)
+		{
+			
 		}
 
 		public override void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData) {
-			throw new NotImplementedException();
+			this.Level = level;
+			this.projectile = projectile;
+			this.flier = projectile.GetDefaultComponent<BallisticProjectile>();
 		}
 
 		public override void ReInitialize(ILevelManager level) {

@@ -152,15 +152,15 @@ namespace DefaultPackage
 			orderArgs.Executed = false;
 		}
 
-		public Vector3 GetSourceOffset(IRangeTarget target) {
+		public Vector3 GetSourceOffset(Shooter shooter) {
 			return new Vector3(0, 1, 0);
 		}
 
-		public void OnTargetAcquired(Shooter shooter, RangeTargetComponent target) {
+		public void OnTargetAcquired(Shooter shooter) {
 
 		}
 
-		public void BeforeShotFired(Shooter shooter, IRangeTarget target) {
+		public void BeforeShotFired(Shooter shooter) {
 
 		}
 

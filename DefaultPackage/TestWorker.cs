@@ -85,16 +85,17 @@ namespace DefaultPackage
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
 			var diff = toTile.MapLocation - fromTile.MapLocation;
+			bool targetEmpty = toTile.Building == null;
 
 			if (diff.X == 0 || diff.Y == 0) {
-				return toTile.Building == null;
+				return targetEmpty;
 			}
 			else {
 				//Diagonal
 				var tile1 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(diff.X, 0));
 				var tile2 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(0, diff.Y));
 
-				return tile1.Building == null && tile2.Building == null;
+				return targetEmpty && (tile1.Building == null || tile2.Building == null);
 			}
 		}
 

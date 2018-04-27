@@ -149,8 +149,12 @@ namespace MHUrho.UnitComponents {
 			yield return new Waypoint(CurrentPosition, 0);
 		}
 
-		public override PluginData SaveState() {
-			throw new NotImplementedException();
+		public override PluginData SaveState()
+		{
+			var sequentialData = new SequentialPluginDataWriter();
+			sequentialData.StoreNext(InstanceID);
+			sequentialData.StoreNext(CurrentPosition);
+			return sequentialData.PluginData;
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
@@ -169,9 +173,9 @@ namespace MHUrho.UnitComponents {
 	public class MovingRangeTarget : RangeTargetComponent {
 		public interface INotificationReceiver {
 
-			IEnumerator<Waypoint> GetWaypoints();
+			IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget target);
 
-			Vector3 GetCurrentPosition();
+			Vector3 GetCurrentPosition(MovingRangeTarget target);
 
 		}
 
@@ -182,7 +186,7 @@ namespace MHUrho.UnitComponents {
 
 		public override bool Moving => true;
 
-		public override Vector3 CurrentPosition => notificationReceiver.GetCurrentPosition();
+		public override Vector3 CurrentPosition => notificationReceiver.GetCurrentPosition(this);
 
 		private INotificationReceiver notificationReceiver;
 
@@ -207,7 +211,7 @@ namespace MHUrho.UnitComponents {
 			return newTarget;
 		}
 
-		internal static RangeTargetComponent Load(LevelManager level, InstancePluginBase plugin, PluginData data) {
+		internal static RangeTargetComponent Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
 			var notificationReceiver = plugin as INotificationReceiver;
 			if (notificationReceiver == null) {
 				throw new
@@ -229,11 +233,14 @@ namespace MHUrho.UnitComponents {
 
 
 		public override IEnumerator<Waypoint> GetWaypoints() {
-			return notificationReceiver.GetWaypoints();
+			return notificationReceiver.GetWaypoints(this);
 		}
 
-		public override PluginData SaveState() {
-			throw new NotImplementedException();
+		public override PluginData SaveState()
+		{
+			var sequentialData = new SequentialPluginDataWriter();
+			sequentialData.StoreNext(InstanceID);
+			return sequentialData.PluginData;
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
@@ -256,7 +263,7 @@ namespace MHUrho.UnitComponents {
 
 		protected List<RangeTargetComponent.IShooter> shooters;
 
-		private LevelManager level;
+		LevelManager level;
 
 		protected MapRangeTarget(LevelManager level, Vector3 position) {
 			this.level = level;

@@ -53,25 +53,25 @@ namespace MHUrho.Logic
 			}
 		}
 
-		public int ID { get; private set; }
+		public int ID { get; }
 
-		private readonly List<IPlayer> friends;
+		readonly HashSet<IPlayer> friends;
 
 		//TODO: Split units and buildings by types
-		private readonly Dictionary<UnitType,List<Unit>> units;
+		readonly Dictionary<UnitType,List<Unit>> units;
 
-		private readonly Dictionary<BuildingType, List<Building>> buildings;
+		readonly Dictionary<BuildingType, List<Building>> buildings;
 
-		private readonly Dictionary<ResourceType, int> resources;
+		readonly Dictionary<ResourceType, int> resources;
 
-		private ILevelManager level;
+		ILevelManager level;
 
 		public Player(ILevelManager level, int ID) {
 			this.ID = ID;
 			units = new Dictionary<UnitType, List<Unit>>();
 			buildings = new Dictionary<BuildingType, List<Building>>();
 			resources = new Dictionary<ResourceType, int>();
-			friends = new List<IPlayer>();
+			friends = new HashSet<IPlayer>();
 			this.level = level;
 		}
 
@@ -155,13 +155,36 @@ namespace MHUrho.Logic
 
 		public IEnumerable<IPlayer> GetEnemyPlayers() {
 			return from player in level.Players
-				   where player != this && !friends.Contains(player)
+				   where IsEnemy(player)
 				   select player;
 
 		}
 
+
+		public bool IsFriend(IPlayer player)
+		{
+			return friends.Contains(player);
+		}
+
+		public bool IsEnemy(IPlayer player)
+		{
+			return player != this && !IsFriend(player);
+		}
+
+		public override int GetHashCode() {
+			return ID;
+		}
+
+		public override bool Equals(object obj) {
+			if (obj == null || GetType() != obj.GetType())
+				return false;
+
+			Player p = (Player)obj;
+			return p.ID == ID;
+		}
+
 		//protected override void OnUpdate(float timeStep) {
-			
+
 		//}
 	}
 }

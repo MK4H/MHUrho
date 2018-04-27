@@ -151,8 +151,8 @@ namespace MHUrho.WorldMap {
 											target,
 											canPassTo,
 											getMovementSpeed);
-
-			return MakePath(source, targetNode, getMovementSpeed);
+			//If path was not found, return null
+			return targetNode == null ? null : MakePath(source, targetNode, getMovementSpeed);
 
 		}
 
@@ -164,8 +164,8 @@ namespace MHUrho.WorldMap {
 											target,
 											canPassTo,
 											getMovementSpeed);
-
-			return MakeTileList(targetNode);
+			//If path was not found, return null
+			return targetNode == null ? null : MakeTileList(targetNode);
 		}
 
 		private Node FindPathInNodes(Vector2 source,

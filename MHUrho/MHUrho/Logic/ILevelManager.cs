@@ -34,6 +34,12 @@ namespace MHUrho.Logic {
 
 		Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement);
 
+		bool RemoveUnit(Unit unit);
+
+		bool RemoveBuilding(Building building);
+
+		bool RemoveProjectile(Projectile projectile);
+
 		Unit GetUnit(int ID);
 
 		Building GetBuilding(int ID);

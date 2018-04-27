@@ -18,5 +18,9 @@ namespace MHUrho.Logic {
 		int GetResourcesOfType(ResourceType type);
 
 		IEnumerable<IPlayer> GetEnemyPlayers();
+
+		bool IsFriend(IPlayer player);
+
+		bool IsEnemy(IPlayer player);
 	}
 }

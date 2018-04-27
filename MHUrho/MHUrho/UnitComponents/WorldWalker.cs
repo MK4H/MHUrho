@@ -73,7 +73,7 @@ namespace MHUrho.UnitComponents
 			Enabled = false;
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path, ITile target) {
+		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path) {
 
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
@@ -94,14 +94,11 @@ namespace MHUrho.UnitComponents
 			var indexedData = new IndexedPluginDataReader(data);
 			var activated = indexedData.Get<bool>(1);
 			Path path = null;
-			ITile target = null;
 			if (activated) {
-				path = indexedData.Get<Path>(2);
-				target = level.Map.GetTileByMapLocation(indexedData.Get<IntVector2>(3));
-				
+				path = indexedData.Get<Path>(2);				
 			}
 
-			return new WorldWalker(notificationReceiver, level, activated, path, target);
+			return new WorldWalker(notificationReceiver, level, activated, path);
 		}
 
 		internal override void ConnectReferences(ILevelManager level) {
@@ -189,9 +186,9 @@ namespace MHUrho.UnitComponents
 
 
 
-		protected override void OnUpdate(float timeStep) {
+		protected override void OnUpdate(float timeStep)
+		{
 			base.OnUpdate(timeStep);
-
 			if (!EnabledEffective) return;
 			Debug.Assert(path != null, "Target was null with scene updates enabled");
 

@@ -94,6 +94,7 @@ namespace MHUrho.Logic
 			foreach (var unit in storedLevel.Units) {
 				var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
 				level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
+				level.entities.Add(unitLoader.Unit.ID, unitLoader.Unit);
 				loaders.Add(unitLoader);
 			}
 
@@ -105,6 +106,7 @@ namespace MHUrho.Logic
 												 building);
 
 				level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building);
+				level.entities.Add(buildingLoader.Building.ID, buildingLoader.Building);
 				loaders.Add(buildingLoader);
 
 			}
@@ -230,8 +232,8 @@ namespace MHUrho.Logic
 			inputController.Dispose();
 			inputController = null;
 			Map.Dispose();
-			Scene.RemoveAllChildren();
-			Scene.Dispose();
+			Scene.Clear();
+			
 			CurrentLevel = null;
 		}
 
@@ -322,7 +324,31 @@ namespace MHUrho.Logic
 			return newProjectile;
 
 		}
-	
+
+
+		public bool RemoveUnit(Unit unit)
+		{
+			if (!unit.IsDeleted) {
+				unit.Kill();
+			}
+			return units.Remove(unit.ID) && entities.Remove(unit.ID);
+		}
+
+		public bool RemoveBuilding(Building building)
+		{
+			if (!building.IsDeleted) {
+				building.Kill();
+			}
+			return buildings.Remove(building.ID) && entities.Remove(building.ID);
+		}
+
+		public bool RemoveProjectile(Projectile projectile)
+		{
+			if (projectile.Enabled) {
+				projectile.Despawn();
+			}
+			return projectiles.Remove(projectile.ID) && entities.Remove(projectile.ID);
+		}
 
 		public Unit GetUnit(int ID) {
 			if (!units.TryGetValue(ID, out Unit value)) {
@@ -391,7 +417,7 @@ namespace MHUrho.Logic
 			Update?.Invoke(timeStep);
 		}
 
-		private static async void LoadSceneParts(MyGame game, Scene scene) {
+		static async void LoadSceneParts(MyGame game, Scene scene) {
 			// Box	
 			Node boxNode = scene.CreateChild(name: "Box node");
 			boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
@@ -432,7 +458,7 @@ namespace MHUrho.Logic
 
 		}
 
-		private static CameraController LoadCamera(MyGame game, Scene scene) {
+		static CameraController LoadCamera(MyGame game, Scene scene) {
 			// Camera
 
 			CameraController cameraController = CameraController.GetCameraController(scene);
@@ -445,8 +471,8 @@ namespace MHUrho.Logic
 			return cameraController;
 		}
 
-		private const int MaxTries = 10000000;
-		private int GetNewID<T>(IDictionary<int, T> dictionary) {
+		const int MaxTries = 10000000;
+		int GetNewID<T>(IDictionary<int, T> dictionary) {
 			int id, i = 0;
 			while (dictionary.ContainsKey(id = rng.Next())) {
 				i++;
