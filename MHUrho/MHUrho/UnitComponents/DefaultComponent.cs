@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
+using MHUrho.Plugins;
 using Urho;
 using MHUrho.Storage;
 
@@ -33,8 +34,6 @@ namespace MHUrho.UnitComponents
 		public abstract DefaultComponents ComponentTypeID{ get; }
 
 		public abstract string ComponentTypeName { get; }
-
-		internal abstract void ConnectReferences(ILevelManager level);
 
 		public abstract PluginData SaveState();
 

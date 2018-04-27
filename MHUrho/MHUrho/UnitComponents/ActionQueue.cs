@@ -13,13 +13,45 @@ namespace MHUrho.UnitComponents
 
 	public class ActionQueue : DefaultComponent {
 
-		public interface INotificationReciver {
+		internal class Loader : DefaultComponentLoader {
+
+			public override DefaultComponent Component => ActionQueue;
+
+			public ActionQueue ActionQueue { get; private set; }
+
+			public Loader() {
+
+			}
+
+			public static PluginData SaveState(ActionQueue actionQueue) {
+				throw new NotImplementedException();
+			}
+
+			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override void ConnectReferences(LevelManager level) {
+
+			}
+
+			public override void FinishLoading() {
+
+			}
+
+			public override DefaultComponentLoader Clone() {
+				return new Loader();
+			}
+		}
+
+		public interface INotificationReceiver {
 			void OnWorkTaskStarted(ActionQueue queue, WorkTask workTask);
 
 			void OnWorkTaskFinished(ActionQueue queue, WorkTask workTask);
 		}
 
-		private interface IWorkTask {
+		interface IWorkTask {
 			bool IsFinished();
 			void OnUpdate(float timeStep);            
 		}
@@ -92,10 +124,10 @@ namespace MHUrho.UnitComponents
 
 		private readonly Queue<IWorkTask> workQueue;
 
-		private INotificationReciver notificationReciver;
+		private INotificationReceiver notificationReceiver;
 
 		public ActionQueue CreateNew<T>(T instancePlugin)
-			where T : InstancePluginBase, INotificationReciver {
+			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
@@ -104,21 +136,14 @@ namespace MHUrho.UnitComponents
 			return new ActionQueue(instancePlugin);
 		}
 
-		protected ActionQueue(INotificationReciver notificationReciver) {
-			this.notificationReciver = notificationReciver;
+		protected ActionQueue(INotificationReceiver notificationReceiver) {
+			this.notificationReceiver = notificationReceiver;
 			workQueue = new Queue<IWorkTask>();
 		}
 
-		internal static ActionQueue Load(ILevelManager level, InstancePluginBase plugin, PluginData pluginData) {
-			throw new NotImplementedException();
-		}
-
-		internal override void ConnectReferences(ILevelManager level) {
-			//NOTHING
-		}
-
-		public override PluginData SaveState() {
-			throw new NotImplementedException();
+		public override PluginData SaveState()
+		{
+			return Loader.SaveState(this);
 		}
 
 		public void EnqueueTask(WorkTask task) {
@@ -128,8 +153,8 @@ namespace MHUrho.UnitComponents
 		public override void OnAttachedToNode(Node node) {
 			base.OnAttachedToNode(node);
 
-			OnTaskStarted += notificationReciver.OnWorkTaskStarted;
-			OnTaskFinished += notificationReciver.OnWorkTaskFinished;
+			OnTaskStarted += notificationReceiver.OnWorkTaskStarted;
+			OnTaskFinished += notificationReceiver.OnWorkTaskFinished;
 		}
 
 		protected override void OnUpdate(float timeStep) {

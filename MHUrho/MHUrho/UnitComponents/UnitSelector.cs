@@ -19,6 +19,45 @@ namespace MHUrho.UnitComponents
 
 	public class UnitSelector : Selector {
 
+		internal class Loader : DefaultComponentLoader {
+
+			public override DefaultComponent Component => UnitSelector;
+
+			public UnitSelector UnitSelector { get; private set; }
+
+			public Loader() {
+
+			}
+
+			public static PluginData SaveState(UnitSelector unitSelector) {
+				var sequentialData = new SequentialPluginDataWriter();
+				return sequentialData.PluginData;
+			}
+
+			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData) {
+				var notificationReceiver = plugin as INotificationReceiver;
+				if (notificationReceiver == null) {
+					throw new
+						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+				}
+
+				UnitSelector = new UnitSelector(notificationReceiver, level);
+
+			}
+
+			public override void ConnectReferences(LevelManager level) {
+
+			}
+
+			public override void FinishLoading() {
+
+			}
+
+			public override DefaultComponentLoader Clone() {
+				return new Loader();
+			}
+		}
+
 		public interface INotificationReceiver {
 			void OnUnitSelected(UnitSelector selector);
 
@@ -74,21 +113,6 @@ namespace MHUrho.UnitComponents
 			return new UnitSelector(instancePlugin, level);
 		}
 
-		internal static UnitSelector Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
-			var notificationReceiver = plugin as INotificationReceiver;
-			if (notificationReceiver == null) {
-				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-			}
-
-			var sequentialData = new SequentialPluginDataReader(data);
-			return new UnitSelector(notificationReceiver, level);
-		}
-
-		internal override void ConnectReferences(ILevelManager level) {
-			//NOTHING
-		}
-
 		/// <summary>
 		/// Orders this selected unit with target <paramref name="targetTile"/>
 		/// 
@@ -128,9 +152,9 @@ namespace MHUrho.UnitComponents
 
 		//TODO: Hook up a reaction to unit death to deselect it from all tools
 
-		public override PluginData SaveState() {
-			var sequentialData = new SequentialPluginDataWriter();
-			return sequentialData.PluginData;
+		public override PluginData SaveState()
+		{
+			return Loader.SaveState(this);
 		}
 
 		public override void OnAttachedToNode(Node node) {

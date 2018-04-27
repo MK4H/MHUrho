@@ -12,6 +12,57 @@ namespace MHUrho.UnitComponents
 {
 	public class BallisticProjectile : DefaultComponent
 	{
+		internal class Loader : DefaultComponentLoader {
+
+			public override DefaultComponent Component => BallisticProjectile;
+
+			public BallisticProjectile BallisticProjectile { get; private set; }
+
+			public Loader() {
+
+			}
+
+			public static PluginData SaveState(BallisticProjectile ballisticProjectile) {
+				var sequentialData = new SequentialPluginDataWriter();
+				sequentialData.StoreNext(ballisticProjectile.Movement);
+				sequentialData.StoreNext(ballisticProjectile.Enabled);
+				return sequentialData.PluginData;
+			}
+
+			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData) {
+				var notificationReceiver = plugin as INotificationReceiver;
+				if (notificationReceiver == null) {
+					throw new
+						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+				}
+
+				var sequentialData = new SequentialPluginDataReader(storedData);
+				var movement = sequentialData.GetCurrent<Vector3>();
+				sequentialData.MoveNext();
+				var enabled = sequentialData.GetCurrent<bool>();
+				sequentialData.MoveNext();
+
+				BallisticProjectile = new BallisticProjectile(notificationReceiver,
+															level,
+															movement,
+															enabled);
+
+			}
+
+			public override void ConnectReferences(LevelManager level) {
+
+			}
+
+			public override void FinishLoading() {
+
+			}
+
+			public override DefaultComponentLoader Clone() {
+				return new Loader();
+			}
+		}
+
+
 		public interface INotificationReceiver {
 
 			void OnMovementStarted(BallisticProjectile flier);
@@ -60,30 +111,6 @@ namespace MHUrho.UnitComponents
 			}
 
 			return new BallisticProjectile(instancePlugin, level);
-		}
-
-		internal static BallisticProjectile Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
-
-			var notificationReceiver = plugin as INotificationReceiver;
-			if (notificationReceiver == null) {
-				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-			}
-
-			var sequentialData = new SequentialPluginDataReader(data);
-			var movement = sequentialData.GetCurrent<Vector3>();
-			sequentialData.MoveNext();
-			var enabled = sequentialData.GetCurrent<bool>();
-			sequentialData.MoveNext();
-
-			return new BallisticProjectile(notificationReceiver,
-									  level,
-									  movement,
-									  enabled);
-		}
-
-		internal override void ConnectReferences(ILevelManager level) {
-			//NOTHING
 		}
 
 		/// <summary>
@@ -311,11 +338,9 @@ namespace MHUrho.UnitComponents
 			Movement = initialMovement;
 		}
 
-		public override PluginData SaveState() {
-			var sequentialData = new SequentialPluginDataWriter();
-			sequentialData.StoreNext(Movement);
-			sequentialData.StoreNext(Enabled);
-			return sequentialData.PluginData;
+		public override PluginData SaveState()
+		{
+			return Loader.SaveState(this);
 		}
 
 		protected override void OnUpdate(float timeStep) {

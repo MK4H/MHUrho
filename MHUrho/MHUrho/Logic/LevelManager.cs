@@ -407,6 +407,11 @@ namespace MHUrho.Logic
 			return newID;
 		}
 
+		internal void LoadRangeTarget(IRangeTarget rangeTarget)
+		{
+			rangeTargets.Add(rangeTarget.InstanceID, rangeTarget);
+		}
+
 		public bool UnRegisterRangeTarget(int ID) {
 			return rangeTargets.Remove(ID);
 		}
@@ -474,7 +479,7 @@ namespace MHUrho.Logic
 		const int MaxTries = 10000000;
 		int GetNewID<T>(IDictionary<int, T> dictionary) {
 			int id, i = 0;
-			while (dictionary.ContainsKey(id = rng.Next())) {
+			while (dictionary.ContainsKey(id = rng.Next()) && id == 0) {
 				i++;
 				if (i > MaxTries) {
 					//TODO: Exception

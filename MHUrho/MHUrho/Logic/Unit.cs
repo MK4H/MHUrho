@@ -26,7 +26,7 @@ namespace MHUrho.Logic
 		   
 			public Unit Unit;
 
-			List<DefaultComponent> preloadedComponents;
+			List<DefaultComponentLoader> componentLoaders;
 
 			/// <summary>
 			/// Holds the image of this unit between the steps of loading
@@ -37,7 +37,7 @@ namespace MHUrho.Logic
 
 			protected Loader(StUnit storedUnit) {
 				this.storedUnit = storedUnit;
-				this.preloadedComponents = new List<DefaultComponent>();
+				this.componentLoaders = new List<DefaultComponentLoader>();
 			}
 
 			/// <summary>
@@ -136,13 +136,14 @@ namespace MHUrho.Logic
 				Unit.Plugin = type.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedUnit.DefaultComponentData) {
-					var preloadedComponent =
-						level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
-																	defaultComponent.Value,
-																	level,
-																	Unit.Plugin);
-					preloadedComponents.Add(preloadedComponent);
-					Unit.AddComponent(preloadedComponent);
+					var componentLoader =
+						level.DefaultComponentFactory
+							.StartLoadingComponent(defaultComponent.Key,
+													defaultComponent.Value,
+													level,
+													Unit.Plugin);
+					componentLoaders.Add(componentLoader);
+					Unit.AddComponent(componentLoader.Component);
 				}
 			}
 
@@ -154,18 +155,20 @@ namespace MHUrho.Logic
 				Unit.Tile = level.Map.GetContainingTile(Unit.Position);
 				//TODO: Connect other things
 
-				foreach (var preloadedComponent in preloadedComponents) {
-					preloadedComponent.ConnectReferences(level);
+				foreach (var componentLoader in componentLoaders) {
+					componentLoader.ConnectReferences(level);
 				}
 
 				Unit.Plugin.LoadState(level, Unit, new PluginDataWrapper(storedUnit.UserPlugin));
 			}
 
 			public void FinishLoading() {
-
+				foreach (var componentLoader in componentLoaders) {
+					componentLoader.FinishLoading();
+				}
 			}
 
-			private static Node CreateBasicNodeStructure(Node legNode, UnitType type) {
+			static Node CreateBasicNodeStructure(Node legNode, UnitType type) {
 				var centerNode = legNode.CreateChild("UnitCenter");
 
 				AddRigidBody(centerNode);
@@ -181,7 +184,7 @@ namespace MHUrho.Logic
 				return centerNode;
 			}
 
-			private static void AddRigidBody(Node node) {
+			static void AddRigidBody(Node node) {
 				var rigidBody = node.CreateComponent<RigidBody>();
 				rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
 				rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
@@ -190,14 +193,14 @@ namespace MHUrho.Logic
 				rigidBody.UseGravity = false;
 			}
 
-			private static StaticModel AddModel(Node node, UnitType type) {
+			static StaticModel AddModel(Node node, UnitType type) {
 				var animatedModel = type.Model.AddModel(node);
 				type.Material.ApplyMaterial(animatedModel);
 				animatedModel.CastShadows = false;
 				return animatedModel;
 			}
 
-			private static void AddAnimationController(Node node) {
+			static void AddAnimationController(Node node) {
 				var animationController = node.CreateComponent<AnimationController>();
 			}
 

@@ -9,14 +9,13 @@ namespace MHUrho.UnitComponents
 {
 	public class DefaultComponentFactory
 	{
-		public delegate DefaultComponent LoadComponentDelegate(ILevelManager level, InstancePluginBase unitPlugin, PluginData storedData);
+		
+		readonly Dictionary<DefaultComponents, DefaultComponentLoader> loaders;
 
-		private readonly Dictionary<DefaultComponents, LoadComponentDelegate> loaders;
-
-		private readonly Dictionary<string, DefaultComponents> nameToID;
+		readonly Dictionary<string, DefaultComponents> nameToID;
 
 		public DefaultComponentFactory() {
-			loaders = new Dictionary<DefaultComponents, LoadComponentDelegate>();
+			loaders = new Dictionary<DefaultComponents, DefaultComponentLoader>();
 			nameToID = new Dictionary<string, DefaultComponents>();
 
 			AddLoaders(loaders);
@@ -28,27 +27,30 @@ namespace MHUrho.UnitComponents
 
 		}
 
-		public DefaultComponent LoadComponent(string name, PluginData storedComponent, ILevelManager level, InstancePluginBase plugin) {
-			return LoadComponent(nameToID[name], storedComponent, level, plugin);
+		internal DefaultComponentLoader StartLoadingComponent(string name, PluginData storedComponent, LevelManager level, InstancePluginBase plugin) {
+			return StartLoadingComponent(nameToID[name], storedComponent, level, plugin);
 		}
 
-		public DefaultComponent LoadComponent(int ID, PluginData storedComponent, ILevelManager level, InstancePluginBase plugin) {
-			return LoadComponent((DefaultComponents) ID, storedComponent, level, plugin);
+		internal DefaultComponentLoader StartLoadingComponent(int ID, PluginData storedComponent, LevelManager level, InstancePluginBase plugin) {
+			return StartLoadingComponent((DefaultComponents) ID, storedComponent, level, plugin);
 		}
 
-		public DefaultComponent LoadComponent(DefaultComponents ID, PluginData storedComponent, ILevelManager level, InstancePluginBase plugin ) {
-			return loaders[ID].Invoke(level, plugin, storedComponent);
+		internal DefaultComponentLoader StartLoadingComponent(DefaultComponents ID, PluginData storedComponent, LevelManager level, InstancePluginBase plugin )
+		{
+			DefaultComponentLoader loader = loaders[ID].Clone();
+			loader.StartLoading(level, plugin, storedComponent);
+			return loader;
 		}
 
-		void AddLoaders(IDictionary<DefaultComponents, LoadComponentDelegate> loaders) {
+		void AddLoaders(IDictionary<DefaultComponents, DefaultComponentLoader> loaders) {
 			//TODO: Maybe reflection
-			loaders.Add(UnitSelector.ComponentID, UnitSelector.Load);
-			loaders.Add(WorldWalker.ComponentID, WorldWalker.Load);
-			loaders.Add(Shooter.ComponentID, Shooter.Load);
-			loaders.Add(ActionQueue.ComponentID, ActionQueue.Load);
-			loaders.Add(BallisticProjectile.ComponentID, BallisticProjectile.Load);
-			loaders.Add(StaticRangeTarget.ComponentID, StaticRangeTarget.Load);
-			loaders.Add(MovingRangeTarget.ComponentID, MovingRangeTarget.Load);
+			loaders.Add(UnitSelector.ComponentID, new UnitSelector.Loader());
+			loaders.Add(WorldWalker.ComponentID, new WorldWalker.Loader());
+			loaders.Add(Shooter.ComponentID, new Shooter.Loader());
+			loaders.Add(ActionQueue.ComponentID, new ActionQueue.Loader());
+			loaders.Add(BallisticProjectile.ComponentID, new BallisticProjectile.Loader());
+			loaders.Add(StaticRangeTarget.ComponentID, new StaticRangeTarget.Loader());
+			loaders.Add(MovingRangeTarget.ComponentID, new MovingRangeTarget.Loader());
 
 			//TODO: Add other components
 		}

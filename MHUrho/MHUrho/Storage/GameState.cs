@@ -37,42 +37,50 @@ namespace MHUrho.Storage {
             "KAUSNQoPdG9wTGVmdFBvc2l0aW9uGAIgASgLMhwuTUhVcmhvLlN0b3JhZ2Uu",
             "U3RJbnRWZWN0b3IyEhUKDXRvcExlZnRIZWlnaHQYAyABKAISFgoOdG9wUmln",
             "aHRIZWlnaHQYBCABKAISFQoNYm90TGVmdEhlaWdodBgFIAEoAhIWCg5ib3RS",
-            "aWdodEhlaWdodBgGIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgHIAEoCCLSAgoG",
-            "U3RVbml0EgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIrCghwb3NpdGlv",
-            "bhgDIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMxIQCghwbGF5ZXJJ",
-            "RBgEIAEoBRIUCgx0YXJnZXRVbml0SUQYBSABKAUSLgoKdXNlclBsdWdpbhgG",
-            "IAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGESTgoUZGVmYXVsdENv",
-            "bXBvbmVudERhdGEYByADKAsyMC5NSFVyaG8uU3RvcmFnZS5TdFVuaXQuRGVm",
-            "YXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0",
-            "YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5T",
-            "dG9yYWdlLlBsdWdpbkRhdGE6AjgBIpkBCgxTdFByb2plY3RpbGUSCgoCaWQY",
-            "ASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEi4KCnVz",
-            "ZXJQbHVnaW4YBSABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhIscC",
-            "CgpTdEJ1aWxkaW5nEgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIuCghs",
-            "b2NhdGlvbhgDIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIQ",
-            "CghwbGF5ZXJJRBgEIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhv",
-            "LlN0b3JhZ2UuUGx1Z2luRGF0YRJSChRkZWZhdWx0Q29tcG9uZW50RGF0YRgH",
-            "IAMoCzI0Lk1IVXJoby5TdG9yYWdlLlN0QnVpbGRpbmcuRGVmYXVsdENvbXBv",
-            "bmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsK",
-            "A2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBs",
-            "dWdpbkRhdGE6AjgBIlsKCFN0UGxheWVyEhAKCHBsYXllcklEGAEgASgFEg8K",
-            "B3VuaXRJRHMYAiADKAUSEwoLYnVpbGRpbmdJRHMYAyADKAUSFwoPZnJpZW5k",
-            "UGxheWVySURzGAQgAygFIo0BCgVTdE1hcBIqCgRzaXplGAEgASgLMhwuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEiUKBXRpbGVzGAIgAygLMhYuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RUaWxlEjEKC2JvcmRlclRpbGVzGAMgAygLMhwuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RCb3JkZXJUaWxlYgZwcm90bzM="));
+            "aWdodEhlaWdodBgGIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgHIAEoCCJOCgtT",
+            "dE1hcFRhcmdldBISCgppbnN0YW5jZUlEGAEgASgFEisKCHBvc2l0aW9uGAIg",
+            "ASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzItICCgZTdFVuaXQSCgoC",
+            "aWQYASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhku",
+            "TUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEhQK",
+            "DHRhcmdldFVuaXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhV",
+            "cmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0",
+            "YRgHIAMoCzIwLk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9u",
+            "ZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoD",
+            "a2V5GAEgASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1",
+            "Z2luRGF0YToCOAEiyAIKDFN0UHJvamVjdGlsZRIKCgJpZBgBIAEoBRIOCgZ0",
+            "eXBlSUQYAiABKAUSKwoIcG9zaXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFn",
+            "ZS5TdFZlY3RvcjMSEAoIcGxheWVySUQYBCABKAUSLgoKdXNlclBsdWdpbhgF",
+            "IAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGESVAoUZGVmYXVsdENv",
+            "bXBvbmVudERhdGEYBiADKAsyNi5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3Rp",
+            "bGUuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9u",
+            "ZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1I",
+            "VXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIscCCgpTdEJ1aWxkaW5nEgoK",
+            "AmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIuCghsb2NhdGlvbhgDIAEoCzIc",
+            "Lk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIQCghwbGF5ZXJJRBgEIAEo",
+            "BRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2lu",
+            "RGF0YRJSChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzI0Lk1IVXJoby5T",
+            "dG9yYWdlLlN0QnVpbGRpbmcuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpX",
+            "ChlEZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2",
+            "YWx1ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIlsK",
+            "CFN0UGxheWVyEhAKCHBsYXllcklEGAEgASgFEg8KB3VuaXRJRHMYAiADKAUS",
+            "EwoLYnVpbGRpbmdJRHMYAyADKAUSFwoPZnJpZW5kUGxheWVySURzGAQgAygF",
+            "IsMBCgVTdE1hcBIqCgRzaXplGAEgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJ",
+            "bnRWZWN0b3IyEiUKBXRpbGVzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2UuU3RU",
+            "aWxlEjEKC2JvcmRlclRpbGVzGAMgAygLMhwuTUhVcmhvLlN0b3JhZ2UuU3RC",
+            "b3JkZXJUaWxlEjQKD21hcFJhbmdlVGFyZ2V0cxgEIAMoCzIbLk1IVXJoby5T",
+            "dG9yYWdlLlN0TWFwVGFyZ2V0YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Buildings", "Players", "Projectiles", "GameSpeed", "PackageName" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "TopLeftPosition", "Height", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMapTarget), global::MHUrho.Storage.StMapTarget.Parser, new[]{ "InstanceID", "Position" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "UserPlugin" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "PlayerID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles", "MapRangeTargets" }, null, null, null)
           }));
     }
     #endregion
@@ -885,6 +893,157 @@ namespace MHUrho.Storage {
 
   }
 
+  public sealed partial class StMapTarget : pb::IMessage<StMapTarget> {
+    private static readonly pb::MessageParser<StMapTarget> _parser = new pb::MessageParser<StMapTarget>(() => new StMapTarget());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StMapTarget> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMapTarget() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMapTarget(StMapTarget other) : this() {
+      instanceID_ = other.instanceID_;
+      Position = other.position_ != null ? other.Position.Clone() : null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMapTarget Clone() {
+      return new StMapTarget(this);
+    }
+
+    /// <summary>Field number for the "instanceID" field.</summary>
+    public const int InstanceIDFieldNumber = 1;
+    private int instanceID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int InstanceID {
+      get { return instanceID_; }
+      set {
+        instanceID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "position" field.</summary>
+    public const int PositionFieldNumber = 2;
+    private global::MHUrho.Storage.StVector3 position_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Position {
+      get { return position_; }
+      set {
+        position_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StMapTarget);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StMapTarget other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (InstanceID != other.InstanceID) return false;
+      if (!object.Equals(Position, other.Position)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (InstanceID != 0) hash ^= InstanceID.GetHashCode();
+      if (position_ != null) hash ^= Position.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (InstanceID != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(InstanceID);
+      }
+      if (position_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Position);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (InstanceID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(InstanceID);
+      }
+      if (position_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StMapTarget other) {
+      if (other == null) {
+        return;
+      }
+      if (other.InstanceID != 0) {
+        InstanceID = other.InstanceID;
+      }
+      if (other.position_ != null) {
+        if (position_ == null) {
+          position_ = new global::MHUrho.Storage.StVector3();
+        }
+        Position.MergeFrom(other.Position);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            InstanceID = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            if (position_ == null) {
+              position_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(position_);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class StUnit : pb::IMessage<StUnit> {
     private static readonly pb::MessageParser<StUnit> _parser = new pb::MessageParser<StUnit>(() => new StUnit());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -892,7 +1051,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[3]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1181,7 +1340,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[4]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1203,6 +1362,7 @@ namespace MHUrho.Storage {
       Position = other.position_ != null ? other.Position.Clone() : null;
       playerID_ = other.playerID_;
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
+      defaultComponentData_ = other.defaultComponentData_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1265,6 +1425,16 @@ namespace MHUrho.Storage {
       }
     }
 
+    /// <summary>Field number for the "defaultComponentData" field.</summary>
+    public const int DefaultComponentDataFieldNumber = 6;
+    private static readonly pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec _map_defaultComponentData_codec
+        = new pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec(pb::FieldCodec.ForInt32(8), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.PluginData.Parser), 50);
+    private readonly pbc::MapField<int, global::MHUrho.Storage.PluginData> defaultComponentData_ = new pbc::MapField<int, global::MHUrho.Storage.PluginData>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::MapField<int, global::MHUrho.Storage.PluginData> DefaultComponentData {
+      get { return defaultComponentData_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as StProjectile);
@@ -1283,6 +1453,7 @@ namespace MHUrho.Storage {
       if (!object.Equals(Position, other.Position)) return false;
       if (PlayerID != other.PlayerID) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
+      if (!DefaultComponentData.Equals(other.DefaultComponentData)) return false;
       return true;
     }
 
@@ -1294,6 +1465,7 @@ namespace MHUrho.Storage {
       if (position_ != null) hash ^= Position.GetHashCode();
       if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
+      hash ^= DefaultComponentData.GetHashCode();
       return hash;
     }
 
@@ -1324,6 +1496,7 @@ namespace MHUrho.Storage {
         output.WriteRawTag(42);
         output.WriteMessage(UserPlugin);
       }
+      defaultComponentData_.WriteTo(output, _map_defaultComponentData_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1344,6 +1517,7 @@ namespace MHUrho.Storage {
       if (userPlugin_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
       }
+      size += defaultComponentData_.CalculateSize(_map_defaultComponentData_codec);
       return size;
     }
 
@@ -1373,6 +1547,7 @@ namespace MHUrho.Storage {
         }
         UserPlugin.MergeFrom(other.UserPlugin);
       }
+      defaultComponentData_.Add(other.defaultComponentData_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1409,6 +1584,10 @@ namespace MHUrho.Storage {
             input.ReadMessage(userPlugin_);
             break;
           }
+          case 50: {
+            defaultComponentData_.AddEntriesFrom(input, _map_defaultComponentData_codec);
+            break;
+          }
         }
       }
     }
@@ -1422,7 +1601,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[5]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1683,7 +1862,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[6]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1866,7 +2045,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[7]; }
+      get { return global::MHUrho.Storage.GameStateReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1886,6 +2065,7 @@ namespace MHUrho.Storage {
       Size = other.size_ != null ? other.Size.Clone() : null;
       tiles_ = other.tiles_.Clone();
       borderTiles_ = other.borderTiles_.Clone();
+      mapRangeTargets_ = other.mapRangeTargets_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1924,6 +2104,16 @@ namespace MHUrho.Storage {
       get { return borderTiles_; }
     }
 
+    /// <summary>Field number for the "mapRangeTargets" field.</summary>
+    public const int MapRangeTargetsFieldNumber = 4;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StMapTarget> _repeated_mapRangeTargets_codec
+        = pb::FieldCodec.ForMessage(34, global::MHUrho.Storage.StMapTarget.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StMapTarget> mapRangeTargets_ = new pbc::RepeatedField<global::MHUrho.Storage.StMapTarget>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::MHUrho.Storage.StMapTarget> MapRangeTargets {
+      get { return mapRangeTargets_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as StMap);
@@ -1940,6 +2130,7 @@ namespace MHUrho.Storage {
       if (!object.Equals(Size, other.Size)) return false;
       if(!tiles_.Equals(other.tiles_)) return false;
       if(!borderTiles_.Equals(other.borderTiles_)) return false;
+      if(!mapRangeTargets_.Equals(other.mapRangeTargets_)) return false;
       return true;
     }
 
@@ -1949,6 +2140,7 @@ namespace MHUrho.Storage {
       if (size_ != null) hash ^= Size.GetHashCode();
       hash ^= tiles_.GetHashCode();
       hash ^= borderTiles_.GetHashCode();
+      hash ^= mapRangeTargets_.GetHashCode();
       return hash;
     }
 
@@ -1965,6 +2157,7 @@ namespace MHUrho.Storage {
       }
       tiles_.WriteTo(output, _repeated_tiles_codec);
       borderTiles_.WriteTo(output, _repeated_borderTiles_codec);
+      mapRangeTargets_.WriteTo(output, _repeated_mapRangeTargets_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1975,6 +2168,7 @@ namespace MHUrho.Storage {
       }
       size += tiles_.CalculateSize(_repeated_tiles_codec);
       size += borderTiles_.CalculateSize(_repeated_borderTiles_codec);
+      size += mapRangeTargets_.CalculateSize(_repeated_mapRangeTargets_codec);
       return size;
     }
 
@@ -1991,6 +2185,7 @@ namespace MHUrho.Storage {
       }
       tiles_.Add(other.tiles_);
       borderTiles_.Add(other.borderTiles_);
+      mapRangeTargets_.Add(other.mapRangeTargets_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2014,6 +2209,10 @@ namespace MHUrho.Storage {
           }
           case 26: {
             borderTiles_.AddEntriesFrom(input, _repeated_borderTiles_codec);
+            break;
+          }
+          case 34: {
+            mapRangeTargets_.AddEntriesFrom(input, _repeated_mapRangeTargets_codec);
             break;
           }
         }

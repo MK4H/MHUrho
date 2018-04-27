@@ -17,8 +17,83 @@ namespace MHUrho.UnitComponents
 	internal delegate void ShotReloadedDelegate(Shooter shooter);
 	internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
 
-	public class Shooter : DefaultComponent, RangeTargetComponent.IShooter
+	public class Shooter : DefaultComponent, RangeTarget.IShooter
 	{
+		internal class Loader : DefaultComponentLoader {
+
+			public override DefaultComponent Component => Shooter;
+
+			public Shooter Shooter { get; private set; }
+
+			int targetID;
+
+			public Loader()
+			{
+
+			}
+
+			public static PluginData SaveState(Shooter shooter)
+			{
+				var sequentialData = new SequentialPluginDataWriter();
+
+				sequentialData.StoreNext<float>(shooter.RateOfFire);
+				sequentialData.StoreNext<int>(shooter.projectileType.ID);
+				sequentialData.StoreNext<bool>(shooter.SearchForTarget);
+				sequentialData.StoreNext<float>(shooter.TargetSearchDelay);
+				sequentialData.StoreNext<float>(shooter.shotDelay);
+				sequentialData.StoreNext<float>(shooter.searchDelay);
+				sequentialData.StoreNext<int>(shooter.Target?.InstanceID ?? 0);
+
+				return sequentialData.PluginData;
+			}
+
+			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData) {
+				var notificationReceiver = plugin as INotificationReceiver;
+				if (notificationReceiver == null) {
+					throw new
+						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+				}
+
+				var sequentialDataReader = new SequentialPluginDataReader(storedData);
+				var rateOfFire = sequentialDataReader.GetNext<float>();
+				var projectileTypeID = sequentialDataReader.GetNext<int>();
+
+				Shooter = new Shooter(level,
+									notificationReceiver,
+									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
+									rateOfFire) {
+													SearchForTarget = sequentialDataReader.GetNext<bool>(),
+													TargetSearchDelay = sequentialDataReader.GetNext<float>(),
+													shotDelay = sequentialDataReader.GetNext<float>(),
+													searchDelay = sequentialDataReader.GetNext<float>()
+
+												};
+
+
+				targetID = sequentialDataReader.GetNext<int>();
+
+			}
+
+			public override  void ConnectReferences(LevelManager level)
+			{
+				//If shooter had a target
+				if (targetID != 0) {
+					Shooter.Target = level.GetRangeTarget(targetID);
+					Shooter.Target.AddShooter(Shooter);
+				} 
+				
+			}
+
+			public override void FinishLoading()
+			{
+
+			}
+
+			public override DefaultComponentLoader Clone() {
+				return new Loader();
+			}
+		}
+
 
 		public interface INotificationReceiver {
 			void OnTargetAcquired(Shooter shooter);
@@ -101,46 +176,10 @@ namespace MHUrho.UnitComponents
 							   rateOfFire);
 		}
 
-		internal static Shooter Load(ILevelManager level, InstancePluginBase plugin, PluginData storedData) {
-			var notificationReceiver = plugin as INotificationReceiver;
-			if (notificationReceiver == null) {
-				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-			}
-
-			var sequentialDataReader = new SequentialPluginDataReader(storedData);
-			var rateOfFire = sequentialDataReader.GetNext<float>();
-			var projectileTypeID = sequentialDataReader.GetNext<int>();
-
-			var shooter = new Shooter(level,
-									notificationReceiver,
-									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-									rateOfFire);
-
-			shooter.SearchForTarget = sequentialDataReader.GetNext<bool>();
-			shooter.TargetSearchDelay = sequentialDataReader.GetNext<float>();
-			
-
-
-			return shooter;
-		}
-
-		internal override void ConnectReferences(ILevelManager level) {
-
-		}
-
-		public override PluginData SaveState() {
-			var sequentialData = new SequentialPluginDataWriter();
-
-			sequentialData.StoreNext<float>(RateOfFire);
-			sequentialData.StoreNext<int>(projectileType.ID);
-			sequentialData.StoreNext<bool>(SearchForTarget);
-			sequentialData.StoreNext<float>(TargetSearchDelay);
-			sequentialData.StoreNext<int>(Target.InstanceID);
-			sequentialData.StoreNext<float>(shotDelay);
-			sequentialData.StoreNext<float>(searchDelay);
-
-			return sequentialData.PluginData;
+		
+		public override PluginData SaveState()
+		{
+			return Loader.SaveState(this);
 		}
 
 		public override void OnAttachedToNode(Node node) {
@@ -199,13 +238,13 @@ namespace MHUrho.UnitComponents
 				var possibleTargets = Player.GetEnemyPlayers()
 											.SelectMany(enemy => enemy.GetAllUnits())
 											//.AsParallel()
-											.Where(unit => projectileType.IsInRange(entity.Position, unit.GetDefaultComponent<RangeTargetComponent>()))
+											.Where(unit => projectileType.IsInRange(entity.Position, unit.GetDefaultComponent<RangeTarget>()))
 											.OrderBy(unit => Vector3.Distance(entity.Position, unit.Position));
 
 
 				foreach (var possibleTarget in possibleTargets) {
 
-					var newTarget = possibleTarget.GetDefaultComponent<RangeTargetComponent>();
+					var newTarget = possibleTarget.GetDefaultComponent<RangeTarget>();
 
 					Target = newTarget;
 					Target.AddShooter(this);

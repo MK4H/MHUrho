@@ -145,7 +145,7 @@ namespace DefaultPackage
 		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs)
 		{
 			IRangeTarget rangeTarget;
-			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTargetComponent>()) != null)) {
+			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTarget>()) != null)) {
 				orderArgs.Executed = shooter.ShootAt(rangeTarget);
 				return;
 			}

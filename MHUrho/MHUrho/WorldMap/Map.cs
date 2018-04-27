@@ -81,12 +81,17 @@ namespace MHUrho.WorldMap
 				Map.BuildGeometry();
 			}
 
-			private void Load(LevelManager level, Node mapNode, StMap storedMap) {
+			void Load(LevelManager level, Node mapNode, StMap storedMap) {
 				Map = new Map(mapNode, storedMap);
 				Map.levelManager = level;
+
+				foreach (var storedMapTarget in storedMap.MapRangeTargets) {
+					var newTarget = MapRangeTarget.Load(level, storedMapTarget);
+					Map.mapRangeTargets.Add(newTarget.CurrentPosition, newTarget);
+				}
+
 				var tiles = storedMap.Tiles.GetEnumerator();
 				var borderTiles = storedMap.BorderTiles.GetEnumerator();
-
 				try {
 
 					for (int y = 0; y < Map.LengthWithBorders; y++) {
@@ -403,16 +408,17 @@ namespace MHUrho.WorldMap
 			stSize.Y = Length;
 			storedMap.Size = stSize;
 
-			var storedTiles = storedMap.Tiles;
-			var storedBorderTiles = storedMap.BorderTiles;
-
 			foreach (var tile in tiles) {
 				if (IsBorder(tile.MapLocation)) {
-					storedBorderTiles.Add(((BorderTile)tile).Save());
+					storedMap.BorderTiles.Add(((BorderTile)tile).Save());
 				}
 				else {
-					storedTiles.Add(tile.Save());
+					storedMap.Tiles.Add(tile.Save());
 				} 
+			}
+
+			foreach (var target in mapRangeTargets.Values) {
+				storedMap.MapRangeTargets.Add(target.Save());
 			}
 
 			return storedMap;

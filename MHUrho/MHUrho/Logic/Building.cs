@@ -22,13 +22,13 @@ namespace MHUrho.Logic
 			/// <summary>
 			/// Used to store the reference to storedBuilding between Load and ConnectReferences calls
 			/// </summary>
-			private StBuilding storedBuilding;
+			StBuilding storedBuilding;
 
-			private List<DefaultComponent> preloadedComponents;
+			List<DefaultComponentLoader> componentLoaders;
 
 			protected Loader(StBuilding storedBuilding) {
 				this.storedBuilding = storedBuilding;
-				preloadedComponents = new List<DefaultComponent>();
+				componentLoaders = new List<DefaultComponentLoader>();
 			}
 
 			/// <summary>
@@ -114,18 +114,20 @@ namespace MHUrho.Logic
 				Building.Player = level.GetPlayer(storedBuilding.PlayerID);
 				//TODO: Tiles
 
-				foreach (var preloadedComponent in preloadedComponents) {
-					preloadedComponent.ConnectReferences(level);
+				foreach (var componentLoader in componentLoaders) {
+					componentLoader.ConnectReferences(level);
 				}
 
 				Building.plugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
 			}
 
 			public void FinishLoading() {
-
+				foreach (var componentLoader in componentLoaders) {
+					componentLoader.FinishLoading();
+				}
 			}
 
-			private void Load(LevelManager level, BuildingType type, Node buildingNode) {
+			void Load(LevelManager level, BuildingType type, Node buildingNode) {
 				//TODO: Check arguments - node cant have more than one Building component
 				if (type.ID != storedBuilding.TypeID) {
 					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
@@ -151,12 +153,15 @@ namespace MHUrho.Logic
 				Building.plugin = type.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
-					var preloadedComponent = level.DefaultComponentFactory.LoadComponent(defaultComponent.Key,
-																						 defaultComponent.Value,
-																						 level,
-																						 Building.plugin);
-					preloadedComponents.Add(preloadedComponent);
-					Building.AddComponent(preloadedComponent);
+					var componentLoader = 
+						level.DefaultComponentFactory
+							.StartLoadingComponent(defaultComponent.Key,
+													defaultComponent.Value,
+													level,
+													Building.plugin);
+
+					componentLoaders.Add(componentLoader);
+					Building.AddComponent(componentLoader.Component);
 				}
 			}
 

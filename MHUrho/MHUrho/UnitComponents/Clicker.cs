@@ -9,6 +9,45 @@ namespace MHUrho.UnitComponents
 {
     public class Clicker : DefaultComponent
     {
+		internal class Loader : DefaultComponentLoader {
+
+			public override DefaultComponent Component => Clicker;
+
+			public Clicker Clicker { get; private set; }
+
+			public Loader() {
+
+			}
+
+			public static PluginData SaveState(Clicker clicker) {
+				var storageData = new SequentialPluginDataWriter();
+				return storageData.PluginData;
+			}
+
+			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData) {
+
+				var notificationReceiver = plugin as INotificationReceiver;
+				if (notificationReceiver == null) {
+					throw new
+						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+				}
+
+				Clicker = new Clicker(notificationReceiver);
+			}
+
+			public override void ConnectReferences(LevelManager level) {
+
+			}
+
+			public override void FinishLoading() {
+
+			}
+
+			public override DefaultComponentLoader Clone() {
+				return new Loader();
+			}
+		}
+
 		public interface INotificationReceiver {
 			void Clicked(Clicker clicker, int button, int qualifiers);
 		}
@@ -35,23 +74,10 @@ namespace MHUrho.UnitComponents
 			return new Clicker(instancePlugin);
 		}
 
-		internal static Clicker Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
-			var notificationReceiver = plugin as INotificationReceiver;
-			if (notificationReceiver == null) {
-				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-			}
 
-			return new Clicker(notificationReceiver);
-		}
-
-		internal override void ConnectReferences(ILevelManager level) {
-			//NOTHING
-		}
-
-		public override PluginData SaveState() {
-			var storageData = new SequentialPluginDataWriter();
-			return storageData.PluginData;
+		public override PluginData SaveState()
+		{
+			return Loader.SaveState(this);
 		}
 
 		public void Click(int button, int qualifiers) {

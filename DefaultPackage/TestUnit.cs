@@ -50,10 +50,10 @@ namespace DefaultPackage
 
 	public class TestUnitInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
 	{
-		private Node unitNode;
-		private Unit unit;
-		private WorldWalker walker;
-		private Shooter shooter;
+		Node unitNode;
+		Unit unit;
+		WorldWalker walker;
+		Shooter shooter;
 
 		public TestUnitInstance() {
 
@@ -86,6 +86,7 @@ namespace DefaultPackage
 			this.unit = unit;
 			this.unitNode = unit.Node;
 			walker = unit.GetComponent<WorldWalker>();
+			shooter = unit.GetComponent<Shooter>();
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {

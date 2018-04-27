@@ -20,6 +20,61 @@ namespace MHUrho.UnitComponents
 
 	public class WorldWalker : DefaultComponent {
 
+		internal class Loader : DefaultComponentLoader {
+
+			public override DefaultComponent Component => Walker;
+
+			public WorldWalker Walker { get; private set; }
+
+			public Loader() {
+
+			}
+
+			public static PluginData SaveState(WorldWalker walker) {
+				var storageData = new IndexedPluginDataWriter();
+				if (walker.Enabled) {
+					storageData.Store(1, true);
+
+					storageData.Store(2, walker.path);
+				}
+				else {
+					storageData.Store(1, false);
+				}
+
+				return storageData.PluginData;
+			}
+
+			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData) {
+				var notificationReceiver = plugin as INotificationReceiver;
+				if (notificationReceiver == null) {
+					throw new
+						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+				}
+
+				var indexedData = new IndexedPluginDataReader(storedData);
+				var activated = indexedData.Get<bool>(1);
+				Path path = null;
+				if (activated) {
+					path = indexedData.Get<Path>(2);
+				}
+
+				Walker = new WorldWalker(notificationReceiver, level, activated, path);
+
+			}
+
+			public override void ConnectReferences(LevelManager level) {
+
+			}
+
+			public  override void FinishLoading() {
+
+			}
+
+			public override DefaultComponentLoader Clone() {
+				return new Loader();
+			}
+		}
+
 		public interface INotificationReceiver {
 			bool CanGoFromTo(ITile fromTile, ITile toTile);
 
@@ -83,40 +138,12 @@ namespace MHUrho.UnitComponents
 			this.Enabled = activated;
 		}
 
-		internal static WorldWalker Load(ILevelManager level, InstancePluginBase plugin, PluginData data) {
 
-			var notificationReceiver = plugin as INotificationReceiver;
-			if (notificationReceiver == null) {
-				throw new
-					ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-			}
 
-			var indexedData = new IndexedPluginDataReader(data);
-			var activated = indexedData.Get<bool>(1);
-			Path path = null;
-			if (activated) {
-				path = indexedData.Get<Path>(2);				
-			}
 
-			return new WorldWalker(notificationReceiver, level, activated, path);
-		}
-
-		internal override void ConnectReferences(ILevelManager level) {
-
-		}
-
-		public override PluginData SaveState() {
-			var storageData = new IndexedPluginDataWriter();
-			if (Enabled) {
-				storageData.Store(1, true);
-
-				storageData.Store(2, path);
-			}
-			else {
-				storageData.Store(1, false);
-			}
-
-			return storageData.PluginData;
+		public override PluginData SaveState()
+		{
+			return Loader.SaveState(this);
 		}
 
 		public void GoAlong(Path newPath) {
