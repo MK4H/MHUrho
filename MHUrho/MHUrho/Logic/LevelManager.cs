@@ -162,7 +162,7 @@ namespace MHUrho.Logic
 		/// <returns>Loaded default level</returns>
 		public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName) {
 			PackageManager.Instance.LoadPackage(gamePackageName);
-
+			
 			var scene = new Scene(game.Context);
 			scene.CreateComponent<Octree>();
 			var physics = scene.CreateComponent<PhysicsWorld>();
@@ -425,45 +425,35 @@ namespace MHUrho.Logic
 			Update?.Invoke(timeStep);
 		}
 
-		static async void LoadSceneParts(MyGame game, Scene scene) {
-			// Box	
-			Node boxNode = scene.CreateChild(name: "Box node");
-			boxNode.Position = new Vector3(x: 0, y: 0, z: 5);
-			boxNode.SetScale(0f);
-			boxNode.Rotation = new Quaternion(x: 60, y: 0, z: 30);
-
-			StaticModel boxModel = boxNode.CreateComponent<StaticModel>();
-			boxModel.Model = game.ResourceCache.GetModel("Models/Box.mdl");
-			boxModel.SetMaterial(game.ResourceCache.GetMaterial("Materials/BoxMaterial.xml"));
-			boxModel.CastShadows = true;
+		static void LoadSceneParts(MyGame game, Scene scene) {
 
 			// Light
-			Node lightNode = scene.CreateChild(name: "light");
-			//lightNode.Position = new Vector3(0, 5, 0);
-			lightNode.Rotation = new Quaternion(45, 0, 0);
-			var light = lightNode.CreateComponent<Light>();
-			light.LightType = LightType.Directional;
-			//light.Range = 10;
-			light.Brightness = 0.5f;
-			light.CastShadows = true;
-			light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
-			light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
+			using (Node lightNode = scene.CreateChild(name: "light")) {
+				lightNode.Rotation = new Quaternion(45, 0, 0);
+				//lightNode.Position = new Vector3(0, 5, 0);
+				using (var light = lightNode.CreateComponent<Light>()) {
+					light.LightType = LightType.Directional;
+					//light.Range = 10;
+					light.Brightness = 0.5f;
+					light.CastShadows = true;
+					light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
+					light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
+				}
+			}
 
 			// Ambient light
-			var zoneNode = scene.CreateChild("Zone");
-			var zone = zoneNode.CreateComponent<Zone>();
+			using (var zoneNode = scene.CreateChild("Zone")) {
+				using (var zone = zoneNode.CreateComponent<Zone>()) {
+					zone.SetBoundingBox(new BoundingBox(-1000.0f, 1000.0f));
+					zone.AmbientColor = new Color(0.5f, 0.5f, 0.5f);
+					zone.FogColor = new Color(0.7f, 0.7f, 0.7f);
+					zone.FogStart = 50;
+					zone.FogEnd = 100;
+				}
+			}
+			
 
-			zone.SetBoundingBox(new BoundingBox(-1000.0f, 1000.0f));
-			zone.AmbientColor = new Color(0.5f, 0.5f, 0.5f);
-			zone.FogColor = new Color(0.7f, 0.7f, 0.7f);
-			zone.FogStart = 50;
-			zone.FogEnd = 100;
-
-			//TODO: Remove this
-			await boxNode.RunActionsAsync(new EaseBounceOut(new ScaleTo(duration: 1f, scale: 1)));
-			await boxNode.RunActionsAsync(new RepeatForever(
-				new RotateBy(duration: 1, deltaAngleX: 90, deltaAngleY: 0, deltaAngleZ: 0)));
-
+			
 		}
 
 		static CameraController LoadCamera(MyGame game, Scene scene) {
