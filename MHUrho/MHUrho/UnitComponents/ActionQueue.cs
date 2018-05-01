@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -126,17 +127,19 @@ namespace MHUrho.UnitComponents
 
 		private INotificationReceiver notificationReceiver;
 
-		public ActionQueue CreateNew<T>(T instancePlugin)
+		public ActionQueue CreateNew<T>(T instancePlugin, ILevelManager level)
 			where T : InstancePluginBase, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new ActionQueue(instancePlugin);
+			return new ActionQueue(instancePlugin, level);
 		}
 
-		protected ActionQueue(INotificationReceiver notificationReceiver) {
+		protected ActionQueue(INotificationReceiver notificationReceiver, ILevelManager level) 
+			: base(level)
+		{
 			this.notificationReceiver = notificationReceiver;
 			workQueue = new Queue<IWorkTask>();
 		}
@@ -157,10 +160,7 @@ namespace MHUrho.UnitComponents
 			OnTaskFinished += notificationReceiver.OnWorkTaskFinished;
 		}
 
-		protected override void OnUpdate(float timeStep) {
-			base.OnUpdate(timeStep);
-
-			if (!EnabledEffective) return;
+		protected override void OnUpdateChecked(float timeStep) {
 
 			if (workQueue.Count == 0) {
 				return;
@@ -181,12 +181,16 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(ActionQueue), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(ActionQueue), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(ActionQueue), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 	}
 }

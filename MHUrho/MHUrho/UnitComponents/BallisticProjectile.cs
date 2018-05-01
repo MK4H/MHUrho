@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Helpers;
 using Urho;
@@ -65,9 +66,6 @@ namespace MHUrho.UnitComponents
 
 		public interface INotificationReceiver {
 
-			void OnMovementStarted(BallisticProjectile flier);
-
-			void OnGroundHit(BallisticProjectile flier);
 		}
 
 		public static DefaultComponents ComponentID = DefaultComponents.UnpoweredFlier;
@@ -79,25 +77,26 @@ namespace MHUrho.UnitComponents
 
 		public Vector3 Movement { get; private set; }
 
-		private INotificationReceiver notificationReceiver;
+		public Projectile Projectile => (Projectile)Entity;
 
-		private ILevelManager level;
-		private Map Map => level.Map;
+		INotificationReceiver notificationReceiver;
 
 		protected BallisticProjectile(INotificationReceiver notificationReceiver,
-							  ILevelManager level) {
+							  ILevelManager level) 
+			:base(level)
+		{
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
-			this.level = level;
 		}
 
 		protected BallisticProjectile(INotificationReceiver notificationReceiver,
 								 ILevelManager level,
 								 Vector3 movement,
-								 bool enabled) {
+								 bool enabled) 
+			: base(level)
+		{
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
-			this.level = level;
 			this.Movement = movement;
 			this.Enabled = enabled;
 		}
@@ -247,6 +246,7 @@ namespace MHUrho.UnitComponents
 			return numSolutions;
 		}
 
+		//TODO: THIS IS WRONG, GETS JUST THE LOWVECTOR, split into two metods
 		public static int GetVectorsForMovingTarget(IRangeTarget rangeTarget,
 													Vector3 sourcePosition,
 													float initialProjectileSpeed,
@@ -343,31 +343,33 @@ namespace MHUrho.UnitComponents
 			return Loader.SaveState(this);
 		}
 
-		protected override void OnUpdate(float timeStep) {
-			base.OnUpdate(timeStep);
+		protected override void OnUpdateChecked(float timeStep) {
 
-			if (!EnabledEffective) return;
-
-			if (Map.IsInside(Node.Position)) {
-				Node.Position += Movement * timeStep;
-				Node.LookAt(Node.Position + Movement, Vector3.UnitY);
-
+			if (Projectile.Move(Movement * timeStep)) {
 				Movement += (-Vector3.UnitY * 10) * timeStep;
 			}
 			else {
 				//Stop movement
 				Movement = Vector3.Zero;
-				notificationReceiver.OnGroundHit(this);
 			}
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			AddedToEntity(typeof(BallisticProjectile), entityDefaultComponents);
+			base.AddedToEntity(entityDefaultComponents);
+			
 
+			if (Entity != null && !(Entity is Projectile)) {
+				throw new InvalidOperationException("Cannot add BallisticProjectile to Entity that is not a projectile");
+			}
+
+			AddedToEntity(typeof(BallisticProjectile), entityDefaultComponents);
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(BallisticProjectile), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(BallisticProjectile), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 	}
 }

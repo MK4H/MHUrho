@@ -175,13 +175,12 @@ namespace MHUrho.Logic
 			return ID;
 		}
 
-		public override bool Equals(object obj) {
-			if (obj == null || GetType() != obj.GetType())
-				return false;
-
-			Player p = (Player)obj;
-			return p.ID == ID;
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj);
 		}
+
+
 
 		//protected override void OnUpdate(float timeStep) {
 

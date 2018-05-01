@@ -165,12 +165,15 @@ namespace DefaultPackage
 			return true;
 		}
 
-		public void OnMovementStarted(BallisticProjectile flier) {
-			
+		public override void OnEntityHit(Entity hitEntity)
+		{
+			projectile.Despawn();
 		}
 
-		public void OnGroundHit(BallisticProjectile flier) {
+		public override void OnTerrainHit()
+		{
 			despawning = true;
 		}
+
 	}
 }

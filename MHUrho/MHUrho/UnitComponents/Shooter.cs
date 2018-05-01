@@ -17,7 +17,7 @@ namespace MHUrho.UnitComponents
 	internal delegate void ShotReloadedDelegate(Shooter shooter);
 	internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
 
-	public class Shooter : DefaultComponent, RangeTarget.IShooter
+	public class Shooter : DefaultComponent, RangeTargetComponent.IShooter
 	{
 		internal class Loader : DefaultComponentLoader {
 
@@ -136,22 +136,20 @@ namespace MHUrho.UnitComponents
 		ProjectileType projectileType;
 
 
-		Entity entity;
-
 		INotificationReceiver notificationReceiver;
 
-		IPlayer Player => entity.Player;
-
-		ILevelManager Level => entity.Level;
-
-		Map Map => Level.Map;
 
 		protected Shooter(ILevelManager level,
 						INotificationReceiver notificationReceiver,
 						ProjectileType projectileType,
-						float rateOfFire) {
+						float rateOfFire) 
+			:base(level)
+		{
 			this.notificationReceiver = notificationReceiver;
 
+			OnShotFired += notificationReceiver.AfterShotFired;
+			OnTargetAcquired += notificationReceiver.OnTargetAcquired;
+			OnShotReloaded += notificationReceiver.OnShotReloaded;
 
 			this.projectileType = projectileType;
 			this.RateOfFire = rateOfFire;
@@ -182,20 +180,12 @@ namespace MHUrho.UnitComponents
 			return Loader.SaveState(this);
 		}
 
-		public override void OnAttachedToNode(Node node) {
-			base.OnAttachedToNode(node);
 
-			entity = node.GetComponent<Entity>();
-
-			OnShotFired += notificationReceiver.AfterShotFired;
-			OnTargetAcquired += notificationReceiver.OnTargetAcquired;
-			OnShotReloaded += notificationReceiver.OnShotReloaded;
-		}
 
 		public bool ShootAt(IRangeTarget newTarget) {
 			StopShooting();
 
-			if (!projectileType.IsInRange(entity.Position, newTarget)) return false;
+			if (!projectileType.IsInRange(Entity.Position, newTarget)) return false;
 
 			Target = newTarget;
 			newTarget.AddShooter(this);
@@ -217,12 +207,8 @@ namespace MHUrho.UnitComponents
 			base.OnDeleted();
 		}
 
-		protected override void OnUpdate(float timeStep)
+		protected override void OnUpdateChecked(float timeStep)
 		{
-			base.OnUpdate(timeStep);
-
-			if (!EnabledEffective) return;
-
 
 			if (shotDelay > 0) {
 				shotDelay -= timeStep;
@@ -238,13 +224,13 @@ namespace MHUrho.UnitComponents
 				var possibleTargets = Player.GetEnemyPlayers()
 											.SelectMany(enemy => enemy.GetAllUnits())
 											//.AsParallel()
-											.Where(unit => projectileType.IsInRange(entity.Position, unit.GetDefaultComponent<RangeTarget>()))
-											.OrderBy(unit => Vector3.Distance(entity.Position, unit.Position));
+											.Where(unit => projectileType.IsInRange(Entity.Position, unit.GetDefaultComponent<RangeTargetComponent>()))
+											.OrderBy(unit => Vector3.Distance(Entity.Position, unit.Position));
 
 
 				foreach (var possibleTarget in possibleTargets) {
 
-					var newTarget = possibleTarget.GetDefaultComponent<RangeTarget>();
+					var newTarget = possibleTarget.GetDefaultComponent<RangeTargetComponent>();
 
 					Target = newTarget;
 					Target.AddShooter(this);
@@ -264,7 +250,7 @@ namespace MHUrho.UnitComponents
 			//TODO: Delegate
 			notificationReceiver.BeforeShotFired(this);
 
-			var projectile = Level.SpawnProjectile(projectileType, entity.Position + notificationReceiver.GetSourceOffset(this), Player, Target);
+			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + notificationReceiver.GetSourceOffset(this), Player, Target);
 			//Could not fire on the target
 			if (projectile == null) {
 				Target.RemoveShooter(this);
@@ -280,12 +266,17 @@ namespace MHUrho.UnitComponents
 
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+
 			AddedToEntity(typeof(Shooter), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(Shooter), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(Shooter), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 
 	}

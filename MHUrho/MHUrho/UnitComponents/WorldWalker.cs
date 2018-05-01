@@ -102,13 +102,11 @@ namespace MHUrho.UnitComponents
 		internal event MovementFailedDelegate OnMovementFailed;
 
 
-		public Unit Unit { get; private set; }
+		public Unit Unit => (Unit) Entity;
 
-		private readonly Map map;
-		private ILevelManager level;
-		private INotificationReceiver notificationReceiver;
+		INotificationReceiver notificationReceiver;
 
-		private Path path;
+		Path path;
 
 		public static WorldWalker GetInstanceFor<T>(T instancePlugin, ILevelManager level)
 			where T : UnitInstancePluginBase, INotificationReceiver {
@@ -120,20 +118,24 @@ namespace MHUrho.UnitComponents
 			return new WorldWalker(instancePlugin, level);
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver,ILevelManager level) {
+		protected WorldWalker(INotificationReceiver notificationReceiver,ILevelManager level) 
+			:base(level)
+		{
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
-			this.level = level;
-			this.map = level.Map;
 			Enabled = false;
+
+			OnMovementStarted += notificationReceiver.OnMovementStarted;
+			OnMovementEnded += notificationReceiver.OnMovementFinished;
+			OnMovementFailed += notificationReceiver.OnMovementFailed;
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path) {
+		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path)
+			:base(level)
+		{
 
 			ReceiveSceneUpdates = true;
 			this.notificationReceiver = notificationReceiver;
-			this.level = level;
-			this.map = level.Map;
 			this.path = path;
 			this.Enabled = activated;
 		}
@@ -163,7 +165,7 @@ namespace MHUrho.UnitComponents
 		public bool GoTo(ITile tile) {
 			var newPath = Path.FromTo(Unit.XZPosition, 
 									tile, 
-									map, 
+									Map, 
 									notificationReceiver.CanGoFromTo,
 									notificationReceiver.GetMovementSpeed);
 			if (newPath == null) {
@@ -178,23 +180,9 @@ namespace MHUrho.UnitComponents
 		}
 
 		public bool GoTo(IntVector2 location) {
-			return GoTo(map.GetTileByMapLocation(location));
+			return GoTo(Map.GetTileByMapLocation(location));
 		}
 
-		public override void OnAttachedToNode(Node node) {
-			base.OnAttachedToNode(node);
-
-			Unit = Node.GetComponent<Unit>();
-
-			if (Unit == null) {
-				throw new
-					InvalidOperationException($"Cannot attach {nameof(WorldWalker)} to a node that does not have {nameof(Logic.Unit)} component");
-			}
-
-			this.OnMovementStarted += notificationReceiver.OnMovementStarted;
-			this.OnMovementEnded += notificationReceiver.OnMovementFinished;
-			this.OnMovementFailed += notificationReceiver.OnMovementFailed;
-		}
 
 		public IEnumerator<Waypoint> GetRestOfThePath()
 		{
@@ -213,10 +201,8 @@ namespace MHUrho.UnitComponents
 
 
 
-		protected override void OnUpdate(float timeStep)
+		protected override void OnUpdateChecked(float timeStep)
 		{
-			base.OnUpdate(timeStep);
-			if (!EnabledEffective) return;
 			Debug.Assert(path != null, "Target was null with scene updates enabled");
 
 
@@ -231,12 +217,22 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+
+			if (Entity == null || !(Entity is Unit)) {
+				throw new
+					InvalidOperationException($"Cannot attach {nameof(WorldWalker)} to a node that does not have {nameof(Logic.Unit)} component");
+			}
+
 			AddedToEntity(typeof(WorldWalker), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(WorldWalker), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(WorldWalker), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 
 		/// <summary>
@@ -244,7 +240,7 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		/// <param name="point">Point to move towards</param>
 		/// <param name="timeStep">timeStep of the game</param>
-		private bool MoveTowards(Vector3 point ,float timeStep) {
+		bool MoveTowards(Vector3 point ,float timeStep) {
 			bool reachedPoint = false;
 
 			Vector3 newPosition = Unit.Position + GetMoveVector(point, timeStep);
@@ -261,8 +257,8 @@ namespace MHUrho.UnitComponents
 
 			//Recalculate path
 			var newPath = Path.FromTo(Unit.XZPosition,
-									path.GetTarget(map),
-									map,
+									path.GetTarget(Map),
+									Map,
 									notificationReceiver.CanGoFromTo,
 									notificationReceiver.GetMovementSpeed);
 			if (newPath == null) {
@@ -283,7 +279,7 @@ namespace MHUrho.UnitComponents
 		/// <param name="destination">The point in space that the unit is trying to get to</param>
 		/// <param name="timeStep"> How many seconds passed since the last update</param>
 		/// <returns></returns>
-		private Vector3 GetMoveVector(Vector3 destination, float timeStep) {
+		Vector3 GetMoveVector(Vector3 destination, float timeStep) {
 			Vector3 movementDirection = destination - Unit.Position;
 			//If the destination is exactly equal to Unit.Position, prevent NaN from normalization
 			// Reached point will proc and the returned value will be ignored, but cant be [0,0,0]
@@ -294,7 +290,7 @@ namespace MHUrho.UnitComponents
 			return movementDirection * LevelManager.CurrentLevel.GameSpeed * timeStep;
 		}
 
-		private bool ReachedPoint(Vector3 currentPosition, Vector3 nextPosition, Vector3 point) {
+		bool ReachedPoint(Vector3 currentPosition, Vector3 nextPosition, Vector3 point) {
 			var currDiff = point - currentPosition;
 			var nextDiff = point - nextPosition;
 			return !(Math.Sign(currDiff.X) == Math.Sign(nextDiff.X) &&
@@ -302,7 +298,7 @@ namespace MHUrho.UnitComponents
 					 Math.Sign(currDiff.Z) == Math.Sign(nextDiff.Z));
 		}
 
-		private void ReachedDestination() {
+		void ReachedDestination() {
 			MovementFinished = true;
 			MovementStarted = false;
 			MovementFailed = false;

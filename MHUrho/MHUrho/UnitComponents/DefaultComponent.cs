@@ -5,6 +5,7 @@ using MHUrho.Logic;
 using MHUrho.Plugins;
 using Urho;
 using MHUrho.Storage;
+using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
@@ -24,7 +25,7 @@ namespace MHUrho.UnitComponents
 
 	//TODO: Rename this
 	internal interface IByTypeQueryable {
-		void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+		void AddedToEntity(Entity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
 
 		bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
 	}
@@ -37,17 +38,55 @@ namespace MHUrho.UnitComponents
 
 		public abstract PluginData SaveState();
 
-		void IByTypeQueryable.AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+		public Entity Entity { get; private set; }
+
+		public IPlayer Player => Entity.Player;
+
+		public ILevelManager Level { get; private set; }
+
+
+		public Map Map => Level.Map;
+
+
+
+		protected DefaultComponent(ILevelManager level)
+		{
+			this.Level = level;
+		}
+
+		void IByTypeQueryable.AddedToEntity(Entity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			Entity = entity;
 			AddedToEntity(entityDefaultComponents);
 		}
 
 		bool IByTypeQueryable.RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			Entity = null;
 			return RemovedFromEntity(entityDefaultComponents);
 		}
 
-		protected abstract void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+		protected override void OnUpdate(float timeStep)
+		{
+			base.OnUpdate(timeStep);
+			if (IsDeleted || !EnabledEffective) return;
 
-		protected abstract bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+			OnUpdateChecked(timeStep);
+		}
+
+		protected virtual void OnUpdateChecked(float timeStep)
+		{
+			//NOTHING
+		}
+
+		protected virtual void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents)
+		{
+			AddedToEntity(typeof(DefaultComponent), entityDefaultComponents);
+		}
+
+		protected virtual bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents)
+		{
+			return RemovedFromEntity(typeof(DefaultComponent), entityDefaultComponents);
+		}
+
 
 		protected void AddedToEntity(Type type, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			if (entityDefaultComponents.TryGetValue(type, out var componentsOfType)) {

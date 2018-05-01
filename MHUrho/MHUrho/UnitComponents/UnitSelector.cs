@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
@@ -83,9 +84,7 @@ namespace MHUrho.UnitComponents
 		public override string ComponentTypeName => ComponentName;
 		public override DefaultComponents ComponentTypeID => ComponentID;
 
-		public override IPlayer Player => Unit.Player;
-
-		public Unit Unit { get; private set; }
+		public Unit Unit => (Unit)Entity;
 
 		internal event UnitSelectedDelegate UnitSelected;
 		internal event UnitDeselectedDelegate UnitDeselected;
@@ -93,14 +92,20 @@ namespace MHUrho.UnitComponents
 		internal event UnitOrderedToUnitDelegate OrderedToUnit;
 		internal event UnitOrderedToBuildingDelegate OrderedToBuilding;
 
-		
-		private readonly ILevelManager level;
-		private readonly INotificationReceiver notificationReceiver;
+
+		readonly INotificationReceiver notificationReceiver;
 
 
-		protected UnitSelector(INotificationReceiver notificationReceiver,ILevelManager level) {
+		protected UnitSelector(INotificationReceiver notificationReceiver,ILevelManager level) 
+			:base(level)
+		{
 			this.notificationReceiver = notificationReceiver;
-			this.level = level;
+
+			UnitSelected += notificationReceiver.OnUnitSelected;
+			UnitDeselected += notificationReceiver.OnUnitDeselected;
+			OrderedToTile += notificationReceiver.OnUnitOrderedToTile;
+			OrderedToUnit += notificationReceiver.OnUnitOrderedToUnit;
+			OrderedToBuilding += notificationReceiver.OnUnitOrderedToBuilding;
 		}
 
 		public static UnitSelector CreateNew<T>(T instancePlugin, ILevelManager level)
@@ -157,32 +162,26 @@ namespace MHUrho.UnitComponents
 			return Loader.SaveState(this);
 		}
 
-		public override void OnAttachedToNode(Node node) {
-			base.OnAttachedToNode(node);
 
-			Unit = Node.GetComponent<Unit>();
 
-			if (Unit == null) {
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+
+			if (Entity == null || !(Entity is Unit)) {
 				throw new
 					InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Logic.Unit)} component");
 			}
 
-			UnitSelected += notificationReceiver.OnUnitSelected;
-			UnitDeselected += notificationReceiver.OnUnitDeselected;
-			OrderedToTile += notificationReceiver.OnUnitOrderedToTile;
-			OrderedToUnit += notificationReceiver.OnUnitOrderedToUnit;
-			OrderedToBuilding += notificationReceiver.OnUnitOrderedToBuilding;
-		}
 
-		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(UnitSelector), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			base.AddedToEntity(entityDefaultComponents);
-			return RemovedFromEntity(typeof(UnitSelector), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(UnitSelector), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 
 	}

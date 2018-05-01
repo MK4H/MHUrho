@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Urho;
 using MHUrho.Logic;
@@ -19,15 +20,16 @@ namespace MHUrho.UnitComponents {
 
 		IEnumerator<Waypoint> GetWaypoints();
 
-		void AddShooter(RangeTarget.IShooter shooter);
+		void AddShooter(RangeTargetComponent.IShooter shooter);
 
-		void RemoveShooter(RangeTarget.IShooter shooter);
+		void RemoveShooter(RangeTargetComponent.IShooter shooter);
 	}
 
-	public abstract class RangeTarget : DefaultComponent, IRangeTarget {
+	public abstract class RangeTargetComponent : DefaultComponent, IRangeTarget {
 		public interface IShooter {
 			void OnTargetDestroy(IRangeTarget target);
 		}
+
 
 		public int InstanceID { get; set; }
 
@@ -37,11 +39,15 @@ namespace MHUrho.UnitComponents {
 
 		protected List<IShooter> shooters;
 
-		protected RangeTarget() {
+		protected RangeTargetComponent(ILevelManager level) 
+			: base(level)
+		{
 			shooters = new List<IShooter>();
 		}
 
-		protected RangeTarget(int ID) {
+		protected RangeTargetComponent(int ID,ILevelManager level) 
+			: base(level)
+		{
 			this.InstanceID = ID;
 			shooters = new List<IShooter>();
 		}
@@ -72,16 +78,20 @@ namespace MHUrho.UnitComponents {
 				shooter.OnTargetDestroy(this);
 			}
 
-			
+			Level.UnRegisterRangeTarget(InstanceID);
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			AddedToEntity(typeof(RangeTarget), entityDefaultComponents);
+			base.AddedToEntity(entityDefaultComponents);
+			AddedToEntity(typeof(RangeTargetComponent), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(RangeTarget), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(RangeTargetComponent), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 
 	}

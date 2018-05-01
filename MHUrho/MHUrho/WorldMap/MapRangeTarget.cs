@@ -16,14 +16,14 @@ namespace MHUrho.WorldMap
 
 		public Vector3 CurrentPosition { get; }
 
-		protected List<RangeTarget.IShooter> shooters;
+		protected List<RangeTargetComponent.IShooter> shooters;
 
 		LevelManager level;
 
 		protected MapRangeTarget(LevelManager level, Vector3 position) {
 			this.level = level;
 			this.CurrentPosition = position;
-			shooters = new List<RangeTarget.IShooter>();
+			shooters = new List<RangeTargetComponent.IShooter>();
 		}
 
 		internal static MapRangeTarget CreateNew(LevelManager level, Vector3 position) {
@@ -50,11 +50,11 @@ namespace MHUrho.WorldMap
 			yield return new Waypoint(CurrentPosition, 0);
 		}
 
-		public void AddShooter(RangeTarget.IShooter shooter) {
+		public void AddShooter(RangeTargetComponent.IShooter shooter) {
 			shooters.Add(shooter);
 		}
 
-		public void RemoveShooter(RangeTarget.IShooter shooter) {
+		public void RemoveShooter(RangeTargetComponent.IShooter shooter) {
 			shooters.Remove(shooter);
 
 			if (shooters.Count == 0) {

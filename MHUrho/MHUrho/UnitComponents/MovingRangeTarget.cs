@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -9,7 +10,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	public class MovingRangeTarget : RangeTarget {
+	public class MovingRangeTarget : RangeTargetComponent {
 
 		internal class Loader : DefaultComponentLoader {
 
@@ -63,6 +64,8 @@ namespace MHUrho.UnitComponents
 
 			Vector3 GetCurrentPosition(MovingRangeTarget target);
 
+			void OnHit(MovingRangeTarget target, Projectile projectile);
+
 		}
 
 		public static string ComponentName = nameof(MovingRangeTarget);
@@ -74,14 +77,17 @@ namespace MHUrho.UnitComponents
 
 		public override Vector3 CurrentPosition => notificationReceiver.GetCurrentPosition(this);
 
-		private INotificationReceiver notificationReceiver;
+		INotificationReceiver notificationReceiver;
 
-		protected MovingRangeTarget(ILevelManager level, INotificationReceiver notificationReceiver) {
+		protected MovingRangeTarget(ILevelManager level, INotificationReceiver notificationReceiver)
+			:base(level)
+		{
 			this.notificationReceiver = notificationReceiver;
 		}
 
 		protected MovingRangeTarget(int ID, ILevelManager level, INotificationReceiver notificationReceiver)
-			: base(ID) {
+			: base(ID, level)
+		{
 			this.notificationReceiver = notificationReceiver;
 		}
 
@@ -110,8 +116,27 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			base.RemovedFromEntity(entityDefaultComponents);
-			return RemovedFromEntity(typeof(MovingRangeTarget), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(MovingRangeTarget), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
+		}
+
+		public override void OnAttachedToNode(Node node) {
+			base.OnAttachedToNode(node);
+
+			node.NodeCollisionStart += Collision;
+		}
+
+		void Collision(NodeCollisionStartEventArgs e)
+		{
+			//TODO: instead of GetComponent, implement O(1) Node to Entity lookup
+			var projectile = e.OtherNode.GetComponent<Projectile>();
+			if (projectile == null) {
+				throw new InvalidOperationException("Hit by something that is not a projectile");
+			}
+
+			notificationReceiver.OnHit(this, projectile);
 		}
 	}
 }

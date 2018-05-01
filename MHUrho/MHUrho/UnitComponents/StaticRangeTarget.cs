@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -9,7 +10,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	public class StaticRangeTarget : RangeTarget {
+	public class StaticRangeTarget : RangeTargetComponent {
 
 		internal class Loader : DefaultComponentLoader {
 
@@ -61,6 +62,8 @@ namespace MHUrho.UnitComponents
 
 		public interface INotificationReceiver {
 
+			void OnHit(StaticRangeTarget rangeTarget);
+
 		}
 
 
@@ -74,11 +77,14 @@ namespace MHUrho.UnitComponents
 		public override Vector3 CurrentPosition { get; }
 
 		protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position)
-			: base(instanceID) {
+			: base(instanceID, level)
+		{
 			this.CurrentPosition = position;
 		}
 
-		protected StaticRangeTarget(ILevelManager level, Vector3 position) {
+		protected StaticRangeTarget(ILevelManager level, Vector3 position) 
+			:base(level)
+		{
 			this.CurrentPosition = position;
 		}
 
@@ -111,8 +117,10 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			base.RemovedFromEntity(entityDefaultComponents);
-			return RemovedFromEntity(typeof(StaticRangeTarget), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(StaticRangeTarget), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 	}
 }

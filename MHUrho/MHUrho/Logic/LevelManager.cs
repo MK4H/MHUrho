@@ -40,19 +40,19 @@ namespace MHUrho.Logic
 
 		public IEnumerable<Building> Buildings => buildings.Values;
 
-		private CameraController cameraController;
-		private IGameController inputController;
+		CameraController cameraController;
+		IGameController inputController;
 
-		private readonly Dictionary<int, Unit> units;
-		private readonly Dictionary<int, Player> players;
-		private readonly Dictionary<int, Building> buildings;
-		private readonly Dictionary<int, Projectile> projectiles;
+		readonly Dictionary<int, Unit> units;
+		readonly Dictionary<int, Player> players;
+		readonly Dictionary<int, Building> buildings;
+		readonly Dictionary<int, Projectile> projectiles;
 
-		private readonly Dictionary<int, Entity> entities;
+		readonly Dictionary<int, Entity> entities;
 
-		private readonly Dictionary<int, IRangeTarget> rangeTargets;
+		readonly Dictionary<int, IRangeTarget> rangeTargets;
 
-		private readonly Random rng;
+		readonly Random rng;
 
 		protected LevelManager(CameraController cameraController) {
 			this.units = new Dictionary<int, Unit>();
@@ -257,7 +257,7 @@ namespace MHUrho.Logic
 			var newUnit = unitType.CreateNewUnit(GetNewID(entities),unitNode, this, tile, player);
 			entities.Add(newUnit.ID, newUnit);
 			units.Add(newUnit.ID,newUnit);
-			players[player.ID].AddUnit(newUnit);
+			player.AddUnit(newUnit);
 			tile.AddPassingUnit(newUnit);
 
 			return newUnit;
@@ -328,9 +328,12 @@ namespace MHUrho.Logic
 
 		public bool RemoveUnit(Unit unit)
 		{
-			if (!unit.IsDeleted) {
+
+			if (unit.Enabled) {
 				unit.Kill();
 			}
+
+			unit.Node.Remove();
 			return units.Remove(unit.ID) && entities.Remove(unit.ID);
 		}
 

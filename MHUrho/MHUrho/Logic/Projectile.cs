@@ -88,6 +88,9 @@ namespace MHUrho.Logic
 				node.Position = storedProjectile.Position.ToVector3();
 
 				Projectile = new Projectile(instanceID, level, type);
+				node.AddComponent(Projectile);
+
+				node.NodeCollisionStart += Projectile.CollisionHandler;
 
 				Projectile.Plugin = Projectile.ProjectileType.GetInstancePluginForLoading();
 
@@ -119,16 +122,18 @@ namespace MHUrho.Logic
 			protected set => Node.Position = value;
 		}
 
+		/// <summary>
+		/// Default true
+		/// </summary>
+		public bool FaceInTheDirectionOfMovement { get; set; }
 
-		
-
-		
 		protected Projectile(int ID, ILevelManager level, ProjectileType type, IPlayer player)
 			:base(ID,level)
 		{
 			ReceiveSceneUpdates = true;
 			this.Player = player;
 			this.ProjectileType = type;
+			this.FaceInTheDirectionOfMovement = true;
 		}
 
 		protected Projectile(int ID,
@@ -138,7 +143,7 @@ namespace MHUrho.Logic
 		{
 			ReceiveSceneUpdates = true;
 			this.ProjectileType = type;
-
+			this.FaceInTheDirectionOfMovement = true;
 		}
 
 
@@ -152,6 +157,7 @@ namespace MHUrho.Logic
 			node.Position = position;
 			var projectile = new Projectile(ID, level, type, player);
 			node.AddComponent(projectile);
+			node.NodeCollisionStart += projectile.CollisionHandler;
 
 			projectile.Plugin = type.GetNewInstancePlugin(projectile, level);
 
@@ -160,6 +166,7 @@ namespace MHUrho.Logic
 
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {
 			ID = newID;
+			Enabled = true;
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
@@ -176,12 +183,36 @@ namespace MHUrho.Logic
 
 		public void Despawn() 
 		{
+			Enabled = false;
+			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {
+				
 				Node.Remove();
 			}
 			else {
 				Node.Enabled = false;
 			}
+		}
+
+		public bool Move(Vector3 movement)
+		{
+			if (!Map.IsInside(Position)) {
+				Plugin.OnTerrainHit();
+				return false;
+			}
+
+			Position += movement;
+
+			if (FaceInTheDirectionOfMovement) {
+				Node.LookAt(Position + movement, Node.Up);
+			}
+
+			if (!Map.IsInside(Position)) {
+				Plugin.OnTerrainHit();
+				return false;
+			}
+
+			return true;	
 		}
 
 		protected override void OnUpdate(float timeStep) 
@@ -192,6 +223,11 @@ namespace MHUrho.Logic
 			Plugin.OnUpdate(timeStep);
 		}
 
+		void CollisionHandler(NodeCollisionStartEventArgs e)
+		{
+			//TODO: Instead of linear time search implement constant time node to entity lookup
+			Plugin.OnEntityHit(e.OtherNode.GetComponent<Entity>());
+		}
 
 	}
 }

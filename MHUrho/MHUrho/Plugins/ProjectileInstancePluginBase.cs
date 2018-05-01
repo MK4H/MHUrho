@@ -41,5 +41,9 @@ namespace MHUrho.Plugins
 
 		public abstract bool ShootProjectile(Vector3 movement);
 
+		public abstract void OnEntityHit(Entity hitEntity);
+
+		public abstract void OnTerrainHit();
+
 	}
 }

@@ -78,25 +78,25 @@ namespace MHUrho.Input
 		public event OnMouseUp MouseUp;
 
 		
-		private readonly CameraController cameraController;
-		private readonly Octree octree;
+		readonly CameraController cameraController;
+		readonly Octree octree;
 
 		
 
-		private List<KeyAction> actions;
-		private Dictionary<Key, Actions> keyActions;
+		List<KeyAction> actions;
+		Dictionary<Key, Actions> keyActions;
 
-		private CameraMovementType cameraType;
+		CameraMovementType cameraType;
 
-		private const float CloseToBorder = 1/100f;
+		const float CloseToBorder = 1/100f;
 
-		private bool mouseInLeftRight;
-		private bool mouseInTopBottom;
+		bool mouseInLeftRight;
+		bool mouseInTopBottom;
 
 		/// <summary>
 		/// Is set to null at the end of MouseDown, MouseMove, MouseUp and ViewMoved handlers
 		/// </summary>
-		private ITile cachedTileUnderCursor;
+		ITile cachedTileUnderCursor;
 
 		public GameMandKController(MyGame game, ILevelManager levelManager, IPlayer player, CameraController cameraController) : base(game) {
 			this.CameraScrollSensitivity = 20f;
@@ -127,7 +127,9 @@ namespace MHUrho.Input
 
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
+			cameraController.Dispose();
 			UIManager.Dispose();
 			Disable();
 		}

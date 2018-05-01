@@ -90,11 +90,17 @@ namespace DefaultPackage
 			return false;
 		}
 
-		public void OnMovementStarted(BallisticProjectile flier) {
-			
+		public override void OnEntityHit(Entity hitEntity)
+		{
+			if (hitEntity.Player == projectile.Player) {
+
+			}
+
+			projectile.Despawn();
 		}
 
-		public void OnGroundHit(BallisticProjectile flier) {
+		public override void OnTerrainHit()
+		{
 			projectile.Despawn();
 		}
 

@@ -55,9 +55,11 @@ namespace DefaultPackage
 									Shooter.INotificationReceiver,
 									MovingRangeTarget.INotificationReceiver{
 
-		private AnimationController animationController;
-		private WorldWalker walker;
-		private Shooter shooter;
+		AnimationController animationController;
+		WorldWalker walker;
+		Shooter shooter;
+
+		bool dying;
 
 		public ChickenInstance() {
 
@@ -97,6 +99,13 @@ namespace DefaultPackage
 		}
 
 		public override void OnUpdate(float timeStep) {
+			if (dying) {
+				if (animationController.IsAtEnd("Chicken/Models/Dying.ani")) {
+					Unit.Kill();
+				}
+				return;
+			}
+
 			if (shooter.Target != null) {
 				var targetPos = shooter.Target.CurrentPosition;
 
@@ -131,7 +140,7 @@ namespace DefaultPackage
 		public void OnUnitSelected(UnitSelector selector) {
 			if (!walker.MovementStarted) {
 				animationController.Play("Chicken/Models/Idle.ani", 0, true);
-			}	
+			}
 		}
 
 		public void OnUnitDeselected(UnitSelector selector) {
@@ -145,7 +154,7 @@ namespace DefaultPackage
 		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs)
 		{
 			IRangeTarget rangeTarget;
-			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTarget>()) != null)) {
+			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTargetComponent>()) != null)) {
 				orderArgs.Executed = shooter.ShootAt(rangeTarget);
 				return;
 			}
@@ -188,6 +197,12 @@ namespace DefaultPackage
 
 		public Vector3 GetCurrentPosition(MovingRangeTarget movingRangeTarget) {
 			return Unit.Position + new Vector3(0, 0.5f, 0);
+		}
+
+		public void OnHit(MovingRangeTarget target, Projectile projectile)
+		{
+			animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
+			dying = true;
 		}
 
 		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints(MovingRangeTarget movingRangeTarget)

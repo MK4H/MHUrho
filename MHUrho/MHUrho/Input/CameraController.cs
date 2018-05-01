@@ -42,34 +42,34 @@ namespace MHUrho.Input
 		/// <summary>
 		/// For storing the default camera holder while following unit or other things
 		/// </summary>
-		private Node defaultCameraHolder;
+		Node defaultCameraHolder;
 
-		private Vector3 storedFixedOffset;
+		Vector3 storedFixedOffset;
 		
 		/// <summary>
 		/// Point on the ground
 		/// Camera follows this point at constant offset while not in FreeFloat mode
 		/// </summary>
-		private Node cameraHolder;
+		Node cameraHolder;
 		/// <summary>
 		/// Node of the camera itself
 		/// </summary>
-		private Node cameraNode;
+		Node cameraNode;
 		
 
-		private Vector3 decayingMovement;
-		private Vector3 staticMovement;
+		Vector3 decayingMovement;
+		Vector3 staticMovement;
 
 		/// <summary>
 		/// Only yaw and pitch, no roll
 		/// </summary>
-		private Vector2 decayingRotation;
-		private Vector2 staticRotation;
+		Vector2 decayingRotation;
+		Vector2 staticRotation;
 
-		private Vector3 fixedPosition;
-		private Quaternion fixedRotation;
+		Vector3 fixedPosition;
+		Quaternion fixedRotation;
 
-		private const float NearZero = 0.001f;
+		const float NearZero = 0.001f;
 
 		public static CameraController GetCameraController(Scene scene) {
 			Node cameraHolder = scene.CreateChild(name: "CameraHolder");
@@ -286,7 +286,7 @@ namespace MHUrho.Input
 		/// </summary>
 		/// <param name="deltaX">Movement of the camera in left/right direction</param>
 		/// <param name="deltaZ">Movement of the camera in forward/backward direction</param>
-		private void MoveHorizontal(float deltaX, float deltaZ) {
+		void MoveHorizontal(float deltaX, float deltaZ) {
 			var delta3D = new Vector3(deltaX, 0, deltaZ);
 			var rotation = Quaternion.FromAxisAngle(cameraHolder.Up, cameraHolder.Rotation.YawAngle);
 
@@ -298,14 +298,14 @@ namespace MHUrho.Input
 		/// Moves camera in the Y axis, + is up, - is down
 		/// </summary>
 		/// <param name="delta">Amount of movement</param>
-		private void MoveVertical(float delta) {
+		void MoveVertical(float delta) {
 			var position = cameraNode.Position;
 			position.Y += delta;
 			cameraNode.Position = position;
 			cameraNode.LookAt(cameraHolder.Position, Vector3.UnitY);
 		}
 
-		private void MoveRelativeToLookingDirection(Vector3 delta) {
+		void MoveRelativeToLookingDirection(Vector3 delta) {
 			if (delta != Vector3.Zero) {
 				delta = cameraNode.WorldRotation * delta;
 				cameraNode.Translate(new Vector3(0, delta.Y, 0), TransformSpace.Parent);
@@ -314,7 +314,7 @@ namespace MHUrho.Input
 		}
 
 		//TODO: WEIRD vertical rotation, changes with distance from [0,0]
-		private void RotateCameraFixed(Vector2 rot) {
+		void RotateCameraFixed(Vector2 rot) {
 			cameraHolder.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y));
 
 			if ((5 < cameraNode.Rotation.PitchAngle && rot.X < 0) || (cameraNode.Rotation.PitchAngle < 85 && rot.X > 0)) {
@@ -323,7 +323,7 @@ namespace MHUrho.Input
 			
 		}
 
-		private void RotateCameraFree(Vector2 rot) {
+		void RotateCameraFree(Vector2 rot) {
 			cameraNode.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, -rot.Y),TransformSpace.Parent);
 			cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Right, rot.X),TransformSpace.Parent);
 		}

@@ -49,5 +49,9 @@ namespace MHUrho.Logic {
 		Entity GetEntity(int ID);
 
 		IRangeTarget GetRangeTarget(int ID);
+
+		int RegisterRangeTarget(IRangeTarget rangeTarget);
+
+		bool UnRegisterRangeTarget(int ID);
 	}
 }

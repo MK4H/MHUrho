@@ -392,9 +392,11 @@ namespace MHUrho.Logic
 
 		public void Kill()
 		{
+			Enabled = false;
 			Tile.RemoveUnit(this);
-			Node.Remove();
+			Player.RemoveUnit(this);
 			Level.RemoveUnit(this);
+			Dispose();
 		}
 		#endregion
 
@@ -402,7 +404,7 @@ namespace MHUrho.Logic
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
-			if (!Enabled) return;
+			if (!EnabledEffective) return;
 
 			Plugin.OnUpdate(timeStep);
 		}

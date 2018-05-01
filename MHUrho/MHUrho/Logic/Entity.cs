@@ -54,7 +54,7 @@ namespace MHUrho.Logic
 
 		public void AddComponent(DefaultComponent defaultComponent) {
 			Node.AddComponent(defaultComponent);
-			((IByTypeQueryable) defaultComponent).AddedToEntity(defaultComponents);
+			((IByTypeQueryable) defaultComponent).AddedToEntity(this, defaultComponents);
 		}
 
 		public bool RemoveComponent(DefaultComponent defaultComponent) {

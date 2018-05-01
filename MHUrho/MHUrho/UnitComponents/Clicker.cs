@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -32,7 +33,7 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 				}
 
-				Clicker = new Clicker(notificationReceiver);
+				Clicker = new Clicker(notificationReceiver, level);
 			}
 
 			public override void ConnectReferences(LevelManager level) {
@@ -60,7 +61,9 @@ namespace MHUrho.UnitComponents
 
 		private INotificationReceiver notificationReceiver;
 
-		protected Clicker(INotificationReceiver notificationReceiver) {
+		protected Clicker(INotificationReceiver notificationReceiver, ILevelManager level) 
+			:base(level)
+		{
 			this.notificationReceiver = notificationReceiver;
 		}
 
@@ -71,7 +74,7 @@ namespace MHUrho.UnitComponents
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new Clicker(instancePlugin);
+			return new Clicker(instancePlugin, level);
 		}
 
 
@@ -85,12 +88,16 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(Clicker), entityDefaultComponents);
 
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			return RemovedFromEntity(typeof(Clicker), entityDefaultComponents);
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(Clicker), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
 		}
 
 	}
