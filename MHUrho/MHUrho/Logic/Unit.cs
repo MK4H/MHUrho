@@ -392,11 +392,13 @@ namespace MHUrho.Logic
 
 		public void Kill()
 		{
-			Enabled = false;
+
 			Tile.RemoveUnit(this);
 			Player.RemoveUnit(this);
-			Level.RemoveUnit(this);
+			LegNode.Remove();
+			LegNode.Dispose();
 			Dispose();
+			Level.RemoveUnit(this);
 		}
 		#endregion
 
@@ -415,7 +417,7 @@ namespace MHUrho.Logic
 
 
 
-		private bool CheckTile(Vector3 newPosition) {
+		bool CheckTile(Vector3 newPosition) {
 			ITile newTile;
 			//Still in the same tile
 			if ((newTile = Tile.Map.GetContainingTile(newPosition)) == Tile) {
@@ -434,7 +436,7 @@ namespace MHUrho.Logic
 			return true;
 		}
 
-		private bool IsTileCorner(Vector3 position) {
+		bool IsTileCorner(Vector3 position) {
 			var x = position.X - (float) Math.Floor(position.X);
 			var z = position.Z - (float) Math.Floor(position.Z);
 			return (x < 0.05f || 0.95f < x) && (z < 0.05f || 0.95f < z);

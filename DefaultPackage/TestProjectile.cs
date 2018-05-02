@@ -74,7 +74,7 @@ namespace DefaultPackage
 		{
 			this.rng = new Random(seedRng.Next());
 			flier = BallisticProjectile.GetInstanceFor(this, level);
-			projectile.Node.AddComponent(flier);
+			projectile.AddComponent(flier);
 			myType = type;
 		}
 

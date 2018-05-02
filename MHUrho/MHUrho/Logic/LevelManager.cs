@@ -328,13 +328,13 @@ namespace MHUrho.Logic
 
 		public bool RemoveUnit(Unit unit)
 		{
+			var removed = units.Remove(unit.ID) && entities.Remove(unit.ID);
 
-			if (unit.Enabled) {
+			if (!unit.IsDeleted) {
 				unit.Kill();
 			}
 
-			unit.Node.Remove();
-			return units.Remove(unit.ID) && entities.Remove(unit.ID);
+			return removed;
 		}
 
 		public bool RemoveBuilding(Building building)

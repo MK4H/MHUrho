@@ -203,6 +203,8 @@ namespace DefaultPackage
 		{
 			animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
 			dying = true;
+			shooter.Enabled = false;
+			walker.Enabled = false;
 		}
 
 		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints(MovingRangeTarget movingRangeTarget)

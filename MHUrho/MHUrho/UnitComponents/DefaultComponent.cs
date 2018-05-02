@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -55,13 +56,44 @@ namespace MHUrho.UnitComponents
 		}
 
 		void IByTypeQueryable.AddedToEntity(Entity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			Entity = entity;
-			AddedToEntity(entityDefaultComponents);
+
+			/*
+			 * If called from OnAttachedToNode, entity will already be set
+			 * So i need to just add it to the correct spots in the dictionary
+			 *
+			 * Else it was called from Entity.AddComponent and i need to add the component to
+			 * Engines node hierarchy here
+			 * that will cause the OnAttachedToNode override to be called, in which i set the Entity and
+			 * call Entity.AddComponent second time, now with the Entity set, which will go through the if here
+			 *	
+			 */
+			if (Entity != null) {
+				Debug.Assert(Entity == entity);
+				AddedToEntity(entityDefaultComponents);
+			}
+			else {
+				entity.Node.AddComponent(this);
+			}
+
 		}
 
 		bool IByTypeQueryable.RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			Entity = null;
 			return RemovedFromEntity(entityDefaultComponents);
+		}
+
+		public override void OnAttachedToNode(Node node) {
+			base.OnAttachedToNode(node);
+
+			/*
+			 * Called from Node.AddComponent, need to call Entity.AddComponent
+			 * Set Entity to distinguish the different paths, so on this.AddedToEntity call from Entity
+			 *  i dont add the component to the node second time
+			 */
+			if (Entity == null) {
+				Entity = Node.GetComponent<Entity>();
+				Entity.AddComponent(this);
+			}
 		}
 
 		protected override void OnUpdate(float timeStep)
