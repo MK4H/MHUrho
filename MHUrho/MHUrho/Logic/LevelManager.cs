@@ -232,7 +232,7 @@ namespace MHUrho.Logic
 			inputController.Dispose();
 			inputController = null;
 			Map.Dispose();
-			Scene.Clear();
+			Scene.Dispose();
 			
 			CurrentLevel = null;
 		}
