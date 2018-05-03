@@ -8,7 +8,7 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class ProjectileInstancePlugin : InstancePluginBase
+	public abstract class ProjectileInstancePlugin : InstancePlugin
 	{
 		protected Projectile projectile;
 
