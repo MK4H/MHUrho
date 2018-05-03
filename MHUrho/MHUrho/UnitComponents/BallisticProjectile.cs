@@ -77,7 +77,7 @@ namespace MHUrho.UnitComponents
 
 		public Vector3 Movement { get; private set; }
 
-		public Projectile Projectile => (Projectile)Entity;
+		public IProjectile Projectile => (IProjectile)Entity;
 
 		INotificationReceiver notificationReceiver;
 
@@ -358,7 +358,7 @@ namespace MHUrho.UnitComponents
 			base.AddedToEntity(entityDefaultComponents);
 			
 
-			if (Entity != null && !(Entity is Projectile)) {
+			if (Entity != null && !(Entity is IProjectile)) {
 				throw new InvalidOperationException("Cannot add BallisticProjectile to Entity that is not a projectile");
 			}
 

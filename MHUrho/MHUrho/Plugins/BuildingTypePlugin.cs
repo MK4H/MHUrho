@@ -18,7 +18,7 @@ namespace MHUrho.Plugins
 		/// <param name="level">level in which the building is created</param>
 		/// <param name="building">building Plugin class</param>
 		/// <returns>New instance in default state</returns>
-		public abstract BuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building);
+		public abstract BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building);
 
 		/// <summary>
 		/// Creates instance of <see cref="BuildingInstancePlugin"/> that will be loaded by <see cref="BuildingInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>

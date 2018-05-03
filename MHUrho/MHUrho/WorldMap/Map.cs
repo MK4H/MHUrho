@@ -134,12 +134,10 @@ namespace MHUrho.WorldMap
 			}
 		}
 
-		private class BorderTile : ITile {
-			Building ITile.Building => throw new InvalidOperationException("Cannot add building to Border tile");
+		class BorderTile : ITile {
+			IBuilding ITile.Building => throw new InvalidOperationException("Cannot add building to Border tile");
 
-			Unit ITile.Unit => throw new InvalidOperationException("Cannot add unit to Border tile");
-
-			IReadOnlyList<Unit> ITile.PassingUnits => throw new InvalidOperationException("Cannot add unit to Border tile");
+			IReadOnlyList<IUnit> ITile.Units => throw new InvalidOperationException("Cannot add unit to Border tile");
 
 			float ITile.MovementSpeedModifier => throw new InvalidOperationException("Cannot move through Border tile");
 
@@ -200,30 +198,21 @@ namespace MHUrho.WorldMap
 				storage = null;
 			}
 
-			void ITile.AddPassingUnit(Unit unit) {
+			void ITile.AddUnit(IUnit unit) {
 				throw new InvalidOperationException("Cannot add unit to Border tile");
 			}
 
-			bool ITile.TryAddOwningUnit(Unit unit) {
-				throw new InvalidOperationException("Cannot add unit to Border tile");
-			}
-
-			void ITile.RemoveUnit(Unit unit) {
+			void ITile.RemoveUnit(IUnit unit) {
 				throw new InvalidOperationException("Cannot remove unit from Border tile");
 			}
 
-			public void AddBuilding(Building building) {
+			public void AddBuilding(IBuilding building) {
 				throw new InvalidOperationException("Cannot add building to Border tile");
 			}
 
-			public void RemoveBuilding(Building building) {
+			public void RemoveBuilding(IBuilding building) {
 				throw new InvalidOperationException("Cannot remove building from Border tile");
 			}
-
-			IEnumerable<Unit> ITile.GetAllUnits() {
-				return Enumerable.Empty<Unit>();
-			}
-
 			StTile ITile.Save() {
 				throw new InvalidOperationException("Cannot save BorderTile as a tile");
 			}
@@ -260,10 +249,6 @@ namespace MHUrho.WorldMap
 
 			public void CornerHeightChange() {
 				//Nothing
-			}
-
-			public Path GetPath(Unit forUnit) {
-				return null;
 			}
 
 			public BorderTile(StBorderTile stBorderTile, Map map) {
@@ -341,32 +326,32 @@ namespace MHUrho.WorldMap
 
 		public ILevelManager LevelManager => levelManager;
 
-		private readonly ITile[] tiles;
+		readonly ITile[] tiles;
 
-		private readonly Node node;
+		readonly Node node;
 
-		private MapGraphics graphics;
+		MapGraphics graphics;
 
-		private LevelManager levelManager;
+		LevelManager levelManager;
 
-		private Dictionary<Vector3, MapRangeTarget> mapRangeTargets;
+		Dictionary<Vector3, MapRangeTarget> mapRangeTargets;
 
 		/// <summary>
 		/// Width of the whole map with borders included
 		/// </summary>
-		private int WidthWithBorders => Width + 2;
+		int WidthWithBorders => Width + 2;
 		/// <summary>
 		/// Length of the whole map with the borders included
 		/// </summary>
-		private int LengthWithBorders => Length + 2;
+		int LengthWithBorders => Length + 2;
 
-		private int LeftWithBorders => Left - 1;
+		int LeftWithBorders => Left - 1;
 
-		private int RightWithBorders => Right + 1;
+		int RightWithBorders => Right + 1;
 
-		private int TopWithBorders => Top - 1;
+		int TopWithBorders => Top - 1;
 
-		private int BottomWithBorders => Bottom + 1;
+		int BottomWithBorders => Bottom + 1;
 
 		
 
@@ -712,7 +697,7 @@ namespace MHUrho.WorldMap
 							continue;
 						}
 
-						if (GetTileByTopLeftCorner(pos).Unit == null) {
+						if (GetTileByTopLeftCorner(pos).Units.Count == 0) {
 							return GetTileByTopLeftCorner(pos);
 						}
 					}
@@ -1261,27 +1246,27 @@ namespace MHUrho.WorldMap
 			node.Dispose();
 		}
 
-		private void BuildGeometry() {
+		void BuildGeometry() {
 			graphics = MapGraphics.Build(node, 
 										 this, 
 										 tiles, 
 										 new IntVector2(WidthWithBorders, LengthWithBorders));
 		}
 
-		private int GetTileIndex(int x, int y) {
+		int GetTileIndex(int x, int y) {
 			return x + y * WidthWithBorders;
 		}
 
-		private int GetTileIndex(IntVector2 location) {
+		int GetTileIndex(IntVector2 location) {
 			return GetTileIndex(location.X, location.Y);
 		}
 
-		private int GetTileIndex(ITile tile) {
+		int GetTileIndex(ITile tile) {
 			return GetTileIndex(tile.MapLocation);
 		}
 
 	 
-		private bool IsBorder(int x, int y) {
+		bool IsBorder(int x, int y) {
 			return IsLeftBorder(x,y) ||
 				   IsRightBorder(x,y) ||
 				   IsTopBorder(x,y) ||
@@ -1289,15 +1274,15 @@ namespace MHUrho.WorldMap
 
 		}
 
-		private bool IsBorder(IntVector2 location) {
+		bool IsBorder(IntVector2 location) {
 			return IsBorder(location.X, location.Y);
 		}
 
-		private bool IsBorder(ITile tile) {
+		bool IsBorder(ITile tile) {
 			return IsBorder(tile.MapLocation);
 		}
 
-		private BorderType GetBorderType(int x, int y) {
+		BorderType GetBorderType(int x, int y) {
 			if (IsLeftBorder(x,y)) {
 				if (IsTopBorder(x, y)) {
 					return BorderType.TopLeft;
@@ -1331,39 +1316,39 @@ namespace MHUrho.WorldMap
 			return BorderType.None;
 		}
 
-		private BorderType GetBorderType(IntVector2 location) {
+		BorderType GetBorderType(IntVector2 location) {
 			return GetBorderType(location.X, location.Y);
 		}
 
-		private bool IsTopBorder(int x, int y) {
+		bool IsTopBorder(int x, int y) {
 			return (0 <= y && y < Top);
 		}
 
-		private bool IsTopBorder(IntVector2 location) {
+		bool IsTopBorder(IntVector2 location) {
 			return IsTopBorder(location.X, location.Y);
 		}
 
-		private bool IsBottomBorder(int x, int y) {
+		bool IsBottomBorder(int x, int y) {
 			return (Bottom + 1 <= y && y < WidthWithBorders);
 		}
 
-		private bool IsBottomBorder(IntVector2 location) {
+		bool IsBottomBorder(IntVector2 location) {
 			return IsBottomBorder(location.X, location.Y);
 		}
 
-		private bool IsLeftBorder(int x, int y) {
+		bool IsLeftBorder(int x, int y) {
 			return (0 <= x && x < Left);
 		}
 
-		private bool IsLeftBorder(IntVector2 location) {
+		bool IsLeftBorder(IntVector2 location) {
 			return IsLeftBorder(location.X, location.Y);
 		}
 
-		private bool IsRightBorder(int x, int y) {
+		bool IsRightBorder(int x, int y) {
 			return (Right + 1 <= x && x < WidthWithBorders);
 		}
 
-		private bool IsRightBorder(IntVector2 location) {
+		bool IsRightBorder(IntVector2 location) {
 			return IsRightBorder(location.X, location.Y);
 		}
 		/// <summary>
@@ -1372,7 +1357,7 @@ namespace MHUrho.WorldMap
 		/// <param name="x">top left corner X coord</param>
 		/// <param name="y">top left corner Y coord</param>
 		/// <returns></returns>
-		private ITile GetTileWithBorders(int x, int y) {
+		ITile GetTileWithBorders(int x, int y) {
 			if (LeftWithBorders <= x &&
 				x <= RightWithBorders &&
 				TopWithBorders <= y &&
@@ -1383,47 +1368,47 @@ namespace MHUrho.WorldMap
 			return null;
 		}
 
-		private ITile GetTileWithBorders(IntVector2 coords) {
+		ITile GetTileWithBorders(IntVector2 coords) {
 			return GetTileWithBorders(coords.X, coords.Y);
 		}
 
-		private ITile TileByTopLeftCorner(IntVector2 topLeftCorner, bool withBorders) {
+		ITile TileByTopLeftCorner(IntVector2 topLeftCorner, bool withBorders) {
 			return withBorders ? GetTileWithBorders(topLeftCorner) : GetTileByTopLeftCorner(topLeftCorner);
 		}
 
-		private ITile TileByTopRightCorner(IntVector2 topRightCorner, bool withBorders) {
+		ITile TileByTopRightCorner(IntVector2 topRightCorner, bool withBorders) {
 			IntVector2 topLeft = topRightCorner + new IntVector2(-1, 0);
 			return withBorders ? GetTileWithBorders(topLeft) : GetTileByTopLeftCorner(topLeft);
 		}
 
-		private ITile TileByBottomLeftCorner(IntVector2 bottomLeftCorner, bool withBorders) {
+		ITile TileByBottomLeftCorner(IntVector2 bottomLeftCorner, bool withBorders) {
 			IntVector2 topLeft = bottomLeftCorner + new IntVector2(0, -1);
 			return withBorders ? GetTileWithBorders(topLeft) : GetTileByTopLeftCorner(topLeft);
 		}
-		private ITile TileByBottomRightCorner(IntVector2 bottomRightCorner, bool withBorders) {
+		ITile TileByBottomRightCorner(IntVector2 bottomRightCorner, bool withBorders) {
 			IntVector2 topLeft = bottomRightCorner + new IntVector2(-1, -1);
 			return withBorders ? GetTileWithBorders(topLeft) : GetTileByTopLeftCorner(topLeft);
 		}
 
-		private bool IsBorderCorner(int x, int y) {
+		bool IsBorderCorner(int x, int y) {
 			return (LeftWithBorders <= x && x <= Left) ||
 				   (Right <= x && x <= RightWithBorders + 1) || //+1 because RightWithBorders contains coords of the topLeftCorner
 				   (TopWithBorders <= y && y <= Top) ||
 				   (Bottom <= y && y <= BottomWithBorders + 1);
 		}
 
-		private bool IsBorderCorner(IntVector2 corner) {
+		bool IsBorderCorner(IntVector2 corner) {
 			return IsBorderCorner(corner.X, corner.Y);
 		}
 
-		private bool IsTileSplitFromTopLeftToBottomRight(float topLeftHeight,
+		bool IsTileSplitFromTopLeftToBottomRight(float topLeftHeight,
 														 float topRightHeight,
 														 float bottomLeftHeight,
 														 float bottomRightHeight) {
 			return topLeftHeight + bottomRightHeight >= topRightHeight + bottomLeftHeight;
 		}
 
-		private bool IsTileSplitFromTopLeftToBottomRight(ITile tile) {
+		bool IsTileSplitFromTopLeftToBottomRight(ITile tile) {
 			return IsTileSplitFromTopLeftToBottomRight(tile.TopLeftHeight,
 													   tile.TopRightHeight,
 													   tile.BottomLeftHeight,

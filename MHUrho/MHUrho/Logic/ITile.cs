@@ -17,21 +17,16 @@ namespace MHUrho.Logic
 	};
 	public interface ITile {
 
-		/// <summary>
-		/// Unit that owns the tile, there can only be one
-		/// </summary>
-		Unit Unit { get; }
 
 		/// <summary>
-		/// Other units that are passing through the tile
-		/// Units cannot stop in this tile if Unit is not null
+		/// Units inside the tile
 		/// </summary>
-		IReadOnlyList<Unit> PassingUnits { get; }
+		IReadOnlyList<IUnit> Units { get; }
 
 		/// <summary>
 		/// Building that owns this tile
 		/// </summary>
-		Building Building { get; }
+		IBuilding Building { get; }
 
 		/// <summary>
 		/// Default modifier of the movement speed of units passing through this tile
@@ -100,26 +95,17 @@ namespace MHUrho.Logic
 
 		void FinishLoading();
 
-		void AddPassingUnit(Unit unit);
+		void AddUnit(IUnit unit);
 
 		/// <summary>
-		/// Tries to set unit as owning unit, succedes if there is not one already
-		/// </summary>
-		/// <param name="unit">The new owning unit</param>
-		/// <returns>true if set, false if not set</returns>
-		bool TryAddOwningUnit(Unit unit);
-
-		/// <summary>
-		/// Removes a unit from this tile, either the owning unit or one of the passing units
+		/// Removes a unit from this tile
 		/// </summary>
 		/// <param name="unit">the unit to remove</param>
-		void RemoveUnit(Unit unit);
+		void RemoveUnit(IUnit unit);
 
-		void AddBuilding(Building building);
+		void AddBuilding(IBuilding building);
 
-		void RemoveBuilding(Building building);
-
-		IEnumerable<Unit> GetAllUnits();
+		void RemoveBuilding(IBuilding building);
 
 		StTile Save();
 

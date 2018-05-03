@@ -20,33 +20,33 @@ namespace MHUrho.Logic {
 
 		event OnUpdateDelegate Update;
 
-		IEnumerable<Unit> Units { get; }
+		IEnumerable<IUnit> Units { get; }
 
-		IEnumerable<Player> Players { get; }
+		IEnumerable<IPlayer> Players { get; }
 
-		IEnumerable<Building> Buildings { get; }
+		IEnumerable<IBuilding> Buildings { get; }
 
-		Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
+		IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
 
-		Building BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player);
+		IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player);
 
-		Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target);
+		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target);
 
-		Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement);
+		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement);
 
-		bool RemoveUnit(Unit unit);
+		bool RemoveUnit(IUnit unit);
 
-		bool RemoveBuilding(Building building);
+		bool RemoveBuilding(IBuilding building);
 
-		bool RemoveProjectile(Projectile projectile);
+		bool RemoveProjectile(IProjectile projectile);
 
-		Unit GetUnit(int ID);
+		IUnit GetUnit(int ID);
 
-		Building GetBuilding(int ID);
+		IBuilding GetBuilding(int ID);
 
-		Player GetPlayer(int ID);
+		IPlayer GetPlayer(int ID);
 
-		Entity GetEntity(int ID);
+		IEntity GetEntity(int ID);
 
 		IRangeTarget GetRangeTarget(int ID);
 

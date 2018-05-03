@@ -14,8 +14,7 @@ using Urho.Physics;
 
 namespace MHUrho.Logic
 {
-	public class Building : Entity
-	{
+	public class Building : Entity, IBuilding {
 		internal class Loader : ILoader {
 			public Building Building { get; private set; }
 			
@@ -61,7 +60,7 @@ namespace MHUrho.Logic
 													level.Map.GetHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y,
 													center.Y);
 
-				newBuilding.plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
+				newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 
 
 
@@ -83,7 +82,7 @@ namespace MHUrho.Logic
 													Location = building.Location.ToStIntVector2(),
 													UserPlugin = new PluginData()
 												};
-				building.plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
+				building.Plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
 
 				foreach (var component in building.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -118,7 +117,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Building.plugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
+				Building.Plugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
 			}
 
 			public void FinishLoading() {
@@ -150,7 +149,7 @@ namespace MHUrho.Logic
 								Vector3.Zero,
 								Quaternion.Identity);
 
-				Building.plugin = type.GetInstancePluginForLoading();
+				Building.Plugin = type.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
 					var componentLoader = 
@@ -158,7 +157,7 @@ namespace MHUrho.Logic
 							.StartLoadingComponent(defaultComponent.Key,
 													defaultComponent.Value,
 													level,
-													Building.plugin);
+													Building.Plugin);
 
 					componentLoaders.Add(componentLoader);
 					Building.AddComponent(componentLoader.Component);
@@ -197,11 +196,9 @@ namespace MHUrho.Logic
 
 		public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
-		public object Plugin => plugin;
+		public BuildingInstancePlugin Plugin { get; private set; }
 
 		ITile[] tiles;
-
-		BuildingInstancePlugin plugin;
 
 		protected Building(int id, ILevelManager level, IntVector2 topLeftCorner, BuildingType type, IPlayer player) 
 			:base(id, level)
@@ -233,8 +230,14 @@ namespace MHUrho.Logic
 			return Loader.Save(this);
 		}
 
+		public override void Accept(IEntityVisitor visitor) {
+			visitor.Visit(this);
+		}
 
 		public void Kill() {
+
+			RemovedFromLevel = true;
+
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);
 			}
@@ -251,19 +254,19 @@ namespace MHUrho.Logic
 			base.OnUpdate(timeStep);
 			if (!EnabledEffective) return;
 
-			plugin.OnUpdate(timeStep);
+			Plugin.OnUpdate(timeStep);
 		}
 
-		private int GetTileIndex(int x, int y) {
+		int GetTileIndex(int x, int y) {
 			return x + y * BuildingType.Size.X;
 		}
 
-		private int GetTileIndex(IntVector2 location) {
+		int GetTileIndex(IntVector2 location) {
 			return GetTileIndex(location.X, location.Y);
 		}
 
 
-		private ITile[] GetTiles(Map map, BuildingType type, IntVector2 topLeft) {
+		ITile[] GetTiles(Map map, BuildingType type, IntVector2 topLeft) {
 			var newTiles = new ITile[type.Size.X * type.Size.Y];
 
 			for (int y = 0; y < type.Size.Y; y++) {

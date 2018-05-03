@@ -24,9 +24,9 @@ namespace MHUrho.UnitComponents
 
 		public abstract bool Order(ITile tile, MouseButton button, MouseButton buttons, int qualifiers);
 
-		public abstract bool Order(Unit unit, MouseButton button, MouseButton buttons, int qualifiers);
+		public abstract bool Order(IUnit unit, MouseButton button, MouseButton buttons, int qualifiers);
 
-		public abstract bool Order(Building unit, MouseButton button, MouseButton buttons, int qualifiers);
+		public abstract bool Order(IBuilding unit, MouseButton button, MouseButton buttons, int qualifiers);
 
 		public abstract void Select();
 

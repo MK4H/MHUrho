@@ -150,7 +150,7 @@ namespace MHUrho.EditorTools
 		//TODO: Select other things too
 		void SelectUnitsInTile(ITile tile) {
 			//TODO: Maybe delete selector class, just search for unit
-			foreach (var unit in tile.GetAllUnits()) {
+			foreach (var unit in tile.Units) {
 				UnitSelector selector = unit.GetDefaultComponent<UnitSelector>();
 
 				//Not owned by player

@@ -10,9 +10,9 @@ namespace MHUrho.Plugins
 {
 	public abstract class ProjectileInstancePlugin : InstancePlugin
 	{
-		protected Projectile projectile;
+		protected IProjectile projectile;
 
-		protected ProjectileInstancePlugin(ILevelManager level, Projectile projectile) 
+		protected ProjectileInstancePlugin(ILevelManager level, IProjectile projectile) 
 			:base(level)
 		{
 			this.projectile = projectile;
@@ -29,7 +29,7 @@ namespace MHUrho.Plugins
 		/// <param name="projectile"></param>
 		/// <param name="pluginData">stored state of the building plugin</param>
 		/// <returns>Instance loaded into saved state</returns>
-		public abstract void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData);
+		public abstract void LoadState(ILevelManager level, IProjectile projectile, PluginDataWrapper pluginData);
 
 		/// <summary>
 		/// Reinitializes this instance into default state, to allow for projectile pooling
@@ -41,7 +41,7 @@ namespace MHUrho.Plugins
 
 		public abstract bool ShootProjectile(Vector3 movement);
 
-		public abstract void OnEntityHit(Entity hitEntity);
+		public abstract void OnEntityHit(IEntity hitEntity);
 
 		public abstract void OnTerrainHit();
 

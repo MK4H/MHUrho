@@ -18,7 +18,7 @@ namespace MHUrho.Plugins
 		/// <param name="level">level in which the building is created</param>
 		/// <param name="projectile">projectile Plugin class</param>
 		/// <returns>New instance in default state</returns>
-		public abstract ProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile);
+		public abstract ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile);
 
 
 

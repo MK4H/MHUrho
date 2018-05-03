@@ -34,32 +34,32 @@ namespace MHUrho.Logic
 
 		public event OnUpdateDelegate Update;
 
-		public IEnumerable<Unit> Units => units.Values;
+		public IEnumerable<IUnit> Units => units.Values;
 
-		public IEnumerable<Player> Players => players.Values;
+		public IEnumerable<IPlayer> Players => players.Values;
 
-		public IEnumerable<Building> Buildings => buildings.Values;
+		public IEnumerable<IBuilding> Buildings => buildings.Values;
 
 		CameraController cameraController;
 		IGameController inputController;
 
-		readonly Dictionary<int, Unit> units;
-		readonly Dictionary<int, Player> players;
-		readonly Dictionary<int, Building> buildings;
-		readonly Dictionary<int, Projectile> projectiles;
+		readonly Dictionary<int, IUnit> units;
+		readonly Dictionary<int, IPlayer> players;
+		readonly Dictionary<int, IBuilding> buildings;
+		readonly Dictionary<int, IProjectile> projectiles;
 
-		readonly Dictionary<int, Entity> entities;
+		readonly Dictionary<int, IEntity> entities;
 
 		readonly Dictionary<int, IRangeTarget> rangeTargets;
 
 		readonly Random rng;
 
 		protected LevelManager(CameraController cameraController) {
-			this.units = new Dictionary<int, Unit>();
-			this.players = new Dictionary<int, Player>();
-			this.buildings = new Dictionary<int, Building>();
-			this.projectiles = new Dictionary<int, Projectile>();
-			this.entities = new Dictionary<int, Entity>();
+			this.units = new Dictionary<int, IUnit>();
+			this.players = new Dictionary<int, IPlayer>();
+			this.buildings = new Dictionary<int, IBuilding>();
+			this.projectiles = new Dictionary<int, IProjectile>();
+			this.entities = new Dictionary<int, IEntity>();
 			this.rangeTargets = new Dictionary<int, IRangeTarget>();
 			this.rng = new Random();
 
@@ -246,7 +246,7 @@ namespace MHUrho.Logic
 		/// <param name="tile">Tile to spawn the unit at</param>
 		/// <param name="player">owner of the new unit</param>
 		/// <returns>The new unit if a unit was spawned, or null if no unit was spawned</returns>
-		public Unit SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
+		public IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
 
 			if (!unitType.CanSpawnAt(tile)) {
 				return null;
@@ -258,7 +258,7 @@ namespace MHUrho.Logic
 			entities.Add(newUnit.ID, newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
-			tile.AddPassingUnit(newUnit);
+			tile.AddUnit(newUnit);
 
 			return newUnit;
 		}
@@ -270,7 +270,7 @@ namespace MHUrho.Logic
 		/// <param name="topLeft"></param>
 		/// <param name="player"></param>
 		/// <returns>The new building if building was built, or null if the building could not be built</returns>
-		public Building BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player) {
+		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player) {
 			if (!buildingType.CanBuildIn(buildingType.GetBuildingTilesRectangle(topLeft), this)) {
 				return null;
 			}
@@ -293,7 +293,7 @@ namespace MHUrho.Logic
 		/// <param name="player"></param>
 		/// <param name="target"></param>
 		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
-		public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target) {
+		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target) {
 
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, target);
 
@@ -313,7 +313,7 @@ namespace MHUrho.Logic
 		/// <param name="player"></param>
 		/// <param name="movement"></param>
 		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
-		public Projectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement) {
+		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement) {
 
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, movement);
 			if (newProjectile != null) {
@@ -326,68 +326,68 @@ namespace MHUrho.Logic
 		}
 
 
-		public bool RemoveUnit(Unit unit)
+		public bool RemoveUnit(IUnit unit)
 		{
 			bool removed = units.Remove(unit.ID) && entities.Remove(unit.ID);
 
-			if (!unit.IsDeleted) {
+			if (!unit.RemovedFromLevel) {
 				unit.Kill();
 			}
 
 			return removed;
 		}
 
-		public bool RemoveBuilding(Building building)
+		public bool RemoveBuilding(IBuilding building)
 		{
 			bool removed = buildings.Remove(building.ID) && entities.Remove(building.ID);
 
-			if (!building.IsDeleted) {
+			if (!building.RemovedFromLevel) {
 				building.Kill();
 			}
 			return removed;
 		}
 
-		public bool RemoveProjectile(Projectile projectile)
+		public bool RemoveProjectile(IProjectile projectile)
 		{
 			bool removed = projectiles.Remove(projectile.ID) && entities.Remove(projectile.ID);
 
-			if (projectile.Enabled) {
+			if (!projectile.RemovedFromLevel) {
 				projectile.Despawn();
 			}
 			return removed;
 		}
 
-		public Unit GetUnit(int ID) {
-			if (!units.TryGetValue(ID, out Unit value)) {
+		public IUnit GetUnit(int ID) {
+			if (!units.TryGetValue(ID, out IUnit value)) {
 				throw new ArgumentOutOfRangeException(nameof(ID), "Unit with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
-		public Building GetBuilding(int ID) {
-			if (!buildings.TryGetValue(ID, out Building value)) {
+		public IBuilding GetBuilding(int ID) {
+			if (!buildings.TryGetValue(ID, out IBuilding value)) {
 				throw new ArgumentOutOfRangeException(nameof(ID), "Building with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
-		public Player GetPlayer(int ID) {
-			if (!players.TryGetValue(ID, out Player player)) {
+		public IPlayer GetPlayer(int ID) {
+			if (!players.TryGetValue(ID, out IPlayer player)) {
 				throw new ArgumentOutOfRangeException(nameof(ID), "Player with this ID does not exist in the current level");
 			}
 
 			return player;
 		}
 
-		public Projectile GetProjectile(int ID) {
-			if (!projectiles.TryGetValue(ID, out Projectile value)) {
+		public IProjectile GetProjectile(int ID) {
+			if (!projectiles.TryGetValue(ID, out IProjectile value)) {
 				throw new ArgumentOutOfRangeException(nameof(ID), "Projectile with this ID does not exist in the current level");
 			}
 			return value;
 		}
 
-		public Entity GetEntity(int ID) {
-			if (!entities.TryGetValue(ID, out Entity value)) {
+		public IEntity GetEntity(int ID) {
+			if (!entities.TryGetValue(ID, out IEntity value)) {
 				throw new ArgumentOutOfRangeException(nameof(ID), "Entity with this ID does not exist in the current level");
 			}
 			return value;

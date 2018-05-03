@@ -12,13 +12,12 @@ using Urho;
 namespace DefaultPackage
 {
 	public class TestWorkerType : UnitTypePlugin {
-		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
 		public override bool IsMyType(string typeName) {
 			return typeName == "TestWorker";
 		}
 
-		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
 			return new TestWorkerInstance(level, unit);
 		}
 
@@ -44,7 +43,7 @@ namespace DefaultPackage
 		bool homeGoing = false;
 		bool started = false;
 
-		public TestWorkerInstance(ILevelManager level, Unit unit) : base(level, unit) {
+		public TestWorkerInstance(ILevelManager level, IUnit unit) : base(level, unit) {
 			walker = WorldWalker.GetInstanceFor(this, level);
 			unit.AddComponent(walker);
 
@@ -72,7 +71,7 @@ namespace DefaultPackage
 			indexedData.Store(2, homeGoing);
 		}
 
-		public override void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData) {
+		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
 			this.Level = level;
 			this.Unit = unit;
 			this.started = true;
@@ -80,7 +79,7 @@ namespace DefaultPackage
 			var indexedData = pluginData.GetReaderForWrappedIndexedData();
 			WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).Plugin;
 			homeGoing = indexedData.Get<bool>(2);
-			walker = unit.GetComponent<WorldWalker>();
+			walker = unit.GetDefaultComponent<WorldWalker>();
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {

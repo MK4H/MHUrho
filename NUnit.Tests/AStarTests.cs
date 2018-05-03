@@ -22,32 +22,8 @@ namespace NUnit.Tests {
 		class TestMap : IMap {
 
 			class PassableTestTile : ITile {
-				#region NOT USED IN TEST
-				public Unit Unit => throw new NotImplementedException();
-				IReadOnlyList<Unit> ITile.PassingUnits => PassingUnits;
-
-				public Building Building => throw new NotImplementedException();
-
-				public List<Unit> PassingUnits => throw new NotImplementedException();
-
-				public TileType Type => throw new NotImplementedException();
-
-				public IntRect MapArea => throw new NotImplementedException();
-
-				
-
-				public IntVector2 TopLeft => throw new NotImplementedException();
-
-				public IntVector2 TopRight => throw new NotImplementedException();
-
-				public IntVector2 BottomLeft => throw new NotImplementedException();
-
-				public IntVector2 BottomRight => throw new NotImplementedException();
-
-
+				#region NOT USED IN TESTS
 				public Vector2 Center => throw new NotImplementedException();
-
-
 
 				public Vector3 TopLeft3 => throw new NotImplementedException();
 
@@ -65,73 +41,78 @@ namespace NUnit.Tests {
 
 				public float BottomRightHeight => throw new NotImplementedException();
 
-				public float Height => throw new NotImplementedException();
-
 				public Map Map => throw new NotImplementedException();
 
-				public LevelManager Level => throw new NotImplementedException();
-
-				public void ConnectReferences(LevelManager level) {
+				public void ConnectReferences(ILevelManager level)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void ConnectReferences(ILevelManager level) {
+				public void FinishLoading()
+				{
 					throw new NotImplementedException();
 				}
 
-				public void FinishLoading() {
+				public void AddUnit(IUnit unit)
+				{
 					throw new NotImplementedException();
 				}
 
-
-				public void AddPassingUnit(Unit unit) {
+				public void RemoveUnit(IUnit unit)
+				{
 					throw new NotImplementedException();
 				}
 
-				public bool TryAddOwningUnit(Unit unit) {
+				public void AddBuilding(IBuilding building)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void RemoveUnit(Unit unit) {
+				public void RemoveBuilding(IBuilding building)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void AddBuilding(Building building) {
+				public StTile Save()
+				{
 					throw new NotImplementedException();
 				}
 
-				public void RemoveBuilding(Building building) {
+				public void ChangeType(TileType newType)
+				{
 					throw new NotImplementedException();
 				}
 
-				public IEnumerable<Unit> GetAllUnits() {
+				public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true)
+				{
 					throw new NotImplementedException();
 				}
 
-				public StTile Save() {
+				public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void ChangeType(TileType newType) {
+				public void CornerHeightChange()
+				{
 					throw new NotImplementedException();
 				}
 
-				public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours) {
-					throw new NotImplementedException();
-				}
+				public IntRect MapArea => throw new NotImplementedException();
 
-				public void SetTopLeftHeight(float newHeight, bool signalNeighbours) {
-					throw new NotImplementedException();
-				}
+				public IntVector2 TopLeft => throw new NotImplementedException();
 
-				public void CornerHeightChange() {
-					throw new NotImplementedException();
-				}
+				public IntVector2 TopRight => throw new NotImplementedException();
 
-				public Path GetPath(Unit forUnit) {
-					throw new NotImplementedException();
-				}
+				public IntVector2 BottomLeft => throw new NotImplementedException();
 
+				public IntVector2 BottomRight => throw new NotImplementedException();
+
+				public IReadOnlyList<IUnit> Units => throw new NotImplementedException();
+
+				public IBuilding Building => throw new NotImplementedException();
+
+				public TileType Type => throw new NotImplementedException();
 				#endregion
 
 				public Vector3 Center3 => new Vector3(MapLocation.X + 0.5f, 0, MapLocation.Y + 0.5f);
@@ -151,31 +132,8 @@ namespace NUnit.Tests {
 			}
 
 			class NotPassableTestTile : ITile {
-				#region NOT USED IN TEST
-				public Unit Unit => throw new NotImplementedException();
-				IReadOnlyList<Unit> ITile.PassingUnits => PassingUnits;
 
-				public Building Building => throw new NotImplementedException();
-
-				public List<Unit> PassingUnits => throw new NotImplementedException();
-
-
-
-				public TileType Type => throw new NotImplementedException();
-
-				public IntRect MapArea => throw new NotImplementedException();
-
-				public IntVector2 MapLocation => throw new NotImplementedException();
-
-				public IntVector2 TopLeft => throw new NotImplementedException();
-
-				public IntVector2 TopRight => throw new NotImplementedException();
-
-				public IntVector2 BottomLeft => throw new NotImplementedException();
-
-				public IntVector2 BottomRight => throw new NotImplementedException();
-
-
+				#region NOT USED IN TESTS
 				public Vector2 Center => throw new NotImplementedException();
 
 				public Vector3 TopLeft3 => throw new NotImplementedException();
@@ -194,89 +152,93 @@ namespace NUnit.Tests {
 
 				public float BottomRightHeight => throw new NotImplementedException();
 
-				public float Height => throw new NotImplementedException();
-
 				public Map Map => throw new NotImplementedException();
 
-
-				public LevelManager Level => throw new NotImplementedException();
-
-				public void ConnectReferences(LevelManager level) {
+				public void ConnectReferences(ILevelManager level)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void ConnectReferences(ILevelManager level) {
+				public void FinishLoading()
+				{
 					throw new NotImplementedException();
 				}
 
-				public void FinishLoading() {
+				public void AddUnit(IUnit unit)
+				{
 					throw new NotImplementedException();
 				}
 
-				public bool SpawnUnit(Player player) {
+				public void RemoveUnit(IUnit unit)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void AddPassingUnit(Unit unit) {
+				public void AddBuilding(IBuilding building)
+				{
 					throw new NotImplementedException();
 				}
 
-				public bool TryAddOwningUnit(Unit unit) {
+				public void RemoveBuilding(IBuilding building)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void RemoveUnit(Unit unit) {
+				public StTile Save()
+				{
 					throw new NotImplementedException();
 				}
 
-				public void AddBuilding(Building building) {
+				public void ChangeType(TileType newType)
+				{
 					throw new NotImplementedException();
 				}
 
-				public void RemoveBuilding(Building building) {
+				public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true)
+				{
 					throw new NotImplementedException();
 				}
 
-				public IEnumerable<Unit> GetAllUnits() {
+				public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true)
+				{
 					throw new NotImplementedException();
 				}
 
-				public StTile Save() {
+				public void CornerHeightChange()
+				{
 					throw new NotImplementedException();
 				}
 
-				public void ChangeType(TileType newType) {
-					throw new NotImplementedException();
-				}
 
-				public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours) {
-					throw new NotImplementedException();
-				}
+				public IReadOnlyList<IUnit> Units => throw new NotImplementedException();
 
-				public void SetTopLeftHeight(float newHeight, bool signalNeighbours) {
-					throw new NotImplementedException();
-				}
+				public IBuilding Building => throw new NotImplementedException();
 
-				public void CornerHeightChange() {
-					throw new NotImplementedException();
-				}
 
-				public Path GetPath(Unit forUnit) {
-					throw new NotImplementedException();
-				}
 
+				public TileType Type => throw new NotImplementedException();
+
+				public IntRect MapArea => throw new NotImplementedException();
+
+				public IntVector2 TopLeft => throw new NotImplementedException();
+
+				public IntVector2 TopRight => throw new NotImplementedException();
+
+				public IntVector2 BottomLeft => throw new NotImplementedException();
+
+				public IntVector2 BottomRight => throw new NotImplementedException();
 				#endregion
 
 
+				public IntVector2 MapLocation { get; private set; }
+
 				public Vector3 Center3 => new Vector3(MapLocation.X + 0.5f, 0, MapLocation.Y + 0.5f);
-
-				public IntVector2 Location { get; private set; }
-
+				
 				//Should not call this if it is not passable
 				public float MovementSpeedModifier => throw new NotImplementedException();
 
 				public NotPassableTestTile(int x, int y) {
-					Location = new IntVector2(x, y);
+					MapLocation = new IntVector2(x, y);
 				}
 
 				public override string ToString() {

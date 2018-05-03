@@ -27,7 +27,7 @@ namespace DefaultPackage
 
 		
 
-		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
 			return new TestUnitInstance(level, unit, projectileType);
 		}
 
@@ -50,8 +50,6 @@ namespace DefaultPackage
 
 	public class TestUnitInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
 	{
-		Node unitNode;
-		Unit unit;
 		WorldWalker walker;
 		Shooter shooter;
 
@@ -59,11 +57,9 @@ namespace DefaultPackage
 
 		}
 
-		public TestUnitInstance(ILevelManager level, Unit unit, ProjectileType projectileType)
+		public TestUnitInstance(ILevelManager level, IUnit unit, ProjectileType projectileType)
 			:base(level, unit)
 		{
-			this.unitNode = unit.Node;
-			this.unit = unit;
 			this.walker = WorldWalker.GetInstanceFor(this, level);
 			this.shooter = Shooter.CreateNew(this,
 											level,
@@ -81,12 +77,10 @@ namespace DefaultPackage
 
 		}
 
-		public override void LoadState(ILevelManager level,Unit unit, PluginDataWrapper pluginData) {
+		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
 			this.Level = level;
-			this.unit = unit;
-			this.unitNode = unit.Node;
-			walker = unit.GetComponent<WorldWalker>();
-			shooter = unit.GetComponent<Shooter>();
+			walker = unit.GetDefaultComponent<WorldWalker>();
+			shooter = unit.GetDefaultComponent<Shooter>();
 		}
 
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
@@ -145,11 +139,11 @@ namespace DefaultPackage
 			}
 		}
 
-		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
+		public void OnUnitOrderedToUnit(UnitSelector selector, IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
+		public void OnUnitOrderedToBuilding(UnitSelector selector, IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
@@ -165,7 +159,7 @@ namespace DefaultPackage
 
 		}
 
-		public void AfterShotFired(Shooter shooter, Projectile projectile) {
+		public void AfterShotFired(Shooter shooter, IProjectile projectile) {
 
 		}
 

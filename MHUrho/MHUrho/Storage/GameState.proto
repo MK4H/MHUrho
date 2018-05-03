@@ -17,8 +17,7 @@ message StLevel {
 
 
 message StTile {
-	int32 unitID = 1;
-	repeated int32 passingUnitIDs = 2;
+	repeated int32 unitIDs = 2;
 	int32 tileTypeID = 3;
 	StIntVector2 topLeftPosition = 4;
 	float height = 5;

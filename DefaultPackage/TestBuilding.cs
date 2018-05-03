@@ -16,8 +16,8 @@ namespace DefaultPackage
 {
 	public class TestBuildingType : BuildingTypePlugin
 	{
-		private UnitType workerType;
-		private TileType tileType;
+		UnitType workerType;
+		TileType tileType;
 
 		public TestBuildingType() {
 
@@ -27,8 +27,8 @@ namespace DefaultPackage
 			return typeName == "TestBuilding";
 		}
 
-		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building) {
-			Unit[] workers = new Unit[2];
+		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building) {
+			IUnit[] workers = new Unit[2];
 			workers[0] = level.SpawnUnit(workerType,
 										 level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
 										 building.Player);
@@ -51,8 +51,7 @@ namespace DefaultPackage
 										 bottomRightTileIndex, 
 										 (tile) => {
 
-														if (tile.Unit != null ||
-															tile.PassingUnits.Count != 0 ||
+														if (tile.Units.Count != 0 ||
 															tile.Building != null) {
 
 															empty = false;
@@ -102,8 +101,6 @@ namespace DefaultPackage
 
 	public class TestBuildingInstance : BuildingInstancePlugin {
 
-		public Building Building { get; private set; }
-
 		private ILevelManager level;
 		private TestWorkerInstance[] workers;
 
@@ -117,7 +114,7 @@ namespace DefaultPackage
 
 		}
 
-		public TestBuildingInstance(ILevelManager level, Building building, Unit[] workers) {
+		public TestBuildingInstance(ILevelManager level, IBuilding building, IUnit[] workers) {
 			this.level = level;
 
 			this.Building = building;
@@ -151,7 +148,7 @@ namespace DefaultPackage
 			sequentialData.StoreNext(timeToNextResource);
 		}
 
-		public override void LoadState(ILevelManager level, Building building, PluginDataWrapper pluginData) {
+		public override void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData) {
 			this.level = level;
 			this.Building = building;
 

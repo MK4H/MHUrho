@@ -43,7 +43,7 @@ namespace MHUrho.UnitComponents
 				Vector3 position = sequentialData.GetCurrent<Vector3>();
 				sequentialData.MoveNext();
 
-				StaticRangeTarget =  new StaticRangeTarget(instanceID, level, position);
+				StaticRangeTarget =  new StaticRangeTarget(instanceID, level, position, notificationReceiver);
 				level.LoadRangeTarget(StaticRangeTarget);
 			}
 
@@ -62,7 +62,7 @@ namespace MHUrho.UnitComponents
 
 		public interface INotificationReceiver {
 
-			void OnHit(StaticRangeTarget rangeTarget);
+			void OnHit(StaticRangeTarget target, IProjectile projectile);
 
 		}
 
@@ -76,16 +76,20 @@ namespace MHUrho.UnitComponents
 
 		public override Vector3 CurrentPosition { get; }
 
-		protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position)
+		INotificationReceiver notificationReceiver;
+
+		protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position, INotificationReceiver notificationReceiver)
 			: base(instanceID, level)
 		{
 			this.CurrentPosition = position;
+			this.notificationReceiver = notificationReceiver;
 		}
 
-		protected StaticRangeTarget(ILevelManager level, Vector3 position) 
+		protected StaticRangeTarget(ILevelManager level, Vector3 position, INotificationReceiver notificationReceiver) 
 			:base(level)
 		{
 			this.CurrentPosition = position;
+			this.notificationReceiver = notificationReceiver;
 		}
 
 		public static StaticRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level, Vector3 position)
@@ -95,7 +99,7 @@ namespace MHUrho.UnitComponents
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			var newTarget = new StaticRangeTarget(level, position);
+			var newTarget = new StaticRangeTarget(level, position, instancePlugin);
 
 			((LevelManager)level).RegisterRangeTarget(newTarget);
 
@@ -110,7 +114,12 @@ namespace MHUrho.UnitComponents
 			yield return new Waypoint(CurrentPosition, 0);
 		}
 
-	
+		public override void OnAttachedToNode(Node node) {
+			base.OnAttachedToNode(node);
+
+			node.NodeCollisionStart += Collision;
+		}
+
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(StaticRangeTarget), entityDefaultComponents);
@@ -121,6 +130,16 @@ namespace MHUrho.UnitComponents
 			bool removed = RemovedFromEntity(typeof(StaticRangeTarget), entityDefaultComponents);
 			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
 			return removed;
+		}
+
+		void Collision(NodeCollisionStartEventArgs e) {
+			//TODO: instead of GetComponent, implement O(1) Node to Entity lookup
+			var projectile = e.OtherNode.GetComponent<Projectile>();
+			if (projectile == null) {
+				throw new InvalidOperationException("Hit by something that is not a projectile");
+			}
+
+			notificationReceiver.OnHit(this, projectile);
 		}
 	}
 }

@@ -20,8 +20,7 @@ namespace MHUrho.Logic
 	/// <summary>
 	/// Class representing unit, every action you want to do with the unit should go through this class
 	/// </summary>
-	public class Unit : Entity
-	{
+	public class Unit : Entity, IUnit {
 		internal class Loader : ILoader {
 		   
 			public Unit Unit;
@@ -207,8 +206,6 @@ namespace MHUrho.Logic
 		}
 
 		#region Public members
-
-
 		public UnitType UnitType { get; private set;}
 
 		public override Vector3 Position {
@@ -311,7 +308,11 @@ namespace MHUrho.Logic
 		public StUnit Save() {
 			return Loader.Save(this);
 		}
-		
+
+		public override void Accept(IEntityVisitor visitor) {
+			visitor.Visit(this);
+		}
+
 		public bool CanGoFromTo(ITile fromTile, ITile toTile) {
 			return Plugin.CanGoFromTo(fromTile, toTile);
 		}
@@ -392,6 +393,7 @@ namespace MHUrho.Logic
 
 		public void Kill()
 		{
+			RemovedFromLevel = true;
 
 			Tile.RemoveUnit(this);
 			Player.RemoveUnit(this);
@@ -432,7 +434,7 @@ namespace MHUrho.Logic
 			Tile.RemoveUnit(this);
 			Tile = newTile;
 			//TODO: Add as owning unit
-			Tile.AddPassingUnit(this);
+			Tile.AddUnit(this);
 			return true;
 		}
 

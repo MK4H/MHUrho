@@ -7,8 +7,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Logic
 {
-	public abstract class Entity : Component
-	{
+	public abstract class Entity : Component, IEntity {
 
 		/// <summary>
 		/// ID of this entity
@@ -26,12 +25,22 @@ namespace MHUrho.Logic
 
 		public abstract Vector3 Position { get; protected set; }
 
+		public bool RemovedFromLevel { get; protected set; }
+
 		protected Dictionary<Type, IList<DefaultComponent>> defaultComponents;
 
 		protected Entity(int ID, ILevelManager level) {
 			this.ID = ID;
 			this.Level = level;
 			this.defaultComponents = new Dictionary<Type, IList<DefaultComponent>>();
+		}
+
+		public abstract void Accept(IEntityVisitor visitor);
+
+		public T CreateComponent<T>()
+			where T : Component, new()
+		{
+			return Node.CreateComponent<T>();
 		}
 
 		public T GetDefaultComponent<T>()
@@ -59,5 +68,7 @@ namespace MHUrho.Logic
 		public bool RemoveComponent(DefaultComponent defaultComponent) {
 			return ((IByTypeQueryable) defaultComponent).RemovedFromEntity(defaultComponents);
 		}
+
+
 	}
 }

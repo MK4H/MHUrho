@@ -7,13 +7,15 @@ namespace MHUrho.Logic {
 
 		int ID { get; }
 
-		IEnumerable<Unit> GetAllUnits();
+		StPlayer Save();
 
-		IReadOnlyList<Unit> GetUnitsOfType(UnitType type);
+		IEnumerable<IUnit> GetAllUnits();
 
-		IEnumerable<Building> GetAllBuildings();
+		IReadOnlyList<IUnit> GetUnitsOfType(UnitType type);
 
-		IReadOnlyList<Building> GetBuildingsOfType(BuildingType type);
+		IEnumerable<IBuilding> GetAllBuildings();
+
+		IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType type);
 
 		int GetResourcesOfType(ResourceType type);
 
@@ -23,11 +25,11 @@ namespace MHUrho.Logic {
 
 		bool IsEnemy(IPlayer player);
 
-		void AddUnit(Unit unit);
+		void AddUnit(IUnit unit);
 
-		void AddBuilding(Building building);
+		void AddBuilding(IBuilding building);
 
-		bool RemoveUnit(Unit unit);
-		bool RemoveBuilding(Building building);
+		bool RemoveUnit(IUnit unit);
+		bool RemoveBuilding(IBuilding building);
 	}
 }

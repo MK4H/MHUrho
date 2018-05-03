@@ -25,7 +25,7 @@ namespace DefaultPackage
 			Speed = XmlHelpers.GetFloat(speedElement);
 		}
 
-		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile) {
+		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile) {
 			return new EggProjectileInstance(level, projectile, this);
 		}
 
@@ -55,7 +55,7 @@ namespace DefaultPackage
 			this.myType = myType;
 		}
 
-		public EggProjectileInstance(ILevelManager level, Projectile projectile, EggProjectileType myType)
+		public EggProjectileInstance(ILevelManager level, IProjectile projectile, EggProjectileType myType)
 			:base(level, projectile)
 		{
 			this.myType = myType;
@@ -68,7 +68,7 @@ namespace DefaultPackage
 			
 		}
 
-		public override void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData) {
+		public override void LoadState(ILevelManager level, IProjectile projectile, PluginDataWrapper pluginData) {
 			this.Level = level;
 			this.projectile = projectile;
 			this.flier = projectile.GetDefaultComponent<BallisticProjectile>();
@@ -90,7 +90,7 @@ namespace DefaultPackage
 			return false;
 		}
 
-		public override void OnEntityHit(Entity hitEntity)
+		public override void OnEntityHit(IEntity hitEntity)
 		{
 			if (hitEntity.Player == projectile.Player) {
 

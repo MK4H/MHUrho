@@ -14,8 +14,8 @@ namespace MHUrho.UnitComponents
 	internal delegate void UnitSelectedDelegate(UnitSelector unitSelector);
 	internal delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
 	internal delegate void UnitOrderedToTileDelegate(UnitSelector unitSelector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
-	internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
-	internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToUnitDelegate(UnitSelector unitSelector, IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
+	internal delegate void UnitOrderedToBuildingDelegate(UnitSelector unitSelector, IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 
 
 	public class UnitSelector : Selector {
@@ -73,9 +73,9 @@ namespace MHUrho.UnitComponents
 			/// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
 			void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 
-			void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
+			void OnUnitOrderedToUnit(UnitSelector selector, IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 
-			void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
+			void OnUnitOrderedToBuilding(UnitSelector selector, IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs);
 		}
 
 		public static string ComponentName = nameof(UnitSelector);
@@ -84,7 +84,7 @@ namespace MHUrho.UnitComponents
 		public override string ComponentTypeName => ComponentName;
 		public override DefaultComponents ComponentTypeID => ComponentID;
 
-		public Unit Unit => (Unit)Entity;
+		public IUnit Unit => (IUnit)Entity;
 
 		internal event UnitSelectedDelegate UnitSelected;
 		internal event UnitDeselectedDelegate UnitDeselected;
@@ -133,13 +133,13 @@ namespace MHUrho.UnitComponents
 			return orderArgs.Executed;
 		}
 
-		public override bool Order(Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers) {
+		public override bool Order(IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers) {
 			var orderArgs = new OrderArgs();
 			OrderedToUnit?.Invoke(this, targetUnit, button, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
 		}
 
-		public override bool Order(Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers) {
+		public override bool Order(IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers) {
 			var orderArgs = new OrderArgs();
 			OrderedToBuilding?.Invoke(this, targetBuilding, button, buttons, qualifiers, orderArgs);
 			return orderArgs.Executed;
@@ -167,9 +167,9 @@ namespace MHUrho.UnitComponents
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			base.AddedToEntity(entityDefaultComponents);
 
-			if (Entity == null || !(Entity is Unit)) {
+			if (Entity == null || !(Entity is IUnit)) {
 				throw new
-					InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Logic.Unit)} component");
+					InvalidOperationException($"Cannot attach {nameof(UnitSelector)} to a node that does not have {nameof(Logic.IUnit)} component");
 			}
 
 

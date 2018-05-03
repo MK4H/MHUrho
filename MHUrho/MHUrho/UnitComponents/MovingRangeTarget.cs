@@ -64,7 +64,7 @@ namespace MHUrho.UnitComponents
 
 			Vector3 GetCurrentPosition(MovingRangeTarget target);
 
-			void OnHit(MovingRangeTarget target, Projectile projectile);
+			void OnHit(MovingRangeTarget target, IProjectile projectile);
 
 		}
 
@@ -110,6 +110,12 @@ namespace MHUrho.UnitComponents
 			return Loader.SaveState(this);
 		}
 
+		public override void OnAttachedToNode(Node node) {
+			base.OnAttachedToNode(node);
+
+			node.NodeCollisionStart += Collision;
+		}
+
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(MovingRangeTarget), entityDefaultComponents);
@@ -120,12 +126,6 @@ namespace MHUrho.UnitComponents
 			bool removed = RemovedFromEntity(typeof(MovingRangeTarget), entityDefaultComponents);
 			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
 			return removed;
-		}
-
-		public override void OnAttachedToNode(Node node) {
-			base.OnAttachedToNode(node);
-
-			node.NodeCollisionStart += Collision;
 		}
 
 		void Collision(NodeCollisionStartEventArgs e)

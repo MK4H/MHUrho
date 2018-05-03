@@ -102,7 +102,7 @@ namespace MHUrho.UnitComponents
 		internal event MovementFailedDelegate OnMovementFailed;
 
 
-		public Unit Unit => (Unit) Entity;
+		public IUnit Unit => (IUnit) Entity;
 
 		INotificationReceiver notificationReceiver;
 

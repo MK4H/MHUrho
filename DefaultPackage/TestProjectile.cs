@@ -19,7 +19,7 @@ namespace DefaultPackage
 			return typeName == "TestProjectile";
 		}
 
-		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile) {
+		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile) {
 			return new TestProjectileInstance(level, projectile, this);
 		}
 
@@ -69,7 +69,7 @@ namespace DefaultPackage
 			this.rng = new Random(seedRng.Next());
 		}
 
-		public TestProjectileInstance(ILevelManager level, Projectile projectile, TestProjectileType type)
+		public TestProjectileInstance(ILevelManager level, IProjectile projectile, TestProjectileType type)
 			:base (level, projectile)
 		{
 			this.rng = new Random(seedRng.Next());
@@ -120,7 +120,7 @@ namespace DefaultPackage
 			sequential.StoreNext(timeToDespawn);
 		}
 
-		public override void LoadState(ILevelManager level, Projectile projectile, PluginDataWrapper pluginData) {
+		public override void LoadState(ILevelManager level, IProjectile projectile, PluginDataWrapper pluginData) {
 			this.Level = level;
 			this.projectile = projectile;
 			this.flier = projectile.GetDefaultComponent<BallisticProjectile>();
@@ -166,7 +166,7 @@ namespace DefaultPackage
 			return true;
 		}
 
-		public override void OnEntityHit(Entity hitEntity)
+		public override void OnEntityHit(IEntity hitEntity)
 		{
 			projectile.Despawn();
 		}

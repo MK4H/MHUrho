@@ -11,9 +11,9 @@ namespace MHUrho.Plugins
 
 	public abstract class UnitInstancePlugin : InstancePlugin {
 
-		public Unit Unit { get; protected set; }
+		public IUnit Unit { get; protected set; }
 
-		protected UnitInstancePlugin(ILevelManager level, Unit unit) 
+		protected UnitInstancePlugin(ILevelManager level, IUnit unit) 
 			:base(level)
 		{
 			this.Unit = unit;
@@ -36,7 +36,7 @@ namespace MHUrho.Plugins
 		/// <param name="unit"></param>
 		/// <param name="pluginData">stored state of the unit plugin</param>
 		/// <returns>Instance loaded into saved state</returns>
-		public abstract void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData);
+		public abstract void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData);
 
 		public abstract bool CanGoFromTo(ITile fromTile, ITile toTile);
 

@@ -14,92 +14,15 @@ namespace NUnit.Tests {
 	[TestFixture]
 	public class MapTests {
 
-		private class HeightTestTile : ITile {
+		class HeightTestTile : ITile {
 			#region NOT USED IN TESTS
-			public Unit Unit => throw new NotImplementedException();
-			IReadOnlyList<Unit> ITile.PassingUnits => PassingUnits;
+			public IReadOnlyList<IUnit> Units => throw new NotImplementedException();
 
-			public Building Building => throw new NotImplementedException();
-
-			public List<Unit> PassingUnits => throw new NotImplementedException();
+			public IBuilding Building => throw new NotImplementedException();
 
 			public float MovementSpeedModifier => throw new NotImplementedException();
 
 			public TileType Type => throw new NotImplementedException();
-
-			public float BottomRightHeight => throw new NotImplementedException();
-
-			public Map Map => throw new NotImplementedException();
-
-			public void ConnectReferences(LevelManager level) {
-				throw new NotImplementedException();
-			}
-
-			public void ConnectReferences(ILevelManager level) {
-				throw new NotImplementedException();
-			}
-
-			public void FinishLoading() {
-				throw new NotImplementedException();
-			}
-
-			public bool SpawnUnit(Player player) {
-				throw new NotImplementedException();
-			}
-
-			public void AddPassingUnit(Unit unit) {
-				throw new NotImplementedException();
-			}
-
-			public bool TryAddOwningUnit(Unit unit) {
-				throw new NotImplementedException();
-			}
-
-			public void RemoveUnit(Unit unit) {
-				throw new NotImplementedException();
-			}
-
-			public void AddBuilding(Building building) {
-				throw new NotImplementedException();
-			}
-
-			public void RemoveBuilding(Building building) {
-				throw new NotImplementedException();
-			}
-
-			public IEnumerable<Unit> GetAllUnits() {
-				throw new NotImplementedException();
-			}
-
-			public StTile Save() {
-				throw new NotImplementedException();
-			}
-
-			public void ChangeType(TileType newType) {
-				throw new NotImplementedException();
-			}
-
-			public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours) {
-				throw new NotImplementedException();
-			}
-
-			public void SetTopLeftHeight(float newHeight, bool signalNeighbours) {
-				throw new NotImplementedException();
-			}
-
-			public void CornerHeightChange() {
-				throw new NotImplementedException();
-			}
-
-			public Path GetPath(Unit forUnit) {
-				throw new NotImplementedException();
-			}
-
-			#endregion
-
-			public IntRect MapArea { get; private set; }
-
-			public IntVector2 MapLocation => throw new NotImplementedException();
 
 			public IntVector2 TopLeft => throw new NotImplementedException();
 
@@ -108,13 +31,6 @@ namespace NUnit.Tests {
 			public IntVector2 BottomLeft => throw new NotImplementedException();
 
 			public IntVector2 BottomRight => throw new NotImplementedException();
-
-			/// <summary>
-			/// Location in the Map matrix
-			/// </summary>
-			public IntVector2 Location => new IntVector2(MapArea.Left, MapArea.Top);
-
-			public Vector2 Center => new Vector2(Location.X + 0.5f, Location.Y + 0.5f);
 
 			public Vector3 Center3 => throw new NotImplementedException();
 
@@ -126,24 +42,84 @@ namespace NUnit.Tests {
 
 			public Vector3 BottomRight3 => throw new NotImplementedException();
 
-			public float TopLeftHeight => throw new NotImplementedException();
-
 			public float TopRightHeight => throw new NotImplementedException();
 
 			public float BottomLeftHeight => throw new NotImplementedException();
 
-			public float Height { get; private set; }
+			public float BottomRightHeight => throw new NotImplementedException();
+
+			public Map Map => throw new NotImplementedException();
+
+			public void ConnectReferences(ILevelManager level) {
+				throw new NotImplementedException();
+			}
+
+			public void FinishLoading() {
+				throw new NotImplementedException();
+			}
+
+			public void AddUnit(IUnit unit) {
+				throw new NotImplementedException();
+			}
+
+			public void RemoveUnit(IUnit unit) {
+				throw new NotImplementedException();
+			}
+
+			public void AddBuilding(IBuilding building) {
+				throw new NotImplementedException();
+			}
+
+			public void RemoveBuilding(IBuilding building) {
+				throw new NotImplementedException();
+			}
+
+			public StTile Save() {
+				throw new NotImplementedException();
+			}
+
+			public void ChangeType(TileType newType) {
+				throw new NotImplementedException();
+			}
+
+			public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true) {
+				throw new NotImplementedException();
+			}
+
+			public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true) {
+				throw new NotImplementedException();
+			}
+
+			public void CornerHeightChange() {
+				throw new NotImplementedException();
+			}
+			#endregion
+
+			public float TopLeftHeight { get; private set; }
+
+			public IntRect MapArea { get; private set; }
+
+			/// <summary>
+			/// Location in the Map matrix
+			/// </summary>
+			public IntVector2 MapLocation => new IntVector2(MapArea.Left, MapArea.Top);
+
+			
+
+			public Vector2 Center => new Vector2(MapLocation.X + 0.5f, MapLocation.Y + 0.5f);
+
+			
 
 			public HeightTestTile(IntVector2 location, float height) {
 				this.MapArea = new IntRect(location.X, location.Y, location.X + 1, location.Y + 1);
-				this.Height = height;
+				this.TopLeftHeight = height;
 			}
 		}
 
-		private Map slopedInX10x10;
-		private Map slopedInY10x10;
-		private Map cone10x10;
-		private Random rand;
+		Map slopedInX10x10;
+		Map slopedInY10x10;
+		Map cone10x10;
+		Random rand;
 
 		[OneTimeSetUp]
 		public void TestSetup()
@@ -172,7 +148,7 @@ namespace NUnit.Tests {
 			rand = new Random();
 		}
 
-		private bool FloatsEqual(float a, float b, float epsilon = 0.000001f) {
+		bool FloatsEqual(float a, float b, float epsilon = 0.000001f) {
 			float diff = Math.Abs(a - b);
 			return (a == b) || diff < float.Epsilon || diff / (Math.Abs(a) + Math.Abs(b)) < epsilon;
 		}

@@ -29,52 +29,52 @@ namespace MHUrho.Storage {
             "TUhVcmhvLlN0b3JhZ2UuU3RCdWlsZGluZxIpCgdwbGF5ZXJzGAQgAygLMhgu",
             "TUhVcmhvLlN0b3JhZ2UuU3RQbGF5ZXISMQoLcHJvamVjdGlsZXMYBSADKAsy",
             "HC5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUSEQoJZ2FtZVNwZWVkGAYg",
-            "ASgCEhMKC3BhY2thZ2VOYW1lGAcgASgJIqMBCgZTdFRpbGUSDgoGdW5pdElE",
-            "GAEgASgFEhYKDnBhc3NpbmdVbml0SURzGAIgAygFEhIKCnRpbGVUeXBlSUQY",
-            "AyABKAUSNQoPdG9wTGVmdFBvc2l0aW9uGAQgASgLMhwuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RJbnRWZWN0b3IyEg4KBmhlaWdodBgFIAEoAhIWCg5zcGxpdERpcmVj",
-            "dGlvbhgGIAEoCCLPAQoMU3RCb3JkZXJUaWxlEhIKCnRpbGVUeXBlSUQYASAB",
-            "KAUSNQoPdG9wTGVmdFBvc2l0aW9uGAIgASgLMhwuTUhVcmhvLlN0b3JhZ2Uu",
-            "U3RJbnRWZWN0b3IyEhUKDXRvcExlZnRIZWlnaHQYAyABKAISFgoOdG9wUmln",
-            "aHRIZWlnaHQYBCABKAISFQoNYm90TGVmdEhlaWdodBgFIAEoAhIWCg5ib3RS",
-            "aWdodEhlaWdodBgGIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgHIAEoCCJOCgtT",
-            "dE1hcFRhcmdldBISCgppbnN0YW5jZUlEGAEgASgFEisKCHBvc2l0aW9uGAIg",
-            "ASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzItICCgZTdFVuaXQSCgoC",
-            "aWQYASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhku",
-            "TUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEhQK",
-            "DHRhcmdldFVuaXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhV",
-            "cmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0",
-            "YRgHIAMoCzIwLk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9u",
-            "ZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoD",
-            "a2V5GAEgASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1",
-            "Z2luRGF0YToCOAEiyAIKDFN0UHJvamVjdGlsZRIKCgJpZBgBIAEoBRIOCgZ0",
-            "eXBlSUQYAiABKAUSKwoIcG9zaXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFn",
-            "ZS5TdFZlY3RvcjMSEAoIcGxheWVySUQYBCABKAUSLgoKdXNlclBsdWdpbhgF",
-            "IAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGESVAoUZGVmYXVsdENv",
-            "bXBvbmVudERhdGEYBiADKAsyNi5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3Rp",
-            "bGUuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9u",
-            "ZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1I",
-            "VXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIscCCgpTdEJ1aWxkaW5nEgoK",
-            "AmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIuCghsb2NhdGlvbhgDIAEoCzIc",
-            "Lk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIQCghwbGF5ZXJJRBgEIAEo",
-            "BRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2lu",
-            "RGF0YRJSChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzI0Lk1IVXJoby5T",
-            "dG9yYWdlLlN0QnVpbGRpbmcuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpX",
-            "ChlEZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2",
-            "YWx1ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIosB",
-            "CghTdFBsYXllchIQCghwbGF5ZXJJRBgBIAEoBRIPCgd1bml0SURzGAIgAygF",
-            "EhMKC2J1aWxkaW5nSURzGAMgAygFEhcKD2ZyaWVuZFBsYXllcklEcxgEIAMo",
-            "BRIuCgp1c2VyUGx1Z2luGAUgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2lu",
-            "RGF0YSLDAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIcLk1IVXJoby5TdG9yYWdl",
-            "LlN0SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIWLk1IVXJoby5TdG9yYWdl",
-            "LlN0VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIcLk1IVXJoby5TdG9yYWdl",
-            "LlN0Qm9yZGVyVGlsZRI0Cg9tYXBSYW5nZVRhcmdldHMYBCADKAsyGy5NSFVy",
-            "aG8uU3RvcmFnZS5TdE1hcFRhcmdldGIGcHJvdG8z"));
+            "ASgCEhMKC3BhY2thZ2VOYW1lGAcgASgJIowBCgZTdFRpbGUSDwoHdW5pdElE",
+            "cxgCIAMoBRISCgp0aWxlVHlwZUlEGAMgASgFEjUKD3RvcExlZnRQb3NpdGlv",
+            "bhgEIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIOCgZoZWln",
+            "aHQYBSABKAISFgoOc3BsaXREaXJlY3Rpb24YBiABKAgizwEKDFN0Qm9yZGVy",
+            "VGlsZRISCgp0aWxlVHlwZUlEGAEgASgFEjUKD3RvcExlZnRQb3NpdGlvbhgC",
+            "IAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIVCg10b3BMZWZ0",
+            "SGVpZ2h0GAMgASgCEhYKDnRvcFJpZ2h0SGVpZ2h0GAQgASgCEhUKDWJvdExl",
+            "ZnRIZWlnaHQYBSABKAISFgoOYm90UmlnaHRIZWlnaHQYBiABKAISFgoOc3Bs",
+            "aXREaXJlY3Rpb24YByABKAgiTgoLU3RNYXBUYXJnZXQSEgoKaW5zdGFuY2VJ",
+            "RBgBIAEoBRIrCghwb3NpdGlvbhgCIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0",
+            "VmVjdG9yMyLSAgoGU3RVbml0EgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEo",
+            "BRIrCghwb3NpdGlvbhgDIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9y",
+            "MxIQCghwbGF5ZXJJRBgEIAEoBRIUCgx0YXJnZXRVbml0SUQYBSABKAUSLgoK",
+            "dXNlclBsdWdpbhgGIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGES",
+            "TgoUZGVmYXVsdENvbXBvbmVudERhdGEYByADKAsyMC5NSFVyaG8uU3RvcmFn",
+            "ZS5TdFVuaXQuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0",
+            "Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEo",
+            "CzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIsgCCgxTdFByb2pl",
+            "Y3RpbGUSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9u",
+            "GAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklE",
+            "GAQgASgFEi4KCnVzZXJQbHVnaW4YBSABKAsyGi5NSFVyaG8uU3RvcmFnZS5Q",
+            "bHVnaW5EYXRhElQKFGRlZmF1bHRDb21wb25lbnREYXRhGAYgAygLMjYuTUhV",
+            "cmhvLlN0b3JhZ2UuU3RQcm9qZWN0aWxlLkRlZmF1bHRDb21wb25lbnREYXRh",
+            "RW50cnkaVwoZRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRILCgNrZXkYASAB",
+            "KAUSKQoFdmFsdWUYAiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRh",
+            "OgI4ASLHAgoKU3RCdWlsZGluZxIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiAB",
+            "KAUSLgoIbG9jYXRpb24YAyABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZl",
+            "Y3RvcjISEAoIcGxheWVySUQYBCABKAUSLgoKdXNlclBsdWdpbhgGIAEoCzIa",
+            "Lk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGESUgoUZGVmYXVsdENvbXBvbmVu",
+            "dERhdGEYByADKAsyNC5NSFVyaG8uU3RvcmFnZS5TdEJ1aWxkaW5nLkRlZmF1",
+            "bHRDb21wb25lbnREYXRhRW50cnkaVwoZRGVmYXVsdENvbXBvbmVudERhdGFF",
+            "bnRyeRILCgNrZXkYASABKAUSKQoFdmFsdWUYAiABKAsyGi5NSFVyaG8uU3Rv",
+            "cmFnZS5QbHVnaW5EYXRhOgI4ASKLAQoIU3RQbGF5ZXISEAoIcGxheWVySUQY",
+            "ASABKAUSDwoHdW5pdElEcxgCIAMoBRITCgtidWlsZGluZ0lEcxgDIAMoBRIX",
+            "Cg9mcmllbmRQbGF5ZXJJRHMYBCADKAUSLgoKdXNlclBsdWdpbhgFIAEoCzIa",
+            "Lk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGEiwwEKBVN0TWFwEioKBHNpemUY",
+            "ASABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISJQoFdGlsZXMY",
+            "AiADKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFRpbGUSMQoLYm9yZGVyVGlsZXMY",
+            "AyADKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEJvcmRlclRpbGUSNAoPbWFwUmFu",
+            "Z2VUYXJnZXRzGAQgAygLMhsuTUhVcmhvLlN0b3JhZ2UuU3RNYXBUYXJnZXRi",
+            "BnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Buildings", "Players", "Projectiles", "GameSpeed", "PackageName" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitID", "PassingUnitIDs", "TileTypeID", "TopLeftPosition", "Height", "SplitDirection" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitIDs", "TileTypeID", "TopLeftPosition", "Height", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMapTarget), global::MHUrho.Storage.StMapTarget.Parser, new[]{ "InstanceID", "Position" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
@@ -371,8 +371,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StTile(StTile other) : this() {
-      unitID_ = other.unitID_;
-      passingUnitIDs_ = other.passingUnitIDs_.Clone();
+      unitIDs_ = other.unitIDs_.Clone();
       tileTypeID_ = other.tileTypeID_;
       TopLeftPosition = other.topLeftPosition_ != null ? other.TopLeftPosition.Clone() : null;
       height_ = other.height_;
@@ -384,25 +383,14 @@ namespace MHUrho.Storage {
       return new StTile(this);
     }
 
-    /// <summary>Field number for the "unitID" field.</summary>
-    public const int UnitIDFieldNumber = 1;
-    private int unitID_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int UnitID {
-      get { return unitID_; }
-      set {
-        unitID_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "passingUnitIDs" field.</summary>
-    public const int PassingUnitIDsFieldNumber = 2;
-    private static readonly pb::FieldCodec<int> _repeated_passingUnitIDs_codec
+    /// <summary>Field number for the "unitIDs" field.</summary>
+    public const int UnitIDsFieldNumber = 2;
+    private static readonly pb::FieldCodec<int> _repeated_unitIDs_codec
         = pb::FieldCodec.ForInt32(18);
-    private readonly pbc::RepeatedField<int> passingUnitIDs_ = new pbc::RepeatedField<int>();
+    private readonly pbc::RepeatedField<int> unitIDs_ = new pbc::RepeatedField<int>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<int> PassingUnitIDs {
-      get { return passingUnitIDs_; }
+    public pbc::RepeatedField<int> UnitIDs {
+      get { return unitIDs_; }
     }
 
     /// <summary>Field number for the "tileTypeID" field.</summary>
@@ -462,8 +450,7 @@ namespace MHUrho.Storage {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (UnitID != other.UnitID) return false;
-      if(!passingUnitIDs_.Equals(other.passingUnitIDs_)) return false;
+      if(!unitIDs_.Equals(other.unitIDs_)) return false;
       if (TileTypeID != other.TileTypeID) return false;
       if (!object.Equals(TopLeftPosition, other.TopLeftPosition)) return false;
       if (Height != other.Height) return false;
@@ -474,8 +461,7 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (UnitID != 0) hash ^= UnitID.GetHashCode();
-      hash ^= passingUnitIDs_.GetHashCode();
+      hash ^= unitIDs_.GetHashCode();
       if (TileTypeID != 0) hash ^= TileTypeID.GetHashCode();
       if (topLeftPosition_ != null) hash ^= TopLeftPosition.GetHashCode();
       if (Height != 0F) hash ^= Height.GetHashCode();
@@ -490,11 +476,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (UnitID != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(UnitID);
-      }
-      passingUnitIDs_.WriteTo(output, _repeated_passingUnitIDs_codec);
+      unitIDs_.WriteTo(output, _repeated_unitIDs_codec);
       if (TileTypeID != 0) {
         output.WriteRawTag(24);
         output.WriteInt32(TileTypeID);
@@ -516,10 +498,7 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (UnitID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(UnitID);
-      }
-      size += passingUnitIDs_.CalculateSize(_repeated_passingUnitIDs_codec);
+      size += unitIDs_.CalculateSize(_repeated_unitIDs_codec);
       if (TileTypeID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TileTypeID);
       }
@@ -540,10 +519,7 @@ namespace MHUrho.Storage {
       if (other == null) {
         return;
       }
-      if (other.UnitID != 0) {
-        UnitID = other.UnitID;
-      }
-      passingUnitIDs_.Add(other.passingUnitIDs_);
+      unitIDs_.Add(other.unitIDs_);
       if (other.TileTypeID != 0) {
         TileTypeID = other.TileTypeID;
       }
@@ -569,13 +545,9 @@ namespace MHUrho.Storage {
           default:
             input.SkipLastField();
             break;
-          case 8: {
-            UnitID = input.ReadInt32();
-            break;
-          }
           case 18:
           case 16: {
-            passingUnitIDs_.AddEntriesFrom(input, _repeated_passingUnitIDs_codec);
+            unitIDs_.AddEntriesFrom(input, _repeated_unitIDs_codec);
             break;
           }
           case 24: {

@@ -61,9 +61,9 @@ namespace MHUrho.Logic
 		readonly HashSet<IPlayer> friends;
 
 
-		readonly Dictionary<UnitType,List<Unit>> units;
+		readonly Dictionary<UnitType,List<IUnit>> units;
 
-		readonly Dictionary<BuildingType, List<Building>> buildings;
+		readonly Dictionary<BuildingType, List<IBuilding>> buildings;
 
 		readonly Dictionary<ResourceType, int> resources;
 
@@ -71,8 +71,8 @@ namespace MHUrho.Logic
 
 		public Player(ILevelManager level, int ID) {
 			this.ID = ID;
-			units = new Dictionary<UnitType, List<Unit>>();
-			buildings = new Dictionary<BuildingType, List<Building>>();
+			units = new Dictionary<UnitType, List<IUnit>>();
+			buildings = new Dictionary<BuildingType, List<IBuilding>>();
 			resources = new Dictionary<ResourceType, int>();
 			friends = new HashSet<IPlayer>();
 			this.level = level;
@@ -107,50 +107,50 @@ namespace MHUrho.Logic
 		/// Adds unit to players units
 		/// </summary>
 		/// <param name="unit">unit to add</param>
-		public void AddUnit(Unit unit) {
+		public void AddUnit(IUnit unit) {
 			if (units.TryGetValue(unit.UnitType, out var unitList)) {
 				unitList.Add(unit);
 			}
 			else {
-				units.Add(unit.UnitType, new List<Unit> {unit});
+				units.Add(unit.UnitType, new List<IUnit> {unit});
 			}
 		}
 
-		public void AddBuilding(Building building) {
+		public void AddBuilding(IBuilding building) {
 			if (buildings.TryGetValue(building.BuildingType, out var buildingList)) {
 				buildingList.Add(building);
 			}
 			else {
-				buildings.Add(building.BuildingType, new List<Building> {building});
+				buildings.Add(building.BuildingType, new List<IBuilding> {building});
 			}
 		}
 
-		public bool RemoveUnit(Unit unit) {
+		public bool RemoveUnit(IUnit unit) {
 			return units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
 		}
 
-		public bool RemoveBuilding(Building building) {
+		public bool RemoveBuilding(IBuilding building) {
 			return buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
 		}
 
-		public IEnumerable<Unit> GetAllUnits() {
+		public IEnumerable<IUnit> GetAllUnits() {
 			return from unitList in units.Values
 				   from unit in unitList
 				   select unit;
 		}
 
-		public IReadOnlyList<Unit> GetUnitsOfType(UnitType type) {
-			return units.TryGetValue(type, out List<Unit> unitList) ? new List<Unit>() : unitList;
+		public IReadOnlyList<IUnit> GetUnitsOfType(UnitType type) {
+			return units.TryGetValue(type, out List<IUnit> unitList) ? new List<IUnit>() : unitList;
 		}
 
-		public IEnumerable<Building> GetAllBuildings() {
+		public IEnumerable<IBuilding> GetAllBuildings() {
 			return from buildingList in buildings.Values
 				   from building in buildingList
 				   select building;
 		}
 
-		public IReadOnlyList<Building> GetBuildingsOfType(BuildingType type) {
-			return buildings.TryGetValue(type, out var buildingList) ? new List<Building>() : buildingList;
+		public IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType type) {
+			return buildings.TryGetValue(type, out var buildingList) ? new List<IBuilding>() : buildingList;
 		}
 
 		public int GetResourcesOfType(ResourceType type) {

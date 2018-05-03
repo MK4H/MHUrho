@@ -9,9 +9,9 @@ using Urho;
 namespace MHUrho.Plugins
 {
 	public abstract class BuildingInstancePlugin : InstancePlugin {
-		public Building Building { get; protected set; }
+		public IBuilding Building { get; protected set; }
 
-		protected BuildingInstancePlugin(ILevelManager level, Building building) 
+		protected BuildingInstancePlugin(ILevelManager level, IBuilding building) 
 			:base (level) {
 			this.Building = building;
 		}
@@ -27,7 +27,7 @@ namespace MHUrho.Plugins
 		/// <param name="building"></param>
 		/// <param name="pluginData">stored state of the building plugin</param>
 		/// <returns>Instance loaded into saved state</returns>
-		public abstract void LoadState(ILevelManager level, Building building, PluginDataWrapper pluginData);
+		public abstract void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData);
 
 	}
 }

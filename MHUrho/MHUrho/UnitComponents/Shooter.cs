@@ -15,7 +15,7 @@ namespace MHUrho.UnitComponents
 {
 	internal delegate void HostileTargetAquiredDelegate(Shooter shooter);
 	internal delegate void ShotReloadedDelegate(Shooter shooter);
-	internal delegate void ShotFiredDelegate(Shooter shooter, Projectile projectile);
+	internal delegate void ShotFiredDelegate(Shooter shooter, IProjectile projectile);
 
 	public class Shooter : DefaultComponent, RangeTargetComponent.IShooter
 	{
@@ -100,7 +100,7 @@ namespace MHUrho.UnitComponents
 
 			void BeforeShotFired(Shooter shooter);
 
-			void AfterShotFired(Shooter shooter, Projectile projectile);
+			void AfterShotFired(Shooter shooter, IProjectile projectile);
 
 			void OnShotReloaded(Shooter shooter);
 

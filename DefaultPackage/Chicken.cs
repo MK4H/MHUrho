@@ -31,7 +31,7 @@ namespace DefaultPackage
 
 
 
-		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
 			return new ChickenInstance(level, unit, this);
 		}
 
@@ -65,9 +65,9 @@ namespace DefaultPackage
 
 		}
 
-		public ChickenInstance(ILevelManager level, Unit unit, ChickenType type) 
+		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
 			:base(level,unit) {
-			animationController = unit.Node.CreateComponent<AnimationController>();
+			animationController = unit.CreateComponent<AnimationController>();
 			walker = WorldWalker.GetInstanceFor(this,level);
 			shooter = Shooter.CreateNew(this, level,type.ProjectileType, 20);
 			shooter.SearchForTarget = true;
@@ -84,11 +84,11 @@ namespace DefaultPackage
 
 		}
 
-		public override void LoadState(ILevelManager level, Unit unit, PluginDataWrapper pluginData) {
+		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
 			this.Level = level;
 			this.Unit = unit;
 			unit.AlwaysVertical = true;
-			animationController = unit.Node.CreateComponent<AnimationController>();
+			animationController = unit.CreateComponent<AnimationController>();
 			walker = unit.GetDefaultComponent<WorldWalker>();
 			shooter = unit.GetDefaultComponent<Shooter>();
 
@@ -151,7 +151,7 @@ namespace DefaultPackage
 			orderArgs.Executed = walker.GoTo(targetTile);
 		}
 
-		public void OnUnitOrderedToUnit(UnitSelector selector, Unit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs)
+		public void OnUnitOrderedToUnit(UnitSelector selector, IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs)
 		{
 			IRangeTarget rangeTarget;
 			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTargetComponent>()) != null)) {
@@ -162,7 +162,7 @@ namespace DefaultPackage
 			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToBuilding(UnitSelector selector, Building targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
+		public void OnUnitOrderedToBuilding(UnitSelector selector, IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
 			orderArgs.Executed = false;
 		}
 
@@ -182,7 +182,7 @@ namespace DefaultPackage
 			Unit.FaceTowards(Unit.Position + diff);
 		}
 
-		public void AfterShotFired(Shooter shooter, Projectile projectile) {
+		public void AfterShotFired(Shooter shooter, IProjectile projectile) {
 
 		}
 
@@ -199,7 +199,7 @@ namespace DefaultPackage
 			return Unit.Position + new Vector3(0, 0.5f, 0);
 		}
 
-		public void OnHit(MovingRangeTarget target, Projectile projectile)
+		public void OnHit(MovingRangeTarget target, IProjectile projectile)
 		{
 			animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
 			dying = true;

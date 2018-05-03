@@ -12,7 +12,7 @@ using MHUrho.UnitComponents;
 
 namespace MHUrho.Logic
 {
-	public class Projectile : Entity {
+	public class Projectile : Entity, IProjectile {
 		internal class Loader : ILoader {
 
 			public Projectile Projectile;
@@ -220,6 +220,7 @@ namespace MHUrho.Logic
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {
 			ID = newID;
 			Enabled = true;
+			RemovedFromLevel = false;
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
@@ -237,6 +238,7 @@ namespace MHUrho.Logic
 		public void Despawn() 
 		{
 			Enabled = false;
+			RemovedFromLevel = true;
 			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {
 				
@@ -247,6 +249,11 @@ namespace MHUrho.Logic
 			else {
 				Node.Enabled = false;
 			}
+		}
+
+		public override void Accept(IEntityVisitor visitor)
+		{
+			visitor.Visit(this);
 		}
 
 		public bool Move(Vector3 movement)

@@ -16,18 +16,14 @@ namespace MHUrho.Logic
 		public const int ImageHeight = 100;
 
 
-		/// <summary>
-		/// Unit that owns the tile, there can only be one
-		/// </summary>
-		public Unit Unit { get; private set; }
+
 
 		/// <summary>
-		/// Other units that are passing through the tile
-		/// Units cannot stop in this tile if Unit is not null
+		/// Units inside the tile
 		/// </summary>
-		public IReadOnlyList<Unit> PassingUnits => passingUnits;
+		public IReadOnlyList<IUnit> Units => units;
 
-		public Building Building{ get; private set;}
+		public IBuilding Building{ get; private set;}
 
 		/// <summary>
 		/// Modifier of the movement speed of units passing through this tile
@@ -96,20 +92,18 @@ namespace MHUrho.Logic
 		/// Stores tile image between the steps of loading
 		/// After loading is set to null to reclaim resources
 		/// </summary>
-		private StTile storage;
+		StTile storage;
 
-		private List<Unit> passingUnits;
+		List<IUnit> units;
 
 		public StTile Save() {
 			var storedTile = new StTile();
-			storedTile.UnitID = Unit?.ID ?? 0;
 			storedTile.TopLeftPosition = TopLeft.ToStIntVector2();
 			storedTile.Height = TopLeftHeight;
 			storedTile.TileTypeID = Type.ID;
 
-			var storedPassingUnits = storedTile.PassingUnitIDs;
-			foreach (var passingUnit in PassingUnits) {
-				storedPassingUnits.Add(passingUnit.ID);
+			foreach (var passingUnit in Units) {
+				storedTile.UnitIDs.Add(passingUnit.ID);
 			}
 
 			return storedTile;
@@ -133,12 +127,9 @@ namespace MHUrho.Logic
 		public void ConnectReferences(ILevelManager level) {
 			Type = PackageManager.Instance.ActiveGame.GetTileType(storage.TileTypeID);
 
-			if (storage.UnitID != 0) {
-				Unit = level.GetUnit(storage.UnitID);
-			}
 
-			foreach (var passingUnit in storage.PassingUnitIDs) {
-				passingUnits.Add(level.GetUnit(passingUnit));
+			foreach (var unit in storage.UnitIDs) {
+				units.Add(level.GetUnit(unit));
 			}
 
 			//TODO: Connect buildings
@@ -157,58 +148,33 @@ namespace MHUrho.Logic
 									   storedTile.TopLeftPosition.Y + 1);
 			this.TopLeftHeight = storedTile.Height;
 			this.Map = map;
-			passingUnits = new List<Unit>();
+			units = new List<IUnit>();
 		}
 
 		public Tile(int x, int y, TileType tileType, Map map) {
 			MapArea = new IntRect(x, y, x + 1, y + 1);
-			passingUnits = new List<Unit>();
-			Unit = null;
+			units = new List<IUnit>();
 			this.Type = tileType;
 			this.TopLeftHeight = 0;
 			this.Map = map;
 		}
 
-		public void AddPassingUnit(Unit unit)
+		public void AddUnit(IUnit unit)
 		{
-			passingUnits.Add(unit);
-		}
-
-		/// <summary>
-		/// Tries to set unit as owning unit, if there is not already one
-		/// </summary>
-		/// <param name="unit">The new owning unit</param>
-		/// <returns>true if set, false if not set</returns>
-		public bool TryAddOwningUnit(Unit unit)
-		{
-			//TODO: locking/threading
-			if (Unit == null)
-			{
-				Unit = unit;
-				return true;
-			}
-			return false;
-
+			units.Add(unit);
 		}
 
 		/// <summary>
 		/// Removes a unit from this tile, either the owning unit or one of the passing units
 		/// </summary>
 		/// <param name="unit">the unit to remove</param>
-		public void RemoveUnit(Unit unit)
+		public void RemoveUnit(IUnit unit)
 		{
 			//TODO: Error, unit not present
-			if (Unit == unit)
-			{
-				Unit = null;
-			}
-			else
-			{
-				passingUnits.Remove(unit);
-			}
+			units.Remove(unit);
 		}
 
-		public void AddBuilding(Building building) {
+		public void AddBuilding(IBuilding building) {
 			if (Building != null) {
 				throw new InvalidOperationException("Adding building to a tile that already has a building");
 			}
@@ -216,22 +182,12 @@ namespace MHUrho.Logic
 			Building = building;
 		}
 
-		public void RemoveBuilding(Building building) {
+		public void RemoveBuilding(IBuilding building) {
 			if (Building != building) {
 				throw new ArgumentException("Removing building that is not on this tile");
 			}
 
 			Building = null;
-		}
-
-		public IEnumerable<Unit> GetAllUnits() {
-			if (Unit != null) {
-				yield return Unit;
-			}
-			
-			foreach (var unit in PassingUnits) {
-				yield return unit;
-			}
 		}
 
 		public void ChangeType(TileType newType) {
@@ -277,8 +233,7 @@ namespace MHUrho.Logic
 		/// Is called every time any of the 4 corners of the tile change height
 		/// </summary>
 		public void CornerHeightChange() {
-			Unit?.SetHeight(Map.GetHeightAt(Unit.XZPosition));
-			foreach (var unit in PassingUnits) {
+			foreach (var unit in Units) {
 				unit.SetHeight(Map.GetHeightAt(unit.XZPosition));
 			}
 		}
