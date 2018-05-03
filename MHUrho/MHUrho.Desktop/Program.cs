@@ -14,6 +14,7 @@ namespace MHUrho.Desktop
 			MyGame.Config.CopyStaticToDynamic(Path.Combine("Data","Test"));
 
 			new MyGame(new ApplicationOptions("Data")).Run();
+
 		}
 	}
 }

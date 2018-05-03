@@ -199,9 +199,9 @@ namespace MHUrho.Logic
 
 		public object Plugin => plugin;
 
-		private ITile[] tiles;
+		ITile[] tiles;
 
-		private BuildingInstancePluginBase plugin;
+		BuildingInstancePlugin plugin;
 
 		protected Building(int id, ILevelManager level, IntVector2 topLeftCorner, BuildingType type, IPlayer player) 
 			:base(id, level)
@@ -239,7 +239,10 @@ namespace MHUrho.Logic
 				tile.RemoveBuilding(this);
 			}
 
+			Player.RemoveBuilding(this);
 			Node.Remove();
+			Node.Dispose();
+			Dispose();
 			Level.RemoveBuilding(this);
 		}
 

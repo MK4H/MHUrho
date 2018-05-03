@@ -7,17 +7,17 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Plugins
 {
-	public abstract class InstancePluginBase
+	public abstract class InstancePlugin
 	{
 		public ILevelManager Level { get; protected set; }
 
 		public Map Map => Level.Map;
 
-		protected InstancePluginBase(ILevelManager level) {
+		protected InstancePlugin(ILevelManager level) {
 			this.Level = level;
 		}
 
-		protected InstancePluginBase() {
+		protected InstancePlugin() {
 
 		}
 

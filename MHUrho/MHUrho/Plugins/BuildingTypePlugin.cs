@@ -10,7 +10,7 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class BuildingTypePluginBase : TypePluginBase {
+	public abstract class BuildingTypePlugin : TypePlugin {
 
 		/// <summary>
 		/// Creates new instance from scratch
@@ -18,13 +18,13 @@ namespace MHUrho.Plugins
 		/// <param name="level">level in which the building is created</param>
 		/// <param name="building">building Plugin class</param>
 		/// <returns>New instance in default state</returns>
-		public abstract BuildingInstancePluginBase CreateNewInstance(ILevelManager level, Building building);
+		public abstract BuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building);
 
 		/// <summary>
-		/// Creates instance of <see cref="BuildingInstancePluginBase"/> that will be loaded by <see cref="BuildingInstancePluginBase.LoadState(LevelManager, PluginDataWrapper)"/>
+		/// Creates instance of <see cref="BuildingInstancePlugin"/> that will be loaded by <see cref="BuildingInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>
 		/// </summary>
 		/// <returns>New instance, that will be loaded in the next step</returns>
-		public abstract BuildingInstancePluginBase GetInstanceForLoading();
+		public abstract BuildingInstancePlugin GetInstanceForLoading();
 
 		public abstract bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
 
@@ -36,8 +36,8 @@ namespace MHUrho.Plugins
 
 		public abstract void ClearUI(TouchUI touchUI);
 
-		public abstract void AddSelected(BuildingInstancePluginBase buildingInstance);
+		public abstract void AddSelected(BuildingInstancePlugin buildingInstance);
 
-		public abstract void RemoveSelected(BuildingInstancePluginBase buildingInstance);
+		public abstract void RemoveSelected(BuildingInstancePlugin buildingInstance);
 	}
 }

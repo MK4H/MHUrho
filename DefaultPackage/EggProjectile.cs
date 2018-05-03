@@ -13,7 +13,7 @@ using MHUrho.WorldMap;
 
 namespace DefaultPackage
 {
-	public class EggProjectileType : ProjectileTypePluginBase {
+	public class EggProjectileType : ProjectileTypePlugin {
 		public float Speed { get; private set; }
 
 		public override bool IsMyType(string typeName) {
@@ -25,11 +25,11 @@ namespace DefaultPackage
 			Speed = XmlHelpers.GetFloat(speedElement);
 		}
 
-		public override ProjectileInstancePluginBase CreateNewInstance(ILevelManager level, Projectile projectile) {
+		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile) {
 			return new EggProjectileInstance(level, projectile, this);
 		}
 
-		public override ProjectileInstancePluginBase GetInstanceForLoading()
+		public override ProjectileInstancePlugin GetInstanceForLoading()
 		{
 			return new EggProjectileInstance(this);
 		}
@@ -45,7 +45,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class EggProjectileInstance : ProjectileInstancePluginBase, BallisticProjectile.INotificationReceiver {
+	public class EggProjectileInstance : ProjectileInstancePlugin, BallisticProjectile.INotificationReceiver {
 
 		BallisticProjectile flier;
 		readonly EggProjectileType myType;

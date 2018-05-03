@@ -27,7 +27,7 @@ namespace MHUrho
 
 		public IMenuController menuController;
 
-		private MonoDebugHud monoDebugHud;
+		MonoDebugHud monoDebugHud;
 
 		static MyGame()
 		{
@@ -57,6 +57,12 @@ namespace MHUrho
 
 			monoDebugHud = new MonoDebugHud(this);
 			monoDebugHud.Show();
+
+			//var monitor = Graphics.CurrentMonitor;
+			//var resolution = Graphics.GetDesktopResolution(monitor);
+			//Graphics.SetMode(resolution.X, resolution.Y);
+			//Graphics.ToggleFullscreen();
+			
 		}
 
 		//async void CreateScene() {

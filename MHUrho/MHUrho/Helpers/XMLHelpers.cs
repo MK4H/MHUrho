@@ -104,7 +104,7 @@ namespace MHUrho.Helpers
 			return typeXmlElement.Element(ExtensionElementName);
 		}
 
-		public static T LoadTypePlugin<T>(XElement typeXml, string pathToPackageXmlDir, string typeName) where T: TypePluginBase {
+		public static T LoadTypePlugin<T>(XElement typeXml, string pathToPackageXmlDir, string typeName) where T: TypePlugin {
 			if (!System.IO.Path.IsPathRooted(pathToPackageXmlDir)) {
 				pathToPackageXmlDir = System.IO.Path.Combine(MyGame.Config.DynamicDirPath, pathToPackageXmlDir);
 			}

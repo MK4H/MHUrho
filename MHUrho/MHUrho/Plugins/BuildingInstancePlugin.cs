@@ -8,15 +8,15 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class BuildingInstancePluginBase : InstancePluginBase {
+	public abstract class BuildingInstancePlugin : InstancePlugin {
 		public Building Building { get; protected set; }
 
-		protected BuildingInstancePluginBase(ILevelManager level, Building building) 
+		protected BuildingInstancePlugin(ILevelManager level, Building building) 
 			:base (level) {
 			this.Building = building;
 		}
 
-		protected BuildingInstancePluginBase() {
+		protected BuildingInstancePlugin() {
 
 		}
 

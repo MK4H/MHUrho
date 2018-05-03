@@ -9,7 +9,7 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class UnitTypePluginBase : TypePluginBase
+	public abstract class UnitTypePlugin : TypePlugin
 	{
 
 		/// <summary>
@@ -21,19 +21,19 @@ namespace MHUrho.Plugins
 		/// Create new instance of the unit in with default contents
 		/// 
 		/// Add components from <see cref="MHUrho.UnitComponents"/> to <see name="unit.Node"/> and/or
-		/// create your own Plugin in <see cref="UnitInstancePluginBase.OnUpdate(float)"/>
+		/// create your own Plugin in <see cref="UnitInstancePlugin.OnUpdate(float)"/>
 		/// </summary>
 		/// <param name="level"></param>
 		/// <param name="unit"></param>
 		/// <returns></returns>
-		public abstract UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit);
+		public abstract UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit);
 
 
 		/// <summary>
-		/// Creates instance of <see cref="UnitInstancePluginBase"/> that will be loaded by <see cref="UnitInstancePluginBase.LoadState(LevelManager, PluginDataWrapper)"/>
+		/// Creates instance of <see cref="UnitInstancePlugin"/> that will be loaded by <see cref="UnitInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>
 		/// </summary>
 		/// <returns></returns>
-		public abstract UnitInstancePluginBase GetInstanceForLoading();
+		public abstract UnitInstancePlugin GetInstanceForLoading();
 
 
 		/// <summary>

@@ -11,11 +11,11 @@ using Urho;
 
 namespace DefaultPackage
 {
-	public class TestUnitType : UnitTypePluginBase {
+	public class TestUnitType : UnitTypePlugin {
 
 		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
-		private ProjectileType projectileType;
+		ProjectileType projectileType;
 
 		public override bool IsMyType(string unitTypeName) {
 			return unitTypeName == "TestUnit";
@@ -27,11 +27,11 @@ namespace DefaultPackage
 
 		
 
-		public override UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit) {
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
 			return new TestUnitInstance(level, unit, projectileType);
 		}
 
-		public override UnitInstancePluginBase GetInstanceForLoading() {
+		public override UnitInstancePlugin GetInstanceForLoading() {
 			return new TestUnitInstance();
 		}
 
@@ -48,7 +48,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestUnitInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
+	public class TestUnitInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
 	{
 		Node unitNode;
 		Unit unit;

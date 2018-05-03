@@ -28,7 +28,7 @@ namespace MHUrho.UnitComponents
 				throw new NotImplementedException();
 			}
 
-			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData)
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData)
 			{
 				throw new NotImplementedException();
 			}
@@ -82,7 +82,7 @@ namespace MHUrho.UnitComponents
 
 		public class TimedWorkTask : WorkTask {
 			
-			private float duration;
+			float duration;
 
 			public TimedWorkTask(float duration, int tag) : base(tag) {
 				this.duration = duration;
@@ -99,7 +99,7 @@ namespace MHUrho.UnitComponents
 
 		public class DelegatedWorkTask : WorkTask {
 
-			private bool finished = false;
+			bool finished = false;
 
 			public DelegatedWorkTask(int tag) : base(tag) {
 
@@ -123,12 +123,12 @@ namespace MHUrho.UnitComponents
 		internal event TaskStartedDelegate OnTaskStarted;
 		internal event TaskFinishedDelegate OnTaskFinished;
 
-		private readonly Queue<IWorkTask> workQueue;
+		readonly Queue<IWorkTask> workQueue;
 
-		private INotificationReceiver notificationReceiver;
+		INotificationReceiver notificationReceiver;
 
 		public ActionQueue CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T : InstancePluginBase, INotificationReceiver {
+			where T : InstancePlugin, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));

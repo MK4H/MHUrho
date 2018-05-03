@@ -27,15 +27,15 @@ namespace MHUrho.UnitComponents
 
 		}
 
-		internal DefaultComponentLoader StartLoadingComponent(string name, PluginData storedComponent, LevelManager level, InstancePluginBase plugin) {
+		internal DefaultComponentLoader StartLoadingComponent(string name, PluginData storedComponent, LevelManager level, InstancePlugin plugin) {
 			return StartLoadingComponent(nameToID[name], storedComponent, level, plugin);
 		}
 
-		internal DefaultComponentLoader StartLoadingComponent(int ID, PluginData storedComponent, LevelManager level, InstancePluginBase plugin) {
+		internal DefaultComponentLoader StartLoadingComponent(int ID, PluginData storedComponent, LevelManager level, InstancePlugin plugin) {
 			return StartLoadingComponent((DefaultComponents) ID, storedComponent, level, plugin);
 		}
 
-		internal DefaultComponentLoader StartLoadingComponent(DefaultComponents ID, PluginData storedComponent, LevelManager level, InstancePluginBase plugin )
+		internal DefaultComponentLoader StartLoadingComponent(DefaultComponents ID, PluginData storedComponent, LevelManager level, InstancePlugin plugin )
 		{
 			DefaultComponentLoader loader = loaders[ID].Clone();
 			loader.StartLoading(level, plugin, storedComponent);

@@ -27,6 +27,26 @@ namespace MHUrho.Logic
 				this.componentLoaders = new List<DefaultComponentLoader>();
 			}
 
+			public static Projectile CreateNew(int ID,
+												ILevelManager level,
+												IPlayer player,
+												Vector3 position,
+												ProjectileType type,
+												Node node)
+			{
+				node.Position = position;
+				var projectile = new Projectile(ID, level, type, player);
+				node.AddComponent(projectile);
+
+				AddBasicComponents(projectile);
+
+				node.NodeCollisionStart += projectile.CollisionHandler;
+
+				projectile.Plugin = type.GetNewInstancePlugin(projectile, level);
+
+				return projectile;
+			}
+
 			public static StProjectile Save(Projectile projectile)
 			{
 				var stProjectile = new StProjectile {
@@ -90,6 +110,8 @@ namespace MHUrho.Logic
 				Projectile = new Projectile(instanceID, level, type);
 				node.AddComponent(Projectile);
 
+				AddBasicComponents(Projectile);
+
 				node.NodeCollisionStart += Projectile.CollisionHandler;
 
 				Projectile.Plugin = Projectile.ProjectileType.GetInstancePluginForLoading();
@@ -106,15 +128,45 @@ namespace MHUrho.Logic
 					Projectile.AddComponent(componentLoader.Component);
 				}
 			}
+
+			static void AddBasicComponents(Projectile projectile)
+			{
+				AddRigidBody(projectile);
+				StaticModel model = AddModel(projectile.Node, projectile.ProjectileType);
+				//TODO: Move collider to plugin
+				var collider = projectile.Node.CreateComponent<CollisionShape>();
+				collider.SetBox(model.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
+			}
+
+			static void AddRigidBody(Projectile projectile)
+			{
+
+
+				projectile.rigidBody = projectile.Node.CreateComponent<RigidBody>();
+				projectile.rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
+				projectile.rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
+				projectile.rigidBody.Kinematic = true;
+				projectile.rigidBody.Mass = 1;
+				projectile.rigidBody.UseGravity = false;
+
+				
+			}
+
+			static StaticModel AddModel(Node projectileNode, ProjectileType type)
+			{
+				var staticModel = type.Model.AddModel(projectileNode);
+				type.Material.ApplyMaterial(staticModel);
+				return staticModel;
+			}
 		}
 
 		public ProjectileType ProjectileType { get; private set; }
 
 		/// <summary>
-		/// Cast it to your own type, the one returned by <see cref="ProjectileTypePluginBase.CreateNewInstance(ILevelManager, Projectile)"/>
-		/// for this type with name <see cref="ProjectileTypePluginBase.IsMyType(string)"/>
+		/// Cast it to your own type, the one returned by <see cref="ProjectileTypePlugin.CreateNewInstance(ILevelManager, Projectile)"/>
+		/// for this type with name <see cref="ProjectileTypePlugin.IsMyType(string)"/>
 		/// </summary>
-		public ProjectileInstancePluginBase Plugin { get; private set; }
+		public ProjectileInstancePlugin Plugin { get; private set; }
 
 
 		public override Vector3 Position {
@@ -126,6 +178,13 @@ namespace MHUrho.Logic
 		/// Default true
 		/// </summary>
 		public bool FaceInTheDirectionOfMovement { get; set; }
+
+		public bool TriggerCollisions {
+			get => rigidBody.Enabled;
+			set => rigidBody.Enabled = value;
+		}
+
+		RigidBody rigidBody;
 
 		protected Projectile(int ID, ILevelManager level, ProjectileType type, IPlayer player)
 			:base(ID,level)
@@ -148,20 +207,14 @@ namespace MHUrho.Logic
 
 
 
-		internal static Projectile SpawnNew(int ID,
+		internal static Projectile CreateNew(int ID,
 											ILevelManager level,
 											IPlayer player,
 											Vector3 position,
 											ProjectileType type,
-											Node node) {
-			node.Position = position;
-			var projectile = new Projectile(ID, level, type, player);
-			node.AddComponent(projectile);
-			node.NodeCollisionStart += projectile.CollisionHandler;
-
-			projectile.Plugin = type.GetNewInstancePlugin(projectile, level);
-
-			return projectile;
+											Node node)
+		{
+			return Loader.CreateNew(ID, level, player, position, type, node);
 		}
 
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {
@@ -188,6 +241,8 @@ namespace MHUrho.Logic
 			if (!ProjectileType.ProjectileDespawn(this)) {
 				
 				Node.Remove();
+				Node.Dispose();
+				Dispose();
 			}
 			else {
 				Node.Enabled = false;

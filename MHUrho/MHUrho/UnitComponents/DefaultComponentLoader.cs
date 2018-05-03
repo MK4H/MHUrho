@@ -10,7 +10,7 @@ namespace MHUrho.UnitComponents
 	internal abstract class DefaultComponentLoader : ILoader{
 		public abstract DefaultComponent Component { get; }
 
-		public abstract void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData);
+		public abstract void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData);
 
 		public abstract void ConnectReferences(LevelManager level);
 

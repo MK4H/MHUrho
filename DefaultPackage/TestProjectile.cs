@@ -12,18 +12,18 @@ using MHUrho.Helpers;
 
 namespace DefaultPackage
 {
-	public class TestProjectileType : ProjectileTypePluginBase {
+	public class TestProjectileType : ProjectileTypePlugin {
 		public float Speed { get;private set; }
 
 		public override bool IsMyType(string typeName) {
 			return typeName == "TestProjectile";
 		}
 
-		public override ProjectileInstancePluginBase CreateNewInstance(ILevelManager level, Projectile projectile) {
+		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile) {
 			return new TestProjectileInstance(level, projectile, this);
 		}
 
-		public override ProjectileInstancePluginBase GetInstanceForLoading()
+		public override ProjectileInstancePlugin GetInstanceForLoading()
 		{
 			return new TestProjectileInstance(this);
 		}
@@ -47,21 +47,21 @@ namespace DefaultPackage
 
 	}
 
-	public class TestProjectileInstance : ProjectileInstancePluginBase, BallisticProjectile.INotificationReceiver {
-		private static readonly Random seedRng = new Random();
+	public class TestProjectileInstance : ProjectileInstancePlugin, BallisticProjectile.INotificationReceiver {
+		static readonly Random seedRng = new Random();
 
-		private BallisticProjectile flier;
-		private TestProjectileType myType;
+		BallisticProjectile flier;
+		TestProjectileType myType;
 
-		private const float baseTimeToSplit = 0.5f;
-		private float timeToSplit = baseTimeToSplit;
+		const float baseTimeToSplit = 0.5f;
+		float timeToSplit = baseTimeToSplit;
 
-		private Random rng;
+		Random rng;
 
-		private int splits = 10;
+		int splits = 10;
 
-		private bool despawning;
-		private float timeToDespawn = 6;
+		bool despawning;
+		float timeToDespawn = 6;
 
 		public TestProjectileInstance(TestProjectileType type)
 		{
@@ -142,6 +142,7 @@ namespace DefaultPackage
 			splits = 10;
 			timeToDespawn = 6;
 			despawning = false;
+			projectile.TriggerCollisions = true;
 		}
 
 		public override bool ShootProjectile(IRangeTarget target) {
@@ -173,6 +174,7 @@ namespace DefaultPackage
 		public override void OnTerrainHit()
 		{
 			despawning = true;
+			projectile.TriggerCollisions = false;
 		}
 
 	}

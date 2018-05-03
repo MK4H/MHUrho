@@ -14,7 +14,7 @@ using Urho;
 
 namespace DefaultPackage
 {
-	public class TestBuildingType : BuildingTypePluginBase
+	public class TestBuildingType : BuildingTypePlugin
 	{
 		private UnitType workerType;
 		private TileType tileType;
@@ -27,7 +27,7 @@ namespace DefaultPackage
 			return typeName == "TestBuilding";
 		}
 
-		public override BuildingInstancePluginBase CreateNewInstance(ILevelManager level, Building building) {
+		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, Building building) {
 			Unit[] workers = new Unit[2];
 			workers[0] = level.SpawnUnit(workerType,
 										 level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
@@ -39,7 +39,7 @@ namespace DefaultPackage
 			return new TestBuildingInstance(level, building, workers);
 		}
 
-		public override BuildingInstancePluginBase GetInstanceForLoading() {
+		public override BuildingInstancePlugin GetInstanceForLoading() {
 			return new TestBuildingInstance();
 		}
 
@@ -83,11 +83,11 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
-		public override void AddSelected(BuildingInstancePluginBase buildingInstance) {
+		public override void AddSelected(BuildingInstancePlugin buildingInstance) {
 			throw new NotImplementedException();
 		}
 
-		public override void RemoveSelected(BuildingInstancePluginBase buildingInstance) {
+		public override void RemoveSelected(BuildingInstancePlugin buildingInstance) {
 			throw new NotImplementedException();
 		}
 
@@ -100,7 +100,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestBuildingInstance : BuildingInstancePluginBase {
+	public class TestBuildingInstance : BuildingInstancePlugin {
 
 		public Building Building { get; private set; }
 

@@ -328,7 +328,7 @@ namespace MHUrho.Logic
 
 		public bool RemoveUnit(Unit unit)
 		{
-			var removed = units.Remove(unit.ID) && entities.Remove(unit.ID);
+			bool removed = units.Remove(unit.ID) && entities.Remove(unit.ID);
 
 			if (!unit.IsDeleted) {
 				unit.Kill();
@@ -339,18 +339,22 @@ namespace MHUrho.Logic
 
 		public bool RemoveBuilding(Building building)
 		{
+			bool removed = buildings.Remove(building.ID) && entities.Remove(building.ID);
+
 			if (!building.IsDeleted) {
 				building.Kill();
 			}
-			return buildings.Remove(building.ID) && entities.Remove(building.ID);
+			return removed;
 		}
 
 		public bool RemoveProjectile(Projectile projectile)
 		{
+			bool removed = projectiles.Remove(projectile.ID) && entities.Remove(projectile.ID);
+
 			if (projectile.Enabled) {
 				projectile.Despawn();
 			}
-			return projectiles.Remove(projectile.ID) && entities.Remove(projectile.ID);
+			return removed;
 		}
 
 		public Unit GetUnit(int ID) {

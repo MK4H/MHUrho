@@ -26,13 +26,13 @@ namespace MHUrho.Logic
 
 		public object Plugin => typePlugin;
 
-		private ModelWrapper model;
+		public ModelWrapper Model { get; private set; }
 
-		private MaterialWrapper material;
+		public MaterialWrapper Material { get; private set; }
 
-		private readonly Queue<Projectile> projectilePool;
+		readonly Queue<Projectile> projectilePool;
 
-		private ProjectileTypePluginBase typePlugin;
+		ProjectileTypePlugin typePlugin;
 
 		public ProjectileType() {
 			projectilePool = new Queue<Projectile>();
@@ -42,11 +42,11 @@ namespace MHUrho.Logic
 		public void Load(XElement xml, GamePack package) {
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
-			model = XmlHelpers.GetModel(xml);
-			material = XmlHelpers.GetMaterial(xml);
+			Model = XmlHelpers.GetModel(xml);
+			Material = XmlHelpers.GetMaterial(xml);
 			Package = package;
 
-			typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePluginBase>(xml,
+			typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePlugin>(xml,
 																		  package.XmlDirectoryPath,
 																		  Name);
 			typePlugin.Initialize(XmlHelpers.GetExtensionElement(xml),
@@ -81,11 +81,11 @@ namespace MHUrho.Logic
 			return projectile;
 		}
 
-		public ProjectileInstancePluginBase GetNewInstancePlugin(Projectile projectile, ILevelManager levelManager) {
+		public ProjectileInstancePlugin GetNewInstancePlugin(Projectile projectile, ILevelManager levelManager) {
 			return typePlugin.CreateNewInstance(levelManager, projectile);
 		}
 
-		public ProjectileInstancePluginBase GetInstancePluginForLoading() {
+		public ProjectileInstancePlugin GetInstancePluginForLoading() {
 			return typePlugin.GetInstanceForLoading();
 		}
 
@@ -98,8 +98,8 @@ namespace MHUrho.Logic
 		}
 
 		public void Dispose() {
-			model?.Dispose();
-			material?.Dispose();
+			Model?.Dispose();
+			Material?.Dispose();
 		}
 
 		internal bool ProjectileDespawn(Projectile projectile) {
@@ -111,7 +111,7 @@ namespace MHUrho.Logic
 
 
 
-		private Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position) {
+		Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position) {
 			Projectile projectile = null;
 
 			if (projectilePool.Count != 0) {
@@ -123,26 +123,14 @@ namespace MHUrho.Logic
 			else {
 				//Projectile node has to be a child of the scene directly for physics to work correctly
 				var projectileNode = level.Scene.CreateChild("Projectile");
-				projectile = Projectile.SpawnNew(newID,
+				projectile = Projectile.CreateNew(newID,
 												 level,
 												 player,
 												 position,
 												 this,
 												 projectileNode);
 
-				var staticModel = model.AddModel(projectileNode);
-				material.ApplyMaterial(staticModel);
 
-				var rigidBody = projectileNode.CreateComponent<RigidBody>();
-				rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
-				rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
-				rigidBody.Kinematic = true;
-				rigidBody.Mass = 1;
-				rigidBody.UseGravity = false;
-
-				//TODO: Move collider to plugin
-				var collider = projectileNode.CreateComponent<CollisionShape>();
-				collider.SetBox(staticModel.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
 			}
 
 			return projectile;

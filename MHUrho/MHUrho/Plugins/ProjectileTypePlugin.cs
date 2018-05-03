@@ -10,7 +10,7 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class ProjectileTypePluginBase : TypePluginBase
+	public abstract class ProjectileTypePlugin : TypePlugin
 	{
 		/// <summary>
 		/// Creates new instance from scratch
@@ -18,15 +18,15 @@ namespace MHUrho.Plugins
 		/// <param name="level">level in which the building is created</param>
 		/// <param name="projectile">projectile Plugin class</param>
 		/// <returns>New instance in default state</returns>
-		public abstract ProjectileInstancePluginBase CreateNewInstance(ILevelManager level, Projectile projectile);
+		public abstract ProjectileInstancePlugin CreateNewInstance(ILevelManager level, Projectile projectile);
 
 
 
 		/// <summary>
-		/// Creates instance of <see cref="ProjectileInstancePluginBase"/> that will be loaded by <see cref="ProjectileInstancePluginBase.LoadState(ILevelManager, Projectile, PluginDataWrapper)"/>
+		/// Creates instance of <see cref="ProjectileInstancePlugin"/> that will be loaded by <see cref="ProjectileInstancePlugin.LoadState(ILevelManager, Projectile, PluginDataWrapper)"/>
 		/// </summary>
 		/// <returns>New instance, that will be loaded in the next step</returns>
-		public abstract ProjectileInstancePluginBase GetInstanceForLoading();
+		public abstract ProjectileInstancePlugin GetInstanceForLoading();
 
 		public abstract bool IsInRange(Vector3 source, IRangeTarget target);
 	}

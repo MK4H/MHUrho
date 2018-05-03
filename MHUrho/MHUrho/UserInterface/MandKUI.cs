@@ -14,30 +14,30 @@ using Urho.Urho2D;
 namespace MHUrho.UserInterface
 {
 	public class MandKUI : UIManager, IDisposable {
-		private static Color selectedColor = Color.Gray;
-		private static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
+		static Color selectedColor = Color.Gray;
+		static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
-		private static Texture2D DefaultButtonTexture =
+		static Texture2D DefaultButtonTexture =
 			PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
 
 
-		private readonly GameMandKController inputCtl;
+		readonly GameMandKController inputCtl;
 
-		private IPlayer player => inputCtl.Player;
+		IPlayer player => inputCtl.Player;
 
 		
-		private readonly UIElement toolSelection;
-		private readonly UIElement selectionBar;
-		private readonly UIElement playerSelection;
+		readonly UIElement toolSelection;
+		readonly UIElement selectionBar;
+		readonly UIElement playerSelection;
 
 
-		private UIElement selectionBarSelected;
-		private UIElement toolSelected;
-		private UIElement playerSelected;
+		UIElement selectionBarSelected;
+		UIElement selectedToolButton;
+		UIElement selectedPlayerButton;
 		
 
-		private int hovering = 0;
+		int hovering = 0;
 
 		public MandKUI(MyGame game, GameMandKController inputCtl) 
 			:base(game)
@@ -244,26 +244,26 @@ namespace MHUrho.UserInterface
 			throw new NotImplementedException();
 		}
 
-		private void Button_HoverBegin(HoverBeginEventArgs e) {
+		void Button_HoverBegin(HoverBeginEventArgs e) {
 			if (e.Element != selectionBarSelected) {
 				e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
 			}
 		}
 
-		private void Button_HoverEnd(HoverEndEventArgs e) {
+		void Button_HoverEnd(HoverEndEventArgs e) {
 			if (e.Element != selectionBarSelected) {
 				e.Element.SetColor(Color.White);
 			}
 		}
 
-		private void UIHoverBegin(HoverBeginEventArgs e) {
+		void UIHoverBegin(HoverBeginEventArgs e) {
 			hovering++;
 			inputCtl.UIHovering = true;
 
 			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
 		}
 
-		private void UIHoverEnd(HoverEndEventArgs e) {
+		void UIHoverEnd(HoverEndEventArgs e) {
 			if (--hovering == 0) {
 				inputCtl.UIHovering = false;
 			}
@@ -271,7 +271,7 @@ namespace MHUrho.UserInterface
 			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
 		}
 
-		private void ClearDelegates() {
+		void ClearDelegates() {
 			selectionBar.HoverBegin -= UIHoverBegin;
 			selectionBar.HoverEnd -= UIHoverEnd;
 			toolSelection.HoverBegin -= UIHoverBegin;
@@ -292,29 +292,29 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		private void ToolSwitchbuttonPress(PressedEventArgs e) {
-			if (toolSelected != null) {
-				tools[toolSelected].Disable();
+		void ToolSwitchbuttonPress(PressedEventArgs e) {
+			if (selectedToolButton != null) {
+				tools[selectedToolButton].Disable();
 			}
 
-			toolSelected = e.Element;
-			tools[toolSelected].Enable();
+			selectedToolButton = e.Element;
+			tools[selectedToolButton].Enable();
 		}
 
-		private void PlayerSwitchButtonPress(PressedEventArgs e) {
-			playerSelected?.SetColor(Color.White);
+		void PlayerSwitchButtonPress(PressedEventArgs e) {
+			selectedPlayerButton?.SetColor(Color.White);
 
 			foreach (var tool in tools.Values) {
 				tool.ClearPlayerSpecificState();
 			}
 
-			if (e.Element == playerSelected) {
+			if (e.Element == selectedPlayerButton) {
 				//TODO: Neutral player
 			}
 			else {
 				e.Element.SetColor(selectedColor);
-				playerSelected = e.Element;
-				inputCtl.Player = players[playerSelected];
+				selectedPlayerButton = e.Element;
+				inputCtl.Player = players[selectedPlayerButton];
 			}
 		}
 

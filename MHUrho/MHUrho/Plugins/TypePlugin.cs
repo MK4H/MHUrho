@@ -6,7 +6,7 @@ using MHUrho.Packaging;
 
 namespace MHUrho.Plugins
 {
-	public abstract class TypePluginBase
+	public abstract class TypePlugin
 	{
 		public abstract bool IsMyType(string typeName);
 

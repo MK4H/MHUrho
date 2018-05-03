@@ -14,7 +14,7 @@ using Urho;
 
 namespace DefaultPackage
 {
-	public class ChickenType : UnitTypePluginBase {
+	public class ChickenType : UnitTypePlugin {
 
 		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
@@ -31,11 +31,11 @@ namespace DefaultPackage
 
 
 
-		public override UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit) {
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
 			return new ChickenInstance(level, unit, this);
 		}
 
-		public override UnitInstancePluginBase GetInstanceForLoading() {
+		public override UnitInstancePlugin GetInstanceForLoading() {
 			return new ChickenInstance();
 		}
 
@@ -49,7 +49,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class ChickenInstance : UnitInstancePluginBase, 
+	public class ChickenInstance : UnitInstancePlugin, 
 									WorldWalker.INotificationReceiver, 
 									UnitSelector.INotificationReceiver, 
 									Shooter.INotificationReceiver,

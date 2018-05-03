@@ -34,7 +34,7 @@ namespace MHUrho.Logic
 
 		public object Plugin => unitTypeLogic;
 
-		private UnitTypePluginBase unitTypeLogic;
+		private UnitTypePlugin unitTypeLogic;
 
 		private Dictionary<int, Animation> animations;
 
@@ -68,7 +68,7 @@ namespace MHUrho.Logic
 			Package = package;
 
 			unitTypeLogic =
-				XmlHelpers.LoadTypePlugin<UnitTypePluginBase>(xml,
+				XmlHelpers.LoadTypePlugin<UnitTypePlugin>(xml,
 															 package.XmlDirectoryPath,
 															 Name);
 
@@ -108,11 +108,11 @@ namespace MHUrho.Logic
 
 
 
-		public UnitInstancePluginBase GetNewInstancePlugin(Unit unit, ILevelManager level) {
+		public UnitInstancePlugin GetNewInstancePlugin(Unit unit, ILevelManager level) {
 			return unitTypeLogic.CreateNewInstance(level, unit);
 		}
 
-		public UnitInstancePluginBase GetInstancePluginForLoading() {
+		public UnitInstancePlugin GetInstancePluginForLoading() {
 			return unitTypeLogic.GetInstanceForLoading();
 		}
 

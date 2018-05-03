@@ -35,7 +35,7 @@ namespace MHUrho.UnitComponents
 				return sequentialData.PluginData;
 			}
 
-			public override void StartLoading(LevelManager level, InstancePluginBase plugin, PluginData storedData) {
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
 				var notificationReceiver = plugin as INotificationReceiver;
 				if (notificationReceiver == null) {
 					throw new
@@ -109,7 +109,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		public static UnitSelector CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T: UnitInstancePluginBase, INotificationReceiver {
+			where T: UnitInstancePlugin, INotificationReceiver {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));

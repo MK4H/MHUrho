@@ -19,7 +19,7 @@ using Urho;
 namespace MHUrho.Droid {
 	public class FileManagerDroid : FileManager {
 
-		private readonly AssetManager assetManager;
+		readonly AssetManager assetManager;
 
 		public override Stream OpenStaticFileRO(string relativePath) {
 			try {
@@ -92,7 +92,7 @@ namespace MHUrho.Droid {
 			this.assetManager = assetManager;
 		}
 
-		private void CopyFile(string srcRelativePath) {
+		void CopyFile(string srcRelativePath) {
 			//TODO: Exceptions
 			string path = Path.Combine(DynamicDirPath, srcRelativePath);
 

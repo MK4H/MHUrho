@@ -11,18 +11,18 @@ using Urho;
 
 namespace DefaultPackage
 {
-	public class TestWorkerType : UnitTypePluginBase {
+	public class TestWorkerType : UnitTypePlugin {
 		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
 		public override bool IsMyType(string typeName) {
 			return typeName == "TestWorker";
 		}
 
-		public override UnitInstancePluginBase CreateNewInstance(ILevelManager level, Unit unit) {
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, Unit unit) {
 			return new TestWorkerInstance(level, unit);
 		}
 
-		public override UnitInstancePluginBase GetInstanceForLoading() {
+		public override UnitInstancePlugin GetInstanceForLoading() {
 			return new TestWorkerInstance();
 		}
 
@@ -37,12 +37,12 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestWorkerInstance : UnitInstancePluginBase, WorldWalker.INotificationReceiver {
+	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver {
 		public TestBuildingInstance WorkedBuilding { get; set; }
 
-		private WorldWalker walker;
-		private bool homeGoing = false;
-		private bool started = false;
+		WorldWalker walker;
+		bool homeGoing = false;
+		bool started = false;
 
 		public TestWorkerInstance(ILevelManager level, Unit unit) : base(level, unit) {
 			walker = WorldWalker.GetInstanceFor(this, level);

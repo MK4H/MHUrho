@@ -236,7 +236,7 @@ namespace MHUrho.Logic
 		/// </summary>
 		public ITile Tile { get; private set; }
 
-		public UnitInstancePluginBase Plugin { get; private set; }
+		public UnitInstancePlugin Plugin { get; private set; }
 
 		public bool AlwaysVertical { get; set; } = false;
 

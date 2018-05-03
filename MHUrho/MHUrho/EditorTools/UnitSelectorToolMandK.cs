@@ -16,7 +16,7 @@ namespace MHUrho.EditorTools
 {
 	class UnitSelectorToolMandK : UnitSelectorTool, IMandKTool {
 
-		private class SelectedInfo {
+		class SelectedInfo {
 			public int Count => UnitSelectors.Count;
 
 			public readonly List<UnitSelector> UnitSelectors;
@@ -38,17 +38,17 @@ namespace MHUrho.EditorTools
 
 		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
 
-		private readonly GameMandKController input;
-		private Map Map => input.LevelManager.Map;
-		private readonly FormationController formation;
+		readonly GameMandKController input;
+		Map Map => input.LevelManager.Map;
+		readonly FormationController formation;
 
-		private readonly DynamicRectangleToolMandK dynamicHighlight;
+		readonly DynamicRectangleToolMandK dynamicHighlight;
 
-		private readonly Dictionary<UnitType, SelectedInfo> selected;
+		readonly Dictionary<UnitType, SelectedInfo> selected;
 
-		private readonly Dictionary<Button, UnitType> buttons;
+		readonly Dictionary<Button, UnitType> buttons;
 
-		private bool enabled;
+		bool enabled;
 
 
 		public UnitSelectorToolMandK(GameMandKController input) {
@@ -94,11 +94,11 @@ namespace MHUrho.EditorTools
 			dynamicHighlight.Dispose();
 		}
 
-		private void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
+		void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
 			Map.ForEachInRectangle(topLeft, bottomRight, SelectUnitsInTile);
 		}
 
-		private void HandleSingleClick(MouseButtonUpEventArgs e) {
+		void HandleSingleClick(MouseButtonUpEventArgs e) {
 			//TODO: Check that the raycastResults are ordered by distance
 			foreach (var result in input.CursorRaycast()) {
 
@@ -148,7 +148,7 @@ namespace MHUrho.EditorTools
 		}
 
 		//TODO: Select other things too
-		private void SelectUnitsInTile(ITile tile) {
+		void SelectUnitsInTile(ITile tile) {
 			//TODO: Maybe delete selector class, just search for unit
 			foreach (var unit in tile.GetAllUnits()) {
 				UnitSelector selector = unit.GetDefaultComponent<UnitSelector>();
@@ -164,7 +164,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private Button CreateButton(UnitType unitType) {
+		Button CreateButton(UnitType unitType) {
 			var unitIcon = unitType.Icon;
 
 			var buttonTexture = new Texture2D();
@@ -197,12 +197,12 @@ namespace MHUrho.EditorTools
 			return button;
 		}
 
-		private void DisplayCount(Button button, int count) {
+		void DisplayCount(Button button, int count) {
 			Text text = (Text)button.GetChild("Count");
 			text.Value = count.ToString();
 		}
 
-		private void AddUnit(UnitSelector unitSelector) {
+		void AddUnit(UnitSelector unitSelector) {
 			//TODO: Check owner of the units
 			var unit = unitSelector.GetComponent<Unit>();
 			if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
@@ -222,7 +222,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void RemoveUnit(UnitSelector unitSelector) {
+		void RemoveUnit(UnitSelector unitSelector) {
 			var info = selected[unitSelector.GetComponent<Unit>().UnitType];
 			info.UnitSelectors.Remove(unitSelector);
 			if (info.Count == 0) {
@@ -233,7 +233,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private IEnumerable<UnitSelector> GetAllSelectedUnitSelectors() {
+		IEnumerable<UnitSelector> GetAllSelectedUnitSelectors() {
 			foreach (var unitType in selected.Values) {
 				foreach (var unitSelector in unitType.UnitSelectors) {
 					yield return unitSelector;
@@ -241,16 +241,16 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void DeselectAll() {
+		void DeselectAll() {
 			foreach (var unitType in selected.Values) {
-				if (unitType.Count > 0) {
+				if (enabled && unitType.Count > 0) {
 					input.UIManager.SelectionBarHideButton(unitType.Button);
 				}
 				unitType.DeselectAll();
 			}
 		}
 
-		private bool HandleUnitClick(Unit unit, MouseButtonUpEventArgs e) {
+		bool HandleUnitClick(Unit unit, MouseButtonUpEventArgs e) {
 			var selector = unit.GetComponent<UnitSelector>();
 			//If the unit is selectable and owned by the clicking player
 			if (selector != null && selector.Player == input.Player) {
@@ -279,7 +279,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private bool HandleBuildingClick() {
+		bool HandleBuildingClick() {
 			return false;
 		}
 
