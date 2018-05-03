@@ -74,6 +74,7 @@ message StPlayer {
 	repeated int32 unitIDs = 2;
 	repeated int32 buildingIDs = 3;
 	repeated int32 friendPlayerIDs = 4;
+	PluginData userPlugin = 5;
 }
 
 message StMap {

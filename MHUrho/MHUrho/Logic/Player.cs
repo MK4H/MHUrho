@@ -6,11 +6,12 @@ using MHUrho.Storage;
 using Urho;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
+using MHUrho.Plugins;
 
 
 namespace MHUrho.Logic
 {
-	public class Player : IPlayer {
+	public class Player : Component, IPlayer {
 
 		internal class Loader : ILoader {
 
@@ -53,11 +54,13 @@ namespace MHUrho.Logic
 			}
 		}
 
-		public int ID { get; }
+		public new int ID { get; }
+
+		public PlayerLogicPlugin Plugin { get; private set; }
 
 		readonly HashSet<IPlayer> friends;
 
-		//TODO: Split units and buildings by types
+
 		readonly Dictionary<UnitType,List<Unit>> units;
 
 		readonly Dictionary<BuildingType, List<Building>> buildings;
@@ -93,11 +96,12 @@ namespace MHUrho.Logic
 
 			storedPlayer.FriendPlayerIDs.Add(from friend in friends
 											 select friend.ID);
+
+			storedPlayer.UserPlugin = new PluginData();
+			Plugin.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin));
 			
 			return storedPlayer;
 		}
-
-
 
 		/// <summary>
 		/// Adds unit to players units
@@ -171,6 +175,8 @@ namespace MHUrho.Logic
 			return player != this && !IsFriend(player);
 		}
 
+
+
 		public override int GetHashCode() {
 			return ID;
 		}
@@ -181,9 +187,11 @@ namespace MHUrho.Logic
 		}
 
 
+		protected override void OnUpdate(float timeStep)
+		{
+			if (!EnabledEffective) return;
 
-		//protected override void OnUpdate(float timeStep) {
-
-		//}
+			Plugin.OnUpdate(timeStep);
+		}
 	}
 }
