@@ -393,7 +393,7 @@ namespace MHUrho.Logic
 
 		public void Kill()
 		{
-			RemovedFromLevel = true;
+			RemoveFromLevel();
 
 			Tile.RemoveUnit(this);
 			Player.RemoveUnit(this);

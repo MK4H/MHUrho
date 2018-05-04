@@ -707,6 +707,58 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		public ITile FindClosestTile(ITile source, Predicate<ITile> predicate)
+		{
+			return FindClosestTile(source, int.MaxValue, predicate);
+		}
+
+		public ITile FindClosestTile(ITile source, int squareSize, Predicate<ITile> predicate) {
+			IntVector2 topLeft = source.MapLocation;
+			IntVector2 bottomRight = topLeft;
+			IntVector2 oneOne = new IntVector2(1, 1);
+
+			bool moveTopLeft = false;
+			ITile result = null;
+
+			for (int size = 0; size < squareSize; size++) {
+
+
+				//Top row
+				if ((result = SearchLineInX(topLeft, size, predicate)) != null) {
+					break;
+				}
+
+				//Right column
+				if ((result = SearchLineInY(new IntVector2(bottomRight.X, topLeft.Y), size, predicate)) != null) {
+					break;
+				}
+
+
+				//Bottom row
+				if ((result = SearchLineInX(new IntVector2(topLeft.X, bottomRight.Y), size, predicate)) != null) {
+					break;
+				}
+
+				//Left column
+				if ((result = SearchLineInY(topLeft, size, predicate)) != null) {
+					break;
+				}
+
+				if (moveTopLeft) {
+					topLeft += oneOne;
+				}
+				else {
+					bottomRight -= oneOne;
+				}
+				moveTopLeft = !moveTopLeft;
+
+				if (!IsInside(topLeft) && !IsInside(bottomRight)) {
+					return result;
+				}
+			}
+			return result;
+		}
+
 		public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) {
 			return graphics.RaycastToTile(rayQueryResults);
 		}
@@ -1413,6 +1465,36 @@ namespace MHUrho.WorldMap
 													   tile.TopRightHeight,
 													   tile.BottomLeftHeight,
 													   tile.BottomRightHeight);
+		}
+
+		ITile SearchLineInX(IntVector2 source, int length, Predicate<ITile> predicate)
+		{
+			if (!IsYInside(source.Y)) return null;
+
+			source.X = Math.Max(source.X, Left);
+			length = Math.Min(Right - source.X, length);
+			for (int i = 0; i < length; i++) {
+				ITile tile = GetTileByMapLocation(new IntVector2(source.X + i, source.Y));
+				if (predicate(tile)) {
+					return tile;
+				}
+			}
+			return null;
+		}
+
+		ITile SearchLineInY(IntVector2 source, int length, Predicate<ITile> predicate)
+		{
+			if (!IsXInside(source.X)) return null;
+
+			source.Y = Math.Max(source.Y, Top);
+			length = Math.Min(Bottom - source.Y, length);
+			for (int i = 0; i < length; i++) {
+				ITile tile = GetTileByMapLocation(new IntVector2(source.X, source.Y + i));
+				if (predicate(tile)) {
+					return tile;
+				}
+			}
+			return null;
 		}
 	}
 }

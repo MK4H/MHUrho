@@ -155,7 +155,6 @@ namespace MHUrho.UnitComponents
 			UnitDeselected?.Invoke(this);
 		}
 
-		//TODO: Hook up a reaction to unit death to deselect it from all tools
 
 		public override PluginData SaveState()
 		{
@@ -174,7 +173,7 @@ namespace MHUrho.UnitComponents
 
 
 			AddedToEntity(typeof(UnitSelector), entityDefaultComponents);
-
+			Entity.OnRemoval += Deselect;
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
@@ -183,6 +182,7 @@ namespace MHUrho.UnitComponents
 			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
 			return removed;
 		}
+
 
 	}
 }

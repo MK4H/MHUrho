@@ -27,7 +27,10 @@ namespace MHUrho.Logic
 
 		public bool RemovedFromLevel { get; protected set; }
 
+		public event Action OnRemoval;
+
 		protected Dictionary<Type, IList<DefaultComponent>> defaultComponents;
+
 
 		protected Entity(int ID, ILevelManager level) {
 			this.ID = ID;
@@ -69,6 +72,11 @@ namespace MHUrho.Logic
 			return ((IByTypeQueryable) defaultComponent).RemovedFromEntity(defaultComponents);
 		}
 
+		protected void RemoveFromLevel()
+		{
+			RemovedFromLevel = true;
+			OnRemoval?.Invoke();
+		}
 
 	}
 }

@@ -9,7 +9,7 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-	public class ResourceType : IEntityType, IDisposable {
+	public class ResourceType : ILoadableType, IDisposable {
 		private const string IDAttributeName = "ID";
 		private const string NameAttribute = "name";
 		private const string IconPathElement = "iconPath";

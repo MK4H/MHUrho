@@ -17,7 +17,7 @@ namespace MHUrho.Logic
 
 			public Player Player { get; private set; }
 
-			private StPlayer storedPlayer;
+			StPlayer storedPlayer;
 
 			protected Loader(StPlayer storedPlayer) {
 				this.storedPlayer = storedPlayer;
@@ -49,14 +49,15 @@ namespace MHUrho.Logic
 				storedPlayer = null;
 			}
 
-			private void Load(LevelManager level) {
-				Player = new Player(level, storedPlayer.PlayerID);
+			void Load(LevelManager level) {
+				//TODO: Load with type
+				Player = new Player(storedPlayer.PlayerID, level);
 			}
 		}
 
 		public new int ID { get; }
 
-		public PlayerLogicPlugin Plugin { get; private set; }
+		public PlayerAIInstancePlugin Plugin { get; private set; }
 
 		readonly HashSet<IPlayer> friends;
 
@@ -67,10 +68,14 @@ namespace MHUrho.Logic
 
 		readonly Dictionary<ResourceType, int> resources;
 
+		readonly PlayerType type;
+
 		ILevelManager level;
 
-		public Player(ILevelManager level, int ID) {
-			this.ID = ID;
+		protected Player(int id, ILevelManager level) {
+			ReceiveSceneUpdates = true;
+
+			this.ID = id;
 			units = new Dictionary<UnitType, List<IUnit>>();
 			buildings = new Dictionary<BuildingType, List<IBuilding>>();
 			resources = new Dictionary<ResourceType, int>();
@@ -78,11 +83,29 @@ namespace MHUrho.Logic
 			this.level = level;
 		}
 
-		protected Player(int id, ILevelManager level) 
-			: this(level, id) {
+		protected Player(int id, ILevelManager level, PlayerType type)
+			:this(id, level)
+		{
+			this.type = type;
+			this.Plugin = type.GetNewInstancePlugin(this, level);
+		}
+
+		public static Player CreateNewAIPlayer(int id, ILevelManager level, Node node, PlayerType type)
+		{
+			var player = new Player(id, level, type);
+			node.AddComponent(player);
+			return player;
+		}
+
+		public static Player CreateNewHumanPlayer(int id, ILevelManager level, Node node)
+		{
+			var player = new Player(id, level);
+			node.AddComponent(player);
+			return player;
 		}
 
 		public StPlayer Save() {
+			//TODO: SAVE TYPE
 			var storedPlayer = new StPlayer { PlayerID = ID };
 
 
@@ -126,11 +149,22 @@ namespace MHUrho.Logic
 		}
 
 		public bool RemoveUnit(IUnit unit) {
-			return units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
+			bool removed = units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
+			if (removed) {
+				Plugin?.OnUnitKilled(unit);
+			}
+
+			return removed;
 		}
 
 		public bool RemoveBuilding(IBuilding building) {
-			return buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
+			bool removed = buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
+
+			if (removed) {
+				Plugin.OnBuildingDestroyed(building);
+			}
+
+			return removed;
 		}
 
 		public IEnumerable<IUnit> GetAllUnits() {
@@ -191,7 +225,7 @@ namespace MHUrho.Logic
 		{
 			if (!EnabledEffective) return;
 
-			Plugin.OnUpdate(timeStep);
+			Plugin?.OnUpdate(timeStep);
 		}
 	}
 }

@@ -236,7 +236,7 @@ namespace MHUrho.Logic
 
 		public void Kill() {
 
-			RemovedFromLevel = true;
+			RemoveFromLevel();
 
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);

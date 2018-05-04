@@ -23,11 +23,11 @@ namespace MHUrho.EditorTools
 			public readonly Button Button;
 
 			public void DeselectAll() {
-				foreach (var unitSelector in UnitSelectors) {
-					unitSelector.Deselect();
+				while (UnitSelectors.Count != 0) {
+					UnitSelectors[Count - 1].Deselect();
 				}
 
-				UnitSelectors.Clear();
+
 			}
 
 			public SelectedInfo(Button button, List<UnitSelector> unitSelectors) {
@@ -36,7 +36,10 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
+		public override IEnumerable<Button> Buttons =>
+			from button in buttons
+			where selected[button.Value].Count > 0
+			select button.Key;
 
 		readonly GameMandKController input;
 		Map Map => input.LevelManager.Map;
@@ -220,10 +223,12 @@ namespace MHUrho.EditorTools
 				input.UIManager.SelectionBarAddButton(button);
 				input.UIManager.SelectionBarShowButton(button);
 			}
+
+			unitSelector.UnitDeselected += RemoveUnit;
 		}
 
 		void RemoveUnit(UnitSelector unitSelector) {
-			var info = selected[unitSelector.GetComponent<Unit>().UnitType];
+			var info = selected[unitSelector.Unit.UnitType];
 			info.UnitSelectors.Remove(unitSelector);
 			if (info.Count == 0) {
 				input.UIManager.SelectionBarHideButton(info.Button);
@@ -231,6 +236,8 @@ namespace MHUrho.EditorTools
 			else {
 				DisplayCount(info.Button, info.Count);
 			}
+
+			unitSelector.UnitDeselected -= RemoveUnit;
 		}
 
 		IEnumerable<UnitSelector> GetAllSelectedUnitSelectors() {
@@ -243,9 +250,6 @@ namespace MHUrho.EditorTools
 
 		void DeselectAll() {
 			foreach (var unitType in selected.Values) {
-				if (enabled && unitType.Count > 0) {
-					input.UIManager.SelectionBarHideButton(unitType.Button);
-				}
 				unitType.DeselectAll();
 			}
 		}
@@ -263,7 +267,6 @@ namespace MHUrho.EditorTools
 				}
 				else {
 					selector.Deselect();
-					RemoveUnit(selector);
 					//Executed an action, stop handling click
 					return true;
 				}

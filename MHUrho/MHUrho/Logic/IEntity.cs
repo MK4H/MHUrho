@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 using Urho;
@@ -18,6 +19,8 @@ namespace MHUrho.Logic {
 		Vector3 Position { get; }
 
 		bool RemovedFromLevel { get; }
+
+		event Action OnRemoval;
 
 		void AddComponent(DefaultComponent defaultComponent);
 

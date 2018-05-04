@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
 <gamePack xmlns="http://www.MobileHold.cz/GamePack.xsd" name="testRP2">
   <description>Second test pack to test multiple resource packs</description>
+	<playerAITypes>
+		<playerAIType name="TestAI" ID="1">
+			<iconPath>xamarin.png</iconPath>
+			<assemblyPath>DefaultPackage.dll</assemblyPath>
+		</playerAIType>
+	</playerAITypes>
   <tileTypes>
     <defaultTileType name="Default" ID="1">
       <texturePath>xamarin.png</texturePath>

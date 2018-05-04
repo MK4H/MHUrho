@@ -12,7 +12,7 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-	public class BuildingType : IEntityType, IDisposable
+	public class BuildingType : ILoadableType, IDisposable
 	{
 		//XML ELEMENTS AND ATTRIBUTES
 		private static readonly XName SizeElementName = PackageManager.XMLNamespace + "size";

@@ -38,6 +38,13 @@
     <xs:complexContent>
       <xs:extension base="gamePackBase">
         <xs:sequence>
+					<xs:element name="playerAITypes" minOccurs="0" maxOccurs="1">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="playerAIType" type="playerAITypeType" minOccurs="0" maxOccurs="unbounded"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
           <xs:element name="resourceTypes" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:sequence>
@@ -115,7 +122,7 @@
 		</xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="playerTypeType">
+  <xs:complexType name="playerAITypeType">
     <xs:sequence>
       <xs:element name="iconPath" type="xs:string"/>
       <xs:element name="assemblyPath" type="xs:string"/>

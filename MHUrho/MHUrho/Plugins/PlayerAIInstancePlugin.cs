@@ -1,23 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 
 namespace MHUrho.Plugins
 {
-    public abstract class PlayerLogicPlugin
+    public abstract class PlayerAIInstancePlugin
     {
 		public ILevelManager Level { get; protected set; }
 
 		public Map Map => Level.Map;
 
-		protected PlayerLogicPlugin(ILevelManager level) {
+		protected IPlayer Player;
+
+		protected PlayerAIInstancePlugin(ILevelManager level) {
 			this.Level = level;
 		}
 
-		protected PlayerLogicPlugin() {
+		protected PlayerAIInstancePlugin() {
 
 		}
 
@@ -27,12 +30,12 @@ namespace MHUrho.Plugins
 
 		public abstract void LoadState(ILevelManager level, IPlayer player, PluginDataWrapper pluginData);
 
-		public virtual void OnBuildingDestroyed(Building building)
+		public virtual void OnBuildingDestroyed(IBuilding building)
 		{
 
 		}
 
-		public virtual void OnUnitKilled(Unit unit)
+		public virtual void OnUnitKilled(IUnit unit)
 		{
 
 		}

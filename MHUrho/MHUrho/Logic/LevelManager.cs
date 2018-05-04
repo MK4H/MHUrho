@@ -181,13 +181,13 @@ namespace MHUrho.Logic
 			CurrentLevel.Map = map;
 
 			//TODO: Temporary player
-			var player = new Player(CurrentLevel, CurrentLevel.GetNewID(CurrentLevel.players));
+			var player = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene);
 			CurrentLevel.players.Add(player.ID, player);
 			CurrentLevel.inputController = game.menuController.GetGameController(cameraController, CurrentLevel, player);
 
 			CurrentLevel.inputController.UIManager.AddPlayer(player);
 
-			player = new Player(CurrentLevel, CurrentLevel.GetNewID(CurrentLevel.players));
+			player = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"));
 			CurrentLevel.players.Add(player.ID, player);
 			CurrentLevel.inputController.UIManager.AddPlayer(player);
 

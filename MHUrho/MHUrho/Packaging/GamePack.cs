@@ -11,18 +11,20 @@ using Urho.Resources;
 
 namespace MHUrho.Packaging {
 	public class GamePack {
-		private const string defaultThumbnailPath = "Textures/xamarin.png";
+		const string DefaultThumbnailPath = "Textures/xamarin.png";
 
-		private const string TileTypeGroupName = "tileTypes";
-		private const string TileTypeItemName = "tileType";
-		private const string UnitTypeGroupName = "unitTypes";
-		private const string UnitTypeItemName = "unitType";
-		private const string BuildingTypeGroupName = "buildingTypes";
-		private const string BuildingTypeItemName = "buildingType";
-		private const string ProjectileTypeGroupName = "projectileTypes";
-		private const string ProjectileTypeItemName = "projectileType";
-		private const string ResourceTypeGroupName = "resourceTypes";
-		private const string ResourceTypeItemName = "resourceType";
+		const string TileTypeGroupName = "tileTypes";
+		const string TileTypeItemName = "tileType";
+		const string UnitTypeGroupName = "unitTypes";
+		const string UnitTypeItemName = "unitType";
+		const string BuildingTypeGroupName = "buildingTypes";
+		const string BuildingTypeItemName = "buildingType";
+		const string ProjectileTypeGroupName = "projectileTypes";
+		const string ProjectileTypeItemName = "projectileType";
+		const string ResourceTypeGroupName = "resourceTypes";
+		const string ResourceTypeItemName = "resourceType";
+		const string PlayerAITypeGroupName = "playerAITypes";
+		const string PlayerAITypeItemName = "playerAIType";
 
 		public string Name { get; private set; }
 	  
@@ -56,22 +58,24 @@ namespace MHUrho.Packaging {
 		public IEnumerable<ProjectileType> ProjectileTypes => projectileTypesByName.Values;
 
 
-		private readonly string pathToXml;
+		readonly string pathToXml;
 
 	   
-		private Dictionary<string, TileType> tileTypesByName;
-		private Dictionary<string, UnitType> unitTypesByName;
-		private Dictionary<string, BuildingType> buildingTypesByName;
-		private Dictionary<string, ProjectileType> projectileTypesByName;
-		private Dictionary<string, ResourceType> resourceTypesByName;
+		Dictionary<string, TileType> tileTypesByName;
+		Dictionary<string, UnitType> unitTypesByName;
+		Dictionary<string, BuildingType> buildingTypesByName;
+		Dictionary<string, ProjectileType> projectileTypesByName;
+		Dictionary<string, ResourceType> resourceTypesByName;
+		Dictionary<string, PlayerType> playerAITypesByName;
 
-		private Dictionary<int, TileType> tileTypesByID;
-		private Dictionary<int, UnitType> unitTypesByID;
-		private Dictionary<int, BuildingType> buildingTypesByID;
-		private Dictionary<int, ProjectileType> projectileTypesByID;
-		private Dictionary<int, ResourceType> resourceTypesByID;
+		Dictionary<int, TileType> tileTypesByID;
+		Dictionary<int, UnitType> unitTypesByID;
+		Dictionary<int, BuildingType> buildingTypesByID;
+		Dictionary<int, ProjectileType> projectileTypesByID;
+		Dictionary<int, ResourceType> resourceTypesByID;
+		Dictionary<int, PlayerType> playerAITypesByID;
 
-		private XDocument data;
+		XDocument data;
 
 		/// <summary>
 		/// Loads data for initial resource pack managment, so the user can choose which resource packs to 
@@ -92,7 +96,7 @@ namespace MHUrho.Packaging {
 											PackageManager packageManager) {
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 			pathToThumbnail = FileManager.CorrectRelativePath(pathToThumbnail);
-			var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? defaultThumbnailPath);
+			var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? DefaultThumbnailPath);
 
 			return new GamePack(name, pathToXml, description ?? "No description", thumbnail, packageManager);
 		}
@@ -118,12 +122,14 @@ namespace MHUrho.Packaging {
 			buildingTypesByName = new Dictionary<string, BuildingType>();
 			projectileTypesByName = new Dictionary<string, ProjectileType>();
 			resourceTypesByName = new Dictionary<string, ResourceType>();
+			playerAITypesByName = new Dictionary<string, PlayerType>();
 
 			tileTypesByID = new Dictionary<int, TileType>();
 			unitTypesByID = new Dictionary<int, UnitType>();
 			buildingTypesByID = new Dictionary<int, BuildingType>();
 			projectileTypesByID = new Dictionary<int, ProjectileType>();
 			resourceTypesByID = new Dictionary<int, ResourceType>();
+			playerAITypesByID = new Dictionary<int, PlayerType>();
 
 		}
 
@@ -137,10 +143,10 @@ namespace MHUrho.Packaging {
 
 		public TileType GetTileType(string name, bool load = false) {
 			if (name == null) {
-				throw new ArgumentNullException("Name of the tileType cannot be null");
+				throw new ArgumentNullException(nameof(name),"Name of the tileType cannot be null");
 			}
 
-			var found = tileTypesByName.TryGetValue(name, out TileType value);
+			bool found = tileTypesByName.TryGetValue(name, out TileType value);
 
 			if (load && !found) {
 				return LoadType(name, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
@@ -151,7 +157,7 @@ namespace MHUrho.Packaging {
 		}
 
 		public TileType GetTileType(int ID, bool load = false) {
-			var found = tileTypesByID.TryGetValue(ID, out TileType value);
+			bool found = tileTypesByID.TryGetValue(ID, out TileType value);
 
 			if (load && !found) {
 				return LoadType(ID, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
@@ -163,10 +169,10 @@ namespace MHUrho.Packaging {
 
 		public UnitType GetUnitType(string name, bool load = false) {
 			if (name == null) {
-				throw new ArgumentNullException("Name of the unitType cannot be null");
+				throw new ArgumentNullException(nameof(name), "Name of the unitType cannot be null");
 			}
 
-			var found = unitTypesByName.TryGetValue(name, out UnitType value);
+			bool found = unitTypesByName.TryGetValue(name, out UnitType value);
 
 			if (load && !found) {
 				return LoadType(name, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
@@ -177,7 +183,7 @@ namespace MHUrho.Packaging {
 		}
 
 		public UnitType GetUnitType(int ID, bool load = false) {
-			var found = unitTypesByID.TryGetValue(ID, out UnitType value);
+			bool found = unitTypesByID.TryGetValue(ID, out UnitType value);
 
 			if (load && !found) {
 				return LoadType(ID, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
@@ -189,10 +195,10 @@ namespace MHUrho.Packaging {
 
 		public BuildingType GetBuildingType(string name, bool load = false) {
 			if (name == null) {
-				throw new ArgumentNullException("Name of the buildingType cannot be null");
+				throw new ArgumentNullException(nameof(name), "Name of the buildingType cannot be null");
 			}
 
-			var found =  buildingTypesByName.TryGetValue(name, out BuildingType value);
+			bool found =  buildingTypesByName.TryGetValue(name, out BuildingType value);
 
 			if (load && !found) {
 				return LoadType(name, 
@@ -207,7 +213,7 @@ namespace MHUrho.Packaging {
 		}
 
 		public BuildingType GetBuildingType(int ID, bool load = false) {
-			var found = buildingTypesByID.TryGetValue(ID, out BuildingType value);
+			bool found = buildingTypesByID.TryGetValue(ID, out BuildingType value);
 
 			if (load && !found) {
 				return LoadType(ID,
@@ -223,10 +229,10 @@ namespace MHUrho.Packaging {
 
 		public ProjectileType GetProjectileType(string name, bool load = false) {
 			if (name == null) {
-				throw new ArgumentNullException("Name of the projectileType cannot be null");
+				throw new ArgumentNullException(nameof(name), "Name of the projectileType cannot be null");
 			}
 
-			var found = projectileTypesByName.TryGetValue(name, out ProjectileType value);
+			bool found = projectileTypesByName.TryGetValue(name, out ProjectileType value);
 
 			if (load && !found) {
 				return LoadType(name,
@@ -241,7 +247,7 @@ namespace MHUrho.Packaging {
 		}
 
 		public ProjectileType GetProjectileType(int ID, bool load = false) {
-			var found = projectileTypesByID.TryGetValue(ID, out ProjectileType value);
+			bool found = projectileTypesByID.TryGetValue(ID, out ProjectileType value);
 
 			if (load && !found) {
 				return LoadType(ID,
@@ -257,10 +263,10 @@ namespace MHUrho.Packaging {
 
 		public ResourceType GetResourceType(string name, bool load = false) {
 			if (name == null) {
-				throw new ArgumentNullException("Name of the ResourceType cannot be null");
+				throw new ArgumentNullException(nameof(name), "Name of the ResourceType cannot be null");
 			}
 
-			var found = resourceTypesByName.TryGetValue(name, out ResourceType value);
+			bool found = resourceTypesByName.TryGetValue(name, out ResourceType value);
 
 			if (load && !found) {
 				return LoadType(name,
@@ -275,7 +281,7 @@ namespace MHUrho.Packaging {
 		}
 
 		public ResourceType GetResourceType(int ID, bool load = false) {
-			var found = resourceTypesByID.TryGetValue(ID, out ResourceType value);
+			bool found = resourceTypesByID.TryGetValue(ID, out ResourceType value);
 
 			if (load && !found) {
 				return LoadType(ID,
@@ -283,6 +289,41 @@ namespace MHUrho.Packaging {
 								ResourceTypeItemName,
 								resourceTypesByName,
 								resourceTypesByID);
+			}
+			else {
+				return value;
+			}
+		}
+
+		public PlayerType GetPlayerAIType(string name, bool load = false)
+		{
+			if (name == null) {
+				throw new ArgumentNullException(nameof(name), "Name of the PlayerAIType cannot be null");
+			}
+
+			bool found = playerAITypesByName.TryGetValue(name, out PlayerType value);
+
+			if (load && !found) {
+				return LoadType(name,
+								PlayerAITypeGroupName,
+								PlayerAITypeItemName,
+								playerAITypesByName,
+								playerAITypesByID);
+			}
+			else {
+				return value;
+			}
+		}
+
+		public PlayerType GetPlayerAIType(int ID, bool load = false) {
+			bool found = playerAITypesByID.TryGetValue(ID, out PlayerType value);
+
+			if (load && !found) {
+				return LoadType(ID, 
+								PlayerAITypeGroupName,
+								PlayerAITypeItemName,
+								playerAITypesByName,
+								playerAITypesByID);
 			}
 			else {
 				return value;
@@ -297,6 +338,7 @@ namespace MHUrho.Packaging {
 			LoadAllBuildingTypes();
 			LoadAllProjectileTypes();
 			LoadAllResourceTypes();
+			LoadAllPlayerTypes();
 		}
 
 
@@ -381,12 +423,30 @@ namespace MHUrho.Packaging {
 				return Enumerable.Empty<ResourceType>();
 			}
 
-			return resourceTypesElement.Elements(PackageManager.XMLNamespace + "projectileType")
+			return resourceTypesElement.Elements(PackageManager.XMLNamespace + "resourceType")
 									   .Select(resourceTypeElement =>
 												   LoadType<ResourceType>(resourceTypeElement,
 																		  resourceTypesByName,
 																		  resourceTypesByID))
 									   .ToArray();
+		}
+
+		public IEnumerable<PlayerType> LoadAllPlayerTypes()
+		{
+			CheckIfLoading();
+
+			XElement playerTypes = data.Root.Element(PackageManager.XMLNamespace + "playerAITypes");
+
+			if (playerTypes == null) {
+				return Enumerable.Empty<PlayerType>();
+			}
+
+			return playerTypes.Elements(PackageManager.XMLNamespace + "playerAIType")
+							.Select(playerTypeElement =>
+										LoadType<PlayerType>(playerTypeElement,
+															playerAITypesByName,
+															playerAITypesByID))
+							.ToArray();
 		}
 
 		public void UnLoad() {
@@ -422,7 +482,7 @@ namespace MHUrho.Packaging {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="dictionary">removes items with Value.ID 0 from this dictionary</param>
 		/// <returns>true if deleted something, false if didnt delete anything</returns>
-		private bool RemoveUnused<T>(IDictionary<string,T> dictionary)
+		bool RemoveUnused<T>(IDictionary<string,T> dictionary)
 			where T : IIDNameAndPackage {
 
 			bool deleted = false;
@@ -440,7 +500,7 @@ namespace MHUrho.Packaging {
 			return deleted;
 		}
 
-		private XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName) {
+		XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName) {
 			//Load from file
 			var typeElements = (from element in data.Root
 													.Element(PackageManager.XMLNamespace + groupName)
@@ -451,7 +511,7 @@ namespace MHUrho.Packaging {
 			return GetXmlTypeDescription(typeElements);
 		}
 
-		private XElement GetXmlTypeDescription(int typeID, string groupName, string itemName) {
+		XElement GetXmlTypeDescription(int typeID, string groupName, string itemName) {
 			var typeElements = (from element in data.Root
 													.Element(PackageManager.XMLNamespace + groupName)
 													.Elements(PackageManager.XMLNamespace + itemName)
@@ -460,7 +520,7 @@ namespace MHUrho.Packaging {
 			return GetXmlTypeDescription(typeElements);
 		}
 
-		private XElement GetXmlTypeDescription(IEnumerator<XElement> typeElements) {
+		XElement GetXmlTypeDescription(IEnumerator<XElement> typeElements) {
 			if (!typeElements.MoveNext()) {
 				throw new ArgumentException("type of that name does not exist in this package");
 			}
@@ -477,7 +537,7 @@ namespace MHUrho.Packaging {
 			return typeElement;
 		}
 
-		private void CheckIfLoading() {
+		void CheckIfLoading() {
 			if (data == null) {
 				throw new InvalidOperationException("Before loading things, you need to call StartLoading");
 			}
@@ -485,16 +545,16 @@ namespace MHUrho.Packaging {
 
 		
 
-		private static string GetTypeName(XElement typeElement) {
+		static string GetTypeName(XElement typeElement) {
 			return typeElement.Attribute("name").Value;
 		}
 
-		private static int GetTypeID(XElement typeElement) {
+		static int GetTypeID(XElement typeElement) {
 			return XmlHelpers.GetIntAttribute(typeElement, "ID");
 		}
 
-		private T LoadType<T>(XElement typeElement, IDictionary<string, T> typesByName, IDictionary<int, T> typesByID)
-			where T : IEntityType, new() {
+		T LoadType<T>(XElement typeElement, IDictionary<string, T> typesByName, IDictionary<int, T> typesByID)
+			where T : ILoadableType, new() {
 			string name = GetTypeName(typeElement);
 			int ID = GetTypeID(typeElement);
 
@@ -529,12 +589,12 @@ namespace MHUrho.Packaging {
 
 		}
 
-		private T LoadType<T>(int ID,
-							  string groupName,
-							  string itemName,
-							  IDictionary<string, T> typesByName,
-							  IDictionary<int, T> typesByID)
-			where T : IEntityType, new()
+		T LoadType<T>(int ID,
+					  string groupName,
+					  string itemName,
+					  IDictionary<string, T> typesByName,
+					  IDictionary<int, T> typesByID)
+			where T : ILoadableType, new()
 		{
 			CheckIfLoading();
 
@@ -545,12 +605,12 @@ namespace MHUrho.Packaging {
 			return LoadType(typeElement, typesByName, typesByID);
 		}
 
-		private T LoadType<T>(string name,
-							  string groupName,
-							  string itemName,
-							  IDictionary<string, T> typesByName,
-							  IDictionary<int, T> typesByID) 
-			where T: IEntityType, new()
+		T LoadType<T>(string name,
+					  string groupName,
+					  string itemName,
+					  IDictionary<string, T> typesByName,
+					  IDictionary<int, T> typesByID) 
+			where T: ILoadableType, new()
 		{
 			CheckIfLoading();
 

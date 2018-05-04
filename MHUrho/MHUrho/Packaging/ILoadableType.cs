@@ -6,7 +6,7 @@ using MHUrho.Storage;
 
 namespace MHUrho.Packaging
 {
-	public interface IEntityType : IIDNameAndPackage {
+	public interface ILoadableType : IIDNameAndPackage {
 		void Load(XElement xml, GamePack package);
 	}
 }

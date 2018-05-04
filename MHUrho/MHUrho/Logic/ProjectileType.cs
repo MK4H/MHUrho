@@ -14,7 +14,7 @@ using Urho.Physics;
 namespace MHUrho.Logic
 {
 	//TODO: Make this an arrow type
-	public class ProjectileType : IEntityType, IDisposable {
+	public class ProjectileType : ILoadableType, IDisposable {
 
 		public float ProjectileSpeed { get; private set; }
 

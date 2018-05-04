@@ -11,7 +11,7 @@ using MHUrho.Packaging;
 
 namespace MHUrho.Logic
 {
-	public class TileType : IEntityType {
+	public class TileType : ILoadableType {
 		private static readonly string IDAttributeName = "ID";
 		private static readonly string NameAttributeName = "name";
 		private static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";

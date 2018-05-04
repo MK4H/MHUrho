@@ -14,7 +14,7 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-	public class UnitType : IEntityType, IDisposable
+	public class UnitType : ILoadableType, IDisposable
 	{
 
 
@@ -32,11 +32,9 @@ namespace MHUrho.Logic
 
 		public Image Icon { get; private set; }
 
-		public object Plugin => unitTypeLogic;
+		public UnitTypePlugin Plugin { get; private set; }
 
-		private UnitTypePlugin unitTypeLogic;
-
-		private Dictionary<int, Animation> animations;
+		Dictionary<int, Animation> animations;
 
 		//TODO: More loaded properties
 
@@ -67,24 +65,24 @@ namespace MHUrho.Logic
 			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
-			unitTypeLogic =
+			Plugin =
 				XmlHelpers.LoadTypePlugin<UnitTypePlugin>(xml,
 															 package.XmlDirectoryPath,
 															 Name);
 
-			var data = unitTypeLogic.TypeData;
+			var data = Plugin.TypeData;
 
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
 			Icon = XmlHelpers.GetIcon(xml);
 			
-			unitTypeLogic.Initialize(XmlHelpers.GetExtensionElement(xml),
+			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 									 package.PackageManager);
 		}
 
 
 		public bool CanSpawnAt(ITile tile) {
-			return unitTypeLogic.CanSpawnAt(tile);
+			return Plugin.CanSpawnAt(tile);
 		}
 
 		/// <summary>
@@ -108,12 +106,12 @@ namespace MHUrho.Logic
 
 
 
-		public UnitInstancePlugin GetNewInstancePlugin(Unit unit, ILevelManager level) {
-			return unitTypeLogic.CreateNewInstance(level, unit);
+		public UnitInstancePlugin GetNewInstancePlugin(IUnit unit, ILevelManager level) {
+			return Plugin.CreateNewInstance(level, unit);
 		}
 
 		public UnitInstancePlugin GetInstancePluginForLoading() {
-			return unitTypeLogic.GetInstanceForLoading();
+			return Plugin.GetInstanceForLoading();
 		}
 
 		public void Dispose() {
