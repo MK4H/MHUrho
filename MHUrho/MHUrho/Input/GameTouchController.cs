@@ -16,7 +16,7 @@ namespace MHUrho.Input
 		private enum CameraMovementType { Horizontal, Vertical, FreeFloat }
 
 
-		UIManager IGameController.UIManager => UIManager;
+		GameUIManager IGameController.UIManager => UIManager;
 
 		public TouchUI UIManager { get; private set; }
 

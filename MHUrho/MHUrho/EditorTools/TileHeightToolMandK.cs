@@ -74,7 +74,7 @@ namespace MHUrho.EditorTools
 
 		private void MouseUp(MouseButtonUpEventArgs e) {
 			if (centerTile != null) {
-				input.ShowCursor(new Vector3(centerTile.Center.X, Map.GetHeightAt(centerTile.Center), centerTile.Center.Y));
+				input.ShowCursor(new Vector3(centerTile.Center.X, Map.GetTerrainHeightAt(centerTile.Center), centerTile.Center.Y));
 				mouseButtonDown = false;
 				centerTile = null;
 				highlight.FreeHighlight();

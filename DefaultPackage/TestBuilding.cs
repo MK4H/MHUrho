@@ -66,11 +66,11 @@ namespace DefaultPackage
 		}
 
 
-		public override void PopulateUI(MandKUI mouseAndKeyboardUI) {
+		public override void PopulateUI(MandKGameUI mouseAndKeyboardUI) {
 			throw new NotImplementedException();
 		}
 
-		public override void ClearUI(MandKUI mouseAndKeyboardUI) {
+		public override void ClearUI(MandKGameUI mouseAndKeyboardUI) {
 			throw new NotImplementedException();
 		}
 

@@ -13,7 +13,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-	public class MandKUI : UIManager, IDisposable {
+	public class MandKGameUI : GameUIManager, IDisposable {
 		static Color selectedColor = Color.Gray;
 		static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
@@ -39,7 +39,7 @@ namespace MHUrho.UserInterface
 
 		int hovering = 0;
 
-		public MandKUI(MyGame game, GameMandKController inputCtl) 
+		public MandKGameUI(MyGame game, GameMandKController inputCtl) 
 			:base(game)
 		{
 			this.inputCtl = inputCtl;

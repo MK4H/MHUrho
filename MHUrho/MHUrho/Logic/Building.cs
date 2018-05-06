@@ -57,7 +57,7 @@ namespace MHUrho.Logic
 				var center = newBuilding.Rectangle.Center();
 
 				buildingNode.Position = new Vector3(center.X,
-													level.Map.GetHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y,
+													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y,
 													center.Y);
 
 				newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
@@ -141,7 +141,7 @@ namespace MHUrho.Logic
 				var center = Building.Rectangle.Center();
 
 				buildingNode.Position = new Vector3(center.X, 
-													level.Map.GetHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y, 
+													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y, 
 													center.Y);
 
 				var collider = buildingNode.CreateComponent<CollisionShape>();
@@ -247,6 +247,11 @@ namespace MHUrho.Logic
 			Node.Dispose();
 			Dispose();
 			Level.RemoveBuilding(this);
+		}
+
+		public float? GetHeightAt(float x, float y)
+		{
+			return Plugin.GetHeightAt(x, y);
 		}
 
 		protected override void OnUpdate(float timeStep)

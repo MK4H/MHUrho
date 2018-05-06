@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.WorldMap;
 using Urho;
 using MHUrho.Logic;
@@ -19,11 +20,28 @@ namespace MHUrho.WorldMap {
 	/// <returns>if it is possible to go from source to target</returns>
 	public delegate bool CanGoToNeighbour(ITile source, ITile target);
 
-	public delegate float GetMovementSpeed(ITile tile);
+	/// <summary>
+	/// Gets movements speed across that tile as a multiplier of base movementSpeed
+	///
+	/// Get the movementSpeed across the <paramref name="across"/> tile, while going straight
+	/// from the center of <paramref name="from"/> to the center of <paramref name="to"/>
+	///
+	///<paramref name="from"/> and <paramref name="to"/> MUST BE ADJACENT at least by sharing a corner
+	/// 
+	/// HAS TO BE BETWEEN 1 and 5000
+	/// </summary>
+	/// <param name="across"></param>
+	/// <param name="from"></param>
+	/// <param name="to"></param>
+	/// <returns></returns>
+	public delegate float GetMovementSpeed(ITile across, ITile from, ITile to);
 
 	public class AStar : IPathFindAlg {
-		private class Node : FastPriorityQueueNode {
-			private IntVector2 position;
+
+		public const float MaxSpeed = 5000;
+
+		class Node : FastPriorityQueueNode {
+			IntVector2 position;
 
 			public NodeState State { get; set; }
 
@@ -33,54 +51,46 @@ namespace MHUrho.WorldMap {
 			/// COPIES Position with new X coordinate
 			/// </summary>
 			public int X {
-				get {
-					return position.X;
-				}
-				set {
-					position = new IntVector2(value, position.Y);
-				}
+				get => position.X;
+				set => position = new IntVector2(value, position.Y);
 			}
 
 			/// <summary>
 			/// COPIES Position with new Y coordinate
 			/// </summary>
 			public int Y {
-				get {
-					return position.Y;
-				}
-				set {
-					position = new IntVector2(position.X, value);
-				}
+				get => position.Y;
+				set => position = new IntVector2(position.X, value);
 			}
 
 			/// <summary>
-			/// Distance from start to the middle of the tile
+			/// Time from start to the middle of the tile
 			/// </summary>
-			public float Distance { get; private set; }
+			public float Time { get; private set; }
 
 			public float Heuristic { get; private set; }
 
-			public float Value => Distance + Heuristic;
+			public float Value => Time + Heuristic;
 
 			public Node PreviousNode { get; private set; }
 
 			public ITile Tile { get; private set; }
 
 
-			private GetMovementSpeed getMovementSpeed;
+			GetMovementSpeed getMovementSpeed;
 
-			private static readonly float fsqrt2 = (float)Math.Sqrt(2);
-			private static readonly double dsqrt2 = Math.Sqrt(2);
+			static readonly float fsqrt2 = (float)Math.Sqrt(2);
+			static readonly double dsqrt2 = Math.Sqrt(2);
 
-			private static readonly float fsqrt2d2 = fsqrt2 / 2;
-			private static readonly double dsqrt2d2 = dsqrt2 / 2;
+			static readonly float fsqrt2d2 = fsqrt2 / 2;
+			static readonly double dsqrt2d2 = dsqrt2 / 2;
 
-			private const float half = 1f / 2;
+			const float half = 1f / 2;
 
 
 			/// <summary>
 			/// Tests if the distance through the new Previous Node is less than
-			/// the old distance, if true, then sets Distance and PreviousNode
+			/// the old distance, if true, then sets Time and PreviousNode
 			/// </summary>
 			/// <param name="newPreviousNode">New possible previous node, will be tested and if its shorter distance, set as previous</param>
 			/// <returns>true if the new distance is lower and was set, false if not and was not</returns>
@@ -90,21 +100,25 @@ namespace MHUrho.WorldMap {
 				// and i always need only half of this distance, i just have two constants from which i choose
 				float halfRawDistance =
 					(position.X == newPreviousNode.position.X || position.Y == newPreviousNode.position.Y) ? half : fsqrt2d2;
-				float newDistance =
-					halfRawDistance * getMovementSpeed(Tile) +
-					halfRawDistance * getMovementSpeed(newPreviousNode.Tile) +
-					newPreviousNode.Distance;
 
-				if (newDistance > Distance) return false;
+				//newTime is always by at least RawDistance(halfRawDistance * 2) bigger than newPreviousNode.Time
+				// so A* works, because heuristic is RawDistance
+				float newTime =
+					(halfRawDistance / getMovementSpeed(newPreviousNode.Tile, newPreviousNode.Tile, Tile) + 
+						halfRawDistance / getMovementSpeed(Tile, newPreviousNode.Tile, Tile)) 
+					* MaxSpeed +
+					newPreviousNode.Time;
 
-				Distance = newDistance;
+				if (newTime > Time) return false;
+
+				Time = newTime;
 				PreviousNode = newPreviousNode;
 				return true;
 			}
 
 
 			public override string ToString() {
-				return $"X={X}, Y={Y}, Dist={Distance}, Heur={Heuristic}";
+				return $"X={X}, Y={Y}, Time={Time}, Heur={Heuristic}";
 			}
 
 			public Node(IntVector2 position,
@@ -121,21 +135,21 @@ namespace MHUrho.WorldMap {
 				Heuristic = heuristic;
 				State = state;
 				if (previousNode != null) {
-					Distance = float.MaxValue;
+					Time = float.MaxValue;
 					TestAndSetDistance(previousNode);
 				}
 				//start node
 				else {
-					Distance = 0;
+					Time = 0;
 				}
 			}
 
 		}
 
 
-		private enum NodeState { Opened, Closed };
+		enum NodeState { Opened, Closed };
 
-		private readonly IMap map;
+		readonly IMap map;
 
 		public AStar(IMap map) {
 			this.map = map;
@@ -168,7 +182,7 @@ namespace MHUrho.WorldMap {
 			return targetNode == null ? null : MakeTileList(targetNode);
 		}
 
-		private Node FindPathInNodes(Vector2 source,
+		Node FindPathInNodes(Vector2 source,
 								ITile target,
 								CanGoToNeighbour canPassTo,
 								GetMovementSpeed getMovementSpeed) {
@@ -217,7 +231,7 @@ namespace MHUrho.WorldMap {
 		/// <param name="sourceNode">center of the square from which tiles are taken</param>
 		/// <param name="target">Coordinates of the target</param>
 		/// <param name="unit">The unit going through the path, needed for speed calculation through different tile types</param>
-		private void AddNeighbours(
+		void AddNeighbours(
 			FastPriorityQueue<Node> queue,
 			Dictionary<IntVector2, Node> touchedNodes,
 			Node sourceNode,
@@ -282,7 +296,7 @@ namespace MHUrho.WorldMap {
 			}
 		}
 
-		private float Heuristic(IntVector2 srcPoint, IntVector2 target) {
+		float Heuristic(IntVector2 srcPoint, IntVector2 target) {
 			return IntVector2.Distance(srcPoint, target);
 		}
 
@@ -291,26 +305,23 @@ namespace MHUrho.WorldMap {
 		/// </summary>
 		/// <param name="target">Last Node of the path</param>
 		/// <returns>Path in correct order, from first point to the last point</returns>
-		private Path MakePath(Vector2 source, Node target, GetMovementSpeed getMovementSpeed) {
+		Path MakePath(Vector2 source, Node target, GetMovementSpeed getMovementSpeed) {
 			List<Waypoint> reversedWaypoints = new List<Waypoint>();
-			Vector3 source3 = new Vector3(source.X, map.GetHeightAt(source), source.Y);
+			Vector3 source3 = new Vector3(source.X, map.GetTerrainHeightAt(source), source.Y);
 			//If the source is the target
 			if (target.PreviousNode == null) {
-				float distance = (target.Tile.Center3 - source3).Length;
-				reversedWaypoints.Add(new Waypoint(target.Tile.Center3, distance * getMovementSpeed(target.Tile)));
-				return Path.CreateFrom(source3, reversedWaypoints);
+				return StartIsFinish(target, source3, getMovementSpeed);
 			}
 
 			while (target.PreviousNode != null) {
 				Node previousNode = target.PreviousNode;
 				//Waypoint through which we enter the target.Tile
-				Waypoint entranceWapoint = GetBorderWaypoint(target.Tile.Center3,
-															 previousNode.Tile.Center3,
+				Waypoint entranceWapoint = GetBorderWaypoint(target.Tile,
 															 previousNode.Tile,
 															 getMovementSpeed);
 				//Waypoint at the center of the target.Tile, to which we go to from the entrance
 				Waypoint centerWaypoint = new Waypoint(target.Tile.Center3, 
-														target.Distance - previousNode.Distance - entranceWapoint.TimeToWaypoint);
+														target.Time / MaxSpeed - previousNode.Time / MaxSpeed - entranceWapoint.TimeToWaypoint);
 				reversedWaypoints.Add(centerWaypoint);
 				reversedWaypoints.Add(entranceWapoint);
 
@@ -322,14 +333,18 @@ namespace MHUrho.WorldMap {
 			*/
 
 			Waypoint firstEntrance = reversedWaypoints[reversedWaypoints.Count - 1];
-			firstEntrance.TimeToWaypoint = (firstEntrance.Position - source3).Length * getMovementSpeed(target.Tile);
+			// v = d / t
+			//TODO: This movement speed is for the direction between centers, but the direction between source and center may be different
+			float movementSpeed = (target.Tile.Center3 - firstEntrance.Position).Length / firstEntrance.TimeToWaypoint;
+			// Correct it with the correct distance
+			firstEntrance.TimeToWaypoint = (firstEntrance.Position - source3).Length / movementSpeed;
 
 			reversedWaypoints.Reverse();
 			return Path.CreateFrom(source3, reversedWaypoints);
 		}
 
 
-		private List<ITile> MakeTileList(Node target) {
+		List<ITile> MakeTileList(Node target) {
 			List<ITile> reversedTileList = new List<ITile>();
 			for (;target != null; target = target.PreviousNode) {
 				reversedTileList.Add(target.Tile);
@@ -339,15 +354,40 @@ namespace MHUrho.WorldMap {
 			return reversedTileList;
 		}
 
-		private static Waypoint GetBorderWaypoint(Vector3 followingPosition, 
-												Vector3 precedingPosition,
-												ITile precedingTile,
-												GetMovementSpeed getMovementSpeed) 
+		Waypoint GetBorderWaypoint(ITile followingTile, 
+									ITile precedingTile,
+									GetMovementSpeed getMovementSpeed)
 		{
-			Vector3 toWaypoint = (followingPosition - precedingPosition) / 2;
-			Vector3 borderPosition = precedingPosition + toWaypoint;
-			return new Waypoint(borderPosition,
-								getMovementSpeed(precedingTile) * toWaypoint.Length);
+
+			Vector3 borderPoint = map.GetBorderBetweenTiles(followingTile, precedingTile);
+			return new Waypoint(borderPoint,
+								(borderPoint - precedingTile.Center3).Length / getMovementSpeed(precedingTile, precedingTile, followingTile));
+		}
+
+		static readonly float SinCos45 = 1 / (float)Math.Sqrt(2);
+
+		Path StartIsFinish(Node target, Vector3 source, GetMovementSpeed getMovementSpeed)
+		{
+			//Handle total equality, where Normalize would produce NaN
+			if (target.Tile.Center3 == source) {
+				return Path.CreateFrom(source, new List<Waypoint> {new Waypoint(source, 0)});
+			}
+
+			Vector2 XZDiff = (target.Tile.Center3 - source).XZ2();
+			XZDiff.Normalize();
+
+			XZDiff /= SinCos45;
+			//Make it X in {-1,0,1} and Y in {-1,0,1}
+			
+			IntVector2 fakeTileCoords = IntVector2.Clamp(XZDiff.RoundToIntVector2(), new IntVector2(-1,-1),new IntVector2(1,1));
+
+
+			ITile fakePreviousTile = map.GetTileByTopLeftCorner(target.Tile.TopLeft + fakeTileCoords);
+
+
+			float distance = (target.Tile.Center3 - source).Length;
+			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(target.Tile.Center3, distance / getMovementSpeed(target.Tile, fakePreviousTile, target.Tile))};
+			return Path.CreateFrom(source, waypoints);
 		}
 
 	}

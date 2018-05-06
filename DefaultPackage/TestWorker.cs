@@ -98,8 +98,8 @@ namespace DefaultPackage
 			}
 		}
 
-		public float GetMovementSpeed(ITile tile) {
-			return 1;
+		public float GetMovementSpeed(ITile across, ITile from, ITile to) {
+			return 1000;
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {

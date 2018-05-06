@@ -21,5 +21,7 @@ namespace MHUrho.Logic {
 		void Kill();
 
 		StBuilding Save();
+
+		float? GetHeightAt(float x, float y);
 	}
 }

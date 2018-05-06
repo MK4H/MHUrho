@@ -78,7 +78,7 @@ namespace MHUrho.UnitComponents
 		public interface INotificationReceiver {
 			bool CanGoFromTo(ITile fromTile, ITile toTile);
 
-			float GetMovementSpeed(ITile onTile);
+			float GetMovementSpeed(ITile across, ITile from, ITile to);
 
 			void OnMovementStarted(WorldWalker walker);
 
@@ -183,6 +183,10 @@ namespace MHUrho.UnitComponents
 			return GoTo(Map.GetTileByMapLocation(location));
 		}
 
+		public void Stop()
+		{
+			ReachedDestination();
+		}
 
 		public IEnumerator<Waypoint> GetRestOfThePath()
 		{

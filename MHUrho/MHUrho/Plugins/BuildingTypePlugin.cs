@@ -28,9 +28,9 @@ namespace MHUrho.Plugins
 
 		public abstract bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
 
-		public abstract void PopulateUI(MandKUI mouseAndKeyboardUI);
+		public abstract void PopulateUI(MandKGameUI mouseAndKeyboardUI);
 
-		public abstract void ClearUI(MandKUI mouseAndKeyboardUI);
+		public abstract void ClearUI(MandKGameUI mouseAndKeyboardUI);
 
 		public abstract void PopulateUI(TouchUI touchUI);
 

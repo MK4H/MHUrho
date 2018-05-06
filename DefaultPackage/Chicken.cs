@@ -115,8 +115,23 @@ namespace DefaultPackage
 			}
 		}
 
-		public float GetMovementSpeed(ITile tile) {
-			return 1;
+		public float GetMovementSpeed(ITile across, ITile from, ITile to) {
+			Vector3 source;
+			Vector3 target;
+			if (across == from) {
+				source = from.Center3;
+				target = Map.GetBorderBetweenTiles(from, to);
+			}
+			else if (across == to) {
+				source = Map.GetBorderBetweenTiles(from, to);
+				target = to.Center3;
+			}
+			else {
+				throw new InvalidOperationException();
+			}
+			Vector3 targetInSourcePlane = new Vector3(target.X, source.Y, target.Z);
+			float angle = 1 - (Vector3.CalculateAngle(targetInSourcePlane, target) / (float)(Math.PI / 2));
+			return Math.Max(1000 * angle, 1);
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {
@@ -201,10 +216,12 @@ namespace DefaultPackage
 
 		public void OnHit(MovingRangeTarget target, IProjectile projectile)
 		{
-			animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
-			dying = true;
-			Shooter.Enabled = false;
-			Walker.Enabled = false;
+			if (projectile.Player != Unit.Player) {
+				animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
+				dying = true;
+				Shooter.Enabled = false;
+				Walker.Enabled = false;
+			}
 		}
 
 		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints(MovingRangeTarget movingRangeTarget)

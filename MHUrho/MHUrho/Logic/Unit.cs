@@ -223,7 +223,7 @@ namespace MHUrho.Logic
 			}
 			private set {
 				Debug.Assert(LegNode != null, nameof(LegNode) + " != null");
-				LegNode.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetHeightAt(value), value.Y);
+				LegNode.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetTerrainHeightAt(value), value.Y);
 			}
 		}
 
@@ -355,7 +355,7 @@ namespace MHUrho.Logic
 		}
 
 		public bool MoveTo(Vector2 newLocation) {
-			return MoveTo(new Vector3(newLocation.X, Map.GetHeightAt(newLocation), newLocation.Y));
+			return MoveTo(new Vector3(newLocation.X, Map.GetTerrainHeightAt(newLocation), newLocation.Y));
 		}
 
 		public void ChangeType(UnitType newType) {

@@ -29,5 +29,10 @@ namespace MHUrho.Plugins
 		/// <returns>Instance loaded into saved state</returns>
 		public abstract void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData);
 
+		public virtual float? GetHeightAt(float x, float y)
+		{
+			return null;
+		}
+
 	}
 }

@@ -69,6 +69,9 @@ namespace DefaultPackage
 		List<ChickenWrapper> chickens;
 		IntVector2 spawnPoint;
 
+		int state = 0;
+		float logicTimeout;
+
 		public TestAIPlayer(TestAIPlayerType type)
 		{
 			this.type = type;
@@ -85,35 +88,53 @@ namespace DefaultPackage
 
 		public override void OnUpdate(float timeStep)
 		{
-			if (chickens.Count < 10 && Map.GetTileByMapLocation(spawnPoint).Units.Count == 0) {
-				IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(spawnPoint), Player);
-				chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.Plugin));
-			}
-			
-			foreach (var chickenInstance in chickens) {
-				if (chickenInstance.Chicken.Shooter.Target != null || chickenInstance.NextTarget != null) continue;
+			return;
 
-				if (chickenInstance.TimeToNextTargetCheck > 0) {
-					chickenInstance.TimeToNextTargetCheck -= timeStep;
-				}
-				chickenInstance.TimeToNextTargetCheck = ChickenWrapper.DefaultWaitingTime;
+			logicTimeout -= timeStep;
+			if (logicTimeout > 0) return;
+			logicTimeout = 2;
+			switch (state) {
+				case 0:
+					state = 1;
+					var spiralPoint = new Spiral(spawnPoint).GetEnumerator();
+					spiralPoint.MoveNext();
+					for (int i = 0; i < 10; i++, spiralPoint.MoveNext()) {
+						IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(spiralPoint.Current), Player);
+						chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.Plugin));
+					}
 
+					var target = FindTargets(spawnPoint).FirstOrDefault();
+					if (target == null) {
+						return;
+					}
 
-			   ITile foundTile = Map.FindClosestTile(chickenInstance.Chicken.Unit.Tile,
-													(tile) => {
-														return tile.Units.Any(unit => unit.Player != chickenInstance.Chicken.Unit.Player &&
-																					unit.HasDefaultComponent<RangeTargetComponent>());
-													});
+					foreach (var chicken in chickens) {
+						if (!chicken.Chicken.Shooter.ShootAt(target)) {
+							chicken.Chicken.Walker.GoTo(target.CurrentPosition.XZ2().RoundToIntVector2());
+							chicken.NextTarget = target;
+						}
+					}
+					break;
+				case 1:
+					var newTarget = FindTargets(spawnPoint).FirstOrDefault();
+					if (newTarget == null) return;
+					foreach (var chicken in chickens) {
+						if (chicken.Chicken.Shooter.Target != null) {
+							continue;
+						}
 
-				IRangeTarget target = foundTile?.Units
-												.Where(unit => unit.Player != chickenInstance.Chicken.Unit.Player &&
-																unit.HasDefaultComponent<RangeTargetComponent>())
-												.Select(unit => unit.GetDefaultComponent<RangeTargetComponent>()).FirstOrDefault();
-
-				if (target != null && !chickenInstance.Chicken.Shooter.ShootAt(target)) {
-					chickenInstance.NextTarget = target;
-					chickenInstance.Chicken.Walker.GoTo(chickenInstance.NextTarget.CurrentPosition.XZ2().RoundToIntVector2());
-				}
+						chicken.NextTarget = newTarget;
+						if (!chicken.Chicken.Shooter.ShootAt(chicken.NextTarget)) {
+							chicken.Chicken.Walker.GoTo(chicken.NextTarget.CurrentPosition.XZ2().RoundToIntVector2());
+						}
+						else {
+							chicken.Chicken.Walker.Stop();
+						}
+						
+					}
+					break;
+				default:
+					throw new InvalidOperationException("Invalid state of logic");
 			}
 		}
 
@@ -135,10 +156,24 @@ namespace DefaultPackage
 			}
 
 			chickens.RemoveAll((chicken) => chicken.Chicken == unit.Plugin);
+
+			foreach (var point in new Spiral(spawnPoint)) {
+				if (Map.GetTileByMapLocation(point).Units.Count == 0) {
+					IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(point), Player);
+					chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.Plugin));
+					break;
+				}
+			}
 		}
 
-	
-		
+		IEnumerable<IRangeTarget> FindTargets(IntVector2 sourcePoint)
+		{
+
+			return from tile in Map.GetTilesInSpiral(Map.GetTileByMapLocation(sourcePoint))
+					from unit in tile.Units
+					where unit.Player != Player && unit.HasDefaultComponent<RangeTargetComponent>()
+					select unit.GetDefaultComponent<RangeTargetComponent>();
+		}		
 
 	}
 }

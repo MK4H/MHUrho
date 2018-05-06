@@ -138,6 +138,8 @@ namespace MHUrho.Logic
 		/// </summary>
 		void CornerHeightChange();
 
+		float GetHeightAt(float x, float y);
 
+		float GetHeightAt(Vector2 position);
 	}
 }

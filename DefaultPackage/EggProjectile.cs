@@ -92,11 +92,9 @@ namespace DefaultPackage
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
-			if (hitEntity.Player == projectile.Player) {
-
-			}
-
-			projectile.Despawn();
+			if (hitEntity.Player != projectile.Player) {
+				projectile.Despawn();
+			}	
 		}
 
 		public override void OnTerrainHit()
@@ -104,7 +102,7 @@ namespace DefaultPackage
 			projectile.Despawn();
 		}
 
-		private bool ShootMovingTarget(IRangeTarget target)
+		bool ShootMovingTarget(IRangeTarget target)
 		{
 			int numSolutions = BallisticProjectile.GetVectorsForMovingTarget(target,
 																			projectile.Position,
@@ -120,7 +118,7 @@ namespace DefaultPackage
 			return false;
 		}
 
-		private bool ShootStaticTarget(IRangeTarget target) {
+		bool ShootStaticTarget(IRangeTarget target) {
 			if (BallisticProjectile.GetTimesAndVectorsForStaticTarget(
 									target.CurrentPosition,
 									projectile.Position,

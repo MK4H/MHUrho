@@ -1,40 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MHUrho.EditorTools;
-using MHUrho.Logic;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    public abstract class UIManager
+    public class UIManager
     {
-		protected readonly MyGame game;
 
-		protected UI UI => game.UI;
-		protected Urho.Input Input => game.Input;
+		protected readonly MyGame Game;
 
-		protected Dictionary<UIElement, Tool> tools;
-		protected Dictionary<UIElement, IPlayer> players;
+		protected UI UI => Game.UI;
+		protected Urho.Input Input => Game.Input;
 
-		protected UIManager(MyGame game) {
-			this.game = game;
+		public UIManager(MyGame game)
+		{
+			this.Game = game;
 		}
-
-		public abstract void AddTool(Tool tool);
-
-		public abstract void RemoveTool(Tool tool);
-
-		public abstract void AddPlayer(IPlayer player);
-
-		public abstract void RemovePlayer(IPlayer player);
-
-		public abstract void EnableUI();
-
-		public abstract void DisableUI();
-
-		public abstract void ShowUI();
-
-		public abstract void HideUI();
 	}
 }

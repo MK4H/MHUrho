@@ -24,11 +24,11 @@ namespace MHUrho.WorldMap
 
 		public bool Finished => targetWaypointIndex == waypoints.Count;
 
-		private readonly List<Waypoint> waypoints;
+		readonly List<Waypoint> waypoints;
 
-		private int targetWaypointIndex;
+		int targetWaypointIndex;
 
-		private Vector3 currentPosition;
+		Vector3 currentPosition;
 
 		protected Path() {
 			this.waypoints = new List<Waypoint>();

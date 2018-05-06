@@ -12,7 +12,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-	public class TouchUI : UIManager,IDisposable {
+	public class TouchUI : GameUIManager,IDisposable {
 
 
 		private readonly GameTouchController touchInputCtl;

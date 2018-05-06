@@ -132,13 +132,15 @@ namespace MHUrho.WorldMap {
 		void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight);
 		ITile FindClosestEmptyTile(ITile closestTo);
 
-		float GetHeightAt(int x, int y);
+		float GetTerrainHeightAt(int x, int y);
 
-		float GetHeightAt(IntVector2 position);
+		float GetTerrainHeightAt(IntVector2 position);
 
-		float GetHeightAt(float x, float y);
+		float GetTerrainHeightAt(float x, float y);
 
-		float GetHeightAt(Vector2 position);
+		float GetTerrainHeightAt(Vector2 position);
+
+		Vector3 GetBorderBetweenTiles(ITile tile1, ITile tile2);
 
 		StMap Save();
 

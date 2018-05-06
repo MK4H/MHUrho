@@ -57,9 +57,9 @@ namespace MHUrho.Input
 
 		public IPlayer Player { get; set; }
 
-		UIManager IGameController.UIManager => UIManager;
+		GameUIManager IGameController.UIManager => UIManager;
 
-		public MandKUI UIManager { get; private set; }
+		public MandKGameUI UIManager { get; private set; }
 
 		public bool DoOnlySingleRaycasts { get; set; }
 
@@ -107,7 +107,7 @@ namespace MHUrho.Input
 			this.LevelManager = levelManager;
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;
-			this.UIManager = new MandKUI(game, this);
+			this.UIManager = new MandKGameUI(game, this);
 
 			cameraController.OnFixedMove += OnViewMoved;
 

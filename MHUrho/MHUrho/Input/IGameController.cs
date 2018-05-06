@@ -10,7 +10,7 @@ namespace MHUrho.Input
 { 
 	public interface IGameController : IDisposable
 	{
-		UIManager UIManager { get; }
+		GameUIManager UIManager { get; }
 
 		IPlayer Player { get; set; }
 

@@ -341,7 +341,7 @@ namespace MHUrho.WorldMap
 
 				IntVector2 corner = new IntVector2((int)Math.Round(rayQueryResult.Position.X),
 												   (int)Math.Round(rayQueryResult.Position.Z));
-				float height = map.GetHeightAt(corner);
+				float height = map.GetTerrainHeightAt(corner);
 				return new Vector3(corner.X, height, corner.Y);
 			}
 
@@ -421,10 +421,10 @@ namespace MHUrho.WorldMap
 
 							for (int x = topLeft.X; x <= bottomRight.X; x++) {
 
-								tileInVertexBuffer->TopLeft.Position.Y = map.GetHeightAt(x, y);
-								tileInVertexBuffer->TopRight.Position.Y = map.GetHeightAt(x + 1, y);
-								tileInVertexBuffer->BottomLeft.Position.Y = map.GetHeightAt(x, y + 1);
-								tileInVertexBuffer->BottomRight.Position.Y = map.GetHeightAt(x + 1, y + 1);
+								tileInVertexBuffer->TopLeft.Position.Y = map.GetTerrainHeightAt(x, y);
+								tileInVertexBuffer->TopRight.Position.Y = map.GetTerrainHeightAt(x + 1, y);
+								tileInVertexBuffer->BottomLeft.Position.Y = map.GetTerrainHeightAt(x, y + 1);
+								tileInVertexBuffer->BottomRight.Position.Y = map.GetTerrainHeightAt(x + 1, y + 1);
 
 								tileInVertexBuffer->CalculateLocalNormals();
 								tileInIndexBuffer->TestAndRotate(tileInVertexBuffer);
@@ -676,25 +676,25 @@ namespace MHUrho.WorldMap
 
 				//Top side
 				for (int x = rectangle.Left; x <= rectangle.Right; x++) {
-					highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
+					highlight.DefineVertex(new Vector3(x, map.GetTerrainHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
 					highlight.DefineColor(color);
 				}
 
 				//Right side
 				for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
-					highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
+					highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetTerrainHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
 					highlight.DefineColor(color);
 				}
 
 				//Bottom side
 				for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
-					highlight.DefineVertex(new Vector3(x, map.GetHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
+					highlight.DefineVertex(new Vector3(x, map.GetTerrainHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
 					highlight.DefineColor(color);
 				}
 
 				//Left side
 				for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
-					highlight.DefineVertex(new Vector3(rectangle.Left, map.GetHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
+					highlight.DefineVertex(new Vector3(rectangle.Left, map.GetTerrainHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
 					highlight.DefineColor(color);
 				}
 			}

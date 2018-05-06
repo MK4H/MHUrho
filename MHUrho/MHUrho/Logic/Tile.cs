@@ -68,23 +68,23 @@ namespace MHUrho.Logic
 
 		public Vector2 Center => new Vector2(TopLeft.X + 0.5f, TopLeft.Y + 0.5f);
 
-		public Vector3 Center3 => new Vector3(Center.X, Map.GetHeightAt(Center), Center.Y);
+		public Vector3 Center3 => new Vector3(Center.X, Map.GetTerrainHeightAt(Center), Center.Y);
 
-		public Vector3 TopLeft3 => new Vector3(MapArea.Left, Map.GetHeightAt(MapArea.Left, MapArea.Top), MapArea.Top);
+		public Vector3 TopLeft3 => new Vector3(MapArea.Left, Map.GetTerrainHeightAt(MapArea.Left, MapArea.Top), MapArea.Top);
 
-		public Vector3 TopRight3 => new Vector3(MapArea.Right, Map.GetHeightAt(MapArea.Right, MapArea.Top), MapArea.Top);
+		public Vector3 TopRight3 => new Vector3(MapArea.Right, Map.GetTerrainHeightAt(MapArea.Right, MapArea.Top), MapArea.Top);
 
-		public Vector3 BottomLeft3 => new Vector3(MapArea.Left, Map.GetHeightAt(MapArea.Left, MapArea.Bottom), MapArea.Bottom);
+		public Vector3 BottomLeft3 => new Vector3(MapArea.Left, Map.GetTerrainHeightAt(MapArea.Left, MapArea.Bottom), MapArea.Bottom);
 
-		public Vector3 BottomRight3 => new Vector3(MapArea.Right, Map.GetHeightAt(MapArea.Right, MapArea.Bottom), MapArea.Bottom);
+		public Vector3 BottomRight3 => new Vector3(MapArea.Right, Map.GetTerrainHeightAt(MapArea.Right, MapArea.Bottom), MapArea.Bottom);
 
 		public float TopLeftHeight { get; private set; }
 
-		public float TopRightHeight => Map.GetHeightAt(MapArea.Left + 1, MapArea.Top);
+		public float TopRightHeight => Map.GetTerrainHeightAt(MapArea.Left + 1, MapArea.Top);
 
-		public float BottomLeftHeight => Map.GetHeightAt(MapArea.Left, MapArea.Top + 1);
+		public float BottomLeftHeight => Map.GetTerrainHeightAt(MapArea.Left, MapArea.Top + 1);
 
-		public float BottomRightHeight => Map.GetHeightAt(MapArea.Left + 1, MapArea.Top + 1);
+		public float BottomRightHeight => Map.GetTerrainHeightAt(MapArea.Left + 1, MapArea.Top + 1);
 
 		public Map Map { get; private set; }
 
@@ -234,8 +234,18 @@ namespace MHUrho.Logic
 		/// </summary>
 		public void CornerHeightChange() {
 			foreach (var unit in Units) {
-				unit.SetHeight(Map.GetHeightAt(unit.XZPosition));
+				unit.SetHeight(Map.GetTerrainHeightAt(unit.XZPosition));
 			}
+		}
+
+		public float GetHeightAt(float x, float y)
+		{
+			return Building?.GetHeightAt(x, y) ?? Map.GetTerrainHeightAt(x, y);
+		}
+
+		public float GetHeightAt(Vector2 position)
+		{
+			return GetHeightAt(position.X, position.Y);
 		}
 	} 
 }
