@@ -8,6 +8,7 @@ using MHUrho.Storage;
 using MHUrho.Control;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.UnitComponents;
 using Urho;
 
 namespace NUnit.Tests {
@@ -40,7 +41,7 @@ namespace NUnit.Tests {
 
 				public float BottomRightHeight => throw new NotImplementedException();
 
-				public Map Map => throw new NotImplementedException();
+				
 
 				public void ConnectReferences(ILevelManager level)
 				{
@@ -124,6 +125,8 @@ namespace NUnit.Tests {
 				public TileType Type => throw new NotImplementedException();
 				#endregion
 
+				public IMap Map { get; private set; }
+
 				public Vector2 Center => new Vector2(MapLocation.X + 0.5f, MapLocation.Y + 0.5f);
 
 				public Vector3 Center3 => new Vector3(MapLocation.X + 0.5f, 0, MapLocation.Y + 0.5f);
@@ -132,9 +135,10 @@ namespace NUnit.Tests {
 
 				public float MovementSpeedModifier { get; private set; }
 
-				public PassableTestTile(float speedModifier, int x, int y) {
+				public PassableTestTile(float speedModifier, int x, int y, IMap map) {
 					this.MovementSpeedModifier = speedModifier;
 					MapLocation = new IntVector2(x, y);
+					this.Map = map;
 				}
 
 				public override string ToString() {
@@ -161,8 +165,6 @@ namespace NUnit.Tests {
 
 				public float BottomRightHeight => throw new NotImplementedException();
 
-				public Map Map => throw new NotImplementedException();
-
 				public void ConnectReferences(ILevelManager level)
 				{
 					throw new NotImplementedException();
@@ -248,6 +250,7 @@ namespace NUnit.Tests {
 				public IntVector2 BottomRight => throw new NotImplementedException();
 				#endregion
 
+				public IMap Map { get; private set; }
 
 				public IntVector2 MapLocation { get; private set; }
 
@@ -258,7 +261,7 @@ namespace NUnit.Tests {
 				//Should not call this if it is not passable
 				public float MovementSpeedModifier => throw new NotImplementedException();
 
-				public NotPassableTestTile(int x, int y) {
+				public NotPassableTestTile(int x, int y, IMap map) {
 					MapLocation = new IntVector2(x, y);
 				}
 
@@ -348,6 +351,10 @@ namespace NUnit.Tests {
 			}
 
 
+			public ITile GetContainingTile(float x, float y)
+			{
+				throw new NotImplementedException();
+			}
 
 			public bool SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) {
 				throw new NotImplementedException();
@@ -358,6 +365,71 @@ namespace NUnit.Tests {
 			}
 
 			public ITile FindClosestEmptyTile(ITile closestTo) {
+				throw new NotImplementedException();
+			}
+
+			public ITile FindClosestTile(ITile source, Predicate<ITile> predicate)
+			{
+				throw new NotImplementedException();
+			}
+
+			public ITile FindClosestTile(ITile source, int squareSize, Predicate<ITile> predicate)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IEnumerable<ITile> GetTilesInSpiral(ITile center)
+			{
+				throw new NotImplementedException();
+			}
+
+			public ITile RaycastToTile(List<RayQueryResult> rayQueryResults)
+			{
+				throw new NotImplementedException();
+			}
+
+			public ITile RaycastToTile(RayQueryResult rayQueryResult)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResults)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3? RaycastToVertexPosition(RayQueryResult rayQueryResult)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResults)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IntVector2? RaycastToVertex(RayQueryResult rayQueryResult)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ChangeTileType(ITile tile, TileType newType)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ChangeTileType(ITile centerTile, IntVector2 rectangleSize, TileType newType)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, float heightDelta)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, ChangeTileHeightDelegate newHeightFunction)
+			{
 				throw new NotImplementedException();
 			}
 
@@ -380,11 +452,66 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public void HighlightArea(ITile center, IntVector2 size, HighlightMode mode, Color color) {
+			public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)
+			{
 				throw new NotImplementedException();
 			}
 
-			public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, HighlightMode mode, Color color) {
+			public void HighlightTileList(IEnumerable<ITile> tiles, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangle(IntVector2 topLeft, IntVector2 bottomRight, Func<ITile, Color> getColor)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangle(ITile center, IntVector2 size, Func<ITile, Color> getColor)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangle(IntRect rectangle, Func<ITile, Color> getColor)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangle(IntVector2 topLeft, IntVector2 bottomRight, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangle(ITile center, IntVector2 size, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangle(IntRect rectangle, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangleBorder(IntVector2 topLeft, IntVector2 bottomRight, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangleBorder(ITile center, IntVector2 size, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightRectangleBorder(IntRect rectangle, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightArea(ITile center, IntVector2 size,  Color color) {
+				throw new NotImplementedException();
+			}
+
+			public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, Color color) {
 				throw new NotImplementedException();
 			}
 
@@ -393,6 +520,31 @@ namespace NUnit.Tests {
 			}
 
 			public void DisableHighlight() {
+				throw new NotImplementedException();
+			}
+
+			public void ChangeHeight(List<IntVector2> tileCorners, float heightDelta)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ForEachInRectangle(IntRect rectangle, Action<ITile> action)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IRangeTarget GetRangeTarget(Vector3 position)
+			{
 				throw new NotImplementedException();
 			}
 
@@ -420,6 +572,9 @@ namespace NUnit.Tests {
 			public int Top => TopLeft.Y;
 
 			public int Bottom => BottomRight.Y;
+
+			public ILevelManager LevelManager => throw new NotImplementedException();
+
 			public bool IsInside(int x, int y) {
 				throw new NotImplementedException();
 			}
@@ -433,6 +588,11 @@ namespace NUnit.Tests {
 			}
 
 			public bool IsInside(Vector2 point) {
+				throw new NotImplementedException();
+			}
+
+			public Vector3 GetUpDirectionAt(Vector2 position)
+			{
 				throw new NotImplementedException();
 			}
 
@@ -460,104 +620,130 @@ namespace NUnit.Tests {
 				return 0;
 			}
 
+			public float GetHeightAt(float x, float y)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3 GetUpDirectionAt(float x, float y)
+			{
+				throw new NotImplementedException();
+			}
+
 			public static TestMap GetTestMapRandomSpeeds(int width, int height, Random rnd) {
-				ITile[][] map = new ITile[width][];
+
+				var newMap = new TestMap(width, height);
+				ITile[][] tiles = new ITile[width][];
 				for (int x = 0; x < width; x++) {
-					map[x] = new ITile[height];
+					tiles[x] = new ITile[height];
 					for (int y = 0; y < height; y++) {
-						map[x][y] = new PassableTestTile((float) rnd.NextDouble(), x, y);
+						tiles[x][y] = new PassableTestTile((float) rnd.NextDouble(), x, y, newMap);
 					}
 				}
 
-				return new TestMap(width, height, map);
+				newMap.map = tiles;
+				return newMap;
 			}
 
 			public static TestMap GetTestMapStaticSpeed(int width, int height, float speed = 1) {
-				ITile[][] map = new ITile[width][];
+				var newMap = new TestMap(width, height);
+
+				ITile[][] tiles = new ITile[width][];
 				for (int x = 0; x < width; x++) {
-					map[x] = new ITile[height];
+					tiles[x] = new ITile[height];
 					for (int y = 0; y < height; y++) {
-						map[x][y] = new PassableTestTile(speed, x, y);
+						tiles[x][y] = new PassableTestTile(speed, x, y, newMap);
 					}
 				}
 
-				return new TestMap(width, height, map);
+				newMap.map = tiles;
+				return newMap;
 			}
 
-			public static TestMap GetTestMapWithImpassableCrossAndStaticSpeed(int width, int height, float speed) {
-				ITile[][] map = new ITile[width][];
+			public static TestMap GetTestMapWithImpassableCrossAndStaticSpeed(int width, int height, float speed)
+			{
+				var newMap = new TestMap(width, height);
+
+				ITile[][] tiles = new ITile[width][];
 				for (int x = 0; x < width; x++) {
-					map[x] = new ITile[height];
+					tiles[x] = new ITile[height];
 					for (int y = 0; y < height; y++) {
 						if ((x == width / 2) || (y == height / 2)) {
-							map[x][y] = new NotPassableTestTile(x, y);
+							tiles[x][y] = new NotPassableTestTile(x, y, newMap);
 						}
 						else {
-							map[x][y] = new PassableTestTile(speed, x, y);
+							tiles[x][y] = new PassableTestTile(speed, x, y, newMap);
 						}
 
 					}
 				}
-
-				return new TestMap(width, height, map);
+				newMap.map = tiles;
+				return newMap;
 			}
 
 			public static TestMap GetTestMapWithImpassableCrossAndRandomSpeed(int width, int height, Random rnd) {
-				ITile[][] map = new ITile[width][];
+				var newMap = new TestMap(width, height);
+
+				ITile[][] tiles = new ITile[width][];
 				for (int x = 0; x < width; x++) {
-					map[x] = new ITile[height];
+					tiles[x] = new ITile[height];
 					for (int y = 0; y < height; y++) {
 						if ((x == width / 2) || (y == height / 2)) {
-							map[x][y] = new NotPassableTestTile(x, y);
+							tiles[x][y] = new NotPassableTestTile(x, y, newMap);
 						}
 						else {
-							map[x][y] = new PassableTestTile((float)rnd.NextDouble(), x, y);
+							tiles[x][y] = new PassableTestTile((float)rnd.NextDouble(), x, y, newMap);
 						}
 
 					}
 				}
 
-				return new TestMap(width, height, map);
+				newMap.map = tiles;
+				return newMap;
 			}
 
 			public static TestMap GetTestMapWithImpassableTiles(int width, int height, Random rnd, List<IntVector2> impassableTiles) {
-				ITile[][] map = new ITile[width][];
+				var newMap = new TestMap(width, height);
+				ITile[][] tiles = new ITile[width][];
 				for (int x = 0; x < width; x++) {
-					map[x] = new ITile[height];
+					tiles[x] = new ITile[height];
 					for (int y = 0; y < height; y++) {
 						if (impassableTiles.Contains(new IntVector2(x, y))) {
-							map[x][y] = new NotPassableTestTile(x, y);
+							tiles[x][y] = new NotPassableTestTile(x, y, newMap);
 						}
 						else {
-							map[x][y] = new PassableTestTile((float)rnd.NextDouble(), x, y);
+							tiles[x][y] = new PassableTestTile((float)rnd.NextDouble(), x, y, newMap);
 						}
 
 					}
 				}
 
-				return new TestMap(width, height, map);
+				newMap.map = tiles;
+				return newMap;
 			}
 
 			public static TestMap GetTestMapWithImpassableTiles(int width, int height, int speed, List<IntVector2> impassableTiles) {
-				ITile[][] map = new ITile[width][];
+				var newMap = new TestMap(width, height);
+				ITile[][] tiles = new ITile[width][];
 				for (int x = 0; x < width; x++) {
-					map[x] = new ITile[height];
+					tiles[x] = new ITile[height];
 					for (int y = 0; y < height; y++) {
 						if (impassableTiles.Contains(new IntVector2(x, y))) {
-							map[x][y] = new NotPassableTestTile(x,y);
+							tiles[x][y] = new NotPassableTestTile(x,y, newMap);
 						}
 						else {
-							map[x][y] = new PassableTestTile(speed, x, y);
+							tiles[x][y] = new PassableTestTile(speed, x, y, newMap);
 						}
 
 					}
 				}
 
-				return new TestMap(width, height, map);
+				newMap.map = tiles;
+				return newMap;
 			}
 
-			private TestMap(int width, int height, ITile[][] map) {
-				this.map = map;
+			TestMap(int width, int height) {
+
 				TopLeft = new IntVector2(0, 0);
 				BottomRight = new IntVector2(width - 1, height - 1);
 			}
@@ -572,21 +758,24 @@ namespace NUnit.Tests {
 
 		}
 
+		float speed = 5000;
+
 		[Test]
 
 		public void StraightCornerToCornerAllSpeedsOneGetTileList() {
 			var aStar = new AStar(allOneSpeed);
 
-			//Top
 			
-			List<ITile> path = aStar.GetTileList(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			//Top
+
+			List<ITile> path = aStar.GetTileList(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			List<ITile> expected = new List<ITile>();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(i,0));
 			}
 			CollectionAssert.AreEqual(expected, path,"Fail going from topLeft to the topRight");
 
-			path = aStar.GetTileList(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			path = aStar.GetTileList(allOneSpeed.TopLeft.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			expected.Clear();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(0, i));
@@ -594,14 +783,14 @@ namespace NUnit.Tests {
 			CollectionAssert.AreEqual(expected, path, "Fail going from topLeft to the bottomLeft");
 
 
-			path = aStar.GetTileList(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			path = aStar.GetTileList(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			expected.Clear();
 			for (int i = allOneSpeed.Right; i >= allOneSpeed.Left; i--) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(i, allOneSpeed.Bottom));
 			}
 			CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the bottomLeft");
 
-			path = aStar.GetTileList(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			path = aStar.GetTileList(allOneSpeed.BottomRight.ToVector2(), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			expected.Clear();
 			for (int i = allOneSpeed.Bottom; i >= allOneSpeed.Top; i--) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(allOneSpeed.Right, i));
@@ -618,7 +807,7 @@ namespace NUnit.Tests {
 
 			//Top
 
-			Path path = aStar.FindPath(new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			Path path = aStar.FindPath(new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			var pathEnumerator = path.GetEnumerator();
 			Vector3 position = new Vector3(0.5f, 0, 0.5f);
 			for (int i = 0; i < allOneSpeed.Right * 2 + 1; i++) {
@@ -629,7 +818,7 @@ namespace NUnit.Tests {
 
 			Assert.That(!pathEnumerator.MoveNext());
 
-			path = aStar.FindPath(new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			path = aStar.FindPath(new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3(0.5f, 0, 0.5f);
 			for (int i = 0; i < allOneSpeed.Bottom * 2 + 1; i++) {
@@ -641,7 +830,7 @@ namespace NUnit.Tests {
 			Assert.That(!pathEnumerator.MoveNext());
 
 
-			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2() + new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2() + new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3( allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom + 0.5f);
 			for (int i = 0; i < allOneSpeed.Right * 2 + 1; i++) {
@@ -652,7 +841,7 @@ namespace NUnit.Tests {
 
 			Assert.That(!pathEnumerator.MoveNext());
 
-			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2() + new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			path = aStar.FindPath(allOneSpeed.BottomRight.ToVector2() + new Vector2(0.5f, 0.5f), allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3(allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom + 0.5f);
 			for (int i = 0; i < allOneSpeed.Bottom * 2 + 1; i++) {
@@ -688,7 +877,7 @@ namespace NUnit.Tests {
 		public void StartIsFinishPath() {
 			var aStar = new AStar(allOneSpeed);
 
-			Path path = aStar.FindPath(new Vector2(10.5f, 10.5f), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			Path path = aStar.FindPath(new Vector2(10.5f, 10.5f), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 
 			Assert.IsNotNull(path);
 			var enumerator = path.GetEnumerator();
@@ -709,12 +898,33 @@ namespace NUnit.Tests {
 		public void StartIsFinishTileList() {
 			var aStar = new AStar(allOneSpeed);
 
-			var path = aStar.GetTileList(new Vector2(10, 10), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => 1);
+			var path = aStar.GetTileList(new Vector2(10, 10), allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)), (tile1, tile2) => true, (tile, dontCare1, dontCare2) => speed, speed);
 
 			Assert.IsNotNull(path);
 			CollectionAssert.AreEqual(new List<ITile> {allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))}, path);
 			Assert.Pass();
 
+
+		}
+
+		[Test]
+		public void MicroBenchmark()
+		{
+			var aStar = new AStar(allOneSpeed);
+
+			Path path = null;
+			Vector3 position = new Vector3();
+			for (int i = 0; i < 100000; i++) {
+				path = aStar.FindPath(allOneSpeed.TopLeft.ToVector2(),
+										allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight),
+										(tile1, tile2) => true,
+										(tile, source, target) => speed,
+										speed);
+				position += path.TargetWaypoint.Position;
+			}
+
+			Assert.AreNotEqual(new Vector3(), position);
+			Assert.Pass();
 
 		}
 	}

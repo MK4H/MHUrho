@@ -71,10 +71,11 @@ namespace MHUrho.WorldMap
 									ITile target, 
 									Map map, 
 									CanGoToNeighbour canPass,
-									GetMovementSpeed getMovementSpeed)
+									GetMovementSpeed getMovementSpeed,
+									float maxMovementSpeed)
 		{
 
-			return map.PathFinding.FindPath(source, target, canPass, getMovementSpeed);
+			return map.PathFinding.FindPath(source, target, canPass, getMovementSpeed, maxMovementSpeed);
 		}
 
 

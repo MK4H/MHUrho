@@ -83,6 +83,8 @@ namespace DefaultPackage
 			shooter = unit.GetDefaultComponent<Shooter>();
 		}
 
+		public float MaxMovementSpeed => 100;
+
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
 			var diff = toTile.MapLocation - fromTile.MapLocation;
 
@@ -103,8 +105,8 @@ namespace DefaultPackage
 
 		}
 
-		public float GetMovementSpeed(ITile across, ITile from, ITile to) {
-			return 1000;
+		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
+			return MaxMovementSpeed;
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {

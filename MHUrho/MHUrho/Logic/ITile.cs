@@ -86,7 +86,7 @@ namespace MHUrho.Logic
 
 		float BottomRightHeight { get; }
 
-		Map Map { get; }
+		IMap Map { get; }
 
 		/// <summary>
 		/// Continues loading by connecting references

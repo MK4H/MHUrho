@@ -39,6 +39,8 @@ namespace DefaultPackage
 	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver {
 		public TestBuildingInstance WorkedBuilding { get; set; }
 
+		public float MaxMovementSpeed => 100;
+
 		WorldWalker walker;
 		bool homeGoing = false;
 		bool started = false;
@@ -82,6 +84,8 @@ namespace DefaultPackage
 			walker = unit.GetDefaultComponent<WorldWalker>();
 		}
 
+		
+
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
 			var diff = toTile.MapLocation - fromTile.MapLocation;
 			bool targetEmpty = toTile.Building == null;
@@ -98,8 +102,8 @@ namespace DefaultPackage
 			}
 		}
 
-		public float GetMovementSpeed(ITile across, ITile from, ITile to) {
-			return 1000;
+		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
+			return MaxMovementSpeed;
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {

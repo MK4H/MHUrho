@@ -94,6 +94,8 @@ namespace DefaultPackage
 
 		}
 
+		public float MaxMovementSpeed => 100;
+
 		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
 			return toTile.Building == null;
 		}
@@ -115,23 +117,13 @@ namespace DefaultPackage
 			}
 		}
 
-		public float GetMovementSpeed(ITile across, ITile from, ITile to) {
-			Vector3 source;
-			Vector3 target;
-			if (across == from) {
-				source = from.Center3;
-				target = Map.GetBorderBetweenTiles(from, to);
-			}
-			else if (across == to) {
-				source = Map.GetBorderBetweenTiles(from, to);
-				target = to.Center3;
-			}
-			else {
-				throw new InvalidOperationException();
-			}
-			Vector3 targetInSourcePlane = new Vector3(target.X, source.Y, target.Z);
-			float angle = 1 - (Vector3.CalculateAngle(targetInSourcePlane, target) / (float)(Math.PI / 2));
-			return Math.Max(1000 * angle, 1);
+		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
+
+			Vector3 diff = to - from;
+			
+			float angle = (float)Math.Max(Math.Asin(diff.Length * Math.Abs(diff.Y)), 0);
+			angle = Math.Max(1 - angle * 2, 0.25f);
+			return Math.Max(MaxMovementSpeed * angle, 1);
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {

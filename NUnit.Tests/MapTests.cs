@@ -119,7 +119,7 @@ namespace NUnit.Tests {
 
 			public Vector2 Center => new Vector2(MapLocation.X + 0.5f, MapLocation.Y + 0.5f);
 
-			
+			IMap ITile.Map => throw new NotImplementedException();
 
 			public HeightTestTile(IntVector2 location, float height) {
 				this.MapArea = new IntRect(location.X, location.Y, location.X + 1, location.Y + 1);

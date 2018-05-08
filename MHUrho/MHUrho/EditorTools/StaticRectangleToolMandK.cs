@@ -62,13 +62,13 @@ namespace MHUrho.EditorTools
 
 		private void OnMouseMove(MouseMovedEventArgs e) {
 			if (fixedCenter != null) {
-				Map.HighlightArea(fixedCenter, Size, WorldMap.HighlightMode.Full, Color.Green);
+				Map.HighlightRectangle(fixedCenter, Size,  Color.Green);
 				return;
 			}
 
 			var centerTile = input.GetTileUnderCursor();
 			if (centerTile != null) {
-				Map.HighlightArea(centerTile, Size, WorldMap.HighlightMode.Full, Color.Green);
+				Map.HighlightRectangle(centerTile, Size, Color.Green);
 			}
 
 		}

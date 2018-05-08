@@ -76,9 +76,12 @@ namespace MHUrho.UnitComponents
 		}
 
 		public interface INotificationReceiver {
+
+			float MaxMovementSpeed { get; }
+
 			bool CanGoFromTo(ITile fromTile, ITile toTile);
 
-			float GetMovementSpeed(ITile across, ITile from, ITile to);
+			float GetMovementSpeed(ITile across, Vector3 from, Vector3 to);
 
 			void OnMovementStarted(WorldWalker walker);
 
@@ -167,7 +170,8 @@ namespace MHUrho.UnitComponents
 									tile, 
 									Map, 
 									notificationReceiver.CanGoFromTo,
-									notificationReceiver.GetMovementSpeed);
+									notificationReceiver.GetMovementSpeed,
+									notificationReceiver.MaxMovementSpeed);
 			if (newPath == null) {
 				MovementStarted = true;
 				OnMovementStarted?.Invoke(this);
@@ -244,7 +248,7 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		/// <param name="point">Point to move towards</param>
 		/// <param name="timeStep">timeStep of the game</param>
-		bool MoveTowards(Vector3 point ,float timeStep) {
+		bool MoveTowards(Vector3 point, float timeStep) {
 			bool reachedPoint = false;
 
 			Vector3 newPosition = Unit.Position + GetMoveVector(point, timeStep);
@@ -264,7 +268,8 @@ namespace MHUrho.UnitComponents
 									path.GetTarget(Map),
 									Map,
 									notificationReceiver.CanGoFromTo,
-									notificationReceiver.GetMovementSpeed);
+									notificationReceiver.GetMovementSpeed,
+									 notificationReceiver.MaxMovementSpeed);
 			if (newPath == null) {
 				//Cant get there
 				MovementFailed = true;
@@ -291,7 +296,12 @@ namespace MHUrho.UnitComponents
 				return new Vector3(1, 0, 0);
 			}
 			movementDirection.Normalize();
-			return movementDirection * LevelManager.CurrentLevel.GameSpeed * timeStep;
+			// divided by 100 so that with GameSpeed == 1, MovementSpeed of 100 goes through the tile in 1 second
+			return movementDirection * 
+					LevelManager.CurrentLevel.GameSpeed * 
+					timeStep * 
+					notificationReceiver.GetMovementSpeed(Unit.Tile,Unit.Position, destination) / 
+					100;
 		}
 
 		bool ReachedPoint(Vector3 currentPosition, Vector3 nextPosition, Vector3 point) {

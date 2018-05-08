@@ -147,7 +147,7 @@ namespace MHUrho.EditorTools
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
 			Color color = buildingType.CanBuildIn(topLeft, bottomRight, Level) ? Color.Green : Color.Red;
-			Map.HighlightArea(topLeft, bottomRight, WorldMap.HighlightMode.Full, color);
+			Map.HighlightRectangle(topLeft, bottomRight, color);
 		}
 	}
 }

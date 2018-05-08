@@ -11,17 +11,15 @@ using MHUrho.Storage;
 
 namespace MHUrho.WorldMap
 {
-	public enum HighlightMode { None, Borders, Full }
-
 	public partial class Map {
 
-		private enum BorderType { None, Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight }
+		enum BorderType { None, Top, Bottom, Left, Right, TopLeft, TopRight, BottomLeft, BottomRight }
 
-		private class MapGraphics : IDisposable {
+		class MapGraphics : IDisposable {
 
-			private const float HighlightHeightAboveTerain = 0.005f;
+			const float HighlightHeightAboveTerain = 0.005f;
 
-			private static Vector3 HighlightAboveTerrainOffset = new Vector3(0, HighlightHeightAboveTerain, 0);
+			static Vector3 HighlightAboveTerrainOffset = new Vector3(0, HighlightHeightAboveTerain, 0);
 
 
 			[StructLayout(LayoutKind.Sequential)]
@@ -223,13 +221,13 @@ namespace MHUrho.WorldMap
 				}
 			}
 
-			private class CornerTiles : IEnumerable<ITile>,IEnumerator<ITile> {
+			class CornerTiles : IEnumerable<ITile>,IEnumerator<ITile> {
 				public ITile TopLeft;
 				public ITile TopRight;
 				public ITile BottomLeft;
 				public ITile BottomRight;
 
-				private int state = -1;
+				int state = -1;
 
 				public IEnumerator<ITile> GetEnumerator() {
 					state = -1;
@@ -272,18 +270,17 @@ namespace MHUrho.WorldMap
 				}
 			}
 
-			private Model model;
-			private VertexBuffer mapVertexBuffer;
-			private IndexBuffer mapIndexBuffer;
+			Model model;
+			VertexBuffer mapVertexBuffer;
+			IndexBuffer mapIndexBuffer;
 
-			private Material material;
+			Material material;
 
-			private HighlightMode highlightMode;
-			private CustomGeometry highlight;
+			CustomGeometry highlight;
 
-			private readonly Map map;
+			readonly Map map;
 			//TODO: Probably split map into more parts to speed up raycasts and drawing
-			private readonly Node mapNode;
+			readonly Node mapNode;
 
 			public static MapGraphics Build(Node mapNode,
 											Map map,
@@ -485,33 +482,77 @@ namespace MHUrho.WorldMap
 				mapIndexBuffer.Unlock();
 			}
 
-			public void HighlightArea(IntRect rectangle, HighlightMode mode, Color color) {
+			public void HighlightBorder(IntRect rectangle, Color color) {
 
-				if (highlight == null) {
-					highlight = mapNode.CreateComponent<CustomGeometry>();
-					var highlightMaterial = new Material();
-					highlightMaterial.SetTechnique(0, CoreAssets.Techniques.NoTextureUnlitVCol, 1, 1);
-					highlight.SetMaterial(highlightMaterial);
-				}
-				highlight.Enabled = true;
+				HighlightInit();
 
+				highlight.BeginGeometry(0, PrimitiveType.LineStrip);
 
-				switch (mode) {
-					case HighlightMode.None:
-						DisableHighlight();
-						break;
-					case HighlightMode.Borders:
-						HighlightBorder(rectangle, color);
-						break;
-					case HighlightMode.Full:
-						HighlightFullRectangle(rectangle, color);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown Highlight mode");
+				//Top side
+				for (int x = rectangle.Left; x <= rectangle.Right; x++) {
+					highlight.DefineVertex(new Vector3(x, map.GetTerrainHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
+					highlight.DefineColor(color);
 				}
 
+				//Right side
+				for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
+					highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetTerrainHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
+					highlight.DefineColor(color);
+				}
 
-				highlight.Commit();
+				//Bottom side
+				for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
+					highlight.DefineVertex(new Vector3(x, map.GetTerrainHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
+					highlight.DefineColor(color);
+				}
+
+				//Left side
+				for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
+					highlight.DefineVertex(new Vector3(rectangle.Left, map.GetTerrainHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
+					highlight.DefineColor(color);
+				}
+
+				HighlightCommit();
+			}
+
+			public void HighlightRectangle(IntRect rectangle, Color color)
+			{
+				HighlightRectangle(rectangle, (tile) => color);
+			}
+
+			public void HighlightRectangle(IntRect rectangle, Func<ITile, Color> getColor)
+			{
+				HighlightInit();
+
+				HighlightFullRectangle(rectangle, getColor);
+
+				HighlightCommit();
+			}
+
+			public void HighlightTileList(IEnumerable<ITile> tiles, Color color)
+			{
+
+				HighlightTileList(tiles, (tile) => color);
+			}
+
+			public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)
+			{
+				HighlightInit();
+
+
+				highlight.BeginGeometry(0, PrimitiveType.TriangleList);
+
+				foreach (var tile in tiles) {
+					if (map.IsTileSplitFromTopLeftToBottomRight(tile)) {
+						DefineTopLeftBotRightSplitTile(highlight, tile, getColor(tile));
+					}
+					else {
+						DefineTopRightBotLeftSplitTile(highlight, tile, getColor(tile));
+					}
+				}
+
+				HighlightCommit();
+
 			}
 
 			public void DisableHighlight() {
@@ -525,7 +566,7 @@ namespace MHUrho.WorldMap
 				material.Dispose();
 			}
 
-			private void CreateMaterial() {
+			void CreateMaterial() {
 				//Count for output image size
 				int tileTypeCount = PackageManager.Instance.ActiveGame.TileTypeCount;
 
@@ -572,7 +613,7 @@ namespace MHUrho.WorldMap
 				material = Material.FromImage(mapImage);
 			}
 
-			private void CreateModel(ITile[] tiles) {
+			void CreateModel(ITile[] tiles) {
 
 				//4 verticies for every tile, so that we can map every tile to different texture
 				// and the same tile types to the same textures
@@ -641,7 +682,7 @@ namespace MHUrho.WorldMap
 				this.mapIndexBuffer = ib;
 			}
 
-			private unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, 
+			unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, 
 												   IntVector2 cornerPosition, 
 												   float heightDelta, 
 												   List<CornerTiles> changedCorners) {
@@ -671,50 +712,40 @@ namespace MHUrho.WorldMap
 				changedCorners.Add(cornerTiles);
 			}
 
-			private void HighlightBorder(IntRect rectangle, Color color) {
-				highlight.BeginGeometry(0, PrimitiveType.LineStrip);
+			
 
-				//Top side
-				for (int x = rectangle.Left; x <= rectangle.Right; x++) {
-					highlight.DefineVertex(new Vector3(x, map.GetTerrainHeightAt(x, rectangle.Top) + HighlightHeightAboveTerain, rectangle.Top));
-					highlight.DefineColor(color);
-				}
-
-				//Right side
-				for (int y = rectangle.Top; y <= rectangle.Bottom; y++) {
-					highlight.DefineVertex(new Vector3(rectangle.Right + 1, map.GetTerrainHeightAt(rectangle.Right + 1, y) + HighlightHeightAboveTerain, y));
-					highlight.DefineColor(color);
-				}
-
-				//Bottom side
-				for (int x = rectangle.Right + 1; x >= rectangle.Left; x--) {
-					highlight.DefineVertex(new Vector3(x, map.GetTerrainHeightAt(x, rectangle.Bottom + 1) + HighlightHeightAboveTerain, rectangle.Bottom + 1));
-					highlight.DefineColor(color);
-				}
-
-				//Left side
-				for (int y = rectangle.Bottom + 1; y >= rectangle.Top; y--) {
-					highlight.DefineVertex(new Vector3(rectangle.Left, map.GetTerrainHeightAt(rectangle.Left, y) + HighlightHeightAboveTerain, y));
-					highlight.DefineColor(color);
-				}
-			}
-
-			private void HighlightFullRectangle(IntRect rectangle, Color color) {
+			void HighlightFullRectangle(IntRect rectangle, Func<ITile, Color> getColor) {
 				//I need triangle list because the tiles can be split in two different ways
 				// topLeft to bottomRight or topRight to bottomLeft
 				highlight.BeginGeometry(0, PrimitiveType.TriangleList);
 
 				map.ForEachInRectangle(rectangle, (tile) => {
 													  if (map.IsTileSplitFromTopLeftToBottomRight(tile)) {
-														  DefineTopLeftBotRightSplitTile(highlight, tile, color);
+														  DefineTopLeftBotRightSplitTile(highlight, tile, getColor(tile));
 													  }
 													  else {
-														  DefineTopRightBotLeftSplitTile(highlight, tile, color);
+														  DefineTopRightBotLeftSplitTile(highlight, tile, getColor(tile));
 													  }
 												  });
 			}
 
-			private void DefineTopLeftBotRightSplitTile(CustomGeometry geometry, ITile tile, Color color) {
+			void HighlightInit()
+			{
+				if (highlight == null) {
+					highlight = mapNode.CreateComponent<CustomGeometry>();
+					var highlightMaterial = new Material();
+					highlightMaterial.SetTechnique(0, CoreAssets.Techniques.NoTextureUnlitVCol, 1, 1);
+					highlight.SetMaterial(highlightMaterial);
+				}
+				highlight.Enabled = true;
+			}
+
+			void HighlightCommit()
+			{
+				highlight.Commit();
+			}
+
+			void DefineTopLeftBotRightSplitTile(CustomGeometry geometry, ITile tile, Color color) {
 				geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
 				geometry.DefineColor(color);
 				geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
@@ -730,7 +761,7 @@ namespace MHUrho.WorldMap
 				geometry.DefineColor(color);
 			}
 
-			private void DefineTopRightBotLeftSplitTile(CustomGeometry geometry, ITile tile, Color color) {
+			void DefineTopRightBotLeftSplitTile(CustomGeometry geometry, ITile tile, Color color) {
 				geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
 				geometry.DefineColor(color);
 				geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
@@ -745,6 +776,8 @@ namespace MHUrho.WorldMap
 				geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
 				geometry.DefineColor(color);
 			}
+
+			
 		}
 
 	}

@@ -86,7 +86,7 @@ namespace MHUrho.Logic
 
 		public float BottomRightHeight => Map.GetTerrainHeightAt(MapArea.Left + 1, MapArea.Top + 1);
 
-		public Map Map { get; private set; }
+		public IMap Map { get; private set; }
 
 		/// <summary>
 		/// Stores tile image between the steps of loading

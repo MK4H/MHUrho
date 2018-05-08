@@ -70,7 +70,7 @@ namespace MHUrho.EditorTools
 			Disable();
 		}
 
-		private void MouseDown(MouseButtonDownEventArgs e) {
+		void MouseDown(MouseButtonDownEventArgs e) {
 			var tile = input.GetTileUnderCursor();
 			//TODO: Raycast into a plane and get point even outside the map
 			if (tile != null) {
@@ -81,7 +81,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void MouseUp(MouseButtonUpEventArgs e) {
+		void MouseUp(MouseButtonUpEventArgs e) {
 			var tile = input.GetTileUnderCursor();
 
 			if (!validMouseDown) {
@@ -118,8 +118,8 @@ namespace MHUrho.EditorTools
 			validMouseDown = false;
 		}
 
-		private void MouseMove(MouseMovedEventArgs e) {
-			//TODO: DRAW HIGHLIGHT SOMEHOW
+		void MouseMove(MouseMovedEventArgs e) {
+
 			if (!validMouseDown) return;
 
 			var tile = input.GetTileUnderCursor();
@@ -137,7 +137,7 @@ namespace MHUrho.EditorTools
 				var bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
 												 Math.Max(mouseDownPos.Y, endTilePos.Y));
 
-				Map.HighlightArea(topLeft, bottomRight,WorldMap.HighlightMode.Full, Color.Green);
+				Map.HighlightRectangle(topLeft, bottomRight, Color.Green);
 				lastMousePos = tile.MapLocation;
 				rectangle = true;
 			}

@@ -10,12 +10,14 @@ namespace MHUrho.WorldMap
 
 		Path FindPath(Vector2 source,
 					ITile target,
-					CanGoToNeighbour canPassTo,
-					GetMovementSpeed getMovementSpeed);
+					CanGoToNeighbour canPassFromTo,
+					GetMovementSpeed getMovementSpeed,
+					float maxMovementSpeed);
 
 		List<ITile> GetTileList(Vector2 source,
-									ITile target,
-									CanGoToNeighbour canPassTo,
-									GetMovementSpeed getMovementSpeed);
+								ITile target,
+								CanGoToNeighbour canPassTo,
+								GetMovementSpeed getMovementSpeed,
+								float maxMovementSpeed);
 	}
 }

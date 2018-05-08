@@ -17,30 +17,8 @@ namespace MHUrho.WorldMap
 {
 	public partial class Map : IMap, IDisposable {
 
-		/// <summary>
-		/// Gets new height of the [x,y] tile corner from previous height and position of the corner
-		/// Can and WILL BE CALLED MULTIPLE TIMES FOR THE SAME X,Y COORDINATES
-		/// </summary>
-		/// <param name="previousHeight">Previous height of the [x,y] corner</param>
-		/// <param name="x">X coord of the tile corner</param>
-		/// <param name="y">Y coord of the tile corner</param>
-		/// <returns>New height of the [x,y] corner</returns>
-		public delegate float ChangeCornerHeightDelegate(float previousHeight, int x, int y);
 
-		/// <summary>
-		/// Gets new height of the top left corner of the tile [x,y] from previous height and position of this corner
-		/// Can and WILL BE CALLED MULTIPLE TIMES FOR THE SAME X,Y COORDINATES
-		/// 
-		/// Used in a rectangle, for 3x3 rectangle of tiles called 4x4 times, to change even the bottom and right sides
-		/// of the bottom and right tiles
-		/// 
-		/// So for 3x3 rectangle with top left [0,0] it is called even at [3,0],[0,3] and [3,3]
-		/// </summary>
-		/// <param name="previousHeight">Previous height of the tile corner</param>
-		/// <param name="x">X coord of the tile corner</param>
-		/// <param name="y">Y coord of the tile corner</param>
-		/// <returns>New height of the tile top left corner</returns>
-		public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
+
 
 		internal class Loader : ILoader {
 			
@@ -171,7 +149,7 @@ namespace MHUrho.WorldMap
 
 			public Vector3 BottomRight3 => new Vector3(MapArea.Right, Map.GetTerrainHeightAt(MapArea.Right, MapArea.Bottom), MapArea.Bottom);
 
-			public Map Map { get; private set; }
+			public IMap Map { get; private set; }
 
 			public float Height {
 				get => TopLeftHeight;
@@ -331,8 +309,6 @@ namespace MHUrho.WorldMap
 		/// Y coordinate of the bottom row of the map
 		/// </summary>
 		public int Bottom => BottomRight.Y;
-
-		public IntRect? HighlightedArea { get; private set; }
 
 		public ILevelManager LevelManager => levelManager;
 
@@ -1247,25 +1223,65 @@ namespace MHUrho.WorldMap
 					return Vector3.Cross(topRight - botRight, botLeft - botRight);
 				}
 			}
-		} 
-
-		public void HighlightArea(ITile center, IntVector2 size, HighlightMode mode, Color color) 
-		{
-			IntVector2 topLeft = center.TopLeft - (size / 2);
-			IntVector2 bottomRight = center.TopLeft + (size / 2);
-			HighlightArea(topLeft, bottomRight, mode, color);
 		}
 
-		public void HighlightArea(IntVector2 topLeft, IntVector2 bottomRight, HighlightMode mode, Color color) 
+		public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)
+		{
+			graphics.HighlightTileList(tiles, getColor);
+		}
+
+		public void HighlightTileList(IEnumerable<ITile> tiles, Color color)
+		{
+			HighlightTileList(tiles, (tile) => color);
+		}
+
+		public void HighlightRectangle(IntVector2 topLeft, IntVector2 bottomRight, Func<ITile, Color> getColor)
 		{
 			SquishToMap(ref topLeft, ref bottomRight);
-			graphics.HighlightArea(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), mode, color);
+			graphics.HighlightRectangle(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), getColor);
 		}
 
-		public void HighlightArea(IntRect rectangle, HighlightMode mode, Color color)
-		{
-			HighlightArea(rectangle.TopLeft(), rectangle.BottomRight(), mode, color);
+		public void HighlightRectangle(ITile center, IntVector2 size, Func<ITile, Color> getColor) {
+			IntVector2 topLeft = center.TopLeft - (size / 2);
+			IntVector2 bottomRight = center.TopLeft + (size / 2);
+			HighlightRectangle(topLeft, bottomRight, getColor);
 		}
+
+		public void HighlightRectangle(IntRect rectangle, Func<ITile, Color> getColor) {
+			HighlightRectangle(rectangle.TopLeft(), rectangle.BottomRight(), getColor);
+		}
+
+		public void HighlightRectangle(IntVector2 topLeft, IntVector2 bottomRight, Color color)
+		{
+			HighlightRectangle(topLeft, bottomRight, (tile) => color);
+		}
+
+		public void HighlightRectangle(ITile center, IntVector2 size, Color color)
+		{
+			HighlightRectangle(center, size, (tile) => color);
+		}
+		
+		public void HighlightRectangle(IntRect rectangle, Color color)
+		{
+			HighlightRectangle(rectangle, (tile) => color);
+		}
+
+		public void HighlightRectangleBorder(IntVector2 topLeft, IntVector2 bottomRight, Color color) {
+			SquishToMap(ref topLeft, ref bottomRight);
+			graphics.HighlightBorder(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), color);
+		}
+
+		public void HighlightRectangleBorder(ITile center, IntVector2 size, Color color) {
+			IntVector2 topLeft = center.TopLeft - (size / 2);
+			IntVector2 bottomRight = center.TopLeft + (size / 2);
+			HighlightRectangleBorder(topLeft, bottomRight, color);
+		}
+
+		public void HighlightRectangleBorder(IntRect rectangle, Color color)
+		{
+			HighlightRectangleBorder(rectangle.TopLeft(), rectangle.BottomRight(), color);
+		}
+
 
 		public void DisableHighlight() 
 		{
