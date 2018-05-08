@@ -56,6 +56,7 @@ namespace MHUrho.WorldMap
 					tile.FinishLoading();
 				}
 
+				Map.PathFinding = new AStar(Map);
 				Map.BuildGeometry();
 			}
 
@@ -149,7 +150,9 @@ namespace MHUrho.WorldMap
 
 			public Vector3 BottomRight3 => new Vector3(MapArea.Right, Map.GetTerrainHeightAt(MapArea.Right, MapArea.Bottom), MapArea.Bottom);
 
-			public IMap Map { get; private set; }
+			IMap ITile.Map => Map;
+
+			Map Map;
 
 			public float Height {
 				get => TopLeftHeight;
@@ -211,18 +214,12 @@ namespace MHUrho.WorldMap
 				Type = newType;
 			}
 
-			public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true) {
+			public void ChangeTopLeftHeight(float heightDelta) {
 				Height += heightDelta;
-				if (signalNeighbours) {
-					Map.ForEachAroundCorner(MapLocation, (tile) => { tile.CornerHeightChange(); });
-				}
 			}
 
-			public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true) {
+			public void SetTopLeftHeight(float newHeight) {
 				Height = newHeight;
-				if (signalNeighbours) {
-					Map.ForEachAroundCorner(MapLocation, (tile) => { tile.CornerHeightChange(); });
-				}
 			}
 
 			public void CornerHeightChange() {
@@ -312,6 +309,8 @@ namespace MHUrho.WorldMap
 
 		public ILevelManager LevelManager => levelManager;
 
+		public event Action<ITile> TileHeightChanged;
+
 		readonly ITile[] tiles;
 
 		readonly Node node;
@@ -369,6 +368,7 @@ namespace MHUrho.WorldMap
 				}
 			}
 
+			newMap.PathFinding = new AStar(newMap);
 			newMap.BuildGeometry();
 			return newMap;
 		}
@@ -416,7 +416,6 @@ namespace MHUrho.WorldMap
 			this.mapRangeTargets = new Dictionary<Vector3, MapRangeTarget>();
 
 			this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
-			this.PathFinding = new AStar(this);
 		}
 
 		public bool IsInside(int x, int y) 
@@ -946,18 +945,21 @@ namespace MHUrho.WorldMap
 								 (y == bottomRight.Y && x != topLeft.X)) {
 							//Only the right side tiles need to change on the border if they are normal inner tiles
 							// excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
-							GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta, false);
+							GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta);
 						} 
 					}
 					else {
 						//inner tile
 						Debug.Assert(!IsBorder(x, y));
-						GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta, false);
+						GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta);
 					}
 				}
 			}
 
-			ForEachInRectangle(topLeft, bottomRight, (tile) => { tile.CornerHeightChange(); });
+			ForEachInRectangle(topLeft, bottomRight, (tile) => {
+														tile.CornerHeightChange();
+														TileHeightChanged?.Invoke(tile);
+													});
 
 			graphics.CorrectTileHeight(topLeft, bottomRight);
 
@@ -1070,19 +1072,23 @@ namespace MHUrho.WorldMap
 							//Only the right side tiles need to change on the border if they are normal inner tiles
 							// excluding topRight corner tile, that one doesnt need to change too if its normal inner tile
 							ITile tile = GetTileByTopLeftCorner(x, y);
-							tile.SetTopLeftHeight(newHeightFunction(tile.TopLeftHeight, x, y), false);
+							tile.SetTopLeftHeight(newHeightFunction(tile.TopLeftHeight, x, y));
 						}
 					}
 					else {
 						//inner tile
 						Debug.Assert(!IsBorder(x, y));
 						ITile tile = GetTileByTopLeftCorner(x, y);
-						tile.SetTopLeftHeight(newHeightFunction(tile.TopLeftHeight, x, y), false);
+						tile.SetTopLeftHeight(newHeightFunction(tile.TopLeftHeight, x, y));
 					}
 				}
 			}
 
-			ForEachInRectangle(topLeft, bottomRight, (tile) => { tile.CornerHeightChange(); });
+			ForEachInRectangle(topLeft, bottomRight,
+								(tile) => {
+									tile.CornerHeightChange();
+									TileHeightChanged?.Invoke(tile);
+								});
 
 			graphics.CorrectTileHeight(topLeft, bottomRight);
 		}
@@ -1321,6 +1327,13 @@ namespace MHUrho.WorldMap
 					// the default changeHeight method
 					tile?.ChangeTopLeftHeight(heightDelta);
 				}
+
+				ForEachAroundCorner(tileCorner, 
+									(changedTile) => {
+										changedTile.CornerHeightChange();
+										TileHeightChanged?.Invoke(changedTile);
+									},
+									 true);
 			}
 
 			graphics.ChangeCornerHeights(tileCorners, heightDelta);
@@ -1376,24 +1389,9 @@ namespace MHUrho.WorldMap
 			ForEachInRectangle(rectangle.TopLeft(), rectangle.BottomRight(), action);
 		}
 
-		public void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action) 
+		public void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action)
 		{
-			ITile tile;
-			if ((tile = GetTileWithBorders(cornerCoords)) != null) {
-				action(tile);
-			}
-
-			if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(-1, 0))) != null) {
-				action(tile);
-			}
-
-			if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(0, -1))) != null) {
-				action(tile);
-			}
-
-			if ((tile = GetTileWithBorders(cornerCoords + new IntVector2(-1, -1))) != null) {
-				action(tile);
-			}
+			ForEachAroundCorner(cornerCoords, action, false);
 		}
 
 		public IRangeTarget GetRangeTarget(Vector3 position) 
@@ -1602,6 +1600,26 @@ namespace MHUrho.WorldMap
 		bool IsBorderCorner(IntVector2 corner) 
 		{
 			return IsBorderCorner(corner.X, corner.Y);
+		}
+
+		void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action, bool withBorders) {
+			ITile tile;
+
+			if ((tile = TileByTopLeftCorner(cornerCoords, withBorders)) != null) {
+				action(tile);
+			}
+
+			if ((tile = TileByTopRightCorner(cornerCoords, withBorders)) != null) {
+				action(tile);
+			}
+
+			if ((tile = TileByBottomRightCorner(cornerCoords, withBorders)) != null) {
+				action(tile);
+			}
+
+			if ((tile = TileByBottomLeftCorner(cornerCoords, withBorders)) != null) {
+				action(tile);
+			}
 		}
 
 		bool IsTileSplitFromTopLeftToBottomRight(float topLeftHeight,

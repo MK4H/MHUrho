@@ -200,16 +200,9 @@ namespace MHUrho.Logic
 		/// If you want to change height, go through <see cref="Map.ChangeTileHeight(ITile, float)"/>
 		/// </summary>
 		/// <param name="heightDelta"></param>
-		/// <param name="signalNeighbours">If <see cref="ChangeTopLeftHeight"/> should signal neighbours automatically
-		/// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-		public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true) {
+		public void ChangeTopLeftHeight(float heightDelta) {
 			TopLeftHeight += heightDelta;
-			// For rectangle changing height goes through every tile 4 times, which is slow
-			// So if i want to speed it up, i can just call CornerHeightChange for the whole
-			// rectangle just once per tile
-			if (signalNeighbours) {
-				Map.ForEachAroundCorner(TopLeft, (tile) => { tile.CornerHeightChange(); });
-			}
+
 			
 		}
 
@@ -217,16 +210,9 @@ namespace MHUrho.Logic
 		/// Sets the height of the top left corner of the tile to <paramref name="newHeight"/>
 		/// </summary>
 		/// <param name="newHeight">the height to set</param>
-		/// <param name="signalNeighbours">If <see cref="SetTopLeftHeight"/> should signal neighbours automatically
-		/// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-		public void SetTopLeftHeight(float newHeight, bool signalNeighbours = true) {
+
+		public void SetTopLeftHeight(float newHeight) {
 			TopLeftHeight = newHeight;
-			// For rectangle changing height goes through every tile 4 times, which is slow
-			// So if i want to speed it up, i can just call CornerHeightChange for the whole
-			// rectangle just once per tile
-			if (signalNeighbours) {
-				Map.ForEachAroundCorner(TopLeft, (tile) => { tile.CornerHeightChange(); });
-			}
 		}
 
 		/// <summary>

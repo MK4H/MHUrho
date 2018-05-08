@@ -121,17 +121,14 @@ namespace MHUrho.Logic
 		/// If you want to change height, go through <see cref="Map.ChangeTileHeight(ITile, float)"/>
 		/// </summary>
 		/// <param name="heightDelta"></param>
-		/// <param name="signalNeighbours">If <see cref="ChangeTopLeftHeight"/> should signal neighbours automatically
-		/// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-		void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true);
+
+		void ChangeTopLeftHeight(float heightDelta);
 
 		/// <summary>
 		/// Sets the height of the top left corner of the tile to <paramref name="newHeight"/>
 		/// </summary>
 		/// <param name="newHeight">the height to set</param>
-		/// <param name="signalNeighbours">If <see cref="SetTopLeftHeight"/> should signal neighbours automatically
-		/// if false, you need to signal every tile that has a corner height change yourself by calling <see cref="CornerHeightChange"/></param>
-		void SetTopLeftHeight(float newHeight, bool signalNeighbours = true);
+		void SetTopLeftHeight(float newHeight);
 
 		/// <summary>
 		/// Is called every time any of the 4 corners of the tile change height

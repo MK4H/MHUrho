@@ -76,6 +76,8 @@ namespace MHUrho.WorldMap {
 
 		ILevelManager LevelManager { get; }
 
+		event Action<ITile> TileHeightChanged;
+
 		bool IsInside(int x, int y);
 
 		bool IsInside(float x, float y);
