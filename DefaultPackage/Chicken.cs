@@ -121,7 +121,7 @@ namespace DefaultPackage
 
 			Vector3 diff = to - from;
 			
-			float angle = (float)Math.Max(Math.Asin(diff.Length * Math.Abs(diff.Y)), 0);
+			float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
 			angle = Math.Max(1 - angle * 2, 0.25f);
 			return Math.Max(MaxMovementSpeed * angle, 1);
 		}

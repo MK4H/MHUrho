@@ -57,21 +57,24 @@ namespace MHUrho.WorldMap {
 			public Edge(Node source, Node target, IMap map) {
 				this.Source = source;
 				this.Target = target;
-				if (Target != null) {
-					EdgeCenter = map.GetBorderBetweenTiles(source.Tile, target.Tile);
-					SourceToCenterDist = (EdgeCenter - source.Center).Length;
-					CenterToTargetDist = (target.Center - EdgeCenter).Length;
-				}
-				else {
-					EdgeCenter = new Vector3();
-					SourceToCenterDist = 0;
-					CenterToTargetDist = 0;
-				}
+				EdgeCenter = new Vector3();
+				SourceToCenterDist = 0;
+				CenterToTargetDist = 0;
+				FixHeight(map);
 			}
 
 			public float GetValue(GetMovementSpeed speedGetter) {
 				return SourceToCenterDist / speedGetter(Source.Tile, Source.Center, EdgeCenter) +
 						CenterToTargetDist / speedGetter(Target.Tile, EdgeCenter, Source.Center);
+			}
+
+			public void FixHeight(IMap map)
+			{
+				if (Target != null) {
+					EdgeCenter = map.GetBorderBetweenTiles(Source.Tile, Target.Tile);
+					SourceToCenterDist = (EdgeCenter - Source.Center).Length;
+					CenterToTargetDist = (Target.Center - EdgeCenter).Length;
+				}
 			}
 
 			public void Process(AStar aStar)
@@ -142,6 +145,33 @@ namespace MHUrho.WorldMap {
 				downLeft.Process(aStar);
 				down.Process(aStar);
 				downRight.Process(aStar);
+			}
+
+			public void FixHeight(IMap map)
+			{
+				right.FixHeight(map);
+				right.Target?.Neighbours.left.FixHeight(map);
+
+				upRight.FixHeight(map);
+				upRight.Target?.Neighbours.downLeft.FixHeight(map);
+
+				up.FixHeight(map);
+				up.Target?.Neighbours.down.FixHeight(map);
+
+				upLeft.FixHeight(map);
+				upLeft.Target?.Neighbours.downRight.FixHeight(map);
+
+				left.FixHeight(map);
+				left.Target?.Neighbours.right.FixHeight(map);
+
+				downLeft.FixHeight(map);
+				downLeft.Target?.Neighbours.upRight.FixHeight(map);
+
+				down.FixHeight(map);
+				down.Target?.Neighbours.up.FixHeight(map);
+
+				downRight.FixHeight(map);
+				downRight.Target?.Neighbours.upLeft.FixHeight(map);
 			}
 
 			public Neighbours(IMap map,
@@ -224,6 +254,12 @@ namespace MHUrho.WorldMap {
 											 neighbours[5],
 											 neighbours[6],
 											 neighbours[7]);
+			}
+
+			public void FixHeights()
+			{
+				Center = Tile.Center3;
+				Neighbours.FixHeight(Tile.Map);
 			}
 
 			public void Reset()
@@ -316,8 +352,7 @@ namespace MHUrho.WorldMap {
 
 		void TileHeightChanged(ITile tile)
 		{
-			Node tileNode = GetTileNode(tile);
-
+			GetTileNode(tile).FixHeights();
 		}
 
 		Node FindPathInNodes(ITile source,

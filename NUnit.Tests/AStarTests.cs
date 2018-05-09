@@ -83,6 +83,16 @@ namespace NUnit.Tests {
 					throw new NotImplementedException();
 				}
 
+				public void ChangeTopLeftHeight(float heightDelta)
+				{
+					throw new NotImplementedException();
+				}
+
+				public void SetTopLeftHeight(float newHeight)
+				{
+					throw new NotImplementedException();
+				}
+
 				public void ChangeTopLeftHeight(float heightDelta, bool signalNeighbours = true)
 				{
 					throw new NotImplementedException();
@@ -201,6 +211,16 @@ namespace NUnit.Tests {
 				}
 
 				public void ChangeType(TileType newType)
+				{
+					throw new NotImplementedException();
+				}
+
+				public void ChangeTopLeftHeight(float heightDelta)
+				{
+					throw new NotImplementedException();
+				}
+
+				public void SetTopLeftHeight(float newHeight)
 				{
 					throw new NotImplementedException();
 				}
@@ -574,6 +594,7 @@ namespace NUnit.Tests {
 			public int Bottom => BottomRight.Y;
 
 			public ILevelManager LevelManager => throw new NotImplementedException();
+			public event Action<ITile> TileHeightChanged;
 
 			public bool IsInside(int x, int y) {
 				throw new NotImplementedException();

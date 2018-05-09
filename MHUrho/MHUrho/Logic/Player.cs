@@ -121,7 +121,7 @@ namespace MHUrho.Logic
 											 select friend.ID);
 
 			storedPlayer.UserPlugin = new PluginData();
-			Plugin.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin));
+			Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin));
 			
 			return storedPlayer;
 		}

@@ -88,8 +88,6 @@ namespace DefaultPackage
 
 		public override void OnUpdate(float timeStep)
 		{
-			return;
-
 			logicTimeout -= timeStep;
 			if (logicTimeout > 0) return;
 			logicTimeout = 2;
@@ -140,14 +138,19 @@ namespace DefaultPackage
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
-			throw new NotImplementedException();
+			var indexedData = pluginData.GetWriterForWrappedIndexedData();
+			indexedData.Store(1, state);
 		}
 
 		public override void LoadState(ILevelManager level, IPlayer player, PluginDataWrapper pluginData)
 		{
+			var indexedData = pluginData.GetReaderForWrappedIndexedData();
+
 			this.Level = level;
 			this.Player = player;
-			throw new NotImplementedException();
+
+			state = indexedData.Get<int>(1);
+
 		}
 
 		public override void OnUnitKilled(IUnit unit) {
