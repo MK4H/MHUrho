@@ -42,7 +42,7 @@ namespace MHUrho.EditorTools
 			select button.Key;
 
 		readonly GameMandKController input;
-		Map Map => input.LevelManager.Map;
+		Map Map => input.Level.Map;
 		readonly FormationController formation;
 
 		readonly DynamicRectangleToolMandK dynamicHighlight;

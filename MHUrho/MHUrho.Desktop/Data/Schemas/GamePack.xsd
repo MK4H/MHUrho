@@ -97,6 +97,7 @@
     <xs:sequence>
       <xs:element name="texturePath" type="xs:string"/>
       <xs:element name="movementSpeed" type="xs:float"/>
+			<xs:element name="minimapColor" type="Color"/>
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
     <xs:attribute name="ID" use="required" type="xs:int"/>
@@ -214,5 +215,12 @@
 		<xs:attribute name="x" use="required" type="xs:float"/>
 		<xs:attribute name="y" use="required" type="xs:float"/>
 		<xs:attribute name="z" use="required" type="xs:float"/>
+	</xs:complexType>
+
+	<xs:complexType name="Color">
+		<xs:attribute name="R" use="required" type="xs:unsignedByte"/>
+		<xs:attribute name="G" use="required" type="xs:unsignedByte"/>
+		<xs:attribute name="B" use="required" type="xs:unsignedByte"/>
+		<xs:attribute name="A" use="optional" type="xs:unsignedByte"/>
 	</xs:complexType>
 </xs:schema>

@@ -20,6 +20,8 @@ namespace MHUrho.Input
 
 		public TouchUI UIManager { get; private set; }
 
+		public ILevelManager Level { get; private set; }
+
 		public IPlayer Player { get; set; }
 
 		public float Sensitivity { get; set; }
@@ -29,22 +31,22 @@ namespace MHUrho.Input
 
 		public bool UIPressed { get; set; }
 
-		private readonly CameraController cameraController;
-		private readonly Octree octree;
-		private readonly ILevelManager levelManager;
+		readonly CameraController cameraController;
+		readonly Octree octree;
+		
 
-		private CameraMovementType movementType;
+		CameraMovementType movementType;
 
-		private readonly Dictionary<int, Vector2> activeTouches = new Dictionary<int, Vector2>();
+		readonly Dictionary<int, Vector2> activeTouches = new Dictionary<int, Vector2>();
 
 
 		
 
-		public GameTouchController(MyGame game, ILevelManager levelManager, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
+		public GameTouchController(MyGame game, ILevelManager level, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
 			this.cameraController = cameraController;
 			this.Sensitivity = sensitivity;
-			this.levelManager = levelManager;
-			this.octree = levelManager.Scene.GetComponent<Octree>();
+			this.Level = level;
+			this.octree = level.Scene.GetComponent<Octree>();
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;
 

@@ -32,9 +32,7 @@ namespace MHUrho.Logic
 
 		public IntVector2 Size { get; private set; }
 
-		public object Plugin => buildingTypeLogic;
-
-		private BuildingTypePlugin buildingTypeLogic;
+		public BuildingTypePlugin Plugin { get; private set; }
 
 
 		/// <summary>
@@ -55,10 +53,10 @@ namespace MHUrho.Logic
 			Icon = XmlHelpers.GetIcon(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
-			buildingTypeLogic = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,
+			Plugin = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,
 																				 package.XmlDirectoryPath,
 																				 Name);
-			buildingTypeLogic.Initialize(XmlHelpers.GetExtensionElement(xml),
+			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 										 package.PackageManager);
 		}
 
@@ -72,7 +70,7 @@ namespace MHUrho.Logic
 		}
 
 		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
-			return buildingTypeLogic.CanBuildIn(topLeft, bottomRight, level);
+			return Plugin.CanBuildIn(topLeft, bottomRight, level);
 		}
 
 		public bool CanBuildIn(IntRect buildingTilesRectangle, ILevelManager level) {
@@ -80,11 +78,11 @@ namespace MHUrho.Logic
 		}
  
 		public BuildingInstancePlugin GetNewInstancePlugin(Building building, ILevelManager level) {
-			return buildingTypeLogic.CreateNewInstance(level, building);
+			return Plugin.CreateNewInstance(level, building);
 		}
 
 		public BuildingInstancePlugin GetInstancePluginForLoading() {
-			return buildingTypeLogic.GetInstanceForLoading();
+			return Plugin.GetInstanceForLoading();
 		}
 
 		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft) {

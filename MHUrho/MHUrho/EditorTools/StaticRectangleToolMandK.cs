@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 		public IntVector2 Size { get; set; }
 
 		private GameMandKController input;
-		private Map Map => input.LevelManager.Map;
+		private Map Map => input.Level.Map;
 
 		private bool enabled;
 

@@ -57,6 +57,8 @@ namespace MHUrho.Logic
 
 		public new int ID { get; }
 
+		public Color Color { get; private set; } = Color.Red;
+
 		public PlayerAIInstancePlugin Plugin { get; private set; }
 
 		readonly HashSet<IPlayer> friends;

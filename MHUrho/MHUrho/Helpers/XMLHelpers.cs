@@ -186,5 +186,14 @@ namespace MHUrho.Helpers
 			return element.Value.Trim();
 		}
 
+		public static Color GetColor(XElement element)
+		{
+			int R = element.GetIntFromAttribute("R");
+			int G = element.GetIntFromAttribute("G");
+			int B = element.GetIntFromAttribute("B");
+			int A = element.Attribute("A") != null ? element.GetIntFromAttribute("A") : 255;
+			//xml schema makes sure it will be of type byte
+			return Color.FromByteFormat((byte)R, (byte)G, (byte)B, (byte)A);
+		}
 	}
 }

@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 		private Dictionary<Button, TileType> tileTypeButtons;
 
 		private GameMandKController input;
-		private Map Map => input.LevelManager.Map;
+		private Map Map => input.Level.Map;
 		private StaticRectangleToolMandK highlight;
 
 		private Button selected;

@@ -19,7 +19,7 @@ namespace MHUrho.EditorTools
 
 		private GameMandKController input;
 
-		private ILevelManager Level => input.LevelManager;
+		private ILevelManager Level => input.Level;
 		private Map Map => Level.Map;
 
 		private Button selected;

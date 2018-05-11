@@ -12,6 +12,8 @@ namespace MHUrho.Logic {
 
 		Map Map { get; }
 
+		Minimap Minimap { get; }
+
 		Scene Scene { get; }
 
 		DefaultComponentFactory DefaultComponentFactory { get; }

@@ -11,6 +11,8 @@ using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using Urho.Actions;
 using MHUrho.WorldMap;
+using MHUrho.Helpers;
+
 
 namespace MHUrho.Logic
 {
@@ -28,6 +30,8 @@ namespace MHUrho.Logic
 
 		public Map Map { get; private set; }
 
+		public Minimap Minimap { get; private set; }
+
 		public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
 		public PackageManager PackageManager => PackageManager.Instance;
@@ -42,6 +46,9 @@ namespace MHUrho.Logic
 
 		CameraController cameraController;
 		IGameController inputController;
+
+		int minimapRefreshRate;
+		float minimapRefreshDelay;
 
 		readonly Dictionary<int, IUnit> units;
 		readonly Dictionary<int, IPlayer> players;
@@ -180,6 +187,10 @@ namespace MHUrho.Logic
 			Map map = Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize);
 			CurrentLevel.Map = map;
 
+			CurrentLevel.Minimap = new Minimap(map);
+			CurrentLevel.minimapRefreshRate = 4;
+			CurrentLevel.minimapRefreshDelay = 1.0f / CurrentLevel.minimapRefreshRate; 
+
 			//TODO: Temporary player
 			var player = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene);
 			CurrentLevel.players.Add(player.ID, player);
@@ -232,6 +243,7 @@ namespace MHUrho.Logic
 			inputController.Dispose();
 			inputController = null;
 			Map.Dispose();
+			Minimap.Dispose();
 			Scene.Dispose();
 			
 			CurrentLevel = null;
@@ -425,6 +437,14 @@ namespace MHUrho.Logic
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
+
+			minimapRefreshDelay -= timeStep;
+
+			if (minimapRefreshDelay < 0) {
+				minimapRefreshDelay = 1.0f / minimapRefreshRate;
+				Minimap.MoveTo(cameraController.CameraXZPosition.RoundToIntVector2());
+				Minimap.Refresh();
+			}
 
 			Update?.Invoke(timeStep);
 		}

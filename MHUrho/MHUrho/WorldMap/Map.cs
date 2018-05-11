@@ -796,6 +796,24 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <inheritdoc />
+		public IEnumerable<ITile> GetTilesInRectangle(IntVector2 topLeft, IntVector2 bottomRight)
+		{
+			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+				for (int x = topLeft.X; x <= bottomRight.X; x++) {
+					ITile tile = GetTileByMapLocation(x, y);
+					if (tile == null) continue;
+					yield return tile;
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		public IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle)
+		{
+			return GetTilesInRectangle(rectangle.TopLeft(), rectangle.BottomRight());
+		}
+
 		public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) 
 		{
 			return graphics.RaycastToTile(rayQueryResults);

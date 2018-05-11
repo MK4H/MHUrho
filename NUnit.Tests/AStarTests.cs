@@ -403,6 +403,16 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public IEnumerable<ITile> GetTilesInRectangle(IntVector2 topLeft, IntVector2 bottomRight)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle)
+			{
+				throw new NotImplementedException();
+			}
+
 			public ITile RaycastToTile(List<RayQueryResult> rayQueryResults)
 			{
 				throw new NotImplementedException();

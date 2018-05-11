@@ -30,7 +30,7 @@ namespace MHUrho.UserInterface
 		readonly UIElement toolSelection;
 		readonly UIElement selectionBar;
 		readonly UIElement playerSelection;
-
+		readonly BorderImage minimap;
 
 		UIElement selectionBarSelected;
 		UIElement selectedToolButton;
@@ -40,7 +40,7 @@ namespace MHUrho.UserInterface
 		int hovering = 0;
 
 		public MandKGameUI(MyGame game, GameMandKController inputCtl) 
-			:base(game)
+			:base(game, inputCtl.Level)
 		{
 			this.inputCtl = inputCtl;
 			this.tools = new Dictionary<UIElement, Tool>();
@@ -87,6 +87,15 @@ namespace MHUrho.UserInterface
 			playerSelection.HoverBegin += UIHoverBegin;
 			playerSelection.HoverEnd += UIHoverEnd;
 
+
+			minimap = UI.Root.CreateBorderImage();
+
+
+			minimap.Texture = Level.Minimap.Texture;
+			minimap.MinSize = new IntVector2(minimap.Texture.Width, minimap.Texture.Height);		
+			minimap.Size = minimap.MinSize;
+			minimap.HorizontalAlignment = HorizontalAlignment.Center;
+			minimap.VerticalAlignment = VerticalAlignment.Center;
 		}
 
 		public void Dispose() {
@@ -108,24 +117,29 @@ namespace MHUrho.UserInterface
 			selectionBar.Enabled = true;
 			toolSelection.Enabled = true;
 			playerSelection.Enabled = true;
+			minimap.Enabled = true;
 		}
 
 		public override void DisableUI() {
 			selectionBar.Enabled = false;
 			toolSelection.Enabled = false;
 			playerSelection.Enabled = false;
+			minimap.Enabled = false;
 		}
 
 		public override void ShowUI() {
 			selectionBar.Visible = true;
 			toolSelection.Visible = true;
 			playerSelection.Visible = true;
+			minimap.Visible = true;
+			
 		}
 
 		public override void HideUI() {
 			selectionBar.Visible = false;
 			toolSelection.Visible = false;
 			playerSelection.Visible = false;
+			minimap.Visible = false;
 		}
 
 		

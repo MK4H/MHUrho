@@ -25,7 +25,7 @@ namespace MHUrho.EditorTools {
 		private List<Button> buttons;
 		private Mode mode;
 		private GameMandKController input;
-		private Map Map => input.LevelManager.Map;
+		private Map Map => input.Level.Map;
 
 		private List<IntVector2> verticies;
 		private Vector3 mainPoint;

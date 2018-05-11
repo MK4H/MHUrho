@@ -22,7 +22,7 @@ namespace MHUrho.EditorTools
 		public event HandleSingleClick SingleClickHandler;
 
 		private readonly GameMandKController input;
-		private Map Map => input.LevelManager.Map;
+		private Map Map => input.Level.Map;
 
 		private IntVector2 mouseDownPos;
 		private IntVector2 lastMousePos;

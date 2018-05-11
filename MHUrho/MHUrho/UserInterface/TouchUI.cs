@@ -26,7 +26,7 @@ namespace MHUrho.UserInterface
 
 
 		public TouchUI(MyGame game, GameTouchController gameTouchController)
-			:base(game)
+			:base(game, gameTouchController.Level)
 		{
 			this.touchInputCtl = gameTouchController;
 

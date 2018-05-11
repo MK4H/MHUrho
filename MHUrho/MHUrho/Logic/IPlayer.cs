@@ -7,6 +7,8 @@ namespace MHUrho.Logic {
 
 		int ID { get; }
 
+		Color Color { get; }
+
 		StPlayer Save();
 
 		IEnumerable<IUnit> GetAllUnits();

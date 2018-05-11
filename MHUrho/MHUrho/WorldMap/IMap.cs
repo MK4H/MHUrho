@@ -175,6 +175,24 @@ namespace MHUrho.WorldMap {
 
 		IEnumerable<ITile> GetTilesInSpiral(ITile center);
 
+		/// <summary>
+		/// Returns an enumerable that iterates over all the tiles in the given rectangle,
+		/// specified by the <paramref name="topLeft"/> and <paramref name="bottomRight"/> corners
+		/// Skips the parts of the rectangle outside of the map borders
+		/// </summary>
+		/// <param name="topLeft">top left corner of the rectangle</param>
+		/// <param name="bottomRight">bottom right corner of the rectangle</param>
+		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
+		IEnumerable<ITile> GetTilesInRectangle(IntVector2 topLeft, IntVector2 bottomRight);
+
+		/// <summary>
+		/// Returns an enumerable that iterates over all the tiles in the given rectangle
+		/// Skips the parts of the rectangle outside of the map borders
+		/// </summary>
+		/// <param name="rectangle">The rectangle which the enumerable should iterate over</param>
+		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
+		IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle);
+
 		//TODO: Maybe remove from this interface
 		ITile RaycastToTile(List<RayQueryResult> rayQueryResults);
 		//TODO: Maybe remove from this interface

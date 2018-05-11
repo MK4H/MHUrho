@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 
 		//private List<Button> buttons;
 		private GameMandKController input;
-		private Map Map => input.LevelManager.Map;
+		private Map Map => input.Level.Map;
 		private StaticRectangleToolMandK highlight;
 
 		private bool enabled;

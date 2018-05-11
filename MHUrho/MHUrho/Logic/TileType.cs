@@ -12,10 +12,11 @@ using MHUrho.Packaging;
 namespace MHUrho.Logic
 {
 	public class TileType : ILoadableType {
-		private static readonly string IDAttributeName = "ID";
-		private static readonly string NameAttributeName = "name";
-		private static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";
-		private static readonly XName MovementSpeedElementName = PackageManager.XMLNamespace + "movementSpeed";
+		static readonly string IDAttributeName = "ID";
+		static readonly string NameAttributeName = "name";
+		static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";
+		static readonly XName MovementSpeedElementName = PackageManager.XMLNamespace + "movementSpeed";
+		static readonly XName MinimapColorElement = PackageManager.XMLNamespace + "minimapColor";
 
 		public int ID { get; set; }
 
@@ -28,7 +29,9 @@ namespace MHUrho.Logic
 		//TODO: Check that texture is null
 		public Rect TextureCoords { get; private set; }
 
-		private string imagePath;
+		public Color MinimapColor { get; private set; }
+
+		string imagePath;
 
 		public static string GetNameFromXml(XElement tileTypeElement) {
 			return tileTypeElement.Attribute("name").Value;
@@ -40,6 +43,7 @@ namespace MHUrho.Logic
 			Name = xml.Attribute(NameAttributeName).Value;
 			imagePath = XmlHelpers.GetPath(xml.Element(TexturePathElementName));
 			MovementSpeedModifier = XmlHelpers.GetFloat(xml.Element(MovementSpeedElementName));
+			MinimapColor = XmlHelpers.GetColor(xml.Element(MinimapColorElement));
 			Package = package;
 		}
 

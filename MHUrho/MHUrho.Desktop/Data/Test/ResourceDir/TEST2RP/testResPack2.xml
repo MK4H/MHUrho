@@ -11,10 +11,12 @@
     <defaultTileType name="Default" ID="1">
       <texturePath>xamarin.png</texturePath>
       <movementSpeed>1</movementSpeed>
+			<minimapColor R="102" G="194" B="255"/>
     </defaultTileType>
     <tileType name="Sand" ID="2">
       <texturePath>sand.jpg</texturePath>
       <movementSpeed>0.5</movementSpeed>
+	    <minimapColor R="255" G="210" B="77"/>
     </tileType>
   </tileTypes>
   <unitTypes>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.EditorTools;
 using MHUrho.Logic;
+using MHUrho.WorldMap;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
@@ -14,10 +15,14 @@ namespace MHUrho.UserInterface
 		protected Dictionary<UIElement, Tool> tools;
 		protected Dictionary<UIElement, IPlayer> players;
 
-		protected GameUIManager(MyGame game)
+		protected ILevelManager Level { get; private set; }
+
+		protected IMap Map => Level.Map;
+
+		protected GameUIManager(MyGame game, ILevelManager level)
 			:base(game)
 		{
-
+			this.Level = level;
 		}
 
 		public abstract void AddTool(Tool tool);

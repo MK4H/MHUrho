@@ -12,6 +12,8 @@ namespace MHUrho.Input
 	{
 		GameUIManager UIManager { get; }
 
+		ILevelManager Level { get; }
+
 		IPlayer Player { get; set; }
 
 		bool Enabled { get; }

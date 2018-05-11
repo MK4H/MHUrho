@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 		private Dictionary<Button, UnitType> unitTypeButtons;
 
 		private GameMandKController input;
-		private Map Map => input.LevelManager.Map;
+		private Map Map => input.Level.Map;
 
 		private Button selected;
 

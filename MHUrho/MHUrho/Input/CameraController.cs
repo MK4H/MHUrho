@@ -36,6 +36,10 @@ namespace MHUrho.Input
 
 		public Camera Camera { get; private set; }
 
+		public Vector3 CameraPosition => cameraNode.WorldPosition;
+
+		public Vector2 CameraXZPosition => cameraNode.WorldPosition.XZ2();
+
 		public event OnCameraMove OnFixedMove;
 		public event OnCameraMove OnFreeFloatMove;
 
