@@ -79,7 +79,7 @@ namespace DefaultPackage
 			this.started = true;
 
 			var indexedData = pluginData.GetReaderForWrappedIndexedData();
-			WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).Plugin;
+			WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).BuildingPlugin;
 			homeGoing = indexedData.Get<bool>(2);
 			walker = unit.GetDefaultComponent<WorldWalker>();
 		}

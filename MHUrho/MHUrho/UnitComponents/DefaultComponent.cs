@@ -21,7 +21,9 @@ namespace MHUrho.UnitComponents
 		UnpoweredFlier,
 		StaticRangeTarget,
 		MovingRangeTarget,
-		Clicker
+		Clicker,
+		MovingMeele,
+		StaticMeele
 	}
 
 	//TODO: Rename this

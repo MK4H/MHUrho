@@ -193,6 +193,8 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
 		IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle);
 
+		bool IsRaycastToMap(RayQueryResult rayQueryResult);
+
 		//TODO: Maybe remove from this interface
 		ITile RaycastToTile(List<RayQueryResult> rayQueryResults);
 		//TODO: Maybe remove from this interface

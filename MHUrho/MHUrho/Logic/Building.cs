@@ -60,7 +60,7 @@ namespace MHUrho.Logic
 													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y,
 													center.Y);
 
-				newBuilding.Plugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
+				newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 
 
 
@@ -82,7 +82,7 @@ namespace MHUrho.Logic
 													Location = building.Location.ToStIntVector2(),
 													UserPlugin = new PluginData()
 												};
-				building.Plugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
+				building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
 
 				foreach (var component in building.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -117,7 +117,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Building.Plugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
+				Building.BuildingPlugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
 			}
 
 			public void FinishLoading() {
@@ -149,7 +149,7 @@ namespace MHUrho.Logic
 								Vector3.Zero,
 								Quaternion.Identity);
 
-				Building.Plugin = type.GetInstancePluginForLoading();
+				Building.BuildingPlugin = type.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
 					var componentLoader = 
@@ -157,7 +157,7 @@ namespace MHUrho.Logic
 							.StartLoadingComponent(defaultComponent.Key,
 													defaultComponent.Value,
 													level,
-													Building.Plugin);
+													Building.BuildingPlugin);
 
 					componentLoaders.Add(componentLoader);
 					Building.AddComponent(componentLoader.Component);
@@ -190,13 +190,15 @@ namespace MHUrho.Logic
 			protected set => Node.Position = value;
 		}
 
+		public override InstancePlugin Plugin => BuildingPlugin;
+
 		public Vector3 Center => Node.Position;
 
 		public BuildingType BuildingType { get; private set; }
 
 		public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
-		public BuildingInstancePlugin Plugin { get; private set; }
+		public BuildingInstancePlugin BuildingPlugin { get; private set; }
 
 		ITile[] tiles;
 
@@ -234,6 +236,11 @@ namespace MHUrho.Logic
 			visitor.Visit(this);
 		}
 
+		public override T Accept<T>(IEntityVisitor<T> visitor)
+		{
+			return visitor.Visit(this);
+		}
+
 		public void Kill() {
 
 			RemoveFromLevel();
@@ -251,7 +258,7 @@ namespace MHUrho.Logic
 
 		public float? GetHeightAt(float x, float y)
 		{
-			return Plugin.GetHeightAt(x, y);
+			return BuildingPlugin.GetHeightAt(x, y);
 		}
 
 		protected override void OnUpdate(float timeStep)
@@ -259,7 +266,7 @@ namespace MHUrho.Logic
 			base.OnUpdate(timeStep);
 			if (!EnabledEffective) return;
 
-			Plugin.OnUpdate(timeStep);
+			BuildingPlugin.OnUpdate(timeStep);
 		}
 
 		int GetTileIndex(int x, int y) {
@@ -283,6 +290,16 @@ namespace MHUrho.Logic
 			}
 
 			return newTiles;
+		}
+
+		void Collision(NodeCollisionStartEventArgs e)
+		{
+			var projectile = Level.GetProjectile(e.OtherNode);
+			if (projectile == null) {
+				throw new InvalidOperationException("Hit by something that is not a projectile");
+			}
+
+			BuildingPlugin.OnProjectileHit(projectile);
 		}
 	}
 }

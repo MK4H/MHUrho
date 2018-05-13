@@ -8,7 +8,7 @@ namespace MHUrho.Logic {
 	public interface IProjectile : IEntity {
 		bool FaceInTheDirectionOfMovement { get; set; }
 
-		ProjectileInstancePlugin Plugin { get; }
+		ProjectileInstancePlugin ProjectilePlugin { get; }
 
 		ProjectileType ProjectileType { get; }
 

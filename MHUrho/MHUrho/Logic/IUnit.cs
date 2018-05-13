@@ -19,7 +19,7 @@ namespace MHUrho.Logic {
 
 		Node LegNode { get; }
 
-		UnitInstancePlugin Plugin { get; }
+		UnitInstancePlugin UnitPlugin { get; }
 
 		Vector3 Right { get; }
 

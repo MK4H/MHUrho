@@ -34,5 +34,8 @@ namespace MHUrho.Plugins
 			return null;
 		}
 
+		public abstract void OnProjectileHit(IProjectile projectile);
+
+		public abstract void OnMeeleHit(IEntity byEntity);
 	}
 }

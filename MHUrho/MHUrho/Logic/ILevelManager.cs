@@ -44,16 +44,47 @@ namespace MHUrho.Logic {
 
 		IUnit GetUnit(int ID);
 
+		IUnit GetUnit(Node node);
+
+		bool TryGetUnit(int ID, out IUnit unit);
+
+		bool TryGetUnit(Node node, out IUnit unit);
+
+		
 		IBuilding GetBuilding(int ID);
+
+		IBuilding GetBuilding(Node node);
+
+		bool TryGetBuilding(int ID, out IBuilding building);
+
+		bool TryGetBuilding(Node node, out IBuilding building);
 
 		IPlayer GetPlayer(int ID);
 
+		bool TryGetPlayer(int ID, out IPlayer player);
+
+		IProjectile GetProjectile(int ID);
+
+		IProjectile GetProjectile(Node node);
+
+		bool TryGetProjectile(int ID, out IProjectile projectile);
+
+		bool TryGetProjectile(Node node, out IProjectile projectile);
+
 		IEntity GetEntity(int ID);
+
+		IEntity GetEntity(Node node);
+
+		bool TryGetEntity(int ID, out IEntity entity);
+
+		bool TryGetEntity(Node node, out IEntity entity);
 
 		IRangeTarget GetRangeTarget(int ID);
 
 		int RegisterRangeTarget(IRangeTarget rangeTarget);
 
 		bool UnRegisterRangeTarget(int ID);
+
+		bool CanSee(Vector3 source, IEntity target, bool mapBlocks = true, bool buildingsBlock = true, bool unitsBlock = false);
 	}
 }

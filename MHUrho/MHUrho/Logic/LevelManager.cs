@@ -21,6 +21,24 @@ namespace MHUrho.Logic
 
 	internal class LevelManager : Component, ILevelManager
 	{
+		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
+			public bool Visit(IUnit unit)
+			{
+				return typeof(T) == typeof(IUnit);
+			}
+
+			public bool Visit(IBuilding building)
+			{
+				return typeof(T) == typeof(IBuilding);
+			}
+
+			public bool Visit(IProjectile projectile)
+			{
+				return typeof(T) == typeof(IProjectile);
+			}
+		}
+
+
 		/// <summary>
 		/// Currently running level, CANNOT BE USED DURING LOADING
 		/// </summary>
@@ -47,6 +65,8 @@ namespace MHUrho.Logic
 		CameraController cameraController;
 		IGameController inputController;
 
+		Octree octree;
+
 		int minimapRefreshRate;
 		float minimapRefreshDelay;
 
@@ -59,18 +79,22 @@ namespace MHUrho.Logic
 
 		readonly Dictionary<int, IRangeTarget> rangeTargets;
 
+		readonly Dictionary<Node, IEntity> nodeToEntity;
+
 		readonly Random rng;
 
-		protected LevelManager(CameraController cameraController) {
+		protected LevelManager(CameraController cameraController, Octree octree) {
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
 			this.buildings = new Dictionary<int, IBuilding>();
 			this.projectiles = new Dictionary<int, IProjectile>();
 			this.entities = new Dictionary<int, IEntity>();
 			this.rangeTargets = new Dictionary<int, IRangeTarget>();
+			this.nodeToEntity = new Dictionary<Node, IEntity>();
 			this.rng = new Random();
 
 			this.cameraController = cameraController;
+			this.octree = octree;
 			this.DefaultComponentFactory = new DefaultComponentFactory();
 			ReceiveSceneUpdates = true;
 		}
@@ -78,14 +102,14 @@ namespace MHUrho.Logic
 		public static LevelManager Load(MyGame game, StLevel storedLevel) {
 
 			var scene = new Scene(game.Context);
-			scene.CreateComponent<Octree>();
+			var octree = scene.CreateComponent<Octree>();
 
 			LoadSceneParts(game, scene);
 			var cameraController = LoadCamera(game, scene);
 
 
 
-			LevelManager level = new LevelManager(cameraController);
+			LevelManager level = new LevelManager(cameraController, octree);
 			scene.AddComponent(level);
 
 			PackageManager.Instance.LoadPackage(storedLevel.PackageName);
@@ -171,7 +195,7 @@ namespace MHUrho.Logic
 			PackageManager.Instance.LoadPackage(gamePackageName);
 			
 			var scene = new Scene(game.Context);
-			scene.CreateComponent<Octree>();
+			var octree = scene.CreateComponent<Octree>();
 			var physics = scene.CreateComponent<PhysicsWorld>();
 			//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
 			physics.Enabled = true;
@@ -179,7 +203,7 @@ namespace MHUrho.Logic
 			LoadSceneParts(game, scene);
 			var cameraController = LoadCamera(game, scene);
 
-			CurrentLevel = new LevelManager(cameraController);
+			CurrentLevel = new LevelManager(cameraController, octree);
 			scene.AddComponent(CurrentLevel);
 
 			Node mapNode = scene.CreateChild("MapNode");
@@ -267,7 +291,7 @@ namespace MHUrho.Logic
 			Node unitNode = Scene.CreateChild("Unit");
 
 			var newUnit = unitType.CreateNewUnit(GetNewID(entities),unitNode, this, tile, player);
-			entities.Add(newUnit.ID, newUnit);
+			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
 			tile.AddUnit(newUnit);
@@ -290,7 +314,7 @@ namespace MHUrho.Logic
 			Node buildingNode = Scene.CreateChild("Building");
 
 			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), buildingNode, this, topLeft, player);
-			entities.Add(newBuilding.ID, newBuilding);
+			RegisterEntity(newBuilding);
 			buildings.Add(newBuilding.ID,newBuilding);
 			players[player.ID].AddBuilding(newBuilding);
 
@@ -310,7 +334,7 @@ namespace MHUrho.Logic
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, target);
 
 			if (newProjectile != null) {
-				entities.Add(newProjectile.ID, newProjectile);
+				RegisterEntity(newProjectile);
 				projectiles.Add(newProjectile.ID, newProjectile);
 			}
 			
@@ -329,7 +353,7 @@ namespace MHUrho.Logic
 
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, movement);
 			if (newProjectile != null) {
-				entities.Add(newProjectile.ID, newProjectile);
+				RegisterEntity(newProjectile);
 				projectiles.Add(newProjectile.ID, newProjectile);
 			}
 
@@ -370,39 +394,114 @@ namespace MHUrho.Logic
 		}
 
 		public IUnit GetUnit(int ID) {
-			if (!units.TryGetValue(ID, out IUnit value)) {
-				throw new ArgumentOutOfRangeException(nameof(ID), "Unit with this ID does not exist in the current level");
-			}
-			return value;
+			return TryGetUnit(ID, out IUnit value) ? 
+						value :
+						throw new ArgumentOutOfRangeException(nameof(ID), "Unit with this ID does not exist in the current level");
+
+		}
+
+		public IUnit GetUnit(Node node)
+		{
+			return TryGetUnit(node, out IUnit value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(node), "Node does not contain any Units");
+		}
+
+		public bool TryGetUnit(int ID, out IUnit unit)
+		{
+			return units.TryGetValue(ID, out unit);
+		}
+
+		public bool TryGetUnit(Node node, out IUnit unit)
+		{
+			bool hasEntity = TryGetEntity(node, out IEntity entity);
+			unit = null;
+			return hasEntity && TryGetUnit(entity.ID, out unit);
 		}
 
 		public IBuilding GetBuilding(int ID) {
-			if (!buildings.TryGetValue(ID, out IBuilding value)) {
-				throw new ArgumentOutOfRangeException(nameof(ID), "Building with this ID does not exist in the current level");
-			}
-			return value;
+			return TryGetBuilding(ID, out IBuilding value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(ID), "Building with this ID does not exist in the current level");
+		}
+
+		public IBuilding GetBuilding(Node node)
+		{
+			return TryGetBuilding(node, out IBuilding value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(node), "Node does not contain any Buildings");
+		}
+
+		public bool TryGetBuilding(int ID, out IBuilding building)
+		{
+			return buildings.TryGetValue(ID, out building);
+		}
+
+		public bool TryGetBuilding(Node node, out IBuilding building)
+		{
+			bool hasEntity = TryGetEntity(node, out IEntity entity);
+			building = null;
+			return hasEntity && TryGetBuilding(entity.ID, out building);
 		}
 
 		public IPlayer GetPlayer(int ID) {
-			if (!players.TryGetValue(ID, out IPlayer player)) {
-				throw new ArgumentOutOfRangeException(nameof(ID), "Player with this ID does not exist in the current level");
-			}
+			return TryGetPlayer(ID, out IPlayer value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(ID), "Player with this ID does not exist in the current level");
+		}
 
-			return player;
+		public bool TryGetPlayer(int ID, out IPlayer player)
+		{
+			return players.TryGetValue(ID, out player);
 		}
 
 		public IProjectile GetProjectile(int ID) {
-			if (!projectiles.TryGetValue(ID, out IProjectile value)) {
-				throw new ArgumentOutOfRangeException(nameof(ID), "Projectile with this ID does not exist in the current level");
-			}
-			return value;
+			return TryGetProjectile(ID, out IProjectile value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(ID), "Projectile with this ID does not exist in the current level");
+		}
+
+		public IProjectile GetProjectile(Node node)
+		{
+			return TryGetProjectile(node, out IProjectile value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(node), "Node does not contain any Projectiles");
+		}
+
+		public bool TryGetProjectile(int ID, out IProjectile projectile)
+		{
+			return projectiles.TryGetValue(ID, out projectile);
+		}
+
+		public bool TryGetProjectile(Node node, out IProjectile projectile)
+		{
+			bool hasEntity = TryGetEntity(node, out IEntity entity);
+			projectile = null;
+			return hasEntity && TryGetProjectile(entity.ID, out projectile);
 		}
 
 		public IEntity GetEntity(int ID) {
-			if (!entities.TryGetValue(ID, out IEntity value)) {
-				throw new ArgumentOutOfRangeException(nameof(ID), "Entity with this ID does not exist in the current level");
-			}
-			return value;
+			return TryGetEntity(ID, out IEntity value) ?
+						value :
+						throw new ArgumentOutOfRangeException(nameof(ID), "Entity with this ID does not exist in the current level");
+
+		}
+
+		public IEntity GetEntity(Node node)
+		{
+			return TryGetEntity(node, out IEntity value)
+						? value
+						: throw new ArgumentOutOfRangeException(nameof(ID), "Node does not contain any entities");
+		}
+
+		public bool TryGetEntity(int ID, out IEntity entity)
+		{
+			return entities.TryGetValue(ID, out entity);
+		}
+
+		public bool TryGetEntity(Node node, out IEntity entity)
+		{
+			return nodeToEntity.TryGetValue(node, out entity);
 		}
 
 		public IRangeTarget GetRangeTarget(int ID) {
@@ -433,6 +532,55 @@ namespace MHUrho.Logic
 
 		public bool UnRegisterRangeTarget(int ID) {
 			return rangeTargets.Remove(ID);
+		}
+
+		public bool CanSee(Vector3 source, IEntity target, bool mapBlocks = true, bool buildingsBlock = true, bool unitsBlock = false)
+		{
+			Vector3 diff = target.Position - source;
+			Ray visionRay = new Ray(source, diff);
+			List<RayQueryResult> results =  octree.Raycast(visionRay,
+															RayQueryLevel.Aabb,
+															diff.Length * 1.2f); //distance between source and target with 20% reserve
+			TypeCheckVisitor<IUnit> unitCheck = new TypeCheckVisitor<IUnit>();
+			TypeCheckVisitor<IBuilding> buildingCheck = new TypeCheckVisitor<IBuilding>();
+			foreach (var result in results) {
+				// If we hit a map
+				if (Map.IsRaycastToMap(result)) {
+					// If map blocks sight, return false, else check next result
+					if (mapBlocks) {
+						return false;
+					}
+					continue;
+				}
+
+				if (!nodeToEntity.TryGetValue(result.Node, out IEntity entity)) continue;
+
+				if (entity == target) {
+					return true;
+				}
+
+				// Entity is not target, check if it is unit
+				if (entity.Accept(unitCheck)) {
+					// it is unit, if units block sight, return false, else check next result
+					if (unitsBlock) {
+						return false;
+					}
+					continue;
+				}
+
+				// Entity is not a unit, check if it is a building
+				if (entity.Accept(buildingCheck)) {
+					// Entity is a building, if buildings block sight, return false, else check next result
+					if (buildingsBlock) {
+						return false;
+					}
+					continue;
+				}
+				
+				// it was not the map, nor unit, nor building, just check next, ignore
+			}
+
+			return false;
 		}
 
 		protected override void OnUpdate(float timeStep) {
@@ -505,6 +653,12 @@ namespace MHUrho.Logic
 			}
 
 			return id;
+		}
+
+		void RegisterEntity(Entity entity)
+		{
+			entities.Add(entity.ID, entity);
+			nodeToEntity.Add(entity.Node, entity);
 		}
 
 	}

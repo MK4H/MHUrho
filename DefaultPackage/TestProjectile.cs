@@ -100,7 +100,7 @@ namespace DefaultPackage
 				movement = new Quaternion((float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5) * movement;
 
 				var newProjectile = Level.SpawnProjectile(projectile.ProjectileType, projectile.Position, projectile.Player,  movement);
-				((TestProjectileInstance) newProjectile.Plugin).splits = 0;
+				((TestProjectileInstance) newProjectile.ProjectilePlugin).splits = 0;
 				
 			}
 

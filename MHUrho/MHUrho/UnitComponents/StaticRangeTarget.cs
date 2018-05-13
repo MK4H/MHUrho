@@ -114,11 +114,6 @@ namespace MHUrho.UnitComponents
 			yield return new Waypoint(CurrentPosition, 0);
 		}
 
-		public override void OnAttachedToNode(Node node) {
-			base.OnAttachedToNode(node);
-
-			node.NodeCollisionStart += Collision;
-		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			base.AddedToEntity(entityDefaultComponents);
@@ -130,16 +125,6 @@ namespace MHUrho.UnitComponents
 			bool removed = RemovedFromEntity(typeof(StaticRangeTarget), entityDefaultComponents);
 			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
 			return removed;
-		}
-
-		void Collision(NodeCollisionStartEventArgs e) {
-			//TODO: instead of GetComponent, implement O(1) Node to Entity lookup
-			var projectile = e.OtherNode.GetComponent<Projectile>();
-			if (projectile == null) {
-				throw new InvalidOperationException("Hit by something that is not a projectile");
-			}
-
-			notificationReceiver.OnHit(this, projectile);
 		}
 	}
 }

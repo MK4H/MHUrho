@@ -101,14 +101,14 @@ namespace DefaultPackage
 
 	public class TestBuildingInstance : BuildingInstancePlugin {
 
-		private ILevelManager level;
-		private TestWorkerInstance[] workers;
+		ILevelManager level;
+		TestWorkerInstance[] workers;
 
-		private int resources;
+		int resources;
 
-		private const float timeBetweenResourceSpawns = 5;
+		const float timeBetweenResourceSpawns = 5;
 
-		private float timeToNextResource = timeBetweenResourceSpawns;
+		float timeToNextResource = timeBetweenResourceSpawns;
 
 		public TestBuildingInstance() {
 
@@ -121,7 +121,7 @@ namespace DefaultPackage
 			this.workers = new TestWorkerInstance[workers.Length];
 
 			for (int i = 0; i < workers.Length; i++) {
-				this.workers[i] = (TestWorkerInstance)workers[i].Plugin;
+				this.workers[i] = (TestWorkerInstance)workers[i].UnitPlugin;
 				this.workers[i].WorkedBuilding = this;
 			}
 		}
@@ -157,7 +157,7 @@ namespace DefaultPackage
 			workers = new TestWorkerInstance[reader.GetCurrent<int>()];
 			reader.MoveNext();
 			for (int i = 0; i < workers.Length; i++) {
-				workers[i] = (TestWorkerInstance)level.GetUnit(reader.GetCurrent<int>()).Plugin;
+				workers[i] = (TestWorkerInstance)level.GetUnit(reader.GetCurrent<int>()).UnitPlugin;
 				reader.MoveNext();
 			}
 
@@ -177,28 +177,6 @@ namespace DefaultPackage
 			}
 			return null;
 		}
-
-		//private void StartWorker(ActionQueue worker) {
-		 
-		//    worker.EnqueueTask(new ActionQueue.DelegatedWorkTask()
-		//                           .OnTaskStarted((unit, task) => {
-		//                                              unit.GetComponent<WorldWalker>()
-		//                                                  .OnMovementFinishedCall((_) => task.Finish())
-		//                                                  .OnMovementFailedCall((_) => task.Finish())
-		//                                                  .GoTo(new IntVector2(10, 10));
-		//                                          }));
-
-		//    worker.EnqueueTask(new ActionQueue.TimedWorkTask(5));
-
-		//    worker.EnqueueTask(new ActionQueue.DelegatedWorkTask()
-		//                           .OnTaskStarted((unit, task) => {
-		//                                              unit.GetComponent<WorldWalker>()
-		//                                                  .OnMovementFinishedCall((_) => task.Finish())
-		//                                                  .OnMovementFailedCall((_) => task.Finish())
-		//                                                  .GoTo(building.GetExchangeTile(unit));
-		//                                          })
-		//                       .OnTaskFinished((unit, task) => { StartWorker(worker); }));
-		//}
 
 	}
 }

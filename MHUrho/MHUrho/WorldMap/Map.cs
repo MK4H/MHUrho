@@ -814,6 +814,11 @@ namespace MHUrho.WorldMap
 			return GetTilesInRectangle(rectangle.TopLeft(), rectangle.BottomRight());
 		}
 
+		public bool IsRaycastToMap(RayQueryResult rayQueryResult)
+		{
+			return rayQueryResult.Node == node;
+		}
+
 		public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) 
 		{
 			return graphics.RaycastToTile(rayQueryResults);

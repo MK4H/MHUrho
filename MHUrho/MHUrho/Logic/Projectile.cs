@@ -42,7 +42,7 @@ namespace MHUrho.Logic
 
 				node.NodeCollisionStart += projectile.CollisionHandler;
 
-				projectile.Plugin = type.GetNewInstancePlugin(projectile, level);
+				projectile.ProjectilePlugin = type.GetNewInstancePlugin(projectile, level);
 
 				return projectile;
 			}
@@ -55,7 +55,7 @@ namespace MHUrho.Logic
 														TypeID = projectile.ProjectileType.ID,
 														UserPlugin = new PluginData()
 													};
-				projectile.Plugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin));
+				projectile.ProjectilePlugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin));
 
 				return stProjectile;
 			}
@@ -80,7 +80,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Projectile.Plugin.LoadState(level,
+				Projectile.ProjectilePlugin.LoadState(level,
 											Projectile,
 											new PluginDataWrapper(storedProjectile.UserPlugin));
 
@@ -114,7 +114,7 @@ namespace MHUrho.Logic
 
 				node.NodeCollisionStart += Projectile.CollisionHandler;
 
-				Projectile.Plugin = Projectile.ProjectileType.GetInstancePluginForLoading();
+				Projectile.ProjectilePlugin = Projectile.ProjectileType.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedProjectile.DefaultComponentData) {
 					var componentLoader =
@@ -122,7 +122,7 @@ namespace MHUrho.Logic
 							.StartLoadingComponent(defaultComponent.Key,
 													defaultComponent.Value,
 													level,
-													Projectile.Plugin);
+													Projectile.ProjectilePlugin);
 
 					componentLoaders.Add(componentLoader);
 					Projectile.AddComponent(componentLoader.Component);
@@ -166,7 +166,7 @@ namespace MHUrho.Logic
 		/// Cast it to your own type, the one returned by <see cref="ProjectileTypePlugin.CreateNewInstance(ILevelManager, Projectile)"/>
 		/// for this type with name <see cref="ProjectileTypePlugin.IsMyType(string)"/>
 		/// </summary>
-		public ProjectileInstancePlugin Plugin { get; private set; }
+		
 
 
 		public override Vector3 Position {
@@ -174,6 +174,10 @@ namespace MHUrho.Logic
 			protected set => Node.Position = value;
 		}
 
+		public override InstancePlugin Plugin => ProjectilePlugin;
+
+
+		public ProjectileInstancePlugin ProjectilePlugin { get; private set; }
 		/// <summary>
 		/// Default true
 		/// </summary>
@@ -224,7 +228,7 @@ namespace MHUrho.Logic
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
-			Plugin.ReInitialize(level);
+			ProjectilePlugin.ReInitialize(level);
 		}
 
 		
@@ -257,10 +261,15 @@ namespace MHUrho.Logic
 			visitor.Visit(this);
 		}
 
+		public override T Accept<T>(IEntityVisitor<T> visitor)
+		{
+			return visitor.Visit(this);
+		}
+
 		public bool Move(Vector3 movement)
 		{
 			if (!Map.IsInside(Position)) {
-				Plugin.OnTerrainHit();
+				ProjectilePlugin.OnTerrainHit();
 				return false;
 			}
 
@@ -271,7 +280,7 @@ namespace MHUrho.Logic
 			}
 
 			if (!Map.IsInside(Position)) {
-				Plugin.OnTerrainHit();
+				ProjectilePlugin.OnTerrainHit();
 				return false;
 			}
 
@@ -283,13 +292,13 @@ namespace MHUrho.Logic
 
 			if (!EnabledEffective) return;
 
-			Plugin.OnUpdate(timeStep);
+			ProjectilePlugin.OnUpdate(timeStep);
 		}
 
 		void CollisionHandler(NodeCollisionStartEventArgs e)
 		{
 			//TODO: Instead of linear time search implement constant time node to entity lookup
-			Plugin.OnEntityHit(e.OtherNode.GetComponent<Entity>());
+			ProjectilePlugin.OnEntityHit(e.OtherNode.GetComponent<Entity>());
 		}
 
 	}

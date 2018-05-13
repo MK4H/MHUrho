@@ -12,7 +12,7 @@ namespace MHUrho.Logic {
 
 		IntVector2 Location { get; }
 
-		BuildingInstancePlugin Plugin { get; }
+		BuildingInstancePlugin BuildingPlugin { get; }
 
 		IntRect Rectangle { get; }
 

@@ -57,7 +57,7 @@ namespace MHUrho.Logic
 		public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, IRangeTarget target) {
 			var projectile = GetProjectile(newID, level, player, position);
 
-			if (!projectile.Plugin.ShootProjectile(target)) {
+			if (!projectile.ProjectilePlugin.ShootProjectile(target)) {
 				projectile.Despawn();
 				projectile = null;
 			}
@@ -73,7 +73,7 @@ namespace MHUrho.Logic
 
 			var projectile = GetProjectile(newID, level, player, position);
 
-			if (!projectile.Plugin.ShootProjectile(movement)) {
+			if (!projectile.ProjectilePlugin.ShootProjectile(movement)) {
 				projectile.Despawn();
 				projectile = null;
 			}

@@ -346,6 +346,48 @@ namespace MHUrho.WorldMap {
 			return finalList;
 		}
 
+//		public Path GetPathToIntersection(Vector2 source,
+//										Path targetPath,
+//										CanGoToNeighbour canPassFromTo,
+//										GetMovementSpeed getMovementSpeed,
+//										float maxMovementSpeed)
+//		{
+//			Dictionary<Node, float> waypoints = GetWaypointDictionary(targetPath);
+
+//			Node startNode = GetTileNode(map.GetContainingTile(source));
+//			this.canPassTo = canPassFromTo;
+//			this.getMovementSpeed = getMovementSpeed;
+//			this.maxMovementSpeed = maxMovementSpeed;
+
+//			startNode.Time = ge
+
+//			// Enque the starting node
+//			priorityQueue.Enqueue(startNode, 0);
+//			// Add the starting node to touched nodes, so it does not get enqued again
+//			touchedNodes.Add(startNode);
+
+//			//Main loop
+//			while (priorityQueue.Count != 0) {
+//				Node currentNode = priorityQueue.Dequeue();
+
+//				//If we hit the target, finish and return the sourceNode
+//				if (currentNode == targetNode) {
+//#if DEBUG
+//					//VisualizeTouchedNodes();
+//#endif
+//					return currentNode;
+//				}
+
+//				//If not finished, add untouched neighbours to the queue and touched nodes
+//				currentNode.Neighbours.Process(this);
+
+//				currentNode.State = NodeState.Closed;
+//			}
+//			//Did not find path
+//			return null;
+
+//		}
+
 		float Heuristic(Vector3 from) {
 			return Vector3.Distance(from, targetNode.Center) / maxMovementSpeed;
 		}
@@ -521,6 +563,25 @@ namespace MHUrho.WorldMap {
 		{
 			return (x - map.Left) + (y - map.Top) * map.Width;
 		}
+
+		//Dictionary<Node, float> GetWaypointDictionary(Path path)
+		//{
+		//	Dictionary<Node, float> waypointDict = new Dictionary<Node, float>();
+		//	bool center = false;
+		//	float totalTime = 0;
+		//	foreach (var waypoint in path) {
+		//		totalTime += waypoint.TimeToWaypoint;
+
+		//		if (center) { 
+		//			Node node = GetTileNode(map.GetContainingTile(waypoint.Position));
+		//			waypointDict.Add(node, waypoint.TimeToWaypoint);
+		//		}
+
+		//		center = !center;
+		//	}
+
+		//	return waypointDict;
+		//}
 	}
 
 

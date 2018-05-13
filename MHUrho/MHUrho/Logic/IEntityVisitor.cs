@@ -12,4 +12,13 @@ namespace MHUrho.Logic
 
 		void Visit(IProjectile projectile);
 	}
+
+	public interface IEntityVisitor<out T> {
+
+		T Visit(IUnit unit);
+
+		T Visit(IBuilding building);
+
+		T Visit(IProjectile projectile);
+	}
 }

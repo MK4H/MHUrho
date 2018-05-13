@@ -40,9 +40,9 @@ namespace MHUrho.Plugins
 
 		public abstract bool CanGoFromTo(ITile fromTile, ITile toTile);
 
-		public virtual void OnUnitHit() {
-			//NOTHING
-		}
+		public abstract void OnProjectileHit(IProjectile projectile);
+
+		public abstract void OnMeeleHit(IEntity byEntity);
 
 		//TODO: Expand this
 	}

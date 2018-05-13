@@ -51,7 +51,8 @@ namespace MHUrho.UnitComponents
 			loaders.Add(BallisticProjectile.ComponentID, new BallisticProjectile.Loader());
 			loaders.Add(StaticRangeTarget.ComponentID, new StaticRangeTarget.Loader());
 			loaders.Add(MovingRangeTarget.ComponentID, new MovingRangeTarget.Loader());
-
+			loaders.Add(MovingMeeleAttacker.ComponentID, new MovingMeeleAttacker.Loader());
+			loaders.Add(StaticMeeleAttacker.ComponentID, new StaticMeeleAttacker.Loader());
 			//TODO: Add other components
 		}
 
@@ -63,6 +64,8 @@ namespace MHUrho.UnitComponents
 			map.Add(BallisticProjectile.ComponentName, BallisticProjectile.ComponentID);
 			map.Add(StaticRangeTarget.ComponentName, StaticRangeTarget.ComponentID);
 			map.Add(MovingRangeTarget.ComponentName, MovingRangeTarget.ComponentID);
+			map.Add(MovingMeeleAttacker.ComponentName, MovingMeeleAttacker.ComponentID);
+			map.Add(StaticMeeleAttacker.ComponentName, StaticMeeleAttacker.ComponentID);
 		}
 
 	}

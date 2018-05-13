@@ -59,7 +59,7 @@ namespace MHUrho.Logic
 				centerNode.AddComponent(unit);
 				
 
-				unit.Plugin = type.GetNewInstancePlugin(unit, level);
+				unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
 
 				return unit;
 			}
@@ -73,7 +73,7 @@ namespace MHUrho.Logic
 
 
 				storedUnit.UserPlugin = new PluginData();
-				unit.Plugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
+				unit.UnitPlugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
 
 				foreach (var component in unit.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -132,7 +132,7 @@ namespace MHUrho.Logic
 				// to this class, and for that i need to set the Position here
 				legNode.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
 
-				Unit.Plugin = type.GetInstancePluginForLoading();
+				Unit.UnitPlugin = type.GetInstancePluginForLoading();
 
 				foreach (var defaultComponent in storedUnit.DefaultComponentData) {
 					var componentLoader =
@@ -140,7 +140,7 @@ namespace MHUrho.Logic
 							.StartLoadingComponent(defaultComponent.Key,
 													defaultComponent.Value,
 													level,
-													Unit.Plugin);
+													Unit.UnitPlugin);
 					componentLoaders.Add(componentLoader);
 					Unit.AddComponent(componentLoader.Component);
 				}
@@ -158,7 +158,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Unit.Plugin.LoadState(level, Unit, new PluginDataWrapper(storedUnit.UserPlugin));
+				Unit.UnitPlugin.LoadState(level, Unit, new PluginDataWrapper(storedUnit.UserPlugin));
 			}
 
 			public void FinishLoading() {
@@ -213,6 +213,8 @@ namespace MHUrho.Logic
 			protected set => LegNode.Position = value;
 		}
 
+		public override InstancePlugin Plugin => UnitPlugin;
+
 		/// <summary>
 		/// Position in the level
 		/// </summary>
@@ -233,7 +235,7 @@ namespace MHUrho.Logic
 		/// </summary>
 		public ITile Tile { get; private set; }
 
-		public UnitInstancePlugin Plugin { get; private set; }
+		public UnitInstancePlugin UnitPlugin { get; private set; }
 
 		public bool AlwaysVertical { get; set; } = false;
 
@@ -313,8 +315,13 @@ namespace MHUrho.Logic
 			visitor.Visit(this);
 		}
 
+		public override T Accept<T>(IEntityVisitor<T> visitor)
+		{
+			return visitor.Visit(this);
+		}
+
 		public bool CanGoFromTo(ITile fromTile, ITile toTile) {
-			return Plugin.CanGoFromTo(fromTile, toTile);
+			return UnitPlugin.CanGoFromTo(fromTile, toTile);
 		}
 
 		/// <summary>
@@ -410,7 +417,7 @@ namespace MHUrho.Logic
 			base.OnUpdate(timeStep);
 			if (!EnabledEffective) return;
 
-			Plugin.OnUpdate(timeStep);
+			UnitPlugin.OnUpdate(timeStep);
 		}
 
 		#endregion
@@ -442,6 +449,16 @@ namespace MHUrho.Logic
 			var x = position.X - (float) Math.Floor(position.X);
 			var z = position.Z - (float) Math.Floor(position.Z);
 			return (x < 0.05f || 0.95f < x) && (z < 0.05f || 0.95f < z);
+		}
+
+		void Collision(NodeCollisionStartEventArgs e)
+		{
+			var projectile = Level.GetProjectile(e.OtherNode);
+			if (projectile == null) {
+				throw new InvalidOperationException("Hit by something that is not a projectile");
+			}
+
+			UnitPlugin.OnProjectileHit(projectile);
 		}
 
 		#endregion

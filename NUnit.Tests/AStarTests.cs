@@ -413,6 +413,11 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public bool IsRaycastToMap(RayQueryResult rayQueryResult)
+			{
+				throw new NotImplementedException();
+			}
+
 			public ITile RaycastToTile(List<RayQueryResult> rayQueryResults)
 			{
 				throw new NotImplementedException();
