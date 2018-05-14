@@ -215,14 +215,14 @@ namespace MHUrho.Logic
 			CurrentLevel.minimapRefreshRate = 4;
 			CurrentLevel.minimapRefreshDelay = 1.0f / CurrentLevel.minimapRefreshRate; 
 
-			//TODO: Temporary player
-			var player = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene);
+			//TODO: Temporary player, COLOR PICKING
+			var player = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, Color.Red);
 			CurrentLevel.players.Add(player.ID, player);
 			CurrentLevel.inputController = game.menuController.GetGameController(cameraController, CurrentLevel, player);
 
 			CurrentLevel.inputController.UIManager.AddPlayer(player);
 
-			player = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"));
+			player = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"), Color.Blue);
 			CurrentLevel.players.Add(player.ID, player);
 			CurrentLevel.inputController.UIManager.AddPlayer(player);
 
@@ -364,10 +364,10 @@ namespace MHUrho.Logic
 
 		public bool RemoveUnit(IUnit unit)
 		{
-			bool removed = units.Remove(unit.ID) && entities.Remove(unit.ID);
+			bool removed = units.Remove(unit.ID) && RemoveEntity(unit);
 
 			if (!unit.RemovedFromLevel) {
-				unit.Kill();
+				unit.RemoveFromLevel();
 			}
 
 			return removed;
@@ -375,20 +375,20 @@ namespace MHUrho.Logic
 
 		public bool RemoveBuilding(IBuilding building)
 		{
-			bool removed = buildings.Remove(building.ID) && entities.Remove(building.ID);
+			bool removed = buildings.Remove(building.ID) && RemoveEntity(building);
 
 			if (!building.RemovedFromLevel) {
-				building.Kill();
+				building.RemoveFromLevel();
 			}
 			return removed;
 		}
 
 		public bool RemoveProjectile(IProjectile projectile)
 		{
-			bool removed = projectiles.Remove(projectile.ID) && entities.Remove(projectile.ID);
+			bool removed = projectiles.Remove(projectile.ID) && RemoveEntity(projectile);
 
 			if (!projectile.RemovedFromLevel) {
-				projectile.Despawn();
+				projectile.RemoveFromLevel();
 			}
 			return removed;
 		}
@@ -659,6 +659,12 @@ namespace MHUrho.Logic
 		{
 			entities.Add(entity.ID, entity);
 			nodeToEntity.Add(entity.Node, entity);
+		}
+
+		bool RemoveEntity(IEntity entity)
+		{
+			bool removed = entities.Remove(entity.ID);
+			return nodeToEntity.Remove(entity.Node) && removed;
 		}
 
 	}

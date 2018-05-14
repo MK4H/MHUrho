@@ -58,7 +58,7 @@ namespace MHUrho.Logic
 			var projectile = GetProjectile(newID, level, player, position);
 
 			if (!projectile.ProjectilePlugin.ShootProjectile(target)) {
-				projectile.Despawn();
+				projectile.RemoveFromLevel();
 				projectile = null;
 			}
 
@@ -74,7 +74,7 @@ namespace MHUrho.Logic
 			var projectile = GetProjectile(newID, level, player, position);
 
 			if (!projectile.ProjectilePlugin.ShootProjectile(movement)) {
-				projectile.Despawn();
+				projectile.RemoveFromLevel();
 				projectile = null;
 			}
 

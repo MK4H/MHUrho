@@ -102,6 +102,16 @@ namespace DefaultPackage
 			}
 		}
 
+		public override void OnProjectileHit(IProjectile projectile)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void OnMeeleHit(IEntity byEntity)
+		{
+			throw new NotImplementedException();
+		}
+
 		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
 			return MaxMovementSpeed;
 		}

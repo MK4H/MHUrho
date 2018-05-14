@@ -93,13 +93,13 @@ namespace DefaultPackage
 		public override void OnEntityHit(IEntity hitEntity)
 		{
 			if (hitEntity.Player != projectile.Player) {
-				projectile.Despawn();
+				projectile.RemoveFromLevel();
 			}	
 		}
 
 		public override void OnTerrainHit()
 		{
-			projectile.Despawn();
+			projectile.RemoveFromLevel();
 		}
 
 		bool ShootMovingTarget(IRangeTarget target)

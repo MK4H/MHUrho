@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Google.Protobuf;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
@@ -58,6 +59,10 @@ namespace MHUrho.Logic
 				var unit = new Unit(id, level, type, tile, player, unitNode);
 				centerNode.AddComponent(unit);
 				
+				//TODO: TEMPORARY
+				unit.HealthBar = new HealthBar(level);
+				unit.HealthBar.AddToNode(centerNode, unit);
+
 
 				unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
 
@@ -216,20 +221,6 @@ namespace MHUrho.Logic
 		public override InstancePlugin Plugin => UnitPlugin;
 
 		/// <summary>
-		/// Position in the level
-		/// </summary>
-		public Vector2 XZPosition {
-			get {
-				Debug.Assert(LegNode != null, nameof(LegNode) + " != null");
-				return LegNode.Position.XZ2();
-			}
-			private set {
-				Debug.Assert(LegNode != null, nameof(LegNode) + " != null");
-				LegNode.Position = new Vector3(value.X, LevelManager.CurrentLevel.Map.GetTerrainHeightAt(value), value.Y);
-			}
-		}
-
-		/// <summary>
 		/// Tile this unit is standing on
 		/// TODO: Maybe include all the tiles this unit touches, which may be up to 4 tiles
 		/// </summary>
@@ -260,6 +251,8 @@ namespace MHUrho.Logic
 		public Vector3 Up => LegNode.WorldUp;
 
 		public Vector3 Down => -Up;
+
+		public HealthBar HealthBar { get; private set; }
 
 		#endregion
 
@@ -398,9 +391,9 @@ namespace MHUrho.Logic
 			Node.Rotate(new Quaternion(pitch, yaw, roll));
 		}
 
-		public void Kill()
+		public override void RemoveFromLevel()
 		{
-			RemoveFromLevel();
+			base.RemoveFromLevel();
 
 			Tile.RemoveUnit(this);
 			Player.RemoveUnit(this);

@@ -22,3 +22,10 @@ message StVector3 {
 	float Y = 2;
 	float Z = 3;
 }
+
+message StColor {
+	float R = 1;
+	float G = 2;
+	float B = 3;
+	float A = 4;
+}

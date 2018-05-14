@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using Urho;
@@ -10,14 +11,18 @@ namespace MHUrho.Logic
 {
 	public abstract class Entity : Component, IEntity {
 
+		/// <inheritdoc />
 		/// <summary>
 		/// ID of this entity
-		/// Hides component member ID, but having two IDs would be more confusing
-		/// 
+		/// Hides component member ID, but having two IDs would be more confusing.
 		/// If you need component ID, just cast this to component and access ID
 		/// </summary>
 		public new int ID { get; protected set; }
 
+		/// <inheritdoc />
+		/// <summary>
+		/// Player owning this entity
+		/// </summary>
 		public IPlayer Player { get; protected set; }
 
 		public ILevelManager Level { get; protected set; }
@@ -25,6 +30,11 @@ namespace MHUrho.Logic
 		public Map Map => Level.Map;
 
 		public abstract Vector3 Position { get; protected set; }
+
+		public Vector2 XZPosition {
+			get => Position.XZ2();
+			set => Position = new Vector3(value.X, Position.Y, value.Y);
+		}
 
 		public abstract InstancePlugin Plugin { get; }
 	
@@ -78,7 +88,7 @@ namespace MHUrho.Logic
 			return ((IByTypeQueryable) defaultComponent).RemovedFromEntity(defaultComponents);
 		}
 
-		protected void RemoveFromLevel()
+		public virtual void RemoveFromLevel()
 		{
 			RemovedFromLevel = true;
 			OnRemoval?.Invoke();

@@ -70,10 +70,11 @@ message StBuilding {
 message StPlayer {
 	int32 playerID = 1;
 	//TODO: Redundant references both ways, could just store it in building/unit and connect it from there
-	repeated int32 unitIDs = 2;
-	repeated int32 buildingIDs = 3;
-	repeated int32 friendPlayerIDs = 4;
-	PluginData userPlugin = 5;
+	StColor color = 2;
+	repeated int32 unitIDs = 3;
+	repeated int32 buildingIDs = 4;
+	repeated int32 friendPlayerIDs = 5;
+	PluginData userPlugin = 6;
 }
 
 message StMap {

@@ -43,6 +43,7 @@ namespace MHUrho.UnitComponents
 				sequentialData.StoreNext<float>(shooter.shotDelay);
 				sequentialData.StoreNext<float>(shooter.searchDelay);
 				sequentialData.StoreNext<int>(shooter.Target?.InstanceID ?? 0);
+				sequentialData.StoreNext<bool>(shooter.Enabled);
 
 				return sequentialData.PluginData;
 			}
@@ -65,7 +66,8 @@ namespace MHUrho.UnitComponents
 													SearchForTarget = sequentialDataReader.GetNext<bool>(),
 													TargetSearchDelay = sequentialDataReader.GetNext<float>(),
 													shotDelay = sequentialDataReader.GetNext<float>(),
-													searchDelay = sequentialDataReader.GetNext<float>()
+													searchDelay = sequentialDataReader.GetNext<float>(),
+													Enabled = sequentialDataReader.GetNext<bool>()
 
 												};
 

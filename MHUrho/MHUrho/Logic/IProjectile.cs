@@ -14,8 +14,6 @@ namespace MHUrho.Logic {
 
 		bool TriggerCollisions { get; set; }
 
-		void Despawn();
-
 		bool Move(Vector3 movement);
 
 		void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position);

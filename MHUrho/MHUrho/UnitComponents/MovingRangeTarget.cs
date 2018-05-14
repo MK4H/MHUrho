@@ -25,6 +25,7 @@ namespace MHUrho.UnitComponents
 			public static PluginData SaveState(MovingRangeTarget movingRangeTarget) {
 				var sequentialData = new SequentialPluginDataWriter();
 				sequentialData.StoreNext(movingRangeTarget.InstanceID);
+				sequentialData.StoreNext(movingRangeTarget.Enabled);
 				return sequentialData.PluginData;
 			}
 
@@ -39,8 +40,11 @@ namespace MHUrho.UnitComponents
 				sequentialData.MoveNext();
 				int instanceID = sequentialData.GetCurrent<int>();
 				sequentialData.MoveNext();
+				bool enabled = sequentialData.GetCurrent<bool>();
+				sequentialData.MoveNext();
 
-				MovingRangeTarget = new MovingRangeTarget(instanceID, level, notificationReceiver);
+
+				MovingRangeTarget = new MovingRangeTarget(instanceID, level, notificationReceiver) {Enabled = enabled};
 				level.LoadRangeTarget(MovingRangeTarget);
 			}
 
@@ -110,12 +114,6 @@ namespace MHUrho.UnitComponents
 			return Loader.SaveState(this);
 		}
 
-		public override void OnAttachedToNode(Node node) {
-			base.OnAttachedToNode(node);
-
-			node.NodeCollisionStart += Collision;
-		}
-
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(MovingRangeTarget), entityDefaultComponents);
@@ -128,15 +126,5 @@ namespace MHUrho.UnitComponents
 			return removed;
 		}
 
-		void Collision(NodeCollisionStartEventArgs e)
-		{
-			//TODO: instead of GetComponent, implement O(1) Node to Entity lookup
-			var projectile = e.OtherNode.GetComponent<Projectile>();
-			if (projectile == null) {
-				throw new InvalidOperationException("Hit by something that is not a projectile");
-			}
-
-			notificationReceiver.OnHit(this, projectile);
-		}
 	}
 }

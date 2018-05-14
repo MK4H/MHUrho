@@ -168,6 +168,16 @@ namespace DefaultPackage
 
 		}
 
+		public override void OnProjectileHit(IProjectile projectile)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void OnMeeleHit(IEntity byEntity)
+		{
+			throw new NotImplementedException();
+		}
+
 		public ITile GetInterfaceTile(TestWorkerInstance testWorker) {
 			for (int i = 0; i < workers.Length; i++) {
 				if (testWorker == workers[i]) {

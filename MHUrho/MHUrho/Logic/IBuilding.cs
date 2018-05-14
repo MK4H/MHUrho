@@ -18,8 +18,6 @@ namespace MHUrho.Logic {
 
 		IntVector2 Size { get; }
 
-		void Kill();
-
 		StBuilding Save();
 
 		float? GetHeightAt(float x, float y);

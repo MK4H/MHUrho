@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Storage;
 using Urho;
 using MHUrho.Logic;
@@ -21,6 +22,30 @@ namespace MHUrho.Logic
 
 			protected Loader(StPlayer storedPlayer) {
 				this.storedPlayer = storedPlayer;
+			}
+
+			public static StPlayer Save(Player player)
+			{
+				//TODO: SAVE TYPE
+				var storedPlayer = new StPlayer { PlayerID = player.ID };
+
+				storedPlayer.Color = player.Color.ToStColor();
+
+				storedPlayer.UnitIDs.Add(from unitType in player.units
+										from unit in unitType.Value
+										select unit.ID);
+
+				storedPlayer.BuildingIDs.Add(from buildingType in player.buildings
+											from building in buildingType.Value
+											select building.ID);
+
+				storedPlayer.FriendPlayerIDs.Add(from friend in player.friends
+												select friend.ID);
+
+				storedPlayer.UserPlugin = new PluginData();
+				player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin));
+
+				return storedPlayer;
 			}
 
 			public static Loader StartLoading(LevelManager level, StPlayer storedPlayer) {
@@ -51,13 +76,13 @@ namespace MHUrho.Logic
 
 			void Load(LevelManager level) {
 				//TODO: Load with type
-				Player = new Player(storedPlayer.PlayerID, level);
+				Player = new Player(storedPlayer.PlayerID, level, storedPlayer.Color.ToColor());
 			}
 		}
 
 		public new int ID { get; }
 
-		public Color Color { get; private set; } = Color.Red;
+		public Color Color { get; private set; }
 
 		public PlayerAIInstancePlugin Plugin { get; private set; }
 
@@ -74,7 +99,7 @@ namespace MHUrho.Logic
 
 		ILevelManager level;
 
-		protected Player(int id, ILevelManager level) {
+		protected Player(int id, ILevelManager level, Color color) {
 			ReceiveSceneUpdates = true;
 
 			this.ID = id;
@@ -83,49 +108,33 @@ namespace MHUrho.Logic
 			resources = new Dictionary<ResourceType, int>();
 			friends = new HashSet<IPlayer>();
 			this.level = level;
+			this.Color = color;
 		}
 
-		protected Player(int id, ILevelManager level, PlayerType type)
-			:this(id, level)
+		protected Player(int id, ILevelManager level, PlayerType type, Color color)
+			:this(id, level, color)
 		{
 			this.type = type;
 			this.Plugin = type.GetNewInstancePlugin(this, level);
 		}
 
-		public static Player CreateNewAIPlayer(int id, ILevelManager level, Node node, PlayerType type)
+		public static Player CreateNewAIPlayer(int id, ILevelManager level, Node node, PlayerType type, Color color)
 		{
-			var player = new Player(id, level, type);
+			var player = new Player(id, level, type, color);
 			node.AddComponent(player);
 			return player;
 		}
 
-		public static Player CreateNewHumanPlayer(int id, ILevelManager level, Node node)
+		public static Player CreateNewHumanPlayer(int id, ILevelManager level, Node node, Color color)
 		{
-			var player = new Player(id, level);
+			var player = new Player(id, level, color);
 			node.AddComponent(player);
 			return player;
 		}
 
-		public StPlayer Save() {
-			//TODO: SAVE TYPE
-			var storedPlayer = new StPlayer { PlayerID = ID };
-
-
-			storedPlayer.UnitIDs.Add(from unitType in units
-									 from unit in unitType.Value
-									 select unit.ID);
-
-			storedPlayer.BuildingIDs.Add(from buildingType in buildings
-										 from building in buildingType.Value
-										 select building.ID);
-
-			storedPlayer.FriendPlayerIDs.Add(from friend in friends
-											 select friend.ID);
-
-			storedPlayer.UserPlugin = new PluginData();
-			Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin));
-			
-			return storedPlayer;
+		public StPlayer Save()
+		{
+			return Loader.Save(this);
 		}
 
 		/// <summary>

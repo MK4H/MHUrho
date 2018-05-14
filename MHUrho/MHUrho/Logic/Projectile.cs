@@ -239,10 +239,10 @@ namespace MHUrho.Logic
 		}
 
 
-		public void Despawn() 
+		public override void RemoveFromLevel() 
 		{
 			Enabled = false;
-			RemoveFromLevel();
+			base.RemoveFromLevel();
 
 			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {

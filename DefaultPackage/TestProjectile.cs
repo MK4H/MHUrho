@@ -84,7 +84,7 @@ namespace DefaultPackage
 				timeToDespawn -= timeStep;
 
 				if (timeToDespawn < 0) {
-					projectile.Despawn();
+					projectile.RemoveFromLevel();
 					return;
 				}
 			}
@@ -106,7 +106,7 @@ namespace DefaultPackage
 
 			if (splits != 0) {
 				splits = 0;
-				projectile.Despawn();
+				projectile.RemoveFromLevel();
 			}
 			
 		}
@@ -168,7 +168,7 @@ namespace DefaultPackage
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
-			projectile.Despawn();
+			projectile.RemoveFromLevel();
 		}
 
 		public override void OnTerrainHit()

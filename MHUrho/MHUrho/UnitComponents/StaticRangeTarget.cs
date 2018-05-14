@@ -42,8 +42,13 @@ namespace MHUrho.UnitComponents
 				sequentialData.MoveNext();
 				Vector3 position = sequentialData.GetCurrent<Vector3>();
 				sequentialData.MoveNext();
+				bool enabled = sequentialData.GetCurrent<bool>();
+				sequentialData.MoveNext();
 
-				StaticRangeTarget =  new StaticRangeTarget(instanceID, level, position, notificationReceiver);
+				StaticRangeTarget = new StaticRangeTarget(instanceID, level, position, notificationReceiver)
+									{
+										Enabled = enabled
+									};
 				level.LoadRangeTarget(StaticRangeTarget);
 			}
 

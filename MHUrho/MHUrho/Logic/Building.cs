@@ -241,9 +241,9 @@ namespace MHUrho.Logic
 			return visitor.Visit(this);
 		}
 
-		public void Kill() {
+		public override void RemoveFromLevel() {
 
-			RemoveFromLevel();
+			base.RemoveFromLevel();
 
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);
