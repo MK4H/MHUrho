@@ -302,15 +302,15 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public bool IsXInside(IntVector2 vector) {
+			public bool IsXInside(IntVector2 point) {
 				throw new NotImplementedException();
 			}
 
-			public bool IsYInside(int y) {
+			public bool IsZInside(int z) {
 				throw new NotImplementedException();
 			}
 
-			public bool IsYInside(IntVector2 vector) {
+			public bool IsZInside(IntVector2 point) {
 				throw new NotImplementedException();
 			}
 
@@ -318,7 +318,7 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public int WhereIsX(IntVector2 vector) {
+			public int WhereIsX(IntVector2 point) {
 				throw new NotImplementedException();
 			}
 
@@ -326,7 +326,7 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public int WhereIsY(IntVector2 vector) {
+			public int WhereIsY(IntVector2 point) {
 				throw new NotImplementedException();
 			}
 
@@ -611,11 +611,11 @@ namespace NUnit.Tests {
 			public ILevelManager LevelManager => throw new NotImplementedException();
 			public event Action<ITile> TileHeightChanged;
 
-			public bool IsInside(int x, int y) {
+			public bool IsInside(int x, int z) {
 				throw new NotImplementedException();
 			}
 
-			public bool IsInside(float x, float y) {
+			public bool IsInside(float x, float z) {
 				throw new NotImplementedException();
 			}
 

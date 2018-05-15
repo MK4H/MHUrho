@@ -20,8 +20,6 @@ namespace MHUrho.EntityInfo
 		static readonly Color DeadColor = new Color(0.8f,0.1f,0.1f);
 		static readonly uint DividerColor = Color.Black.ToUInt();
 
-		Node node;
-
 		ILevelManager level;
 		Image image;
 		Texture2D texture;
@@ -39,7 +37,6 @@ namespace MHUrho.EntityInfo
 
 		public void AddToNode(Node node, IEntity entity)
 		{
-			this.node = node;
 			image.Clear(entity.Player.Color);
 			
 
@@ -59,7 +56,7 @@ namespace MHUrho.EntityInfo
 			
 
 			var billboard = billboardSet.GetBillboardSafe(0);
-			billboard.Position = new Vector3(0,20,0);
+			billboard.Position = new Vector3(0,1.5f / node.Scale.Y,0);
 			billboard.Rotation = 0;
 			billboard.Size = new Vector2(0.5f, 0.1f);
 			billboard.Uv = new Rect(new Vector2(0, 0), new Vector2(1, 1));

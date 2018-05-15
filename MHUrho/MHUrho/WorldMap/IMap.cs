@@ -38,96 +38,176 @@ namespace MHUrho.WorldMap {
 	public interface IMap {
 			   
 		/// <summary>
-		/// Coordinates of the top left corner of the map
+		/// Gets the coordinates of the top left corner tile of the map
 		/// </summary>
 		IntVector2 TopLeft { get; }
 
 		/// <summary>
-		/// Coordinates of the bottom right corner of the map
+		/// Gets the coordinates of the bottom right corner tile of the map
 		/// </summary>
 		IntVector2 BottomRight { get; }
 
+		/// <summary>
+		/// Gets the coordinates of the top right corner tile of the map
+		/// </summary>
 		IntVector2 TopRight { get; }
 
+		/// <summary>
+		/// Gets the coordinates of the bottom left corner tile of the map
+		/// </summary>
 		IntVector2 BottomLeft { get; }
 
+		/// <summary>
+		/// Gets width of the map in tiles (and in World units as well, because tile is 1x1)
+		/// </summary>
 		int Width { get; }
+
+		/// <summary>
+		/// Gets length of the map in tiles (and in World units as well, because tile is 1x1)
+		/// </summary>
 		int Length { get; }
 
 		/// <summary>
-		/// X coordinate of the left row of the map
+		/// Gets X coordinate of the left row of the map
 		/// </summary>
 		int Left { get; }
 
 		/// <summary>
-		/// X coordinate of the right row of the map
+		/// Gets X coordinate of the right row of the map
 		/// </summary>
 		int Right { get; }
 
 		/// <summary>
-		/// Y coordinate of the top row of the map
+		/// Gets Z coordinate of the top row of the map
 		/// </summary>
 		int Top { get; }
 
 		/// <summary>
-		/// Y coordinate of the bottom row of the map
+		/// Gets Z coordinate of the bottom row of the map
 		/// </summary>
 		int Bottom { get; }
 
+		/// <summary>
+		/// Gets the level manager responsible for this level
+		/// </summary>
 		ILevelManager LevelManager { get; }
 
+		/// <summary>
+		/// Occurs when height of any tile in the map changes
+		/// Gets called with the changed tile as arguments
+		/// </summary>
 		event Action<ITile> TileHeightChanged;
 
-		bool IsInside(int x, int y);
-
-		bool IsInside(float x, float y);
+		/// <summary>
+		/// Returns whether there exists a tile with <see cref="ITile.MapLocation"/> equal to [<paramref name="x"/>,<paramref name="z"/>]
+		/// </summary>
+		/// <param name="x">X coordinate</param>
+		/// <param name="z">Z coordinate</param>
+		/// <returns>Returns whether there exists a tile with <see cref="ITile.MapLocation"/> equal to [<paramref name="x"/>,<paramref name="z"/>]</returns>
+		bool IsInside(int x, int z);
 
 		/// <summary>
-		/// Checks if the point is inside the map, which means it could be used for indexing into the map
+		/// Returns whether there exists an XZ projection of a tile containing the point [<paramref name="x"/>,<paramref name="z"/>]
 		/// </summary>
-		/// <param name="point">the point to check</param>
-		/// <returns>True if it is inside, False if not</returns>
+		/// <param name="x">X world coordinate</param>
+		/// <param name="z">Z world coordinate</param>
+		/// <returns>Returns whether there exists a tile containing the point [<paramref name="x"/>,<paramref name="z"/>] </returns>
+		bool IsInside(float x, float z);
+
+		/// <summary>
+		/// Returns whether there exists a tile with <see cref="ITile.MapLocation"/> equal to <paramref name="point"/>
+		/// </summary>
+		/// <param name="point">point in the XZ plane</param>
+		/// <returns>Returns whether there exists a tile with <see cref="ITile.MapLocation"/> equal to <paramref name="point"/></returns>
 		bool IsInside(IntVector2 point);
 
+		/// <summary>
+		/// Returns whether there exists an XZ projection of a tile containing the point <paramref name="point"/>
+		/// </summary>
+		/// <param name="point">point in the XZ plane</param>
+		/// <returns>Returns whether there exists a tile containing the point <paramref name="point"/></returns>
 		bool IsInside(Vector2 point);
 
+		/// <summary>
+		/// Returns whether there exists a tile whose XZ projection contains the XZ projection of <paramref name="point"/>
+		/// </summary>
+		/// <param name="point">point, whose XZ projection you want to test</param>
+		/// <returns>Returns whether there exists a tile containing the XZ projection of <paramref name="point"/></returns>
 		bool IsInside(Vector3 point);
 
+		/// <summary>
+		/// Returns whether there exists a tile with <see cref="ITile.MapLocation"/> with X coord equal <paramref name="x"/>
+		/// </summary>
+		/// <param name="x">X coord to test</param>
+		/// <returns>Returns whether there exists a tile with <see cref="ITile.MapLocation"/> with X coord equal <paramref name="x"/></returns>
 		bool IsXInside(int x);
-		bool IsXInside(IntVector2 vector);
-		bool IsYInside(int y);
-		bool IsYInside(IntVector2 vector);
 
 		/// <summary>
-		/// Compares x with the coords of Left and Right side, returns where the x is
+		/// Returns whether there exist a tile with <see cref="ITile.MapLocation"/> with X coord equal <paramref name="point.X"/>
+		/// </summary>
+		/// <param name="point">point with X coord to test</param>
+		/// <returns>Returns whether there exist a tile with <see cref="ITile.MapLocation"/> with X coord equal <paramref name="point.X"/></returns>
+		bool IsXInside(IntVector2 point);
+
+		/// <summary>
+		/// Returns whether there exists a tile with <see cref="ITile.MapLocation"/> with X coord equal <paramref name="z"/>
+		/// </summary>
+		/// <param name="z">Z coord to test</param>
+		/// <returns>Returns whether there exists a tile with <see cref="ITile.MapLocation"/> with X coord equal <paramref name="z"/></returns>
+		bool IsZInside(int z);
+
+		/// <summary>
+		/// Returns whether there exist a tile with <see cref="ITile.MapLocation"/> with Y coord equal <paramref name="point.Y"/>
+		/// </summary>
+		/// <param name="point">point with Y coord to test</param>
+		/// <returns>Returns whether there exist a tile with <see cref="ITile.MapLocation"/> with Y coord equal <paramref name="point.Y"/></returns>
+		bool IsZInside(IntVector2 point);
+
+		/// <summary>
+		/// Compares <paramref name="x"/> with the coords of <see cref="Left"/> and <see cref="Right"/>,
+		/// returns -1 if <paramref name="x"/> is to the left of <see cref="Left"/>, 0 if inside, 1 if to the right of <see cref="Right"/>
 		/// </summary>
 		/// <param name="x">x coord to copare with the map boundaries</param>
-		/// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
+		/// <returns>Returns -1 if X is to the left of <see cref="Left"/>, 0 if inside, 1 if to the right of <see cref="Right"/></returns>
 		int WhereIsX(int x);
 
 		/// <summary>
-		/// Compares x with the coords of Left and Right side, returns where the x is
+		/// Compares X coords of <paramref name="point"/> with the coords of <see cref="Left"/> and <see cref="Right"/>,
+		/// returns -1 if X is to the left of <see cref="Left"/>, 0 if inside, 1 if to the right of <see cref="Right"/>
 		/// </summary>
-		/// <param name="vector">compares x coord of this vector</param>
-		/// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
-		int WhereIsX(IntVector2 vector);
+		/// <param name="point">point whose X coord to compare</param>
+		/// <returns>returns -1 if X is to the left of <see cref="Left"/>, 0 if inside, 1 if to the right of <see cref="Right"/></returns>
+		int WhereIsX(IntVector2 point);
 
 		/// <summary>
-		/// Compares y with the coords of Top and Bottom side, returns where the y is
+		/// Compares <paramref name="y"/> with the coords of <see cref="Top"/> and <see cref="Bottom"/>,
+		/// returns -1 if <paramref name="y"/> is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/>
 		/// </summary>
 		/// <param name="y">y coord to copare with the map boundaries</param>
-		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
+		/// <returns>Returns -1 if <paramref name="y"/> is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/></returns>
 		int WhereIsY(int y);
 
 		/// <summary>
-		/// Compares y with the coords of Top and Bottom side, returns where the y is
+		/// Compares <paramref name="point"/> Y coord with the coords of <see cref="Top"/> and <see cref="Bottom"/>,
+		/// returns -1 if it is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/>
 		/// </summary>
-		/// <param name="vector">compares y of this vector</param>
-		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
-		int WhereIsY(IntVector2 vector);
+		/// <param name="point">compares y of this point</param>
+		/// <returns>Returns -1 if it is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/></returns>
+		int WhereIsY(IntVector2 point);
 
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.MapLocation"/> equal to [<paramref name="x"/>, <paramref name="y"/>]
+		/// </summary>
+		/// <param name="x">X coord of the <see cref="ITile.MapLocation"/></param>
+		/// <param name="y">y coord of the <see cref="ITile.MapLocation"/> </param>
+		/// <returns>The tile with <see cref="ITile.MapLocation"/>  equal to [<paramref name="x"/>, <paramref name="y"/>], or null if none exists</returns>
 		ITile GetTileByMapLocation(int x, int y);
 
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.MapLocation"/> equal to <paramref name="mapLocation"/>
+		/// </summary>
+		/// <param name="mapLocation">the mapLocation of the tile to get</param>
+		/// <returns>The tile with <see cref="ITile.MapLocation"/>  equal to <paramref name="mapLocation"/>, or null if none exists</returns>
 		ITile GetTileByMapLocation(IntVector2 mapLocation);
 
 		ITile GetTileByTopLeftCorner(int x, int y);
@@ -281,10 +361,27 @@ namespace MHUrho.WorldMap {
 
 		void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="rectangle"></param>
+		/// <param name="action"></param>
 		void ForEachInRectangle(IntRect rectangle, Action<ITile> action);
 
+		/// <summary>
+		/// Invokes <paramref name="action"/> for each tile with the corner <paramref name="cornerCoords"/>
+		/// For most corners, it will be the 4 tiles containing this corner
+		/// For corners around the border, it may be less
+		/// </summary>
+		/// <param name="cornerCoords">Corner around which to get the tiles</param>
+		/// <param name="action">Action to call for every tile around the corner</param>
 		void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action);
 
+		/// <summary>
+		/// Gets a range target providing the ability to aim at the <paramref name="position"/>
+		/// </summary>
+		/// <param name="position">Position of the new range target</param>
+		/// <returns>Returns a range target at the <paramref name="position"/></returns>
 		IRangeTarget GetRangeTarget(Vector3 position);
 	}
 }

@@ -418,14 +418,14 @@ namespace MHUrho.WorldMap
 			this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
 		}
 
-		public bool IsInside(int x, int y) 
+		public bool IsInside(int x, int z) 
 		{
-			return Left <= x && x <= Right && Top <= y && y <= Bottom;
+			return Left <= x && x <= Right && Top <= z && z <= Bottom;
 		}
 
-		public bool IsInside(float x, float y) 
+		public bool IsInside(float x, float z) 
 		{
-			return Left <= x && x < Left + Width && Top <= y && y < Top + Length;
+			return Left <= x && x < Left + Width && Top <= z && z < Top + Length;
 		}
 
 		/// <summary>
@@ -463,19 +463,19 @@ namespace MHUrho.WorldMap
 			return Left <= x && x <= Right;
 		}
 
-		public bool IsXInside(IntVector2 vector) 
+		public bool IsXInside(IntVector2 point) 
 		{
-			return IsXInside(vector.X);
+			return IsXInside(point.X);
 		}
 
-		public bool IsYInside(int y) 
+		public bool IsZInside(int z) 
 		{
-			return Top <= y && y <= Bottom;
+			return Top <= z && z <= Bottom;
 		}
 
-		public bool IsYInside(IntVector2 vector) 
+		public bool IsZInside(IntVector2 point) 
 		{
-			return IsYInside(vector.Y);
+			return IsZInside(point.Y);
 		}
 
 		/// <summary>
@@ -499,11 +499,11 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Compares x with the coords of Left and Right side, returns where the x is
 		/// </summary>
-		/// <param name="vector">compares x coord of this vector</param>
+		/// <param name="point">compares x coord of this vector</param>
 		/// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
-		public int WhereIsX(IntVector2 vector) 
+		public int WhereIsX(IntVector2 point) 
 		{
-			return WhereIsX(vector.X);
+			return WhereIsX(point.X);
 		}
 
 
@@ -528,11 +528,11 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Compares y with the coords of Top and Bottom side, returns where the y is
 		/// </summary>
-		/// <param name="vector">compares y of this vector</param>
+		/// <param name="point">compares y of this vector</param>
 		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
-		public int WhereIsY(IntVector2 vector) 
+		public int WhereIsY(IntVector2 point) 
 		{
-			return WhereIsY(vector.Y);
+			return WhereIsY(point.Y);
 		}
 
 		public ITile GetTileByMapLocation(int x, int y) 
@@ -876,7 +876,7 @@ namespace MHUrho.WorldMap
 			if (tile.Type == newType) {
 				return;
 			}
-
+		
 			tile.ChangeType(newType);
 			graphics.ChangeTileType(tile.MapLocation, newType);
 		}
@@ -1663,7 +1663,7 @@ namespace MHUrho.WorldMap
 
 		ITile SearchLineInX(IntVector2 source, int length, Predicate<ITile> predicate)
 		{
-			if (!IsYInside(source.Y)) return null;
+			if (!IsZInside(source.Y)) return null;
 
 			source.X = Math.Max(source.X, Left);
 			length = Math.Min(Right - source.X, length);
