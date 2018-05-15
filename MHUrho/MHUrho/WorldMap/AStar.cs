@@ -23,6 +23,7 @@ namespace MHUrho.WorldMap {
 	/// <returns>if it is possible to go from source to target</returns>
 	public delegate bool CanGoToNeighbour(ITile source, ITile target);
 
+	//TODO: WRONG COMMENT
 	/// <summary>
 	/// Gets movements speed across that tile as a multiplier of base movementSpeed
 	///
@@ -359,12 +360,10 @@ namespace MHUrho.WorldMap {
 //			this.getMovementSpeed = getMovementSpeed;
 //			this.maxMovementSpeed = maxMovementSpeed;
 
-//			startNode.Time = ge
-
-//			// Enque the starting node
-//			priorityQueue.Enqueue(startNode, 0);
 //			// Add the starting node to touched nodes, so it does not get enqued again
 //			touchedNodes.Add(startNode);
+
+
 
 //			//Main loop
 //			while (priorityQueue.Count != 0) {
@@ -476,9 +475,8 @@ namespace MHUrho.WorldMap {
 			*/
 
 			Waypoint firstEntrance = reversedWaypoints[reversedWaypoints.Count - 1];
-			// v = d / t
-			//TODO: This movement speed is for the direction between centers, but the direction between source and center may be different
-			float movementSpeed = (target.Tile.Center3 - firstEntrance.Position).Length / firstEntrance.TimeToWaypoint;
+
+			float movementSpeed = getMovementSpeed(target.Tile, source3, firstEntrance.Position);
 			// Correct it with the correct distance
 			firstEntrance.TimeToWaypoint = (firstEntrance.Position - source3).Length / movementSpeed;
 
@@ -572,7 +570,7 @@ namespace MHUrho.WorldMap {
 		//	foreach (var waypoint in path) {
 		//		totalTime += waypoint.TimeToWaypoint;
 
-		//		if (center) { 
+		//		if (center) {
 		//			Node node = GetTileNode(map.GetContainingTile(waypoint.Position));
 		//			waypointDict.Add(node, waypoint.TimeToWaypoint);
 		//		}
@@ -581,6 +579,20 @@ namespace MHUrho.WorldMap {
 		//	}
 
 		//	return waypointDict;
+		//}
+
+		//bool ProcessStartForIntersection(Node startNode, Vector2 source, IDictionary<Node, float> waypointDict)
+		//{
+		//	if (waypointDict.TryGetValue(startNode, out float targetTimeToStartNode)) {
+
+		//	}
+		//	else {
+		//		startNode.Neighbours.Process(this);
+
+				
+
+		//		return false;
+		//	}
 		//}
 	}
 

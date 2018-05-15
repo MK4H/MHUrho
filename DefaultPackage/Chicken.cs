@@ -130,10 +130,12 @@ namespace DefaultPackage
 		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
 
 			Vector3 diff = to - from;
-			
-			float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
-			angle = Math.Max(1 - angle * 2, 0.25f);
-			return Math.Max(MaxMovementSpeed * angle, 1);
+
+			//In radians
+			float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0) ;
+			// angle / Math.PI means how close to 90 degrees it is
+			float speedMod = Math.Max(1 - angle / (float)Math.PI, 0.25f);
+			return Math.Max(MaxMovementSpeed * speedMod, 1);
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {
