@@ -8,6 +8,7 @@ using MHUrho.Storage;
 using MHUrho.Control;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.PathFinding;
 using MHUrho.UnitComponents;
 using Urho;
 

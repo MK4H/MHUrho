@@ -10,7 +10,7 @@ using MHUrho.Helpers;
 using Urho;
 
 
-namespace MHUrho.WorldMap
+namespace MHUrho.PathFinding
 {
 
 

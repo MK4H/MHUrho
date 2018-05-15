@@ -4,7 +4,7 @@ using System.Text;
 using Urho;
 using MHUrho.Logic;
 
-namespace MHUrho.WorldMap
+namespace MHUrho.PathFinding
 {
 	public interface IPathFindAlg {
 

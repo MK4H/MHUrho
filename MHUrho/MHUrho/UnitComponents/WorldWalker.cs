@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using Urho;

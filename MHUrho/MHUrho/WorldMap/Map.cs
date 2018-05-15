@@ -11,6 +11,7 @@ using MHUrho.Storage;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.UnitComponents;
+using MHUrho.PathFinding;
 
 
 namespace MHUrho.WorldMap

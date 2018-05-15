@@ -13,7 +13,7 @@ using Priority_Queue;
 
 
 
-namespace MHUrho.WorldMap {
+namespace MHUrho.PathFinding {
 
 	/// <summary>
 	/// Predicate, if it is possible to go from source to the NEIGHBOURING target
@@ -275,7 +275,6 @@ namespace MHUrho.WorldMap {
 				return $"Center={Center}, Time={Time}, Heur={Heuristic}";
 			}
 		}
-
 
 		enum NodeState { Untouched, Opened, Closed };
 
