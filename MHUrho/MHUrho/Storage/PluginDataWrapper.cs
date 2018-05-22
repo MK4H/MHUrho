@@ -16,8 +16,11 @@ namespace MHUrho.Storage
 		/// </summary>
 		internal PluginData PluginData { get; private set; }
 
-		public PluginDataWrapper(PluginData pluginData) {
+		protected ILevelManager Level;
+
+		public PluginDataWrapper(PluginData pluginData, ILevelManager level) {
 			this.PluginData = pluginData;
+			this.Level = level;
 		}
 
 		public bool CanStoreAndLoad(Type t) {
@@ -42,7 +45,7 @@ namespace MHUrho.Storage
 				throw new
 					InvalidOperationException("Cannot get SequentialReader for data that are not stored in sequential format");
 			}
-			return new SequentialPluginDataReader(PluginData);
+			return new SequentialPluginDataReader(PluginData, Level);
 		}
 		/// <summary>
 		/// Creates a writer that stores data in sequential format,
@@ -55,7 +58,7 @@ namespace MHUrho.Storage
 			} else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
 				throw new InvalidOperationException("Cannot get sequentialWriter for data that are not sequential");
 			}
-			return new SequentialPluginDataWriter(PluginData);
+			return new SequentialPluginDataWriter(PluginData, Level);
 		}
 		/// <summary>
 		/// Creates a reader for wrapped data in Indexed format
@@ -67,7 +70,7 @@ namespace MHUrho.Storage
 				throw new
 					InvalidOperationException("Cannot get IndexedReader for data that are not stored in indexed format");
 			}
-			return new IndexedPluginDataReader(PluginData);
+			return new IndexedPluginDataReader(PluginData, Level);
 		}
 		/// <summary>
 		/// Creates a writer that writes data in Indexed format,
@@ -81,7 +84,7 @@ namespace MHUrho.Storage
 			else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
 				throw new InvalidOperationException("Cannot get IndexedWriter for data that are not Indexed");
 			}
-			return new IndexedPluginDataWriter(PluginData);
+			return new IndexedPluginDataWriter(PluginData, Level);
 		}
 		/// <summary>
 		/// Creates a reader for wrapped data in Named format
@@ -93,7 +96,7 @@ namespace MHUrho.Storage
 				throw new
 					InvalidOperationException("Cannot get NamedReader for data that are not stored in named format");
 			}
-			return new NamedPluginDataReader(PluginData);
+			return new NamedPluginDataReader(PluginData, Level);
 		}
 		/// <summary>
 		/// Creates a writer that writes data in Named format,
@@ -107,50 +110,50 @@ namespace MHUrho.Storage
 			else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Named) {
 				throw new InvalidOperationException("Cannot get NamedWriter for data that are not Named");
 			}
-			return new NamedPluginDataWriter(PluginData);
+			return new NamedPluginDataWriter(PluginData, Level);
 		}
 
-		protected static Dictionary<Type, Func<Data, object>> FromDataConvertors 
-			= new Dictionary<Type, Func<Data, object>> 
+		protected static Dictionary<Type, Func<Data, ILevelManager, object>> FromDataConvertors 
+			= new Dictionary<Type, Func<Data, ILevelManager, object>> 
 			{
 				//TODO: Type checks
-				{ typeof(float),(data) => data.Float },
-				{ typeof(double),(data) => data.Double },
-				{ typeof(int), (data) => data.Int },
-				{ typeof(long), (data) => data.Long },
-				{ typeof(uint), (data) => data.Uint },
-				{ typeof(ulong), (data) => data.Ulong },
-				{ typeof(bool), (data) => data.Bool },
-				{ typeof(string), (data) => data.String },
-				{ typeof(Google.Protobuf.ByteString), (data) => data.ByteArray },
-				{ typeof(IntVector2), (data) => data.IntVector2.ToIntVector2() },
-				{ typeof(IntVector3), (data) => data.IntVector3.ToIntVector3() },
-				{ typeof(Vector2), (data) => data.Vector2.ToVector2() },
-				{ typeof(Vector3), (data) => data.Vector3.ToVector3() },
+				{ typeof(float),(data,level) => data.Float },
+				{ typeof(double),(data, level) => data.Double },
+				{ typeof(int), (data, level) => data.Int },
+				{ typeof(long), (data, level) => data.Long },
+				{ typeof(uint), (data, level) => data.Uint },
+				{ typeof(ulong), (data, level) => data.Ulong },
+				{ typeof(bool), (data, level) => data.Bool },
+				{ typeof(string), (data, level) => data.String },
+				{ typeof(Google.Protobuf.ByteString), (data, level) => data.ByteArray },
+				{ typeof(IntVector2), (data, level) => data.IntVector2.ToIntVector2() },
+				{ typeof(IntVector3), (data, level) => data.IntVector3.ToIntVector3() },
+				{ typeof(Vector2), (data, level) => data.Vector2.ToVector2() },
+				{ typeof(Vector3), (data, level) => data.Vector3.ToVector3() },
 				//TODO: Lists
-				{ typeof(Path), (data) => Path.Load(data.Path) }
+				{ typeof(Path), (data, level) => Path.Load(data.Path, level) }
 				
 			};
 
-		protected static Dictionary<Type, Func<object, Data>> ToDataConvertors 
-			= new Dictionary<Type, Func<object, Data>> 
+		protected static Dictionary<Type, Func<object, ILevelManager, Data>> ToDataConvertors 
+			= new Dictionary<Type, Func<object, ILevelManager, Data>> 
 			{
 				//TODO: Type checks
-				{ typeof(float),(o) => new Data{Float = (float)o} },
-				{ typeof(double),(o) => new Data{Double = (double)o } },
-				{ typeof(int), (o) => new Data{Int = (int)o } },
-				{ typeof(long), (o) => new Data{Long = (long)o } },
-				{ typeof(uint), (o) => new Data{Uint = (uint)o } },
-				{ typeof(ulong), (o) => new Data{Ulong = (ulong)o } },
-				{ typeof(bool), (o) => new Data{Bool = (bool)o } },
-				{ typeof(string), (o) => new Data{String = (string)o } },
-				{ typeof(Google.Protobuf.ByteString), (o) => new Data{ByteArray = (Google.Protobuf.ByteString)o } },
-				{ typeof(IntVector2), (o) => new Data{ IntVector2 = ((IntVector2)o).ToStIntVector2()} },
-				{ typeof(IntVector3), (o) => new Data{ IntVector3 = ((IntVector3)o).ToStIntVector3() } },
-				{ typeof(Vector2), (o) => new Data{ Vector2 = ((Vector2)o).ToStVector2()} },
-				{ typeof(Vector3), (o) => new Data{ Vector3 = ((Vector3)o).ToStVector3()} },
+				{ typeof(float),(o, level) => new Data{Float = (float)o} },
+				{ typeof(double),(o, level) => new Data{Double = (double)o } },
+				{ typeof(int), (o, level) => new Data{Int = (int)o } },
+				{ typeof(long), (o, level) => new Data{Long = (long)o } },
+				{ typeof(uint), (o, level) => new Data{Uint = (uint)o } },
+				{ typeof(ulong), (o, level) => new Data{Ulong = (ulong)o } },
+				{ typeof(bool), (o, level) => new Data{Bool = (bool)o } },
+				{ typeof(string), (o, level) => new Data{String = (string)o } },
+				{ typeof(Google.Protobuf.ByteString), (o, level) => new Data{ByteArray = (Google.Protobuf.ByteString)o } },
+				{ typeof(IntVector2), (o, level) => new Data{ IntVector2 = ((IntVector2)o).ToStIntVector2()} },
+				{ typeof(IntVector3), (o, level) => new Data{ IntVector3 = ((IntVector3)o).ToStIntVector3() } },
+				{ typeof(Vector2), (o, level) => new Data{ Vector2 = ((Vector2)o).ToStVector2()} },
+				{ typeof(Vector3), (o, level) => new Data{ Vector3 = ((Vector3)o).ToStVector3()} },
 				//TODO: Lists
-				{ typeof(Path), (o) => new Data{ Path = ((Path)o).Save() } }
+				{ typeof(Path), (o, level) => new Data{ Path = ((Path)o).Save() } }
 				
 			};
 	}

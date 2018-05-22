@@ -32,7 +32,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			public static PluginData SaveState(WorldWalker walker) {
-				var storageData = new IndexedPluginDataWriter();
+				var storageData = new IndexedPluginDataWriter(walker.Level);
 				if (walker.Enabled) {
 					storageData.Store(1, true);
 
@@ -52,7 +52,7 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 				}
 
-				var indexedData = new IndexedPluginDataReader(storedData);
+				var indexedData = new IndexedPluginDataReader(storedData, level);
 				var activated = indexedData.Get<bool>(1);
 				Path path = null;
 				if (activated) {
@@ -202,7 +202,7 @@ namespace MHUrho.UnitComponents
 		/// <returns>Returns the current position and the part of the path that has not been reached yet</returns>
 		public IEnumerator<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
-			return path?.GetEnumerator(offset) ?? ((IEnumerable<Waypoint>)new [] {new Waypoint(Unit.Position + offset, 0, MovementType.Linear)}).GetEnumerator();
+			return path?.GetEnumerator(offset) ?? ((IEnumerable<Waypoint>)new [] {new Waypoint(new TempNode(Unit.Position), 0, MovementType.Linear).WithOffset(offset)}).GetEnumerator();
 		}
 
 

@@ -17,5 +17,7 @@ namespace MHUrho.PathFinding
 								Vector3 target,
 								GetTime getTimeBetweenNodes,
 								GetMinimalAproxTime getMinimalAproxTime);
+
+		INode GetNode(Vector3 position);
 	}
 }

@@ -26,7 +26,7 @@ namespace MHUrho.UnitComponents
 
 			public static PluginData SaveState(MovingMeeleAttacker movingMeele)
 			{
-				var writer = new SequentialPluginDataWriter();
+				var writer = new SequentialPluginDataWriter(movingMeele.Level);
 				writer.StoreNext(movingMeele.AttackIfInRange);
 				writer.StoreNext(movingMeele.AttacksPerSecond);
 				writer.StoreNext(movingMeele.TargetSearchRectangleSize);
@@ -46,7 +46,7 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 				}
 
-				var reader = new SequentialPluginDataReader(storedData);
+				var reader = new SequentialPluginDataReader(storedData, level);
 				var attackIfInRange = reader.GetNext<bool>();
 				var attacksPerSecond = reader.GetNext<float>();
 				var targetSearchRectangleSize = reader.GetNext<IntVector2>();

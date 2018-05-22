@@ -21,7 +21,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			public static PluginData SaveState(Clicker clicker) {
-				var storageData = new SequentialPluginDataWriter();
+				var storageData = new SequentialPluginDataWriter(clicker.Level);
 				return storageData.PluginData;
 			}
 

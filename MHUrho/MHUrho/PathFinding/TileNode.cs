@@ -90,7 +90,7 @@ namespace MHUrho.PathFinding
 
 		public override Waypoint GetWaypoint()
 		{
-			return new Waypoint(Position, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
+			return new Waypoint(this, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
 		public override TileNode GetTileNode()
@@ -114,21 +114,23 @@ namespace MHUrho.PathFinding
 			return outgoingEdges.TryGetValue(neighbour, out MovementType value) ? value : MovementType.Linear;
 		}
 
-		public AStarNode GetNode(Vector3 pointOnThisTile)
+		public AStarNode GetClosestNode(Vector3 pointOnThisTile)
 		{
+			AStarNode closestNode = this;
+			float minDist = Vector3.Distance(Position, pointOnThisTile);
 			foreach (var node in nodesOnThisTile) {
-				if (node.IsItThisNode(pointOnThisTile)) {
-					return node;
+				float newDist = Vector3.Distance(node.Position, pointOnThisTile);
+				if (newDist < minDist) {
+					closestNode = node;
+					minDist = newDist;
 				}
 			}
-			return this;
+
+			return closestNode;
+
 		}
 
-		public override bool IsItThisNode(Vector3 point)
-		{
-			return Tile.Map.GetContainingTile(point) == Tile &&
-					FloatHelpers.FloatsEqual(Tile.Map.GetHeightAt(point.X, point.Z), point.Y);
-		}
+	
 
 
 

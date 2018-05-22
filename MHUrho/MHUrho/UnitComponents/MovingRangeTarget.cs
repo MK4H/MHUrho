@@ -24,7 +24,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			public static PluginData SaveState(MovingRangeTarget movingRangeTarget) {
-				var sequentialData = new SequentialPluginDataWriter();
+				var sequentialData = new SequentialPluginDataWriter(movingRangeTarget.Level);
 				sequentialData.StoreNext(movingRangeTarget.InstanceID);
 				sequentialData.StoreNext(movingRangeTarget.Enabled);
 				return sequentialData.PluginData;
@@ -37,7 +37,7 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 				}
 
-				var sequentialData = new SequentialPluginDataReader(storedData);
+				var sequentialData = new SequentialPluginDataReader(storedData, level);
 				sequentialData.MoveNext();
 				int instanceID = sequentialData.GetCurrent<int>();
 				sequentialData.MoveNext();

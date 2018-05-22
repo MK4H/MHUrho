@@ -55,7 +55,7 @@ namespace MHUrho.Logic
 														TypeID = projectile.ProjectileType.ID,
 														UserPlugin = new PluginData()
 													};
-				projectile.ProjectilePlugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin));
+				projectile.ProjectilePlugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin, projectile.Level));
 
 				return stProjectile;
 			}
@@ -82,7 +82,7 @@ namespace MHUrho.Logic
 
 				Projectile.ProjectilePlugin.LoadState(level,
 											Projectile,
-											new PluginDataWrapper(storedProjectile.UserPlugin));
+											new PluginDataWrapper(storedProjectile.UserPlugin, level));
 
 
 			}

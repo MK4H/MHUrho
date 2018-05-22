@@ -24,7 +24,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			public static PluginData SaveState(StaticRangeTarget staticRangeTarget) {
-				var sequentialData = new SequentialPluginDataWriter();
+				var sequentialData = new SequentialPluginDataWriter(staticRangeTarget.Level);
 				sequentialData.StoreNext(staticRangeTarget.InstanceID);
 				sequentialData.StoreNext(staticRangeTarget.CurrentPosition);
 				return sequentialData.PluginData;
@@ -37,7 +37,7 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 				}
 
-				var sequentialData = new SequentialPluginDataReader(storedData);
+				var sequentialData = new SequentialPluginDataReader(storedData, level);
 				sequentialData.MoveNext();
 				int instanceID = sequentialData.GetCurrent<int>();
 				sequentialData.MoveNext();
@@ -117,7 +117,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		public override IEnumerator<Waypoint> GetWaypoints() {
-			yield return new Waypoint(CurrentPosition, 0, MovementType.Linear);
+			yield return new Waypoint(new TempNode(CurrentPosition), 0, MovementType.Linear);
 		}
 
 

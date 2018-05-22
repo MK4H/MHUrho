@@ -6,7 +6,7 @@ using Urho;
 namespace MHUrho.PathFinding
 {
 	[Flags]
-	public enum NodeType {None = 0, Tile = 1, TileEdge = 2, Building = 4}
+	public enum NodeType {None = 0, Tile = 1, TileEdge = 2, Building = 4, Temp = 8}
 
 
 	public interface INode

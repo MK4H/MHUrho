@@ -82,7 +82,7 @@ namespace MHUrho.Logic
 													Location = building.Location.ToStIntVector2(),
 													UserPlugin = new PluginData()
 												};
-				building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin));
+				building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin, building.Level));
 
 				foreach (var component in building.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -117,7 +117,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Building.BuildingPlugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin));
+				Building.BuildingPlugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin, level));
 			}
 
 			public void FinishLoading() {

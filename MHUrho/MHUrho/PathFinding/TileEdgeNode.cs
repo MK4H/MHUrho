@@ -62,14 +62,10 @@ namespace MHUrho.PathFinding
 			}
 		}
 
-		public override bool IsItThisNode(Vector3 point)
-		{
-			return point.IsNear(Position, 0.001f);
-		}
 
 		public override Waypoint GetWaypoint()
 		{
-			return new Waypoint(Position, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
+			return new Waypoint(this, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
 

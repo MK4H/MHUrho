@@ -25,7 +25,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			public static PluginData SaveState(BallisticProjectile ballisticProjectile) {
-				var sequentialData = new SequentialPluginDataWriter();
+				var sequentialData = new SequentialPluginDataWriter(ballisticProjectile.Level);
 				sequentialData.StoreNext(ballisticProjectile.Movement);
 				sequentialData.StoreNext(ballisticProjectile.Enabled);
 				return sequentialData.PluginData;
@@ -38,7 +38,7 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
 				}
 
-				var sequentialData = new SequentialPluginDataReader(storedData);
+				var sequentialData = new SequentialPluginDataReader(storedData, level);
 				var movement = sequentialData.GetCurrent<Vector3>();
 				sequentialData.MoveNext();
 				var enabled = sequentialData.GetCurrent<bool>();

@@ -48,7 +48,7 @@ namespace MHUrho.WorldMap
 		}
 
 		public IEnumerator<Waypoint> GetWaypoints() {
-			yield return new Waypoint(CurrentPosition, 0, MovementType.Linear);
+			yield return new Waypoint(new TempNode(CurrentPosition), 0, MovementType.Linear);
 		}
 
 		public void AddShooter(RangeTargetComponent.IShooter shooter) {

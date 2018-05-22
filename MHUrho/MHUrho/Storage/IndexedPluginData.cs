@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Logic;
 
 namespace MHUrho.Storage
 {
@@ -11,7 +12,7 @@ namespace MHUrho.Storage
 			return PluginData.Indexed.DataMap.ContainsKey(index);
 		}
 
-		protected IndexedPluginDataWrapper(PluginData pluginData) : base(pluginData) {
+		protected IndexedPluginDataWrapper(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			//TODO: Check that pluginData is indexed
 			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
 				throw new ArgumentException("pluginData was not Indexed");
@@ -24,14 +25,14 @@ namespace MHUrho.Storage
 		
 
 		public void Store<T>(int index, T value) {
-			PluginData.Indexed.DataMap.Add(index, ToDataConvertors[typeof(T)](value));
+			PluginData.Indexed.DataMap.Add(index, ToDataConvertors[typeof(T)](value, Level));
 		}
 
-		public IndexedPluginDataWriter(PluginData pluginData) : base(pluginData) {
+		public IndexedPluginDataWriter(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			//TODO: Check that pluginData is indexed
 		}
 
-		public IndexedPluginDataWriter() : base(new PluginData{ Indexed = new IndexedPluginData()}) {
+		public IndexedPluginDataWriter(ILevelManager level) : base(new PluginData{ Indexed = new IndexedPluginData()}, level) {
 
 		}
 	}
@@ -39,19 +40,19 @@ namespace MHUrho.Storage
 	public class IndexedPluginDataReader : IndexedPluginDataWrapper {
 
 		public T Get<T>(int index) {
-			return (T) FromDataConvertors[typeof(T)](PluginData.Indexed.DataMap[index]);
+			return (T) FromDataConvertors[typeof(T)](PluginData.Indexed.DataMap[index], Level);
 		}
 
 		public bool TryGetValue<T>(int index, out T value) {
 			value = default(T);
 			if (PluginData.Indexed.DataMap.TryGetValue(index, out Data dataValue)) {
-				value = (T)FromDataConvertors[typeof(T)](dataValue);
+				value = (T)FromDataConvertors[typeof(T)](dataValue, Level);
 				return true;
 			}
 			return false;
 		}
 
-		public IndexedPluginDataReader(PluginData pluginData) : base(pluginData) {
+		public IndexedPluginDataReader(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			//TODO: Check that pluginData is indexed
 		}
 	}

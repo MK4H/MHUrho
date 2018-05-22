@@ -44,16 +44,9 @@ namespace MHUrho.PathFinding
 			}
 		}
 
-		public override bool IsItThisNode(Vector3 point)
-		{
-			throw new NotImplementedException();
-		}
-
-
-
 		public override Waypoint GetWaypoint()
 		{
-			return new Waypoint(Position,
+			return new Waypoint(this,
 								Time - PreviousNode.Time,
 								PreviousNode.GetMovementTypeToNeighbour(this));
 		}

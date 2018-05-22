@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Logic;
 
 
 namespace MHUrho.Storage
@@ -9,7 +10,7 @@ namespace MHUrho.Storage
 
 		public int Count => PluginData.Sequential.Data.Count;
 
-		protected SequentialPluginDataWrapper(PluginData pluginData) : base(pluginData) {
+		protected SequentialPluginDataWrapper(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
 				throw new ArgumentException("pluginData was not Sequential");
 			}
@@ -19,14 +20,14 @@ namespace MHUrho.Storage
 	public class SequentialPluginDataWriter : SequentialPluginDataWrapper {
 
 		public void StoreNext<T>(T value) {
-			PluginData.Sequential.Data.Add(ToDataConvertors[typeof(T)](value));
+			PluginData.Sequential.Data.Add(ToDataConvertors[typeof(T)](value, Level));
 		}
 
-		public SequentialPluginDataWriter() : base(new PluginData { Sequential = new SequentialPluginData() }) {
+		public SequentialPluginDataWriter(ILevelManager level) : base(new PluginData { Sequential = new SequentialPluginData() }, level) {
 
 		}
 
-		public SequentialPluginDataWriter(PluginData pluginData) : base(pluginData) {
+		public SequentialPluginDataWriter(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 
 		}
 
@@ -43,7 +44,7 @@ namespace MHUrho.Storage
 		}
 
 		public T GetCurrent<T>() {
-			return(T) FromDataConvertors[typeof(T)](dataEnumerator.Current);
+			return(T) FromDataConvertors[typeof(T)](dataEnumerator.Current, Level);
 		}
 
 		/// <summary>
@@ -62,7 +63,7 @@ namespace MHUrho.Storage
 			this.dataEnumerator = PluginData.Sequential.Data.GetEnumerator();
 		}
 
-		public SequentialPluginDataReader(PluginData pluginData) : base(pluginData) {
+		public SequentialPluginDataReader(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			this.dataEnumerator = pluginData.Sequential.Data.GetEnumerator();
 		}
 

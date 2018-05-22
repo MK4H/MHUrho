@@ -103,6 +103,11 @@ namespace MHUrho.PathFinding {
 			return finalList;
 		}
 
+		public INode GetNode(Vector3 position)
+		{
+			return GetTileNode(position).GetClosestNode(position);
+		}
+
 		public TileNode GetTileNode(ITile tile)
 		{
 			return tile == null ? null : nodeMap[GetTileNodeIndex(tile.MapLocation.X, tile.MapLocation.Y)];
@@ -173,8 +178,8 @@ namespace MHUrho.PathFinding {
 							GetTime getTimeBetweenNodes,
 							GetMinimalAproxTime getMinimalTime) {
 
-			AStarNode startNode = GetTileNode(source).GetNode(source);
-			targetNode = GetTileNode(target).GetNode(target);
+			AStarNode startNode = GetTileNode(source).GetClosestNode(source);
+			targetNode = GetTileNode(target).GetClosestNode(target);
 			this.getTime = getTimeBetweenNodes;
 			this.getMinimalTime = getMinimalTime;
 
@@ -232,9 +237,14 @@ namespace MHUrho.PathFinding {
 				default:
 					//Default to linear movement
 					Waypoint firstWaypoint = waypoints[0];
-					waypoints[0] = new Waypoint(firstWaypoint.Position,
-												getMinimalTime(source, firstWaypoint.Position),
-												firstWaypoint.MovementType);
+					TempNode sourceNode = new TempNode(source);
+					if (getTime(sourceNode, firstWaypoint.Node, out float time)) {
+						waypoints[0] = firstWaypoint.WithTimeToWaypointSet(time);
+					}
+					else {
+						waypoints[0] = firstWaypoint.WithTimeToWaypointSet(getMinimalTime(source, firstWaypoint.Position));
+					}
+					
 					break;
 			}
 
@@ -261,12 +271,12 @@ namespace MHUrho.PathFinding {
 		{
 			//Handle total equality, where Normalize would produce NaN
 			if (target.Position == source) {
-				return Path.CreateFrom(source, new List<Waypoint> {new Waypoint(source, 0, MovementType.Linear)});
+				return Path.CreateFrom(source, new List<Waypoint> {new Waypoint(target, 0, MovementType.Linear)});
 			}
 
 
 			float distance = Vector3.Distance(target.Position, source);
-			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(target.Position, getMinimalTime(source, target.Position), MovementType.Linear)};
+			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(target, getMinimalTime(source, target.Position), MovementType.Linear)};
 			return Path.CreateFrom(source, waypoints);
 		}
 

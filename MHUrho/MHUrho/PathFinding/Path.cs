@@ -51,10 +51,10 @@ namespace MHUrho.PathFinding
 			return storedPath;
 		}
 
-		public static Path Load(StPath storedPath) {
+		public static Path Load(StPath storedPath, ILevelManager level) {
 			var newPath = new Path();
 			foreach (var waypoint in storedPath.Waypoints) {
-				newPath.waypoints.Add(new Waypoint(waypoint));
+				newPath.waypoints.Add(new Waypoint(waypoint, level));
 			}
 			return newPath;
 		}
@@ -82,15 +82,13 @@ namespace MHUrho.PathFinding
 		{
 			switch (TargetWaypoint.MovementType) {
 				case MovementType.Teleport:
-					TargetWaypoint = new Waypoint(TargetWaypoint.Position,
-												TargetWaypoint.TimeToWaypoint - secondsFromLastUpdate,
-												TargetWaypoint.MovementType);
+					TargetWaypoint = TargetWaypoint.WithTimeToWapointChanged(-secondsFromLastUpdate);
 					break;
 				default:
 					//Default to linear movement
 					float speed = Vector3.Distance(newPosition, currentPosition) / secondsFromLastUpdate;
 					float distToTarget = Vector3.Distance(newPosition, TargetWaypoint.Position);
-					TargetWaypoint = new Waypoint(TargetWaypoint.Position, distToTarget / speed, TargetWaypoint.MovementType);
+					TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(distToTarget / speed);
 					break;
 			}
 
@@ -108,7 +106,7 @@ namespace MHUrho.PathFinding
 		/// <returns>If there was next waypoint to target, or this was the end</returns>
 		public bool TargetNextWaypoint()
 		{
-			TargetWaypoint = new Waypoint(TargetWaypoint.Position, 0f, TargetWaypoint.MovementType);
+			TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(0.0f);
 			if (targetWaypointIndex >= waypoints.Count - 1) {
 				targetWaypointIndex = waypoints.Count;
 				return false;
@@ -124,7 +122,7 @@ namespace MHUrho.PathFinding
 		/// <returns></returns>
 		public IEnumerator<Waypoint> GetEnumerator()
 		{
-			yield return new Waypoint(currentPosition, 0, MovementType.Linear);
+			yield return new Waypoint(new TempNode(currentPosition), 0, MovementType.Linear);
 			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
 				yield return waypoints[i];
 			}
@@ -132,10 +130,9 @@ namespace MHUrho.PathFinding
 
 		public IEnumerator<Waypoint> GetEnumerator(Vector3 offset)
 		{
-			yield return new Waypoint(currentPosition + offset, 0, MovementType.Linear);
+			yield return new Waypoint(new TempNode(currentPosition), 0, MovementType.Linear).WithOffset(offset);
 			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
-				Waypoint current = waypoints[i];
-				yield return new Waypoint(current.Position + offset,current.TimeToWaypoint, current.MovementType);
+				yield return waypoints[i].WithOffset(offset);
 			}
 		}
 

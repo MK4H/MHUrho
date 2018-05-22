@@ -43,7 +43,7 @@ namespace MHUrho.Logic
 												select friend.ID);
 
 				storedPlayer.UserPlugin = new PluginData();
-				player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin));
+				player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.level));
 
 				return storedPlayer;
 			}

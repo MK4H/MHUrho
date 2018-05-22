@@ -59,9 +59,6 @@ namespace MHUrho.PathFinding
 											Func<Vector3, float> heuristic);
 
 
-
-		public abstract bool IsItThisNode(Vector3 point);
-
 		/// <summary>
 		/// Returns waypoints to get from <see cref="previousNode"/> to this node
 		/// </summary>

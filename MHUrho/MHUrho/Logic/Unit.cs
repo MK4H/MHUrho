@@ -78,7 +78,7 @@ namespace MHUrho.Logic
 
 
 				storedUnit.UserPlugin = new PluginData();
-				unit.UnitPlugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin));
+				unit.UnitPlugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin, unit.Level));
 
 				foreach (var component in unit.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -163,7 +163,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Unit.UnitPlugin.LoadState(level, Unit, new PluginDataWrapper(storedUnit.UserPlugin));
+				Unit.UnitPlugin.LoadState(level, Unit, new PluginDataWrapper(storedUnit.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
