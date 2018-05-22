@@ -16,7 +16,7 @@ using Priority_Queue;
 namespace MHUrho.PathFinding {
 
 	
-	public delegate bool GetTime(AStarNode from, AStarNode to, out float time);
+	public delegate bool GetTime(INode from, INode to, out float time);
 
 	/// <summary>
 	/// Used as a heuristic for the A* algorithm
@@ -44,7 +44,7 @@ namespace MHUrho.PathFinding {
 
 		readonly TileNode[] nodeMap;
 
-		readonly List<IProcessingNode> touchedNodes;
+		readonly List<AStarNode> touchedNodes;
 		readonly FastPriorityQueue<AStarNode> priorityQueue;
 		AStarNode targetNode;
 		GetTime getTime;
@@ -53,7 +53,7 @@ namespace MHUrho.PathFinding {
 		public AStar(IMap map) {
 			this.Map = map;
 			nodeMap = new TileNode[map.Width * map.Length];
-			touchedNodes = new List<IProcessingNode>();
+			touchedNodes = new List<AStarNode>();
 			priorityQueue = new FastPriorityQueue<AStarNode>(map.Width * map.Length / 4);
 
 			FillNodeMap();
@@ -158,50 +158,6 @@ namespace MHUrho.PathFinding {
 
 		//		}
 
-		void ProcessEdge(IProcessingNode source, IProcessingNode target)
-		{
-
-		
-			//If already opened or closed
-			if (target.State == NodeState.Closed) {
-				//Already closed, either not passable or the best path there can be found
-				return;
-
-			}
-			else if (target.State == NodeState.Opened) {
-				//if it is closer through the current sourceNode
-
-				if (getTime(source.ThisNode, target.ThisNode, out float timeToTarget)) {
-					float newTime = source.Time + timeToTarget;
-					if (newTime < target.Time) {
-						target.Time = newTime;
-						target.PreviousNode = source;
-						priorityQueue.UpdatePriority(target.ThisNode, target.Value);
-					}
-				}
-
-			}
-			else /*NodeState.Untouched*/{
-				// Compute the heuristic for the new tile
-				float heuristic = Heuristic(target.Position);
-
-				if (!getTime(source.ThisNode, target.ThisNode, out float timeToTarget)) {
-					//Unit cannot pass to target node from source node
-					return;
-				}
-				else {
-					target.State = NodeState.Opened;
-					target.Heuristic = heuristic;
-					target.PreviousNode = source;
-					target.Time = source.Time + timeToTarget;
-
-					//Unit can pass through this tile, enqueue it
-					Enqueue(target);
-				}
-
-			}
-		}
-
 		float Heuristic(Vector3 from)
 		{
 			return getMinimalTime(from.XZ(), targetNode.Position.XZ());
@@ -240,25 +196,13 @@ namespace MHUrho.PathFinding {
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				foreach (var neighbour in currentNode.GetNeighbours()) {
-					ProcessEdge(currentNode, neighbour);
-				}
-
-				
-
-				currentNode.State = NodeState.Closed;
+				currentNode.ProcessNeighbours(priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, Heuristic);
 			}
 			//Did not find path
 			return null;
 		}
 
 
-
-		void Enqueue(IProcessingNode node)
-		{
-			priorityQueue.Enqueue(node.ThisNode, node.Value);
-			touchedNodes.Add(node);
-		}
 
 		/// <summary>
 		/// Reconstructs the path when given the last Node
@@ -277,7 +221,7 @@ namespace MHUrho.PathFinding {
 
 			List<Waypoint> waypoints = new List<Waypoint>();
 			for (int i = 1; i < nodes.Count; i++) {
-				waypoints.AddRange(nodes[i].GetWaypoints());
+				waypoints.Add(nodes[i].GetWaypoint());
 			}
 
 			switch (waypoints[0].MovementType) {
@@ -328,7 +272,7 @@ namespace MHUrho.PathFinding {
 
 		void Reset()
 		{
-			foreach (var node in touchedNodes) {
+			foreach (IProcessingNode node in touchedNodes) {
 				node.Reset();
 			}
 

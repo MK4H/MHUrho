@@ -78,7 +78,7 @@ namespace MHUrho.UnitComponents
 
 		public interface INotificationReceiver {
 
-			bool GetTime(AStarNode from, AStarNode to, out float time);
+			bool GetTime(INode from, INode to, out float time);
 
 			float GetMinimalAproximatedTime(Vector3 from, Vector3 to);
 

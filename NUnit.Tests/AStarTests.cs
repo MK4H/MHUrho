@@ -294,6 +294,7 @@ namespace NUnit.Tests {
 			ITile[][] map;
 
 			#region NOT USED IN TEST
+			public ILevelManager LevelManager => throw new NotImplementedException();
 
 			public bool IsInside(Vector3 point) {
 				throw new NotImplementedException();
@@ -366,11 +367,6 @@ namespace NUnit.Tests {
 			public ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner) {
 				throw new NotImplementedException();
 			}
-
-			public ITile GetContainingTile(Vector3 point) {
-				throw new NotImplementedException();
-			}
-
 
 			public ITile GetContainingTile(float x, float z)
 			{
@@ -584,9 +580,36 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public bool IsInside(Vector2 point)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3 GetUpDirectionAt(Vector2 position)
+			{
+				throw new NotImplementedException();
+			}
+
+			public bool IsInside(float x, float z)
+			{
+				throw new NotImplementedException();
+			}
+
+
+
+
+			public float GetHeightAt(float x, float y)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3 GetUpDirectionAt(float x, float y)
+			{
+				throw new NotImplementedException();
+			}
 			#endregion
 
-			
+
 
 			public IntVector2 TopLeft { get; private set; }
 
@@ -609,29 +632,22 @@ namespace NUnit.Tests {
 
 			public int Bottom => BottomRight.Y;
 
-			public ILevelManager LevelManager => throw new NotImplementedException();
+
 			public event Action<ITile> TileHeightChanged;
 
 			public bool IsInside(int x, int z) {
-				throw new NotImplementedException();
+				return x >= Left && x <= Right && z >= Top && z <= Bottom;
 			}
 
-			public bool IsInside(float x, float z) {
-				throw new NotImplementedException();
-			}
 
-			public bool IsInside(IntVector2 point) {
-				return point.X >= Left && point.X <= Right && point.Y >= Top && point.Y <= Bottom;
-			}
+			
 
-			public bool IsInside(Vector2 point) {
-				throw new NotImplementedException();
-			}
-
-			public Vector3 GetUpDirectionAt(Vector2 position)
+			public bool IsInside(IntVector2 point)
 			{
-				throw new NotImplementedException();
+				return IsInside(point.X, point.Y);
 			}
+
+
 
 			public Vector3 GetBorderBetweenTiles(ITile tile1, ITile tile2) {
 				Vector2 borderPosition = (tile1.Center + tile2.Center) / 2;
@@ -644,8 +660,13 @@ namespace NUnit.Tests {
 				return GetTileByMapLocation(topLeftX, topLeftZ);
 			}
 
+			public ITile GetContainingTile(Vector3 point)
+			{
+				return GetContainingTile(point.XZ2());
+			}
+
 			public ITile GetTileByMapLocation(int x, int z) {
-				return map[x][z];
+				return IsInside(x,z) ? map[x][z] : null;
 			}
 
 			public ITile GetTileByMapLocation(IntVector2 mapLocation) {
@@ -657,15 +678,6 @@ namespace NUnit.Tests {
 				return 0;
 			}
 
-			public float GetHeightAt(float x, float y)
-			{
-				throw new NotImplementedException();
-			}
-
-			public Vector3 GetUpDirectionAt(float x, float y)
-			{
-				throw new NotImplementedException();
-			}
 
 			public static TestMap GetTestMapRandomSpeeds(int width, int height, Random rnd) {
 
@@ -805,26 +817,26 @@ namespace NUnit.Tests {
 
 			//Top
 
-			List<ITile> path = aStar.GetTileList(allOneSpeed.GetTileByTopLeftCorner(allOneSpeed.TopLeft).Center3,
+			List<ITile> path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft).Center3,
 												allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
-												(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-													time = 1;
+												(AStarNode source, AStarNode target, out float time) => {
+													time = Vector3.Distance(source.Position, target.Position);
 													return true;
 												},
-												(dontCare1, dontCare2) => 1);
+												(source, target) => Vector3.Distance(source, target));
 			List<ITile> expected = new List<ITile>();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(i,0));
 			}
 			CollectionAssert.AreEqual(expected, path,"Fail going from topLeft to the topRight");
 
-			path = aStar.GetTileList(allOneSpeed.GetTileByTopLeftCorner(allOneSpeed.TopLeft).Center3,
+			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft).Center3,
 									allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
-									(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-										time = 1;
+									(AStarNode source, AStarNode target, out float time) => {
+										time = Vector3.Distance(source.Position, target.Position);
 										return true;
 									},
-									(dontCare1, dontCare2) => 1);
+									(source, target) => Vector3.Distance(source, target));
 			expected.Clear();
 			for (int i = 0; i <= allOneSpeed.Right; i++) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(0, i));
@@ -834,11 +846,11 @@ namespace NUnit.Tests {
 
 			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
 									allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
-									(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-										time = 1;
+									(AStarNode source, AStarNode target, out float time) => {
+										time = Vector3.Distance(source.Position, target.Position);
 										return true;
 									},
-									(dontCare1, dontCare2) => 1);
+									(source, target) => Vector3.Distance(source, target));
 			expected.Clear();
 			for (int i = allOneSpeed.Right; i >= allOneSpeed.Left; i--) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(i, allOneSpeed.Bottom));
@@ -847,11 +859,11 @@ namespace NUnit.Tests {
 
 			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
 									allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
-									(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-										time = 1;
+									(AStarNode source, AStarNode target, out float time) => {
+										time = Vector3.Distance(source.Position, target.Position);
 										return true;
 									},
-									(dontCare1, dontCare2) => 1);
+									(source, target) => Vector3.Distance(source, target));
 			expected.Clear();
 			for (int i = allOneSpeed.Bottom; i >= allOneSpeed.Top; i--) {
 				expected.Add(allOneSpeed.GetTileByMapLocation(allOneSpeed.Right, i));
@@ -870,11 +882,11 @@ namespace NUnit.Tests {
 
 			Path path = aStar.FindPath(new Vector3(0.5f, 0, 0.5f), 
 										allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
-										(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-											time = 1;
+										(AStarNode source, AStarNode target, out float time) => {
+											time = Vector3.Distance(source.Position, target.Position);
 											return true;
 										},
-										(dontCare1, dontCare2) => 1);
+										(source, target) => Vector3.Distance(source, target));
 			var pathEnumerator = path.GetEnumerator();
 			Vector3 position = new Vector3(0.5f, 0, 0.5f);
 			for (int i = 0; i < allOneSpeed.Right * 2 + 1; i++) {
@@ -887,11 +899,11 @@ namespace NUnit.Tests {
 
 			path = aStar.FindPath(new Vector3(0.5f, 0, 0.5f), 
 								allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
-								(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-									time = 1;
+								(AStarNode source, AStarNode target, out float time) => {
+									time = Vector3.Distance(source.Position, target.Position);
 									return true;
 								},
-								(dontCare1, dontCare2) => 1);
+								(source, target) => Vector3.Distance(source, target));
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3(0.5f, 0, 0.5f);
 			for (int i = 0; i < allOneSpeed.Bottom * 2 + 1; i++) {
@@ -905,11 +917,11 @@ namespace NUnit.Tests {
 
 			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
 								allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
-								(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-									time = 1;
+								(AStarNode source, AStarNode target, out float time) => {
+									time = Vector3.Distance(source.Position, target.Position);
 									return true;
 								},
-								(dontCare1, dontCare2) => 1);
+								(source, target) => Vector3.Distance(source, target));
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3( allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom + 0.5f);
 			for (int i = 0; i < allOneSpeed.Right * 2 + 1; i++) {
@@ -922,11 +934,11 @@ namespace NUnit.Tests {
 
 			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
 								allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
-								(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-									time = 1;
+								(AStarNode source, AStarNode target, out float time) => {
+									time = Vector3.Distance(source.Position, target.Position);
 									return true;
 								},
-								(dontCare1, dontCare2) => 1);
+								(source, target) => Vector3.Distance(source, target));
 			pathEnumerator = path.GetEnumerator();
 			position = new Vector3(allOneSpeed.Right + 0.5f, 0, allOneSpeed.Bottom + 0.5f);
 			for (int i = 0; i < allOneSpeed.Bottom * 2 + 1; i++) {
@@ -964,11 +976,11 @@ namespace NUnit.Tests {
 
 			Path path = aStar.FindPath(new Vector3(10.5f, 0, 10.5f),
 										allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)).Center3,
-										(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-											time = 1;
+										(AStarNode source, AStarNode target, out float time) => {
+											time = Vector3.Distance(source.Position, target.Position);
 											return true;
 										},
-										(dontCare1, dontCare2) => 1);
+										(source, target) => Vector3.Distance(source, target));
 
 			Assert.IsNotNull(path);
 			var enumerator = path.GetEnumerator();
@@ -991,11 +1003,11 @@ namespace NUnit.Tests {
 
 			var path = aStar.GetTileList(new Vector3(10.5f, 0, 10.5f), 
 										allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)).Center3,
-										(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-											time = 1;
+										(AStarNode source, AStarNode target, out float time) => {
+											time = Vector3.Distance(source.Position, target.Position);
 											return true;
 										},
-										(dontCare1, dontCare2) => 1);
+										(source, target) => Vector3.Distance(source, target));
 
 			Assert.IsNotNull(path);
 			CollectionAssert.AreEqual(new List<ITile> {allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))}, path);
@@ -1011,14 +1023,14 @@ namespace NUnit.Tests {
 
 			Path path = null;
 			Vector3 position = new Vector3();
-			for (int i = 0; i < 100000; i++) {
+			for (int i = 0; i < 1000000; i++) {
 				path = aStar.FindPath(new Vector3(0.5f, 0, 0.5f),
 									allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
-									(AStarNode dontCare1, AStarNode dontCare2, out float time) => {
-										time = 1;
+									(AStarNode source, AStarNode target, out float time) => {
+										time = Vector3.Distance(source.Position, target.Position);
 										return true;
 									},
-									(dontCare1, dontCare2) => 1);
+									(source, target) => Vector3.Distance(source, target));
 				position += path.TargetWaypoint.Position;
 			}
 

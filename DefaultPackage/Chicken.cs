@@ -103,8 +103,7 @@ namespace DefaultPackage
 
 		public bool GetTime(AStarNode from, AStarNode to, out float time)
 		{
-			if (from.GetType() == typeof(TileNode) && to.GetType() == typeof(EdgeNode) ||
-				from.GetType() == typeof(EdgeNode) && to.GetType() == typeof(TileNode)) {
+			if () {
 
 				Vector3 diff = to.Position - from.Position;
 

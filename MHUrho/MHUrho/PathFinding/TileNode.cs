@@ -4,38 +4,14 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using Priority_Queue;
 using Urho;
 
 namespace MHUrho.PathFinding
 {
-    public class TileNode : AStarNode
+    public class TileNode : AStarNode, ITileNode
     {
-		public struct TileEdge {
-
-			public Vector3 EdgeCenter;
-			public float SourceToCenterDist;
-			public float CenterToTargetDist;
-
-			public TileEdge(TileNode source, TileNode target, IMap map)
-			{
-				EdgeCenter = new Vector3();
-				SourceToCenterDist = 0;
-				CenterToTargetDist = 0;
-				FixHeight(source, target, map);
-			}
-
-			public void FixHeight(TileNode source, TileNode target,IMap map)
-			{
-				EdgeCenter = map.GetBorderBetweenTiles(source.Tile, target.Tile);
-				SourceToCenterDist = (EdgeCenter - source.Position).Length;
-				CenterToTargetDist = (target.Position - EdgeCenter).Length;
-			}
-
-		}
-
-		public IReadOnlyDictionary<TileNode, EdgeNode> EdgeToNeighbour => edgeToNeighbour;
-		readonly Dictionary<TileNode, EdgeNode> edgeToNeighbour;
-		List<AStarNode> otherNeighbours;
+		public override NodeType NodeType => NodeType.Tile;
 
 		public ITile Tile { get; private set; }
 
@@ -43,14 +19,20 @@ namespace MHUrho.PathFinding
 
 		readonly List<AStarNode> nodesOnThisTile;
 
+		readonly Dictionary<TileNode, TileEdgeNode> edgeToNeighbourTile;
+
+		readonly IDictionary<AStarNode, MovementType> outgoingEdges;
+
+		
+
 		public TileNode(ITile tile, AStar aStar) 
 			:base(aStar)
 		{
 			this.Tile = tile;
 			this.Position = Tile.Center3;
 			nodesOnThisTile = new List<AStarNode>();
-			edgeToNeighbour = new Dictionary<TileNode, EdgeNode>();
-			otherNeighbours = new List<AStarNode>();
+			edgeToNeighbourTile = new Dictionary<TileNode, TileEdgeNode>();
+			outgoingEdges = new Dictionary<AStarNode, MovementType>();
 		}
 
 		public void ConnectNeighbours()
@@ -73,10 +55,13 @@ namespace MHUrho.PathFinding
 			}
 
 			foreach (var tileNeighbour in newTileNeighbours) {
-				if (!edgeToNeighbour.ContainsKey(tileNeighbour)) {
-					EdgeNode edge = new EdgeNode(this, tileNeighbour, AStar);
-					edgeToNeighbour.Add(tileNeighbour, edge);
-					tileNeighbour.edgeToNeighbour.Add(this, edge);
+				if (!edgeToNeighbourTile.ContainsKey(tileNeighbour)) {
+					TileEdgeNode tileEdge = new TileEdgeNode(this, tileNeighbour, AStar);
+					edgeToNeighbourTile.Add(tileNeighbour, tileEdge);
+					tileNeighbour.edgeToNeighbourTile.Add(this, tileEdge);
+
+					outgoingEdges.Add(tileEdge, MovementType.Linear);
+					tileNeighbour.outgoingEdges.Add(tileEdge, MovementType.Linear);
 				}
 			}
 		}
@@ -84,21 +69,30 @@ namespace MHUrho.PathFinding
 		public void FixHeights()
 		{
 			Position = Tile.Center3;
-			foreach (var tileNeighbour in edgeToNeighbour.Keys) {
-				edgeToNeighbour[tileNeighbour].FixHeight();
+			foreach (var tileNeighbour in edgeToNeighbourTile.Keys) {
+				edgeToNeighbourTile[tileNeighbour].FixHeight();
 			}
 		}
 
-		public override IEnumerable<Waypoint> GetWaypoints()
+		public override void ProcessNeighbours(FastPriorityQueue<AStarNode> priorityQueue,
+												List<AStarNode> touchedNodes,
+												AStarNode targetNode,
+												GetTime getTime,
+												Func<Vector3, float> heuristic)
 		{
-			if (previousNode.GetType() == typeof(EdgeNode)) {
-				yield return new Waypoint(Position, Time - previousNode.Time, MovementType.Linear);
-			}
-			else {
-				foreach (var waypoint in previousNode.GetToNode(this)) {
-					yield return waypoint;
+			foreach (var neighbour in outgoingEdges.Keys) {
+				if (neighbour.NodeType == NodeType.TileEdge) {
+
+				}
+				else {
+					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, getTime, heuristic);
 				}
 			}
+		}
+
+		public override Waypoint GetWaypoint()
+		{
+			return new Waypoint(Position, Time - previousNode.Time, previousNode.GetMovementTypeToNeighbour(this));
 		}
 
 		public override TileNode GetTileNode()
@@ -106,9 +100,19 @@ namespace MHUrho.PathFinding
 			return this;
 		}
 
-		public override IEnumerable<Waypoint> GetToNode(AStarNode node)
+		public override void AddNeighbour(AStarNode neighbour, MovementType movementType)
 		{
-			throw new NotImplementedException();
+			outgoingEdges.Add(neighbour, movementType);
+		}
+
+		public override bool RemoveNeighbour(AStarNode neighbour)
+		{
+			return outgoingEdges.Remove(neighbour);
+		}
+
+		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
+		{
+			return outgoingEdges[neighbour];
 		}
 
 		public AStarNode GetNode(Vector3 pointOnThisTile)
@@ -127,15 +131,8 @@ namespace MHUrho.PathFinding
 					FloatHelpers.FloatsEqual(Tile.Map.GetHeightAt(point.X, point.Z), point.Y);
 		}
 
-		public override IEnumerable<AStarNode> GetNeighbours()
-		{
-			foreach (var tileNeighbour in edgeToNeighbour.Keys) {
-				yield return tileNeighbour;
-			}
 
-			foreach (var otherNeighbour in otherNeighbours) {
-				yield return otherNeighbour;
-			}
-		}
+
+		
 	}
 }

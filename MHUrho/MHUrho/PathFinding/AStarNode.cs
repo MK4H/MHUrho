@@ -10,34 +10,11 @@ namespace MHUrho.PathFinding
 {
 	enum NodeState { Untouched, Opened, Closed };
 
-	/// <summary>
-	/// Interface of members and methods used by the A* itself
-	/// </summary>
-	interface IProcessingNode {
-		NodeState State { get; set; }
+	
 
-		float Time { get; set; }
+	public abstract class AStarNode : FastPriorityQueueNode, IProcessingNode, INode {
 
-		float Heuristic { get; set; }
-
-		float Value { get; }
-
-		IProcessingNode PreviousNode { get; set; }
-
-		AStarNode ThisNode { get; }
-
-		Vector3 Position { get; }
-
-		void Reset();
-
-		IEnumerable<AStarNode> GetNeighbours();
-
-		IEnumerable<Waypoint> GetWaypoints();
-
-		TileNode GetTileNode();
-	}
-
-	public abstract class AStarNode : FastPriorityQueueNode, IProcessingNode {
+		public abstract NodeType NodeType { get; }
 
 		NodeState IProcessingNode.State {
 			get => state;
@@ -67,6 +44,8 @@ namespace MHUrho.PathFinding
 
 		AStarNode IProcessingNode.ThisNode => this;
 
+		
+
 		public Vector3 Position { get; protected set; }
 
 		protected readonly AStar AStar;
@@ -88,15 +67,21 @@ namespace MHUrho.PathFinding
 			heuristic = 0;
 		}
 
-		public abstract bool IsItThisNode(Vector3 point);
+		public abstract void ProcessNeighbours(FastPriorityQueue<AStarNode> priorityQueue,
+											List<AStarNode> touchedNodes,
+											AStarNode targetNode,
+											GetTime getTimeBetweenNodes,
+											Func<Vector3, float> heuristic);
 
-		public abstract IEnumerable<AStarNode> GetNeighbours();
+
+
+		public abstract bool IsItThisNode(Vector3 point);
 
 		/// <summary>
 		/// Returns waypoints to get from <see cref="previousNode"/> to this node
 		/// </summary>
 		/// <returns>Returns waypoints to get from <see cref="previousNode"/> to this node</returns>
-		public abstract IEnumerable<Waypoint> GetWaypoints();
+		public abstract Waypoint GetWaypoint();
 
 		public abstract TileNode GetTileNode();
 
@@ -105,7 +90,59 @@ namespace MHUrho.PathFinding
 			return $"Center={Position}, Time={Time}, Heur={heuristic}";
 		}
 
-		public abstract IEnumerable<Waypoint> GetToNode(AStarNode node);
+		public abstract void AddNeighbour(AStarNode neighbour, MovementType movementType);
 
+		public abstract bool RemoveNeighbour(AStarNode neighbour);
+
+		public abstract MovementType GetMovementTypeToNeighbour(AStarNode neighbour);
+
+		protected void ProcessNeighbour(AStarNode neighbour,
+										FastPriorityQueue<AStarNode> priorityQueue,
+										List<AStarNode> touchedNodes,
+										AStarNode targetNode,
+										GetTime getTime,
+										Func<Vector3, float> getHeuristic)
+		{
+			IProcessingNode neighbourAsP = neighbour;
+			//If already opened or closed
+			if (neighbour.state == NodeState.Closed) {
+				//Already closed, either not passable or the best path there can be found
+				return;
+
+			}
+			else if (neighbour.state == NodeState.Opened) {
+				//if it is closer through the current sourceNode
+
+				if (getTime(this, neighbour, out float timeToTarget)) {
+					float newTime = Time + timeToTarget;
+					if (newTime < neighbour.Time) {
+						neighbour.Time = newTime;
+						neighbour.previousNode = this;
+						priorityQueue.UpdatePriority(this, neighbourAsP.Value);
+					}
+				}
+
+			}
+			else /*NodeState.Untouched*/{
+				// Compute the heuristic for the new tile
+				float heuristic = getHeuristic(neighbour.Position);
+
+				if (!getTime(this, neighbour, out float timeToTarget)) {
+					//Unit cannot pass to target node from source node
+					return;
+				}
+				else {
+					neighbourAsP.State = NodeState.Opened;
+					neighbourAsP.Heuristic = heuristic;
+					neighbourAsP.PreviousNode = this;
+					neighbourAsP.Time = Time + timeToTarget;
+
+					//Unit can pass through this tile, enqueue it
+					priorityQueue.Enqueue(neighbour, neighbourAsP.Value);
+					touchedNodes.Add(neighbour);
+				}
+
+			}
+		}
 	}
 }
