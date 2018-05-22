@@ -5,7 +5,7 @@ using MHUrho.Helpers;
 using MHUrho.Storage;
 using Urho;
 
-namespace MHUrho.WorldMap
+namespace MHUrho.PathFinding
 {
 	public enum MovementType { Linear, Teleport }
 

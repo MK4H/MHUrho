@@ -88,8 +88,8 @@ namespace MHUrho.PathFinding
 					break;
 				default:
 					//Default to linear movement
-					float speed = (newPosition - currentPosition).Length / secondsFromLastUpdate;
-					float distToTarget = (TargetWaypoint.Position - newPosition).Length;
+					float speed = Vector3.Distance(newPosition, currentPosition) / secondsFromLastUpdate;
+					float distToTarget = Vector3.Distance(newPosition, TargetWaypoint.Position);
 					TargetWaypoint = new Waypoint(TargetWaypoint.Position, distToTarget / speed, TargetWaypoint.MovementType);
 					break;
 			}
