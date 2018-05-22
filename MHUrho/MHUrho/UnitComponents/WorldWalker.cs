@@ -78,11 +78,9 @@ namespace MHUrho.UnitComponents
 
 		public interface INotificationReceiver {
 
-			float MaxMovementSpeed { get; }
+			bool GetTime(AStarNode from, AStarNode to, out float time);
 
-			bool CanGoFromTo(ITile fromTile, ITile toTile);
-
-			float GetMovementSpeed(ITile across, Vector3 from, Vector3 to);
+			float GetMinimalAproximatedTime(Vector3 from, Vector3 to);
 
 			void OnMovementStarted(WorldWalker walker);
 
@@ -167,12 +165,11 @@ namespace MHUrho.UnitComponents
 		}
 
 		public bool GoTo(ITile tile) {
-			var newPath = Path.FromTo(Unit.XZPosition, 
-									tile, 
+			var newPath = Path.FromTo(Unit.Position, 
+									tile.Center3, 
 									Map, 
-									notificationReceiver.CanGoFromTo,
-									notificationReceiver.GetMovementSpeed,
-									notificationReceiver.MaxMovementSpeed);
+									notificationReceiver.GetTime,
+									notificationReceiver.GetMinimalAproximatedTime);
 			if (newPath == null) {
 				MovementStarted = true;
 				OnMovementStarted?.Invoke(this);
@@ -205,7 +202,7 @@ namespace MHUrho.UnitComponents
 		/// <returns>Returns the current position and the part of the path that has not been reached yet</returns>
 		public IEnumerator<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
-			return path?.GetEnumerator(offset) ?? ((IEnumerable<Waypoint>)new [] {new Waypoint(Unit.Position + offset, 0)}).GetEnumerator();
+			return path?.GetEnumerator(offset) ?? ((IEnumerable<Waypoint>)new [] {new Waypoint(Unit.Position + offset, 0, MovementType.Linear)}).GetEnumerator();
 		}
 
 
@@ -215,7 +212,7 @@ namespace MHUrho.UnitComponents
 			Debug.Assert(path != null, "Target was null with scene updates enabled");
 
 
-			if (!MoveTowards(path.TargetWaypoint.Position,timeStep)) {
+			if (!MoveTowards(path.TargetWaypoint, timeStep)) {
 				path.Update(Unit.Position, timeStep);
 				return;
 			}
@@ -247,30 +244,47 @@ namespace MHUrho.UnitComponents
 		/// <summary>
 		/// Moves unit towards the <paramref name="point"/>
 		/// </summary>
-		/// <param name="point">Point to move towards</param>
+		/// <param name="waypoint">waypoint to move towards</param>
 		/// <param name="timeStep">timeStep of the game</param>
-		bool MoveTowards(Vector3 point, float timeStep) {
-			bool reachedPoint = false;
+		bool MoveTowards(Waypoint waypoint, float timeStep) {
 
-			Vector3 newPosition = Unit.Position + GetMoveVector(point, timeStep);
-			if (ReachedPoint(Unit.Position, newPosition, point)) {
-				newPosition = point;
-				reachedPoint = true;
+			switch (waypoint.MovementType) {
+				case MovementType.Teleport:
+					//NOTHING
+					if (waypoint.TimeToWaypoint - timeStep <= 0) {
+						//Teleport timeout finished
+						if (Unit.MoveTo(waypoint.Position)) {
+							//Unit could move to teleport target
+							return true;
+						}
+						//Unit could not move to teleport target, recalculate path
+					}
+					break;
+				default:
+					//Default to linear movement
+					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
+
+					bool reachedPoint = false;
+					if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
+						newPosition = waypoint.Position;
+						reachedPoint = true;
+					}
+
+					if (Unit.MoveTo(newPosition)) {
+						//Unit could move
+						return reachedPoint;
+					}
+					break;
 			}
 
-			if (Unit.MoveTo(newPosition)) {
-				//Unit could move
-				return reachedPoint;
-			}
 			//Unit couldnt move to newPosition
 
 			//Recalculate path
-			var newPath = Path.FromTo(Unit.XZPosition,
-									path.GetTarget(Map),
+			var newPath = Path.FromTo(Unit.Position,
+									path.GetTarget(),
 									Map,
-									notificationReceiver.CanGoFromTo,
-									notificationReceiver.GetMovementSpeed,
-									 notificationReceiver.MaxMovementSpeed);
+									notificationReceiver.GetTime,
+									 notificationReceiver.GetMinimalAproximatedTime);
 			if (newPath == null) {
 				//Cant get there
 				MovementFailed = true;
@@ -286,23 +300,24 @@ namespace MHUrho.UnitComponents
 		/// <summary>
 		/// Calculates by how much should the unit move
 		/// </summary>
-		/// <param name="destination">The point in space that the unit is trying to get to</param>
+		/// <param name="waypoint">The waypoint to move towards</param>
 		/// <param name="timeStep"> How many seconds passed since the last update</param>
-		/// <returns></returns>
-		Vector3 GetMoveVector(Vector3 destination, float timeStep) {
-			Vector3 movementDirection = destination - Unit.Position;
+		/// <returns>The change of units position to make it reach the waypoint in time</returns>
+		Vector3 GetMoveVector(Waypoint waypoint, float timeStep) {
+			Vector3 movementDirection = waypoint.Position - Unit.Position;
+
+			float dist = movementDirection.Length;
 			//If the destination is exactly equal to Unit.Position, prevent NaN from normalization
 			// Reached point will proc and the returned value will be ignored, but cant be [0,0,0]
 			if (movementDirection == new Vector3(0, 0, 0)) {
 				return new Vector3(1, 0, 0);
 			}
 			movementDirection.Normalize();
-			// divided by 100 so that with GameSpeed == 1, MovementSpeed of 100 goes through the tile in 1 second
-			return movementDirection * 
-					LevelManager.CurrentLevel.GameSpeed * 
-					timeStep * 
-					notificationReceiver.GetMovementSpeed(Unit.Tile,Unit.Position, destination) / 
-					100;
+
+			return movementDirection *
+					LevelManager.CurrentLevel.GameSpeed *
+					timeStep *
+					(dist / waypoint.TimeToWaypoint) ; // speed = distance / time
 		}
 
 		bool ReachedPoint(Vector3 currentPosition, Vector3 nextPosition, Vector3 point) {

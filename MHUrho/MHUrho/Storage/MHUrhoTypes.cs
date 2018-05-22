@@ -23,15 +23,16 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChFNSFVyaG9UeXBlcy5wcm90bxIOTUhVcmhvLlN0b3JhZ2UaD1VyaG9UeXBl",
-            "cy5wcm90byJHCgpTdFdheXBvaW50EisKCHBvc2l0aW9uGAEgASgLMhkuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RWZWN0b3IzEgwKBHRpbWUYAiABKAIiRwoQU3RQYXRo",
-            "RW51bWVyYXRvchIkCgRwYXRoGAEgASgLMhYuTUhVcmhvLlN0b3JhZ2UuU3RQ",
-            "YXRoEg0KBWluZGV4GAIgASgFIjcKBlN0UGF0aBItCgl3YXlwb2ludHMYASAD",
-            "KAsyGi5NSFVyaG8uU3RvcmFnZS5TdFdheXBvaW50YgZwcm90bzM="));
+            "cy5wcm90byJdCgpTdFdheXBvaW50EisKCHBvc2l0aW9uGAEgASgLMhkuTUhV",
+            "cmhvLlN0b3JhZ2UuU3RWZWN0b3IzEgwKBHRpbWUYAiABKAISFAoMbW92ZW1l",
+            "bnRUeXBlGAMgASgFIkcKEFN0UGF0aEVudW1lcmF0b3ISJAoEcGF0aBgBIAEo",
+            "CzIWLk1IVXJoby5TdG9yYWdlLlN0UGF0aBINCgVpbmRleBgCIAEoBSI3CgZT",
+            "dFBhdGgSLQoJd2F5cG9pbnRzGAEgAygLMhouTUhVcmhvLlN0b3JhZ2UuU3RX",
+            "YXlwb2ludGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWaypoint), global::MHUrho.Storage.StWaypoint.Parser, new[]{ "Position", "Time" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWaypoint), global::MHUrho.Storage.StWaypoint.Parser, new[]{ "Position", "Time", "MovementType" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPathEnumerator), global::MHUrho.Storage.StPathEnumerator.Parser, new[]{ "Path", "Index" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPath), global::MHUrho.Storage.StPath.Parser, new[]{ "Waypoints" }, null, null, null)
           }));
@@ -66,6 +67,7 @@ namespace MHUrho.Storage {
     public StWaypoint(StWaypoint other) : this() {
       Position = other.position_ != null ? other.Position.Clone() : null;
       time_ = other.time_;
+      movementType_ = other.movementType_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -95,6 +97,17 @@ namespace MHUrho.Storage {
       }
     }
 
+    /// <summary>Field number for the "movementType" field.</summary>
+    public const int MovementTypeFieldNumber = 3;
+    private int movementType_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int MovementType {
+      get { return movementType_; }
+      set {
+        movementType_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as StWaypoint);
@@ -110,6 +123,7 @@ namespace MHUrho.Storage {
       }
       if (!object.Equals(Position, other.Position)) return false;
       if (Time != other.Time) return false;
+      if (MovementType != other.MovementType) return false;
       return true;
     }
 
@@ -118,6 +132,7 @@ namespace MHUrho.Storage {
       int hash = 1;
       if (position_ != null) hash ^= Position.GetHashCode();
       if (Time != 0F) hash ^= Time.GetHashCode();
+      if (MovementType != 0) hash ^= MovementType.GetHashCode();
       return hash;
     }
 
@@ -136,6 +151,10 @@ namespace MHUrho.Storage {
         output.WriteRawTag(21);
         output.WriteFloat(Time);
       }
+      if (MovementType != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(MovementType);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -146,6 +165,9 @@ namespace MHUrho.Storage {
       }
       if (Time != 0F) {
         size += 1 + 4;
+      }
+      if (MovementType != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MovementType);
       }
       return size;
     }
@@ -163,6 +185,9 @@ namespace MHUrho.Storage {
       }
       if (other.Time != 0F) {
         Time = other.Time;
+      }
+      if (other.MovementType != 0) {
+        MovementType = other.MovementType;
       }
     }
 
@@ -183,6 +208,10 @@ namespace MHUrho.Storage {
           }
           case 21: {
             Time = input.ReadFloat();
+            break;
+          }
+          case 24: {
+            MovementType = input.ReadInt32();
             break;
           }
         }

@@ -51,8 +51,6 @@ namespace MHUrho.Logic {
 		//TODO: Temp
 		HealthBar HealthBar{ get;}
 
-		bool CanGoFromTo(ITile fromTile, ITile toTile);
-
 		void ChangeType(UnitType newType);
 
 		void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false);

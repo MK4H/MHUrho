@@ -116,7 +116,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		public override IEnumerator<Waypoint> GetWaypoints() {
-			yield return new Waypoint(CurrentPosition, 0);
+			yield return new Waypoint(CurrentPosition, 0, MovementType.Linear);
 		}
 
 

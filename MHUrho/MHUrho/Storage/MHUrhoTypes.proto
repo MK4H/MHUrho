@@ -6,6 +6,7 @@ import "UrhoTypes.proto";
 message StWaypoint {
 	StVector3 position = 1;
 	float time = 2;
+	int32 movementType = 3;
 }
 
 message StPathEnumerator {

@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -94,10 +95,34 @@ namespace DefaultPackage
 
 		}
 
-		public float MaxMovementSpeed => 100;
+		public override bool CanGoFromTo(Vector3 from, Vector3 to)
+		{
+			return Map.GetContainingTile(to).Building == null;
+		}
 
-		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
-			return toTile.Building == null;
+
+		public bool GetTime(AStarNode from, AStarNode to, out float time)
+		{
+			if (from.GetType() == typeof(TileNode) && to.GetType() == typeof(EdgeNode) ||
+				from.GetType() == typeof(EdgeNode) && to.GetType() == typeof(TileNode)) {
+
+				Vector3 diff = to.Position - from.Position;
+
+				//In radians
+				float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
+
+				//TODO: Maybe cache the Length in the Edge
+				time = (diff.Length / 2) + angle;
+
+				return true;
+			}
+			time = 0;
+			return false;
+		}
+
+		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
+		{
+			return (from.XZ2() - to.XZ2()).Length / 2;
 		}
 
 		public override void OnProjectileHit(IProjectile projectile)
@@ -127,16 +152,6 @@ namespace DefaultPackage
 			}
 		}
 
-		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
-
-			Vector3 diff = to - from;
-
-			//In radians
-			float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0) ;
-			// angle / Math.PI means how close to 90 degrees it is
-			float speedMod = Math.Max(1 - angle / (float)Math.PI, 0.25f);
-			return Math.Max(MaxMovementSpeed * speedMod, 1);
-		}
 
 		public void OnMovementStarted(WorldWalker walker) {
 			animationController.PlayExclusive("Chicken/Models/Walk.ani", 0, true);
@@ -232,5 +247,7 @@ namespace DefaultPackage
 		{
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
+
+
 	}
 }

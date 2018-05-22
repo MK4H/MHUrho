@@ -35,6 +35,12 @@ namespace MHUrho.WorldMap {
 	/// <returns>New height of the [x,y] corner</returns>
 	public delegate float ChangeCornerHeightDelegate(float previousHeight, int x, int y);
 
+	/// <summary>
+	/// Represents a level map, with XZ plane horizontal and Y plane vertical. <para/>
+	/// The map contains tiles with topLeft corners from <see cref="IMap.Left"/> to <see cref="IMap.Right"/> in X and
+	/// <see cref="IMap.Top"/> to <see cref="IMap.Bottom"/> in Y. <para/>
+	/// Map is not bounded in vertical direction.
+	/// </summary>
 	public interface IMap {
 			   
 		/// <summary>
@@ -180,12 +186,12 @@ namespace MHUrho.WorldMap {
 		int WhereIsX(IntVector2 point);
 
 		/// <summary>
-		/// Compares <paramref name="y"/> with the coords of <see cref="Top"/> and <see cref="Bottom"/>,
-		/// returns -1 if <paramref name="y"/> is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/>
+		/// Compares <paramref name="z"/> with the coords of <see cref="Top"/> and <see cref="Bottom"/>,
+		/// returns -1 if <paramref name="z"/> is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/>
 		/// </summary>
-		/// <param name="y">y coord to copare with the map boundaries</param>
-		/// <returns>Returns -1 if <paramref name="y"/> is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/></returns>
-		int WhereIsY(int y);
+		/// <param name="z">y coord to copare with the map boundaries</param>
+		/// <returns>Returns -1 if <paramref name="z"/> is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/></returns>
+		int WhereIsZ(int z);
 
 		/// <summary>
 		/// Compares <paramref name="point"/> Y coord with the coords of <see cref="Top"/> and <see cref="Bottom"/>,
@@ -193,15 +199,15 @@ namespace MHUrho.WorldMap {
 		/// </summary>
 		/// <param name="point">compares y of this point</param>
 		/// <returns>Returns -1 if it is above <see cref="Top"/>, 0 if inside, 1 if below <see cref="Bottom"/></returns>
-		int WhereIsY(IntVector2 point);
+		int WhereIsZ(IntVector2 point);
 
 		/// <summary>
-		/// Returns the tile with <see cref="ITile.MapLocation"/> equal to [<paramref name="x"/>, <paramref name="y"/>]
+		/// Returns the tile with <see cref="ITile.MapLocation"/> equal to [<paramref name="x"/>, <paramref name="z"/>]
 		/// </summary>
 		/// <param name="x">X coord of the <see cref="ITile.MapLocation"/></param>
-		/// <param name="y">y coord of the <see cref="ITile.MapLocation"/> </param>
-		/// <returns>The tile with <see cref="ITile.MapLocation"/>  equal to [<paramref name="x"/>, <paramref name="y"/>], or null if none exists</returns>
-		ITile GetTileByMapLocation(int x, int y);
+		/// <param name="z">y coord of the <see cref="ITile.MapLocation"/> </param>
+		/// <returns>The tile with <see cref="ITile.MapLocation"/>  equal to [<paramref name="x"/>, <paramref name="z"/>], or null if none exists</returns>
+		ITile GetTileByMapLocation(int x, int z);
 
 		/// <summary>
 		/// Returns the tile with <see cref="ITile.MapLocation"/> equal to <paramref name="mapLocation"/>
@@ -210,22 +216,80 @@ namespace MHUrho.WorldMap {
 		/// <returns>The tile with <see cref="ITile.MapLocation"/>  equal to <paramref name="mapLocation"/>, or null if none exists</returns>
 		ITile GetTileByMapLocation(IntVector2 mapLocation);
 
-		ITile GetTileByTopLeftCorner(int x, int y);
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.TopLeft"/> equal to [<paramref name="x"/>,<paramref name="z"/>]
+		/// </summary>
+		/// <param name="x">x coord of the topLeft corner</param>
+		/// <param name="z">y coord of the topLeft corner</param>
+		/// <returns>Returns the tile with <see cref="ITile.TopLeft"/> equal to [<paramref name="x"/>,<paramref name="z"/>]
+		/// or null if there is none ([<paramref name="x"/>, <paramref name="z"/>] is outside of the map)</returns>
+		ITile GetTileByTopLeftCorner(int x, int z);
 
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.TopLeft"/> equal to <paramref name="topLeftCorner"/>
+		/// </summary>
+		/// <param name="topLeftCorner">the coords of the top left corner</param>
+		/// <returns>Returns the tile with <see cref="ITile.TopLeft"/> equal to <paramref name="topLeftCorner"/>
+		/// or null if there is none (<paramref name="topLeftCorner"/> is outside of the map)</returns>
 		ITile GetTileByTopLeftCorner(IntVector2 topLeftCorner);
 
-		ITile GetTileByTopRightCorner(int x, int y);
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.TopRight"/> equal to [<paramref name="x"/>,<paramref name="z"/>]
+		/// </summary>
+		/// <param name="x">x coord of the top right corner of the wanted tile</param>
+		/// <param name="z">z coord of the top right corner of the wanted tile</param>
+		/// <returns>Returns the tile with <see cref="ITile.TopRight"/> equal to [<paramref name="x"/>,<paramref name="z"/>]
+		/// or null if there is none ([<paramref name="x"/>, <paramref name="z"/>] is outside of the map)</returns>
+		ITile GetTileByTopRightCorner(int x, int z);
 
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.TopRight"/> equal to <paramref name="topRightCorner"/>
+		/// </summary>
+		/// <param name="topRightCorner">the coords in the XZ plane of the topRight corner of the wanted tile</param>
+		/// <returns>Returns the tile with <see cref="ITile.TopRight"/> equal to <paramref name="topRightCorner"/>
+		/// or null if there is none (<paramref name="topRightCorner"/> is outside of the map)</returns>
 		ITile GetTileByTopRightCorner(IntVector2 topRightCorner);
 
-		ITile GetTileByBottomLeftCorner(int x, int y);
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.BottomLeft"/> equal to [<paramref name="x"/>, <paramref name="z"/>]
+		/// </summary>
+		/// <param name="x">x coord of the bottom left corner of the wanted tile</param>
+		/// <param name="z">z coord of the bottom left corner of the wanted tile</param>
+		/// <returns>Returns the tile with <see cref="ITile.BottomLeft"/> equal to [<paramref name="x"/>, <paramref name="z"/>
+		/// or null if there is none ([<paramref name="x"/>, <paramref name="z"/>] is outside of the map)</returns>
+		ITile GetTileByBottomLeftCorner(int x, int z);
 
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.BottomLeft"/> equal to <paramref name="bottomLeftCorner"/>
+		/// </summary>
+		/// <param name="bottomLeftCorner">the coords in the XZ plane of the bottomLeft corner of the wanted tile</param>
+		/// <returns>Returns the tile with <see cref="ITile.BottomLeft"/> equal to <paramref name="bottomLeftCorner"/>
+		/// or null if there is none (<paramref name="bottomLeftCorner"/> is outside of the map)</returns>
 		ITile GetTileByBottomLeftCorner(IntVector2 bottomLeftCorner);
 
-		ITile GetTileByBottomRightCorner(int x, int y);
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.BottomRight"/> equal to [<paramref name="x"/>, <paramref name="z"/>]
+		/// </summary>
+		/// <param name="x">x coord of the bottom right corner of the wanted tile</param>
+		/// <param name="z">z coord of the bottom right corner of the wanted tile</param>
+		/// <returns>Returns the tile with <see cref="ITile.BottomRight"/> equal to [<paramref name="x"/>, <paramref name="z"/>]
+		/// or null if there is none ([<paramref name="x"/>, <paramref name="z"/>] is outside of the map)</returns>
+		ITile GetTileByBottomRightCorner(int x, int z);
 
+		/// <summary>
+		/// Returns the tile with <see cref="ITile.BottomRight"/> equal to <paramref name="bottomRightCorner"/>
+		/// </summary>
+		/// <param name="bottomRightCorner">the coords in the XZ plane of the bottomRight corner of the wanted tile</param>
+		/// <returns>Returns the tile with <see cref="ITile.BottomRight"/> equal to <paramref name="bottomRightCorner"/>
+		/// or null if there is none (<paramref name="bottomRightCorner"/> is outside of the map)</returns>
 		ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner);
 
+		/// <summary>
+		/// Returns the tile containing the projection of <paramref name="point"/> to XZ plane
+		/// Ignores height, is equal to <see cref="GetContainingTile(Vector2)"/> with the X and Z members of <paramref name="point"/>
+		/// </summary>
+		/// <param name="point">point in the WorldSpace</param>
+		/// <returns>Returns the tile containing the projection of <paramref name="point"/> to XZ plane, or null if <paramref name="point"/> is outside of the map</returns>
 		ITile GetContainingTile(Vector3 point);
 
 		/// <summary>
@@ -235,10 +299,16 @@ namespace MHUrho.WorldMap {
 		/// <returns>The tile containing <paramref name="point"/></returns>
 		ITile GetContainingTile(Vector2 point);
 
-		ITile GetContainingTile(float x, float y);
+		/// <summary>
+		/// Gets tile containing [<paramref name="x"/>, <paramref name="z"/>] in the XZ plane
+		/// </summary>
+		/// <param name="x">x coord of the point</param>
+		/// <param name="z">z coord of the point</param>
+		/// <returns>The tile containing [<paramref name="x"/>, <paramref name="z"/>] or null if [<paramref name="x"/>, <paramref name="z"/>] is outside of the map</returns>
+		ITile GetContainingTile(float x, float z);
 
 		/// <summary>
-		/// Moves the rectangle defined by topLeft and bottomRight corners so that
+		/// Moves the rectangle defined by <paramref name="topLeft"/> and <paramref name="bottomRight"/> corners so that
 		/// the whole rectangle is inside the map
 		/// </summary>
 		/// <param name="topLeft">top left corner of the rectangle</param>
@@ -246,13 +316,45 @@ namespace MHUrho.WorldMap {
 		/// <returns>True if it is possible to snap to map, false if it is not possible</returns>
 		bool SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight);
 
+		/// <summary>
+		/// Changes the size of the rectangle in XZ plane defined by <paramref name="topLeft"/> and <paramref name="bottomRight"/> corners
+		/// so that no part extends outside of the map. <para/>
+		/// If any side of the rectangle is outside of the map, changes just that side to the map border value. <para/>
+		/// For example if <paramref name="topLeft"/>.X is less than <see cref="IMap.Left"/>, then <paramref name="topLeft"/>.X = <see cref="IMap.Left"/>
+		/// </summary>
+		/// <param name="topLeft">top left corner of the rectangle to squish</param>
+		/// <param name="bottomRight">bottom right corner of the rectangle to squish</param>
 		void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight);
-		ITile FindClosestEmptyTile(ITile closestTo);
 
+		/// <summary>
+		/// Finds the closest tile to <paramref name="source"/> which matches the condition specified by the <paramref name="predicate"/>
+		/// This version is unbounded, so it continues outwards until it finds a match or searches the whole map.
+		/// For bounded version, see <see cref="FindClosestTile(ITile, int, Predicate{ITile})"/><para/>
+		/// The search starts with the source tile and continues with growing "concentric" squares.
+		/// The order inside the square is implementation dependent.
+		/// </summary>
+		/// <param name="source">center tile, from which the search starts in squares</param>
+		/// <param name="predicate">the predicate defining the condition</param>
+		/// <returns></returns>
 		ITile FindClosestTile(ITile source, Predicate<ITile> predicate);
 
+		/// <summary>
+		/// Finds the closest tile to <paramref name="source"/> which matches the condition specified by the <paramref name="predicate"/>
+		/// This version is bounded, so the search stops with a square of size <paramref name="squareSize"/>.
+		/// For unbounded version, see <see cref="FindClosestTile(ITile, Predicate{ITile})"/><para/>
+		/// The search starts with the source tile and continues with growing "concentric" squares.
+		/// The order inside the square is implementation dependent.
+		/// </summary>
+		/// <param name="source">center tile, from which the search starts in squares</param>
+		/// <param name="squareSize"></param>
+		/// <param name="predicate"></param>
 		ITile FindClosestTile(ITile source, int squareSize, Predicate<ITile> predicate);
 
+		/// <summary>
+		/// Returns an <see cref="IEnumerable{ITile}"/> which enumerates tiles in a spiral, starting from <paramref name="center"/>
+		/// </summary>
+		/// <param name="center">Center tile of the spiral. Starting point of the spiral</param>
+		/// <returns>Returns an <see cref="IEnumerable{ITile}"/> which enumerates the tiles in a spiral, starting from <paramref name="center"/></returns>
 		IEnumerable<ITile> GetTilesInSpiral(ITile center);
 
 		/// <summary>
@@ -273,6 +375,11 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
 		IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle);
 
+		/// <summary>
+		/// Returns whether the <paramref name="rayQueryResult"/> is the Map (the ray hit the map), or if it the ray hit something else
+		/// </summary>
+		/// <param name="rayQueryResult">RayQueryResult to check</param>
+		/// <returns>Returns whether the <paramref name="rayQueryResult"/> is the Map</returns>
 		bool IsRaycastToMap(RayQueryResult rayQueryResult);
 
 		//TODO: Maybe remove from this interface
@@ -359,13 +466,23 @@ namespace MHUrho.WorldMap {
 
 		void ChangeHeight(List<IntVector2> tileCorners, float heightDelta);
 
+		/// <summary>
+		/// Invokes <paramref name="action"/> for each tile with <see cref="ITile.MapLocation"/> 
+		/// X between <paramref name="topLeft"/> and <paramref name="bottomRight"/>, including both <paramref name="topLeft"/> and <paramref name="bottomRight"/>
+		/// Y between <paramref name="topLeft"/> and <paramref name="bottomRight"/>, including both <paramref name="topLeft"/> and <paramref name="bottomRight"/>
+		/// </summary>
+		/// <param name="topLeft">top left corner of the rectangle to iterate over</param>
+		/// <param name="bottomRight">bottom right corner of the rectangle to iterate over</param>
+		/// <param name="action">Action to invoke on each tile</param>
 		void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action);
 
 		/// <summary>
-		/// 
+		/// Invokes <paramref name="action"/> for each tile with <see cref="ITile.MapLocation"/> 
+		/// X between <see cref="IntRect.Left"/> and <see cref="IntRect.Right"/>, including both <see cref="IntRect.Left"/> and <see cref="IntRect.Right"/>
+		/// Y between <see cref="IntRect.Top"/> and <see cref="IntRect.Bottom"/>, including both <see cref="IntRect.Top"/> and <see cref="IntRect.Bottom"/>
 		/// </summary>
-		/// <param name="rectangle"></param>
-		/// <param name="action"></param>
+		/// <param name="rectangle">Rectangle to iterate over</param>
+		/// <param name="action">Action to invoke on each tile</param>
 		void ForEachInRectangle(IntRect rectangle, Action<ITile> action);
 
 		/// <summary>

@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using MHUrho.Storage;
@@ -85,7 +86,10 @@ namespace DefaultPackage
 
 		public float MaxMovementSpeed => 100;
 
-		public override bool CanGoFromTo(ITile fromTile, ITile toTile) {
+		public override bool CanGoFromTo(Vector3 from, Vector3 to)
+		{
+			ITile fromTile = Map.GetContainingTile(from);
+			ITile toTile = Map.GetContainingTile(to);
 			var diff = toTile.MapLocation - fromTile.MapLocation;
 
 			if (diff.X == 0 || diff.Y == 0) {
@@ -115,8 +119,17 @@ namespace DefaultPackage
 
 		}
 
-		public float GetMovementSpeed(ITile across, Vector3 from, Vector3 to) {
-			return MaxMovementSpeed;
+
+
+		public bool GetTime(AStarNode from, AStarNode to, out float time)
+		{
+			time = (to.Position - from.Position).Length;
+			return true;
+		}
+
+		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
+		{
+			return (to - from).Length;
 		}
 
 		public void OnMovementStarted(WorldWalker walker) {

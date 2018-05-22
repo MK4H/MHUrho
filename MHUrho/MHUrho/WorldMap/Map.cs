@@ -511,15 +511,15 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Compares y with the coords of Top and Bottom side, returns where the y is
 		/// </summary>
-		/// <param name="y">y coord to copare with the map boundaries</param>
+		/// <param name="z">y coord to copare with the map boundaries</param>
 		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
-		public int WhereIsY(int y) 
+		public int WhereIsZ(int z) 
 		{
-			if (y < Top) {
+			if (z < Top) {
 				return -1;
 			}
 
-			if (y > Bottom) {
+			if (z > Bottom) {
 				return 1;
 			}
 
@@ -531,14 +531,14 @@ namespace MHUrho.WorldMap
 		/// </summary>
 		/// <param name="point">compares y of this vector</param>
 		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
-		public int WhereIsY(IntVector2 point) 
+		public int WhereIsZ(IntVector2 point) 
 		{
-			return WhereIsY(point.Y);
+			return WhereIsZ(point.Y);
 		}
 
-		public ITile GetTileByMapLocation(int x, int y) 
+		public ITile GetTileByMapLocation(int x, int z) 
 		{
-			return GetTileByTopLeftCorner(x, y);
+			return GetTileByTopLeftCorner(x, z);
 		}
 
 		public ITile GetTileByMapLocation(IntVector2 mapLocation) 
@@ -546,9 +546,9 @@ namespace MHUrho.WorldMap
 			return GetTileByTopLeftCorner(mapLocation);
 		}
 
-		public ITile GetTileByTopLeftCorner(int x, int y) 
+		public ITile GetTileByTopLeftCorner(int x, int z) 
 		{
-			return IsInside(x, y) ? tiles[GetTileIndex(x, y)] : null;
+			return IsInside(x, z) ? tiles[GetTileIndex(x, z)] : null;
 		}
 
 		public ITile GetTileByTopLeftCorner(IntVector2 topLeftCorner) 
@@ -556,9 +556,9 @@ namespace MHUrho.WorldMap
 			return GetTileByTopLeftCorner(topLeftCorner.X, topLeftCorner.Y);
 		}
 
-		public ITile GetTileByTopRightCorner(int x, int y) 
+		public ITile GetTileByTopRightCorner(int x, int z) 
 		{
-			return GetTileByTopLeftCorner(x - 1, y);
+			return GetTileByTopLeftCorner(x - 1, z);
 		}
 
 		public ITile GetTileByTopRightCorner(IntVector2 topRightCorner) 
@@ -566,9 +566,9 @@ namespace MHUrho.WorldMap
 			return GetTileByTopRightCorner(topRightCorner.X, topRightCorner.Y);
 		}
 
-		public ITile GetTileByBottomLeftCorner(int x, int y) 
+		public ITile GetTileByBottomLeftCorner(int x, int z) 
 		{
-			return GetTileByTopLeftCorner(x, y - 1);
+			return GetTileByTopLeftCorner(x, z - 1);
 		}
 
 		public ITile GetTileByBottomLeftCorner(IntVector2 bottomLeftCorner) 
@@ -576,9 +576,9 @@ namespace MHUrho.WorldMap
 			return GetTileByBottomLeftCorner(bottomLeftCorner.X, bottomLeftCorner.Y);
 		}
 
-		public ITile GetTileByBottomRightCorner(int x, int y) 
+		public ITile GetTileByBottomRightCorner(int x, int z) 
 		{
-			return GetTileByTopLeftCorner(x - 1, y - 1);
+			return GetTileByTopLeftCorner(x - 1, z - 1);
 		}
 
 		public ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner) 
@@ -627,7 +627,7 @@ namespace MHUrho.WorldMap
 
 				fits = false;
 			}
-			else if ((where = WhereIsY(topLeft.Y)) != 0) {
+			else if ((where = WhereIsZ(topLeft.Y)) != 0) {
 				int dist = (where == -1) ? this.TopLeft.Y - topLeft.Y : this.BottomRight.Y - bottomRight.Y;
 				topLeft.Y += dist;
 				bottomRight.Y += dist;
@@ -670,7 +670,7 @@ namespace MHUrho.WorldMap
 					throw new Exception("Switch not updated for the current implementation of WhereIsX");
 			}
 
-			switch (WhereIsY(topLeft.Y)) {
+			switch (WhereIsZ(topLeft.Y)) {
 				case 0:
 					break;
 				case -1:
@@ -684,7 +684,7 @@ namespace MHUrho.WorldMap
 					throw new Exception("Switch not updated for the current implementation of WhereIsY");
 			}
 
-			switch (WhereIsY(bottomRight.Y)) {
+			switch (WhereIsZ(bottomRight.Y)) {
 				case 0:
 					break;
 				case -1:
@@ -696,29 +696,6 @@ namespace MHUrho.WorldMap
 				default:
 					//TODO: Exceptions
 					throw new Exception("Switch not updated for the current implementation of WhereIsY");
-			}
-		}
-
-		public ITile FindClosestEmptyTile(ITile closestTo) 
-		{
-			int dist = 1;
-			while (true) {
-				for (int dx = -dist; dx < dist + 1; dx++) {
-					for (int dy = -dist; dy < dist + 1; dy++) {
-						IntVector2 pos = closestTo.MapLocation;
-						pos.X += dx;
-						pos.Y += dy;
-						if (!IsInside(pos)) {
-							continue;
-						}
-
-						if (GetTileByTopLeftCorner(pos).Units.Count == 0) {
-							return GetTileByTopLeftCorner(pos);
-						}
-					}
-				}
-				dist++;
-				//TODO: Cutoff
 			}
 		}
 
@@ -1388,10 +1365,10 @@ namespace MHUrho.WorldMap
 			return GetContainingTile(point.X, point.Y);
 		}
 
-		public ITile GetContainingTile(float x, float y)
+		public ITile GetContainingTile(float x, float z)
 		{
 			int topLeftX = (int)Math.Floor(x);
-			int topLeftZ = (int)Math.Floor(y);
+			int topLeftZ = (int)Math.Floor(z);
 			return GetTileByTopLeftCorner(topLeftX, topLeftZ);
 		}
 

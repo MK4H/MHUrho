@@ -313,10 +313,6 @@ namespace MHUrho.Logic
 			return visitor.Visit(this);
 		}
 
-		public bool CanGoFromTo(ITile fromTile, ITile toTile) {
-			return UnitPlugin.CanGoFromTo(fromTile, toTile);
-		}
-
 		/// <summary>
 		/// Gets units movements speed while moving through the tile
 		/// </summary>
@@ -420,19 +416,15 @@ namespace MHUrho.Logic
 
 
 		bool CheckTile(Vector3 newPosition) {
-			ITile newTile;
-			//Still in the same tile
-			if ((newTile = Tile.Map.GetContainingTile(newPosition)) == Tile) {
-				return true;
-			}
+
 			//New tile, but cant pass
-			if (!CanGoFromTo(Tile,newTile) && !IsTileCorner(newPosition)) {
+			if (!UnitPlugin.CanGoFromTo(Position,newPosition) && !IsTileCorner(newPosition)) {
 				return false;
 			}
 
 			//New tile, but can pass
 			Tile.RemoveUnit(this);
-			Tile = newTile;
+			Tile = Map.GetContainingTile(newPosition);
 			//TODO: Add as owning unit
 			Tile.AddUnit(this);
 			return true;

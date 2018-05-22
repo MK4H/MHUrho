@@ -15,285 +15,46 @@ using Priority_Queue;
 
 namespace MHUrho.PathFinding {
 
-	/// <summary>
-	/// Predicate, if it is possible to go from source to the NEIGHBOURING target
-	/// </summary>
-	/// <param name="source">source tile</param>
-	/// <param name="target">NEIGHBOUR of source</param>
-	/// <returns>if it is possible to go from source to target</returns>
-	public delegate bool CanGoToNeighbour(ITile source, ITile target);
+	
+	public delegate bool GetTime(AStarNode from, AStarNode to, out float time);
 
-	//TODO: WRONG COMMENT
 	/// <summary>
-	/// Gets movements speed across that tile as a multiplier of base movementSpeed
+	/// Used as a heuristic for the A* algorithm
 	///
-	/// Get the movementSpeed across the <paramref name="across"/> tile, while going straight
-	/// from <paramref name="from"/> to <paramref name="to"/>
+	/// It has to be admissible, which means it must not overestimate the time
+	/// GetMinimalAproxTime has to always be lower than the optimal path time
 	///
-	///<paramref name="from"/> MUST BE IN THE <paramref name="across"/> tile
-	/// 
-	/// HAS TO BE BETWEEN 1 and 5000
+	/// But the closer you get it to the optimal time, the faster the A* will run
+	///
+	/// If it is not admissible, the returned path may not be optimal and the runtime of A* may be longer
+	///
+	/// If the <paramref name="from"/> and <paramref name="to"/> are in the same Tile, it should return the optimal time
+	/// as that will be used for the movement
 	/// </summary>
-	/// <param name="across"></param>
 	/// <param name="from"></param>
 	/// <param name="to"></param>
 	/// <returns></returns>
-	public delegate float GetMovementSpeed(ITile across, Vector3 from, Vector3 to);
+	public delegate float GetMinimalAproxTime(Vector3 from, Vector3 to);
 
 	public class AStar : IPathFindAlg {
 
 		
 
-		struct Edge {
-			public Node Source;
-			/// <summary>
-			/// If there is no Edge, target will be null
-			/// </summary>
-			public Node Target;
+		public IMap Map { get; private set; }
 
-			public Vector3 EdgeCenter;
-			public float SourceToCenterDist;
-			public float CenterToTargetDist;
+		readonly TileNode[] nodeMap;
 
-			public Edge(Node source, Node target, IMap map) {
-				this.Source = source;
-				this.Target = target;
-				EdgeCenter = new Vector3();
-				SourceToCenterDist = 0;
-				CenterToTargetDist = 0;
-				FixHeight(map);
-			}
-
-			public float GetValue(GetMovementSpeed speedGetter) {
-				return SourceToCenterDist / speedGetter(Source.Tile, Source.Center, EdgeCenter) +
-						CenterToTargetDist / speedGetter(Target.Tile, EdgeCenter, Source.Center);
-			}
-
-			public void FixHeight(IMap map)
-			{
-				if (Target != null) {
-					EdgeCenter = map.GetBorderBetweenTiles(Source.Tile, Target.Tile);
-					SourceToCenterDist = (EdgeCenter - Source.Center).Length;
-					CenterToTargetDist = (Target.Center - EdgeCenter).Length;
-				}
-			}
-
-			public void Process(AStar aStar)
-			{
-				if (Target == null) {
-					//There is no edge
-					return;
-				}
-
-				//If already opened or closed
-				if (Target.State == NodeState.Closed) {
-					//Already closed, either not passable or the best path there can be found
-					return;
-
-				}
-				else if (Target.State == NodeState.Opened) {
-					//if it is closer through the current sourceNode
-					float newTime = Source.Time + GetValue(aStar.getMovementSpeed);
-					if (newTime < Target.Time) {
-						Target.Time = newTime;
-						Target.PreviousNode = Source;
-						aStar.priorityQueue.UpdatePriority(Target, Target.Value);
-					}
-				}
-				else /*NodeState.Untouched*/{
-					// Compute the heuristic for the new tile
-					float heuristic = aStar.Heuristic(Target.Center);
-
-					if (!aStar.canPassTo(Source.Tile, Target.Tile)) {
-						//Unit cannot pass this tile
-						Target.State = NodeState.Closed;
-						aStar.touchedNodes.Add(Target);
-					}
-					else {
-						Target.State = NodeState.Opened;
-						Target.Heuristic = heuristic;
-						Target.PreviousNode = Source;
-						Target.Time = Source.Time + GetValue(aStar.getMovementSpeed);
-
-						//Unit can pass through this tile, enqueue it
-						aStar.Enqueue(Target);
-					}
-
-				}
-			}
-
-
-
-		}
-
-		struct Neighbours {
-			Edge right;
-			Edge upRight;
-			Edge up;
-			Edge upLeft;
-			Edge left;
-			Edge downLeft;
-			Edge down;
-			Edge downRight;
-
-
-			public void Process(AStar aStar) {
-				right.Process(aStar);
-				upRight.Process(aStar);
-				up.Process(aStar);
-				upLeft.Process(aStar);
-				left.Process(aStar);
-				downLeft.Process(aStar);
-				down.Process(aStar);
-				downRight.Process(aStar);
-			}
-
-			public void FixHeight(IMap map)
-			{
-				right.FixHeight(map);
-				right.Target?.Neighbours.left.FixHeight(map);
-
-				upRight.FixHeight(map);
-				upRight.Target?.Neighbours.downLeft.FixHeight(map);
-
-				up.FixHeight(map);
-				up.Target?.Neighbours.down.FixHeight(map);
-
-				upLeft.FixHeight(map);
-				upLeft.Target?.Neighbours.downRight.FixHeight(map);
-
-				left.FixHeight(map);
-				left.Target?.Neighbours.right.FixHeight(map);
-
-				downLeft.FixHeight(map);
-				downLeft.Target?.Neighbours.upRight.FixHeight(map);
-
-				down.FixHeight(map);
-				down.Target?.Neighbours.up.FixHeight(map);
-
-				downRight.FixHeight(map);
-				downRight.Target?.Neighbours.upLeft.FixHeight(map);
-			}
-
-			public Neighbours(IMap map,
-							Node source,
-							Node right,
-							Node upRight,
-							Node up,
-							Node upLeft,
-							Node left,
-							Node downLeft,
-							Node down,
-							Node downRight) {
-				this.right = new Edge(source, right, map);
-				this.upRight = new Edge(source, upRight, map);
-				this.up = new Edge(source, up, map);
-				this.upLeft = new Edge(source, upLeft, map);
-				this.left = new Edge(source, left, map);
-				this.downLeft = new Edge(source, downLeft, map);
-				this.down = new Edge(source, down, map);
-				this.downRight = new Edge(source, downRight, map);
-			}
-
-		}
-
-
-		class Node : FastPriorityQueueNode {
-
-			public NodeState State;
-
-			/// <summary>
-			/// Time from start to the middle of the tile
-			/// </summary>
-			public float Time;
-
-			public float Heuristic;
-
-			public float Value => Time + Heuristic;
-
-			public Node PreviousNode;
-
-			public readonly ITile Tile;
-
-			public Vector3 Center;
-
-			public Neighbours Neighbours;
-
-			AStar aStar;
-
-			public Node(ITile tile, AStar aStar) {
-				this.Tile = tile;
-				this.aStar = aStar;
-				State = NodeState.Untouched;
-				Center = tile.Center3;
-			}
-
-			public void ConnectNeighbours()
-			{
-				int i = 0;
-				Node[] neighbours = new Node[8];
-				IntVector2 myLocation = Tile.MapLocation;
-				for (int y = -1; y < 2; y++) {
-					for (int x = -1; x < 2; x++) {
-						if (x == 0 && y == 0) {
-							continue;
-						}
-						IntVector2 newLocation = myLocation + new IntVector2(x, y);
-						ITile neighbourTile = Tile.Map.GetTileByMapLocation(newLocation);
-						neighbours[i++] = aStar.GetTileNode(neighbourTile);
-						
-					}
-				}
-
-				Neighbours = new Neighbours(aStar.map,
-											 this,
-											 neighbours[4],
-											 neighbours[2],
-											 neighbours[1],
-											 neighbours[0],
-											 neighbours[3],
-											 neighbours[5],
-											 neighbours[6],
-											 neighbours[7]);
-			}
-
-			public void FixHeights()
-			{
-				Center = Tile.Center3;
-				Neighbours.FixHeight(Tile.Map);
-			}
-
-			public void Reset()
-			{
-				PreviousNode = null;
-				Time = 0;
-				State = NodeState.Untouched;
-				Heuristic = 0;
-			}
-
-			public override string ToString() {
-				return $"Center={Center}, Time={Time}, Heur={Heuristic}";
-			}
-		}
-
-		enum NodeState { Untouched, Opened, Closed };
-
-		readonly IMap map;
-
-		readonly Node[] nodeMap;
-
-		readonly List<Node> touchedNodes;
-		readonly FastPriorityQueue<Node> priorityQueue;
-		Node targetNode;
-		CanGoToNeighbour canPassTo;
-		GetMovementSpeed getMovementSpeed;
-		float maxMovementSpeed;
+		readonly List<IProcessingNode> touchedNodes;
+		readonly FastPriorityQueue<AStarNode> priorityQueue;
+		AStarNode targetNode;
+		GetTime getTime;
+		GetMinimalAproxTime getMinimalTime;
 
 		public AStar(IMap map) {
-			this.map = map;
-			nodeMap = new Node[map.Width * map.Length];
-			touchedNodes = new List<Node>();
-			priorityQueue = new FastPriorityQueue<Node>(map.Width * map.Length / 4);
+			this.Map = map;
+			nodeMap = new TileNode[map.Width * map.Length];
+			touchedNodes = new List<IProcessingNode>();
+			priorityQueue = new FastPriorityQueue<AStarNode>(map.Width * map.Length / 4);
 
 			FillNodeMap();
 			map.TileHeightChanged += TileHeightChanged;
@@ -306,88 +67,144 @@ namespace MHUrho.PathFinding {
 		/// </summary>
 		/// <param name="target">Target coordinates</param>
 		/// <returns>List of IntVector2s the unit should pass through</returns>
-		public Path FindPath(Vector2 source, 
-							ITile target, 
-							CanGoToNeighbour canPassFromTo, 
-							GetMovementSpeed getMovementSpeed, 
-							float maxMovementSpeed) 
+		public Path FindPath(Vector3 source, 
+							Vector3 target, 
+							GetTime getTimeBetweenNodes, 
+							GetMinimalAproxTime getMinimalTime) 
 		{
-			Node realTargetNode = FindPathInNodes(map.GetContainingTile(source),
+			AStarNode realTargetNode = FindPathInNodes(source,
 											target,
-											canPassFromTo,
-											getMovementSpeed,
-											maxMovementSpeed);
+											getTimeBetweenNodes,
+											getMinimalTime);
 
 			Debug.Assert(realTargetNode == null || realTargetNode == targetNode);
 
 			//If path was not found, return null
 			Path finalPath = realTargetNode == null
 								? null
-								: MakePath(source, realTargetNode, getMovementSpeed, maxMovementSpeed);
+								: MakePath(source, realTargetNode);
 			Reset();
 			return finalPath;
 
 		}
 
-		public List<ITile> GetTileList(Vector2 source, 
-										ITile target,
-										CanGoToNeighbour canPassTo,
-										GetMovementSpeed getMovementSpeed,
-										float maxMovementSpeed) {
+		public List<ITile> GetTileList(Vector3 source, 
+										Vector3 target,
+										GetTime getTimeBetweenNodes,
+										GetMinimalAproxTime getMinimalTime) {
 			
-			Node targetNode = FindPathInNodes(map.GetContainingTile(source),
+			AStarNode targetNode = FindPathInNodes(source,
 											target,
-											canPassTo,
-											getMovementSpeed,
-											maxMovementSpeed);
+											getTimeBetweenNodes,
+											getMinimalTime);
 			//If path was not found, return null
 			List<ITile> finalList = targetNode == null ? null : MakeTileList(targetNode);
 			Reset();
 			return finalList;
 		}
 
-//		public Path GetPathToIntersection(Vector2 source,
-//										Path targetPath,
-//										CanGoToNeighbour canPassFromTo,
-//										GetMovementSpeed getMovementSpeed,
-//										float maxMovementSpeed)
-//		{
-//			Dictionary<Node, float> waypoints = GetWaypointDictionary(targetPath);
+		public TileNode GetTileNode(ITile tile)
+		{
+			return tile == null ? null : nodeMap[GetTileNodeIndex(tile.MapLocation.X, tile.MapLocation.Y)];
+		}
 
-//			Node startNode = GetTileNode(map.GetContainingTile(source));
-//			this.canPassTo = canPassFromTo;
-//			this.getMovementSpeed = getMovementSpeed;
-//			this.maxMovementSpeed = maxMovementSpeed;
+		public TileNode GetTileNode(Vector2 position)
+		{
+			return GetTileNode(Map.GetContainingTile(position));
+		}
 
-//			// Add the starting node to touched nodes, so it does not get enqued again
-//			touchedNodes.Add(startNode);
+		public TileNode GetTileNode(Vector3 position)
+		{
+			return GetTileNode(Map.GetContainingTile(position));
+		}
+
+		//		public Path GetPathToIntersection(Vector2 source,
+		//										Path targetPath,
+		//										CanGoToNeighbour canPassFromTo,
+		//										GetMovementSpeed getMovementSpeed,
+		//										float maxMovementSpeed)
+		//		{
+		//			Dictionary<Node, float> waypoints = GetWaypointDictionary(targetPath);
+
+		//			Node startNode = GetTileNode(map.GetContainingTile(source));
+		//			this.canPassTo = canPassFromTo;
+		//			this.getMovementSpeed = getMovementSpeed;
+		//			this.maxMovementSpeed = maxMovementSpeed;
+
+		//			// Add the starting node to touched nodes, so it does not get enqued again
+		//			touchedNodes.Add(startNode);
 
 
 
-//			//Main loop
-//			while (priorityQueue.Count != 0) {
-//				Node currentNode = priorityQueue.Dequeue();
+		//			//Main loop
+		//			while (priorityQueue.Count != 0) {
+		//				Node currentNode = priorityQueue.Dequeue();
 
-//				//If we hit the target, finish and return the sourceNode
-//				if (currentNode == targetNode) {
-//#if DEBUG
-//					//VisualizeTouchedNodes();
-//#endif
-//					return currentNode;
-//				}
+		//				//If we hit the target, finish and return the sourceNode
+		//				if (currentNode == targetNode) {
+		//#if DEBUG
+		//					//VisualizeTouchedNodes();
+		//#endif
+		//					return currentNode;
+		//				}
 
-//				//If not finished, add untouched neighbours to the queue and touched nodes
-//				currentNode.Neighbours.Process(this);
+		//				//If not finished, add untouched neighbours to the queue and touched nodes
+		//				currentNode.Neighbours.Process(this);
 
-//				currentNode.State = NodeState.Closed;
-//			}
-//			//Did not find path
-//			return null;
+		//				currentNode.State = NodeState.Closed;
+		//			}
+		//			//Did not find path
+		//			return null;
 
-//		}
+		//		}
 
-		float Heuristic(Vector3 from) {
-			return Vector3.Distance(from, targetNode.Center) / maxMovementSpeed;
+		void ProcessEdge(IProcessingNode source, IProcessingNode target)
+		{
+
+		
+			//If already opened or closed
+			if (target.State == NodeState.Closed) {
+				//Already closed, either not passable or the best path there can be found
+				return;
+
+			}
+			else if (target.State == NodeState.Opened) {
+				//if it is closer through the current sourceNode
+
+				if (getTime(source.ThisNode, target.ThisNode, out float timeToTarget)) {
+					float newTime = source.Time + timeToTarget;
+					if (newTime < target.Time) {
+						target.Time = newTime;
+						target.PreviousNode = source;
+						priorityQueue.UpdatePriority(target.ThisNode, target.Value);
+					}
+				}
+
+			}
+			else /*NodeState.Untouched*/{
+				// Compute the heuristic for the new tile
+				float heuristic = Heuristic(target.Position);
+
+				if (!getTime(source.ThisNode, target.ThisNode, out float timeToTarget)) {
+					//Unit cannot pass to target node from source node
+					return;
+				}
+				else {
+					target.State = NodeState.Opened;
+					target.Heuristic = heuristic;
+					target.PreviousNode = source;
+					target.Time = source.Time + timeToTarget;
+
+					//Unit can pass through this tile, enqueue it
+					Enqueue(target);
+				}
+
+			}
+		}
+
+		float Heuristic(Vector3 from)
+		{
+			return getMinimalTime(from.XZ(), targetNode.Position.XZ());
 		}
 
 		void TileHeightChanged(ITile tile)
@@ -395,17 +212,15 @@ namespace MHUrho.PathFinding {
 			GetTileNode(tile).FixHeights();
 		}
 
-		Node FindPathInNodes(ITile source,
-							ITile target,
-							CanGoToNeighbour canPassTo,
-							GetMovementSpeed getMovementSpeed,
-							float maxMovementSpeed) {
+		AStarNode FindPathInNodes(Vector3 source,
+							Vector3 target,
+							GetTime getTimeBetweenNodes,
+							GetMinimalAproxTime getMinimalTime) {
 
-			Node startNode = GetTileNode(source);
-			targetNode = GetTileNode(target);
-			this.canPassTo = canPassTo;
-			this.getMovementSpeed = getMovementSpeed;
-			this.maxMovementSpeed = maxMovementSpeed;
+			AStarNode startNode = GetTileNode(source).GetNode(source);
+			targetNode = GetTileNode(target).GetNode(target);
+			this.getTime = getTimeBetweenNodes;
+			this.getMinimalTime = getMinimalTime;
 
 			// Enque the starting node
 			priorityQueue.Enqueue(startNode, 0);
@@ -414,18 +229,22 @@ namespace MHUrho.PathFinding {
 
 			//Main loop
 			while (priorityQueue.Count != 0) {
-				Node currentNode = priorityQueue.Dequeue();
+				IProcessingNode currentNode = priorityQueue.Dequeue();
 
 				//If we hit the target, finish and return the sourceNode
 				if (currentNode == targetNode) {
 #if DEBUG
 					//VisualizeTouchedNodes();
 #endif
-					return currentNode;
+					return currentNode.ThisNode;
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				currentNode.Neighbours.Process(this);
+				foreach (var neighbour in currentNode.GetNeighbours()) {
+					ProcessEdge(currentNode, neighbour);
+				}
+
+				
 
 				currentNode.State = NodeState.Closed;
 			}
@@ -435,9 +254,9 @@ namespace MHUrho.PathFinding {
 
 
 
-		void Enqueue(Node node)
+		void Enqueue(IProcessingNode node)
 		{
-			priorityQueue.Enqueue(node, node.Value);
+			priorityQueue.Enqueue(node.ThisNode, node.Value);
 			touchedNodes.Add(node);
 		}
 
@@ -446,76 +265,64 @@ namespace MHUrho.PathFinding {
 		/// </summary>
 		/// <param name="target">Last Node of the path</param>
 		/// <returns>Path in correct order, from first point to the last point</returns>
-		Path MakePath(Vector2 source, Node target, GetMovementSpeed getMovementSpeed, float maxMovementSpeed) {
-			List<Waypoint> reversedWaypoints = new List<Waypoint>();
-			Vector3 source3 = new Vector3(source.X, map.GetTerrainHeightAt(source), source.Y);
-			//If the source is the target
-			if (target.PreviousNode == null) {
-				return StartIsFinish(target, source3, getMovementSpeed);
+		Path MakePath(Vector3 source, IProcessingNode target)
+		{
+			List<AStarNode> nodes = new List<AStarNode>();
+			while (target != null) {
+				nodes.Add(target.ThisNode);
+				target = target.PreviousNode;
+			}
+			//Reverse so that source is first and target is last
+			nodes.Reverse();
+
+			List<Waypoint> waypoints = new List<Waypoint>();
+			for (int i = 1; i < nodes.Count; i++) {
+				waypoints.AddRange(nodes[i].GetWaypoints());
 			}
 
-			while (target.PreviousNode != null) {
-				Node previousNode = target.PreviousNode;
-				//Waypoint through which we enter the target.Tile
-				Waypoint entranceWapoint = GetBorderWaypoint(target.Tile,
-															 previousNode.Tile,
-															 getMovementSpeed);
-				//Waypoint at the center of the target.Tile, to which we go to from the entrance
-				Waypoint centerWaypoint = new Waypoint(target.Tile.Center3, 
-														target.Time / maxMovementSpeed - previousNode.Time / maxMovementSpeed - entranceWapoint.TimeToWaypoint);
-				reversedWaypoints.Add(centerWaypoint);
-				reversedWaypoints.Add(entranceWapoint);
+			switch (waypoints[0].MovementType) {
 
-				target = previousNode;
+				case MovementType.Teleport:
+					//NOTHING
+					break;
+				default:
+					//Default to linear movement
+					Waypoint firstWaypoint = waypoints[0];
+					waypoints[0] = new Waypoint(firstWaypoint.Position,
+												getMinimalTime(source, firstWaypoint.Position),
+												firstWaypoint.MovementType);
+					break;
 			}
 
-			/*Because we are not going to the first (now last) entrance waypoint from the center of the tile
-			 * we need to recalculate it with preceding position set to param source
-			*/
-
-			Waypoint firstEntrance = reversedWaypoints[reversedWaypoints.Count - 1];
-
-			float movementSpeed = getMovementSpeed(target.Tile, source3, firstEntrance.Position);
-			// Correct it with the correct distance
-			firstEntrance.TimeToWaypoint = (firstEntrance.Position - source3).Length / movementSpeed;
-
-			reversedWaypoints.Reverse();
-			return Path.CreateFrom(source3, reversedWaypoints);
+			return Path.CreateFrom(source, waypoints);
 		}
 
 
-		List<ITile> MakeTileList(Node target) {
+		List<ITile> MakeTileList(IProcessingNode target) {
 			List<ITile> reversedTileList = new List<ITile>();
+			ITile previousTile = null;
 			for (;target != null; target = target.PreviousNode) {
-				reversedTileList.Add(target.Tile);
+				ITile targetTile = target.GetTileNode().Tile;
+				if (previousTile != targetTile) {
+					reversedTileList.Add(targetTile);
+					previousTile = targetTile;
+				}
 			}
 
 			reversedTileList.Reverse();
 			return reversedTileList;
 		}
 
-		Waypoint GetBorderWaypoint(ITile followingTile, 
-									ITile precedingTile,
-									GetMovementSpeed getMovementSpeed)
-		{
-
-			Vector3 borderPoint = map.GetBorderBetweenTiles(followingTile, precedingTile);
-			return new Waypoint(borderPoint,
-								(borderPoint - precedingTile.Center3).Length / getMovementSpeed(precedingTile, precedingTile.Center3, borderPoint));
-		}
-
-		static readonly float SinCos45 = 1 / (float)Math.Sqrt(2);
-
-		Path StartIsFinish(Node target, Vector3 source, GetMovementSpeed getMovementSpeed)
+		Path StartIsFinish(IProcessingNode target, Vector3 source)
 		{
 			//Handle total equality, where Normalize would produce NaN
-			if (target.Tile.Center3 == source) {
-				return Path.CreateFrom(source, new List<Waypoint> {new Waypoint(source, 0)});
+			if (target.Position == source) {
+				return Path.CreateFrom(source, new List<Waypoint> {new Waypoint(source, 0, MovementType.Linear)});
 			}
 
 
-			float distance = (target.Tile.Center3 - source).Length;
-			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(target.Tile.Center3, distance / getMovementSpeed(target.Tile, source, target.Tile.Center3))};
+			float distance = Vector3.Distance(target.Position, source);
+			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(target.Position, getMinimalTime(source, target.Position), MovementType.Linear)};
 			return Path.CreateFrom(source, waypoints);
 		}
 
@@ -528,21 +335,20 @@ namespace MHUrho.PathFinding {
 			touchedNodes.Clear();
 			priorityQueue.Clear();
 			targetNode = null;
-			canPassTo = null;
-			getMovementSpeed = null;
-			maxMovementSpeed = 0;
+			getTime = null;
+			getMinimalTime = null;
 		}
 
 		void VisualizeTouchedNodes()
 		{
-			map.HighlightTileList(from node in touchedNodes select node.Tile, Color.Green);
+			Map.HighlightTileList(from node in touchedNodes select node.GetTileNode().Tile, Color.Green);
 		}
 
 		void FillNodeMap()
 		{
-			for (int y = map.Top; y <= map.Bottom; y++) {
-				for (int x = map.Left; x <= map.Right; x++) {
-					nodeMap[GetNodeIndex(x,y)] = new Node(map.GetTileByMapLocation(x, y), this);
+			for (int y = Map.Top; y <= Map.Bottom; y++) {
+				for (int x = Map.Left; x <= Map.Right; x++) {
+					nodeMap[GetTileNodeIndex(x,y)] = new TileNode(Map.GetTileByMapLocation(x, y), this);
 				}
 			}
 
@@ -551,14 +357,9 @@ namespace MHUrho.PathFinding {
 			}
 		}
 
-		Node GetTileNode(ITile tile)
+		int GetTileNodeIndex(int x, int y)
 		{
-			return tile == null ? null : nodeMap[GetNodeIndex(tile.MapLocation.X, tile.MapLocation.Y)];
-		}
-
-		int GetNodeIndex(int x, int y)
-		{
-			return (x - map.Left) + (y - map.Top) * map.Width;
+			return (x - Map.Left) + (y - Map.Top) * Map.Width;
 		}
 
 		//Dictionary<Node, float> GetWaypointDictionary(Path path)

@@ -8,16 +8,14 @@ namespace MHUrho.PathFinding
 {
 	public interface IPathFindAlg {
 
-		Path FindPath(Vector2 source,
-					ITile target,
-					CanGoToNeighbour canPassFromTo,
-					GetMovementSpeed getMovementSpeed,
-					float maxMovementSpeed);
+		Path FindPath(Vector3 source,
+					Vector3 target,
+					GetTime getTimeBetweenNodes,
+					GetMinimalAproxTime getMinimalAproxTime);
 
-		List<ITile> GetTileList(Vector2 source,
-								ITile target,
-								CanGoToNeighbour canPassTo,
-								GetMovementSpeed getMovementSpeed,
-								float maxMovementSpeed);
+		List<ITile> GetTileList(Vector3 source,
+								Vector3 target,
+								GetTime getTimeBetweenNodes,
+								GetMinimalAproxTime getMinimalAproxTime);
 	}
 }
