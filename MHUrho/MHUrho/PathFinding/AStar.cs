@@ -185,18 +185,18 @@ namespace MHUrho.PathFinding {
 
 			//Main loop
 			while (priorityQueue.Count != 0) {
-				IProcessingNode currentNode = priorityQueue.Dequeue();
+				AStarNode currentNode = priorityQueue.Dequeue();
 
 				//If we hit the target, finish and return the sourceNode
 				if (currentNode == targetNode) {
 #if DEBUG
 					//VisualizeTouchedNodes();
 #endif
-					return currentNode.ThisNode;
+					return currentNode;
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				currentNode.ProcessNeighbours(priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, Heuristic);
+				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, Heuristic);
 			}
 			//Did not find path
 			return null;
@@ -209,11 +209,11 @@ namespace MHUrho.PathFinding {
 		/// </summary>
 		/// <param name="target">Last Node of the path</param>
 		/// <returns>Path in correct order, from first point to the last point</returns>
-		Path MakePath(Vector3 source, IProcessingNode target)
+		Path MakePath(Vector3 source, AStarNode target)
 		{
 			List<AStarNode> nodes = new List<AStarNode>();
 			while (target != null) {
-				nodes.Add(target.ThisNode);
+				nodes.Add(target);
 				target = target.PreviousNode;
 			}
 			//Reverse so that source is first and target is last
@@ -242,7 +242,7 @@ namespace MHUrho.PathFinding {
 		}
 
 
-		List<ITile> MakeTileList(IProcessingNode target) {
+		List<ITile> MakeTileList(AStarNode target) {
 			List<ITile> reversedTileList = new List<ITile>();
 			ITile previousTile = null;
 			for (;target != null; target = target.PreviousNode) {
@@ -257,7 +257,7 @@ namespace MHUrho.PathFinding {
 			return reversedTileList;
 		}
 
-		Path StartIsFinish(IProcessingNode target, Vector3 source)
+		Path StartIsFinish(AStarNode target, Vector3 source)
 		{
 			//Handle total equality, where Normalize would produce NaN
 			if (target.Position == source) {
@@ -272,7 +272,7 @@ namespace MHUrho.PathFinding {
 
 		void Reset()
 		{
-			foreach (IProcessingNode node in touchedNodes) {
+			foreach (AStarNode node in touchedNodes) {
 				node.Reset();
 			}
 

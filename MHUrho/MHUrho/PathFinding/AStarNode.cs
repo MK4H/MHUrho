@@ -8,46 +8,30 @@ using Urho;
 
 namespace MHUrho.PathFinding
 {
-	enum NodeState { Untouched, Opened, Closed };
+	public enum NodeState { Untouched, Opened, Closed };
 
 	
 
-	public abstract class AStarNode : FastPriorityQueueNode, IProcessingNode, INode {
+	public abstract class AStarNode : FastPriorityQueueNode, INode {
 
 		public abstract NodeType NodeType { get; }
 
-		NodeState IProcessingNode.State {
-			get => state;
-			set => state = value;
-		}
-		NodeState state;
+		public AStarNode PreviousNode { get; protected set; }
+
 
 		/// <summary>
 		/// Time from start to the middle of the tile
 		/// </summary>
 		public float Time { get; set; }
 
-
-		float IProcessingNode.Heuristic {
-			get => heuristic;
-			set => heuristic = value;
-		}
-		float heuristic;
-
-		float IProcessingNode.Value => Time + heuristic;
-
-		IProcessingNode IProcessingNode.PreviousNode {
-			get => previousNode;
-			set => previousNode = value.ThisNode;
-		}
-		protected AStarNode previousNode;
-
-		AStarNode IProcessingNode.ThisNode => this;
-
-		
-
 		public Vector3 Position { get; protected set; }
 
+		protected NodeState State;
+
+		protected float Heuristic;
+
+		protected float Value => Time + Heuristic;
+	
 		protected readonly AStar AStar;
 
 		protected IMap Map => AStar.Map;
@@ -55,19 +39,20 @@ namespace MHUrho.PathFinding
 		protected AStarNode(AStar aStar)
 		{
 			this.AStar = aStar;
-			state = NodeState.Untouched;
+			State = NodeState.Untouched;
 
 		}
 
-		void IProcessingNode.Reset()
+		public void Reset()
 		{
-			previousNode = null;
+			PreviousNode = null;
 			Time = 0;
-			state = NodeState.Untouched;
-			heuristic = 0;
+			State = NodeState.Untouched;
+			Heuristic = 0;
 		}
 
-		public abstract void ProcessNeighbours(FastPriorityQueue<AStarNode> priorityQueue,
+		public abstract void ProcessNeighbours(AStarNode source,
+											FastPriorityQueue<AStarNode> priorityQueue,
 											List<AStarNode> touchedNodes,
 											AStarNode targetNode,
 											GetTime getTimeBetweenNodes,
@@ -87,7 +72,7 @@ namespace MHUrho.PathFinding
 
 		public override string ToString()
 		{
-			return $"Center={Position}, Time={Time}, Heur={heuristic}";
+			return $"Center={Position}, Time={Time}, Heur={Heuristic}";
 		}
 
 		public abstract void AddNeighbour(AStarNode neighbour, MovementType movementType);
@@ -103,22 +88,21 @@ namespace MHUrho.PathFinding
 										GetTime getTime,
 										Func<Vector3, float> getHeuristic)
 		{
-			IProcessingNode neighbourAsP = neighbour;
 			//If already opened or closed
-			if (neighbour.state == NodeState.Closed) {
+			if (neighbour.State == NodeState.Closed) {
 				//Already closed, either not passable or the best path there can be found
 				return;
 
 			}
-			else if (neighbour.state == NodeState.Opened) {
+			else if (neighbour.State == NodeState.Opened) {
 				//if it is closer through the current sourceNode
 
 				if (getTime(this, neighbour, out float timeToTarget)) {
 					float newTime = Time + timeToTarget;
 					if (newTime < neighbour.Time) {
 						neighbour.Time = newTime;
-						neighbour.previousNode = this;
-						priorityQueue.UpdatePriority(this, neighbourAsP.Value);
+						neighbour.PreviousNode = this;
+						priorityQueue.UpdatePriority(neighbour, neighbour.Value);
 					}
 				}
 
@@ -132,13 +116,13 @@ namespace MHUrho.PathFinding
 					return;
 				}
 				else {
-					neighbourAsP.State = NodeState.Opened;
-					neighbourAsP.Heuristic = heuristic;
-					neighbourAsP.PreviousNode = this;
-					neighbourAsP.Time = Time + timeToTarget;
+					neighbour.State = NodeState.Opened;
+					neighbour.Heuristic = heuristic;
+					neighbour.PreviousNode = this;
+					neighbour.Time = Time + timeToTarget;
 
 					//Unit can pass through this tile, enqueue it
-					priorityQueue.Enqueue(neighbour, neighbourAsP.Value);
+					priorityQueue.Enqueue(neighbour, neighbour.Value);
 					touchedNodes.Add(neighbour);
 				}
 

@@ -26,16 +26,17 @@ namespace MHUrho.PathFinding
 			this.outgoingEdges = new Dictionary<AStarNode, MovementType>();
 		}
 
-		public override void ProcessNeighbours(FastPriorityQueue<AStarNode> priorityQueue,
+		public override void ProcessNeighbours(AStarNode source,
+												FastPriorityQueue<AStarNode> priorityQueue,
 												List<AStarNode> touchedNodes,
 												AStarNode targetNode,
 												GetTime getTime,
 												Func<Vector3, float> heuristic)
 		{
-
+			State = NodeState.Closed;
 			foreach (var neighbour in outgoingEdges.Keys) {
 				if (neighbour.NodeType == NodeType.TileEdge) {
-
+					neighbour.ProcessNeighbours(this, priorityQueue, touchedNodes, targetNode, getTime, heuristic);
 				}
 				else {
 					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, getTime, heuristic);
@@ -53,8 +54,8 @@ namespace MHUrho.PathFinding
 		public override Waypoint GetWaypoint()
 		{
 			return new Waypoint(Position,
-								Time - previousNode.Time,
-								previousNode.GetMovementTypeToNeighbour(this));
+								Time - PreviousNode.Time,
+								PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
 		public override TileNode GetTileNode()

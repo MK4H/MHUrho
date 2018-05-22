@@ -59,9 +59,6 @@ namespace MHUrho.PathFinding
 					TileEdgeNode tileEdge = new TileEdgeNode(this, tileNeighbour, AStar);
 					edgeToNeighbourTile.Add(tileNeighbour, tileEdge);
 					tileNeighbour.edgeToNeighbourTile.Add(this, tileEdge);
-
-					outgoingEdges.Add(tileEdge, MovementType.Linear);
-					tileNeighbour.outgoingEdges.Add(tileEdge, MovementType.Linear);
 				}
 			}
 		}
@@ -74,25 +71,26 @@ namespace MHUrho.PathFinding
 			}
 		}
 
-		public override void ProcessNeighbours(FastPriorityQueue<AStarNode> priorityQueue,
+		public override void ProcessNeighbours(AStarNode source,
+												FastPriorityQueue<AStarNode> priorityQueue,
 												List<AStarNode> touchedNodes,
 												AStarNode targetNode,
 												GetTime getTime,
 												Func<Vector3, float> heuristic)
 		{
-			foreach (var neighbour in outgoingEdges.Keys) {
-				if (neighbour.NodeType == NodeType.TileEdge) {
+			State = NodeState.Closed;
+			foreach (var tileEdgeNode in edgeToNeighbourTile.Values) {
+				tileEdgeNode.ProcessNeighbours(this, priorityQueue, touchedNodes, targetNode, getTime, heuristic);
+			}
 
-				}
-				else {
-					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, getTime, heuristic);
-				}
+			foreach (var neighbour in outgoingEdges.Keys) {
+				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, getTime, heuristic);
 			}
 		}
 
 		public override Waypoint GetWaypoint()
 		{
-			return new Waypoint(Position, Time - previousNode.Time, previousNode.GetMovementTypeToNeighbour(this));
+			return new Waypoint(Position, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
 		public override TileNode GetTileNode()
@@ -112,7 +110,8 @@ namespace MHUrho.PathFinding
 
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
 		{
-			return outgoingEdges[neighbour];
+			//Movement type to tile edges is always linear, for other edges, look at what they were added with
+			return outgoingEdges.TryGetValue(neighbour, out MovementType value) ? value : MovementType.Linear;
 		}
 
 		public AStarNode GetNode(Vector3 pointOnThisTile)

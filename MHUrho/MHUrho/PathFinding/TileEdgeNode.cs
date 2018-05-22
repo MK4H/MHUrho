@@ -31,13 +31,35 @@ namespace MHUrho.PathFinding
 			Position = Map.GetBorderBetweenTiles(Tile1.Tile, Tile2.Tile);
 		}
 
-		public override void ProcessNeighbours(FastPriorityQueue<AStarNode> priorityQueue,
+		public override void ProcessNeighbours(AStarNode source,
+												FastPriorityQueue<AStarNode> priorityQueue,
 												List<AStarNode> touchedNodes,
 												AStarNode targetNode,
 												GetTime getTimeBetweenNodes,
-												Func<AStarNode, float> heuristic)
+												Func<Vector3, float> heuristic)
 		{
-			throw new NotImplementedException();
+			if (getTimeBetweenNodes(source, this, out float time)) {
+				float newTime = source.Time + time;
+				if (State != NodeState.Untouched) {
+					if (newTime > Time) {
+						return;
+					}
+				}
+				else {
+					State = NodeState.Opened;
+					touchedNodes.Add(this);
+				}
+
+				Time = newTime;
+				PreviousNode = source;
+
+				ProcessNeighbour(Tile1, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, heuristic);
+				ProcessNeighbour(Tile2, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, heuristic);
+
+				foreach (var neighbour in outgoingEdges.Keys) {
+					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, heuristic);
+				}
+			}
 		}
 
 		public override bool IsItThisNode(Vector3 point)
@@ -47,7 +69,7 @@ namespace MHUrho.PathFinding
 
 		public override Waypoint GetWaypoint()
 		{
-			return new Waypoint(Position, Time - previousNode.Time, previousNode.GetMovementTypeToNeighbour(this));
+			return new Waypoint(Position, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
 
@@ -68,7 +90,8 @@ namespace MHUrho.PathFinding
 
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
 		{
-			return outgoingEdges[neighbour];
+			//Movement between tiles is always linear, to other neighbours, check what they were added with
+			return outgoingEdges.TryGetValue(neighbour, out MovementType value) ? value : MovementType.Linear;
 		}
 
 		

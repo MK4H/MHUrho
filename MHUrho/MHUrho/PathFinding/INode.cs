@@ -5,7 +5,9 @@ using Urho;
 
 namespace MHUrho.PathFinding
 {
-	public enum NodeType { Tile, TileEdge, Building}
+	[Flags]
+	public enum NodeType {None = 0, Tile = 1, TileEdge = 2, Building = 4}
+
 
 	public interface INode
     {
@@ -13,4 +15,12 @@ namespace MHUrho.PathFinding
 
 		Vector3 Position { get; }
     }
+
+
+	public static class NodeTypeExtensions {
+		public static bool IsAnyOfType(this NodeType testedType, NodeType testTypes)
+		{
+			return (testedType & testTypes) != 0;
+		}
+	}
 }

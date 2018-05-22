@@ -101,9 +101,10 @@ namespace DefaultPackage
 		}
 
 
-		public bool GetTime(AStarNode from, AStarNode to, out float time)
+		public bool GetTime(INode from, INode to, out float time)
 		{
-			if () {
+			if (from.NodeType.IsAnyOfType(NodeType.Tile | NodeType.TileEdge) &&
+				to.NodeType.IsAnyOfType(NodeType.Tile | NodeType.TileEdge)) {
 
 				Vector3 diff = to.Position - from.Position;
 

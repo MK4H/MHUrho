@@ -121,7 +121,7 @@ namespace DefaultPackage
 
 
 
-		public bool GetTime(AStarNode from, AStarNode to, out float time)
+		public bool GetTime(INode from, INode to, out float time)
 		{
 			time = (to.Position - from.Position).Length;
 			return true;
