@@ -213,11 +213,10 @@ namespace MHUrho.UnitComponents
 
 
 			if (!MoveTowards(path.TargetWaypoint, timeStep)) {
-				path.Update(Unit.Position, timeStep);
 				return;
 			}
 
-			if (!path.TargetNextWaypoint()) {
+			if (!path.WaypointReached(notificationReceiver.GetTime)) {
 				ReachedDestination();
 			}
 		}
@@ -246,34 +245,43 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		/// <param name="waypoint">waypoint to move towards</param>
 		/// <param name="timeStep">timeStep of the game</param>
+		/// <returns>If unit reached the waypoint</returns>
 		bool MoveTowards(Waypoint waypoint, float timeStep) {
 
 			switch (waypoint.MovementType) {
+				case MovementType.None:
+					return false;
 				case MovementType.Teleport:
-					//NOTHING
-					if (waypoint.TimeToWaypoint - timeStep <= 0) {
+					if (path.Update(Unit.Position, timeStep, notificationReceiver.GetTime)) {
+						//Still can teleport
+
+						//Check timeout
+						if (waypoint.TimeToWaypoint > 0) return false;
+						
 						//Teleport timeout finished
-						if (Unit.MoveTo(waypoint.Position)) {
-							//Unit could move to teleport target
-							return true;
-						}
-						//Unit could not move to teleport target, recalculate path
+						Unit.MoveTo(waypoint.Position);
+						return true;
 					}
+					//Cannot teleport, something in the map changed, recalculate path
+
 					break;
 				default:
 					//Default to linear movement
 					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
 
-					bool reachedPoint = false;
-					if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
-						newPosition = waypoint.Position;
-						reachedPoint = true;
+
+					if (path.Update(newPosition, timeStep, notificationReceiver.GetTime)) {
+						//Can still move towards the waypoint
+						bool reachedWaypoint = false;
+						if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
+							newPosition = waypoint.Position;
+							reachedWaypoint = true;
+						}
+						Unit.MoveTo(newPosition);
+						return reachedWaypoint;
 					}
 
-					if (Unit.MoveTo(newPosition)) {
-						//Unit could move
-						return reachedPoint;
-					}
+					//Cannot move towards the waypoint, something in the map changed, recalculate path
 					break;
 			}
 
@@ -285,6 +293,7 @@ namespace MHUrho.UnitComponents
 									Map,
 									notificationReceiver.GetTime,
 									 notificationReceiver.GetMinimalAproximatedTime);
+
 			if (newPath == null) {
 				//Cant get there
 				MovementFailed = true;

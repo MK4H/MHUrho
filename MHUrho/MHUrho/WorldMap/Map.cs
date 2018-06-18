@@ -237,6 +237,18 @@ namespace MHUrho.WorldMap
 				return GetHeightAt(position.X, position.Y);
 			}
 
+			public IEnumerable<ITile> GetNeighbours()
+			{
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(-1, -1));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(0, -1));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(1, -1));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(-1, 0));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(1, 0));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(-1, 1));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(0, 1));
+				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(1, 1));
+			}
+
 			public BorderTile(StBorderTile stBorderTile, Map map) {
 				this.storage = stBorderTile;
 				this.MapArea = new IntRect(stBorderTile.TopLeftPosition.X, 
@@ -262,7 +274,6 @@ namespace MHUrho.WorldMap
 				this.Map = map;
 			}
 		}
-
 
 		public IPathFindAlg PathFinding { get; private set; }
 
@@ -772,6 +783,11 @@ namespace MHUrho.WorldMap
 					spiralPoint.MoveNext();
 				}
 			}
+		}
+
+		public IFormationController GetFormationController(ITile center)
+		{
+			return new MapFormationController(this, center);
 		}
 
 		/// <inheritdoc />

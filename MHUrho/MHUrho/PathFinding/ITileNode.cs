@@ -8,5 +8,7 @@ namespace MHUrho.PathFinding
     public interface ITileNode : INode
     {
 		ITile Tile { get; }
-    }
+
+		ITileEdgeNode GetEdgeNode(ITileNode neighbour);
+	}
 }

@@ -15,14 +15,11 @@ namespace MHUrho.PathFinding
 
 		public override NodeType NodeType => NodeType.TileEdge;
 
-		IDictionary<AStarNode, MovementType> outgoingEdges;
-
 		public TileEdgeNode(TileNode tile1, TileNode tile2, AStar aStar)
 			:base(aStar)
 		{
 			this.Tile1 = tile1;
 			this.Tile2 = tile2;
-			outgoingEdges = new Dictionary<AStarNode, MovementType>();
 			FixHeight();
 		}
 
@@ -69,27 +66,49 @@ namespace MHUrho.PathFinding
 		}
 
 
-		public override TileNode GetTileNode()
-		{
-			return Tile1;
-		}
-
-		public override void AddNeighbour(AStarNode neighbour, MovementType movementType)
-		{
-			outgoingEdges.Add(neighbour, movementType);
-		}
-
-		public override bool RemoveNeighbour(AStarNode neighbour)
-		{
-			return outgoingEdges.Remove(neighbour);
-		}
-
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
 		{
 			//Movement between tiles is always linear, to other neighbours, check what they were added with
 			return outgoingEdges.TryGetValue(neighbour, out MovementType value) ? value : MovementType.Linear;
 		}
 
-		
+		public override bool Accept(INodeVisitor visitor, INode target, out float time)
+		{
+			return target.Accept(visitor, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITempNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public ITileNode GetOtherSide(ITileNode source)
+		{
+			if (source == Tile1) {
+				return Tile2;
+			}
+
+			if (source == Tile2) {
+				return Tile1;
+			}
+
+			throw new ArgumentException("Source tileNode was not one of the ends of this edge", nameof(source));
+			
+		}
 	}
 }

@@ -68,7 +68,7 @@ namespace MHUrho.PathFinding {
 		/// <param name="target">Target coordinates</param>
 		/// <returns>List of IntVector2s the unit should pass through</returns>
 		public Path FindPath(Vector3 source, 
-							Vector3 target, 
+							INode target, 
 							GetTime getTimeBetweenNodes, 
 							GetMinimalAproxTime getMinimalTime) 
 		{
@@ -89,7 +89,7 @@ namespace MHUrho.PathFinding {
 		}
 
 		public List<ITile> GetTileList(Vector3 source, 
-										Vector3 target,
+										INode target,
 										GetTime getTimeBetweenNodes,
 										GetMinimalAproxTime getMinimalTime) {
 			
@@ -103,9 +103,14 @@ namespace MHUrho.PathFinding {
 			return finalList;
 		}
 
-		public INode GetNode(Vector3 position)
+		public INode GetClosestNode(Vector3 position)
 		{
 			return GetTileNode(position).GetClosestNode(position);
+		}
+
+		ITileNode IPathFindAlg.GetTileNode(ITile tile)
+		{
+			return GetTileNode(tile);
 		}
 
 		public TileNode GetTileNode(ITile tile)
@@ -121,6 +126,11 @@ namespace MHUrho.PathFinding {
 		public TileNode GetTileNode(Vector3 position)
 		{
 			return GetTileNode(Map.GetContainingTile(position));
+		}
+
+		public IBuildingNode CreateBuildingNode(IBuilding building, Vector3 position, object tag)
+		{
+			return new BuildingNode(building, position, tag, this);
 		}
 
 		//		public Path GetPathToIntersection(Vector2 source,
@@ -174,12 +184,16 @@ namespace MHUrho.PathFinding {
 		}
 
 		AStarNode FindPathInNodes(Vector3 source,
-							Vector3 target,
+							INode target,
 							GetTime getTimeBetweenNodes,
 							GetMinimalAproxTime getMinimalTime) {
 
 			AStarNode startNode = GetTileNode(source).GetClosestNode(source);
-			targetNode = GetTileNode(target).GetClosestNode(target);
+
+			targetNode = target as AStarNode;
+			if (targetNode == null) {
+				throw new ArgumentException("Target node was not created by this pathfinding algorithm", nameof(target));
+			}
 			this.getTime = getTimeBetweenNodes;
 			this.getMinimalTime = getMinimalTime;
 
@@ -221,34 +235,41 @@ namespace MHUrho.PathFinding {
 				nodes.Add(target);
 				target = target.PreviousNode;
 			}
+
+			if (nodes.Count == 1) {
+				return StartIsFinish(nodes[0], source);
+			}
+
 			//Reverse so that source is first and target is last
 			nodes.Reverse();
 
 			List<Waypoint> waypoints = new List<Waypoint>();
+			waypoints.Add(new Waypoint(new TempNode(source), 0, MovementType.None));
 			for (int i = 1; i < nodes.Count; i++) {
 				waypoints.Add(nodes[i].GetWaypoint());
 			}
 
-			switch (waypoints[0].MovementType) {
-
+			switch (waypoints[1].MovementType) {
+				case MovementType.None:
+					throw new InvalidOperationException("Waypoint on a path cannot have a MovementType of None");
 				case MovementType.Teleport:
 					//NOTHING
 					break;
 				default:
 					//Default to linear movement
-					Waypoint firstWaypoint = waypoints[0];
-					TempNode sourceNode = new TempNode(source);
-					if (getTime(sourceNode, firstWaypoint.Node, out float time)) {
-						waypoints[0] = firstWaypoint.WithTimeToWaypointSet(time);
+					Waypoint sourceWaypoint = waypoints[0];
+					Waypoint firstWaypoint = waypoints[1];
+					if (getTime(sourceWaypoint.Node, firstWaypoint.Node, out float time)) {
+						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(time);
 					}
 					else {
-						waypoints[0] = firstWaypoint.WithTimeToWaypointSet(getMinimalTime(source, firstWaypoint.Position));
+						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(getMinimalTime(source, firstWaypoint.Position));
 					}
 					
 					break;
 			}
 
-			return Path.CreateFrom(source, waypoints);
+			return Path.CreateFrom(waypoints);
 		}
 
 
@@ -256,7 +277,7 @@ namespace MHUrho.PathFinding {
 			List<ITile> reversedTileList = new List<ITile>();
 			ITile previousTile = null;
 			for (;target != null; target = target.PreviousNode) {
-				ITile targetTile = target.GetTileNode().Tile;
+				ITile targetTile = GetTileNode(target).Tile;
 				if (previousTile != targetTile) {
 					reversedTileList.Add(targetTile);
 					previousTile = targetTile;
@@ -269,15 +290,19 @@ namespace MHUrho.PathFinding {
 
 		Path StartIsFinish(AStarNode target, Vector3 source)
 		{
-			//Handle total equality, where Normalize would produce NaN
-			if (target.Position == source) {
-				return Path.CreateFrom(source, new List<Waypoint> {new Waypoint(target, 0, MovementType.Linear)});
+			TempNode sourceNode = new TempNode(source);
+			float time;
+			//Check for total equality, which would probably break the user code in getTime
+			if (sourceNode.Position == target.Position) {
+				time = 0.0f;
 			}
-
-
-			float distance = Vector3.Distance(target.Position, source);
-			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(target, getMinimalTime(source, target.Position), MovementType.Linear)};
-			return Path.CreateFrom(source, waypoints);
+			else if (!getTime(sourceNode, target, out time)) {
+				return null;
+			}
+			
+			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(sourceNode, 0.0f, MovementType.None),
+															new Waypoint(target, time, MovementType.Linear)};
+			return Path.CreateFrom(waypoints);
 		}
 
 		void Reset()
@@ -295,7 +320,7 @@ namespace MHUrho.PathFinding {
 
 		void VisualizeTouchedNodes()
 		{
-			Map.HighlightTileList(from node in touchedNodes select node.GetTileNode().Tile, Color.Green);
+			Map.HighlightTileList(from node in touchedNodes select GetTileNode(node).Tile, Color.Green);
 		}
 
 		void FillNodeMap()
@@ -314,6 +339,11 @@ namespace MHUrho.PathFinding {
 		int GetTileNodeIndex(int x, int y)
 		{
 			return (x - Map.Left) + (y - Map.Top) * Map.Width;
+		}
+
+		TileNode GetTileNode(INode node)
+		{
+			return GetTileNode(node.Position);
 		}
 
 		//Dictionary<Node, float> GetWaypointDictionary(Path path)

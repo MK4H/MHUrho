@@ -15,5 +15,42 @@ namespace MHUrho.PathFinding
 		{
 			this.Position = position;
 		}
+
+
+		public INode CreateEdge(INode target, MovementType movementType)
+		{
+			throw new NotImplementedException();
+		}
+
+		public INode RemoveEdge(INode target)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Accept(INodeVisitor visitor, INode target, out float time)
+		{
+			return target.Accept(visitor, this, out time);
+		}
+
+		public bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		{
+			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+		}
+
+		public bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		{
+			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+		}
+
+		public bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		{
+			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+		}
+
+		public bool Accept(INodeVisitor visitor, ITempNode source, out float time)
+		{
+			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+		}
+
 	}
 }

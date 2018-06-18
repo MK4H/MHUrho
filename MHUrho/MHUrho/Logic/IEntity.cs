@@ -46,6 +46,25 @@ namespace MHUrho.Logic {
 		/// </summary>
 		Vector2 XZPosition { get; }
 
+
+		Vector3 Up { get; }
+
+		/// <summary>
+		/// Get vector in world coordinates indicating the downwards direction in reference to current unit orientation
+		/// </summary>
+		Vector3 Down { get; }
+
+		Vector3 Forward { get; }
+
+		/// <summary>
+		/// Get vector in world coordinates indicating the backwards direction in reference to current unit orientation
+		/// </summary>
+		Vector3 Backward { get; }
+
+		Vector3 Left { get; }
+
+		Vector3 Right { get; }
+
 		/// <summary>
 		/// Get user logic plugin of this entity
 		/// </summary>

@@ -240,17 +240,17 @@ namespace MHUrho.Logic
 		/// </summary>
 		public Node CenterNode => Node;
 
-		public Vector3 Forward => LegNode.WorldDirection;
+		public override Vector3 Forward => LegNode.WorldDirection;
 
-		public Vector3 Backward => -Forward;
+		public override Vector3 Backward => -Forward;
 
-		public Vector3 Right => LegNode.WorldRight;
+		public override Vector3 Right => LegNode.WorldRight;
 
-		public Vector3 Left => -Right;
+		public override Vector3 Left => -Right;
 
-		public Vector3 Up => LegNode.WorldUp;
+		public override Vector3 Up => LegNode.WorldUp;
 
-		public Vector3 Down => -Up;
+		public override Vector3 Down => -Up;
 
 		public HealthBar HealthBar { get; private set; }
 
@@ -328,30 +328,32 @@ namespace MHUrho.Logic
 			Position = new Vector3(Position.X, newHeight, Position.Z);
 		}
 
-		public bool MoveBy(Vector3 moveBy) {
+		public void MoveBy(Vector3 moveBy) {
 			var newPosition = Position + moveBy;
 
-			return MoveTo(newPosition);
+			MoveTo(newPosition);
 		}
 
-		public bool MoveBy(Vector2 moveBy) {
+		public void MoveBy(Vector2 moveBy) {
 			var newLocation = new Vector2(Position.X + moveBy.X, Position.Z + moveBy.Y);
-			return MoveTo(newLocation);
+			MoveTo(newLocation);
 		}
 
-		public bool MoveTo(Vector3 newPosition) {
-			bool canMoveToTile = CheckTile(newPosition);
-			if (!canMoveToTile) {
-				return false;
-			}
+		public void MoveTo(Vector3 newPosition) {
 
 			FaceTowards(newPosition);
 			Position = newPosition;
-			return true;
+			ITile newTile;
+
+			if ((newTile = Map.GetContainingTile(Position)) != Tile) {
+				Tile.RemoveUnit(this);
+				Tile = newTile;
+				Tile.AddUnit(this);
+			} 
 		}
 
-		public bool MoveTo(Vector2 newLocation) {
-			return MoveTo(new Vector3(newLocation.X, Map.GetTerrainHeightAt(newLocation), newLocation.Y));
+		public void MoveTo(Vector2 newLocation) {
+			MoveTo(new Vector3(newLocation.X, Map.GetTerrainHeightAt(newLocation), newLocation.Y));
 		}
 
 		public void ChangeType(UnitType newType) {
@@ -413,28 +415,6 @@ namespace MHUrho.Logic
 
 		#region Private Methods
 
-
-
-		bool CheckTile(Vector3 newPosition) {
-
-			//New tile, but cant pass
-			if (!UnitPlugin.CanGoFromTo(Position,newPosition) && !IsTileCorner(newPosition)) {
-				return false;
-			}
-
-			//New tile, but can pass
-			Tile.RemoveUnit(this);
-			Tile = Map.GetContainingTile(newPosition);
-			//TODO: Add as owning unit
-			Tile.AddUnit(this);
-			return true;
-		}
-
-		bool IsTileCorner(Vector3 position) {
-			var x = position.X - (float) Math.Floor(position.X);
-			var z = position.Z - (float) Math.Floor(position.Z);
-			return (x < 0.05f || 0.95f < x) && (z < 0.05f || 0.95f < z);
-		}
 
 		void Collision(NodeCollisionStartEventArgs e)
 		{

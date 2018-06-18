@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using MHUrho.Control;
 using Urho;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
@@ -198,6 +198,18 @@ namespace MHUrho.Logic
 
 		public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
+		public override Vector3 Forward => Node.WorldDirection;
+
+		public override Vector3 Backward => -Forward;
+
+		public override Vector3 Right => Node.WorldRight;
+
+		public override Vector3 Left => -Right;
+
+		public override Vector3 Up => Node.WorldUp;
+
+		public override Vector3 Down => -Up;
+
 		public BuildingInstancePlugin BuildingPlugin { get; private set; }
 
 		ITile[] tiles;
@@ -259,6 +271,11 @@ namespace MHUrho.Logic
 		public float? GetHeightAt(float x, float y)
 		{
 			return BuildingPlugin.GetHeightAt(x, y);
+		}
+
+		public IFormationController GetFormationController(Vector3 centerPosition)
+		{
+			return BuildingPlugin.GetFormationController();
 		}
 
 		protected override void OnUpdate(float timeStep)

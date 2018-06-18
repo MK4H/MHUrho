@@ -14,16 +14,22 @@ namespace MHUrho.PathFinding
 
 		public IBuilding Building { get; private set; }
 
-		IDictionary<AStarNode, MovementType> outgoingEdges;
+		public object Tag { get; private set; }
+
+		public bool IsRemoved { get; private set; } = false;
+
+		readonly List<INode> incomingEdges;
 
 		public BuildingNode(IBuilding building, 
 							Vector3 position,
+							object tag,
 							AStar aStar)
 			: base(aStar)
 		{
-			Building = building;
-			Position = position;
-			this.outgoingEdges = new Dictionary<AStarNode, MovementType>();
+			this.Building = building;
+			this.Position = position;
+			this.Tag = tag;
+			incomingEdges = new List<INode>();
 		}
 
 		public override void ProcessNeighbours(AStarNode source,
@@ -51,26 +57,52 @@ namespace MHUrho.PathFinding
 								PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
-		public override TileNode GetTileNode()
-		{
-			throw new NotImplementedException();
-		}
-
-		public override void AddNeighbour(AStarNode neighbour, MovementType movementType)
-		{
-			outgoingEdges.Add(neighbour, movementType);
-		}
-
-		public override bool RemoveNeighbour(AStarNode neighbour)
-		{
-			return outgoingEdges.Remove(neighbour);
-		}
-
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
 		{
 			return outgoingEdges[neighbour];
 		}
 
-		
+		public void Remove()
+		{
+			foreach (var source in incomingEdges) {
+				source.RemoveEdge(this);
+			}
+			IsRemoved = true;
+		}
+
+		public override bool Accept(INodeVisitor visitor, INode target, out float time)
+		{
+			return target.Accept(visitor, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITempNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		protected override void AddedAsTarget(AStarNode source)
+		{
+			incomingEdges.Add(source);
+		}
+
+		protected override void RemovedAsTarget(AStarNode source)
+		{
+			incomingEdges.Remove(source);
+		}
 	}
 }

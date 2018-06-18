@@ -9,15 +9,19 @@ namespace MHUrho.PathFinding
 	public interface IPathFindAlg {
 
 		Path FindPath(Vector3 source,
-					Vector3 target,
+					INode target,
 					GetTime getTimeBetweenNodes,
 					GetMinimalAproxTime getMinimalAproxTime);
 
 		List<ITile> GetTileList(Vector3 source,
-								Vector3 target,
+								INode target,
 								GetTime getTimeBetweenNodes,
 								GetMinimalAproxTime getMinimalAproxTime);
 
-		INode GetNode(Vector3 position);
+		INode GetClosestNode(Vector3 position);
+
+		ITileNode GetTileNode(ITile tile);
+
+		IBuildingNode CreateBuildingNode(IBuilding building, Vector3 position, object tag);
 	}
 }

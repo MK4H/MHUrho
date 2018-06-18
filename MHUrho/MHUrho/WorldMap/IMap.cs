@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -356,6 +357,13 @@ namespace MHUrho.WorldMap {
 		/// <param name="center">Center tile of the spiral. Starting point of the spiral</param>
 		/// <returns>Returns an <see cref="IEnumerable{ITile}"/> which enumerates the tiles in a spiral, starting from <paramref name="center"/></returns>
 		IEnumerable<ITile> GetTilesInSpiral(ITile center);
+
+		/// <summary>
+		/// Returns an <see cref="IFormationController"/> that orders provided units to tiles around the <paramref name="center"/>
+		/// </summary>
+		/// <param name="center">Center tile the units should be ordered around</param>
+		/// <returns>Returns an <see cref="IFormationController"/> that orders provided units to tiles around the <paramref name="center"/></returns>
+		IFormationController GetFormationController(ITile center);
 
 		/// <summary>
 		/// Returns an enumerable that iterates over all the tiles in the given rectangle,

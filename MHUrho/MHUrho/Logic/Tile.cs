@@ -233,5 +233,26 @@ namespace MHUrho.Logic
 		{
 			return GetHeightAt(position.X, position.Y);
 		}
+
+		public IEnumerable<ITile> GetNeighbours()
+		{
+			//Top left neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, -1));
+			//Top neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(0, -1));
+			//Top right neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, -1));
+			//Right neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, 0));
+			//Bottom right neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, 1));
+			//Bottom neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(0, 1));
+			//Bottom left neighbour 
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, 1));
+			//Left neighbour
+			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, 0));
+
+		}
 	} 
 }

@@ -38,22 +38,82 @@ namespace DefaultPackage
 	}
 
 	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver {
+
+		class PathVisitor : NodeVisitor {
+			TestWorkerInstance worker;
+
+			public PathVisitor(TestWorkerInstance worker)
+			{
+				this.worker = worker;
+			}
+
+			public override bool Visit(ITempNode source, ITileEdgeNode target, out float time)
+			{
+				time = (source.Position - target.Position).Length;
+				return true;
+			}
+
+			public override bool Visit(ITempNode source, ITileNode target, out float time)
+			{
+				time = (source.Position - target.Position).Length;
+				return true;
+			}
+
+			public override bool Visit(ITileEdgeNode source, ITileNode target, out float time)
+			{
+				if (target.Tile.Building == null) {
+					time = (source.Position - target.Position).Length;
+					return true;
+				}
+
+				time = -1;
+				return false;
+			}
+
+			public override bool Visit(ITileNode source, ITileEdgeNode target, out float time)
+			{
+				time = (source.Position - target.Position).Length;
+				ITileNode targetTile = target.GetOtherSide(source);
+
+				//If the edge is diagonal and there are buildings on both sides of the edge, dont go there
+				if (source.Tile.MapLocation.X != targetTile.Tile.MapLocation.X &&
+					source.Tile.MapLocation.Y != targetTile.Tile.MapLocation.Y &&
+					worker.Map
+						.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X,
+															targetTile.Tile.MapLocation.Y))
+						.Building != null &&
+					worker.Map
+						.GetTileByMapLocation(new IntVector2(targetTile.Tile.MapLocation.X,
+															source.Tile.MapLocation.Y)) != null
+				) {
+					time = -1;
+					return false;
+				}
+
+				return true;
+			}
+
+		}
+
 		public TestBuildingInstance WorkedBuilding { get; set; }
 
-		public float MaxMovementSpeed => 100;
 
 		WorldWalker walker;
 		bool homeGoing = false;
 		bool started = false;
 
+		readonly PathVisitor pathVisitor;
+
 		public TestWorkerInstance(ILevelManager level, IUnit unit) : base(level, unit) {
 			walker = WorldWalker.GetInstanceFor(this, level);
 			unit.AddComponent(walker);
 
+			this.pathVisitor = new PathVisitor(this);
+			
 		}
 
 		public TestWorkerInstance() {
-
+			this.pathVisitor = new PathVisitor(this);
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -85,28 +145,6 @@ namespace DefaultPackage
 			walker = unit.GetDefaultComponent<WorldWalker>();
 		}
 
-		
-
-		public override bool CanGoFromTo(Vector3 from, Vector3 to)
-		{
-			ITile fromTile = Map.GetContainingTile(from);
-			ITile toTile = Map.GetContainingTile(to);
-
-			var diff = toTile.MapLocation - fromTile.MapLocation;
-			bool targetEmpty = toTile.Building == null;
-
-			if (diff.X == 0 || diff.Y == 0) {
-				return targetEmpty;
-			}
-			else {
-				//Diagonal
-				var tile1 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(diff.X, 0));
-				var tile2 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(0, diff.Y));
-
-				return targetEmpty && (tile1.Building == null || tile2.Building == null);
-			}
-		}
-
 		public override void OnProjectileHit(IProjectile projectile)
 		{
 			throw new NotImplementedException();
@@ -119,8 +157,7 @@ namespace DefaultPackage
 
 		public bool GetTime(INode from, INode to, out float time)
 		{
-			time = (to.Position - from.Position).Length;
-			return true;
+			return from.Accept(pathVisitor, to, out time);
 		}
 
 		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)

@@ -88,8 +88,8 @@ namespace DefaultPackage
 
 		public override void OnUpdate(float timeStep)
 		{
-			return;
 
+			return;
 
 			logicTimeout -= timeStep;
 			if (logicTimeout > 0) return;

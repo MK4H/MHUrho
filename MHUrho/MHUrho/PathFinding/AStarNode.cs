@@ -34,13 +34,15 @@ namespace MHUrho.PathFinding
 	
 		protected readonly AStar AStar;
 
+		protected readonly IDictionary<AStarNode, MovementType> outgoingEdges;
+
 		protected IMap Map => AStar.Map;
 
 		protected AStarNode(AStar aStar)
 		{
 			this.AStar = aStar;
 			State = NodeState.Untouched;
-
+			outgoingEdges = new Dictionary<AStarNode, MovementType>();
 		}
 
 		public void Reset()
@@ -65,18 +67,75 @@ namespace MHUrho.PathFinding
 		/// <returns>Returns waypoints to get from <see cref="previousNode"/> to this node</returns>
 		public abstract Waypoint GetWaypoint();
 
-		public abstract TileNode GetTileNode();
-
 		public override string ToString()
 		{
 			return $"Center={Position}, Time={Time}, Heur={Heuristic}";
 		}
 
-		public abstract void AddNeighbour(AStarNode neighbour, MovementType movementType);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="movementType"></param>
+		/// <exception cref="ArgumentNullException"/>
+		/// <exception cref="ArgumentException"/>
+		public INode CreateEdge(INode target, MovementType movementType)
+		{
+			if (movementType == MovementType.None) {
+				throw new ArgumentException("Movement type cannot be None", nameof(movementType));
+			}
 
-		public abstract bool RemoveNeighbour(AStarNode neighbour);
+			try {
+				AStarNode aStarTarget = (AStarNode) target;
+				outgoingEdges.Add(aStarTarget, movementType);
+				aStarTarget.AddedAsTarget(this);
+			}
+			catch (ArgumentNullException e) {
+				throw new ArgumentNullException(nameof(target), "TargetNode cannot be null");
+			}
+			catch (ArgumentException e) {
+				throw new ArgumentException("This pathfinding algorithm does not support multiple edges between the same nodes",
+											nameof(target));
+			}
+			catch (InvalidCastException e) {
+				throw new ArgumentException("Target node was not from the same pathfinding algorithm", nameof(target), e);
+			}
+			return this;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="target"></param>
+		/// <exception cref="ArgumentNullException"/>
+		/// <exception cref="ArgumentException"/>
+		public INode RemoveEdge(INode target)
+		{
+			try {
+				AStarNode aStarTarget = (AStarNode)target;
+				if (!outgoingEdges.Remove(aStarTarget)) {
+					throw new ArgumentException("There was no edge to the target", nameof(target));
+				}
+
+				aStarTarget.RemovedAsTarget(this);
+			}
+			catch (InvalidCastException e) {
+				throw new ArgumentException("Target node was not from the same pathfinding algorithm", nameof(target), e);
+			}
+			return this;
+		}
 
 		public abstract MovementType GetMovementTypeToNeighbour(AStarNode neighbour);
+
+		public abstract bool Accept(INodeVisitor visitor, INode target, out float time);
+
+		public abstract bool Accept(INodeVisitor visitor, ITileNode source, out float time);
+
+		public abstract bool Accept(INodeVisitor visitor, IBuildingNode source, out float time);
+
+		public abstract bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time);
+
+		public abstract bool Accept(INodeVisitor visitor, ITempNode source, out float time);
 
 		protected void ProcessNeighbour(AStarNode neighbour,
 										FastPriorityQueue<AStarNode> priorityQueue,
@@ -124,6 +183,16 @@ namespace MHUrho.PathFinding
 				}
 
 			}
+		}
+
+		protected virtual void AddedAsTarget(AStarNode source)
+		{
+			//NOTHING
+		}
+
+		protected virtual void RemovedAsTarget(AStarNode source)
+		{
+			//NOTHING
 		}
 	}
 }

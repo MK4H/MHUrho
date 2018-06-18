@@ -36,6 +36,18 @@ namespace MHUrho.Logic
 			set => Position = new Vector3(value.X, Position.Y, value.Y);
 		}
 
+		public abstract Vector3 Forward { get; }
+
+		public abstract Vector3 Backward { get; }
+
+		public abstract Vector3 Right { get; }
+
+		public abstract Vector3 Left { get; }
+
+		public abstract Vector3 Up { get; }
+
+		public abstract Vector3 Down { get; }
+
 		public abstract InstancePlugin Plugin { get; }
 	
 

@@ -8,7 +8,7 @@ using Urho;
 
 namespace MHUrho.PathFinding
 {
-	public enum MovementType { Linear, Teleport }
+	public enum MovementType { None, Linear, Teleport }
 
 	public interface IPositionOnlyWaypoint {
 		Vector3 Position { get; }
@@ -47,7 +47,7 @@ namespace MHUrho.PathFinding
 		{
 			
 			this.Position = storedWaypoint.Position.ToVector3();
-			this.Node = level.Map.PathFinding.GetNode(Position);
+			this.Node = level.Map.PathFinding.GetClosestNode(Position);
 			this.TimeToWaypoint = storedWaypoint.Time;
 			this.MovementType = (MovementType)storedWaypoint.MovementType;
 		}

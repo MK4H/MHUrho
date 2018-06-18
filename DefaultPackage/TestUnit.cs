@@ -86,25 +86,6 @@ namespace DefaultPackage
 
 		public float MaxMovementSpeed => 100;
 
-		public override bool CanGoFromTo(Vector3 from, Vector3 to)
-		{
-			ITile fromTile = Map.GetContainingTile(from);
-			ITile toTile = Map.GetContainingTile(to);
-			var diff = toTile.MapLocation - fromTile.MapLocation;
-
-			if (diff.X == 0 || diff.Y == 0) {
-				return toTile.Building == null;
-			}
-			else {
-				//Diagonal
-				var tile1 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(diff.X, 0));
-				var tile2 = fromTile.Map.GetTileByMapLocation(fromTile.MapLocation + new IntVector2(0, diff.Y));
-
-				return tile1.Building == null && tile2.Building == null;
-			}
-			
-		}
-
 		public override void OnProjectileHit(IProjectile projectile)
 		{
 			throw new NotImplementedException();

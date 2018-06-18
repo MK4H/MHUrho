@@ -1,4 +1,5 @@
-﻿using MHUrho.Plugins;
+﻿using MHUrho.Control;
+using MHUrho.Plugins;
 using MHUrho.Storage;
 using Urho;
 
@@ -21,5 +22,7 @@ namespace MHUrho.Logic {
 		StBuilding Save();
 
 		float? GetHeightAt(float x, float y);
+
+		IFormationController GetFormationController(Vector3 centerPosition);
 	}
 }

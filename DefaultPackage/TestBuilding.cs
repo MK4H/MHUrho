@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Control;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -42,7 +44,6 @@ namespace DefaultPackage
 		public override BuildingInstancePlugin GetInstanceForLoading() {
 			return new TestBuildingInstance();
 		}
-
 
 		public override bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level) {
 			bool empty = true;
@@ -103,6 +104,7 @@ namespace DefaultPackage
 
 		ILevelManager level;
 		TestWorkerInstance[] workers;
+		Dictionary<ITile, IBuildingNode> pathfindingNodes;
 
 		int resources;
 
@@ -178,6 +180,11 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
+		public override IFormationController GetFormationController(Vector3 centerPosition)
+		{
+			return new TestBuildingFormationController(pathfindingNodes, Map.GetContainingTile(centerPosition), Map);
+		}
+
 		public ITile GetInterfaceTile(TestWorkerInstance testWorker) {
 			for (int i = 0; i < workers.Length; i++) {
 				if (testWorker == workers[i]) {
@@ -188,5 +195,63 @@ namespace DefaultPackage
 			return null;
 		}
 
+
+		void AddPathfindingNodes()
+		{
+			pathfindingNodes = new Dictionary<ITile, IBuildingNode>();
+			IntVector2 tileLocation = Building.Rectangle.TopLeft();
+
+			for (int y = Building.Rectangle.Top; y <= Building.Rectangle.Bottom; y++) {
+				for (int x = Building.Rectangle.Left; x <= Building.Rectangle.Right; x++) {
+					ITile tile = Map.GetTileByTopLeftCorner(x, y);
+					pathfindingNodes.Add(tile,
+										Map.PathFinding.CreateBuildingNode(Building, tile.Center3 + new Vector3(0, 3, 0), null));
+				}
+			}
+
+			foreach (var node in pathfindingNodes) {
+				foreach (var neighbour in node.Key.GetNeighbours()) {
+					if (neighbour != null && pathfindingNodes.TryGetValue(neighbour, out IBuildingNode neighbourNode)) {
+						node.Value.CreateEdge(neighbourNode, MovementType.Linear);
+					} 
+				}
+			}
+
+			ITile sourceTile = Map.GetContainingTile(Building.Center + Building.Forward * 2);
+			var tileNode = Map.PathFinding.GetTileNode(sourceTile);
+			var buildingEntryNode = pathfindingNodes[Map.GetContainingTile(Building.Center + Building.Forward)];
+			buildingEntryNode.CreateEdge(tileNode, MovementType.Teleport);
+			tileNode.CreateEdge(buildingEntryNode, MovementType.Teleport);
+		}
+
 	}
+
+	class TestBuildingFormationController : IFormationController {
+
+		Dictionary<ITile, IBuildingNode> nodes;
+		Spiral.SpiralEnumerator spiral;
+		IMap map;
+
+		public TestBuildingFormationController(Dictionary<ITile, IBuildingNode> nodes, ITile center, IMap map)
+		{
+			nodes = new Dictionary<ITile, IBuildingNode>();
+			spiral = new Spiral(center.MapLocation).GetSpiralEnumerator();
+		}
+
+		public bool MoveToFormation(UnitSelector unit)
+		{
+			while (spiral.MoveNext() && 
+					spiral.ContainingSquareSize < 6 &&
+					nodes.TryGetValue(map.GetTileByMapLocation(spiral.Current), out IBuildingNode buildingNode)) {
+				unit.Order(buildingNode,)
+			}
+		}
+
+		public void MoveToFormation(IEnumerator<UnitSelector> units)
+		{
+			
+		}
+
+	}
+
 }

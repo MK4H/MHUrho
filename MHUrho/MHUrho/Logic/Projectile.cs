@@ -174,6 +174,18 @@ namespace MHUrho.Logic
 			protected set => Node.Position = value;
 		}
 
+		public override Vector3 Forward => Node.WorldDirection;
+
+		public override Vector3 Backward => -Forward;
+
+		public override Vector3 Right => Node.WorldRight;
+
+		public override Vector3 Left => -Right;
+
+		public override Vector3 Up => Node.WorldUp;
+
+		public override Vector3 Down => -Up;
+
 		public override InstancePlugin Plugin => ProjectilePlugin;
 
 

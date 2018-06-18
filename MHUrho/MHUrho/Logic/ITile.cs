@@ -138,5 +138,7 @@ namespace MHUrho.Logic
 		float GetHeightAt(float x, float y);
 
 		float GetHeightAt(Vector2 position);
+
+		IEnumerable<ITile> GetNeighbours();
 	}
 }

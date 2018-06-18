@@ -24,20 +24,32 @@ namespace MHUrho.PathFinding
 
 		public bool Finished => targetWaypointIndex == waypoints.Count;
 
+		Waypoint PreviousWaypoint {
+			get => waypoints[previousWaypointIndex];
+			set => waypoints[previousWaypointIndex] = value;
+		}
+
 		readonly List<Waypoint> waypoints;
 
 		int targetWaypointIndex;
 
 		Vector3 currentPosition;
 
+		/// <summary>
+		/// Original time to TargetWaypoint on the call of <see cref="WaypointReached(GetTime)"/>
+		/// </summary>
+		float originalTime;
+		int previousWaypointIndex = 0;
+
 		protected Path() {
 			this.waypoints = new List<Waypoint>();
 		}
 
-		protected Path(Vector3 currentPosition, List<Waypoint> waypoints) {
+		protected Path(List<Waypoint> waypoints) {
 			this.waypoints = waypoints;
-			targetWaypointIndex = 0;
-			this.currentPosition = currentPosition;
+			targetWaypointIndex = 1;
+			this.currentPosition = waypoints[0].Position;
+			originalTime = TargetWaypoint.TimeToWaypoint;
 		}
 
 
@@ -59,8 +71,13 @@ namespace MHUrho.PathFinding
 			return newPath;
 		}
 
-		public static Path CreateFrom(Vector3 currentPosition,List<Waypoint> waypoints) {
-			return new Path(currentPosition, waypoints);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="waypoints">List of waypoints, where waypoints[0] is the current Position with time 0 and MovementType.None and there is at least one more waypoint as a target</param>
+		/// <returns></returns>
+		public static Path CreateFrom(List<Waypoint> waypoints) {
+			return new Path(waypoints);
 		}
 
 
@@ -78,21 +95,35 @@ namespace MHUrho.PathFinding
 		}
 
 
-		public void Update(Vector3 newPosition, float secondsFromLastUpdate)
+		public bool Update(Vector3 newPosition, float secondsFromLastUpdate, GetTime getTime)
 		{
 			switch (TargetWaypoint.MovementType) {
+				case MovementType.None:
+					return false;
 				case MovementType.Teleport:
-					TargetWaypoint = TargetWaypoint.WithTimeToWapointChanged(-secondsFromLastUpdate);
+					//NOTHING
 					break;
-				default:
+				default: /*Linear movement and unknown*/
 					//Default to linear movement
-					float speed = Vector3.Distance(newPosition, currentPosition) / secondsFromLastUpdate;
-					float distToTarget = Vector3.Distance(newPosition, TargetWaypoint.Position);
-					TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(distToTarget / speed);
+					currentPosition = newPosition;
 					break;
+
+
 			}
 
-			currentPosition = newPosition;
+			if (getTime(waypoints[previousWaypointIndex].Node, TargetWaypoint.Node, out var newTime)) {
+				//Still can teleport to TargetWaypoint
+
+				//Scale the remaining time if the time from previous waypoint to targetWaypoint changed
+				float remainingTime = TargetWaypoint.TimeToWaypoint * (newTime / originalTime);
+				//Save the current time from waypoint to waypoint to scale in the next update
+				originalTime = newTime;
+				//Set the remaining time with the timeStep subtracted
+				TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(remainingTime - secondsFromLastUpdate);
+				return true;
+			}
+			//Can no longer move to target position
+			return false;
 		}
 
 		public bool IsWaypointReached()
@@ -104,15 +135,25 @@ namespace MHUrho.PathFinding
 		/// 
 		/// </summary>
 		/// <returns>If there was next waypoint to target, or this was the end</returns>
-		public bool TargetNextWaypoint()
+		public bool WaypointReached(GetTime getTime)
 		{
+			currentPosition = TargetWaypoint.Position;
 			TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(0.0f);
-			if (targetWaypointIndex >= waypoints.Count - 1) {
+			//If there is no next waypoint
+			if (!MoveNext()) {
 				targetWaypointIndex = waypoints.Count;
+				//End of the path
 				return false;
 			}
 
-			targetWaypointIndex++;
+			if (!getTime(PreviousWaypoint.Node, TargetWaypoint.Node, out float newTimeToWaypoint))
+			{
+				//Cant get to the waypoint, path changed, end of the current path
+				return false;
+			}
+
+			TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(newTimeToWaypoint);
+			originalTime = newTimeToWaypoint;
 			return true;
 		}
 
@@ -147,6 +188,16 @@ namespace MHUrho.PathFinding
 
 		public Vector3 GetTarget() {
 			return waypoints[waypoints.Count - 1].Position;
+		}
+
+		bool MoveNext()
+		{
+			if (targetWaypointIndex < waypoints.Count - 1) {
+				previousWaypointIndex++;
+				targetWaypointIndex++;
+				return true;
+			}
+			return false;
 		}
 
 	}

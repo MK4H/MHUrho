@@ -44,6 +44,20 @@ namespace MHUrho.Helpers
 			return rectangle.Bottom - rectangle.Top;
 		}
 
+		public static bool IsVectorInside(this IntRect rectangle, IntVector2 intVector)
+		{
+			return rectangle.Left <= intVector.X &&
+					intVector.X <= rectangle.Right &&
+					rectangle.Top <= intVector.Y &&
+					intVector.Y <= rectangle.Bottom;
+		}
 
+		public static bool IsVectorInside(this IntRect rectangle, Vector2 vector)
+		{
+			return rectangle.Left <= vector.X &&
+					vector.X <= rectangle.Right &&
+					rectangle.Top <= vector.Y &&
+					vector.Y <= rectangle.Bottom;
+		}
 	}
 }

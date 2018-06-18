@@ -4,7 +4,8 @@ using System.Text;
 
 namespace MHUrho.PathFinding
 {
-    public interface ITileEdgeNode : INode
-    {
-    }
+    public interface ITileEdgeNode : INode {
+
+		ITileNode GetOtherSide(ITileNode source);
+	}
 }

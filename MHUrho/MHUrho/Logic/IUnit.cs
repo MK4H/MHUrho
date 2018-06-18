@@ -12,27 +12,16 @@ namespace MHUrho.Logic {
 		/// </summary>
 		bool AlwaysVertical { get; set; }
 
-		/// <summary>
-		/// Get vector in world coordinates indicating the backwards direction in reference to current unit orientation
-		/// </summary>
-		Vector3 Backward { get; }
+
 
 		Node CenterNode { get; }
 
-		/// <summary>
-		/// Get vector in world coordinates indicating the downwards direction in reference to current unit orientation
-		/// </summary>
-		Vector3 Down { get; }
-
-		Vector3 Forward { get; }
-
-		Vector3 Left { get; }
 
 		Node LegNode { get; }
 
 		UnitInstancePlugin UnitPlugin { get; }
 
-		Vector3 Right { get; }
+		
 
 		/// <summary>
 		/// Get tile currently containinng the units Node, value is equal to IMap.GetContainingTile(unit.Position)
@@ -46,7 +35,6 @@ namespace MHUrho.Logic {
 		/// </summary>
 		UnitType UnitType { get; }
 
-		Vector3 Up { get; }
 
 		//TODO: Temp
 		HealthBar HealthBar{ get;}
@@ -55,15 +43,15 @@ namespace MHUrho.Logic {
 
 		void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false);
 
-		bool MoveBy(Vector2 moveBy);
+		void MoveBy(Vector2 moveBy);
 
-		bool MoveBy(Vector3 moveBy);
+		void MoveBy(Vector3 moveBy);
 
 		float MovementSpeed(ITile tile);
 
-		bool MoveTo(Vector2 newLocation);
+		void MoveTo(Vector2 newLocation);
 
-		bool MoveTo(Vector3 newPosition);
+		void MoveTo(Vector3 newPosition);
 
 		void RotateAroundCenter(float pitch, float yaw, float roll);
 

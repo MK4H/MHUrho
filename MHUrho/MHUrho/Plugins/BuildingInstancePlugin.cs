@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.UserInterface;
@@ -30,6 +31,11 @@ namespace MHUrho.Plugins
 		public abstract void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData);
 
 		public virtual float? GetHeightAt(float x, float y)
+		{
+			return null;
+		}
+
+		public virtual IFormationController GetFormationController(Vector3 centerPosition)
 		{
 			return null;
 		}

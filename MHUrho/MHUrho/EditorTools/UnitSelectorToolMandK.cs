@@ -14,6 +14,22 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
+	public class MandKOrderArgs : OrderArgs {
+		public MouseButton ClickedButton { get; private set; }
+		public MouseButton HeldDownButtons { get; private set; }
+		/// <summary>
+		/// Other qualifiers, like Ctrl, Alt, Shift etc.
+		/// </summary>
+		public int OtherQualifiers{ get; private set; }
+
+		public MandKOrderArgs(MouseButton clickedButton, MouseButton heldDownButtons, int otherQualifiers)
+		{
+			this.ClickedButton = clickedButton;
+			this.HeldDownButtons = heldDownButtons;
+			this.OtherQualifiers = otherQualifiers;
+		}
+	}
+
 	class UnitSelectorToolMandK : UnitSelectorTool, IMandKTool {
 
 		class SelectedInfo {
@@ -36,14 +52,47 @@ namespace MHUrho.EditorTools
 			}
 		}
 
+		class ClickDispatcher : IEntityVisitor<bool> {
+
+			readonly UnitSelectorToolMandK unitSelectorTool;
+			readonly MouseButtonUpEventArgs args;
+			readonly Vector3 worldPosition;
+
+			public ClickDispatcher(UnitSelectorToolMandK unitSelectorTool,
+									MouseButtonUpEventArgs args,
+									Vector3 worldPosition)
+			{
+				this.unitSelectorTool = unitSelectorTool;
+				this.args = args;
+				this.worldPosition = worldPosition;
+			}
+
+			public bool Visit(IUnit unit)
+			{
+				return unitSelectorTool.HandleUnitClick(unit, args);
+			}
+
+			public bool Visit(IBuilding building)
+			{
+				return unitSelectorTool.HandleBuildingClick(building, args, worldPosition);
+			}
+
+			public bool Visit(IProjectile projectile)
+			{
+				return false;
+			}
+		}
+
 		public override IEnumerable<Button> Buttons =>
 			from button in buttons
 			where selected[button.Value].Count > 0
 			select button.Key;
 
 		readonly GameMandKController input;
+
+		ILevelManager Level => input.Level;
+
 		Map Map => input.Level.Map;
-		readonly FormationController formation;
 
 		readonly DynamicRectangleToolMandK dynamicHighlight;
 
@@ -53,13 +102,11 @@ namespace MHUrho.EditorTools
 
 		bool enabled;
 
-
 		public UnitSelectorToolMandK(GameMandKController input) {
 			this.input = input;
 			this.selected = new Dictionary<UnitType, SelectedInfo>();
 			this.buttons = new Dictionary<Button, UnitType>();
 
-			this.formation = new FormationController(Map);
 			this.dynamicHighlight = new DynamicRectangleToolMandK(input);
 		}
 
@@ -108,23 +155,14 @@ namespace MHUrho.EditorTools
 				
 
 				//TODO: Target
-				var entity = result.Node.GetComponent<Entity>();
+				var entity = Level.GetEntity(result.Node);
+
+				
 
 				if (entity != null) {
-					if (entity.GetType() == typeof(Unit)) {
-						var handled = HandleUnitClick((Unit) entity, e);
-						//TODO: react to handle failed
+					var visitor = new ClickDispatcher(this, e, result.Position);
+					if (entity.Accept(visitor)) {
 						return;
-					}
-					else if (entity.GetType() == typeof(Building)) {
-						//TODO:
-						return;
-					}
-					else if (entity.GetType() == typeof(Projectile)) {
-						continue;
-					}
-					else {
-						throw new InvalidOperationException("There is an entity type clicked that i dont know");
 					}
 				}
 				
@@ -136,11 +174,11 @@ namespace MHUrho.EditorTools
 				//TODO: this
 				switch (e.Button) {
 					case (int)MouseButton.Left:
-						formation.MoveToFormation(GetAllSelectedUnitSelectors(), tile);
+						Map.GetFormationController(tile).MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
 						break;
 					case (int) MouseButton.Right:
 						foreach (var unit in GetAllSelectedUnitSelectors()) {
-							unit.Order(tile, (MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers);
+							unit.Order(tile, new MandKOrderArgs((MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers));
 						}
 						break;
 				}
@@ -254,8 +292,8 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		bool HandleUnitClick(Unit unit, MouseButtonUpEventArgs e) {
-			var selector = unit.GetComponent<UnitSelector>();
+		bool HandleUnitClick(IUnit unit, MouseButtonUpEventArgs e) {
+			var selector = unit.GetDefaultComponent<UnitSelector>();
 			//If the unit is selectable and owned by the clicking player
 			if (selector != null && selector.Player == input.Player) {
 				//Select if not selected, deselect if selected
@@ -276,14 +314,21 @@ namespace MHUrho.EditorTools
 				var executed = false;
 
 				foreach (var selectedUnit in GetAllSelectedUnitSelectors()) {
-					executed |= selectedUnit.Order(unit, (MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers);
+					executed |= selectedUnit.Order(unit, new MandKOrderArgs((MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers));
 				}
 				return executed;
 			}
 		}
 
-		bool HandleBuildingClick() {
-			return false;
+		bool HandleBuildingClick(IBuilding building, MouseButtonUpEventArgs e, Vector3 worldPosition)
+		{
+			var formationController = building.GetFormationController(worldPosition);
+			if (formationController == null) {
+				return false;
+			}
+
+			formationController.MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
+			return true;
 		}
 
 	}

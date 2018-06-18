@@ -56,14 +56,102 @@ namespace DefaultPackage
 									Shooter.INotificationReceiver,
 									MovingRangeTarget.INotificationReceiver{
 
+		class PathVisitor : NodeVisitor {
+			readonly ChickenInstance chicken;
+
+			public PathVisitor(ChickenInstance chicken)
+			{
+				this.chicken = chicken;
+			}
+
+			public override bool Visit(ITempNode source, IBuildingNode target, out float time)
+			{
+				time = GetTime(source.Position, target.Position);
+				return true;
+			}
+
+			public override bool Visit(ITempNode source, ITileEdgeNode target, out float time)
+			{
+				time = GetTime(source.Position, target.Position);
+				return true;
+			}
+
+			public override bool Visit(ITempNode source, ITileNode target, out float time)
+			{
+				time = GetTime(source.Position, target.Position);
+				return true;
+			}
+
+			public override bool Visit(ITileEdgeNode source, ITileNode target, out float time)
+			{
+				time = GetTime(source.Position, target.Position);
+				return true;
+			}
+
+			public override bool Visit(IBuildingNode source, IBuildingNode target, out float time)
+			{
+				time = GetTime(source.Position, target.Position);
+				return true;
+			}
+
+			public override bool Visit(ITileNode source, IBuildingNode target, out float time)
+			{
+				time = 1;
+				return true;
+			}
+
+			public override bool Visit(ITileNode source, ITileEdgeNode target, out float time)
+			{
+				time = GetTime(source.Position, target.Position);
+				return true;
+			}
+
+			public override bool Visit(ITileEdgeNode source, IBuildingNode target, out float time)
+			{
+				time = 1;
+				return true;
+			}
+
+			public override bool Visit(IBuildingNode source, ITileEdgeNode target, out float time)
+			{
+				time = 1;
+				return true;
+			}
+
+			public override bool Visit(IBuildingNode source, ITileNode target, out float time)
+			{
+				time = 1;
+				return true;
+			}
+
+			float GetTime(Vector3 from, Vector3 to)
+			{
+				//Check for complete equality, which breaks the code below
+				if (from == to) {
+					return 0;
+				}
+
+				Vector3 diff = to - from;
+
+				//In radians
+				float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
+
+				//TODO: Maybe cache the Length in the Edge
+				return (diff.Length / 2) + angle;
+			}
+		}
+
 		AnimationController animationController;
 		public WorldWalker Walker { get; private set; }
 		public Shooter Shooter{ get; private set; }
 
 		bool dying;
 
-		public ChickenInstance() {
+		readonly PathVisitor pathVisitor;
 
+		public ChickenInstance()
+		{
+			pathVisitor = new PathVisitor(this);
 		}
 
 		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
@@ -79,6 +167,7 @@ namespace DefaultPackage
 			unit.AddComponent(MovingRangeTarget.CreateNew(this, level));
 			
 			unit.AlwaysVertical = true;
+			pathVisitor = new PathVisitor(this);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage) {
@@ -95,29 +184,9 @@ namespace DefaultPackage
 
 		}
 
-		public override bool CanGoFromTo(Vector3 from, Vector3 to)
-		{
-			return Map.GetContainingTile(to).Building == null;
-		}
-
-
 		public bool GetTime(INode from, INode to, out float time)
 		{
-			if (from.NodeType.IsAnyOfType(NodeType.Tile | NodeType.TileEdge) &&
-				to.NodeType.IsAnyOfType(NodeType.Tile | NodeType.TileEdge)) {
-
-				Vector3 diff = to.Position - from.Position;
-
-				//In radians
-				float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
-
-				//TODO: Maybe cache the Length in the Edge
-				time = (diff.Length / 2) + angle;
-
-				return true;
-			}
-			time = 0;
-			return false;
+			return from.Accept(pathVisitor, to, out time);
 		}
 
 		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)

@@ -19,11 +19,7 @@ namespace MHUrho.PathFinding
 
 		readonly List<AStarNode> nodesOnThisTile;
 
-		readonly Dictionary<TileNode, TileEdgeNode> edgeToNeighbourTile;
-
-		readonly IDictionary<AStarNode, MovementType> outgoingEdges;
-
-		
+		readonly Dictionary<ITileNode, TileEdgeNode> edgeToNeighbourTile;
 
 		public TileNode(ITile tile, AStar aStar) 
 			:base(aStar)
@@ -31,8 +27,7 @@ namespace MHUrho.PathFinding
 			this.Tile = tile;
 			this.Position = Tile.Center3;
 			nodesOnThisTile = new List<AStarNode>();
-			edgeToNeighbourTile = new Dictionary<TileNode, TileEdgeNode>();
-			outgoingEdges = new Dictionary<AStarNode, MovementType>();
+			edgeToNeighbourTile = new Dictionary<ITileNode, TileEdgeNode>();
 		}
 
 		public void ConnectNeighbours()
@@ -56,6 +51,7 @@ namespace MHUrho.PathFinding
 
 			foreach (var tileNeighbour in newTileNeighbours) {
 				if (!edgeToNeighbourTile.ContainsKey(tileNeighbour)) {
+//#error REMOVE THE DUPLICATE DIAGONAL TILEEDGENODES
 					TileEdgeNode tileEdge = new TileEdgeNode(this, tileNeighbour, AStar);
 					edgeToNeighbourTile.Add(tileNeighbour, tileEdge);
 					tileNeighbour.edgeToNeighbourTile.Add(this, tileEdge);
@@ -93,19 +89,14 @@ namespace MHUrho.PathFinding
 			return new Waypoint(this, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
 		}
 
-		public override TileNode GetTileNode()
+		public ITileEdgeNode GetEdgeNode(ITileNode neighbour)
 		{
-			return this;
-		}
-
-		public override void AddNeighbour(AStarNode neighbour, MovementType movementType)
-		{
-			outgoingEdges.Add(neighbour, movementType);
-		}
-
-		public override bool RemoveNeighbour(AStarNode neighbour)
-		{
-			return outgoingEdges.Remove(neighbour);
+			try {
+				return edgeToNeighbourTile[neighbour];
+			}
+			catch (IndexOutOfRangeException e) {
+				throw new ArgumentException("Provided tile node is not a neighbour of this tile node", nameof(neighbour));
+			}
 		}
 
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
@@ -130,10 +121,31 @@ namespace MHUrho.PathFinding
 
 		}
 
-	
 
+		public override bool Accept(INodeVisitor visitor, INode target, out float time)
+		{
+			return target.Accept(visitor, this, out time);
+		}
 
+		public override bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
 
-		
+		public override bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
+		public override bool Accept(INodeVisitor visitor, ITempNode source, out float time)
+		{
+			return visitor.Visit(source, this, out time);
+		}
+
 	}
 }
