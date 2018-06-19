@@ -59,7 +59,7 @@ namespace MHUrho.UnitComponents
 		public override string ComponentTypeName => ComponentName;
 		public override DefaultComponents ComponentTypeID => ComponentID;
 
-		private INotificationReceiver notificationReceiver;
+		INotificationReceiver notificationReceiver;
 
 		protected Clicker(INotificationReceiver notificationReceiver, ILevelManager level) 
 			:base(level)

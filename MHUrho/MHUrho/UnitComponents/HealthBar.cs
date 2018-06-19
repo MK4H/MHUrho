@@ -6,9 +6,9 @@ using MHUrho.Logic;
 using Urho.Resources;
 using Urho.Urho2D;
 
-namespace MHUrho.EntityInfo
+namespace MHUrho.UnitComponents
 {
-    public class HealthBar : IDisposable {
+    public class HealthBar : DefaultComponent {
 		const int healthBarPixelWidth = 100;
 		const int healthBarPixelHeight = 20;
 		const int horizontalBorderPixelHeight = 6;
@@ -20,58 +20,33 @@ namespace MHUrho.EntityInfo
 		static readonly Color DeadColor = new Color(0.8f,0.1f,0.1f);
 		static readonly uint DividerColor = Color.Black.ToUInt();
 
-		ILevelManager level;
 		Image image;
 		Texture2D texture;
 
 		BillboardSet billboardSet;
 
-		public HealthBar(ILevelManager level)
+		public HealthBar(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size)
+			:base(level)
 		{
-			this.level = level;
 			image = new Image();
 			image.SetSize(healthBarPixelWidth + verticalBorderPixelWidth * 2 + verticalDividerPixelWidth * 2, 
 						healthBarPixelHeight + horizontalBorderPixelHeight * 2 + horizontalDividerPixelHeight * 2, 
 						4);
+
+			AddToEntity(entity, offset, size);
 		}
 
-		public void AddToNode(Node node, IEntity entity)
-		{
-			image.Clear(entity.Player.Color);
-			
 
-			texture = new Texture2D();
-			texture.SetData(image);
-
-			var material = new Material();
-			material.Load(level.PackageManager.ResourceCache.GetFile("Materials/HealthBarMat.xml"));
-			material.SetTexture(TextureUnit.Diffuse, texture);
-
-			billboardSet = node.CreateComponent<BillboardSet>();
-			billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
-			billboardSet.NumBillboards = 1;
-			billboardSet.Sorted = false;
-			billboardSet.Material = material;
-			billboardSet.Scaled = false;
-			
-
-			var billboard = billboardSet.GetBillboardSafe(0);
-			billboard.Position = new Vector3(0,1.5f / node.Scale.Y,0);
-			billboard.Rotation = 0;
-			billboard.Size = new Vector2(0.5f, 0.1f);
-			billboard.Uv = new Rect(new Vector2(0, 0), new Vector2(1, 1));
-			billboard.Enabled = true;
-
-			InitialDraw(entity.Player.Color, 49);
-		}
 
 		public void SetHealth(int healthPercent)
 		{
 			DrawHealth(healthPercent);
 		}
 
-		public void Dispose()
+
+		protected override void OnDeleted()
 		{
+			base.OnDeleted();
 			image.Dispose();
 			texture.Dispose();
 			billboardSet.Dispose();
@@ -227,6 +202,34 @@ namespace MHUrho.EntityInfo
 			}
 		}
 
-		
+		void AddToEntity(IEntity entity, Vector3 offset, Vector2 size)
+		{
+			image.Clear(entity.Player.Color);
+
+
+			texture = new Texture2D();
+			texture.SetData(image);
+
+			var material = new Material();
+			material.Load(Level.PackageManager.ResourceCache.GetFile("Materials/HealthBarMat.xml"));
+			material.SetTexture(TextureUnit.Diffuse, texture);
+
+			billboardSet = entity.Node.CreateComponent<BillboardSet>();
+			billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
+			billboardSet.NumBillboards = 1;
+			billboardSet.Sorted = false;
+			billboardSet.Material = material;
+			billboardSet.Scaled = false;
+
+
+			var billboard = billboardSet.GetBillboardSafe(0);
+			billboard.Position = offset;
+			billboard.Rotation = 0;
+			billboard.Size = size;
+			billboard.Uv = new Rect(new Vector2(0, 0), new Vector2(1, 1));
+			billboard.Enabled = true;
+
+			InitialDraw(entity.Player.Color, 49);
+		}
 	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -127,6 +128,7 @@ namespace DefaultPackage
 			}
 
 			AddPathfindingNodes();
+			var healthBar = new HealthBar(level);
 		}
 
 		public override void OnUpdate(float timeStep) {
