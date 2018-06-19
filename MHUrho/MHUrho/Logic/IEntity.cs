@@ -10,7 +10,7 @@ namespace MHUrho.Logic {
 	/// <summary>
 	/// Common ancestor of all visible entities in game, namely Units, Buildings and Projectiles
 	/// </summary>
-	public interface IEntity {
+	public interface IEntity : IDisposable {
 		/// <summary>
 		/// Get entity ID, used for getting reference to entity from Level
 		/// <see cref="ILevelManager.GetEntity(int)"/>

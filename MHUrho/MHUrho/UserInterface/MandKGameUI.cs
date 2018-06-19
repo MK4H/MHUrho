@@ -109,6 +109,8 @@ namespace MHUrho.UserInterface
 			playerSelection.RemoveAllChildren();
 			playerSelection.Remove();
 			playerSelection.Dispose();
+			minimap.Remove();
+			minimap.Dispose();
 
 			Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
 		}

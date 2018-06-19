@@ -8,7 +8,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.EntityInfo
 {
-    public class HealthBar {
+    public class HealthBar : IDisposable {
 		const int healthBarPixelWidth = 100;
 		const int healthBarPixelHeight = 20;
 		const int horizontalBorderPixelHeight = 6;
@@ -68,6 +68,13 @@ namespace MHUrho.EntityInfo
 		public void SetHealth(int healthPercent)
 		{
 			DrawHealth(healthPercent);
+		}
+
+		public void Dispose()
+		{
+			image.Dispose();
+			texture.Dispose();
+			billboardSet.Dispose();
 		}
 
 		void InitialDraw(Color playerColor, int healthPercent)
@@ -219,5 +226,7 @@ namespace MHUrho.EntityInfo
 				*imageData++ = DividerColor;
 			}
 		}
+
+		
 	}
 }

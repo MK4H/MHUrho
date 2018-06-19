@@ -252,8 +252,18 @@ namespace MHUrho.Logic
 			storedLevel.WriteTo(new Google.Protobuf.CodedOutputStream(stream, leaveOpen));
 		}
 
-		public void End() {
+		public void End()
+		{
+			List<IDisposable> toDispose = new List<IDisposable>();
+			toDispose.AddRange(entities.Values);
+
+			foreach (var thing in toDispose) {
+				thing.Dispose();
+			}
+
+
 			Input.Dispose();
+			Camera.Dispose();
 			Input = null;
 			Map.Dispose();
 			Minimap.Dispose();

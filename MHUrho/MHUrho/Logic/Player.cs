@@ -172,7 +172,8 @@ namespace MHUrho.Logic
 			bool removed = buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
 
 			if (removed) {
-				Plugin.OnBuildingDestroyed(building);
+				//TODO: Make sure every player has a plugin
+				Plugin?.OnBuildingDestroyed(building);
 			}
 
 			return removed;

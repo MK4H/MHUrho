@@ -393,14 +393,23 @@ namespace MHUrho.Logic
 
 		public override void RemoveFromLevel()
 		{
+			if (RemovedFromLevel) return;
+
 			base.RemoveFromLevel();
 
+			Level.RemoveUnit(this);
 			Tile.RemoveUnit(this);
 			Player.RemoveUnit(this);
 			LegNode.Remove();
 			LegNode.Dispose();
-			Dispose();
-			Level.RemoveUnit(this);
+			HealthBar.Dispose();
+			
+			Dispose();	
+		}
+
+		void IDisposable.Dispose()
+		{
+			RemoveFromLevel();
 		}
 		#endregion
 

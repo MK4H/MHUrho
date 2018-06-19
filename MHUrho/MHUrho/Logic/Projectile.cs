@@ -254,6 +254,7 @@ namespace MHUrho.Logic
 		public override void RemoveFromLevel() 
 		{
 			Enabled = false;
+			if (RemovedFromLevel) return;
 			base.RemoveFromLevel();
 
 			Level.RemoveProjectile(this);
@@ -297,6 +298,11 @@ namespace MHUrho.Logic
 			}
 
 			return true;	
+		}
+
+		void IDisposable.Dispose()
+		{
+			RemoveFromLevel();
 		}
 
 		protected override void OnUpdate(float timeStep) 

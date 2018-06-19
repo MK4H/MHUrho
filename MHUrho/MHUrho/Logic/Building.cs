@@ -255,17 +255,21 @@ namespace MHUrho.Logic
 
 		public override void RemoveFromLevel() {
 
+			if (RemovedFromLevel) return;
+
 			base.RemoveFromLevel();
 
+
+			Level.RemoveBuilding(this);
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);
 			}
 
 			Player.RemoveBuilding(this);
 			Node.Remove();
-			Node.Dispose();
+			
 			Dispose();
-			Level.RemoveBuilding(this);
+			
 		}
 
 		public float? GetHeightAt(float x, float y)
@@ -276,6 +280,11 @@ namespace MHUrho.Logic
 		public IFormationController GetFormationController(Vector3 centerPosition)
 		{
 			return BuildingPlugin.GetFormationController(centerPosition);
+		}
+
+		void IDisposable.Dispose()
+		{
+			RemoveFromLevel();
 		}
 
 		protected override void OnUpdate(float timeStep)
