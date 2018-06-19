@@ -12,10 +12,7 @@ namespace MHUrho.UnitComponents
 {
 	public enum DefaultComponents {
 		Shooter,
-		Meele,
-		ResourceCarrier,
 		UnitSelector,
-		WallClimber,
 		WorkQueue,
 		WorldWalker,
 		UnpoweredFlier,
@@ -24,6 +21,7 @@ namespace MHUrho.UnitComponents
 		Clicker,
 		MovingMeele,
 		StaticMeele
+
 	}
 
 	//TODO: Rename this

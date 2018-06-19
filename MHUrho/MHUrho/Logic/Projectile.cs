@@ -257,6 +257,7 @@ namespace MHUrho.Logic
 			if (RemovedFromLevel) return;
 			base.RemoveFromLevel();
 
+			Plugin.Dispose();
 			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {
 				

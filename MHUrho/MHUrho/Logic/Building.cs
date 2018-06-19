@@ -259,7 +259,7 @@ namespace MHUrho.Logic
 
 			base.RemoveFromLevel();
 
-
+			Plugin.Dispose();
 			Level.RemoveBuilding(this);
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);

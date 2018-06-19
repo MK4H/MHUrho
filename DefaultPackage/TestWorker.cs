@@ -185,5 +185,10 @@ namespace DefaultPackage
 		public void OnMovementFailed(WorldWalker walker) {
 
 		}
+
+		public override void Dispose()
+		{
+
+		}
 	}
 }

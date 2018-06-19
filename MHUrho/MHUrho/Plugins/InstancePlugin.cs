@@ -7,7 +7,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Plugins
 {
-	public abstract class InstancePlugin
+	public abstract class InstancePlugin : IDisposable
 	{
 		public ILevelManager Level { get; protected set; }
 
@@ -26,5 +26,7 @@ namespace MHUrho.Plugins
 		}
 
 		public abstract void SaveState(PluginDataWrapper pluginData);
+
+		public abstract void Dispose();
 	}
 }

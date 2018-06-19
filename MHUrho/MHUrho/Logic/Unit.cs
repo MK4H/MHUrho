@@ -61,10 +61,6 @@ namespace MHUrho.Logic
 				var unit = new Unit(id, level, type, tile, player, unitNode);
 				centerNode.AddComponent(unit);
 				
-				//TODO: TEMPORARY
-				unit.HealthBar = new HealthBar(level);
-				unit.HealthBar.AddToNode(centerNode, unit);
-
 
 				unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
 
@@ -254,8 +250,6 @@ namespace MHUrho.Logic
 
 		public override Vector3 Down => -Up;
 
-		public HealthBar HealthBar { get; private set; }
-
 		#endregion
 
 		#region Private members
@@ -397,12 +391,12 @@ namespace MHUrho.Logic
 
 			base.RemoveFromLevel();
 
+			Plugin.Dispose();
 			Level.RemoveUnit(this);
 			Tile.RemoveUnit(this);
 			Player.RemoveUnit(this);
 			LegNode.Remove();
 			LegNode.Dispose();
-			HealthBar.Dispose();
 			
 			Dispose();	
 		}

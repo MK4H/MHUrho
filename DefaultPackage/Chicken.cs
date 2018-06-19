@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -150,6 +151,9 @@ namespace DefaultPackage
 
 		readonly PathVisitor pathVisitor;
 
+		float hp;
+		HealthBar healthbar;
+
 		public ChickenInstance()
 		{
 			pathVisitor = new PathVisitor(this);
@@ -169,10 +173,14 @@ namespace DefaultPackage
 			
 			unit.AlwaysVertical = true;
 			pathVisitor = new PathVisitor(this);
+
+			Init(100);
 		}
 
-		public override void SaveState(PluginDataWrapper pluginDataStorage) {
-
+		public override void SaveState(PluginDataWrapper pluginDataStorage)
+		{
+			var sequentialData = pluginDataStorage.GetWriterForWrappedSequentialData();
+			sequentialData.StoreNext(hp);
 		}
 
 		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
@@ -183,6 +191,10 @@ namespace DefaultPackage
 			Walker = unit.GetDefaultComponent<WorldWalker>();
 			Shooter = unit.GetDefaultComponent<Shooter>();
 
+			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
+			hp = sequentialData.GetNext<float>();
+
+			Init(hp);
 		}
 
 		public bool GetTime(INode from, INode to, out float time)
@@ -314,11 +326,21 @@ namespace DefaultPackage
 			}
 		}
 
+		public override void Dispose()
+		{
+			healthbar.Dispose();
+		}
+
 		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints(MovingRangeTarget movingRangeTarget)
 		{
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
 
+		void Init(float health)
+		{
+			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f));
+			healthbar.SetHealth((int)health);
+		}
 
 	}
 }

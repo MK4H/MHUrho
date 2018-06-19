@@ -102,6 +102,11 @@ namespace DefaultPackage
 			projectile.RemoveFromLevel();
 		}
 
+		public override void Dispose()
+		{
+			
+		}
+
 		bool ShootMovingTarget(IRangeTarget target)
 		{
 			int numSolutions = BallisticProjectile.GetVectorsForMovingTarget(target,

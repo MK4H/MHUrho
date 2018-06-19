@@ -128,7 +128,6 @@ namespace DefaultPackage
 			}
 
 			AddPathfindingNodes();
-			var healthBar = new HealthBar(level);
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -203,6 +202,11 @@ namespace DefaultPackage
 				}
 			}
 			return null;
+		}
+
+		public override void Dispose()
+		{
+
 		}
 
 		void AddPathfindingNodes()

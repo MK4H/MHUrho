@@ -177,5 +177,9 @@ namespace DefaultPackage
 			projectile.TriggerCollisions = false;
 		}
 
+		public override void Dispose()
+		{
+
+		}
 	}
 }

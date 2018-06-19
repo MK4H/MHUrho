@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 using MHUrho.Logic;
+using MHUrho.Plugins;
+using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using Urho.Resources;
 using Urho.Urho2D;
 
-namespace MHUrho.UnitComponents
+namespace MHUrho.EntityInfo
 {
-    public class HealthBar : DefaultComponent {
+    public class HealthBar : IDisposable {
+
 		const int healthBarPixelWidth = 100;
 		const int healthBarPixelHeight = 20;
 		const int horizontalBorderPixelHeight = 6;
@@ -25,9 +29,11 @@ namespace MHUrho.UnitComponents
 
 		BillboardSet billboardSet;
 
+		ILevelManager level;
+
 		public HealthBar(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size)
-			:base(level)
 		{
+			this.level = level;
 			image = new Image();
 			image.SetSize(healthBarPixelWidth + verticalBorderPixelWidth * 2 + verticalDividerPixelWidth * 2, 
 						healthBarPixelHeight + horizontalBorderPixelHeight * 2 + horizontalDividerPixelHeight * 2, 
@@ -37,16 +43,13 @@ namespace MHUrho.UnitComponents
 		}
 
 
-
 		public void SetHealth(int healthPercent)
 		{
 			DrawHealth(healthPercent);
 		}
 
-
-		protected override void OnDeleted()
+		public void Dispose()
 		{
-			base.OnDeleted();
 			image.Dispose();
 			texture.Dispose();
 			billboardSet.Dispose();
@@ -211,7 +214,7 @@ namespace MHUrho.UnitComponents
 			texture.SetData(image);
 
 			var material = new Material();
-			material.Load(Level.PackageManager.ResourceCache.GetFile("Materials/HealthBarMat.xml"));
+			material.Load(level.PackageManager.ResourceCache.GetFile("Materials/HealthBarMat.xml"));
 			material.SetTexture(TextureUnit.Diffuse, texture);
 
 			billboardSet = entity.Node.CreateComponent<BillboardSet>();

@@ -37,9 +37,6 @@ namespace MHUrho.Logic {
 		UnitType UnitType { get; }
 
 
-		//TODO: Temp
-		HealthBar HealthBar{ get;}
-
 		void ChangeType(UnitType newType);
 
 		void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false);

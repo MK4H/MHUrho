@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -55,6 +56,8 @@ namespace DefaultPackage
 		WorldWalker walker;
 		Shooter shooter;
 
+		HealthBar healthbar;
+
 		public TestUnitInstance() {
 
 		}
@@ -73,6 +76,7 @@ namespace DefaultPackage
 			unit.AddComponent(UnitSelector.CreateNew(this, level));
 			unit.AddComponent(shooter);
 
+			Init(100);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage) {
@@ -175,5 +179,17 @@ namespace DefaultPackage
 		public void OnShotReloaded(Shooter shooter) {
 
 		}
+
+		public override void Dispose()
+		{
+
+		}
+
+		void Init(float health)
+		{
+			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f));
+			healthbar.SetHealth((int)health);
+		}
+
 	}
 }
