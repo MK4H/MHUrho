@@ -14,25 +14,26 @@ namespace MHUrho.EditorTools {
 	class VertexHeightToolMandK : VertexHeightTool, IMandKTool {
 		public override IEnumerable<Button> Buttons => buttons;
 
-		private const float Sensitivity = 0.01f;
+		const float Sensitivity = 0.01f;
 
-		private enum Mode {
+		enum Mode {
 			None,
 			Selecting,
 			Moving
 		};
 
-		private List<Button> buttons;
-		private Mode mode;
-		private GameMandKController input;
-		private Map Map => input.Level.Map;
+		List<Button> buttons;
+		Mode mode;
+		GameMandKController input;
 
-		private List<IntVector2> verticies;
-		private Vector3 mainPoint;
+		List<IntVector2> verticies;
+		Vector3 mainPoint;
 
-		private bool enabled;
+		bool enabled;
 
-		public VertexHeightToolMandK(GameMandKController input) {
+		public VertexHeightToolMandK(GameMandKController input)
+			:base(input)
+		{
 
 			//var buttonTexture = new Texture2D();
 			//buttonTexture.FilterMode = TextureFilterMode.Nearest;
@@ -113,13 +114,13 @@ namespace MHUrho.EditorTools {
 			}
 		}
 
-		private void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MouseMovedEventArgs e) {
 			if (mode == Mode.Moving) {
 				Map.ChangeHeight(verticies, -e.DY * Sensitivity);
 			}
 		}
 
-		private void MouseDownSelect(MouseButtonDownEventArgs e) {
+		void MouseDownSelect(MouseButtonDownEventArgs e) {
 			var raycastResult = input.CursorRaycast();
 			var vertex = Map.RaycastToVertex(raycastResult);
 			if (vertex.HasValue) {
@@ -133,11 +134,11 @@ namespace MHUrho.EditorTools {
 			}
 		}
 
-		private void MouseDownMove(MouseButtonDownEventArgs e) {
+		void MouseDownMove(MouseButtonDownEventArgs e) {
 			SwitchFromMoving();
 		}
 
-		private void SelectingButtonPress(PressedEventArgs e) {
+		void SelectingButtonPress(PressedEventArgs e) {
 			if (mode != Mode.Selecting) {
 				SwitchToSelecting();
 			}
@@ -146,7 +147,7 @@ namespace MHUrho.EditorTools {
 			}
 		}
 
-		private void MovingButtonPress(PressedEventArgs e) {
+		void MovingButtonPress(PressedEventArgs e) {
 			if (mode != Mode.Moving) {
 				SwitchToMoving();
 			}
@@ -155,11 +156,11 @@ namespace MHUrho.EditorTools {
 			}
 		}
 
-		private void SwitchToSelectingWithKey(int qualifiers) {
+		void SwitchToSelectingWithKey(int qualifiers) {
 			SwitchToSelecting();
 		}
 
-		private void SwitchToMoving() {
+		void SwitchToMoving() {
 			switch (mode) {
 				case Mode.None:
 					break;
@@ -180,7 +181,7 @@ namespace MHUrho.EditorTools {
 			input.UIManager.SelectButton(buttons[1]);
 		}
 
-		private void SwitchToSelecting() {
+		void SwitchToSelecting() {
 			switch (mode) {
 				case Mode.None:
 					break;
@@ -199,7 +200,7 @@ namespace MHUrho.EditorTools {
 			input.UIManager.SelectButton(buttons[0]);
 		}
 
-		private void SwitchFromMoving() {
+		void SwitchFromMoving() {
 			input.MouseMove -= OnMouseMove;
 			input.MouseDown -= MouseDownMove;
 			input.UIManager.Deselect();
@@ -207,7 +208,7 @@ namespace MHUrho.EditorTools {
 			mode = Mode.None;
 		}
 
-		private void SwitchFromSelecting() {
+		void SwitchFromSelecting() {
 			input.MouseDown -= MouseDownSelect;
 			input.UIManager.Deselect();
 			mode = Mode.None;

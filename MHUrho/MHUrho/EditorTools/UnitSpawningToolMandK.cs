@@ -14,16 +14,17 @@ namespace MHUrho.EditorTools
 	class UnitSpawningToolMandK : UnitSpawningTool, IMandKTool {
 		public override IEnumerable<Button> Buttons => unitTypeButtons.Keys;
 
-		private Dictionary<Button, UnitType> unitTypeButtons;
+		Dictionary<Button, UnitType> unitTypeButtons;
 
-		private GameMandKController input;
-		private Map Map => input.Level.Map;
+		GameMandKController input;
 
-		private Button selected;
+		Button selected;
 
-		private bool enabled;
+		bool enabled;
 
-		public UnitSpawningToolMandK(GameMandKController input) {
+		public UnitSpawningToolMandK(GameMandKController input)
+			:base(input)
+		{
 
 			this.input = input;
 			this.unitTypeButtons = new Dictionary<Button, UnitType>();
@@ -90,7 +91,7 @@ namespace MHUrho.EditorTools
 			unitTypeButtons = null;
 		}
 
-		private void Button_Pressed(PressedEventArgs e) {
+		void Button_Pressed(PressedEventArgs e) {
 			if (selected == e.Element) {
 				input.UIManager.Deselect();
 				selected = null;
@@ -103,12 +104,17 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void OnMouseDown(MouseButtonDownEventArgs e) {
+		void OnMouseDown(MouseButtonDownEventArgs e) {
 			if (selected != null) {
-				var tile = input.GetTileUnderCursor();
-				//TODO: Rectangle
-				if (tile != null) {
-					LevelManager.CurrentLevel.SpawnUnit(unitTypeButtons[selected], tile, input.Player);
+
+				foreach (var result in input.CursorRaycast()) {
+					//Spawn at the first possible raycast hit
+					if (Level.SpawnUnit(unitTypeButtons[selected], 
+										 Map.GetContainingTile(result.Position),
+										 input.Player) != null)
+					{
+						return;
+					}
 				}
 			}
 		}

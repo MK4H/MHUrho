@@ -13,6 +13,8 @@ namespace MHUrho.Input
 {
 	class MenuTouchController : TouchController, IMenuController
 	{
+		public InputType InputType => InputType.Touch;
+
 		public MenuTouchController(MyGame game) : base(game) {
 			//TODO: TEMPORARY, probably move to UIManager or something
 

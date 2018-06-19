@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Input;
 using MHUrho.Packaging;
 using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
@@ -27,6 +28,10 @@ namespace MHUrho.Logic {
 		IEnumerable<IPlayer> Players { get; }
 
 		IEnumerable<IBuilding> Buildings { get; }
+
+		IGameController Input { get; }
+
+		CameraController Camera { get; }
 
 		IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
 

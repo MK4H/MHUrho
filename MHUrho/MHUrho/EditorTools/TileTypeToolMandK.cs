@@ -14,19 +14,21 @@ namespace MHUrho.EditorTools
 	class TileTypeToolMandK : TileTypeTool, IMandKTool {
 		public override IEnumerable<Button> Buttons => tileTypeButtons.Keys;
 
-		private Dictionary<Button, TileType> tileTypeButtons;
+		Dictionary<Button, TileType> tileTypeButtons;
 
-		private GameMandKController input;
-		private Map Map => input.Level.Map;
-		private StaticRectangleToolMandK highlight;
+		GameMandKController input;
 
-		private Button selected;
-		private ITile centerTile;
+		StaticRectangleToolMandK highlight;
 
-		private bool mouseButtonDown;
-		private bool enabled;
+		Button selected;
+		ITile centerTile;
 
-		public TileTypeToolMandK(GameMandKController input) {
+		bool mouseButtonDown;
+		bool enabled;
+
+		public TileTypeToolMandK(GameMandKController input)
+			: base(input)
+		{
 
 			this.input = input;
 			this.tileTypeButtons = new Dictionary<Button, TileType>();
@@ -99,7 +101,7 @@ namespace MHUrho.EditorTools
 			tileTypeButtons = null;
 		}
 
-		private void Button_Pressed(PressedEventArgs e) {
+		void Button_Pressed(PressedEventArgs e) {
 			if (selected == e.Element) {
 				input.UIManager.Deselect();
 				selected = null;
@@ -116,7 +118,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void OnMouseDown(MouseButtonDownEventArgs e) {
+		void OnMouseDown(MouseButtonDownEventArgs e) {
 			if (selected != null) {
 				centerTile = input.GetTileUnderCursor();
 				//TODO: Rectangle
@@ -127,13 +129,13 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void OnMouseUp(MouseButtonUpEventArgs e) {
+		void OnMouseUp(MouseButtonUpEventArgs e) {
 			if (selected != null) {
 				mouseButtonDown = false;
 			}
 		}
 
-		private void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MouseMovedEventArgs e) {
 			if (selected != null && mouseButtonDown) {
 				var newCenterTile = input.GetTileUnderCursor();
 				if (newCenterTile != null && newCenterTile != centerTile) {

@@ -15,18 +15,17 @@ namespace MHUrho.EditorTools
 	{
 		public override IEnumerable<Button> Buttons => buildingTypeButtons.Keys;
 
-		private Dictionary<Button, BuildingType> buildingTypeButtons;
+		Dictionary<Button, BuildingType> buildingTypeButtons;
 
-		private GameMandKController input;
+		GameMandKController input;
 
-		private ILevelManager Level => input.Level;
-		private Map Map => Level.Map;
+		Button selected;
 
-		private Button selected;
+		bool enabled;
 
-		private bool enabled;
-
-		public BuildingBuilderToolMandK(GameMandKController input) {
+		public BuildingBuilderToolMandK(GameMandKController input)
+			: base(input)
+		{
 			this.input = input;
 			this.buildingTypeButtons = new Dictionary<Button, BuildingType>();
 
@@ -95,7 +94,7 @@ namespace MHUrho.EditorTools
 
 		}
 
-		private void Button_Pressed(PressedEventArgs e) {
+		void Button_Pressed(PressedEventArgs e) {
 			if (selected == e.Element) {
 				input.UIManager.Deselect();
 				selected = null;
@@ -106,7 +105,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void OnMouseDown(MouseButtonDownEventArgs e) {
+		void OnMouseDown(MouseButtonDownEventArgs e) {
 			if (selected == null) return;
 
 
@@ -122,21 +121,21 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MouseMovedEventArgs e) {
 			HighlightBuildingRectangle();
 		}
 
-		private void OnUpdate(float timeStep) {
+		void OnUpdate(float timeStep) {
 			HighlightBuildingRectangle();
 		}
 
-		private void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
+		void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
 			topLeft = centerTile.TopLeft - buildingType.Size / 2;
 			bottomRight = topLeft + buildingType.Size - new IntVector2(1,1);
 			Map.SnapToMap(ref topLeft, ref bottomRight);
 		}
 
-		private void HighlightBuildingRectangle() {
+		void HighlightBuildingRectangle() {
 			if (selected == null) return;
 
 			var tile = input.GetTileUnderCursor();

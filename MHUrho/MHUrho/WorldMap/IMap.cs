@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.PathFinding;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using Urho;
@@ -43,7 +44,9 @@ namespace MHUrho.WorldMap {
 	/// Map is not bounded in vertical direction.
 	/// </summary>
 	public interface IMap {
-			   
+
+		IPathFindAlg PathFinding { get; }
+
 		/// <summary>
 		/// Gets the coordinates of the top left corner tile of the map
 		/// </summary>

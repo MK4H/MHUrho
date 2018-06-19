@@ -16,14 +16,15 @@ namespace MHUrho.EditorTools
 
 		public IntVector2 Size { get; set; }
 
-		private GameMandKController input;
-		private Map Map => input.Level.Map;
+		GameMandKController input;
 
-		private bool enabled;
+		bool enabled;
 
-		private ITile fixedCenter;
+		ITile fixedCenter;
 
-		public StaticRectangleToolMandK(GameMandKController input, IntVector2 size) {
+		public StaticRectangleToolMandK(GameMandKController input, IntVector2 size)
+			: base(input)
+		{
 			this.input = input;
 			this.Size = size;
 		}
@@ -60,7 +61,7 @@ namespace MHUrho.EditorTools
 			fixedCenter = null;
 		}
 
-		private void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MouseMovedEventArgs e) {
 			if (fixedCenter != null) {
 				Map.HighlightRectangle(fixedCenter, Size,  Color.Green);
 				return;

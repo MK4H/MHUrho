@@ -62,13 +62,12 @@ namespace MHUrho.Logic
 
 		public IEnumerable<IBuilding> Buildings => buildings.Values;
 
-		CameraController cameraController;
-		IGameController inputController;
+		public IGameController Input { get; protected set; }
+
+		public CameraController Camera { get; private set; }
+		
 
 		Octree octree;
-
-		int minimapRefreshRate;
-		float minimapRefreshDelay;
 
 		readonly Dictionary<int, IUnit> units;
 		readonly Dictionary<int, IPlayer> players;
@@ -83,7 +82,7 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(CameraController cameraController, Octree octree) {
+		protected LevelManager(CameraController camera, Octree octree) {
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
 			this.buildings = new Dictionary<int, IBuilding>();
@@ -93,13 +92,15 @@ namespace MHUrho.Logic
 			this.nodeToEntity = new Dictionary<Node, IEntity>();
 			this.rng = new Random();
 
-			this.cameraController = cameraController;
+			this.Camera = camera;
 			this.octree = octree;
 			this.DefaultComponentFactory = new DefaultComponentFactory();
 			ReceiveSceneUpdates = true;
 		}
 
 		public static LevelManager Load(MyGame game, StLevel storedLevel) {
+
+			PackageManager.Instance.LoadPackage(storedLevel.PackageName);
 
 			var scene = new Scene(game.Context);
 			var octree = scene.CreateComponent<Octree>();
@@ -112,7 +113,7 @@ namespace MHUrho.Logic
 			LevelManager level = new LevelManager(cameraController, octree);
 			scene.AddComponent(level);
 
-			PackageManager.Instance.LoadPackage(storedLevel.PackageName);
+			
 
 			List<ILoader> loaders = new List<ILoader>();
 
@@ -157,7 +158,7 @@ namespace MHUrho.Logic
 				loaders.Add(playerLoader);
 			}
 			//TODO: Move this inside the foreach
-			level.inputController = game.menuController.GetGameController(cameraController, level, firstPlayer);
+			level.Input = game.menuController.GetGameController(cameraController, level, firstPlayer);
 			
 			//Connect references
 			foreach (var loader in loaders) {
@@ -191,40 +192,28 @@ namespace MHUrho.Logic
 		/// <param name="mapSize">Size of the map to create</param>
 		/// <param name="packages">packages to load</param>
 		/// <returns>Loaded default level</returns>
-		public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName) {
-			PackageManager.Instance.LoadPackage(gamePackageName);
-			
-			var scene = new Scene(game.Context);
-			var octree = scene.CreateComponent<Octree>();
-			var physics = scene.CreateComponent<PhysicsWorld>();
-			//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
-			physics.Enabled = true;
-			
-			LoadSceneParts(game, scene);
-			var cameraController = LoadCamera(game, scene);
-
-			CurrentLevel = new LevelManager(cameraController, octree);
-			scene.AddComponent(CurrentLevel);
+		public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName)
+		{
+			InitializeLevel(game, gamePackageName, out Scene scene, out CameraController cameraController);
 
 			Node mapNode = scene.CreateChild("MapNode");
 
 			Map map = Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize);
 			CurrentLevel.Map = map;
 
-			CurrentLevel.Minimap = new Minimap(map);
-			CurrentLevel.minimapRefreshRate = 4;
-			CurrentLevel.minimapRefreshDelay = 1.0f / CurrentLevel.minimapRefreshRate; 
+			CurrentLevel.Minimap = new Minimap(CurrentLevel, 4);
+
 
 			//TODO: Temporary player, COLOR PICKING
 			var player = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, Color.Red);
 			CurrentLevel.players.Add(player.ID, player);
-			CurrentLevel.inputController = game.menuController.GetGameController(cameraController, CurrentLevel, player);
+			CurrentLevel.Input = game.menuController.GetGameController(cameraController, CurrentLevel, player);
 
-			CurrentLevel.inputController.UIManager.AddPlayer(player);
+			CurrentLevel.Input.UIManager.AddPlayer(player);
 
 			player = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"), Color.Blue);
 			CurrentLevel.players.Add(player.ID, player);
-			CurrentLevel.inputController.UIManager.AddPlayer(player);
+			CurrentLevel.Input.UIManager.AddPlayer(player);
 
 			return CurrentLevel;
 		}
@@ -264,8 +253,8 @@ namespace MHUrho.Logic
 		}
 
 		public void End() {
-			inputController.Dispose();
-			inputController = null;
+			Input.Dispose();
+			Input = null;
 			Map.Dispose();
 			Minimap.Dispose();
 			Scene.Dispose();
@@ -586,15 +575,27 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
 
-			minimapRefreshDelay -= timeStep;
-
-			if (minimapRefreshDelay < 0) {
-				minimapRefreshDelay = 1.0f / minimapRefreshRate;
-				Minimap.MoveTo(cameraController.CameraXZPosition.RoundToIntVector2());
-				Minimap.Refresh();
-			}
+			Minimap.OnUpdate(timeStep);
 
 			Update?.Invoke(timeStep);
+		}
+
+		static void InitializeLevel(MyGame game, string gamePackageName, out Scene scene, out CameraController cameraController)
+		{
+			PackageManager.Instance.LoadPackage(gamePackageName);
+
+			scene = new Scene(game.Context);
+			var octree = scene.CreateComponent<Octree>();
+			var physics = scene.CreateComponent<PhysicsWorld>();
+			//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
+			physics.Enabled = true;
+
+			LoadSceneParts(game, scene);
+			cameraController = LoadCamera(game, scene);
+
+			CurrentLevel = new LevelManager(cameraController, octree);
+			scene.AddComponent(CurrentLevel);
+
 		}
 
 		static void LoadSceneParts(MyGame game, Scene scene) {

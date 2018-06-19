@@ -111,7 +111,7 @@ namespace DefaultPackage
 
 					foreach (var chicken in chickens) {
 						if (!chicken.Chicken.Shooter.ShootAt(target)) {
-							chicken.Chicken.Walker.GoTo(target.CurrentPosition.XZ2().RoundToIntVector2());
+							chicken.Chicken.Walker.GoTo(Map.PathFinding.GetClosestNode(target.CurrentPosition));
 							chicken.NextTarget = target;
 						}
 					}
@@ -126,7 +126,7 @@ namespace DefaultPackage
 
 						chicken.NextTarget = newTarget;
 						if (!chicken.Chicken.Shooter.ShootAt(chicken.NextTarget)) {
-							chicken.Chicken.Walker.GoTo(chicken.NextTarget.CurrentPosition.XZ2().RoundToIntVector2());
+							chicken.Chicken.Walker.GoTo(Map.PathFinding.GetClosestNode(target.CurrentPosition));
 						}
 						else {
 							chicken.Chicken.Walker.Stop();

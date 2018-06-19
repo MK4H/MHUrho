@@ -119,6 +119,11 @@ namespace NUnit.Tests {
 					throw new NotImplementedException();
 				}
 
+				public IEnumerable<ITile> GetNeighbours()
+				{
+					throw new NotImplementedException();
+				}
+
 				public IntRect MapArea => throw new NotImplementedException();
 
 				public IntVector2 TopLeft => throw new NotImplementedException();
@@ -251,6 +256,11 @@ namespace NUnit.Tests {
 					throw new NotImplementedException();
 				}
 
+				public IEnumerable<ITile> GetNeighbours()
+				{
+					throw new NotImplementedException();
+				}
+
 
 				public IReadOnlyList<IUnit> Units => throw new NotImplementedException();
 
@@ -295,6 +305,8 @@ namespace NUnit.Tests {
 
 			#region NOT USED IN TEST
 			public ILevelManager LevelManager => throw new NotImplementedException();
+
+			public IPathFindAlg PathFinding => throw new NotImplementedException();
 
 			public bool IsInside(Vector3 point) {
 				throw new NotImplementedException();
@@ -396,6 +408,11 @@ namespace NUnit.Tests {
 			}
 
 			public IEnumerable<ITile> GetTilesInSpiral(ITile center)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IFormationController GetFormationController(ITile center)
 			{
 				throw new NotImplementedException();
 			}
@@ -610,6 +627,7 @@ namespace NUnit.Tests {
 			#endregion
 
 
+			
 
 			public IntVector2 TopLeft { get; private set; }
 
@@ -818,7 +836,7 @@ namespace NUnit.Tests {
 			//Top
 
 			List<ITile> path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft).Center3,
-												allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
+												aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight)),
 												(INode source, INode target, out float time) => {
 													time = Vector3.Distance(source.Position, target.Position);
 													return true;
@@ -831,7 +849,7 @@ namespace NUnit.Tests {
 			CollectionAssert.AreEqual(expected, path,"Fail going from topLeft to the topRight");
 
 			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopLeft).Center3,
-									allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
+									aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft)),
 									(INode source, INode target, out float time) => {
 										time = Vector3.Distance(source.Position, target.Position);
 										return true;
@@ -845,7 +863,7 @@ namespace NUnit.Tests {
 
 
 			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
-									allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
+									aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft)),
 									(INode source, INode target, out float time) => {
 										time = Vector3.Distance(source.Position, target.Position);
 										return true;
@@ -858,7 +876,7 @@ namespace NUnit.Tests {
 			CollectionAssert.AreEqual(expected, path, "Fail going from bottomRight to the bottomLeft");
 
 			path = aStar.GetTileList(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
-									allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
+									aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight)),
 									(INode source, INode target, out float time) => {
 										time = Vector3.Distance(source.Position, target.Position);
 										return true;
@@ -881,7 +899,7 @@ namespace NUnit.Tests {
 			//Top
 
 			Path path = aStar.FindPath(new Vector3(0.5f, 0, 0.5f), 
-										allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
+										aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight)),
 										(INode source, INode target, out float time) => {
 											time = Vector3.Distance(source.Position, target.Position);
 											return true;
@@ -898,7 +916,7 @@ namespace NUnit.Tests {
 			Assert.That(!pathEnumerator.MoveNext());
 
 			path = aStar.FindPath(new Vector3(0.5f, 0, 0.5f), 
-								allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
+								aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft)),
 								(INode source, INode target, out float time) => {
 									time = Vector3.Distance(source.Position, target.Position);
 									return true;
@@ -916,7 +934,7 @@ namespace NUnit.Tests {
 
 
 			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
-								allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft).Center3,
+								aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomLeft)),
 								(INode source, INode target, out float time) => {
 									time = Vector3.Distance(source.Position, target.Position);
 									return true;
@@ -933,7 +951,7 @@ namespace NUnit.Tests {
 			Assert.That(!pathEnumerator.MoveNext());
 
 			path = aStar.FindPath(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
-								allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight).Center3,
+								aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.TopRight)),
 								(INode source, INode target, out float time) => {
 									time = Vector3.Distance(source.Position, target.Position);
 									return true;
@@ -975,7 +993,7 @@ namespace NUnit.Tests {
 			var aStar = new AStar(allOneSpeed);
 
 			Path path = aStar.FindPath(new Vector3(10.5f, 0, 10.5f),
-										allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)).Center3,
+										aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))),
 										(INode source, INode target, out float time) => {
 											time = Vector3.Distance(source.Position, target.Position);
 											return true;
@@ -1002,7 +1020,7 @@ namespace NUnit.Tests {
 			var aStar = new AStar(allOneSpeed);
 
 			var path = aStar.GetTileList(new Vector3(10.5f, 0, 10.5f), 
-										allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10)).Center3,
+										aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))),
 										(INode source, INode target, out float time) => {
 											time = Vector3.Distance(source.Position, target.Position);
 											return true;
@@ -1025,7 +1043,7 @@ namespace NUnit.Tests {
 			Vector3 position = new Vector3();
 			for (int i = 0; i < 100000; i++) {
 				path = aStar.FindPath(new Vector3(0.5f, 0, 0.5f),
-									allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight).Center3,
+									aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(allOneSpeed.BottomRight)),
 									(INode source, INode target, out float time) => {
 										time = Vector3.Distance(source.Position, target.Position);
 										return true;

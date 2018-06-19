@@ -11,6 +11,7 @@ namespace MHUrho.Control
 {
 	public interface IFormationController {
 		bool MoveToFormation(UnitSelector unit);
-		void MoveToFormation(IEnumerator<UnitSelector> units);
+
+		bool MoveToFormation(IEnumerator<UnitSelector> units);
 	}
 }

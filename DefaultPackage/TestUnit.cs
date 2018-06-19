@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
+using MHUrho.Control;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -133,24 +134,26 @@ namespace DefaultPackage
 
 		}
 
-		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
-			switch (button) {
-				case MouseButton.Left:
-					orderArgs.Executed = walker.GoTo(targetTile);
-					break;
-				case MouseButton.Right:
-					var rangeTarget = Map.GetRangeTarget(targetTile.Center3);
-					orderArgs.Executed = shooter.ShootAt(rangeTarget);
-					break;
+		public void OnUnitOrdered(UnitSelector selector, Order order) {
+			if (order.PlatformOrder) {
+				switch (order) {
+					case MoveOrder moveOrder:
+						order.Executed = walker.GoTo(moveOrder.Target);
+						break;
+					case AttackOrder attackOrder:
+						IRangeTarget rangeTarget;
+						if (attackOrder.Target.Player != Unit.Player &&
+							(rangeTarget = attackOrder.Target.GetDefaultComponent<RangeTargetComponent>()) != null) {
+							order.Executed = shooter.ShootAt(rangeTarget);
+						}
+						
+						break;
+					case ShootOrder shootOrder:
+						order.Executed = shooter.ShootAt(shootOrder.Target);
+						break;
+				}
 			}
-		}
-
-		public void OnUnitOrderedToUnit(UnitSelector selector, IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
-			orderArgs.Executed = false;
-		}
-
-		public void OnUnitOrderedToBuilding(UnitSelector selector, IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
-			orderArgs.Executed = false;
+			
 		}
 
 		public Vector3 GetSourceOffset(Shooter shooter) {

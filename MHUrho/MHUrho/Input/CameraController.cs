@@ -10,7 +10,7 @@ using MHUrho.Helpers;
 
 namespace MHUrho.Input
 {
-	public delegate void OnCameraMove(float timeStep);
+	public delegate void OnCameraMove(Vector3 movement, Vector2 rotation, float timeStep);
 
 	public class CameraController : Component {
 
@@ -260,16 +260,19 @@ namespace MHUrho.Input
 				Vector3 tickMovement = (staticMovement + decayingMovement) * timeStep ;
 				Vector2 tickRotation = (staticRotation + decayingRotation) * timeStep ;
 
+				//Log.Write(LogLevel.Debug, $"StaticMovement: {staticMovement}, Static rotation: {staticRotation}");
+
+
 				if (FreeFloat) {
 					MoveRelativeToLookingDirection(tickMovement);
 					RotateCameraFree(tickRotation);
-					OnFreeFloatMove?.Invoke(timeStep);
+					OnFreeFloatMove?.Invoke(tickMovement, tickRotation, timeStep);
 				}
 				else {
 					MoveHorizontal(tickMovement.X, tickMovement.Z);
 					MoveVertical(tickMovement.Y);
 					RotateCameraFixed(tickRotation);
-					OnFixedMove?.Invoke(timeStep);
+					OnFixedMove?.Invoke(tickMovement, tickRotation, timeStep);
 				}
 
 				if (SmoothMovement) {
@@ -307,6 +310,7 @@ namespace MHUrho.Input
 			position.Y += delta;
 			cameraNode.Position = position;
 			cameraNode.LookAt(cameraHolder.Position, Vector3.UnitY);
+			//Log.Write(LogLevel.Debug, $"Camera position: {cameraNode.WorldPosition}");
 		}
 
 		void MoveRelativeToLookingDirection(Vector3 delta) {
@@ -317,12 +321,12 @@ namespace MHUrho.Input
 			}
 		}
 
-		//TODO: WEIRD vertical rotation, changes with distance from [0,0]
+
 		void RotateCameraFixed(Vector2 rot) {
 			cameraHolder.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y));
 
 			if ((5 < cameraNode.Rotation.PitchAngle && rot.X < 0) || (cameraNode.Rotation.PitchAngle < 85 && rot.X > 0)) {
-				cameraNode.RotateAround(cameraHolder.Position, Quaternion.FromAxisAngle(Vector3.UnitX, rot.X), TransformSpace.Parent);
+				cameraNode.RotateAround(new Vector3(0,0,0), Quaternion.FromAxisAngle(Vector3.UnitX, rot.X), TransformSpace.Parent);
 			}
 			
 		}

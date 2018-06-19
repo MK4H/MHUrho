@@ -8,6 +8,8 @@ using MHUrho.UserInterface;
 
 namespace MHUrho.Input
 { 
+	public enum InputType { MouseAndKeyboard, Touch }
+
 	public interface IGameController : IDisposable
 	{
 		GameUIManager UIManager { get; }
@@ -17,6 +19,8 @@ namespace MHUrho.Input
 		IPlayer Player { get; set; }
 
 		bool Enabled { get; }
+
+		InputType InputType { get; }
 
 		bool DoOnlySingleRaycasts { get; set; }
 

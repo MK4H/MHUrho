@@ -9,6 +9,8 @@ namespace MHUrho.Input
 {
 	public interface IMenuController
 	{
+		InputType InputType { get; }
+
 		bool Enabled { get; }
 
 		void Enable();

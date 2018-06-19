@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using Urho;
@@ -15,9 +16,24 @@ namespace MHUrho.WorldMap
 
 		public Texture2D Texture { get; private set; }
 
+		float refreshRate;
+		public float RefreshRate {
+			get => refreshRate;
+			set {
+				if (value <= 0) {
+					throw new InvalidOperationException("Refresh rate cannot be negative");
+				}
+				refreshRate = value;
+			}
+		}
+
+		float timeToRefresh;
+
 		Image image;
 
-		readonly IMap map;
+		readonly ILevelManager Level;
+
+		IMap Map => Level.Map;
 
 		/// <summary>
 		/// In both width and height, because tiles are square even in the minimap
@@ -26,20 +42,22 @@ namespace MHUrho.WorldMap
 		IntVector2 topLeftPosition = new IntVector2(1,1);
 
 		
-		public Minimap(IMap map)
+		public Minimap(ILevelManager level, float refreshRate)
 		{
 			image = new Image();
 			image.SetSize(256, 256, 4);
 			image.Clear(Color.Black);
-			this.map = map;
+			this.Level = level;
 			Texture = new Texture2D();
 			Texture.SetData(image);
 
+			RefreshRate = refreshRate;
+			timeToRefresh = 1.0f / RefreshRate;
 		}
 
 		public void Refresh()
 		{
-
+			MoveTo(Level.Camera.CameraXZPosition.ToIntVector2());
 			int tilesPerColumn = image.Height / pixelsPerTile;
 
 			unsafe {
@@ -91,6 +109,15 @@ namespace MHUrho.WorldMap
 			Texture.SetData(image);
 		}
 
+		public void OnUpdate(float timeStep)
+		{
+			timeToRefresh -= timeStep;
+			if (timeToRefresh < 0) {
+				timeToRefresh = 1.0f / RefreshRate;
+				Refresh();
+			}
+		}
+
 		public void MoveTo(IntVector2 centerTileMapLocation)
 		{
 			topLeftPosition = centerTileMapLocation - new IntVector2(image.Width, image.Height) / (2 * pixelsPerTile);
@@ -121,7 +148,7 @@ namespace MHUrho.WorldMap
 
 		protected uint GetTileColor(IntVector2 tileMapLocation)
 		{
-			return GetTileColor(map.GetTileByMapLocation(tileMapLocation));
+			return GetTileColor(Map.GetTileByMapLocation(tileMapLocation));
 		}
 
 		protected uint GetTileColor(ITile tile)

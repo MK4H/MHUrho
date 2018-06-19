@@ -13,6 +13,9 @@ using Urho.IO;
 namespace MHUrho.Input
 {
 	class MenuMandKController : MandKController, IMenuController {
+
+		public InputType InputType => InputType.MouseAndKeyboard;
+
 		MandKMenuUI UI;
 
 		public MenuMandKController(MyGame game) : base(game)

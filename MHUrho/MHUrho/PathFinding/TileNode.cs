@@ -121,6 +121,15 @@ namespace MHUrho.PathFinding
 
 		}
 
+		public void AddNodeOnThisTile(AStarNode aStarNode)
+		{
+			nodesOnThisTile.Add(aStarNode);
+		}
+
+		public bool RemoveNodeOnThisTile(AStarNode aStarNode)
+		{
+			return nodesOnThisTile.Remove(aStarNode);
+		}
 
 		public override bool Accept(INodeVisitor visitor, INode target, out float time)
 		{

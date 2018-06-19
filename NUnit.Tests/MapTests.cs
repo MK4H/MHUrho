@@ -114,6 +114,11 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public IEnumerable<ITile> GetNeighbours()
+			{
+				throw new NotImplementedException();
+			}
+
 			#endregion
 
 			public float TopLeftHeight { get; private set; }

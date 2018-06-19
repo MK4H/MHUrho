@@ -6,6 +6,13 @@ namespace MHUrho.Control
 {
     public abstract class Order
     {
+		public bool Executed { get; set; }
 
+		public bool PlatformOrder { get; protected set; }
+
+		protected Order()
+		{
+			PlatformOrder = false;
+		}
     }
 }

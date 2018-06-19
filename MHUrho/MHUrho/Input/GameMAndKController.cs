@@ -61,6 +61,9 @@ namespace MHUrho.Input
 
 		public MandKGameUI UIManager { get; private set; }
 
+
+		public InputType InputType => InputType.MouseAndKeyboard;
+
 		public bool DoOnlySingleRaycasts { get; set; }
 
 		public float CameraScrollSensitivity { get; set; }
@@ -199,6 +202,16 @@ namespace MHUrho.Input
 			UI.Cursor.Visible = true;
 		}
 
+		public void AddTool(Tool tool)
+		{
+			UIManager.AddTool(tool);
+		}
+
+		public void RemoveTool(Tool tool)
+		{
+			UIManager.RemoveTool(tool);
+		}
+
 		public void RegisterToolAction(int number, Action<int> keyDown, Action<int> repeat = null, Action<int> keyUp = null) {
 			//TODO: REDO THE ACTION MAPPING
 			actions[number] = new KeyAction(keyDown, repeat, keyUp);
@@ -299,12 +312,8 @@ namespace MHUrho.Input
 
 		}
 
-		void OnViewMoved(float timeStep) {
-			//TODO: REDO THIS
-			if (UI.Cursor.Visible) {
-				MouseMove?.Invoke(new MouseMovedEventArgs());
-				cachedTileUnderCursor = null;
-			}
+		void OnViewMoved(Vector3 movement, Vector2 rotation, float timeStep) {
+			cachedTileUnderCursor = null;
 		}
 
 		Ray GetCursorRay() {

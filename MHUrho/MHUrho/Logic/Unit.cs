@@ -55,7 +55,9 @@ namespace MHUrho.Logic
 
 				var centerNode = CreateBasicNodeStructure(unitNode, type);
 
-				unitNode.Position = tile.Center3;
+				unitNode.Position = new Vector3(tile.Center.X,
+												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
+												tile.Center.Y);
 				var unit = new Unit(id, level, type, tile, player, unitNode);
 				centerNode.AddComponent(unit);
 				

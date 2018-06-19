@@ -8,9 +8,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	public class OrderArgs {
-		public bool Executed { get; set; }
-	}
+
 
 	public abstract class Selector : DefaultComponent {
 
@@ -22,11 +20,7 @@ namespace MHUrho.UnitComponents
 
 		}
 
-		public abstract bool Order(ITile tile, OrderArgs orderArgs);
-
-		public abstract bool Order(IUnit unit, OrderArgs orderArgs);
-
-		public abstract bool Order(IBuilding unit, OrderArgs orderArgs);
+		public abstract bool Order(Order order);
 
 		public abstract void Select();
 

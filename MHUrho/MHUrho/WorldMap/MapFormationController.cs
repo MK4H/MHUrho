@@ -22,14 +22,17 @@ namespace MHUrho.WorldMap
 
 		public bool MoveToFormation(UnitSelector unit)
 		{
+
 			while (spiral.ContainingSquareSize < map.Width || spiral.ContainingSquareSize < map.Length) {
+				//Move the spiral coords
+				spiral.MoveNext();
 				var targetTile = map.GetTileByTopLeftCorner(spiral.Current);
-				if (targetTile != null && unit.Order(targetTile, MouseButton.Left, 0, 0)) {
+
+				if (targetTile != null && unit.Order(new MoveOrder(map.PathFinding.GetTileNode(targetTile)))) {
 					return true;
 				}
 
-				//Move the spiral coords
-				spiral.MoveNext();
+
 			}
 			return false;
 		}
@@ -38,15 +41,17 @@ namespace MHUrho.WorldMap
 		/// Creates a spiral around the provided tile
 		/// </summary>
 		/// <param name="units"></param>
-		public void MoveToFormation(IEnumerator<UnitSelector> units)
+		public bool MoveToFormation(IEnumerator<UnitSelector> units)
 		{
 			if (units == null) {
-				return;
+				return false;
 			}
 
+			bool executed = false;
 			while (units.MoveNext() && MoveToFormation(units.Current)) {
-
+				executed = true;
 			}
+			return executed;
 		}
 		
 	}

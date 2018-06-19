@@ -12,7 +12,7 @@ using MHUrho.WorldMap;
 namespace MHUrho.EditorTools
 {
 	class DynamicRectangleToolMandK : DynamicRectangleTool, IMandKTool {
-		public delegate void HandleSelectedRectangle(IntVector2 topLeft, IntVector2 bottomRight);
+		public delegate void HandleSelectedRectangle(IntVector2 topLeft, IntVector2 bottomRight, MouseButtonUpEventArgs e);
 
 		public delegate void HandleSingleClick(MouseButtonUpEventArgs e);
 
@@ -21,18 +21,19 @@ namespace MHUrho.EditorTools
 		public event HandleSelectedRectangle SelectionHandler;
 		public event HandleSingleClick SingleClickHandler;
 
-		private readonly GameMandKController input;
-		private Map Map => input.Level.Map;
+		readonly GameMandKController input;
 
-		private IntVector2 mouseDownPos;
-		private IntVector2 lastMousePos;
+		IntVector2 mouseDownPos;
+		IntVector2 lastMousePos;
 		//TODO: Raycast into a plane and get point even outside the map
-		private bool validMouseDown;
-		private bool rectangle;
+		bool validMouseDown;
+		bool rectangle;
 
-		private bool enabled;
+		bool enabled;
 
-		public DynamicRectangleToolMandK(GameMandKController input) {
+		public DynamicRectangleToolMandK(GameMandKController input)
+			: base(input)
+		{
 			this.input = input;
 		}
 
@@ -47,6 +48,7 @@ namespace MHUrho.EditorTools
 			input.MouseDown += MouseDown;
 			input.MouseUp += MouseUp;
 			input.MouseMove += MouseMove;
+			Level.Camera.OnFixedMove += CameraMove;
 			
 			enabled = true;
 		}
@@ -108,7 +110,7 @@ namespace MHUrho.EditorTools
 													 Math.Max(mouseDownPos.Y, lastMousePos.Y));
 				}
 
-				SelectionHandler?.Invoke(topLeft, bottomRight);
+				SelectionHandler?.Invoke(topLeft, bottomRight, e);
 				//TODO: Different highlight
 				Map.DisableHighlight();
 			}
@@ -119,7 +121,16 @@ namespace MHUrho.EditorTools
 		}
 
 		void MouseMove(MouseMovedEventArgs e) {
+			MouseAndCameraMove();
+		}
 
+		void CameraMove(Vector3 movement, Vector2 rotation, float timeStep)
+		{
+			MouseAndCameraMove();
+		}
+
+		void MouseAndCameraMove()
+		{
 			if (!validMouseDown) return;
 
 			var tile = input.GetTileUnderCursor();
@@ -129,20 +140,18 @@ namespace MHUrho.EditorTools
 				return;
 			}
 
-		   
+
 			if (validMouseDown && tile.MapLocation != mouseDownPos) {
 				var endTilePos = tile.MapLocation;
 				var topLeft = new IntVector2(Math.Min(mouseDownPos.X, endTilePos.X),
-											 Math.Min(mouseDownPos.Y, endTilePos.Y));
+											Math.Min(mouseDownPos.Y, endTilePos.Y));
 				var bottomRight = new IntVector2(Math.Max(mouseDownPos.X, endTilePos.X),
-												 Math.Max(mouseDownPos.Y, endTilePos.Y));
+												Math.Max(mouseDownPos.Y, endTilePos.Y));
 
 				Map.HighlightRectangle(topLeft, bottomRight, Color.Green);
 				lastMousePos = tile.MapLocation;
 				rectangle = true;
 			}
 		}
-
-		
 	}
 }

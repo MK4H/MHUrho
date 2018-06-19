@@ -85,7 +85,7 @@ namespace MHUrho.PathFinding
 		
 
 		public static Path FromTo(	Vector3 source, 
-									Vector3 target, 
+									INode target, 
 									Map map, 
 									GetTime getTime,
 									GetMinimalAproxTime getMinimalTime)
@@ -186,8 +186,8 @@ namespace MHUrho.PathFinding
 		}
 
 
-		public Vector3 GetTarget() {
-			return waypoints[waypoints.Count - 1].Position;
+		public INode GetTarget() {
+			return waypoints[waypoints.Count - 1].Node;
 		}
 
 		bool MoveNext()

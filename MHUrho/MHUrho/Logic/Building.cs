@@ -275,7 +275,7 @@ namespace MHUrho.Logic
 
 		public IFormationController GetFormationController(Vector3 centerPosition)
 		{
-			return BuildingPlugin.GetFormationController();
+			return BuildingPlugin.GetFormationController(centerPosition);
 		}
 
 		protected override void OnUpdate(float timeStep)

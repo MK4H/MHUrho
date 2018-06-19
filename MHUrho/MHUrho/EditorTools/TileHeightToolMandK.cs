@@ -13,19 +13,21 @@ namespace MHUrho.EditorTools
 
 		public override IEnumerable<Button> Buttons => new Button[0];
 
-		private const float Sensitivity = 0.01f;
+		const float Sensitivity = 0.01f;
 
 		//private List<Button> buttons;
-		private GameMandKController input;
-		private Map Map => input.Level.Map;
-		private StaticRectangleToolMandK highlight;
+		GameMandKController input;
 
-		private bool enabled;
-		private bool mouseButtonDown;
+		StaticRectangleToolMandK highlight;
 
-		private ITile centerTile;
+		bool enabled;
+		bool mouseButtonDown;
 
-		public TileHeightToolMandK(GameMandKController input) {
+		ITile centerTile;
+
+		public TileHeightToolMandK(GameMandKController input)
+			: base(input)
+		{
 			this.input = input;
 			highlight = new StaticRectangleToolMandK(input, new IntVector2(3, 3));
 		}
@@ -63,7 +65,7 @@ namespace MHUrho.EditorTools
 
 		
 
-		private void MouseDown(MouseButtonDownEventArgs e) {
+		void MouseDown(MouseButtonDownEventArgs e) {
 			centerTile = input.GetTileUnderCursor();
 			if (centerTile != null) {
 				input.HideCursor();
@@ -72,7 +74,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void MouseUp(MouseButtonUpEventArgs e) {
+		void MouseUp(MouseButtonUpEventArgs e) {
 			if (centerTile != null) {
 				input.ShowCursor(new Vector3(centerTile.Center.X, Map.GetTerrainHeightAt(centerTile.Center), centerTile.Center.Y));
 				mouseButtonDown = false;
@@ -81,7 +83,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		private void MouseMove(MouseMovedEventArgs e) {
+		void MouseMove(MouseMovedEventArgs e) {
 			if (mouseButtonDown) {
 				Map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
 			}

@@ -30,6 +30,7 @@ namespace MHUrho.PathFinding
 			this.Position = position;
 			this.Tag = tag;
 			incomingEdges = new List<INode>();
+			AStar.GetTileNode(position).AddNodeOnThisTile(this);
 		}
 
 		public override void ProcessNeighbours(AStarNode source,
@@ -67,6 +68,8 @@ namespace MHUrho.PathFinding
 			foreach (var source in incomingEdges) {
 				source.RemoveEdge(this);
 			}
+
+			AStar.GetTileNode(Position).RemoveNodeOnThisTile(this);
 			IsRemoved = true;
 		}
 

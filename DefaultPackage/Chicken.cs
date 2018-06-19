@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Control;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -250,24 +251,25 @@ namespace DefaultPackage
 
 		}
 
-		public void OnUnitOrderedToTile(UnitSelector selector, ITile targetTile, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
-			orderArgs.Executed = Walker.GoTo(targetTile);
-		}
-
-		public void OnUnitOrderedToUnit(UnitSelector selector, IUnit targetUnit, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs)
-		{
-			IRangeTarget rangeTarget;
-			if (Unit.Player.IsEnemy(targetUnit.Player) && ((rangeTarget = targetUnit.GetDefaultComponent<RangeTargetComponent>()) != null)) {
-				orderArgs.Executed = Shooter.ShootAt(rangeTarget);
-				return;
+		public void OnUnitOrdered(UnitSelector selector, Order order) {
+			order.Executed = false;
+			if (order.PlatformOrder) {
+				switch (order) {
+					case MoveOrder moveOrder:
+						order.Executed = Walker.GoTo(moveOrder.Target);
+						break;
+					case AttackOrder attackOrder:
+						IRangeTarget rangeTarget;
+						if (Unit.Player.IsEnemy(attackOrder.Target.Player) && ((rangeTarget = attackOrder.Target.GetDefaultComponent<RangeTargetComponent>()) != null)) {
+							order.Executed = Shooter.ShootAt(rangeTarget) || Walker.GoTo(Map.PathFinding.GetClosestNode(rangeTarget.CurrentPosition));
+						}
+						break;
+				}
 			}
-
-			orderArgs.Executed = false;
 		}
 
-		public void OnUnitOrderedToBuilding(UnitSelector selector, IBuilding targetBuilding, MouseButton button, MouseButton buttons, int qualifiers, OrderArgs orderArgs) {
-			orderArgs.Executed = false;
-		}
+
+
 
 		public void OnTargetAcquired(Shooter shooter) {
 			var targetPos = shooter.Target.CurrentPosition;

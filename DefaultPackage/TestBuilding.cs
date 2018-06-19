@@ -102,7 +102,6 @@ namespace DefaultPackage
 
 	public class TestBuildingInstance : BuildingInstancePlugin {
 
-		ILevelManager level;
 		TestWorkerInstance[] workers;
 		Dictionary<ITile, IBuildingNode> pathfindingNodes;
 
@@ -116,16 +115,18 @@ namespace DefaultPackage
 
 		}
 
-		public TestBuildingInstance(ILevelManager level, IBuilding building, IUnit[] workers) {
-			this.level = level;
+		public TestBuildingInstance(ILevelManager level, IBuilding building, IUnit[] workers)
+			:base(level, building)
+		{
 
-			this.Building = building;
 			this.workers = new TestWorkerInstance[workers.Length];
 
 			for (int i = 0; i < workers.Length; i++) {
 				this.workers[i] = (TestWorkerInstance)workers[i].UnitPlugin;
 				this.workers[i].WorkedBuilding = this;
 			}
+
+			AddPathfindingNodes();
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -151,7 +152,7 @@ namespace DefaultPackage
 		}
 
 		public override void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData) {
-			this.level = level;
+			this.Level = level;
 			this.Building = building;
 
 			var reader = pluginData.GetReaderForWrappedSequentialData();
@@ -168,6 +169,8 @@ namespace DefaultPackage
 			timeToNextResource = reader.GetCurrent<float>();
 			reader.MoveNext();
 
+
+			AddPathfindingNodes();
 		}
 
 		public override void OnProjectileHit(IProjectile projectile)
@@ -185,27 +188,31 @@ namespace DefaultPackage
 			return new TestBuildingFormationController(pathfindingNodes, Map.GetContainingTile(centerPosition), Map);
 		}
 
+		public override float? GetHeightAt(float x, float y)
+		{
+			return 3;
+		}
+
 		public ITile GetInterfaceTile(TestWorkerInstance testWorker) {
 			for (int i = 0; i < workers.Length; i++) {
 				if (testWorker == workers[i]) {
-					return level.Map.GetTileByBottomRightCorner(Building.Rectangle.TopLeft() +
-																new IntVector2(0, i % 4));
+					return Map.GetTileByBottomRightCorner(Building.Rectangle.TopLeft() +
+														new IntVector2(0, i % 4));
 				}
 			}
 			return null;
 		}
 
-
 		void AddPathfindingNodes()
 		{
 			pathfindingNodes = new Dictionary<ITile, IBuildingNode>();
-			IntVector2 tileLocation = Building.Rectangle.TopLeft();
 
-			for (int y = Building.Rectangle.Top; y <= Building.Rectangle.Bottom; y++) {
-				for (int x = Building.Rectangle.Left; x <= Building.Rectangle.Right; x++) {
+			for (int y = Building.Rectangle.Top; y < Building.Rectangle.Bottom; y++) {
+				for (int x = Building.Rectangle.Left; x < Building.Rectangle.Right; x++) {
 					ITile tile = Map.GetTileByTopLeftCorner(x, y);
+					Vector3 position = new Vector3(tile.Center.X, GetHeightAt(tile.Center.X, tile.Center.Y).Value, tile.Center.Y);
 					pathfindingNodes.Add(tile,
-										Map.PathFinding.CreateBuildingNode(Building, tile.Center3 + new Vector3(0, 3, 0), null));
+										Map.PathFinding.CreateBuildingNode(Building, position, null));
 				}
 			}
 
@@ -234,22 +241,31 @@ namespace DefaultPackage
 
 		public TestBuildingFormationController(Dictionary<ITile, IBuildingNode> nodes, ITile center, IMap map)
 		{
-			nodes = new Dictionary<ITile, IBuildingNode>();
+			this.nodes = nodes;
+			this.map = map;
 			spiral = new Spiral(center.MapLocation).GetSpiralEnumerator();
 		}
 
 		public bool MoveToFormation(UnitSelector unit)
 		{
-			while (spiral.MoveNext() && 
+			bool executed = false;
+			while (!executed &&
+					spiral.MoveNext() && 
 					spiral.ContainingSquareSize < 6 &&
 					nodes.TryGetValue(map.GetTileByMapLocation(spiral.Current), out IBuildingNode buildingNode)) {
-				unit.Order(buildingNode,)
+				executed = unit.Order(new MoveOrder(buildingNode));
 			}
+
+			return executed;
 		}
 
-		public void MoveToFormation(IEnumerator<UnitSelector> units)
+		public bool MoveToFormation(IEnumerator<UnitSelector> units)
 		{
-			
+			bool executed = false;
+			while (units.MoveNext()) {
+				executed |= MoveToFormation(units.Current);
+			}
+			return executed;
 		}
 
 	}

@@ -164,9 +164,9 @@ namespace MHUrho.UnitComponents
 			Enabled = true;			
 		}
 
-		public bool GoTo(ITile tile) {
+		public bool GoTo(INode targetNode) {
 			var newPath = Path.FromTo(Unit.Position, 
-									tile.Center3, 
+									targetNode, 
 									Map, 
 									notificationReceiver.GetTime,
 									notificationReceiver.GetMinimalAproximatedTime);
@@ -179,10 +179,6 @@ namespace MHUrho.UnitComponents
 			}
 			GoAlong(newPath);
 			return true;
-		}
-
-		public bool GoTo(IntVector2 location) {
-			return GoTo(Map.GetTileByMapLocation(location));
 		}
 
 		public void Stop()

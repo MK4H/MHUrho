@@ -14,23 +14,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
-	public class MandKOrderArgs : OrderArgs {
-		public MouseButton ClickedButton { get; private set; }
-		public MouseButton HeldDownButtons { get; private set; }
-		/// <summary>
-		/// Other qualifiers, like Ctrl, Alt, Shift etc.
-		/// </summary>
-		public int OtherQualifiers{ get; private set; }
-
-		public MandKOrderArgs(MouseButton clickedButton, MouseButton heldDownButtons, int otherQualifiers)
-		{
-			this.ClickedButton = clickedButton;
-			this.HeldDownButtons = heldDownButtons;
-			this.OtherQualifiers = otherQualifiers;
-		}
-	}
-
-	class UnitSelectorToolMandK : UnitSelectorTool, IMandKTool {
+	public class UnitSelectorToolMandK : UnitSelectorTool, IMandKTool {
 
 		class SelectedInfo {
 			public int Count => UnitSelectors.Count;
@@ -90,10 +74,6 @@ namespace MHUrho.EditorTools
 
 		readonly GameMandKController input;
 
-		ILevelManager Level => input.Level;
-
-		Map Map => input.Level.Map;
-
 		readonly DynamicRectangleToolMandK dynamicHighlight;
 
 		readonly Dictionary<UnitType, SelectedInfo> selected;
@@ -102,7 +82,9 @@ namespace MHUrho.EditorTools
 
 		bool enabled;
 
-		public UnitSelectorToolMandK(GameMandKController input) {
+		public UnitSelectorToolMandK(GameMandKController input)
+			:base(input)
+		{
 			this.input = input;
 			this.selected = new Dictionary<UnitType, SelectedInfo>();
 			this.buttons = new Dictionary<Button, UnitType>();
@@ -113,7 +95,7 @@ namespace MHUrho.EditorTools
 		public override void Enable() {
 			if (enabled) return;
 
-			dynamicHighlight.SelectionHandler += HandleSelection;
+			dynamicHighlight.SelectionHandler += HandleAreaSelection;
 			dynamicHighlight.SingleClickHandler += HandleSingleClick;
 
 			dynamicHighlight.Enable();
@@ -126,7 +108,7 @@ namespace MHUrho.EditorTools
 		public override void Disable() {
 			if (!enabled) return;
 
-			dynamicHighlight.SelectionHandler -= HandleSelection;
+			dynamicHighlight.SelectionHandler -= HandleAreaSelection;
 			dynamicHighlight.SingleClickHandler -= HandleSingleClick;
 			dynamicHighlight.Disable();
 
@@ -144,22 +126,100 @@ namespace MHUrho.EditorTools
 			dynamicHighlight.Dispose();
 		}
 
-		void HandleSelection(IntVector2 topLeft, IntVector2 bottomRight) {
-			Map.ForEachInRectangle(topLeft, bottomRight, SelectUnitsInTile);
+		public void SelectUnit(UnitSelector unitSelector)
+		{
+			if (unitSelector.Selected) {
+				throw new InvalidOperationException($"{nameof(unitSelector)} was already selected");
+			}
+
+			unitSelector.Select();
+			AddUnit(unitSelector);
+		}
+
+		public bool DeselectUnit(UnitSelector unitSelector)
+		{
+			if (unitSelector.Selected) {
+				unitSelector.Deselect();
+				RemoveUnit(unitSelector);
+				return true;
+			}
+
+			return false;
+		}
+
+		protected virtual void HandleAreaSelection(IntVector2 topLeft, IntVector2 bottomRight, MouseButtonUpEventArgs e)
+		{
+
+			var unitSelectorsInRectangle = Map.GetTilesInRectangle(topLeft, bottomRight)
+											.SelectMany((tile) => tile.Units)
+											.Where((unit) => unit.Player == input.Player)
+											.Select((unit) => unit.GetDefaultComponent<UnitSelector>())
+											.Where((selector) => selector != null && !selector.Selected);
+
+			foreach (var unitSelector in unitSelectorsInRectangle) {
+				AddUnit(unitSelector);
+			}
+		}
+
+		protected virtual bool HandleUnitClick(IUnit unit, MouseButtonUpEventArgs e)
+		{
+			var selector = unit.GetDefaultComponent<UnitSelector>();
+			//If the unit is selectable and owned by the clicking player
+			if (selector != null && selector.Player == input.Player) {
+				//Select if not selected, deselect if selected
+				if (!selector.Selected) {
+					SelectUnit(selector);
+					//Executed an action, stop handling click
+					return true;
+				}
+				else {
+					DeselectUnit(selector);
+					//Executed an action, stop handling click
+					return true;
+				}
+			}
+			else {
+				//Either not selectable or enemy unit
+				var executed = false;
+
+				foreach (var selectedUnit in GetAllSelectedUnitSelectors()) {
+					executed |= selectedUnit.Order(new AttackOrder(unit));
+				}
+				return executed;
+			}
+		}
+
+		protected virtual bool HandleBuildingClick(IBuilding building, MouseButtonUpEventArgs e, Vector3 worldPosition)
+		{
+			var formationController = building.GetFormationController(worldPosition);
+			if (formationController == null) {
+				return false;
+			}
+
+			formationController.MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
+			return true;
+		}
+
+		protected virtual bool HandleTileClick(ITile tile, MouseButtonUpEventArgs e)
+		{
+			switch (e.Button) {
+				case (int)MouseButton.Left:
+					return Map.GetFormationController(tile).MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
+				case (int)MouseButton.Right:
+					bool executed = false;
+					foreach (var unit in GetAllSelectedUnitSelectors()) {
+						executed = unit.Order(new ShootOrder(Map.GetRangeTarget(tile.Center3)));
+					}
+					return executed;
+			}
+			return false;
 		}
 
 		void HandleSingleClick(MouseButtonUpEventArgs e) {
 			//TODO: Check that the raycastResults are ordered by distance
 			foreach (var result in input.CursorRaycast()) {
 
-				
-
-				//TODO: Target
-				var entity = Level.GetEntity(result.Node);
-
-				
-
-				if (entity != null) {
+				if (Level.TryGetEntity(result.Node, out IEntity entity)) {
 					var visitor = new ClickDispatcher(this, e, result.Position);
 					if (entity.Accept(visitor)) {
 						return;
@@ -171,39 +231,13 @@ namespace MHUrho.EditorTools
 				if (tile == null) {
 					return;
 				}
-				//TODO: this
-				switch (e.Button) {
-					case (int)MouseButton.Left:
-						Map.GetFormationController(tile).MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
-						break;
-					case (int) MouseButton.Right:
-						foreach (var unit in GetAllSelectedUnitSelectors()) {
-							unit.Order(tile, new MandKOrderArgs((MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers));
-						}
-						break;
-				}
 
-				return;
+				HandleTileClick(tile, e);
 				
+				return;
 			}
 		}
 
-		//TODO: Select other things too
-		void SelectUnitsInTile(ITile tile) {
-			//TODO: Maybe delete selector class, just search for unit
-			foreach (var unit in tile.Units) {
-				UnitSelector selector = unit.GetDefaultComponent<UnitSelector>();
-
-				//Not owned by player
-				if (unit.Player != input.Player) continue;
-
-				//Not selectable
-				if (selector == null || selector.Selected) continue;
-
-				selector.Select();
-				AddUnit(selector);
-			}
-		}
 
 		Button CreateButton(UnitType unitType) {
 			var unitIcon = unitType.Icon;
@@ -292,44 +326,6 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		bool HandleUnitClick(IUnit unit, MouseButtonUpEventArgs e) {
-			var selector = unit.GetDefaultComponent<UnitSelector>();
-			//If the unit is selectable and owned by the clicking player
-			if (selector != null && selector.Player == input.Player) {
-				//Select if not selected, deselect if selected
-				if (!selector.Selected) {
-					selector.Select();
-					AddUnit(selector);
-					//Executed an action, stop handling click
-					return true;
-				}
-				else {
-					selector.Deselect();
-					//Executed an action, stop handling click
-					return true;
-				}
-			}
-			else {
-				//Either not selectable or enemy unit
-				var executed = false;
-
-				foreach (var selectedUnit in GetAllSelectedUnitSelectors()) {
-					executed |= selectedUnit.Order(unit, new MandKOrderArgs((MouseButton)e.Button, (MouseButton)e.Buttons, e.Qualifiers));
-				}
-				return executed;
-			}
-		}
-
-		bool HandleBuildingClick(IBuilding building, MouseButtonUpEventArgs e, Vector3 worldPosition)
-		{
-			var formationController = building.GetFormationController(worldPosition);
-			if (formationController == null) {
-				return false;
-			}
-
-			formationController.MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
-			return true;
-		}
-
+		
 	}
 }

@@ -20,6 +20,8 @@ namespace MHUrho.Input
 
 		public TouchUI UIManager { get; private set; }
 
+		public InputType InputType => InputType.Touch;
+
 		public ILevelManager Level { get; private set; }
 
 		public IPlayer Player { get; set; }
