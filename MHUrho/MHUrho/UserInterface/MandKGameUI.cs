@@ -20,11 +20,9 @@ namespace MHUrho.UserInterface
 		static Texture2D DefaultButtonTexture =
 			PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
 
+		public GameMandKController InputCtl { get; protected set; }
 
-
-		readonly GameMandKController inputCtl;
-
-		IPlayer player => inputCtl.Player;
+		IPlayer player => InputCtl.Player;
 
 		
 		readonly UIElement toolSelection;
@@ -39,12 +37,13 @@ namespace MHUrho.UserInterface
 
 		int hovering = 0;
 
-		public MandKGameUI(MyGame game, GameMandKController inputCtl) 
-			:base(game, inputCtl.Level)
+		public MandKGameUI(MyGame game, GameMandKController input) 
+			:base(game, input.Level)
 		{
-			this.inputCtl = inputCtl;
+			this.InputCtl = input;
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
+			this.CursorTooltips = new CursorTooltips(this, game);
 
 			selectionBar = UI.Root.CreateWindow();
 			selectionBar.SetStyle("windowStyle");
@@ -274,14 +273,14 @@ namespace MHUrho.UserInterface
 
 		void UIHoverBegin(HoverBeginEventArgs e) {
 			hovering++;
-			inputCtl.UIHovering = true;
+			InputCtl.UIHovering = true;
 
 			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
 		}
 
 		void UIHoverEnd(HoverEndEventArgs e) {
 			if (--hovering == 0) {
-				inputCtl.UIHovering = false;
+				InputCtl.UIHovering = false;
 			}
 
 			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
@@ -330,7 +329,7 @@ namespace MHUrho.UserInterface
 			else {
 				e.Element.SetColor(selectedColor);
 				selectedPlayerButton = e.Element;
-				inputCtl.Player = players[selectedPlayerButton];
+				InputCtl.Player = players[selectedPlayerButton];
 			}
 		}
 

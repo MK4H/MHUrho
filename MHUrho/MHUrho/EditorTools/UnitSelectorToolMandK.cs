@@ -157,7 +157,7 @@ namespace MHUrho.EditorTools
 											.Where((selector) => selector != null && !selector.Selected);
 
 			foreach (var unitSelector in unitSelectorsInRectangle) {
-				AddUnit(unitSelector);
+				SelectUnit(unitSelector);
 			}
 		}
 
@@ -196,7 +196,7 @@ namespace MHUrho.EditorTools
 				return false;
 			}
 
-			formationController.MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
+			formationController.MoveToFormation(new UnitGroup(GetAllSelectedUnitSelectors()));
 			return true;
 		}
 
@@ -204,7 +204,7 @@ namespace MHUrho.EditorTools
 		{
 			switch (e.Button) {
 				case (int)MouseButton.Left:
-					return Map.GetFormationController(tile).MoveToFormation(GetAllSelectedUnitSelectors().GetEnumerator());
+					return Map.GetFormationController(tile).MoveToFormation(new UnitGroup(GetAllSelectedUnitSelectors()));
 				case (int)MouseButton.Right:
 					bool executed = false;
 					foreach (var unit in GetAllSelectedUnitSelectors()) {

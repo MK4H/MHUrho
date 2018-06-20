@@ -69,8 +69,6 @@ namespace MHUrho.UnitComponents
 
 			Vector3 GetCurrentPosition(MovingRangeTarget target);
 
-			void OnHit(MovingRangeTarget target, IProjectile projectile);
-
 		}
 
 		public static string ComponentName = nameof(MovingRangeTarget);

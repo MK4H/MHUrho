@@ -105,6 +105,7 @@ namespace DefaultPackage
 
 		TestWorkerInstance[] workers;
 		Dictionary<ITile, IBuildingNode> pathfindingNodes;
+		ITile entryTile;
 
 		int resources;
 
@@ -176,7 +177,7 @@ namespace DefaultPackage
 
 		public override void OnProjectileHit(IProjectile projectile)
 		{
-			throw new NotImplementedException();
+			
 		}
 
 		public override void OnMeeleHit(IEntity byEntity)
@@ -186,7 +187,7 @@ namespace DefaultPackage
 
 		public override IFormationController GetFormationController(Vector3 centerPosition)
 		{
-			return new TestBuildingFormationController(pathfindingNodes, Map.GetContainingTile(centerPosition), Map);
+			return new TestBuildingFormationController(pathfindingNodes, Map.GetContainingTile(centerPosition), entryTile, Map);
 		}
 
 		public override float? GetHeightAt(float x, float y)
@@ -230,8 +231,8 @@ namespace DefaultPackage
 				}
 			}
 
-			ITile sourceTile = Map.GetContainingTile(Building.Center + Building.Forward * 2);
-			var tileNode = Map.PathFinding.GetTileNode(sourceTile);
+			entryTile = Map.GetContainingTile(Building.Center + Building.Forward * 2);
+			var tileNode = Map.PathFinding.GetTileNode(entryTile);
 			var buildingEntryNode = pathfindingNodes[Map.GetContainingTile(Building.Center + Building.Forward)];
 			buildingEntryNode.CreateEdge(tileNode, MovementType.Teleport);
 			tileNode.CreateEdge(buildingEntryNode, MovementType.Teleport);
@@ -244,11 +245,13 @@ namespace DefaultPackage
 		Dictionary<ITile, IBuildingNode> nodes;
 		Spiral.SpiralEnumerator spiral;
 		IMap map;
+		ITile entry;
 
-		public TestBuildingFormationController(Dictionary<ITile, IBuildingNode> nodes, ITile center, IMap map)
+		public TestBuildingFormationController(Dictionary<ITile, IBuildingNode> nodes, ITile center, ITile entry, IMap map)
 		{
 			this.nodes = nodes;
 			this.map = map;
+			this.entry = entry;
 			spiral = new Spiral(center.MapLocation).GetSpiralEnumerator();
 		}
 
@@ -265,11 +268,18 @@ namespace DefaultPackage
 			return executed;
 		}
 
-		public bool MoveToFormation(IEnumerator<UnitSelector> units)
+		public bool MoveToFormation(UnitGroup units)
 		{
 			bool executed = false;
-			while (units.MoveNext()) {
-				executed |= MoveToFormation(units.Current);
+
+			while (units.IsValid()) {
+				if (MoveToFormation(units.Current)) {
+					executed = true;
+					units.TryMoveNext();
+				}
+				else if (spiral.ContainingSquareSize >= 6 ) {
+					map.GetFormationController(entry).MoveToFormation(units);
+				}
 			}
 			return executed;
 		}

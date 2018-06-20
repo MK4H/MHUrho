@@ -10,7 +10,7 @@ namespace MHUrho.UserInterface
 {
     public abstract class GameUIManager : UIManager
     {
-
+		public CursorTooltips CursorTooltips { get; protected set; }
 
 		protected Dictionary<UIElement, Tool> tools;
 		protected Dictionary<UIElement, IPlayer> players;

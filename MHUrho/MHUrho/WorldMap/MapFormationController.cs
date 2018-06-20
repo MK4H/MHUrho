@@ -41,15 +41,22 @@ namespace MHUrho.WorldMap
 		/// Creates a spiral around the provided tile
 		/// </summary>
 		/// <param name="units"></param>
-		public bool MoveToFormation(IEnumerator<UnitSelector> units)
+		public bool MoveToFormation(UnitGroup units)
 		{
 			if (units == null) {
 				return false;
 			}
 
+
+
 			bool executed = false;
-			while (units.MoveNext() && MoveToFormation(units.Current)) {
+			while (units.IsValid()) {
+				if (!MoveToFormation(units.Current)) continue;
+
 				executed = true;
+				if (!units.TryMoveNext()) {
+					break;
+				}
 			}
 			return executed;
 		}

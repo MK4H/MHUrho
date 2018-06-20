@@ -92,7 +92,7 @@ namespace DefaultPackage
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
-			if (hitEntity.Player != projectile.Player) {
+			if (hitEntity is IBuilding || hitEntity.Player != projectile.Player) {
 				projectile.RemoveFromLevel();
 			}	
 		}

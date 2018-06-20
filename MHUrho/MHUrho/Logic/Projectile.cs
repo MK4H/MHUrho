@@ -301,6 +301,11 @@ namespace MHUrho.Logic
 			return true;	
 		}
 
+		public override void HitBy(IProjectile projectile)
+		{
+			throw new InvalidOperationException("Projectiles should not hit each other");
+		}
+
 		void IDisposable.Dispose()
 		{
 			RemoveFromLevel();
@@ -316,8 +321,9 @@ namespace MHUrho.Logic
 
 		void CollisionHandler(NodeCollisionStartEventArgs e)
 		{
-			//TODO: Instead of linear time search implement constant time node to entity lookup
-			ProjectilePlugin.OnEntityHit(e.OtherNode.GetComponent<Entity>());
+			IEntity hitEntity = Level.GetEntity(e.OtherNode);
+			hitEntity.HitBy(this);
+			ProjectilePlugin.OnEntityHit(hitEntity);
 		}
 
 	}

@@ -272,6 +272,11 @@ namespace MHUrho.Logic
 			
 		}
 
+		public override void HitBy(IProjectile projectile)
+		{
+			BuildingPlugin.OnProjectileHit(projectile);
+		}
+
 		public float? GetHeightAt(float x, float y)
 		{
 			return BuildingPlugin.GetHeightAt(x, y);
@@ -281,6 +286,8 @@ namespace MHUrho.Logic
 		{
 			return BuildingPlugin.GetFormationController(centerPosition);
 		}
+
+		
 
 		void IDisposable.Dispose()
 		{

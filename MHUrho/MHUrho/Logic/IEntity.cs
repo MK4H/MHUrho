@@ -95,6 +95,24 @@ namespace MHUrho.Logic {
 		T CreateComponent<T>() where T : Component, new();
 
 		/// <summary>
+		/// O(n) Gets the first component of type <typeparamref name="T"/> or derived from it present on this entity
+		/// This method is provided for getting the Urho3D basic components from entity
+		/// For getting <see cref="DefaultComponent"/> and derived, use <see cref="GetDefaultComponent{T}"/>
+		/// </summary>
+		/// <typeparam name="T">Any class derived from <see cref="Component"/></typeparam>
+		/// <returns>First component of type <typeparamref name="T"/> or derived from it present on this entity</returns>
+		T GetComponent<T>() where T : Component;
+
+		/// <summary>
+		/// O(n) Gets every component of type <typeparamref name="T"/> or derived from it present on this entity
+		/// This method is provided for getting the Urho3D basic components from entity
+		/// For getting <see cref="DefaultComponent"/> and derived, use <see cref="GetDefaultComponents{T}"/>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		IEnumerable<T> GetComponents<T>() where T : Component;
+
+		/// <summary>
 		/// O(1) Get the first component of type <typeparamref name="T"/> or derived from it present on this entity
 		/// Compared to <see cref="Node.GetComponent{T}(bool)"/> and <see cref="Component.GetComponent{T}"/> which are O(n) in the number of components
 		/// </summary>
@@ -142,5 +160,7 @@ namespace MHUrho.Logic {
 		/// <param name="visitor">Visitor to visit</param>
 		/// <returns></returns>
 		T Accept<T>(IEntityVisitor<T> visitor);
+
+		void HitBy(IProjectile projectile);
 	}
 }

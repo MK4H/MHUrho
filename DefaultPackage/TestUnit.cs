@@ -187,8 +187,7 @@ namespace DefaultPackage
 
 		void Init(float health)
 		{
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f));
-			healthbar.SetHealth((int)health);
+			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f), health);
 		}
 
 	}

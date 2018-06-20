@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MHUrho.Helpers;
 using MHUrho.Plugins;
@@ -74,6 +75,18 @@ namespace MHUrho.Logic
 			return Node.CreateComponent<T>();
 		}
 
+
+		T IEntity.GetComponent<T>()
+		{
+			return GetComponent<T>();
+		}
+
+		public IEnumerable<T> GetComponents<T>()
+			where T : Component
+		{
+			return Node.Components.OfType<T>();
+		}
+
 		public T GetDefaultComponent<T>()
 			where T: DefaultComponent
 		{
@@ -105,6 +118,8 @@ namespace MHUrho.Logic
 			RemovedFromLevel = true;
 			OnRemoval?.Invoke();
 		}
+
+		public abstract void HitBy(IProjectile projectile);
 
 	}
 }

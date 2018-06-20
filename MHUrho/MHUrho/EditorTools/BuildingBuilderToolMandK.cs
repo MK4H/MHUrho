@@ -72,6 +72,7 @@ namespace MHUrho.EditorTools
 				selected = null;
 			}
 
+			input.UIManager.CursorTooltips.Clear();
 			input.UIManager.SelectionBarClearButtons();
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMove;
@@ -95,6 +96,7 @@ namespace MHUrho.EditorTools
 		}
 
 		void Button_Pressed(PressedEventArgs e) {
+			input.UIManager.CursorTooltips.Clear();
 			if (selected == e.Element) {
 				input.UIManager.Deselect();
 				selected = null;
@@ -102,6 +104,10 @@ namespace MHUrho.EditorTools
 			else {
 				input.UIManager.SelectButton((Button)e.Element);
 				selected = (Button)e.Element;
+				var text = input.UIManager.CursorTooltips.AddText();
+				text.SetStyleAuto();
+				text.Value = "Hello world";
+				text.Position = new IntVector2(10, 0);
 			}
 		}
 

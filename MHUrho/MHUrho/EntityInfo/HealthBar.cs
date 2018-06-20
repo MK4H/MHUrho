@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -13,226 +14,93 @@ namespace MHUrho.EntityInfo
 {
     public class HealthBar : IDisposable {
 
-		const int healthBarPixelWidth = 100;
-		const int healthBarPixelHeight = 20;
-		const int horizontalBorderPixelHeight = 6;
-		const int verticalBorderPixelWidth = 3;
-		const int horizontalDividerPixelHeight = 0;
-		const int verticalDividerPixelWidth = 0;
 
-		static readonly Color HealthyColor = new Color(0.1f, 0.8f, 0.1f);
-		static readonly Color DeadColor = new Color(0.8f,0.1f,0.1f);
-		static readonly uint DividerColor = Color.Black.ToUInt();
-
-		Image image;
-		Texture2D texture;
+		static Dictionary<IPlayer, Material> coloredHealthbars = new Dictionary<IPlayer, Material>();
 
 		BillboardSet billboardSet;
+		uint billboardIndex;
 
 		ILevelManager level;
 
-		public HealthBar(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size)
+		public HealthBar(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size, float healthPercent)
 		{
 			this.level = level;
-			image = new Image();
-			image.SetSize(healthBarPixelWidth + verticalBorderPixelWidth * 2 + verticalDividerPixelWidth * 2, 
-						healthBarPixelHeight + horizontalBorderPixelHeight * 2 + horizontalDividerPixelHeight * 2, 
-						4);
+			if (!coloredHealthbars.ContainsKey(entity.Player)) {
+				CreateHealthbar(entity.Player);
+			}
 
 			AddToEntity(entity, offset, size);
+			SetHealth(healthPercent);
 		}
 
 
-		public void SetHealth(int healthPercent)
+		public void SetHealth(float healthPercent)
 		{
-			DrawHealth(healthPercent);
+			healthPercent = Math.Max(Math.Min(healthPercent, 100), 0);
+
+			var billboard = billboardSet.GetBillboardSafe(billboardIndex);
+			int imagePart = (int)healthPercent / 5;
+			billboard.Uv = new Rect(new Vector2(0, imagePart / 21.0f), new Vector2(1, (imagePart + 1) / 21.0f));
+
+			billboardSet.Commit();
 		}
 
 		public void Dispose()
 		{
-			image.Dispose();
-			texture.Dispose();
 			billboardSet.Dispose();
 		}
 
-		void InitialDraw(Color playerColor, int healthPercent)
+
+
+		unsafe void CreateHealthbar(IPlayer player)
 		{
-			uint pixelColor = playerColor.ToUInt();
-			unsafe {
-				uint* imageData = (uint*)image.Data;
+			Image image = PackageManager.Instance.ResourceCache.GetImage("Textures/HealthBars.png").ConvertToRGBA();
 
-				DrawHorizontalBorder(ref imageData, pixelColor);
-
-				//Horizontal divider
-				for (int i = 0; i < horizontalDividerPixelHeight; i++) {
-					DrawVerticalBorder(ref imageData, pixelColor);
-					DrawHorizontalDivider(ref imageData);
-					DrawVerticalBorder(ref imageData, pixelColor);
-				}
-
-				//Health bar
-				for (int i = 0; i < healthBarPixelHeight; i++) {
-					DrawVerticalBorder(ref imageData, pixelColor);
-					DrawVerticalDivider(ref imageData);
-					DrawHealthBarRow(ref imageData, healthPercent);
-					DrawVerticalDivider(ref imageData);
-					SkipVerticalBorder(ref imageData);
-				}
-
-				//Horizontal divider
-				for (int i = 0; i < horizontalDividerPixelHeight; i++) {
-					DrawVerticalBorder(ref imageData, pixelColor);
-					DrawHorizontalDivider(ref imageData);
-					DrawVerticalBorder(ref imageData, pixelColor);
-				}
-
-				DrawHorizontalBorder(ref imageData, playerColor.ToUInt());
-			}
-			texture.SetData(image);
-		}
-
-		void DrawHealth(int healthPercent)
-		{
-			unsafe {
-				uint* imageData = (uint*) image.Data;
-
-				SkipHorizontalBorder(ref imageData);
-
-				SkipHorizontalDivider(ref imageData);
-
-				for (int i = 0; i < healthBarPixelHeight; i++) {
-					SkipVerticalBorder(ref imageData);
-					SkipVerticalDivider(ref imageData);
-
-					DrawHealthBarRow(ref imageData, healthPercent);
-
-					SkipVerticalDivider(ref imageData);
-					SkipVerticalBorder(ref imageData);
+			uint playerColor = player.Color.ToUInt();
+			uint* imageData = (uint*)image.Data;
+			for (int i = 0; i < image.Width * image.Height; i++, imageData++) {
+				if (*imageData == new Color(1, 1, 1).ToUInt()) {
+					*imageData = playerColor;
 				}
 			}
 
-			texture.SetData(image);
-		}
-
-		void DrawBorders(Color color)
-		{
-			uint pixelColor = color.ToUInt();
-			unsafe {
-				uint* imageData = (uint*)image.Data;
-				DrawHorizontalBorder(ref imageData, pixelColor);
-
-				for (int i = 0; i < healthBarPixelHeight + horizontalDividerPixelHeight; i++) {
-					DrawVerticalBorder(ref imageData, pixelColor);
-					SkipVerticalDivider(ref imageData);
-					SkipHealthBarRow(ref imageData);
-					SkipVerticalDivider(ref imageData);
-					DrawVerticalBorder(ref imageData, pixelColor);
-				}
-
-				DrawHorizontalBorder(ref imageData, pixelColor);
-			}
-
-			texture.SetData(image);
-		}
-
-		unsafe void SkipHorizontalBorder(ref uint* imageData)
-		{
-			imageData += horizontalBorderPixelHeight * image.Width;
-		}
-
-		unsafe void SkipHorizontalDivider(ref uint* imageData)
-		{
-			imageData += horizontalDividerPixelHeight * image.Width;
-		}
-
-		unsafe void SkipVerticalBorder(ref uint* imageData)
-		{
-			imageData += verticalBorderPixelWidth;
-		}
-
-		unsafe void SkipVerticalDivider(ref uint* imageData)
-		{
-			imageData += verticalDividerPixelWidth;
-		}
-
-		unsafe void SkipHealthBarRow(ref uint* imageData)
-		{
-			imageData += healthBarPixelWidth;
-		}
-
-		unsafe void DrawHealthBarRow(ref uint* imageData, int healthPercent)
-		{
-			int pixelX = 0;
-			uint healthyColor = HealthyColor.ToUInt();
-			uint deadColor = DeadColor.ToUInt();
-			for (; pixelX < (healthPercent / 100.0f) * healthBarPixelWidth; pixelX++) {
-				*imageData++ = healthyColor;
-			}
-
-			for (; pixelX < healthBarPixelWidth; pixelX++) {
-				*imageData++ = deadColor;
-			}
-			
-		}
-
-		unsafe void DrawHorizontalBorder(ref uint* imageData, uint color)
-		{
-			for (int y = 0; y < horizontalBorderPixelHeight; y++) {
-				for (int x = 0; x < image.Width; x++) {
-					*imageData++ = color;
-				}
-			}
-		}
-
-		unsafe void DrawVerticalBorder(ref uint* imageData, uint color)
-		{
-			for (int i = 0; i < verticalBorderPixelWidth; i++) {
-				*imageData++ = color;
-			}
-		}
-
-		unsafe void DrawHorizontalDivider(ref uint* imageData)
-		{
-			for (int i = 0; i < verticalDividerPixelWidth * 2 + healthBarPixelWidth; i++) {
-				*imageData++ = DividerColor;
-			}
-		}
-
-		unsafe void DrawVerticalDivider(ref uint* imageData)
-		{
-			for (int i = 0; i < verticalDividerPixelWidth; i++) {
-				*imageData++ = DividerColor;
-			}
+			Material newMaterial = Material.FromImage(image);
+			coloredHealthbars.Add(player, newMaterial);
 		}
 
 		void AddToEntity(IEntity entity, Vector3 offset, Vector2 size)
 		{
-			image.Clear(entity.Player.Color);
+			billboardSet = null;
+			foreach (var component in entity.GetComponents<BillboardSet>()) {
+				if (component.Material == coloredHealthbars[entity.Player]) {
+					billboardSet = component;
+					billboardIndex = billboardSet.NumBillboards;
+					billboardSet.NumBillboards = billboardSet.NumBillboards + 1;
+					
+				}
+			}
+
+			if (billboardSet == null) {
+				billboardSet = entity.CreateComponent<BillboardSet>();
+
+				billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
+				billboardSet.NumBillboards = 1;
+				billboardSet.Sorted = false;
+				billboardSet.Material = coloredHealthbars[entity.Player];
+				billboardSet.Scaled = false;
+
+				billboardIndex = 0;
+			}
+
+			
 
 
-			texture = new Texture2D();
-			texture.SetData(image);
-
-			var material = new Material();
-			material.Load(level.PackageManager.ResourceCache.GetFile("Materials/HealthBarMat.xml"));
-			material.SetTexture(TextureUnit.Diffuse, texture);
-
-			billboardSet = entity.Node.CreateComponent<BillboardSet>();
-			billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
-			billboardSet.NumBillboards = 1;
-			billboardSet.Sorted = false;
-			billboardSet.Material = material;
-			billboardSet.Scaled = false;
-
-
-			var billboard = billboardSet.GetBillboardSafe(0);
+			var billboard = billboardSet.GetBillboardSafe(billboardIndex);
 			billboard.Position = offset;
 			billboard.Rotation = 0;
 			billboard.Size = size;
-			billboard.Uv = new Rect(new Vector2(0, 0), new Vector2(1, 1));
 			billboard.Enabled = true;
 
-			InitialDraw(entity.Player.Color, 49);
 		}
 	}
 }

@@ -174,7 +174,8 @@ namespace DefaultPackage
 			unit.AlwaysVertical = true;
 			pathVisitor = new PathVisitor(this);
 
-			Init(100);
+			hp = 100;
+			Init(hp);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage)
@@ -209,7 +210,23 @@ namespace DefaultPackage
 
 		public override void OnProjectileHit(IProjectile projectile)
 		{
-			throw new NotImplementedException();
+			if (projectile.Player == Unit.Player) {
+				return;
+			}
+
+			hp -= 10;
+			
+
+			if (hp < 0) {
+				healthbar.SetHealth(0);
+				animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
+				dying = true;
+				Shooter.Enabled = false;
+				Walker.Enabled = false;
+			}
+			else {
+				healthbar.SetHealth((int)hp);
+			}
 		}
 
 		public override void OnMeeleHit(IEntity byEntity)
@@ -316,16 +333,6 @@ namespace DefaultPackage
 			return Unit.Position + new Vector3(0, 0.5f, 0);
 		}
 
-		public void OnHit(MovingRangeTarget target, IProjectile projectile)
-		{
-			if (projectile.Player != Unit.Player) {
-				animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
-				dying = true;
-				Shooter.Enabled = false;
-				Walker.Enabled = false;
-			}
-		}
-
 		public override void Dispose()
 		{
 			healthbar.Dispose();
@@ -338,8 +345,7 @@ namespace DefaultPackage
 
 		void Init(float health)
 		{
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f));
-			healthbar.SetHealth((int)health);
+			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), health);
 		}
 
 	}

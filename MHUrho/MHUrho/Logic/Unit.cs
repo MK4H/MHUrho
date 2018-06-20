@@ -60,7 +60,6 @@ namespace MHUrho.Logic
 												tile.Center.Y);
 				var unit = new Unit(id, level, type, tile, player, unitNode);
 				centerNode.AddComponent(unit);
-				
 
 				unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
 
@@ -401,6 +400,11 @@ namespace MHUrho.Logic
 			Dispose();	
 		}
 
+		public override void HitBy(IProjectile projectile)
+		{
+			UnitPlugin.OnProjectileHit(projectile);
+		}
+
 		void IDisposable.Dispose()
 		{
 			RemoveFromLevel();
@@ -421,15 +425,6 @@ namespace MHUrho.Logic
 		#region Private Methods
 
 
-		void Collision(NodeCollisionStartEventArgs e)
-		{
-			var projectile = Level.GetProjectile(e.OtherNode);
-			if (projectile == null) {
-				throw new InvalidOperationException("Hit by something that is not a projectile");
-			}
-
-			UnitPlugin.OnProjectileHit(projectile);
-		}
 
 		#endregion
 

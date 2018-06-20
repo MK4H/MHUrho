@@ -68,8 +68,6 @@ namespace MHUrho.UnitComponents
 
 		public interface INotificationReceiver {
 
-			void OnHit(StaticRangeTarget target, IProjectile projectile);
-
 		}
 
 
