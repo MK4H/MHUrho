@@ -65,11 +65,11 @@ namespace MHUrho.Helpers
 			XElement modelScaleElement = modelElement.Element(ModelScaleElementName);
 
 			if (modelScaleElement != null) {
-				return new ModelWrapper(PackageManager.Instance.ResourceCache.GetModel(GetPath(modelPathElement)),
+				return new ModelWrapper(PackageManager.Instance.GetModel(GetPath(modelPathElement)),
 										GetVector3(modelScaleElement));
 			}
 
-			return new ModelWrapper(PackageManager.Instance.ResourceCache.GetModel(GetPath(modelPathElement)));
+			return new ModelWrapper(PackageManager.Instance.GetModel(GetPath(modelPathElement)));
 		}
 
 		public static MaterialWrapper GetMaterial(XElement typeXmlElement) {
@@ -79,11 +79,11 @@ namespace MHUrho.Helpers
 			XElement materialListPathElement = materialElement.Element(MaterialListElementName);
 
 			if (materialPathElement != null) {
-				return new SimpleMaterial(PackageManager.Instance.ResourceCache.GetMaterial(GetPath(materialPathElement)));
+				return new SimpleMaterial(PackageManager.Instance.GetMaterial(GetPath(materialPathElement)));
 			}
 			else if (materialListPathElement != null) {
 				var path = GetPath(materialListPathElement);
-				if (!PackageManager.Instance.ResourceCache.Exists(path)) {
+				if (!PackageManager.Instance.Exists(path)) {
 					throw new FileNotFoundException("Material list file not found",path);
 				}
 				return new MaterialList(path);
@@ -97,7 +97,7 @@ namespace MHUrho.Helpers
 			XElement iconElement = typeXmlElement.Element(IconPathElementName);
 
 			//TODO: Find a way to not need RGBA conversion
-			return PackageManager.Instance.ResourceCache.GetImage(GetPath(iconElement)).ConvertToRGBA();
+			return PackageManager.Instance.GetImage(GetPath(iconElement)).ConvertToRGBA();
 		}
 
 		public static XElement GetExtensionElement(XElement typeXmlElement) {

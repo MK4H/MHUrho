@@ -118,18 +118,14 @@ namespace MHUrho.Logic
 			this.Plugin = type.GetNewInstancePlugin(this, level);
 		}
 
-		public static Player CreateNewAIPlayer(int id, ILevelManager level, Node node, PlayerType type, Color color)
+		public static Player CreateNewAIPlayer(int id, ILevelManager level, PlayerType type, Color color)
 		{
-			var player = new Player(id, level, type, color);
-			node.AddComponent(player);
-			return player;
+			return new Player(id, level, type, color);
 		}
 
-		public static Player CreateNewHumanPlayer(int id, ILevelManager level, Node node, Color color)
+		public static Player CreateNewHumanPlayer(int id, ILevelManager level, Color color)
 		{
-			var player = new Player(id, level, color);
-			node.AddComponent(player);
-			return player;
+			return new Player(id, level, color);
 		}
 
 		public StPlayer Save()

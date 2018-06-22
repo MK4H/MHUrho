@@ -267,7 +267,7 @@ namespace MHUrho.EditorTools
 			text.HorizontalAlignment = HorizontalAlignment.Center;
 			text.VerticalAlignment = VerticalAlignment.Top;
 			text.SetColor(new Color(r: 0f, g: 0f, b: 0f));
-			text.SetFont(font: PackageManager.Instance.ResourceCache.GetFont("Fonts/Font.ttf"), size: 30);
+			text.SetFont(font: PackageManager.Instance.GetFont("Fonts/Font.ttf"), size: 30);
 
 			return button;
 		}

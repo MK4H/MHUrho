@@ -36,7 +36,7 @@ namespace MHUrho.Logic
 
 		private Image LoadIcon(XElement typeElement, GamePack package) {
 			string iconPath = XmlHelpers.GetFullPathFromChild(typeElement, IconPathElement, package.XmlDirectoryPath);
-			return PackageManager.Instance.ResourceCache.GetImage(iconPath);
+			return PackageManager.Instance.GetImage(iconPath);
 		}
 	}
 }

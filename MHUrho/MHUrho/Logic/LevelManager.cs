@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using MHUrho.Control;
 using MHUrho.Input;
 using MHUrho.Packaging;
@@ -158,7 +160,7 @@ namespace MHUrho.Logic
 				loaders.Add(playerLoader);
 			}
 			//TODO: Move this inside the foreach
-			level.Input = game.menuController.GetGameController(cameraController, level, firstPlayer);
+			level.Input = game.menuController.GetGameController(cameraController, level, octree, firstPlayer);
 			
 			//Connect references
 			foreach (var loader in loaders) {
@@ -192,30 +194,51 @@ namespace MHUrho.Logic
 		/// <param name="mapSize">Size of the map to create</param>
 		/// <param name="packages">packages to load</param>
 		/// <returns>Loaded default level</returns>
-		public static LevelManager LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName)
+		public static async Task<LevelManager> LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName)
 		{
 			InitializeLevel(game, gamePackageName, out Scene scene, out CameraController cameraController);
 
 			Node mapNode = scene.CreateChild("MapNode");
 
-			Map map = Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize);
+			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize));
 			CurrentLevel.Map = map;
 
 			CurrentLevel.Minimap = new Minimap(CurrentLevel, 4);
 
+			if (MyGame.IsMainThread(Thread.CurrentThread)) {
+				StartLevel();
+			}
+			else {
+				Application.InvokeOnMainAsync(StartLevel).Wait();
 
-			//TODO: Temporary player, COLOR PICKING
-			var player = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, Color.Red);
-			CurrentLevel.players.Add(player.ID, player);
-			CurrentLevel.Input = game.menuController.GetGameController(cameraController, CurrentLevel, player);
-
-			CurrentLevel.Input.UIManager.AddPlayer(player);
-
-			player = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, scene, PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"), Color.Blue);
-			CurrentLevel.players.Add(player.ID, player);
-			CurrentLevel.Input.UIManager.AddPlayer(player);
+			}
+			
 
 			return CurrentLevel;
+
+			void StartLevel()
+			{
+				//TODO: Temporary player, COLOR 
+				Player newPlayer = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, Color.Red);
+				scene.AddComponent(newPlayer);
+				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
+				CurrentLevel.Input =
+					game.menuController.GetGameController(cameraController, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
+
+				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
+
+				newPlayer = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players),
+													CurrentLevel,
+													PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"),
+													Color.Blue);
+				scene.AddComponent(newPlayer);
+				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
+				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
+
+				scene.AddComponent(CurrentLevel);
+				scene.UpdateEnabled = true;
+			}
+			
 		}
 
 		public StLevel Save() {
@@ -595,6 +618,7 @@ namespace MHUrho.Logic
 			PackageManager.Instance.LoadPackage(gamePackageName);
 
 			scene = new Scene(game.Context);
+			scene.UpdateEnabled = false;
 			var octree = scene.CreateComponent<Octree>();
 			var physics = scene.CreateComponent<PhysicsWorld>();
 			//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
@@ -604,7 +628,6 @@ namespace MHUrho.Logic
 			cameraController = LoadCamera(game, scene);
 
 			CurrentLevel = new LevelManager(cameraController, octree);
-			scene.AddComponent(CurrentLevel);
 
 		}
 

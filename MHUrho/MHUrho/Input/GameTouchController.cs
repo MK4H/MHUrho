@@ -44,11 +44,11 @@ namespace MHUrho.Input
 
 		
 
-		public GameTouchController(MyGame game, ILevelManager level, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
+		public GameTouchController(MyGame game, ILevelManager level, Octree octree, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
 			this.cameraController = cameraController;
 			this.Sensitivity = sensitivity;
 			this.Level = level;
-			this.octree = level.Scene.GetComponent<Octree>();
+			this.octree = octree;
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;
 

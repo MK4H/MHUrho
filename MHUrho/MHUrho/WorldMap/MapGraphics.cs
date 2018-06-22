@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using Urho;
@@ -119,6 +120,11 @@ namespace MHUrho.WorldMap
 					return !IsTopLeftBotRightDiagHigher();
 				}
 
+				public override string ToString()
+				{
+					return $"Top left: {TopLeft.Position}";
+				}
+
 				/// <summary>
 				/// Gets the average vector of the normals of the two adjacent triangles
 				/// 
@@ -129,7 +135,7 @@ namespace MHUrho.WorldMap
 				/// <param name="second">second vector in counterclockwise direction</param>
 				/// <param name="third">third vector in counterclockwise direction</param>
 				/// <returns>Not normalized normal vector</returns>
-				private Vector3 AverageNormalNotNormalized(ref Vector3 center,
+				Vector3 AverageNormalNotNormalized(ref Vector3 center,
 														   ref Vector3 first,
 														   ref Vector3 second,
 														   ref Vector3 third) {
@@ -291,14 +297,12 @@ namespace MHUrho.WorldMap
 				graphics.CreateModel(tiles);
 
 
-				StaticModel model = mapNode.CreateComponent<StaticModel>();
-				model.Model = graphics.model;
-				model.SetMaterial(graphics.material);
+				SetModel(mapNode, graphics);
 
 				return graphics;
 			}
 
-			protected MapGraphics(Map map, Node mapNode) {
+			MapGraphics(Map map, Node mapNode) {
 				this.map = map;
 				this.mapNode = mapNode;
 			}
@@ -610,7 +614,7 @@ namespace MHUrho.WorldMap
 					subimageRect.Right += Tile.ImageWidth;
 				}
 
-				material = Material.FromImage(mapImage);
+				material = PackageManager.Instance.GetMaterialFromImage(mapImage);
 			}
 
 			void CreateModel(ITile[] tiles) {
@@ -622,20 +626,13 @@ namespace MHUrho.WorldMap
 				//two triangles per tile, 3 indicies per triangle
 				uint numIndicies = (uint)(map.WidthWithBorders * map.LengthWithBorders * 6);
 
-				Model model = new Model();
 
-				//TODO: Context
-				VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
-				IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
+				VertexBuffer vb = InitializeVertexBuffer(numVerticies);
+				IndexBuffer ib = InitializeIndexBuffer(numIndicies);
 
-				vb.Shadowed = true;
-				vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
 
-				ib.Shadowed = true;
-				ib.SetSize(numIndicies, false, false);
-
-				IntPtr vbPointer = vb.Lock(0, numVerticies);
-				IntPtr ibPointer = ib.Lock(0, numIndicies);
+				IntPtr vbPointer = LockVertexBuffer(vb, numVerticies);
+				IntPtr ibPointer = LockIndexBuffer(ib, numIndicies);
 
 				if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
 					//TODO: Error, could not lock buffers into memory, cannot create map
@@ -665,19 +662,7 @@ namespace MHUrho.WorldMap
 
 				}
 
-				vb.Unlock();
-				ib.Unlock();
-
-				Geometry geom = new Geometry();
-				geom.SetVertexBuffer(0, vb);
-				geom.IndexBuffer = ib;
-				geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
-
-				model.NumGeometries = 1;
-				model.SetGeometry(0, 0, geom);
-				model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(map.WidthWithBorders, 1, map.LengthWithBorders));
-
-				this.model = model;
+				this.model = FinalizeModelCreation(vb, ib, numIndicies);
 				this.mapVertexBuffer = vb;
 				this.mapIndexBuffer = ib;
 			}
@@ -777,7 +762,124 @@ namespace MHUrho.WorldMap
 				geometry.DefineColor(color);
 			}
 
-			
+			VertexBuffer InitializeVertexBuffer(uint numVerticies)
+			{
+				if (MyGame.IsMainThread(Thread.CurrentThread)) {
+					return InitializeVertexBufferImpl(numVerticies);
+
+				}
+				else {
+					VertexBuffer vb = null;
+					Application.InvokeOnMainAsync(() => { vb = InitializeVertexBufferImpl(numVerticies); }).Wait();
+					return vb;
+				}
+			}
+
+			VertexBuffer InitializeVertexBufferImpl(uint numVerticies)
+			{
+				//TODO: Context
+				VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
+
+				vb.Shadowed = true;
+				vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
+				return vb;
+			}
+
+			IndexBuffer InitializeIndexBuffer(uint numIndicies)
+			{
+				if (MyGame.IsMainThread(Thread.CurrentThread)) {
+					return InitializeIndexBufferImpl(numIndicies);
+
+				}
+				else {
+					IndexBuffer ib = null;
+					Application.InvokeOnMainAsync(() => { ib = InitializeIndexBufferImpl(numIndicies); }).Wait();
+					return ib;
+				}
+			}
+
+			IndexBuffer InitializeIndexBufferImpl(uint numIndicies)
+			{
+				IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
+
+				ib.Shadowed = true;
+				ib.SetSize(numIndicies, false, false);
+
+				return ib;
+			}
+
+			IntPtr LockVertexBuffer(VertexBuffer vb, uint numVerticies)
+			{
+				if (MyGame.IsMainThread(Thread.CurrentThread)) {
+					return vb.Lock(0, numVerticies);
+				}
+				else {
+					IntPtr vbPtr = IntPtr.Zero;
+					Application.InvokeOnMainAsync(() => { vbPtr = vb.Lock(0, numVerticies); }).Wait();
+					return vbPtr;
+				}
+			}
+
+			IntPtr LockIndexBuffer(IndexBuffer ib, uint numIndicies)
+			{
+				if (MyGame.IsMainThread(Thread.CurrentThread)) {
+					return ib.Lock(0, numIndicies);
+				}
+				else {
+					IntPtr ibPtr = IntPtr.Zero;
+					Application.InvokeOnMainAsync(() => { ibPtr = ib.Lock(0, numIndicies); }).Wait();
+					return ibPtr;
+				}
+			}
+
+			Model FinalizeModelCreation(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
+			{
+				if (MyGame.IsMainThread(Thread.CurrentThread)) {
+					return FinalizeModelCreationImpl(vb, ib, numIndicies);
+				}
+				else {
+					Model model = null;
+					Application.InvokeOnMainAsync(() => { model = FinalizeModelCreationImpl(vb, ib, numIndicies); }).Wait();
+					return model;
+				}
+			}
+
+			Model FinalizeModelCreationImpl(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
+			{
+				Model model = new Model();
+
+				vb.Unlock();
+				ib.Unlock();
+
+				Geometry geom = new Geometry();
+				geom.SetVertexBuffer(0, vb);
+				geom.IndexBuffer = ib;
+				geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
+
+				model.NumGeometries = 1;
+				model.SetGeometry(0, 0, geom);
+				model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(map.WidthWithBorders, 1, map.LengthWithBorders));
+
+				return model;
+			}
+
+			static void SetModel(Node mapNode, MapGraphics graphics)
+			{
+				if (MyGame.IsMainThread(Thread.CurrentThread)) {
+					SetModelImpl(mapNode, graphics);
+				}
+				else {
+					Application.InvokeOnMainAsync(() => { SetModelImpl(mapNode, graphics); }).Wait();
+				}
+				
+			}
+
+			static void SetModelImpl(Node mapNode, MapGraphics graphics)
+			{
+				StaticModel model = mapNode.CreateComponent<StaticModel>();
+				model.Model = graphics.model;
+				model.SetMaterial(graphics.material);
+			}
 		}
 
 	}

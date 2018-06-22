@@ -10,6 +10,7 @@ using Urho.Shapes;
 using Urho.IO;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -27,24 +28,35 @@ namespace MHUrho
 
 		public IMenuController menuController;
 
+		static int mainThreadID;
+
 		MonoDebugHud monoDebugHud;
 
 		static MyGame()
 		{
-			//UnhandledException += (s, e) =>
-			//{
-			//    if (Debugger.IsAttached)
-			//        Debugger.Break();
-			//    e.Handled = true;
-			//};
+			UnhandledException += (s, e) => {
+				if (Debugger.IsAttached)
+					Debugger.Break();
+				e.Handled = true;
+			};
+		}
+
+		public static bool IsMainThread(Thread thread)
+		{
+			//TODO: Better
+			return thread.ManagedThreadId == mainThreadID;
 		}
 
 		protected override void Start() {
+			mainThreadID = Thread.CurrentThread.ManagedThreadId;
+
 			Log.Open(Config.LogPath);
 
 			Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
 			PackageManager.CreateInstance(ResourceCache);
+
+			
 
 			if (Platform == Platforms.Android ||
 				Platform == Platforms.iOS) {

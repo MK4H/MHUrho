@@ -96,7 +96,7 @@ namespace MHUrho.Packaging {
 											PackageManager packageManager) {
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 			pathToThumbnail = FileManager.CorrectRelativePath(pathToThumbnail);
-			var thumbnail = PackageManager.Instance.ResourceCache.GetImage(pathToThumbnail ?? DefaultThumbnailPath);
+			var thumbnail = PackageManager.Instance.GetImage(pathToThumbnail ?? DefaultThumbnailPath);
 
 			return new GamePack(name, pathToXml, description ?? "No description", thumbnail, packageManager);
 		}

@@ -50,11 +50,23 @@ namespace MHUrho.EntityInfo
 			billboardSet.Dispose();
 		}
 
+		public void Show()
+		{
+			var billboard = billboardSet.GetBillboardSafe(billboardIndex);
+			billboard.Enabled = true;
+			billboardSet.Commit();
+		}
 
+		public void Hide()
+		{
+			var billboard = billboardSet.GetBillboardSafe(billboardIndex);
+			billboard.Enabled = false;
+			billboardSet.Commit();
+		}
 
 		unsafe void CreateHealthbar(IPlayer player)
 		{
-			Image image = PackageManager.Instance.ResourceCache.GetImage("Textures/HealthBars.png").ConvertToRGBA();
+			Image image = PackageManager.Instance.GetImage("Textures/HealthBars.png").ConvertToRGBA();
 
 			uint playerColor = player.Color.ToUInt();
 			uint* imageData = (uint*)image.Data;
@@ -64,7 +76,7 @@ namespace MHUrho.EntityInfo
 				}
 			}
 
-			Material newMaterial = Material.FromImage(image);
+			Material newMaterial = PackageManager.Instance.GetMaterialFromImage(image);
 			coloredHealthbars.Add(player, newMaterial);
 		}
 
@@ -86,6 +98,7 @@ namespace MHUrho.EntityInfo
 				billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
 				billboardSet.NumBillboards = 1;
 				billboardSet.Sorted = false;
+				//TODO: Material gets deallocated after the death of the last unit with this healthbar, fix
 				billboardSet.Material = coloredHealthbars[entity.Player];
 				billboardSet.Scaled = false;
 

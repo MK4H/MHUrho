@@ -101,12 +101,12 @@ namespace MHUrho.Input
 		/// </summary>
 		ITile cachedTileUnderCursor;
 
-		public GameMandKController(MyGame game, ILevelManager level, IPlayer player, CameraController cameraController) : base(game) {
+		public GameMandKController(MyGame game, ILevelManager level, Octree octree, IPlayer player, CameraController cameraController) : base(game) {
 			this.CameraScrollSensitivity = 20f;
 			this.CameraRotationSensitivity = 15f;
 			this.cameraType = CameraMovementType.Fixed;
 			this.cameraController = cameraController;
-			this.octree = level.Scene.GetComponent<Octree>();
+			this.octree = octree;
 			this.Level = level;
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;

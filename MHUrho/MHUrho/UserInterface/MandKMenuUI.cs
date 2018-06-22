@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;
 using Urho.Gui;
@@ -15,7 +17,7 @@ namespace MHUrho.UserInterface
 		public MandKMenuUI(MyGame game) 
 			:base(game)
 		{
-			var style = Game.ResourceCache.GetXmlFile("UI/DefaultStyle.xml");
+			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml");
 
 			//TODO: TEMPORARY, probably move to UIManager or something
 			var button = UI.Root.CreateButton("StartButton");
@@ -76,7 +78,7 @@ namespace MHUrho.UserInterface
 			switch (obj.Element.Name) {
 				case "StartButton":
 					LevelManager.CurrentLevel?.End();
-					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), "testRP2");
+					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 400), "testRP2");
 					break;
 				case "SaveButton":
 					//TODO: Move this elsewhere

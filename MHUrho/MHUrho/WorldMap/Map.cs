@@ -12,6 +12,7 @@ using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.UnitComponents;
 using MHUrho.PathFinding;
+using Urho.IO;
 
 
 namespace MHUrho.WorldMap
@@ -366,7 +367,7 @@ namespace MHUrho.WorldMap
 			TileType defaultTileType = PackageManager.Instance.ActiveGame.DefaultTileType;
 
 			for (int i = 0; i < newMap.tiles.Length; i++) {
-				IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.LengthWithBorders);
+				IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.WidthWithBorders);
 				if (newMap.IsBorder(tilePosition)) {
 					BorderType borderType = newMap.GetBorderType(tilePosition.X, tilePosition.Y);
 
@@ -1522,9 +1523,9 @@ namespace MHUrho.WorldMap
 			return GetBorderType(location.X, location.Y);
 		}
 
-		bool IsTopBorder(int x, int y) 
+		bool IsTopBorder(int x, int y)
 		{
-			return (0 <= y && y < Top);
+			return y == TopWithBorders;
 		}
 
 		bool IsTopBorder(IntVector2 location) 
@@ -1532,9 +1533,9 @@ namespace MHUrho.WorldMap
 			return IsTopBorder(location.X, location.Y);
 		}
 
-		bool IsBottomBorder(int x, int y) 
+		bool IsBottomBorder(int x, int y)
 		{
-			return (Bottom + 1 <= y && y < WidthWithBorders);
+			return y == BottomWithBorders;
 		}
 
 		bool IsBottomBorder(IntVector2 location) 
@@ -1542,9 +1543,9 @@ namespace MHUrho.WorldMap
 			return IsBottomBorder(location.X, location.Y);
 		}
 
-		bool IsLeftBorder(int x, int y) 
+		bool IsLeftBorder(int x, int y)
 		{
-			return (0 <= x && x < Left);
+			return x == LeftWithBorders;
 		}
 
 		bool IsLeftBorder(IntVector2 location) 
@@ -1552,9 +1553,9 @@ namespace MHUrho.WorldMap
 			return IsLeftBorder(location.X, location.Y);
 		}
 
-		bool IsRightBorder(int x, int y) 
+		bool IsRightBorder(int x, int y)
 		{
-			return (Right + 1 <= x && x < WidthWithBorders);
+			return x == RightWithBorders;
 		}
 
 		bool IsRightBorder(IntVector2 location) 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Packaging;
 using Urho;
 using Urho.Gui;
 using Urho.Resources;
@@ -24,7 +25,7 @@ namespace MHUrho.Input
 			this.MouseSensitivity = 0.2f;
 			this.Enabled = false;
 
-			var style = game.ResourceCache.GetXmlFile("UI/DefaultStyle.xml");
+			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml");
 			UI.Root.SetDefaultStyle(style);
 
 			var cursor = UI.Root.CreateCursor("UICursor");
@@ -32,7 +33,7 @@ namespace MHUrho.Input
 			UI.Cursor.SetStyleAuto(style);
 			UI.Cursor.Position = new IntVector2(UI.Root.Width / 2, UI.Root.Height / 2);
 
-			var cursorImage = game.ResourceCache.GetImage("Textures/xamarin.png");
+			var cursorImage = PackageManager.Instance.GetImage("Textures/xamarin.png");
 			UI.Cursor.DefineShape("MyShape",
 								  cursorImage,
 								  new IntRect(0, 0, cursorImage.Width - 1, cursorImage.Height - 1),

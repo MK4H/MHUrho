@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;
 using Urho.Gui;
@@ -18,7 +19,7 @@ namespace MHUrho.Input
 		public MenuTouchController(MyGame game) : base(game) {
 			//TODO: TEMPORARY, probably move to UIManager or something
 
-			var style = game.ResourceCache.GetXmlFile("UI/DefaultStyle.xml");
+			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml");
 
 			var button = UI.Root.CreateButton("StartButton");
 			button.SetStyleAuto(style);
@@ -49,8 +50,8 @@ namespace MHUrho.Input
 			button.SetColor(Color.Red);
 		}
 
-		public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player) {
-			return new GameTouchController(Game, levelManager, player, cameraController);
+		public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Octree octree, Player player) {
+			return new GameTouchController(Game, levelManager, octree, player, cameraController);
 		}
 
 		//TODO: TEMPORARY, probably move to UIManager or something

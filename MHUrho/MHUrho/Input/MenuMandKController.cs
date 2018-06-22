@@ -23,8 +23,8 @@ namespace MHUrho.Input
 			UI = new MandKMenuUI(game);
 		}
 
-		public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Player player) {
-			return new GameMandKController(Game, levelManager, player, cameraController);
+		public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Octree octree, Player player) {
+			return new GameMandKController(Game, levelManager, octree, player, cameraController);
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {

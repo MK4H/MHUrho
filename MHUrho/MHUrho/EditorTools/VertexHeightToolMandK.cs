@@ -54,7 +54,7 @@ namespace MHUrho.EditorTools {
 			selectingButton.FocusMode = FocusMode.ResetFocus;
 			selectingButton.MaxSize = new IntVector2(100, 100);
 			selectingButton.MinSize = new IntVector2(100, 100);
-			selectingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+			selectingButton.Texture = PackageManager.Instance.GetTexture2D("Textures/xamarin.png");
 			selectingButton.Visible = false;
 
 			buttons.Add(selectingButton);
@@ -68,7 +68,7 @@ namespace MHUrho.EditorTools {
 			movingButton.FocusMode = FocusMode.ResetFocus;
 			movingButton.MaxSize = new IntVector2(100, 100);
 			movingButton.MinSize = new IntVector2(100, 100);
-			movingButton.Texture = PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+			movingButton.Texture = PackageManager.Instance.GetTexture2D("Textures/xamarin.png");
 			movingButton.Visible = false;
 
 			buttons.Add(movingButton);

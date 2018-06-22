@@ -18,7 +18,7 @@ namespace MHUrho.UserInterface
 		static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
 		static Texture2D DefaultButtonTexture =
-			PackageManager.Instance.ResourceCache.GetTexture2D("Textures/xamarin.png");
+			PackageManager.Instance.GetTexture2D("Textures/xamarin.png");
 
 		public GameMandKController InputCtl { get; protected set; }
 
