@@ -1347,12 +1347,20 @@ namespace MHUrho.WorldMap
 					tile?.ChangeTopLeftHeight(heightDelta);
 				}
 
+				//With border tiles
 				ForEachAroundCorner(tileCorner, 
 									(changedTile) => {
 										changedTile.CornerHeightChange();
-										TileHeightChanged?.Invoke(changedTile);
 									},
 									 true);
+
+				//Without border tiles, so they dont leak out of the implementation
+				ForEachAroundCorner(tileCorner,
+									(changedTile) => {
+										TileHeightChanged?.Invoke(changedTile);
+									},
+									false);
+				
 			}
 
 			graphics.ChangeCornerHeights(tileCorners);
@@ -1444,7 +1452,7 @@ namespace MHUrho.WorldMap
 		void BuildGeometry() 
 		{
 			graphics = MapGraphics.Build(this, 
-										 new IntVector2(Width, Length));
+										 new IntVector2(50, 50));
 		}
 
 		int GetTileIndex(int x, int y) 

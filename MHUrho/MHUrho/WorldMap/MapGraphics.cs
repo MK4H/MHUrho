@@ -448,6 +448,11 @@ namespace MHUrho.WorldMap
 						return;
 					}
 
+					if (vertexBuffer.Locked) {
+						//Bounding box could have changed, recalculate
+						FixBoundingBox();
+					}
+
 					//Unlocks only if the buffer was locked
 					vertexBuffer.Unlock();
 					indexBuffer.Unlock();
@@ -469,6 +474,57 @@ namespace MHUrho.WorldMap
 				void CheckLocked()
 				{
 					if (!Locked) throw new InvalidCastException("Locked operation on unlocked chunk");
+				}
+
+				unsafe void FixBoundingBox()
+				{
+					TileInVB* tile = vertexBuffer.Data;
+					float minHeight = tile->TopLeft.Position.Y;
+					float maxHeight = minHeight;
+					float currentHeight;
+
+					int countWithouthBottomRow = TileCount - graphics.chunkSize.X;
+					for (int i = 0; i < countWithouthBottomRow ; i++, tile++) {
+						currentHeight = tile->TopLeft.Position.Y;
+						minHeight = Math.Min(minHeight, currentHeight);
+						maxHeight = Math.Max(maxHeight, currentHeight);
+					}
+
+					//Bottom row
+					tile = vertexBuffer.Data;
+					for (int i = 0; i < graphics.chunkSize.X; i++, tile++) {
+						currentHeight = tile->TopLeft.Position.Y;
+						minHeight = Math.Min(minHeight, currentHeight);
+						maxHeight = Math.Max(maxHeight, currentHeight);
+						currentHeight = tile->BottomLeft.Position.Y;
+						minHeight = Math.Min(minHeight, currentHeight);
+						maxHeight = Math.Max(maxHeight, currentHeight);
+					}
+
+					//Right column
+					tile = vertexBuffer.Data + graphics.chunkSize.X - 1;
+					for (int i = 0; i < graphics.chunkSize.Y - 1; i++, tile += graphics.chunkSize.X) {
+						currentHeight = tile->TopRight.Position.Y;
+						minHeight = Math.Min(minHeight, currentHeight);
+						maxHeight = Math.Max(maxHeight, currentHeight);
+					}
+
+					//Last tile
+					currentHeight = tile->TopRight.Position.Y;
+					minHeight = Math.Min(minHeight, currentHeight);
+					maxHeight = Math.Max(maxHeight, currentHeight);
+					currentHeight = tile->BottomRight.Position.Y;
+					minHeight = Math.Min(minHeight, currentHeight);
+					maxHeight = Math.Max(maxHeight, currentHeight);
+
+					var oldBoundingBox = model.BoundingBox;
+					model.BoundingBox = new BoundingBox(new Vector3(oldBoundingBox.Min.X,
+																	minHeight,
+																	oldBoundingBox.Min.Z),
+														new Vector3(oldBoundingBox.Max.X,
+																	maxHeight,
+																	oldBoundingBox.Max.Z));
+
 				}
 
 				void CreateModel(Map map)
@@ -734,25 +790,41 @@ namespace MHUrho.WorldMap
 
 			IntVector2 numberOfChunks;
 
-			IntVector2 chunkSize = new IntVector2(50, 50);
+			IntVector2 chunkSize;
 
 			readonly Map map;
-			//TODO: Probably split map into more parts to speed up raycasts and drawing
+
 
 			readonly List<MapChunk> chunks;
 
+			/// <summary>
+			/// Creates a graphical representation of the <paramref name="map"/>.
+			/// </summary>
+			/// <param name="map"></param>
+			/// <param name="chunkSize">Size of chunks the map will be divided into, <see cref="Map.Width"/> and <see cref="Map.Length"/>
+			/// of <paramref name="map"/> has to be divisible by <paramref name="chunkSize"/></param>
+			/// <returns></returns>
 			public static MapGraphics Build(Map map,
-											IntVector2 size) {
-				MapGraphics graphics = new MapGraphics(map, size);
+											IntVector2 chunkSize)
+			{
+				IntVector2 mapSize = new IntVector2(map.Width, map.Length);
+
+				if (mapSize.X % chunkSize.X != 0 ||
+					mapSize.Y % chunkSize.Y != 0) {
+					throw new ArgumentException("mapSize was not multiple of chunkSize", nameof(chunkSize));
+				}
+
+				MapGraphics graphics = new MapGraphics(map, chunkSize, mapSize);
 				graphics.CreateMaterial();
 				graphics.CreateModel();
 
 				return graphics;
 			}
 
-			MapGraphics(Map map, IntVector2 size) {
+			MapGraphics(Map map, IntVector2 chunkSize, IntVector2 mapSize) {
 				this.map = map;
-				this.numberOfChunks = IntVector2.Divide(size, chunkSize);
+				this.chunkSize = chunkSize;
+				this.numberOfChunks = IntVector2.Divide(mapSize, chunkSize);
 				chunks = new List<MapChunk>();
 			}
 
