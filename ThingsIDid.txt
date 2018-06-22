@@ -97,6 +97,8 @@ added support for material list
 
 Missing Thread class from Urho3D
 
+Model size limit => split map to chunks
+
 TODO:
 
 Mipmapping of tile textures

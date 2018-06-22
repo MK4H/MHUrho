@@ -22,211 +22,6 @@ namespace MHUrho.WorldMap
 
 			static Vector3 HighlightAboveTerrainOffset = new Vector3(0, HighlightHeightAboveTerain, 0);
 
-
-			[StructLayout(LayoutKind.Sequential)]
-			struct TileVertex {
-				public Vector3 Position;
-				public Vector3 Normal;
-				public Vector2 TexCoords;
-
-				public TileVertex(Vector3 position, Vector3 normal, Vector2 texCoords) {
-					this.Position = position;
-					this.Normal = normal;
-					this.TexCoords = texCoords;
-				}
-			}
-
-			[StructLayout(LayoutKind.Sequential)]
-			struct TileInVB {
-				public const int VerticiesPerTile = 4;
-
-				public TileVertex TopLeft;
-				public TileVertex TopRight;
-				public TileVertex BottomLeft;
-				public TileVertex BottomRight;
-
-				public void ChangeTextureCoords(Rect rect) {
-					TopLeft.TexCoords = rect.Min;
-					TopRight.TexCoords = new Vector2(rect.Max.X, rect.Min.Y);
-					BottomLeft.TexCoords = new Vector2(rect.Min.X, rect.Max.Y);
-					BottomRight.TexCoords = rect.Max;
-				}
-
-				public TileInVB(ITile tile) {
-					TopLeft = new TileVertex(new Vector3(tile.MapArea.Left, tile.TopLeftHeight, tile.MapArea.Top),
-											 new Vector3(0, 1, 0),
-											 new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
-					TopRight = new TileVertex(new Vector3(tile.MapArea.Right, tile.TopRightHeight, tile.MapArea.Top),
-											  new Vector3(0, 1, 0),
-											  new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
-					BottomLeft = new TileVertex(new Vector3(tile.MapArea.Left, tile.BottomLeftHeight, tile.MapArea.Bottom),
-												new Vector3(0, 1, 0),
-												new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
-					BottomRight = new TileVertex(new Vector3(tile.MapArea.Right, tile.BottomRightHeight, tile.MapArea.Bottom),
-												 new Vector3(0, 1, 0),
-												 new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
-					CalculateLocalNormals();
-				}
-		   
-
-				/// <summary>
-				/// Creates normals just from this tile, disregarding the angle of surrounding tiles
-				/// </summary>
-				public void CalculateLocalNormals() {
-					if (IsTopLeftBotRightDiagHigher()) {
-						TopRight.Normal = Vector3.Cross(TopLeft.Position - TopRight.Position,
-														BottomRight.Position - TopRight.Position);
-						BottomLeft.Normal = Vector3.Cross(BottomRight.Position - BottomLeft.Position,
-														  TopLeft.Position - BottomLeft.Position);
-
-						TopLeft.Normal = AverageNormalNotNormalized(ref TopLeft.Position,
-																	ref BottomLeft.Position,
-																	ref BottomRight.Position,
-																	ref TopRight.Position);
-						BottomRight.Normal = AverageNormalNotNormalized(ref BottomRight.Position,
-																		ref TopRight.Position,
-																		ref TopLeft.Position,
-																		ref BottomLeft.Position);
-
-					}
-					else {
-						TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
-													   TopRight.Position - TopLeft.Position);
-						BottomRight.Normal = Vector3.Cross(TopRight.Position - BottomRight.Position,
-														   BottomLeft.Position - BottomRight.Position);
-						TopRight.Normal = AverageNormalNotNormalized(ref TopRight.Position,
-																	 ref TopLeft.Position,
-																	 ref BottomLeft.Position,
-																	 ref BottomRight.Position);
-						BottomLeft.Normal = AverageNormalNotNormalized(ref BottomLeft.Position,
-																	   ref BottomRight.Position,
-																	   ref TopRight.Position,
-																	   ref TopLeft.Position);
-
-					}
-
-					
-					TopLeft.Normal.Normalize();
-					TopRight.Normal.Normalize();
-					BottomLeft.Normal.Normalize();
-					BottomRight.Normal.Normalize();
-				}
-
-				public bool IsTopLeftBotRightDiagHigher() {
-					return TopLeft.Position.Y + BottomRight.Position.Y >= TopRight.Position.Y + BottomLeft.Position.Y ;
-				}
-
-				public bool IsTopRightBotLeftDiagHigher() {
-					return !IsTopLeftBotRightDiagHigher();
-				}
-
-				public override string ToString()
-				{
-					return $"Top left: {TopLeft.Position}";
-				}
-
-				/// <summary>
-				/// Gets the average vector of the normals of the two adjacent triangles
-				/// 
-				/// This normal vector is not normalized yet
-				/// </summary>
-				/// <param name="center">the point where the normal vector originates</param>
-				/// <param name="first">first vector in counterclockwise direction</param>
-				/// <param name="second">second vector in counterclockwise direction</param>
-				/// <param name="third">third vector in counterclockwise direction</param>
-				/// <returns>Not normalized normal vector</returns>
-				Vector3 AverageNormalNotNormalized(ref Vector3 center,
-														   ref Vector3 first,
-														   ref Vector3 second,
-														   ref Vector3 third) {
-
-					var topLeftNormal1 = Vector3.Cross(first - center,
-													   second - center);
-					var topLeftNormal2 = Vector3.Cross(second - center,
-													   third - center);
-					topLeftNormal1.Normalize();
-					topLeftNormal2.Normalize();
-
-					return topLeftNormal1 + topLeftNormal2;
-				}
-			}
-
-			[StructLayout(LayoutKind.Sequential)]
-			struct TileInIB {
-
-				public const int IndiciesPerTile = 6;
-				/*
-				 * 0-----1
-				 * |     |
-				 * |     |
-				 * 2-----3
-				 *
-				 * We switch from
-				 * 0-----1
-				 * |   / |
-				 * |  /  |
-				 * | /   |
-				 * 2-----3
-				 *
-				 * to
-				 * 0-----1
-				 * | \   |
-				 * |  \  |
-				 * |   \ |
-				 * 2-----3
-
-				 */
-
-				private short cornerA1;
-				private short middleA;
-				private short cornerA2;
-				private short cornerB1;
-				private short middleB;
-				private short cornerB2;
-
-				public unsafe void TestAndRotate(TileInVB * tileInVB) {
-					var cornerA1LocalIndex = cornerA1 % 4;
-					if ((tileInVB->IsTopLeftBotRightDiagHigher() && (cornerA1LocalIndex == 1 || cornerA1LocalIndex == 2)) ||
-						(tileInVB->IsTopRightBotLeftDiagHigher() && (cornerA1LocalIndex == 0 || cornerA1LocalIndex == 3))) {
-						//If the diagonal is not the one that is higher, rotate the diagonal
-						Rotate();
-					}
-				}
-
-				public TileInIB(short topLeft, short topRight, short bottomLeft, short bottomRight,ref TileInVB tileInVB ) {
-					if (tileInVB.IsTopLeftBotRightDiagHigher()) {
-						cornerA1 = topLeft;
-						middleA = bottomLeft;
-						cornerA2 = bottomRight;
-						cornerB1 = bottomRight;
-						middleB = topRight;
-						cornerB2 = topLeft;
-					}
-					else {
-						cornerA1 = bottomLeft;
-						middleA = bottomRight;
-						cornerA2 = topRight;
-						cornerB1 = topRight;
-						middleB = topLeft;
-						cornerB2 = bottomLeft;
-					}
-				}
-
-				/// <summary>
-				/// Rotates the split in the quad
-				/// </summary>
-				private void Rotate() {
-					//Because values will be some indecies to the vertex buffer, do rotation by rotating values
-					short tmp = cornerA1;
-					cornerA1 = middleA;
-					cornerB2 = middleA;
-					middleA = cornerA2;
-					cornerA2 = middleB;
-					cornerB1 = middleB;
-					middleB = tmp;
-				}
-			}
-
 			class CornerTiles : IEnumerable<ITile>,IEnumerator<ITile> {
 				public ITile TopLeft;
 				public ITile TopRight;
@@ -276,35 +71,694 @@ namespace MHUrho.WorldMap
 				}
 			}
 
-			Model model;
-			VertexBuffer mapVertexBuffer;
-			IndexBuffer mapIndexBuffer;
+			class MapChunk : IDisposable {
+
+				[StructLayout(LayoutKind.Sequential)]
+				struct TileVertex {
+					public Vector3 Position;
+					public Vector3 Normal;
+					public Vector2 TexCoords;
+
+					public TileVertex(Vector3 position, Vector3 normal, Vector2 texCoords)
+					{
+						this.Position = position;
+						this.Normal = normal;
+						this.TexCoords = texCoords;
+					}
+				}
+
+				[StructLayout(LayoutKind.Sequential)]
+				struct TileInVB {
+					public const int VerticiesPerTile = 4;
+
+					public TileVertex TopLeft;
+					public TileVertex TopRight;
+					public TileVertex BottomLeft;
+					public TileVertex BottomRight;
+
+					public void ChangeTextureCoords(Rect rect)
+					{
+						TopLeft.TexCoords = rect.Min;
+						TopRight.TexCoords = new Vector2(rect.Max.X, rect.Min.Y);
+						BottomLeft.TexCoords = new Vector2(rect.Min.X, rect.Max.Y);
+						BottomRight.TexCoords = rect.Max;
+					}
+
+					public TileInVB(ITile tile, Vector3 chunkPosition)
+					{
+						TopLeft = new TileVertex(tile.TopLeft3 - chunkPosition,
+												 new Vector3(0, 1, 0),
+												 new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Min.Y));
+						TopRight = new TileVertex(tile.TopRight3 - chunkPosition,
+												  new Vector3(0, 1, 0),
+												  new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Min.Y));
+						BottomLeft = new TileVertex(tile.BottomLeft3 - chunkPosition,
+													new Vector3(0, 1, 0),
+													new Vector2(tile.Type.TextureCoords.Min.X, tile.Type.TextureCoords.Max.Y));
+						BottomRight = new TileVertex(tile.BottomRight3 - chunkPosition,
+													 new Vector3(0, 1, 0),
+													 new Vector2(tile.Type.TextureCoords.Max.X, tile.Type.TextureCoords.Max.Y));
+						CalculateLocalNormals();
+					}
+
+
+					/// <summary>
+					/// Creates normals just from this tile, disregarding the angle of surrounding tiles
+					/// </summary>
+					public void CalculateLocalNormals()
+					{
+						if (IsTopLeftBotRightDiagHigher()) {
+							TopRight.Normal = Vector3.Cross(TopLeft.Position - TopRight.Position,
+															BottomRight.Position - TopRight.Position);
+							BottomLeft.Normal = Vector3.Cross(BottomRight.Position - BottomLeft.Position,
+															  TopLeft.Position - BottomLeft.Position);
+
+							TopLeft.Normal = AverageNormalNotNormalized(ref TopLeft.Position,
+																		ref BottomLeft.Position,
+																		ref BottomRight.Position,
+																		ref TopRight.Position);
+							BottomRight.Normal = AverageNormalNotNormalized(ref BottomRight.Position,
+																			ref TopRight.Position,
+																			ref TopLeft.Position,
+																			ref BottomLeft.Position);
+
+						}
+						else {
+							TopLeft.Normal = Vector3.Cross(BottomLeft.Position - TopLeft.Position,
+														   TopRight.Position - TopLeft.Position);
+							BottomRight.Normal = Vector3.Cross(TopRight.Position - BottomRight.Position,
+															   BottomLeft.Position - BottomRight.Position);
+							TopRight.Normal = AverageNormalNotNormalized(ref TopRight.Position,
+																		 ref TopLeft.Position,
+																		 ref BottomLeft.Position,
+																		 ref BottomRight.Position);
+							BottomLeft.Normal = AverageNormalNotNormalized(ref BottomLeft.Position,
+																		   ref BottomRight.Position,
+																		   ref TopRight.Position,
+																		   ref TopLeft.Position);
+
+						}
+
+
+						TopLeft.Normal.Normalize();
+						TopRight.Normal.Normalize();
+						BottomLeft.Normal.Normalize();
+						BottomRight.Normal.Normalize();
+					}
+
+					public bool IsTopLeftBotRightDiagHigher()
+					{
+						return TopLeft.Position.Y + BottomRight.Position.Y >= TopRight.Position.Y + BottomLeft.Position.Y;
+					}
+
+					public bool IsTopRightBotLeftDiagHigher()
+					{
+						return !IsTopLeftBotRightDiagHigher();
+					}
+
+					public override string ToString()
+					{
+						return $"Top left: {TopLeft.Position}";
+					}
+
+					/// <summary>
+					/// Gets the average vector of the normals of the two adjacent triangles
+					/// 
+					/// This normal vector is not normalized yet
+					/// </summary>
+					/// <param name="center">the point where the normal vector originates</param>
+					/// <param name="first">first vector in counterclockwise direction</param>
+					/// <param name="second">second vector in counterclockwise direction</param>
+					/// <param name="third">third vector in counterclockwise direction</param>
+					/// <returns>Not normalized normal vector</returns>
+					Vector3 AverageNormalNotNormalized(ref Vector3 center,
+															   ref Vector3 first,
+															   ref Vector3 second,
+															   ref Vector3 third)
+					{
+
+						var topLeftNormal1 = Vector3.Cross(first - center,
+														   second - center);
+						var topLeftNormal2 = Vector3.Cross(second - center,
+														   third - center);
+						topLeftNormal1.Normalize();
+						topLeftNormal2.Normalize();
+
+						return topLeftNormal1 + topLeftNormal2;
+					}
+				}
+
+				[StructLayout(LayoutKind.Sequential)]
+				struct TileInIB {
+
+					public const int IndiciesPerTile = 6;
+					/*
+					 * 0-----1
+					 * |     |
+					 * |     |
+					 * 2-----3
+					 *
+					 * We switch from
+					 * 0-----1
+					 * |   / |
+					 * |  /  |
+					 * | /   |
+					 * 2-----3
+					 *
+					 * to
+					 * 0-----1
+					 * | \   |
+					 * |  \  |
+					 * |   \ |
+					 * 2-----3
+
+					 */
+
+					short cornerA1;
+					short middleA;
+					short cornerA2;
+					short cornerB1;
+					short middleB;
+					short cornerB2;
+
+					public unsafe void TestAndRotate(TileInVB* tileInVB)
+					{
+						var cornerA1LocalIndex = cornerA1 % 4;
+						if ((tileInVB->IsTopLeftBotRightDiagHigher() && (cornerA1LocalIndex == 1 || cornerA1LocalIndex == 2)) ||
+							(tileInVB->IsTopRightBotLeftDiagHigher() && (cornerA1LocalIndex == 0 || cornerA1LocalIndex == 3))) {
+							//If the diagonal is not the one that is higher, rotate the diagonal
+							Rotate();
+						}
+					}
+
+					public TileInIB(short topLeft, short topRight, short bottomLeft, short bottomRight, ref TileInVB tileInVB)
+					{
+						if (tileInVB.IsTopLeftBotRightDiagHigher()) {
+							cornerA1 = topLeft;
+							middleA = bottomLeft;
+							cornerA2 = bottomRight;
+							cornerB1 = bottomRight;
+							middleB = topRight;
+							cornerB2 = topLeft;
+						}
+						else {
+							cornerA1 = bottomLeft;
+							middleA = bottomRight;
+							cornerA2 = topRight;
+							cornerB1 = topRight;
+							middleB = topLeft;
+							cornerB2 = bottomLeft;
+						}
+					}
+
+					/// <summary>
+					/// Rotates the split in the quad
+					/// </summary>
+					void Rotate()
+					{
+						//Because values will be some indecies to the vertex buffer, do rotation by rotating values
+						short tmp = cornerA1;
+						cornerA1 = middleA;
+						cornerB2 = middleA;
+						middleA = cornerA2;
+						cornerA2 = middleB;
+						cornerB1 = middleB;
+						middleB = tmp;
+					}
+				}
+
+				unsafe class VertexBufferWrapper {
+					readonly VertexBuffer vertexBuffer;
+					readonly MapChunk chunk;
+
+					public bool Locked => vertexBuffer.Locked;
+
+					public TileInVB* Data{ get; private set; }
+
+					public VertexBufferWrapper(MapChunk chunk, VertexBuffer vertexBuffer)
+					{
+						this.chunk = chunk;
+						this.vertexBuffer = vertexBuffer;
+					}
+
+					public void Lock()
+					{
+						if (Locked) return;
+
+						IntPtr vbData = vertexBuffer.Lock(0, (uint)chunk.TileCount * TileInVB.VerticiesPerTile);
+
+						if (vbData == IntPtr.Zero) {
+							throw new Exception("Could not lock buffer to memory");
+						}
+
+						Data = (TileInVB*)vbData.ToPointer();
+					}
+
+					public void Unlock()
+					{
+						if (!Locked) return;
+
+						vertexBuffer.Unlock();
+
+						Data = null;
+					}
+				}
+
+				unsafe class IndexBufferWrapper {
+					readonly IndexBuffer indexBuffer;
+					readonly MapChunk chunk;
+
+					public bool Locked => indexBuffer.Locked;
+
+					public TileInIB* Data { get; private set; }
+
+					public IndexBufferWrapper(MapChunk chunk, IndexBuffer indexBuffer)
+					{
+						this.chunk = chunk;
+						this.indexBuffer = indexBuffer;
+					}
+
+					public void Lock()
+					{
+						if (Locked) return;
+
+						IntPtr ibData = indexBuffer.Lock(0, (uint)chunk.TileCount * TileInIB.IndiciesPerTile);
+
+						if (ibData == IntPtr.Zero) {
+							throw new Exception("Could not lock buffer to memory");
+						}
+
+						Data = (TileInIB*)ibData.ToPointer();
+					}
+
+					public void Unlock()
+					{
+						if (!Locked) return;
+
+						indexBuffer.Unlock();
+
+						Data = null;
+					}
+				}
+
+				public bool Locked { get; private set; }
+
+				Model model;
+				VertexBufferWrapper vertexBuffer;
+				IndexBufferWrapper indexBuffer;
+
+				Node chunkNode;
+
+				IntVector2 topLeftCorner;
+				IntVector2 size => graphics.chunkSize;
+
+				int TileCount => size.X * size.Y;
+
+				readonly MapGraphics graphics;
+
+				Map Map => graphics.map;
+
+				public MapChunk(Map map, MapGraphics graphics, IntVector2 topLeftCorner)
+				{
+					this.graphics = graphics;
+					this.topLeftCorner = topLeftCorner;
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						this.chunkNode = map.node.CreateChild("chunkNode");
+						chunkNode.Position = new Vector3(topLeftCorner.X + size.X / 2.0f, 0, topLeftCorner.Y + size.Y / 2.0f);
+					}
+					else {
+						Application.InvokeOnMainAsync(() => {
+														this.chunkNode = map.node.CreateChild("chunkNode");
+														chunkNode.Position = new Vector3(topLeftCorner.X + size.X / 2.0f, 0, topLeftCorner.Y + size.Y / 2.0f);
+													}).Wait();
+					}
+
+					CreateModel(map);
+				}
+
+				public void Dispose()
+				{
+					model?.Dispose();
+				}
+
+				public unsafe void ChangeTileType(int x, int y, TileType newType)
+				{
+					CheckLocked();
+
+					vertexBuffer.Lock();
+
+					TileInVB* tileInVertexBuffer = vertexBuffer.Data + GetBufferOffset(x,y);
+					tileInVertexBuffer->ChangeTextureCoords(newType.TextureCoords);					
+				}
+
+				/// <summary>
+				/// Changes tile height to the height of the logical tiles
+				/// </summary>
+				/// <param name="topLeft"></param>
+				/// <param name="bottomRight"></param>
+				public unsafe void CorrectTileHeight(int x, int y)
+				{
+					CheckLocked();
+
+					vertexBuffer.Lock();
+					indexBuffer.Lock();
+
+					int offset = GetBufferOffset(x, y);
+					TileInVB* tileInVertexBuffer = vertexBuffer.Data + offset;
+					TileInIB* tileInIndexBuffer = indexBuffer.Data + offset;
+
+					tileInVertexBuffer->TopLeft.Position.Y = Map.GetTerrainHeightAt(x, y);
+					tileInVertexBuffer->TopRight.Position.Y = Map.GetTerrainHeightAt(x + 1, y);
+					tileInVertexBuffer->BottomLeft.Position.Y = Map.GetTerrainHeightAt(x, y + 1);
+					tileInVertexBuffer->BottomRight.Position.Y = Map.GetTerrainHeightAt(x + 1, y + 1);
+
+					tileInVertexBuffer->CalculateLocalNormals();
+					tileInIndexBuffer->TestAndRotate(tileInVertexBuffer);
+				}
+
+				public void Lock()
+				{
+					//Lazy locking, every operation tests if the correct buffers are locked and lockes them if needed
+					Locked = true;
+				}
+
+				public void Unlock()
+				{
+					if (!Locked) {
+						return;
+					}
+
+					//Unlocks only if the buffer was locked
+					vertexBuffer.Unlock();
+					indexBuffer.Unlock();
+
+					Locked = false;
+				}
+
+				int GetBufferOffset(int x, int y)
+				{
+					return x - topLeftCorner.X + (y - topLeftCorner.Y) * size.X;
+				}
+
+				int GetBufferOffset(ITile tile)
+				{
+					//TODO: maybe - Map.Left and - Map.Top
+					return GetBufferOffset(tile.TopLeft.X, tile.TopLeft.Y);
+				}
+
+				void CheckLocked()
+				{
+					if (!Locked) throw new InvalidCastException("Locked operation on unlocked chunk");
+				}
+
+				void CreateModel(Map map)
+				{
+
+					//4 verticies for every tile, so that we can map every tile to different texture
+					// and the same tile types to the same textures
+					uint numVerticies = (uint)(size.X * size.Y * 4);
+					//TODO: maybe connect the neighbouring verticies
+					//two triangles per tile, 3 indicies per triangle
+					uint numIndicies = (uint)(size.X * size.Y * 6);
+
+
+					VertexBuffer vb = InitializeVertexBuffer(numVerticies);
+					IndexBuffer ib = InitializeIndexBuffer(numIndicies);
+
+
+					IntPtr vbPointer = LockVertexBufferSafe(vb, numVerticies);
+					IntPtr ibPointer = LockIndexBufferSafe(ib, numIndicies);
+
+					if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
+						//TODO: Error, could not lock buffers into memory, cannot create map
+						throw new Exception("Could not lock buffer into memory for map model creation");
+					}
+
+					unsafe {
+						TileInVB* verBuff = (TileInVB*)vbPointer.ToPointer();
+						TileInIB* inBuff = (TileInIB*)ibPointer.ToPointer();
+
+						int vertexIndex = 0;
+						for (int y = topLeftCorner.Y; y < topLeftCorner.Y + size.Y; y++) {
+							for (int x = topLeftCorner.X; x < topLeftCorner.X + size.X; x++) {
+								ITile tile = map.GetTileByTopLeftCorner(x, y);
+								var tileInVB = new TileInVB(tile, chunkNode.Position);
+
+								//Create verticies
+								*(verBuff++) = tileInVB;
+
+								//Connect verticies to triangles        
+								*(inBuff++) = new TileInIB((short)(vertexIndex + 0),
+															(short)(vertexIndex + 1),
+															(short)(vertexIndex + 2),
+															(short)(vertexIndex + 3),
+															ref tileInVB);
+
+								vertexIndex += TileInVB.VerticiesPerTile;
+							}
+						}
+
+					}
+
+					FinalizeModelCreation(vb, ib, numIndicies);
+					this.vertexBuffer = new VertexBufferWrapper(this,vb);
+					this.indexBuffer = new IndexBufferWrapper(this,ib);
+
+					SetModel();
+				}
+
+				static VertexBuffer InitializeVertexBuffer(uint numVerticies)
+				{
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						return InitializeVertexBufferImpl();
+
+					}
+					else {
+						VertexBuffer vb = null;
+						Application.InvokeOnMainAsync(() => { vb = InitializeVertexBufferImpl(); }).Wait();
+						return vb;
+					}
+
+					VertexBuffer InitializeVertexBufferImpl()
+					{
+						//TODO: Context
+						VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
+
+						vb.Shadowed = true;
+						vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
+						return vb;
+					}
+				}
+
+				static IndexBuffer InitializeIndexBuffer(uint numIndicies)
+				{
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						return InitializeIndexBufferImpl();
+
+					}
+					else {
+						IndexBuffer ib = null;
+						Application.InvokeOnMainAsync(() => { ib = InitializeIndexBufferImpl(); }).Wait();
+						return ib;
+					}
+
+					IndexBuffer InitializeIndexBufferImpl()
+					{
+						IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
+
+						ib.Shadowed = true;
+						ib.SetSize(numIndicies, false, false);
+
+						return ib;
+					}
+				}
+
+				static IntPtr LockVertexBufferSafe(VertexBuffer vb, uint numVerticies)
+				{
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						return vb.Lock(0, numVerticies);
+					}
+					else {
+						IntPtr vbPtr = IntPtr.Zero;
+						Application.InvokeOnMainAsync(() => { vbPtr = vb.Lock(0, numVerticies); }).Wait();
+						return vbPtr;
+					}
+				}
+
+				static IntPtr LockIndexBufferSafe(IndexBuffer ib, uint numIndicies)
+				{
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						return ib.Lock(0, numIndicies);
+					}
+					else {
+						IntPtr ibPtr = IntPtr.Zero;
+						Application.InvokeOnMainAsync(() => { ibPtr = ib.Lock(0, numIndicies); }).Wait();
+						return ibPtr;
+					}
+				}
+
+				void FinalizeModelCreation(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
+				{
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						FinalizeModelCreationImpl();
+					}
+					else {
+						Application.InvokeOnMainAsync(FinalizeModelCreationImpl).Wait();
+					}
+
+					void FinalizeModelCreationImpl()
+					{
+						model = new Model();
+
+						vb.Unlock();
+						ib.Unlock();
+
+						Geometry geom = new Geometry();
+						geom.SetVertexBuffer(0, vb);
+						geom.IndexBuffer = ib;
+						geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
+
+						model.NumGeometries = 1;
+						model.SetGeometry(0, 0, geom);
+						Vector3 topLeftCorner3 = new Vector3(topLeftCorner.X, -1, topLeftCorner.Y) - chunkNode.Position;
+						model.BoundingBox = new BoundingBox(topLeftCorner3,
+															topLeftCorner3 + new Vector3(size.X, 2, size.Y));
+					}
+				}
+
+				
+
+				void SetModel()
+				{
+					if (MyGame.IsMainThread(Thread.CurrentThread)) {
+						SetModelImpl();
+					}
+					else {
+						Application.InvokeOnMainAsync(SetModelImpl).Wait();
+					}
+
+				}
+
+				void SetModelImpl()
+				{
+					StaticModel staticModel = chunkNode.CreateComponent<StaticModel>();
+					staticModel.Model = model;
+					staticModel.SetMaterial(graphics.material);
+					//TODO: Draw distance
+					staticModel.DrawDistance = 200;
+				}
+			}
+
+			class RectangleOperation {
+				readonly List<MapChunk> lockedChunks;
+
+				readonly IntVector2 topLeft;
+				readonly IntVector2 bottomRight;
+
+				IntVector2 currentPosition;
+
+				readonly MapGraphics graphics;
+
+				public RectangleOperation(IntVector2 topLeft, IntVector2 bottomRight, MapGraphics graphics)
+				{
+					currentPosition = new IntVector2(topLeft.X - 1, topLeft.Y);
+					this.topLeft = topLeft;
+					this.bottomRight = bottomRight;
+					this.graphics = graphics;
+					lockedChunks = new List<MapChunk>();
+				}
+
+				/// <summary>
+				/// Changes whole rectangle of tiles to <paramref name="newTileType"/>
+				/// </summary>
+				/// <param name="newTileType"></param>
+				public void ChangeTileType(TileType newTileType)
+				{
+					MapChunk chunk;
+					while ((chunk = MoveNext()) != null) {
+						chunk.ChangeTileType(currentPosition.X, currentPosition.Y, newTileType);
+					}
+				}
+
+				public void CorrectTileHeight()
+				{
+					MapChunk chunk;
+					while ((chunk = MoveNext()) != null) {
+						chunk.CorrectTileHeight(currentPosition.X, currentPosition.Y);
+					}
+				}
+
+				MapChunk MoveNext()
+				{
+					/*
+					 * Basically this rewritten to step by step incrementing
+					 * for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
+						for (int x = topLeft.X; x <= bottomRight.X; x++) {
+						MapChunk tileChunk = graphics.GetChunk(currentPosition.X, currentPosition.Y);
+
+						if (!tileChunk.Locked) {
+							tileChunk.Lock();
+							lockedChunks.Add(tileChunk);
+						}
+
+						}
+					   }
+					   foreach (var chunk in lockedChunks) {
+						   chunk.Unlock();
+					   }
+					 */
+
+					if (++currentPosition.X > bottomRight.X) {
+						currentPosition.X = topLeft.X;
+						if (++currentPosition.Y > bottomRight.Y) {
+							foreach (var chunk in lockedChunks) {
+								chunk.Unlock();
+							}
+							return null;
+						}
+					}
+
+					MapChunk tileChunk = graphics.GetChunk(currentPosition.X, currentPosition.Y);
+
+					if (!tileChunk.Locked) {
+						tileChunk.Lock();
+						lockedChunks.Add(tileChunk);
+					}
+					return tileChunk;
+				}
+			}
 
 			Material material;
 
 			CustomGeometry highlight;
 
+			IntVector2 numberOfChunks;
+
+			IntVector2 chunkSize = new IntVector2(50, 50);
+
 			readonly Map map;
 			//TODO: Probably split map into more parts to speed up raycasts and drawing
-			readonly Node mapNode;
 
-			public static MapGraphics Build(Node mapNode,
-											Map map,
-											ITile[] tiles,
+			readonly List<MapChunk> chunks;
+
+			public static MapGraphics Build(Map map,
 											IntVector2 size) {
-				MapGraphics graphics = new MapGraphics(map, mapNode);
+				MapGraphics graphics = new MapGraphics(map, size);
 				graphics.CreateMaterial();
-				graphics.CreateModel(tiles);
-
-
-				SetModel(mapNode, graphics);
+				graphics.CreateModel();
 
 				return graphics;
 			}
 
-			MapGraphics(Map map, Node mapNode) {
+			MapGraphics(Map map, IntVector2 size) {
 				this.map = map;
-				this.mapNode = mapNode;
+				this.numberOfChunks = IntVector2.Divide(size, chunkSize);
+				chunks = new List<MapChunk>();
+			}
+
+			public bool IsRaycastToMap(RayQueryResult rayQueryResult)
+			{
+				return rayQueryResult.Node.Parent == map.node;
 			}
 
 			public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) {
@@ -320,7 +774,7 @@ namespace MHUrho.WorldMap
 			}
 
 			public ITile RaycastToTile(RayQueryResult rayQueryResult) {
-				return rayQueryResult.Node == mapNode
+				return IsRaycastToMap(rayQueryResult)
 						   ? map.GetTileByTopLeftCorner((int) Math.Floor(rayQueryResult.Position.X),
 														(int) Math.Floor(rayQueryResult.Position.Z))
 						   : null;
@@ -338,7 +792,7 @@ namespace MHUrho.WorldMap
 			}
 
 			public Vector3? RaycastToVertex(RayQueryResult rayQueryResult) {
-				if (rayQueryResult.Node != mapNode) return null;
+				if (!IsRaycastToMap(rayQueryResult)) return null;
 
 				IntVector2 corner = new IntVector2((int)Math.Round(rayQueryResult.Position.X),
 												   (int)Math.Round(rayQueryResult.Position.Z));
@@ -357,34 +811,8 @@ namespace MHUrho.WorldMap
 			/// <param name="newTileType"></param>
 			/// <param name="bottomRight"></param>
 			public void ChangeTileType(IntVector2 topLeft, IntVector2 bottomRight, TileType newTileType) {
-				//+ [1,1] because i want to change the bottomRight tile to
-				// example TL[1,1], BR[3,3], BT-TL = [2,2],but really i want to change 3 by 3
-				IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);
-				for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
-					int startTileIndex = map.GetTileIndex(topLeft.X, y);
-					uint start = (uint)startTileIndex * TileInVB.VerticiesPerTile;
-					uint count = (uint)rectSize.X * TileInVB.VerticiesPerTile;
-
-					{
-						IntPtr vbPointer = mapVertexBuffer.Lock(start, count);
-						if (vbPointer == IntPtr.Zero) {
-							//TODO: Error
-							throw new Exception("Could not lock tile vertex buffer position to memory to change it");
-						}
-
-						unsafe {
-							TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-
-							for (int x = 0; x < rectSize.X; x++) {
-								tileInVertexBuffer->ChangeTextureCoords(newTileType.TextureCoords);
-								tileInVertexBuffer++;
-							}
-						}
-					}
-
-					mapVertexBuffer.Unlock();
-				}
-
+				var tileRectangle = new RectangleOperation(topLeft, bottomRight, this);
+				tileRectangle.ChangeTileType(newTileType);
 			}
 
 		  
@@ -395,95 +823,48 @@ namespace MHUrho.WorldMap
 			/// <param name="topLeft"></param>
 			/// <param name="bottomRight"></param>
 			public void CorrectTileHeight(  IntVector2 topLeft, 
-											IntVector2 bottomRight) {
+											IntVector2 bottomRight)
+			{
+				var tileRectangle = new RectangleOperation(topLeft, bottomRight, this);
+				tileRectangle.CorrectTileHeight();
+			}
 
-				//+ [1,1] because i want to change the bottomRight tile to
-				// example TL[1,1], BR[3,3], BT-TL = [2,2],but really i want to change 3 by 3
-				IntVector2 rectSize = bottomRight - topLeft + new IntVector2(1, 1);
+			public void ChangeCornerHeights(List<IntVector2> cornerPositions) {
+				List<MapChunk> lockedChunks = new List<MapChunk>();
 
+				foreach (var corner in cornerPositions) {
+					for (int y = -1; y < 1; y++) {
+						for (int x = -1; x < 1; x++) {
+							IntVector2 currentCorner = corner + new IntVector2(x, y);
+							ITile tile;
+							if ((tile = map.GetTileByTopLeftCorner(currentCorner)) != null) {
+								MapChunk chunk = GetChunk(tile);
+								if (!chunk.Locked) {
+									chunk.Lock();
+									lockedChunks.Add(chunk);
+								}
 
-				for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
-					int startTileIndex = map.GetTileIndex(topLeft.X, y);
-
-
-					{
-						IntPtr vbPointer = mapVertexBuffer.Lock((uint)startTileIndex * TileInVB.VerticiesPerTile,
-																(uint)rectSize.X * TileInVB.VerticiesPerTile);
-						IntPtr ibPointer = mapIndexBuffer.Lock((uint)startTileIndex * TileInIB.IndiciesPerTile,
-															   (uint)rectSize.X * TileInIB.IndiciesPerTile);
-						if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
-							//TODO: Error
-							throw new Exception("Could not lock buffer to memory to change it");
-						}
-
-						unsafe {
-							TileInVB* tileInVertexBuffer = (TileInVB*)vbPointer.ToPointer();
-							TileInIB* tileInIndexBuffer = (TileInIB*)ibPointer.ToPointer();
-
-							for (int x = topLeft.X; x <= bottomRight.X; x++) {
-
-								tileInVertexBuffer->TopLeft.Position.Y = map.GetTerrainHeightAt(x, y);
-								tileInVertexBuffer->TopRight.Position.Y = map.GetTerrainHeightAt(x + 1, y);
-								tileInVertexBuffer->BottomLeft.Position.Y = map.GetTerrainHeightAt(x, y + 1);
-								tileInVertexBuffer->BottomRight.Position.Y = map.GetTerrainHeightAt(x + 1, y + 1);
-
-								tileInVertexBuffer->CalculateLocalNormals();
-								tileInIndexBuffer->TestAndRotate(tileInVertexBuffer);
-
-								tileInVertexBuffer++;
-								tileInIndexBuffer++;
+								chunk.CorrectTileHeight(currentCorner.X, currentCorner.Y);
 							}
 						}
 					}
-
-					mapVertexBuffer.Unlock();
-					mapIndexBuffer.Unlock();
 				}
 
-			}
-
-			public void ChangeCornerHeights(List<IntVector2> cornerPositions, float heightDelta) {
-				//TODO: Lock just the needed part
-				IntPtr vbPointer = mapVertexBuffer.Lock(0, (uint)map.tiles.Length * TileInVB.VerticiesPerTile);
-				IntPtr ibPointer = mapIndexBuffer.Lock(0, (uint) map.tiles.Length * TileInIB.IndiciesPerTile);
-				if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
-					//TODO: Error
-					throw new Exception("Could not lock buffer to memory to change it");
+				foreach (var chunk in lockedChunks) {
+					chunk.Unlock();
 				}
 
-				unsafe {
-					TileInVB* vbBasePointer = (TileInVB*)vbPointer.ToPointer();
-					TileInIB* ibBasePointer = (TileInIB*) ibPointer.ToPointer();
-
-					List<CornerTiles> changedCorners = new List<CornerTiles>(cornerPositions.Count); 
-
-					foreach (var corner in cornerPositions) {
-						ChangeCornerHeight(vbBasePointer, corner, heightDelta, changedCorners);
-					}
-
-					foreach (var changedCorner in changedCorners) {
-						foreach (var tile in changedCorner) {
-							var vbTile = vbBasePointer + map.GetTileIndex(tile);
-							var ibTile = ibBasePointer + map.GetTileIndex(tile);
-							vbTile->CalculateLocalNormals();
-							ibTile->TestAndRotate(vbTile);
-						}
-					}
-
-					//Smoothing normals, probably redo a little
-					//foreach (var changedCorner in changedCorners) {
-					//    foreach (var tile in changedCorner) {
-					//        //For all 4 corners of the tile, because their normals could have changed
-					//        CalculateSmoothNormals(basePointer, tile.Location);
-					//        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(1, 0));
-					//        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(0, 1));
-					//        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(1, 1));
-					//    }
-					//}
-				}
-
-				mapVertexBuffer.Unlock();
-				mapIndexBuffer.Unlock();
+				//Smoothing normals, probably redo a little
+				//foreach (var changedCorner in changedCorners) {
+				//    foreach (var tile in changedCorner) {
+				//        //For all 4 corners of the tile, because their normals could have changed
+				//        CalculateSmoothNormals(basePointer, tile.Location);
+				//        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(1, 0));
+				//        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(0, 1));
+				//        CalculateSmoothNormals(basePointer, tile.Location + new IntVector2(1, 1));
+				//    }
+				//}
+				
 			}
 
 			public void HighlightBorder(IntRect rectangle, Color color) {
@@ -566,7 +947,9 @@ namespace MHUrho.WorldMap
 			}
 
 			public void Dispose() {
-				model.Dispose();
+				foreach (var chunk in chunks) {
+					chunk.Dispose();
+				}
 				material.Dispose();
 			}
 
@@ -617,87 +1000,15 @@ namespace MHUrho.WorldMap
 				material = PackageManager.Instance.GetMaterialFromImage(mapImage);
 			}
 
-			void CreateModel(ITile[] tiles) {
-
-				//4 verticies for every tile, so that we can map every tile to different texture
-				// and the same tile types to the same textures
-				uint numVerticies = (uint)(map.WidthWithBorders * map.LengthWithBorders * 4);
-				//TODO: maybe connect the neighbouring verticies
-				//two triangles per tile, 3 indicies per triangle
-				uint numIndicies = (uint)(map.WidthWithBorders * map.LengthWithBorders * 6);
-
-
-				VertexBuffer vb = InitializeVertexBuffer(numVerticies);
-				IndexBuffer ib = InitializeIndexBuffer(numIndicies);
-
-
-				IntPtr vbPointer = LockVertexBuffer(vb, numVerticies);
-				IntPtr ibPointer = LockIndexBuffer(ib, numIndicies);
-
-				if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
-					//TODO: Error, could not lock buffers into memory, cannot create map
-					throw new Exception("Could not lock buffer into memory for map model creation");
-				}
-
-				unsafe {
-					TileInVB* verBuff = (TileInVB*)vbPointer.ToPointer();
-					TileInIB* inBuff = (TileInIB*)ibPointer.ToPointer();
-
-					int vertexIndex = 0;
-					foreach (var tile in tiles) {
-						var tileInVB = new TileInVB(tile);
-
-						//Create verticies
-						* (verBuff++) = tileInVB;
-
-						//Connect verticies to triangles        
-						*(inBuff++) = new TileInIB((short) (vertexIndex + 0),
-												   (short) (vertexIndex + 1),
-												   (short) (vertexIndex + 2),
-												   (short) (vertexIndex + 3),
-												   ref tileInVB);
-
-						vertexIndex += TileInVB.VerticiesPerTile;
+			void CreateModel()
+			{
+				for (int y = 0; y < numberOfChunks.Y; y++) {
+					for (int x = 0; x < numberOfChunks.X; x++) {
+						IntVector2 chunkTopLeftCorner = new IntVector2(x * chunkSize.X + map.Left, y * chunkSize.Y + map.Top);
+						chunks.Add(new MapChunk(map, this, chunkTopLeftCorner));
 					}
-
 				}
-
-				this.model = FinalizeModelCreation(vb, ib, numIndicies);
-				this.mapVertexBuffer = vb;
-				this.mapIndexBuffer = ib;
 			}
-
-			unsafe void ChangeCornerHeight(TileInVB* vertexBufferBase, 
-												   IntVector2 cornerPosition, 
-												   float heightDelta, 
-												   List<CornerTiles> changedCorners) {
-
-				CornerTiles cornerTiles = new CornerTiles();
-
-				if ((cornerTiles.TopLeft = map.TileByTopLeftCorner(cornerPosition, true)) != null) {
-					var topLeftTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.TopLeft));
-					topLeftTileInVB->TopLeft.Position.Y += heightDelta;
-				}
-
-				if ((cornerTiles.TopRight = map.TileByTopRightCorner(cornerPosition, true)) != null) {
-					var topRightTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.TopRight));
-					topRightTileInVB->TopRight.Position.Y += heightDelta;
-				}
-
-				if ((cornerTiles.BottomLeft = map.TileByBottomLeftCorner(cornerPosition, true)) != null) {
-					var bottomLeftTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.BottomLeft));
-					bottomLeftTileInVB->BottomLeft.Position.Y += heightDelta;
-				}
-
-				if ((cornerTiles.BottomRight = map.TileByBottomRightCorner(cornerPosition, true)) != null) {
-					var bottomRightTileInVB = (vertexBufferBase + map.GetTileIndex(cornerTiles.BottomRight));
-					bottomRightTileInVB->BottomRight.Position.Y += heightDelta;
-				}
-
-				changedCorners.Add(cornerTiles);
-			}
-
-			
 
 			void HighlightFullRectangle(IntRect rectangle, Func<ITile, Color> getColor) {
 				//I need triangle list because the tiles can be split in two different ways
@@ -717,7 +1028,7 @@ namespace MHUrho.WorldMap
 			void HighlightInit()
 			{
 				if (highlight == null) {
-					highlight = mapNode.CreateComponent<CustomGeometry>();
+					highlight = map.node.CreateComponent<CustomGeometry>();
 					var highlightMaterial = new Material();
 					highlightMaterial.SetTechnique(0, CoreAssets.Techniques.NoTextureUnlitVCol, 1, 1);
 					highlight.SetMaterial(highlightMaterial);
@@ -762,124 +1073,25 @@ namespace MHUrho.WorldMap
 				geometry.DefineColor(color);
 			}
 
-			VertexBuffer InitializeVertexBuffer(uint numVerticies)
+			MapChunk GetChunk(ITile tile)
 			{
-				if (MyGame.IsMainThread(Thread.CurrentThread)) {
-					return InitializeVertexBufferImpl(numVerticies);
-
-				}
-				else {
-					VertexBuffer vb = null;
-					Application.InvokeOnMainAsync(() => { vb = InitializeVertexBufferImpl(numVerticies); }).Wait();
-					return vb;
-				}
+				return chunks[GetChunkIndex(tile)];
 			}
 
-			VertexBuffer InitializeVertexBufferImpl(uint numVerticies)
+			MapChunk GetChunk(int x, int y)
 			{
-				//TODO: Context
-				VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
-
-				vb.Shadowed = true;
-				vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
-				return vb;
+				return chunks[GetChunkIndex(x, y)];
+			}
+			int GetChunkIndex(int x, int y)
+			{
+				return (x - map.Left) / chunkSize.X + ((y - map.Top) / chunkSize.Y) * numberOfChunks.X;
 			}
 
-			IndexBuffer InitializeIndexBuffer(uint numIndicies)
+			int GetChunkIndex(ITile tile)
 			{
-				if (MyGame.IsMainThread(Thread.CurrentThread)) {
-					return InitializeIndexBufferImpl(numIndicies);
-
-				}
-				else {
-					IndexBuffer ib = null;
-					Application.InvokeOnMainAsync(() => { ib = InitializeIndexBufferImpl(numIndicies); }).Wait();
-					return ib;
-				}
+				return GetChunkIndex(tile.TopLeft.X , tile.TopLeft.Y);
 			}
-
-			IndexBuffer InitializeIndexBufferImpl(uint numIndicies)
-			{
-				IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
-
-				ib.Shadowed = true;
-				ib.SetSize(numIndicies, false, false);
-
-				return ib;
-			}
-
-			IntPtr LockVertexBuffer(VertexBuffer vb, uint numVerticies)
-			{
-				if (MyGame.IsMainThread(Thread.CurrentThread)) {
-					return vb.Lock(0, numVerticies);
-				}
-				else {
-					IntPtr vbPtr = IntPtr.Zero;
-					Application.InvokeOnMainAsync(() => { vbPtr = vb.Lock(0, numVerticies); }).Wait();
-					return vbPtr;
-				}
-			}
-
-			IntPtr LockIndexBuffer(IndexBuffer ib, uint numIndicies)
-			{
-				if (MyGame.IsMainThread(Thread.CurrentThread)) {
-					return ib.Lock(0, numIndicies);
-				}
-				else {
-					IntPtr ibPtr = IntPtr.Zero;
-					Application.InvokeOnMainAsync(() => { ibPtr = ib.Lock(0, numIndicies); }).Wait();
-					return ibPtr;
-				}
-			}
-
-			Model FinalizeModelCreation(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
-			{
-				if (MyGame.IsMainThread(Thread.CurrentThread)) {
-					return FinalizeModelCreationImpl(vb, ib, numIndicies);
-				}
-				else {
-					Model model = null;
-					Application.InvokeOnMainAsync(() => { model = FinalizeModelCreationImpl(vb, ib, numIndicies); }).Wait();
-					return model;
-				}
-			}
-
-			Model FinalizeModelCreationImpl(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
-			{
-				Model model = new Model();
-
-				vb.Unlock();
-				ib.Unlock();
-
-				Geometry geom = new Geometry();
-				geom.SetVertexBuffer(0, vb);
-				geom.IndexBuffer = ib;
-				geom.SetDrawRange(PrimitiveType.TriangleList, 0, numIndicies, true);
-
-				model.NumGeometries = 1;
-				model.SetGeometry(0, 0, geom);
-				model.BoundingBox = new BoundingBox(new Vector3(0, 0, 0), new Vector3(map.WidthWithBorders, 1, map.LengthWithBorders));
-
-				return model;
-			}
-
-			static void SetModel(Node mapNode, MapGraphics graphics)
-			{
-				if (MyGame.IsMainThread(Thread.CurrentThread)) {
-					SetModelImpl(mapNode, graphics);
-				}
-				else {
-					Application.InvokeOnMainAsync(() => { SetModelImpl(mapNode, graphics); }).Wait();
-				}
-				
-			}
-
-			static void SetModelImpl(Node mapNode, MapGraphics graphics)
-			{
-				StaticModel model = mapNode.CreateComponent<StaticModel>();
-				model.Model = graphics.model;
-				model.SetMaterial(graphics.material);
-			}
+		
 		}
 
 	}

@@ -58,7 +58,6 @@ namespace MHUrho.WorldMap
 					tile.FinishLoading();
 				}
 
-				Map.PathFinding = new AStar(Map);
 				Map.BuildGeometry();
 			}
 
@@ -112,6 +111,8 @@ namespace MHUrho.WorldMap
 					borderTiles?.Dispose();
 				}
 
+
+				Map.PathFinding = new AStar(Map);
 			}
 		}
 
@@ -811,7 +812,7 @@ namespace MHUrho.WorldMap
 
 		public bool IsRaycastToMap(RayQueryResult rayQueryResult)
 		{
-			return rayQueryResult.Node == node;
+			return graphics.IsRaycastToMap(rayQueryResult);
 		}
 
 		public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) 
@@ -1354,7 +1355,7 @@ namespace MHUrho.WorldMap
 									 true);
 			}
 
-			graphics.ChangeCornerHeights(tileCorners, heightDelta);
+			graphics.ChangeCornerHeights(tileCorners);
 		}
 
 		public void ChangeHeightTo(List<IntVector2> tileCorners, float newHeight) 
@@ -1442,10 +1443,8 @@ namespace MHUrho.WorldMap
 
 		void BuildGeometry() 
 		{
-			graphics = MapGraphics.Build(node, 
-										 this, 
-										 tiles, 
-										 new IntVector2(WidthWithBorders, LengthWithBorders));
+			graphics = MapGraphics.Build(this, 
+										 new IntVector2(Width, Length));
 		}
 
 		int GetTileIndex(int x, int y) 

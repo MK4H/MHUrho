@@ -50,6 +50,14 @@ namespace MHUrho.EntityInfo
 			billboardSet.Dispose();
 		}
 
+		public static void DisposeMaterials()
+		{
+			foreach (var material in coloredHealthbars.Values) {
+				material.ReleaseRef();
+			}
+			coloredHealthbars = new Dictionary<IPlayer, Material>();
+		}
+
 		public void Show()
 		{
 			var billboard = billboardSet.GetBillboardSafe(billboardIndex);
@@ -78,6 +86,8 @@ namespace MHUrho.EntityInfo
 
 			Material newMaterial = PackageManager.Instance.GetMaterialFromImage(image);
 			coloredHealthbars.Add(player, newMaterial);
+			//Material got deleted after the death of every unit, so i just added this additional reference
+			newMaterial.AddRef();
 		}
 
 		void AddToEntity(IEntity entity, Vector3 offset, Vector2 size)

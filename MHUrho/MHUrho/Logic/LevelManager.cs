@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using MHUrho.Input;
 using MHUrho.Packaging;
 using Urho;
@@ -115,7 +116,7 @@ namespace MHUrho.Logic
 			LevelManager level = new LevelManager(cameraController, octree);
 			scene.AddComponent(level);
 
-			
+			level.Minimap = new Minimap(level, 4);
 
 			List<ILoader> loaders = new List<ILoader>();
 
@@ -284,7 +285,7 @@ namespace MHUrho.Logic
 				thing.Dispose();
 			}
 
-
+			HealthBar.DisposeMaterials();
 			Input.Dispose();
 			Camera.Dispose();
 			Input = null;
