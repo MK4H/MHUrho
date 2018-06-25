@@ -88,8 +88,6 @@ namespace DefaultPackage
 
 		public override void OnUpdate(float timeStep)
 		{
-
-
 			logicTimeout -= timeStep;
 			if (logicTimeout > 0) return;
 			logicTimeout = 2;
@@ -142,6 +140,8 @@ namespace DefaultPackage
 		{
 			var indexedData = pluginData.GetWriterForWrappedIndexedData();
 			indexedData.Store(1, state);
+			indexedData.Store(2, spawnPoint);
+			indexedData.Store(3, from chicken in chickens select chicken.Chicken.Unit.ID);
 		}
 
 		public override void LoadState(ILevelManager level, IPlayer player, PluginDataWrapper pluginData)
@@ -152,6 +152,9 @@ namespace DefaultPackage
 			this.Player = player;
 
 			state = indexedData.Get<int>(1);
+			spawnPoint = indexedData.Get<IntVector2>(2);
+			chickens = new List<ChickenWrapper>(from unit in indexedData.Get<IEnumerable<int>>(3)
+												select new ChickenWrapper((ChickenInstance)level.GetUnit(unit).Plugin));
 
 		}
 
@@ -174,10 +177,12 @@ namespace DefaultPackage
 		IEnumerable<IRangeTarget> FindTargets(IntVector2 sourcePoint)
 		{
 
-			return from tile in Map.GetTilesInSpiral(Map.GetTileByMapLocation(sourcePoint))
-					from unit in tile.Units
-					where unit.Player != Player && unit.HasDefaultComponent<RangeTargetComponent>()
+			return from enemyPlayer in Player.GetEnemyPlayers()
+					from unit in enemyPlayer.GetAllUnits()
+					where unit.HasDefaultComponent<RangeTargetComponent>()
+					orderby (unit.Position.XZ2() - sourcePoint.ToVector2()).Length
 					select unit.GetDefaultComponent<RangeTargetComponent>();
+
 		}		
 
 	}

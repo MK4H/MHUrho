@@ -6,6 +6,7 @@ using MHUrho.Helpers;
 using MHUrho.Storage;
 using Urho;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.WorldMap;
 using MHUrho.Plugins;
 
@@ -26,10 +27,15 @@ namespace MHUrho.Logic
 
 			public static StPlayer Save(Player player)
 			{
-				//TODO: SAVE TYPE
-				var storedPlayer = new StPlayer { PlayerID = player.ID };
+				//TODO: HUMAN PLAYER TYPE
+				var storedPlayer = new StPlayer
+									{
+										Id = player.ID,
+										TypeID = player.type?.ID ?? 0,
+										Color = player.Color.ToStColor()
+									};
 
-				storedPlayer.Color = player.Color.ToStColor();
+
 
 				storedPlayer.UnitIDs.Add(from unitType in player.units
 										from unit in unitType.Value
@@ -48,10 +54,16 @@ namespace MHUrho.Logic
 				return storedPlayer;
 			}
 
-			public static Loader StartLoading(LevelManager level, StPlayer storedPlayer) {
+			public static Loader StartLoading(LevelManager level, StPlayer storedPlayer)
+			{
+				var type = PackageManager.Instance.ActiveGame.GetPlayerAIType(storedPlayer.TypeID);
+				//TODO: HUMAN PLAYER TYPE
+				//if (type == null) {
+				//	throw new ArgumentException("Type of this player was not loaded");
+				//}
 
 				var loader = new Loader(storedPlayer);
-				loader.Load(level);
+				loader.Load(level, type);
 
 				return loader;
 			}
@@ -68,15 +80,24 @@ namespace MHUrho.Logic
 				foreach (var friendID in storedPlayer.FriendPlayerIDs) {
 					Player.friends.Add(level.GetPlayer(friendID));
 				}
+				//TODO: Human player type
+				Player.Plugin?.LoadState(level, Player, new PluginDataWrapper(storedPlayer.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
 				storedPlayer = null;
 			}
 
-			void Load(LevelManager level) {
-				//TODO: Load with type
-				Player = new Player(storedPlayer.PlayerID, level, storedPlayer.Color.ToColor());
+			void Load(LevelManager level, PlayerType type) {
+				//TODO: Human player type
+				if (type == null) {
+					Player = Player.CreateNewHumanPlayer(storedPlayer.Id, level, storedPlayer.Color.ToColor());
+				}
+				else {
+					Player = new Player(storedPlayer.Id, level, storedPlayer.Color.ToColor());
+					Player.Plugin = type.GetInstancePluginForLoading();
+				}
+				
 			}
 		}
 

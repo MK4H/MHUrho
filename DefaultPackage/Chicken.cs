@@ -194,7 +194,6 @@ namespace DefaultPackage
 
 			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
 			hp = sequentialData.GetNext<float>();
-
 			Init(hp);
 		}
 

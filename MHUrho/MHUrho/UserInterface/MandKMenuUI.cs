@@ -78,7 +78,7 @@ namespace MHUrho.UserInterface
 			switch (obj.Element.Name) {
 				case "StartButton":
 					LevelManager.CurrentLevel?.End();
-					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 400), "testRP2");
+					LevelManager.LoadDefaultLevel(Game, new IntVector2(400, 400), "testRP2");
 					break;
 				case "SaveButton":
 					//TODO: Move this elsewhere

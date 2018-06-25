@@ -308,8 +308,9 @@ namespace MHUrho.Input
 
 		}
 
-		protected override void MouseWheel(MouseWheelEventArgs e) {
-
+		protected override void MouseWheel(MouseWheelEventArgs e)
+		{
+			cameraController.AddZoom(e.Wheel * 10);
 		}
 
 		void OnViewMoved(Vector3 movement, Vector2 rotation, float timeStep) {

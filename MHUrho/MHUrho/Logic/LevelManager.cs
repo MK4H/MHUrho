@@ -101,91 +101,119 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
-		public static LevelManager Load(MyGame game, StLevel storedLevel) {
+		public static async Task<LevelManager> Load(MyGame game, StLevel storedLevel) {
 
-			PackageManager.Instance.LoadPackage(storedLevel.PackageName);
-
-			var scene = new Scene(game.Context);
-			var octree = scene.CreateComponent<Octree>();
-
-			LoadSceneParts(game, scene);
-			var cameraController = LoadCamera(game, scene);
-
-
-
-			LevelManager level = new LevelManager(cameraController, octree);
-			scene.AddComponent(level);
-
-			level.Minimap = new Minimap(level, 4);
-
+			Scene scene = null;
+			Octree octree = null;
+			CameraController cameraController = null;
+			LevelManager level = null;
 			List<ILoader> loaders = new List<ILoader>();
+			Node mapNode = null;
 
-			//Load data
-			Node mapNode = scene.CreateChild("MapNode");
-			var mapLoader = Map.Loader.StartLoading(level, mapNode, storedLevel.Map);
+			MyGame.InvokeOnMainSafe(StartLoadingInMain);
+
+
+			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, storedLevel.Map));
 			loaders.Add(mapLoader);
 			level.Map = mapLoader.Map;
 
-			foreach (var unit in storedLevel.Units) {
-				var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
-				level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
-				level.entities.Add(unitLoader.Unit.ID, unitLoader.Unit);
-				loaders.Add(unitLoader);
+			MyGame.InvokeOnMainSafe(LoadEntities);
+
+			return level;
+
+			void StartLoadingInMain()
+			{
+				PackageManager.Instance.LoadPackage(storedLevel.PackageName);
+
+				scene = new Scene(game.Context);
+				scene.UpdateEnabled = false;
+				octree = scene.CreateComponent<Octree>();
+
+				LoadSceneParts(game, scene);
+				cameraController = LoadCamera(game, scene);
+
+
+
+				level = new LevelManager(cameraController, octree);
+
+				level.Minimap = new Minimap(level, 4);
+
+				//Load data
+				mapNode = scene.CreateChild("MapNode");
 			}
 
-			foreach (var building in storedLevel.Buildings) {
-				var buildingLoader =
-					Building.Loader.StartLoading(level, 
-												 PackageManager.Instance, 
-												 scene.CreateChild("BuildingNode"),
-												 building);
-
-				level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building);
-				level.entities.Add(buildingLoader.Building.ID, buildingLoader.Building);
-				loaders.Add(buildingLoader);
-
-			}
-
-
-			//TODO: Remove this
-			Player firstPlayer = null;
-
-			foreach (var player in storedLevel.Players) {
-				var playerLoader = Player.Loader.StartLoading(level, player);
-				//TODO: If player needs controller, give him
-				if (firstPlayer == null) {
-					firstPlayer = playerLoader.Player;
+			void LoadEntities()
+			{
+				foreach (var unit in storedLevel.Units) {
+					var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
+					level.RegisterEntity(unitLoader.Unit);
+					level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
+					loaders.Add(unitLoader);
 				}
 
-				level.players.Add(playerLoader.Player.ID, playerLoader.Player);
-				loaders.Add(playerLoader);
+				foreach (var building in storedLevel.Buildings) {
+					var buildingLoader =
+						Building.Loader.StartLoading(level,
+													PackageManager.Instance,
+													scene.CreateChild("BuildingNode"),
+													building);
+					level.RegisterEntity(buildingLoader.Building);
+					level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building);;
+					loaders.Add(buildingLoader);
+
+				}
+
+				foreach (var projectile in storedLevel.Projectiles) {
+					var projectileLoader = Projectile.Loader.StartLoading(level,
+																		scene.CreateChild("ProjectileNode"),
+																		projectile);
+
+					level.RegisterEntity(projectileLoader.Projectile);
+					level.projectiles.Add(projectileLoader.Projectile.ID, projectileLoader.Projectile);
+					loaders.Add(projectileLoader);
+				}
+
+				//TODO: Remove this
+				Player firstPlayer = null;
+
+				foreach (var player in storedLevel.Players) {
+					var playerLoader = Player.Loader.StartLoading(level, player);
+					//TODO: If player needs controller, give him
+					if (firstPlayer == null) {
+						firstPlayer = playerLoader.Player;
+					}
+
+					scene.AddComponent(playerLoader.Player);
+					level.players.Add(playerLoader.Player.ID, playerLoader.Player);
+					loaders.Add(playerLoader);
+				}
+				//TODO: Move this inside the foreach
+				level.Input = game.menuController.GetGameController(cameraController, level, octree, firstPlayer);
+
+
+				//Connect references
+				foreach (var loader in loaders) {
+					loader.ConnectReferences(level);
+				}
+
+				foreach (var loader in loaders) {
+					loader.FinishLoading();
+				}
+
+				CurrentLevel = level;
+				scene.AddComponent(level);
+				scene.UpdateEnabled = true;
 			}
-			//TODO: Move this inside the foreach
-			level.Input = game.menuController.GetGameController(cameraController, level, octree, firstPlayer);
-			
-			//Connect references
-			foreach (var loader in loaders) {
-				loader.ConnectReferences(level);
-			}
-
-
-			//Build geometry and other things
-
-			foreach (var loader in loaders) {
-				loader.FinishLoading();
-			}
-
-
-			CurrentLevel = level;
-			return level;
 		}
 
-		public static LevelManager LoadFrom(MyGame game, Stream stream, bool leaveOpen = false) {
-			var storedLevel = StLevel.Parser.ParseFrom(stream);
-			var level = Load(game, storedLevel);
+		public static async Task<LevelManager> LoadFrom(MyGame game, Stream stream, bool leaveOpen = false) {
+			var storedLevel = await Task.Run<StLevel>(() => StLevel.Parser.ParseFrom(stream));
+			LevelManager level = await Load(game, storedLevel);
+
 			if (!leaveOpen) {
 				stream.Close();
 			}
+
 			return level;
 		}
 

@@ -10,7 +10,7 @@ message PluginData{
 		NamedPluginData named = 1;
 		//Data identified by user specified index, good for changing implementations
 		IndexedPluginData indexed = 2;
-		//Data identified by their position in the list, good for unchaging implementations
+		//Data identified by their position in the list, good for stable implementations
 		SequentialPluginData sequential = 3;
 	}
 }

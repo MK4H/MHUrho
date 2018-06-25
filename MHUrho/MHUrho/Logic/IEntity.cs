@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MHUrho.Input;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
@@ -79,6 +80,10 @@ namespace MHUrho.Logic {
 		/// Cleanup actions, called on entity removal
 		/// </summary>
 		event Action OnRemoval;
+
+		event Action<IEntity> PositionChanged;
+
+		event Action<IEntity> RotationChanged;
 
 		/// <summary>
 		/// Adds one of the classes derived from <see cref="DefaultComponent"/>. See <see cref="MHUrho.UnitComponents"/>

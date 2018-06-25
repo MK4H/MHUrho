@@ -47,6 +47,44 @@ namespace MHUrho
 			return thread.ManagedThreadId == mainThreadID;
 		}
 
+		/// <summary>
+		/// Invokes <paramref name="action"/> in main thread, does not deadlock even when called from the main thread
+		/// </summary>
+		/// <param name="action"></param>
+		public static void InvokeOnMainSafe(Action action)
+		{
+			if (IsMainThread(Thread.CurrentThread)) {
+				action();
+			}
+			else {
+				InvokeOnMainAsync(action).Wait();
+			}
+		}
+
+		public static T InvokeOnMainSafe<T>(Func<T> function)
+		{
+			T value = default(T);
+			InvokeOnMainSafe(() => { return value = function(); });
+			return value;
+		}
+
+		public static async Task InvokeOnMainSafeAsync(Action action)
+		{
+			if (IsMainThread(Thread.CurrentThread)) {
+				action();
+			}
+			else {
+				await InvokeOnMainAsync(action);
+			}
+		}
+
+		public static async Task<T> InvokeOnMainSafeAsync<T>(Func<T> function)
+		{
+			T value = default(T);
+			await InvokeOnMainAsync(() => { value = function(); });
+			return value;
+		}
+
 		protected override void Start() {
 			mainThreadID = Thread.CurrentThread.ManagedThreadId;
 

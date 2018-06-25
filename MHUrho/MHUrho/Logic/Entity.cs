@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MHUrho.Helpers;
+using MHUrho.Input;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using Urho;
@@ -54,10 +55,13 @@ namespace MHUrho.Logic
 
 		public bool RemovedFromLevel { get; protected set; }
 
+		public event Action<IEntity> PositionChanged;
+
+		public event Action<IEntity> RotationChanged;
+
 		public event Action OnRemoval;
 
 		protected Dictionary<Type, IList<DefaultComponent>> defaultComponents;
-
 
 		protected Entity(int ID, ILevelManager level) {
 			this.ID = ID;
@@ -121,5 +125,14 @@ namespace MHUrho.Logic
 
 		public abstract void HitBy(IProjectile projectile);
 
+		protected void SignalPositionChanged()
+		{
+			PositionChanged?.Invoke(this);
+		}
+
+		protected void SignalRotationChanged()
+		{
+			RotationChanged?.Invoke(this);
+		}
 	}
 }

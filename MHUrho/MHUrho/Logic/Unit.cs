@@ -308,19 +308,9 @@ namespace MHUrho.Logic
 			return visitor.Visit(this);
 		}
 
-		/// <summary>
-		/// Gets units movements speed while moving through the tile
-		/// </summary>
-		/// <param name="tile">the tile on which the returned movementspeed applies</param>
-		/// <returns>movement in tiles per second</returns>
-		public float MovementSpeed(ITile tile) {
-			//TODO: Route this through UnitType
-			return tile.MovementSpeedModifier;
-		}
-
-
 		public void SetHeight(float newHeight) {
 			Position = new Vector3(Position.X, newHeight, Position.Z);
+			SignalPositionChanged();
 		}
 
 		public void MoveBy(Vector3 moveBy) {
@@ -344,7 +334,9 @@ namespace MHUrho.Logic
 				Tile.RemoveUnit(this);
 				Tile = newTile;
 				Tile.AddUnit(this);
-			} 
+			}
+
+			SignalPositionChanged();
 		}
 
 		public void MoveTo(Vector2 newLocation) {
@@ -374,14 +366,18 @@ namespace MHUrho.Logic
 					Tile.Map.GetUpDirectionAt(Position.XZ2());
 				}
 			}
+
+			SignalRotationChanged();
 		}
 
 		public void RotateAroundFeet(float pitch, float yaw, float roll) {
 			LegNode.Rotate(new Quaternion(pitch, yaw, roll));
+			SignalRotationChanged();
 		}
 
 		public void RotateAroundCenter(float pitch, float yaw, float roll) {
 			Node.Rotate(new Quaternion(pitch, yaw, roll));
+			SignalRotationChanged();
 		}
 
 		public override void RemoveFromLevel()

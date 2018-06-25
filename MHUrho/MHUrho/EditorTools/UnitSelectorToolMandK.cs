@@ -140,7 +140,8 @@ namespace MHUrho.EditorTools
 		{
 			if (unitSelector.Selected) {
 				unitSelector.Deselect();
-				RemoveUnit(unitSelector);
+				//RemoveUnit is called by the event in selector
+				//RemoveUnit(unitSelector);
 				return true;
 			}
 
@@ -163,6 +164,11 @@ namespace MHUrho.EditorTools
 
 		protected virtual bool HandleUnitClick(IUnit unit, MouseButtonUpEventArgs e)
 		{
+			if ((MouseButton)e.Button == MouseButton.Right) {
+				Level.Camera.Follow(unit);
+			}
+
+
 			var selector = unit.GetDefaultComponent<UnitSelector>();
 			//If the unit is selectable and owned by the clicking player
 			if (selector != null && selector.Player == input.Player) {

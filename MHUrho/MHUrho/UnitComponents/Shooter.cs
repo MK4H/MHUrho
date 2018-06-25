@@ -44,6 +44,7 @@ namespace MHUrho.UnitComponents
 				sequentialData.StoreNext<float>(shooter.searchDelay);
 				sequentialData.StoreNext<int>(shooter.Target?.InstanceID ?? 0);
 				sequentialData.StoreNext<bool>(shooter.Enabled);
+				
 
 				return sequentialData.PluginData;
 			}
@@ -58,22 +59,23 @@ namespace MHUrho.UnitComponents
 				var sequentialDataReader = new SequentialPluginDataReader(storedData, level);
 				var rateOfFire = sequentialDataReader.GetNext<float>();
 				var projectileTypeID = sequentialDataReader.GetNext<int>();
-
+				var searchForTarget = sequentialDataReader.GetNext<bool>();
+				var targetSearchDelay = sequentialDataReader.GetNext<float>();
+				var shotDelay = sequentialDataReader.GetNext<float>();
+				var searchDelay = sequentialDataReader.GetNext<float>();
+				targetID = sequentialDataReader.GetNext<int>();
+				var enabled = sequentialDataReader.GetNext<bool>();
 				Shooter = new Shooter(level,
 									notificationReceiver,
 									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
 									rateOfFire) {
-													SearchForTarget = sequentialDataReader.GetNext<bool>(),
-													TargetSearchDelay = sequentialDataReader.GetNext<float>(),
-													shotDelay = sequentialDataReader.GetNext<float>(),
-													searchDelay = sequentialDataReader.GetNext<float>(),
-													Enabled = sequentialDataReader.GetNext<bool>()
+													SearchForTarget = searchForTarget,
+													TargetSearchDelay = targetSearchDelay,
+													shotDelay = shotDelay,
+													searchDelay = searchDelay,
+													Enabled = enabled
 
 												};
-
-
-				targetID = sequentialDataReader.GetNext<int>();
-
 			}
 
 			public override  void ConnectReferences(LevelManager level)

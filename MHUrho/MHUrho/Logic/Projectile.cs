@@ -62,10 +62,13 @@ namespace MHUrho.Logic
 
 
 			public static Loader StartLoading(LevelManager level,
-											ProjectileType type,
 											Node node,
 											StProjectile storedProjectile)
 			{
+				var type = PackageManager.Instance.ActiveGame.GetProjectileType(storedProjectile.TypeID);
+				if (type == null) {
+					throw new ArgumentException($"Projectile type {storedProjectile.TypeID} was not loaded");
+				}
 				var loader = new Loader(storedProjectile);
 				loader.Load(level, type, node);
 
@@ -288,9 +291,11 @@ namespace MHUrho.Logic
 			}
 
 			Position += movement;
+			SignalPositionChanged();
 
 			if (FaceInTheDirectionOfMovement) {
 				Node.LookAt(Position + movement, Node.Up);
+				SignalRotationChanged();
 			}
 
 			if (!Map.IsInside(Position)) {

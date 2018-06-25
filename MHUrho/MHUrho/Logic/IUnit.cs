@@ -45,8 +45,6 @@ namespace MHUrho.Logic {
 
 		void MoveBy(Vector3 moveBy);
 
-		float MovementSpeed(ITile tile);
-
 		void MoveTo(Vector2 newLocation);
 
 		void MoveTo(Vector3 newPosition);
