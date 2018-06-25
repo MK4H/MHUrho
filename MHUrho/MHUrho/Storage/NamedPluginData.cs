@@ -20,7 +20,7 @@ namespace MHUrho.Storage
 
 		protected NamedPluginDataWrapper(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Named) {
-				throw new ArgumentException("pluginData was not Named");
+				throw new ArgumentException("pluginData was not of the type Named");
 			}
 		}
 	}
@@ -36,7 +36,9 @@ namespace MHUrho.Storage
 		}
 
 		public NamedPluginDataWriter(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
-
+			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Named) {
+				throw new ArgumentException("pluginData was not of the type Named");
+			}
 		}
 	}
 	public class NamedPluginDataReader : NamedPluginDataWrapper {
@@ -56,7 +58,9 @@ namespace MHUrho.Storage
 		}
 
 		public NamedPluginDataReader(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
-
+			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Named) {
+				throw new ArgumentException("pluginData was not of the type Named");
+			}
 		}
 	}
 }

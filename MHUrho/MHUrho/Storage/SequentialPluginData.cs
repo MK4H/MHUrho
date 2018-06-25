@@ -12,7 +12,7 @@ namespace MHUrho.Storage
 
 		protected SequentialPluginDataWrapper(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
 			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
-				throw new ArgumentException("pluginData was not Sequential");
+				throw new ArgumentException("pluginData was not of type Sequential");
 			}
 		}
 	}
@@ -28,7 +28,9 @@ namespace MHUrho.Storage
 		}
 
 		public SequentialPluginDataWriter(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
-
+			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
+				throw new ArgumentException("pluginData was not of type Sequential");
+			}
 		}
 
 	}
@@ -64,6 +66,10 @@ namespace MHUrho.Storage
 		}
 
 		public SequentialPluginDataReader(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
+			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
+				throw new ArgumentException("pluginData was not of type Sequential");
+			}
+
 			this.dataEnumerator = pluginData.Sequential.Data.GetEnumerator();
 		}
 
