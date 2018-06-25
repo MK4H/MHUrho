@@ -25,22 +25,6 @@ namespace MHUrho.Logic
 
 		public IBuilding Building{ get; private set;}
 
-		/// <summary>
-		/// Modifier of the movement speed of units passing through this tile
-		/// </summary>
-		public float MovementSpeedModifier
-		{
-			get
-			{
-				//TODO: Other factors
-				return Type.MovementSpeedModifier;
-			}
-
-			set
-			{
-
-			}
-		}
 
 		/// <summary>
 		/// Tile type of this tile, only Map should set this
@@ -133,6 +117,9 @@ namespace MHUrho.Logic
 			}
 
 			//TODO: Connect buildings
+			//foreach (var building in storage.Buil) {
+				
+			//}
 			
 		}
 
@@ -140,7 +127,7 @@ namespace MHUrho.Logic
 			storage = null;
 		}
 
-		protected Tile(StTile storedTile, Map map) {
+		protected Tile(StTile storedTile, IMap map) {
 			this.storage = storedTile;
 			this.MapArea = new IntRect(storedTile.TopLeftPosition.X, 
 									   storedTile.TopLeftPosition.Y, 

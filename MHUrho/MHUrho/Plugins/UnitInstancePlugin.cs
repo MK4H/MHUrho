@@ -41,7 +41,5 @@ namespace MHUrho.Plugins
 		public abstract void OnProjectileHit(IProjectile projectile);
 
 		public abstract void OnMeeleHit(IEntity byEntity);
-
-		//TODO: Expand this
 	}
 }

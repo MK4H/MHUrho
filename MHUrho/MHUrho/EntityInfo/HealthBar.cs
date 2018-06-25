@@ -108,7 +108,6 @@ namespace MHUrho.EntityInfo
 				billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
 				billboardSet.NumBillboards = 1;
 				billboardSet.Sorted = false;
-				//TODO: Material gets deallocated after the death of the last unit with this healthbar, fix
 				billboardSet.Material = coloredHealthbars[entity.Player];
 				billboardSet.Scaled = false;
 

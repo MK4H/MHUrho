@@ -285,7 +285,7 @@ namespace MHUrho.EditorTools
 
 		void AddUnit(UnitSelector unitSelector) {
 			//TODO: Check owner of the units
-			var unit = unitSelector.GetComponent<Unit>();
+			var unit = unitSelector.Unit;
 			if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
 				if (info.UnitSelectors.Count == 0) {
 					input.UIManager.SelectionBarShowButton(info.Button);

@@ -122,7 +122,6 @@ namespace MHUrho.Storage
 		protected static Dictionary<Type, Func<Data, ILevelManager, object>> FromDataConvertors 
 			= new Dictionary<Type, Func<Data, ILevelManager, object>> 
 			{
-				//TODO: Type checks
 				{ typeof(float),(data,level) => data.ContentsCase == Data.ContentsOneofCase.Float ? data.Float : throw new TypeArgumentException("float", data.ContentsCase) },
 				{ typeof(double), (data, level) => data.ContentsCase == Data.ContentsOneofCase.Double ? data.Double : throw new TypeArgumentException("double", data.ContentsCase)},
 				{ typeof(int), (data, level) => data.ContentsCase == Data.ContentsOneofCase.Int ? data.Int : throw new TypeArgumentException("int", data.ContentsCase)},

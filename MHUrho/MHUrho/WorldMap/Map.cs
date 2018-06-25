@@ -121,8 +121,6 @@ namespace MHUrho.WorldMap
 
 			IReadOnlyList<IUnit> ITile.Units => throw new InvalidOperationException("Cannot add unit to Border tile");
 
-			float ITile.MovementSpeedModifier => throw new InvalidOperationException("Cannot move through Border tile");
-
 			public TileType Type { get; private set; }
 
 
@@ -172,7 +170,7 @@ namespace MHUrho.WorldMap
 
 			
 
-			private StBorderTile storage;
+			StBorderTile storage;
 
 			public void ConnectReferences(ILevelManager level) {
 				Type = PackageManager.Instance.ActiveGame.GetTileType(storage.TileTypeID);
@@ -1112,7 +1110,7 @@ namespace MHUrho.WorldMap
 			graphics.CorrectTileHeight(topLeft, bottomRight);
 		}
 
-		//TODO: Handle right and bottom side tiles better
+
 		public float GetTerrainHeightAt(int x, int y) 
 		{
 			ITile tile;

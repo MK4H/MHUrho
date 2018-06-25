@@ -447,7 +447,7 @@ namespace MHUrho.Input
 
 		void Zoom(float delta)
 		{
-			cameraNode.Position += Vector3.Divide(Vector3.Normalize(cameraNode.Position) * delta, cameraHolder.Scale);
+			cameraNode.Position += Vector3.Divide(Vector3.Normalize(cameraNode.Position) * (-delta), cameraHolder.Scale);
 		}
 
 		void MoveRelativeToLookingDirection(Vector3 delta) {

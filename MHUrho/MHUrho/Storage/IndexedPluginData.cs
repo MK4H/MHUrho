@@ -13,7 +13,6 @@ namespace MHUrho.Storage
 		}
 
 		protected IndexedPluginDataWrapper(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
-			//TODO: Check that pluginData is indexed
 			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
 				throw new ArgumentException("pluginData was not Indexed");
 			}
@@ -29,7 +28,9 @@ namespace MHUrho.Storage
 		}
 
 		public IndexedPluginDataWriter(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
-			//TODO: Check that pluginData is indexed
+			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
+				throw new ArgumentException("pluginData was not Indexed");
+			}
 		}
 
 		public IndexedPluginDataWriter(ILevelManager level) : base(new PluginData{ Indexed = new IndexedPluginData()}, level) {
@@ -53,7 +54,9 @@ namespace MHUrho.Storage
 		}
 
 		public IndexedPluginDataReader(PluginData pluginData, ILevelManager level) : base(pluginData, level) {
-			//TODO: Check that pluginData is indexed
+			if (pluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
+				throw new ArgumentException("pluginData was not Indexed");
+			}
 		}
 	}
 }

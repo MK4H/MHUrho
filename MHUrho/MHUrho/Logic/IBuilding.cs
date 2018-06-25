@@ -9,13 +9,21 @@ namespace MHUrho.Logic {
 	public interface IBuilding : IEntity {
 		BuildingType BuildingType { get; }
 
-		Vector3 Center { get; }
 
-		IntVector2 Location { get; }
 
 		BuildingInstancePlugin BuildingPlugin { get; }
 
 		IntRect Rectangle { get; }
+
+		IntVector2 TopLeft { get; }
+
+		IntVector2 TopRight { get; }
+
+		IntVector2 BottomLeft { get; }
+
+		IntVector2 BottomRight { get; }
+
+		Vector3 Center { get; }
 
 		IntVector2 Size { get; }
 

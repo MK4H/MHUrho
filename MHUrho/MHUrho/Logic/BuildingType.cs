@@ -47,15 +47,14 @@ namespace MHUrho.Logic
 		public void Load(XElement xml, GamePack package) {
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
-			//TODO: Join the implementations from all the 
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
 			Icon = XmlHelpers.GetIcon(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
 			Plugin = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,
-																				 package.XmlDirectoryPath,
-																				 Name);
+																 package.XmlDirectoryPath,
+																 Name);
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 										 package.PackageManager);
 		}

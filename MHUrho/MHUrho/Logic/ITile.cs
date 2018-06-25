@@ -10,11 +10,6 @@ using Urho;
 namespace MHUrho.Logic
 {
 
-	//TODO: Move it somewhere else
-	public enum SplitDirection {
-		TopRight,
-		TopLeft
-	};
 	public interface ITile {
 
 
@@ -27,11 +22,6 @@ namespace MHUrho.Logic
 		/// Building that owns this tile
 		/// </summary>
 		IBuilding Building { get; }
-
-		/// <summary>
-		/// Default modifier of the movement speed of units passing through this tile
-		/// </summary>
-		float MovementSpeedModifier { get; }
 
 		/// <summary>
 		/// Tile type of this tile
@@ -74,7 +64,6 @@ namespace MHUrho.Logic
 
 		Vector3 BottomRight3 { get; }
 
-		//TODO: Maybe height for every corner
 		/// <summary>
 		/// Heigth of the top left corner of the tile
 		/// </summary>

@@ -64,7 +64,7 @@ namespace MHUrho
 		public static T InvokeOnMainSafe<T>(Func<T> function)
 		{
 			T value = default(T);
-			InvokeOnMainSafe(() => { return value = function(); });
+			InvokeOnMainSafe(() => { value = function(); });
 			return value;
 		}
 

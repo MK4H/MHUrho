@@ -154,8 +154,7 @@ namespace MHUrho.Logic
 			public void ConnectReferences(LevelManager level) {
 				Unit.Player = level.GetPlayer(storedUnit.PlayerID);
 				Unit.Tile = level.Map.GetContainingTile(Unit.Position);
-				//TODO: Connect other things
-
+				
 				foreach (var componentLoader in componentLoaders) {
 					componentLoader.ConnectReferences(level);
 				}

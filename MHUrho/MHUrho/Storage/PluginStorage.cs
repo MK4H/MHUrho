@@ -167,7 +167,7 @@ namespace MHUrho.Storage {
     /// <summary>Field number for the "sequential" field.</summary>
     public const int SequentialFieldNumber = 3;
     /// <summary>
-    ///Data identified by their position in the list, good for unchaging implementations
+    ///Data identified by their position in the list, good for stable implementations
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::MHUrho.Storage.SequentialPluginData Sequential {

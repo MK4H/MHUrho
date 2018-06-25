@@ -6,9 +6,9 @@ using Urho;
 namespace MHUrho.Packaging
 {
     public class ModelWrapper : IDisposable {
-		private readonly Model model;
+		readonly Model model;
 
-		private readonly Vector3 scale;
+		readonly Vector3 scale;
 
 
 		public ModelWrapper(Model model) 
@@ -26,6 +26,8 @@ namespace MHUrho.Packaging
 			node.Scale = scale;
 			var animatedModel = node.CreateComponent<AnimatedModel>();
 			animatedModel.Model = model;
+			//TODO: DRAW DISTANCE
+			animatedModel.DrawDistance = 200;
 			return animatedModel;
 		}
 

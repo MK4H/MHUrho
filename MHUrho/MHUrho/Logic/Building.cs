@@ -79,7 +79,7 @@ namespace MHUrho.Logic
 													Id = building.ID,
 													TypeID = building.BuildingType.ID,
 													PlayerID = building.Player.ID,
-													Location = building.Location.ToStIntVector2(),
+													Location = building.TopLeft.ToStIntVector2(),
 													UserPlugin = new PluginData()
 												};
 				building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin, building.Level));
@@ -111,7 +111,6 @@ namespace MHUrho.Logic
 
 			public void ConnectReferences(LevelManager level) {
 				Building.Player = level.GetPlayer(storedBuilding.PlayerID);
-				//TODO: Tiles
 
 				foreach (var componentLoader in componentLoaders) {
 					componentLoader.ConnectReferences(level);
@@ -183,7 +182,14 @@ namespace MHUrho.Logic
 
 		public IntRect Rectangle { get; private set; }
 
-		public IntVector2 Location => Rectangle.TopLeft();
+		public IntVector2 TopLeft => Rectangle.TopLeft();
+
+		public IntVector2 TopRight => Rectangle.TopRight();
+
+		public IntVector2 BottomLeft => Rectangle.BottomLeft();
+
+		public IntVector2 BottomRight => Rectangle.BottomRight();
+
 
 		public override Vector3 Position {
 			get => Node.Position;
@@ -224,7 +230,7 @@ namespace MHUrho.Logic
 										 topLeftCorner.Y,
 										 topLeftCorner.X + type.Size.X,
 										 topLeftCorner.Y + type.Size.Y);
-			this.tiles = GetTiles(level.Map, type, topLeftCorner);
+			this.tiles = GetTiles();
 		}
 
 		protected Building(ILevelManager level, BuildingType buildingType, StBuilding storedBuilding) 
@@ -236,7 +242,7 @@ namespace MHUrho.Logic
 										 topLeft.Y,
 										 topLeft.X + buildingType.Size.X,
 										 topLeft.Y + buildingType.Size.Y);
-			this.tiles = GetTiles(Map, buildingType, Location);
+			this.tiles = GetTiles();
 		}
 
 
@@ -311,12 +317,12 @@ namespace MHUrho.Logic
 		}
 
 
-		ITile[] GetTiles(Map map, BuildingType type, IntVector2 topLeft) {
-			var newTiles = new ITile[type.Size.X * type.Size.Y];
+		ITile[] GetTiles() {
+			var newTiles = new ITile[BuildingType.Size.X * BuildingType.Size.Y];
 
-			for (int y = 0; y < type.Size.Y; y++) {
-				for (int x = 0; x < type.Size.X; x++) {
-					var tile = map.GetTileByTopLeftCorner(topLeft.X + x, topLeft.Y + y);
+			for (int y = 0; y < BuildingType.Size.Y; y++) {
+				for (int x = 0; x < BuildingType.Size.X; x++) {
+					var tile = Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
 					newTiles[GetTileIndex(x, y)] = tile;
 					tile.AddBuilding(this);
 				}

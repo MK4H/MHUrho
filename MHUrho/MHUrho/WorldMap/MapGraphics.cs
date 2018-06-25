@@ -382,17 +382,11 @@ namespace MHUrho.WorldMap
 				{
 					this.graphics = graphics;
 					this.topLeftCorner = topLeftCorner;
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						this.chunkNode = map.node.CreateChild("chunkNode");
-						chunkNode.Position = new Vector3(topLeftCorner.X + size.X / 2.0f, 0, topLeftCorner.Y + size.Y / 2.0f);
-					}
-					else {
-						Application.InvokeOnMainAsync(() => {
-														this.chunkNode = map.node.CreateChild("chunkNode");
-														chunkNode.Position = new Vector3(topLeftCorner.X + size.X / 2.0f, 0, topLeftCorner.Y + size.Y / 2.0f);
-													}).Wait();
-					}
-
+					MyGame.InvokeOnMainSafe(() => {
+												this.chunkNode = map.node.CreateChild("chunkNode");
+												chunkNode.Position = new Vector3(topLeftCorner.X + size.X / 2.0f, 0, topLeftCorner.Y + size.Y / 2.0f);
+					});
+						
 					CreateModel(map);
 				}
 
@@ -533,7 +527,7 @@ namespace MHUrho.WorldMap
 					//4 verticies for every tile, so that we can map every tile to different texture
 					// and the same tile types to the same textures
 					uint numVerticies = (uint)(size.X * size.Y * 4);
-					//TODO: maybe connect the neighbouring verticies
+
 					//two triangles per tile, 3 indicies per triangle
 					uint numIndicies = (uint)(size.X * size.Y * 6);
 
@@ -585,15 +579,7 @@ namespace MHUrho.WorldMap
 
 				static VertexBuffer InitializeVertexBuffer(uint numVerticies)
 				{
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						return InitializeVertexBufferImpl();
-
-					}
-					else {
-						VertexBuffer vb = null;
-						Application.InvokeOnMainAsync(() => { vb = InitializeVertexBufferImpl(); }).Wait();
-						return vb;
-					}
+					return MyGame.InvokeOnMainSafe(InitializeVertexBufferImpl);
 
 					VertexBuffer InitializeVertexBufferImpl()
 					{
@@ -608,15 +594,7 @@ namespace MHUrho.WorldMap
 
 				static IndexBuffer InitializeIndexBuffer(uint numIndicies)
 				{
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						return InitializeIndexBufferImpl();
-
-					}
-					else {
-						IndexBuffer ib = null;
-						Application.InvokeOnMainAsync(() => { ib = InitializeIndexBufferImpl(); }).Wait();
-						return ib;
-					}
+					return MyGame.InvokeOnMainSafe(InitializeIndexBufferImpl);
 
 					IndexBuffer InitializeIndexBufferImpl()
 					{
@@ -631,36 +609,17 @@ namespace MHUrho.WorldMap
 
 				static IntPtr LockVertexBufferSafe(VertexBuffer vb, uint numVerticies)
 				{
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						return vb.Lock(0, numVerticies);
-					}
-					else {
-						IntPtr vbPtr = IntPtr.Zero;
-						Application.InvokeOnMainAsync(() => { vbPtr = vb.Lock(0, numVerticies); }).Wait();
-						return vbPtr;
-					}
+					return MyGame.InvokeOnMainSafe(() => vb.Lock(0, numVerticies));
 				}
 
 				static IntPtr LockIndexBufferSafe(IndexBuffer ib, uint numIndicies)
 				{
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						return ib.Lock(0, numIndicies);
-					}
-					else {
-						IntPtr ibPtr = IntPtr.Zero;
-						Application.InvokeOnMainAsync(() => { ibPtr = ib.Lock(0, numIndicies); }).Wait();
-						return ibPtr;
-					}
+					return MyGame.InvokeOnMainSafe(() => ib.Lock(0, numIndicies));
 				}
 
 				void FinalizeModelCreation(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
 				{
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						FinalizeModelCreationImpl();
-					}
-					else {
-						Application.InvokeOnMainAsync(FinalizeModelCreationImpl).Wait();
-					}
+					MyGame.InvokeOnMainSafe(FinalizeModelCreationImpl);
 
 					void FinalizeModelCreationImpl()
 					{
@@ -686,22 +645,16 @@ namespace MHUrho.WorldMap
 
 				void SetModel()
 				{
-					if (MyGame.IsMainThread(Thread.CurrentThread)) {
-						SetModelImpl();
-					}
-					else {
-						Application.InvokeOnMainAsync(SetModelImpl).Wait();
-					}
+					MyGame.InvokeOnMainSafe(SetModelImpl);
 
-				}
-
-				void SetModelImpl()
-				{
-					StaticModel staticModel = chunkNode.CreateComponent<StaticModel>();
-					staticModel.Model = model;
-					staticModel.SetMaterial(graphics.material);
-					//TODO: Draw distance
-					staticModel.DrawDistance = 200;
+					void SetModelImpl()
+					{
+						StaticModel staticModel = chunkNode.CreateComponent<StaticModel>();
+						staticModel.Model = model;
+						staticModel.SetMaterial(graphics.material);
+						//TODO: Draw distance
+						staticModel.DrawDistance = 200;
+					}
 				}
 			}
 

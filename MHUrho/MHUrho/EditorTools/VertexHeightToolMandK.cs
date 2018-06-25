@@ -125,10 +125,7 @@ namespace MHUrho.EditorTools {
 			var vertex = Map.RaycastToVertex(raycastResult);
 			if (vertex.HasValue) {
 				//TODO: this is slow, make it faster
-				if (verticies.Contains(vertex.Value)) {
-					verticies.Remove(vertex.Value);
-				}
-				else {
+				if (!verticies.Remove(vertex.Value)) {
 					verticies.Add(vertex.Value);
 				}
 			}

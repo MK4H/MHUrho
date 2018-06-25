@@ -393,17 +393,16 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns whether the <paramref name="rayQueryResult"/> is the Map</returns>
 		bool IsRaycastToMap(RayQueryResult rayQueryResult);
 
-		//TODO: Maybe remove from this interface
 		ITile RaycastToTile(List<RayQueryResult> rayQueryResults);
-		//TODO: Maybe remove from this interface
+
 		ITile RaycastToTile(RayQueryResult rayQueryResult);
-		//TODO: Maybe remove from this interface
+
 		Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResults);
-		//TODO: Maybe remove from this interface
+
 		Vector3? RaycastToVertexPosition(RayQueryResult rayQueryResult);
-		//TODO: Maybe remove from this interface
+
 		IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResults);
-		//TODO: Maybe remove from this interface
+
 		IntVector2? RaycastToVertex(RayQueryResult rayQueryResult);
 
 		void ChangeTileType(ITile tile, TileType newType);

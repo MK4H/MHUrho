@@ -121,7 +121,6 @@ namespace MHUrho.EditorTools
 		void OnMouseDown(MouseButtonDownEventArgs e) {
 			if (selected != null) {
 				centerTile = input.GetTileUnderCursor();
-				//TODO: Rectangle
 				if (centerTile != null) {
 					Map.ChangeTileType(centerTile, highlight.Size, tileTypeButtons[selected]);
 				}

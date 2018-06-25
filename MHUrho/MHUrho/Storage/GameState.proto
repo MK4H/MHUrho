@@ -21,7 +21,6 @@ message StTile {
 	int32 tileTypeID = 3;
 	StIntVector2 topLeftPosition = 4;
 	float height = 5;
-	bool splitDirection = 6;
 }
 
 message StBorderTile {

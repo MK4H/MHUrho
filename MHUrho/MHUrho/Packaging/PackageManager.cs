@@ -91,314 +91,132 @@ namespace MHUrho.Packaging
 
 		public bool Exists(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.Exists(name);
-			}
-			else {
-				bool exists = false;
-				Application.InvokeOnMainAsync(() => { exists = resourceCache.Exists(name); }).Wait();
-				return exists;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.Exists(name));
 		}
 
 		public Animation GetAnimation(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetAnimation(name);
-			}
-			else {
-				Animation animation = null;
-				Application.InvokeOnMainAsync(() => { animation = resourceCache.GetAnimation(name); }).Wait();
-				return animation;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
 		}
 
 		public AnimationSet2D GetAnimationSet2D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetAnimationSet2D(name);
-			}
-			else {
-				AnimationSet2D animationSet2D = null;
-				Application.InvokeOnMainAsync(() => { animationSet2D = resourceCache.GetAnimationSet2D(name); }).Wait();
-				return animationSet2D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
 		}
 
 		public Urho.IO.File GetFile(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetFile(name);
-			}
-			else {
-				Urho.IO.File file = null;
-				Application.InvokeOnMainAsync(() => { file = resourceCache.GetFile(name); }).Wait();
-				return file;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetFile(name));
 		}
 
 		public Font GetFont(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetFont(name);
-			}
-			else {
-				Font font = null;
-				Application.InvokeOnMainAsync(() => { font = resourceCache.GetFont(name); }).Wait();
-				return font;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetFont(name));
 		}
 
 		public Image GetImage(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetImage(name);
-			}
-			else {
-				Image image = null;
-				Application.InvokeOnMainAsync(() => { image = resourceCache.GetImage(name); }).Wait();
-				return image;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetImage(name));
 		}
 
 		public JsonFile GetJsonFile(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetJsonFile(name);
-			}
-			else {
-				JsonFile jsonFile = null;
-				Application.InvokeOnMainAsync(() => { jsonFile = resourceCache.GetJsonFile(name); }).Wait();
-				return jsonFile;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
 		}
 
 		public Material GetMaterial(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetMaterial(name);
-			}
-			else {
-				Material material = null;
-				Application.InvokeOnMainAsync(() => { material = resourceCache.GetMaterial(name); }).Wait();
-				return material;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
 		}
 
 		public Model GetModel(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetModel(name);
-			}
-			else {
-				Model model = null;
-				Application.InvokeOnMainAsync(() => { model = resourceCache.GetModel(name); }).Wait();
-				return model;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetModel(name));
 		}
 
 		public ParticleEffect GetParticleEffect(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetParticleEffect(name);
-			}
-			else {
-				ParticleEffect particleEffect = null;
-				Application.InvokeOnMainAsync(() => { particleEffect = resourceCache.GetParticleEffect(name); }).Wait();
-				return particleEffect;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
 		}
 
 		public ParticleEffect2D GetParticleEffect2D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetParticleEffect2D(name);
-			}
-			else {
-				ParticleEffect2D particleEffect2D = null;
-				Application.InvokeOnMainAsync(() => { particleEffect2D = resourceCache.GetParticleEffect2D(name); }).Wait();
-				return particleEffect2D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
 		}
 
 		public PListFile GetPListFile(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetPListFile(name);
-			}
-			else {
-				PListFile pListFile = null;
-				Application.InvokeOnMainAsync(() => { pListFile = resourceCache.GetPListFile(name); }).Wait();
-				return pListFile;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
 		}
 
 		public Shader GetShader(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetShader(name);
-			}
-			else {
-				Shader shader = null;
-				Application.InvokeOnMainAsync(() => { shader = resourceCache.GetShader(name); }).Wait();
-				return shader;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetShader(name));
 		}
 
 		public Sound GetSound(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetSound(name);
-			}
-			else {
-				Sound sound = null;
-				Application.InvokeOnMainAsync(() => { sound = resourceCache.GetSound(name); }).Wait();
-				return sound;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetSound(name));
 		}
 
 		public Sprite2D GetSprite2D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetSprite2D(name);
-			}
-			else {
-				Sprite2D sprite2D = null;
-				Application.InvokeOnMainAsync(() => { sprite2D = resourceCache.GetSprite2D(name); }).Wait();
-				return sprite2D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
 		}
 
 		public SpriteSheet2D GetSpriteSheet2D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetSpriteSheet2D(name);
-			}
-			else {
-				SpriteSheet2D spriteSheet2D = null;
-				Application.InvokeOnMainAsync(() => { spriteSheet2D = resourceCache.GetSpriteSheet2D(name); }).Wait();
-				return spriteSheet2D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
 		}
 
 		public Technique GetTechnique(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetTechnique(name);
-			}
-			else {
-				Technique technique = null;
-				Application.InvokeOnMainAsync(() => { technique = resourceCache.GetTechnique(name); }).Wait();
-				return technique;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
 		}
 
 		public Texture2D GetTexture2D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetTexture2D(name);
-			}
-			else {
-				Texture2D texture2D = null;
-				Application.InvokeOnMainAsync(() => { texture2D = resourceCache.GetTexture2D(name); }).Wait();
-				return texture2D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
 		}
 
 		public Texture3D GetTexture3D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetTexture3D(name);
-			}
-			else {
-				Texture3D texture3D = null;
-				Application.InvokeOnMainAsync(() => { texture3D = resourceCache.GetTexture3D(name); }).Wait();
-				return texture3D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
 		}
 
 		public Texture GetTextureCube(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetTextureCube(name);
-			}
-			else {
-				Texture textureCube = null;
-				Application.InvokeOnMainAsync(() => { textureCube = resourceCache.GetTextureCube(name); }).Wait();
-				return textureCube;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
 		}
 
 		public TmxFile2D GetTmxFile2D(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetTmxFile2D(name);
-			}
-			else {
-				TmxFile2D tmxFile2D = null;
-				Application.InvokeOnMainAsync(() => { tmxFile2D = resourceCache.GetTmxFile2D(name); }).Wait();
-				return tmxFile2D;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
 		}
 
 		public ValueAnimation GetValueAnimation(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetValueAnimation(name);
-			}
-			else {
-				ValueAnimation valueAnimation = null;
-				Application.InvokeOnMainAsync(() => { valueAnimation = resourceCache.GetValueAnimation(name); }).Wait();
-				return valueAnimation;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
 		}
 
 		public XmlFile GetXmlFile(string name)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return resourceCache.GetXmlFile(name);
-			}
-			else {
-				XmlFile xmlFile = null;
-				Application.InvokeOnMainAsync(() => { xmlFile = resourceCache.GetXmlFile(name); }).Wait();
-				return xmlFile;
-			}
+			return MyGame.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
 		}
 
 		public Material GetMaterialFromImage(Image image)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return Material.FromImage(image);
-			}
-			else {
-				Material material = null;
-				Application.InvokeOnMainAsync(() => { material = Material.FromImage(image); }).Wait();
-				return material;
-			}
+			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image));
 		}
 
 		public Material GetMaterialFromImage(string image)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return Material.FromImage(image);
-			}
-			else {
-				Material material = null;
-				Application.InvokeOnMainAsync(() => { material = Material.FromImage(image); }).Wait();
-				return material;
-			}
+			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image));
 		}
 
 		public Material GetMaterialFromImage(string image, string normals)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				return Material.FromImage(image, normals);
-			}
-			else {
-				Material material = null;
-				Application.InvokeOnMainAsync(() => { material = Material.FromImage(image, normals); }).Wait();
-				return material;
-			}
+			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image, normals));
 		}
 
 		/// <summary>
@@ -461,11 +279,6 @@ namespace MHUrho.Packaging
 		void UnloadPackage(GamePack package) {
 			resourceCache.RemoveResourceDir(package.XmlDirectoryPath);
 			package.UnLoad();
-		}
-
-		bool IsMainThread(Thread thread)
-		{
-			return MyGame.IsMainThread(thread);
 		}
 	}
 }

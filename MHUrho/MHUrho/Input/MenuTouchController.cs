@@ -55,7 +55,7 @@ namespace MHUrho.Input
 		}
 
 		//TODO: TEMPORARY, probably move to UIManager or something
-		private void Button_Pressed(PressedEventArgs obj) {
+		void Button_Pressed(PressedEventArgs obj) {
 			Log.Write(LogLevel.Debug, "Button pressed");
 
 			switch (obj.Element.Name) {

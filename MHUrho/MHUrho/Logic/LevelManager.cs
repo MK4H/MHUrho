@@ -234,14 +234,7 @@ namespace MHUrho.Logic
 
 			CurrentLevel.Minimap = new Minimap(CurrentLevel, 4);
 
-			if (MyGame.IsMainThread(Thread.CurrentThread)) {
-				StartLevel();
-			}
-			else {
-				Application.InvokeOnMainAsync(StartLevel).Wait();
-
-			}
-			
+			MyGame.InvokeOnMainSafe(StartLevel);
 
 			return CurrentLevel;
 
