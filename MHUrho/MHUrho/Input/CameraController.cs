@@ -39,9 +39,9 @@ namespace MHUrho.Input
 
 		public Camera Camera { get; private set; }
 
-		public Vector3 CameraPosition => cameraNode.WorldPosition;
+		public Vector3 Position => cameraHolder.WorldPosition;
 
-		public Vector2 CameraXZPosition => cameraNode.WorldPosition.XZ2();
+		public Vector2 PositionXZ => cameraHolder.WorldPosition.XZ2();
 
 		public IEntity Followed { get; private set; }
 
@@ -460,13 +460,12 @@ namespace MHUrho.Input
 
 
 		void RotateCameraFixed(Vector2 rot) {
-			rot = -rot;
-			cameraNode.RotateAround(cameraHolder.WorldPosition, Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y), TransformSpace.World);
-			
+			cameraNode.RotateAround(new Vector3(0,0,0), Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y), TransformSpace.Parent);
+
+
 			if ((5 < cameraNode.Rotation.PitchAngle && rot.X < 0) || (cameraNode.Rotation.PitchAngle < 85 && rot.X > 0)) {
-				cameraNode.RotateAround(cameraHolder.WorldPosition, Quaternion.FromAxisAngle(cameraNode.WorldRight, rot.X), TransformSpace.World);
+				cameraNode.RotateAround(new Vector3(0, 0, 0), Quaternion.FromAxisAngle(cameraNode.WorldRight, rot.X), TransformSpace.Parent);
 			}
-			
 		}
 
 		void RotateCameraFree(Vector2 rot) {

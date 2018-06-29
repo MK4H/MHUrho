@@ -57,7 +57,7 @@ namespace MHUrho.WorldMap
 
 		public void Refresh()
 		{
-			MoveTo(Level.Camera.CameraXZPosition.ToIntVector2());
+			MoveTo(Level.Camera.PositionXZ.ToIntVector2());
 			int tilesPerColumn = image.Height / pixelsPerTile;
 
 			unsafe {

@@ -43,7 +43,8 @@ namespace MHUrho.UserInterface
 			this.InputCtl = input;
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
-			this.CursorTooltips = new CursorTooltips(this, game);
+			//TODO: User texture
+			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this, game);
 
 			selectionBar = UI.Root.CreateWindow();
 			selectionBar.SetStyle("windowStyle");

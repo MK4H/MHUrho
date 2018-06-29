@@ -84,10 +84,10 @@ namespace MHUrho.Input
 		readonly CameraController cameraController;
 		readonly Octree octree;
 
-		
-
-		List<KeyAction> actions;
-		Dictionary<Key, Actions> keyActions;
+	
+		Dictionary<Key, Action<KeyUpEventArgs>> keyUpActions;
+		Dictionary<Key, Action<KeyDownEventArgs>> keyDownActions;
+		Dictionary<Key, Action<KeyDownEventArgs>> keyRepeatActions;
 
 		CameraMovementType cameraType;
 
@@ -111,13 +111,13 @@ namespace MHUrho.Input
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;
 			this.UIManager = new MandKGameUI(game, this);
+			this.keyDownActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
+			this.keyUpActions = new Dictionary<Key, Action<KeyUpEventArgs>>();
+			this.keyRepeatActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
 
 			cameraController.OnFixedMove += OnViewMoved;
 
-			FillActionList();
-
-			//TODO: Load from config
-			SetKeyBindings();
+			RegisterCameraControlKeys();
 
 			Enable();
 
@@ -212,65 +212,89 @@ namespace MHUrho.Input
 			UIManager.RemoveTool(tool);
 		}
 
-		public void RegisterToolAction(int number, Action<int> keyDown, Action<int> repeat = null, Action<int> keyUp = null) {
-			//TODO: REDO THE ACTION MAPPING
-			actions[number] = new KeyAction(keyDown, repeat, keyUp);
+		public void RegisterKeyUpAction(Key key, Action<KeyUpEventArgs> action)
+		{
+			if (keyUpActions.TryGetValue(key, out var actions)) {
+				keyUpActions[key] = actions + action;
+			}
+			else {
+				keyUpActions.Add(key, action);
+			}
 		}
 
-		public void UnregisterToolAction(int number) {
-			actions[number] = new KeyAction();
-		}
-
-		void FillActionList() {
-			//TODO: REDO ACTION LIST
-			actions = new List<KeyAction> {
-				new KeyAction(StartCameraMoveForward, null, StopCameraMoveForward),
-				new KeyAction(StartCameraMoveBackward, null, StopCameraMoveBackward),
-				new KeyAction(StartCameraMoveLeft, null, StopCameraMoveLeft),
-				new KeyAction(StartCameraMoveRight, null, StopCameraMoveRight),
-				new KeyAction(StartCameraRotationRight, null, StopCameraRotationRight),
-				new KeyAction(StartCameraRotationLeft, null, StopCameraRotationLeft),
-				new KeyAction(StartCameraRotationUp, null, StopCameraRotationUp),
-				new KeyAction(StartCameraRotationDown, null, StopCameraRotationDown),
-				new KeyAction(CameraSwitchMode, null, null),
-				new KeyAction()
-			};
-		}
-		
-		//TODO: Load from config
-		void SetKeyBindings() {
-			keyActions = new Dictionary<Key, Actions> {
-				{Key.W, Actions.CameraMoveForward},
-				{Key.S, Actions.CameraMoveBackward},
-				{Key.A, Actions.CameraMoveLeft},
-				{Key.D, Actions.CameraMoveRight},
-				{Key.E, Actions.CameraRotationRight},
-				{Key.Q, Actions.CameraRotationLeft},
-				{Key.R, Actions.CameraRotationUp },
-				{Key.F, Actions.CameraRotationDown },
-				{Key.LeftShift, Actions.CameraSwitchMode },
-				{Key.C, (Actions)9 }
-			};
-		}
-
-		KeyAction GetAction(Actions action) {
-			return actions[(int)action];
-		}
-
-		protected override void KeyDown(KeyDownEventArgs e) {
-			if (keyActions.TryGetValue(e.Key, out Actions action)) {
-				if (!e.Repeat) {
-					GetAction(action).KeyDown?.Invoke(e.Qualifiers);
+		public void RemoveKeyUpAction(Key key, Action<KeyUpEventArgs> action)
+		{
+			if (keyUpActions.TryGetValue(key, out var actions)) {
+				actions -= action;
+				if (actions == null) {
+					keyUpActions.Remove(key);
 				}
 				else {
-					GetAction(action).Repeat?.Invoke(e.Qualifiers);
+					keyUpActions[key] = actions;
 				}
 			}
 		}
 
+		public void RegisterKeyDownAction(Key key, Action<KeyDownEventArgs> action)
+		{
+			if (keyDownActions.TryGetValue(key, out var actions)) {
+				keyDownActions[key] = actions + action;
+			}
+			else {
+				keyDownActions.Add(key, action);
+			}
+		}
+
+		public void RemoveKeyDownAction(Key key, Action<KeyDownEventArgs> action)
+		{
+			if (keyDownActions.TryGetValue(key, out var actions)) {
+				actions -= action;
+				if (actions == null) {
+					keyDownActions.Remove(key);
+				}
+				else {
+					keyDownActions[key] = actions;
+				}
+			}
+		}
+
+		public void RegisterKeyRepeatAction(Key key, Action<KeyDownEventArgs> action)
+		{
+			if (keyRepeatActions.TryGetValue(key, out var actions)) {
+				keyRepeatActions[key] = actions + action;
+			}
+			else {
+				keyRepeatActions.Add(key, action);
+			}
+		}
+
+		public void RemoveKeyRepeatAction(Key key, Action<KeyDownEventArgs> action)
+		{
+			if (keyRepeatActions.TryGetValue(key, out var actions)) {
+				actions -= action;
+				if (actions == null) {
+					keyRepeatActions.Remove(key);
+				}
+				else {
+					keyRepeatActions[key] = actions;
+				}
+			}
+		}
+
+	
+		
+		protected override void KeyDown(KeyDownEventArgs e) {
+			if (e.Repeat && keyRepeatActions.TryGetValue(e.Key, out var repeatAction)) {
+				repeatAction?.Invoke(e);
+			}
+			else if (keyDownActions.TryGetValue(e.Key, out var downAction)) {
+				downAction?.Invoke(e);
+			}
+		}
+
 		protected override void KeyUp(KeyUpEventArgs e) {
-			if (keyActions.TryGetValue(e.Key, out Actions action)) {
-				GetAction(action).KeyUp?.Invoke(e.Qualifiers);
+			if (keyUpActions.TryGetValue(e.Key, out var upAction)) {
+				upAction?.Invoke(e);
 			}
 		}
 
@@ -377,13 +401,36 @@ namespace MHUrho.Input
 			cameraController.SetHorizontalMovement(cameraMovement);
 		}
 
-		void StartCameraMoveLeft(int qualifiers) {
+		//TODO: Read from config
+		void RegisterCameraControlKeys()
+		{
+			RegisterKeyDownAction(Key.W, StartCameraMoveForward);
+			RegisterKeyDownAction(Key.S, StartCameraMoveBackward);
+			RegisterKeyDownAction(Key.A, StartCameraMoveLeft);
+			RegisterKeyDownAction(Key.D, StartCameraMoveRight);
+			RegisterKeyDownAction(Key.E, StartCameraRotationRight);
+			RegisterKeyDownAction(Key.Q, StartCameraRotationLeft);
+			RegisterKeyDownAction(Key.R, StartCameraRotationUp);
+			RegisterKeyDownAction(Key.F, StartCameraRotationDown);
+			RegisterKeyDownAction(Key.Shift, CameraSwitchMode);
+
+			RegisterKeyUpAction(Key.W, StopCameraMoveForward);
+			RegisterKeyUpAction(Key.S, StopCameraMoveBackward);
+			RegisterKeyUpAction(Key.A, StopCameraMoveLeft);
+			RegisterKeyUpAction(Key.D, StopCameraMoveRight);
+			RegisterKeyUpAction(Key.E, StopCameraRotationRight);
+			RegisterKeyUpAction(Key.Q, StopCameraRotationLeft);
+			RegisterKeyUpAction(Key.R, StopCameraRotationUp);
+			RegisterKeyUpAction(Key.F, StopCameraRotationDown);
+		}
+
+		void StartCameraMoveLeft(KeyDownEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			movement.X = -CameraScrollSensitivity;
 			cameraController.SetMovement(movement);
 		}
 
-		void StopCameraMoveLeft(int qualifiers) {
+		void StopCameraMoveLeft(KeyUpEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			if (movement.X == -CameraScrollSensitivity) {
 				movement.X = 0;
@@ -391,13 +438,13 @@ namespace MHUrho.Input
 			cameraController.SetMovement(movement);
 		}
 
-		void StartCameraMoveRight(int qualifiers) {
+		void StartCameraMoveRight(KeyDownEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			movement.X = CameraScrollSensitivity;
 			cameraController.SetMovement(movement);
 		}
 
-		void StopCameraMoveRight(int qualifiers) {
+		void StopCameraMoveRight(KeyUpEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			if (movement.X == CameraScrollSensitivity) {
 				movement.X = 0;
@@ -405,13 +452,13 @@ namespace MHUrho.Input
 			cameraController.SetMovement(movement);
 		}
 
-		void StartCameraMoveForward(int qualifiers) {
+		void StartCameraMoveForward(KeyDownEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			movement.Z = CameraScrollSensitivity;
 			cameraController.SetMovement(movement);
 		}
 
-		void StopCameraMoveForward(int qualifiers) {
+		void StopCameraMoveForward(KeyUpEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			if (movement.Z == CameraScrollSensitivity) {
 				movement.Z = 0;
@@ -419,13 +466,13 @@ namespace MHUrho.Input
 			cameraController.SetMovement(movement);
 		}
 
-		void StartCameraMoveBackward(int qualifiers) {
+		void StartCameraMoveBackward(KeyDownEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			movement.Z = -CameraScrollSensitivity;
 			cameraController.SetMovement(movement);
 		}
 
-		void StopCameraMoveBackward(int qualifiers) {
+		void StopCameraMoveBackward(KeyUpEventArgs e) {
 			var movement = cameraController.StaticMovement;
 			if (movement.Z == -CameraScrollSensitivity) {
 				movement.Z = 0;
@@ -433,47 +480,47 @@ namespace MHUrho.Input
 			cameraController.SetMovement(movement);
 		}
 
-		void StartCameraRotationRight(int qualifiers) {
-			cameraController.SetYaw(-CameraRotationSensitivity);
-		}
-
-		void StopCameraRotationRight(int qualifiers) {
-			if (cameraController.StaticYaw == -CameraRotationSensitivity) {
-				cameraController.SetYaw(0);
-			}
-		}
-
-		void StartCameraRotationLeft(int qualifiers) {
+		void StartCameraRotationRight(KeyDownEventArgs e) {
 			cameraController.SetYaw(CameraRotationSensitivity);
 		}
 
-		void StopCameraRotationLeft(int qualifiers) {
+		void StopCameraRotationRight(KeyUpEventArgs e) {
 			if (cameraController.StaticYaw == CameraRotationSensitivity) {
 				cameraController.SetYaw(0);
 			}
 		}
 
-		void StartCameraRotationUp(int qualifiers) {
-			cameraController.SetPitch(-CameraRotationSensitivity);
+		void StartCameraRotationLeft(KeyDownEventArgs e) {
+			cameraController.SetYaw(-CameraRotationSensitivity);
 		}
 
-		void StopCameraRotationUp(int qualifiers) {
-			if (cameraController.StaticPitch == -CameraRotationSensitivity) {
-				cameraController.SetPitch(0);
+		void StopCameraRotationLeft(KeyUpEventArgs e) {
+			if (cameraController.StaticYaw == -CameraRotationSensitivity) {
+				cameraController.SetYaw(0);
 			}
 		}
 
-		void StartCameraRotationDown(int qualifiers) {
+		void StartCameraRotationUp(KeyDownEventArgs e) {
 			cameraController.SetPitch(CameraRotationSensitivity);
 		}
 
-		void StopCameraRotationDown(int qualifiers) {
+		void StopCameraRotationUp(KeyUpEventArgs e) {
 			if (cameraController.StaticPitch == CameraRotationSensitivity) {
 				cameraController.SetPitch(0);
 			}
 		}
 
-		void CameraSwitchMode(int qualifiers) {
+		void StartCameraRotationDown(KeyDownEventArgs e) {
+			cameraController.SetPitch(-CameraRotationSensitivity);
+		}
+
+		void StopCameraRotationDown(KeyUpEventArgs e) {
+			if (cameraController.StaticPitch == -CameraRotationSensitivity) {
+				cameraController.SetPitch(0);
+			}
+		}
+
+		void CameraSwitchMode(KeyDownEventArgs e) {
 			if (cameraType == CameraMovementType.FreeFloat) {
 				cameraController.SwitchToFixed();
 				cameraType = CameraMovementType.Fixed;
@@ -486,6 +533,5 @@ namespace MHUrho.Input
 				Level.Map.DisableHighlight();
 			}
 		}
-
 	}
 }

@@ -108,6 +108,8 @@ namespace MHUrho.EditorTools
 				text.SetStyleAuto();
 				text.Value = "Hello world";
 				text.Position = new IntVector2(10, 0);
+
+				input.UIManager.CursorTooltips.AddImage(new IntRect(0, 0, 200, 200));
 			}
 		}
 

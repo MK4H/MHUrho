@@ -79,7 +79,7 @@ namespace MHUrho.EditorTools {
 			if (enabled) return;
 
 			input.UIManager.SelectionBarShowButtons(buttons);
-			input.RegisterToolAction(9, SwitchToSelectingWithKey);
+			input.RegisterKeyDownAction(Key.X, SwitchToSelectingWithKey);
 			enabled = true;
 		}
 
@@ -98,7 +98,7 @@ namespace MHUrho.EditorTools {
 
 			verticies.Clear();
 			input.UIManager.SelectionBarClearButtons();
-			input.UnregisterToolAction(9);
+			input.RemoveKeyDownAction(Key.X, SwitchToSelectingWithKey);
 			input.MouseMove -= OnMouseMove;
 			enabled = false;
 		}
@@ -153,7 +153,7 @@ namespace MHUrho.EditorTools {
 			}
 		}
 
-		void SwitchToSelectingWithKey(int qualifiers) {
+		void SwitchToSelectingWithKey(KeyDownEventArgs e) {
 			SwitchToSelecting();
 		}
 

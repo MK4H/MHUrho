@@ -82,6 +82,9 @@ namespace MHUrho.UserInterface
 					break;
 				case "SaveButton":
 					//TODO: Move this elsewhere
+					if (LevelManager.CurrentLevel == null) {
+						return;
+					}
 					using (var saveFile =
 						new Google.Protobuf.CodedOutputStream(MyGame.Config.OpenDynamicFile("savedGame.save", System.IO.FileMode.Create,
 																							System.IO.FileAccess.Write))) {
