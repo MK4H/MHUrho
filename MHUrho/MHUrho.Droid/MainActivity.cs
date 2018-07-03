@@ -44,8 +44,8 @@ namespace MHUrho.Droid
 			SetContentView(layout);
 
 
-			MyGame.Config = FileManagerDroid.LoadConfig(Assets);
-			MyGame.Config.CopyStaticToDynamic(Path.Combine("Data", "Test"));
+			MyGame.Files = FileManagerDroid.LoadConfig(Assets);
+			MyGame.Files.CopyStaticToDynamic(Path.Combine("Data", "Test"));
 
 			try {
 				myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));

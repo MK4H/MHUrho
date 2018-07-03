@@ -113,7 +113,7 @@ namespace MHUrho.Packaging {
 		}
 
 		public void StartLoading(XmlSchemaSet schemas) {
-			data = XDocument.Load(MyGame.Config.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
+			data = XDocument.Load(MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
 			//TODO: Handler and signal that resource pack is in invalid state
 			data.Validate(schemas, null);
 

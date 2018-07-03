@@ -86,7 +86,7 @@ namespace MHUrho.UserInterface
 						return;
 					}
 					using (var saveFile =
-						new Google.Protobuf.CodedOutputStream(MyGame.Config.OpenDynamicFile("savedGame.save", System.IO.FileMode.Create,
+						new Google.Protobuf.CodedOutputStream(MyGame.Files.OpenDynamicFile("savedGame.save", System.IO.FileMode.Create,
 																							System.IO.FileAccess.Write))) {
 						LevelManager.CurrentLevel.Save().WriteTo(saveFile);
 					}
@@ -94,7 +94,7 @@ namespace MHUrho.UserInterface
 				case "LoadButton":
 					LevelManager.CurrentLevel?.End();
 
-					using (Stream saveFile = MyGame.Config.OpenDynamicFile("savedGame.save",
+					using (Stream saveFile = MyGame.Files.OpenDynamicFile("savedGame.save",
 																			System.IO.FileMode.Open,
 																			FileAccess.Read)) {
 						LevelManager.Load(Game, StLevel.Parser.ParseFrom(saveFile));

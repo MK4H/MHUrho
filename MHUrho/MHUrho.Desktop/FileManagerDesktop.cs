@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 namespace MHUrho.Desktop {
 	class FileManagerDesktop : FileManager {
 
-		public static FileManagerDesktop LoadConfig() {
-			//TODO: Load config files
-			var configManager = new FileManagerDesktop(
+		public static FileManagerDesktop LoadFileManager() {
+			var fileManager = new FileManagerDesktop(
 				new List<string>()
 				{
 					Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
@@ -21,13 +20,13 @@ namespace MHUrho.Desktop {
 				Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
 				Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"));
 
-			if (!Directory.Exists(configManager.DynamicDirPath)) {
-				Directory.CreateDirectory(configManager.DynamicDirPath);
+			if (!Directory.Exists(fileManager.DynamicDirPath)) {
+				Directory.CreateDirectory(fileManager.DynamicDirPath);
 			}
 
-			File.Create(configManager.LogPath).Dispose();
+			File.Create(fileManager.LogPath).Dispose();
 			
-			return configManager;
+			return fileManager;
 		}
 
 		protected FileManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
@@ -78,6 +77,10 @@ namespace MHUrho.Desktop {
 		   
 		}
 
+		public override bool FileExists(string path)
+		{
+			return File.Exists(path);
+		}
 
 	}
 }

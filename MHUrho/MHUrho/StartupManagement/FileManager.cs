@@ -15,7 +15,8 @@ namespace MHUrho
 		public string StaticDirPath { get; protected set; }
 		public string DynamicDirPath { get; protected set; }
 
-		protected string ConfigFilePath;
+		public string ConfigFilePath { get; protected set; }
+
 		protected string DefaultConfigFilePath;
 
 		public static string CorrectRelativePath(string relativePath) {
@@ -58,6 +59,8 @@ namespace MHUrho
 		/// </summary>
 		/// <param name="srcRelativePath">Source relative path in static data</param>
 		public abstract void CopyStaticToDynamic(string srcRelativePath);
+
+		public abstract bool FileExists(string path);
 
 		protected FileManager(
 			List<string> packagePaths,

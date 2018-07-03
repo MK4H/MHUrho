@@ -56,7 +56,7 @@ namespace MHUrho.Packaging
 			Instance = new PackageManager(resourceCache);
 			try {
 
-				Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Config.OpenStaticFileRO(GamePackageSchemaPath)));
+				Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Files.OpenStaticFileRO(GamePackageSchemaPath)));
 			}
 			catch (IOException e) {
 				Log.Write(LogLevel.Error, $"Error loading GamePack schema: {e}");
@@ -65,7 +65,7 @@ namespace MHUrho.Packaging
 				//TODO: Error reading static data of app
 			}
 
-			foreach (var path in MyGame.Config.PackagePaths) {
+			foreach (var path in MyGame.Files.PackagePaths) {
 				Instance.ParseGamePackDir(path);
 			}
 		}
@@ -232,7 +232,7 @@ namespace MHUrho.Packaging
 
 			try
 			{
-				XDocument doc = XDocument.Load(MyGame.Config.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read));
+				XDocument doc = XDocument.Load(MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read));
 				doc.Validate(schemas, null);
 
 				string directoryPath = Path.GetDirectoryName(path);

@@ -71,6 +71,11 @@ namespace MHUrho.Droid {
 			}
 		}
 
+		public override bool FileExists(string path)
+		{
+			return System.IO.File.Exists(path);
+		}
+
 		public static FileManagerDroid LoadConfig(AssetManager assetManager) {
 			//TODO: Load config files
 			return new FileManagerDroid(
