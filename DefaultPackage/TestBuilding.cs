@@ -175,15 +175,11 @@ namespace DefaultPackage
 			AddPathfindingNodes();
 		}
 
-		public override void OnProjectileHit(IProjectile projectile)
+		public override void OnHit(IEntity other, object userData)
 		{
 			
 		}
 
-		public override void OnMeeleHit(IEntity byEntity)
-		{
-			throw new NotImplementedException();
-		}
 
 		public override IFormationController GetFormationController(Vector3 centerPosition)
 		{

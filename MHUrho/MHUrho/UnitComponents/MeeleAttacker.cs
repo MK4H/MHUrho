@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -17,7 +19,7 @@ namespace MHUrho.UnitComponents
 
 			void Attacked(MeeleAttacker attacker, IEntity target);
 
-			IUnit PickTarget(IList<IUnit> possibleTargets);
+			IEntity PickTarget(List<IEntity> possibleTargets);
 
 		}
 
@@ -76,18 +78,6 @@ namespace MHUrho.UnitComponents
 			return removed;
 		}
 
-		protected void SearchTile(ITile searchedTile)
-		{
-			var possibleTargets = new List<IUnit>();
-			foreach (var unit in searchedTile.Units) {
-				if (unit.Player != Entity.Player) {
-					possibleTargets.Add(unit);
-				}
-			}
-
-			Target = BaseNotificationReceiver.PickTarget(possibleTargets);
-		}
-
 		/// <summary>
 		/// Progresses the attack, stepping the time between attacks if <see cref="Target"/> is in range
 		/// </summary>
@@ -118,7 +108,13 @@ namespace MHUrho.UnitComponents
 			if (AttackIfInRange) {
 				ITile centerTile = Map.GetContainingTile(Entity.Position);
 				IntVector2 topLeft = centerTile.MapLocation - (targetSearchRectangleSize / 2);
-				Map.ForEachInRectangle(topLeft, topLeft + targetSearchRectangleSize, SearchTile);
+				List<IUnit> unitsInRange = new List<IUnit>();
+				Map.ForEachInRectangle(topLeft, topLeft + targetSearchRectangleSize,
+										(tile) => {
+											unitsInRange.AddRange(from unit in tile.Units
+																where unit.Player != Entity.Player
+																select unit);
+										});
 			}
 		}
 

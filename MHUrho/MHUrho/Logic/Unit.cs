@@ -395,9 +395,9 @@ namespace MHUrho.Logic
 			Dispose();	
 		}
 
-		public override void HitBy(IProjectile projectile)
+		public override void HitBy(IEntity other, object userData)
 		{
-			UnitPlugin.OnProjectileHit(projectile);
+			UnitPlugin.OnHit(other, userData);
 		}
 
 		void IDisposable.Dispose()

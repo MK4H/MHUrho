@@ -306,7 +306,7 @@ namespace MHUrho.Logic
 			return true;	
 		}
 
-		public override void HitBy(IProjectile projectile)
+		public override void HitBy(IEntity other, object userData)
 		{
 			throw new InvalidOperationException("Projectiles should not hit each other");
 		}

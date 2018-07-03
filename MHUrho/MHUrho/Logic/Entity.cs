@@ -123,7 +123,7 @@ namespace MHUrho.Logic
 			OnRemoval?.Invoke();
 		}
 
-		public abstract void HitBy(IProjectile projectile);
+		public abstract void HitBy(IEntity other, object additionalData);
 
 		protected void SignalPositionChanged()
 		{

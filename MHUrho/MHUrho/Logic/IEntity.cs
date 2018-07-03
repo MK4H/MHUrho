@@ -166,6 +166,12 @@ namespace MHUrho.Logic {
 		/// <returns></returns>
 		T Accept<T>(IEntityVisitor<T> visitor);
 
-		void HitBy(IProjectile projectile);
+		/// <summary>
+		/// Signals to this entity that it was hit by the <paramref name="other"/> entity
+		///
+		/// If <paramref name="other"/> is a Projectile, it was a range hit, if it is other, it was meele hit
+		/// </summary>
+		/// <param name="other">The entity that hit this entity</param>
+		void HitBy(IEntity other, object userData = null);
 	}
 }

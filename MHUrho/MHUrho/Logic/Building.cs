@@ -278,9 +278,9 @@ namespace MHUrho.Logic
 			
 		}
 
-		public override void HitBy(IProjectile projectile)
+		public override void HitBy(IEntity other, object userData)
 		{
-			BuildingPlugin.OnProjectileHit(projectile);
+			BuildingPlugin.OnHit(other, userData);
 		}
 
 		public float? GetHeightAt(float x, float y)
@@ -329,16 +329,6 @@ namespace MHUrho.Logic
 			}
 
 			return newTiles;
-		}
-
-		void Collision(NodeCollisionStartEventArgs e)
-		{
-			var projectile = Level.GetProjectile(e.OtherNode);
-			if (projectile == null) {
-				throw new InvalidOperationException("Hit by something that is not a projectile");
-			}
-
-			BuildingPlugin.OnProjectileHit(projectile);
 		}
 	}
 }

@@ -38,8 +38,6 @@ namespace MHUrho.Plugins
 		/// <returns>Instance loaded into saved state</returns>
 		public abstract void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData);
 
-		public abstract void OnProjectileHit(IProjectile projectile);
-
-		public abstract void OnMeeleHit(IEntity byEntity);
+		public abstract void OnHit(IEntity other, object userData);
 	}
 }

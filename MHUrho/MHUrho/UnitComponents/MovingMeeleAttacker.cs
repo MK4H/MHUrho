@@ -10,7 +10,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-    class MovingMeeleAttacker : MeeleAttacker
+    public class MovingMeeleAttacker : MeeleAttacker
     {
 		internal class Loader : DefaultComponentLoader{
 			public override DefaultComponent Component => MovingMeele;

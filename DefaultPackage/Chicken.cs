@@ -207,9 +207,9 @@ namespace DefaultPackage
 			return (from.XZ2() - to.XZ2()).Length / 2;
 		}
 
-		public override void OnProjectileHit(IProjectile projectile)
+		public override void OnHit(IEntity other, object userData)
 		{
-			if (projectile.Player == Unit.Player) {
+			if (other.Player == Unit.Player) {
 				return;
 			}
 
@@ -228,10 +228,6 @@ namespace DefaultPackage
 			}
 		}
 
-		public override void OnMeeleHit(IEntity byEntity)
-		{
-			throw new NotImplementedException();
-		}
 
 		public override void OnUpdate(float timeStep) {
 			if (dying) {

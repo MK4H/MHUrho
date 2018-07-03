@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using MHUrho.Control;
 using MHUrho.EntityInfo;
@@ -51,10 +53,13 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestUnitInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver, UnitSelector.INotificationReceiver, Shooter.INotificationReceiver
+	public class TestUnitInstance : UnitInstancePlugin, 
+									WorldWalker.INotificationReceiver, 
+									UnitSelector.INotificationReceiver,
+									MovingMeeleAttacker.INotificationReceiver
 	{
 		WorldWalker walker;
-		Shooter shooter;
+		MovingMeeleAttacker meele;
 
 		HealthBar healthbar;
 
@@ -66,15 +71,11 @@ namespace DefaultPackage
 			:base(level, unit)
 		{
 			this.walker = WorldWalker.GetInstanceFor(this, level);
-			this.shooter = Shooter.CreateNew(this,
-											level,
-											projectileType,
-											10);
-			this.shooter.SearchForTarget = false;
+			this.meele = MovingMeeleAttacker.CreateNew(this, level);
 
 			unit.AddComponent(walker);
 			unit.AddComponent(UnitSelector.CreateNew(this, level));
-			unit.AddComponent(shooter);
+
 
 			Init(100);
 		}
@@ -86,17 +87,9 @@ namespace DefaultPackage
 		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
 			this.Level = level;
 			walker = unit.GetDefaultComponent<WorldWalker>();
-			shooter = unit.GetDefaultComponent<Shooter>();
 		}
 
-		public float MaxMovementSpeed => 100;
-
-		public override void OnProjectileHit(IProjectile projectile)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override void OnMeeleHit(IEntity byEntity)
+		public override void OnHit(IEntity byEntity, object userData)
 		{
 			throw new NotImplementedException();
 		}
@@ -145,40 +138,20 @@ namespace DefaultPackage
 						order.Executed = walker.GoTo(moveOrder.Target);
 						break;
 					case AttackOrder attackOrder:
-						IRangeTarget rangeTarget;
-						if (attackOrder.Target.Player != Unit.Player &&
-							(rangeTarget = attackOrder.Target.GetDefaultComponent<RangeTargetComponent>()) != null) {
-							order.Executed = shooter.ShootAt(rangeTarget);
+						if (attackOrder.Target.Player != Unit.Player ) {
+							meele.Attack(attackOrder.Target);
+							order.Executed = true;
 						}
 						
 						break;
 					case ShootOrder shootOrder:
-						order.Executed = shooter.ShootAt(shootOrder.Target);
+						order.Executed = false;
 						break;
 				}
 			}
 			
 		}
 
-		public Vector3 GetSourceOffset(Shooter shooter) {
-			return new Vector3(0, 1, 0);
-		}
-
-		public void OnTargetAcquired(Shooter shooter) {
-
-		}
-
-		public void BeforeShotFired(Shooter shooter) {
-
-		}
-
-		public void AfterShotFired(Shooter shooter, IProjectile projectile) {
-
-		}
-
-		public void OnShotReloaded(Shooter shooter) {
-
-		}
 
 		public override void Dispose()
 		{
@@ -190,5 +163,27 @@ namespace DefaultPackage
 			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f), health);
 		}
 
+		public bool IsInRange(MeeleAttacker attacker, IEntity target)
+		{
+			return Vector3.Distance(Unit.Position, target.Position) < 1;
+		}
+
+		public void Attacked(MeeleAttacker attacker, IEntity target)
+		{
+			target.HitBy(Unit);
+		}
+
+		public IEntity PickTarget(List<IEntity> possibleTargets)
+		{
+			return possibleTargets.Aggregate((e1, e2) => Vector3.Distance(Unit.Position, e1.Position) <
+														Vector3.Distance(Unit.Position, e2.Position)
+															? e1
+															: e2);
+		}
+
+		public void MoveTo(Vector3 position)
+		{
+			walker.GoTo(Map.PathFinding.GetClosestNode(position));
+		}
 	}
 }

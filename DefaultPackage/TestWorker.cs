@@ -125,7 +125,7 @@ namespace DefaultPackage
 				started = true;
 				OnMovementFinished(walker);
 			}
-			
+
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData) {
@@ -145,12 +145,9 @@ namespace DefaultPackage
 			walker = unit.GetDefaultComponent<WorldWalker>();
 		}
 
-		public override void OnProjectileHit(IProjectile projectile)
-		{
-			throw new NotImplementedException();
-		}
 
-		public override void OnMeeleHit(IEntity byEntity)
+
+		public override void OnHit(IEntity other, object userData)
 		{
 			throw new NotImplementedException();
 		}
