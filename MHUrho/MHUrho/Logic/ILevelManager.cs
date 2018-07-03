@@ -9,7 +9,9 @@ using Urho;
 
 namespace MHUrho.Logic {
 	public interface ILevelManager {
-		float GameSpeed { get; set; }
+
+
+		MyGame App { get; }
 
 		Map Map { get; }
 

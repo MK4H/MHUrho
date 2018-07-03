@@ -26,8 +26,6 @@ namespace MHUrho.Packaging
 			node.Scale = scale;
 			var animatedModel = node.CreateComponent<AnimatedModel>();
 			animatedModel.Model = model;
-			//TODO: DRAW DISTANCE
-			animatedModel.DrawDistance = 200;
 			return animatedModel;
 		}
 

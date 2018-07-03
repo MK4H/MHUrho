@@ -94,10 +94,21 @@ namespace MHUrho
 			Log.Open(Files.LogPath);
 			Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
-			Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read);
+			//TODO: DEBUG
+			//Stream newConfigFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Create, FileAccess.Write);
+			//AppOptions.GetDefaultAppOptions().SaveTo(newConfigFile);
+			Files.CopyStaticToDynamic(Files.ConfigFilePath);
 
+
+
+			Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read);
 			Config = AppOptions.LoadFrom(configFile);
+			
+			
+
 			PackageManager.CreateInstance(ResourceCache);
+
+			SetConfigOptions();
 
 			if (Platform == Platforms.Android ||
 				Platform == Platforms.iOS) {
@@ -108,17 +119,34 @@ namespace MHUrho
 			}
 			
 
-			monoDebugHud = new MonoDebugHud(this);
-			monoDebugHud.Show();
 
-			//var monitor = Graphics.CurrentMonitor;
-			//var resolution = Graphics.GetDesktopResolution(monitor);
-			//Graphics.SetMode(resolution.X, resolution.Y);
-			//Graphics.ToggleFullscreen();
+
+
 			
 		}
 
-		
+		void SetConfigOptions()
+		{
+			var monitor = Graphics.CurrentMonitor;
+
+			if (Config.DebugHUD) {
+				monoDebugHud = new MonoDebugHud(this);
+				monoDebugHud.Show();
+			}
+
+			Graphics.SetMode(Config.Resolution.X,
+							 Config.Resolution.Y,
+							 Config.Fullscreen,
+							 Config.Borderless,
+							 Config.Resizable,
+							 Config.HighDPI,
+							 Config.VSync,
+							 Config.TripleBuffer,
+							 Config.Multisample,
+							 Config.Monitor,
+							 Config.RefreshRateCap);
+
+		}
 
 	}
 }

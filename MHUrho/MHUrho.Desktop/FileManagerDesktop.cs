@@ -14,8 +14,7 @@ namespace MHUrho.Desktop {
 				{
 					Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
 				},
-				"TODO",
-				"TODO",
+				"config.xml",
 				Directory.GetCurrentDirectory(),
 				Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
 				Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"));
@@ -29,9 +28,12 @@ namespace MHUrho.Desktop {
 			return fileManager;
 		}
 
-		protected FileManagerDesktop(List<string> packagePaths, string configFilePath, string defaultConfigFilePath,
-			string staticDirPath, string dynamicDirPath, string logFilePath)
-			: base(packagePaths, configFilePath, defaultConfigFilePath, staticDirPath, dynamicDirPath, logFilePath) {
+		protected FileManagerDesktop(List<string> packagePaths, 
+									string configFilePath, 
+									string staticDirPath,
+									string dynamicDirPath,
+									string logFilePath)
+			: base(packagePaths, configFilePath, staticDirPath, dynamicDirPath, logFilePath) {
 
 		}
 
@@ -72,7 +74,7 @@ namespace MHUrho.Desktop {
 			else {
 				string newFilePath = Path.Combine(DynamicDirPath, srcRelativePath);
 				Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
-				File.Copy(filePath, newFilePath);
+				File.Copy(filePath, newFilePath, true);
 			}
 		   
 		}

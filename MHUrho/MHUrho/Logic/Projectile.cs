@@ -38,7 +38,7 @@ namespace MHUrho.Logic
 				var projectile = new Projectile(ID, level, type, player);
 				node.AddComponent(projectile);
 
-				AddBasicComponents(projectile);
+				AddBasicComponents(projectile, level);
 
 				node.NodeCollisionStart += projectile.CollisionHandler;
 
@@ -113,7 +113,7 @@ namespace MHUrho.Logic
 				Projectile = new Projectile(instanceID, level, type);
 				node.AddComponent(Projectile);
 
-				AddBasicComponents(Projectile);
+				AddBasicComponents(Projectile, level);
 
 				node.NodeCollisionStart += Projectile.CollisionHandler;
 
@@ -132,11 +132,13 @@ namespace MHUrho.Logic
 				}
 			}
 
-			static void AddBasicComponents(Projectile projectile)
+			static void AddBasicComponents(Projectile projectile, ILevelManager level)
 			{
 				AddRigidBody(projectile);
 				StaticModel model = AddModel(projectile.Node, projectile.ProjectileType);
-				//TODO: Move collider to plugin
+
+				model.DrawDistance = level.App.Config.ProjectileDrawDistance;
+
 				var collider = projectile.Node.CreateComponent<CollisionShape>();
 				collider.SetBox(model.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
 			}

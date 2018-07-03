@@ -49,7 +49,7 @@ namespace MHUrho.Logic
 				}
 
 				AddRigidBody(buildingNode);
-				StaticModel model = AddModel(buildingNode, type);
+				StaticModel model = AddModel(buildingNode, type, level);
 
 				var newBuilding = new Building(id, level, topLeftCorner, type, player);
 				buildingNode.AddComponent(newBuilding);
@@ -132,7 +132,7 @@ namespace MHUrho.Logic
 				}
 
 				AddRigidBody(buildingNode);
-				StaticModel model = AddModel(buildingNode, type);
+				StaticModel model = AddModel(buildingNode, type, level);
 
 				Building = new Building(level, type, storedBuilding);
 				buildingNode.AddComponent(Building);
@@ -172,10 +172,11 @@ namespace MHUrho.Logic
 				rigidBody.UseGravity = false;
 			}
 
-			static StaticModel AddModel(Node node, BuildingType type) {
+			static StaticModel AddModel(Node node, BuildingType type, ILevelManager level) {
 				var model = type.Model.AddModel(node);
 				type.Material.ApplyMaterial(model);
 				model.CastShadows = false;
+				model.DrawDistance = level.App.Config.UnitDrawDistance;
 				return model;
 			}
 		}

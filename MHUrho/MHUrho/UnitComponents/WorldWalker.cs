@@ -320,7 +320,6 @@ namespace MHUrho.UnitComponents
 			movementDirection.Normalize();
 
 			return movementDirection *
-					LevelManager.CurrentLevel.GameSpeed *
 					timeStep *
 					(dist / waypoint.TimeToWaypoint) ; // speed = distance / time
 		}

@@ -2,231 +2,104 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Xml;
 using Urho;
 
 namespace MHUrho.StartupManagement
 {
+	[DataContract]
     public class AppOptions
     {
-		class Parser {
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 0)]
+		public float UnitDrawDistance { get; set; }
 
-			const int BufferSize = 4096;
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 1)]
+		public float ProjectileDrawDistance { get; set; }
 
-			StreamReader reader;
-			AppOptions options;
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 2)]
+		public float TerrainDrawDistance { get; set; }
 
-			readonly char[] buffer = new char[BufferSize];
-
-			char CurrentChar => buffer[index];
-
-			int index;
-			int filledIndex;
-
-			bool endOfFile;
-
-			public void ParseFrom(Stream stream)
-			{
-				//TODO: Encoding
-				reader = new StreamReader(stream);
-
-				options.UnitRenderDistance = GetUnitRenderDistance();
-				options.ProjectileRenderDistance = GetProjectileRenderDistance();
-				options.TerrainRenderDistance = GetTerrainRenderDistance();
-				options.Resolution = GetResolution();
-				options.Fullscreen = GetFullscreen();
-			}
-
-			float GetUnitRenderDistance()
-			{
-
-				CheckName("UnitRenderDistance");
-				CheckAssign();
-
-				if (TryGetNextFloat(out float value)) {
-					return value;
-				}
-				//TODO: Exception
-				throw new Exception("Invalid config file");
-			}
-
-			float GetProjectileRenderDistance()
-			{
-
-				CheckName("ProjectileRenderDistance");
-				CheckAssign();
-
-				if (TryGetNextFloat(out float value)) {
-					return value;
-				}
-
-				//TODO: Exception
-				throw new Exception("Invalid config file");
-			}
-
-			float GetTerrainRenderDistance()
-			{
-				CheckName("TerrainRenderDistance");
-				CheckAssign();
-
-				if (TryGetNextFloat(out float value)) {
-					return value;
-				}
-				//TODO: Exception
-				throw new Exception("Invalid config file");
-			}
-
-			IntVector2 GetResolution()
-			{
-				CheckName("Resolution");
-				CheckAssign();
-
-				if (TryGetNextInt(out int width) && TryGetNextInt(out int height)) {
-					return new IntVector2(width, height);
-				}
-
-				//TODO: Exception
-				throw new Exception("Invalid config file");
-			}
-
-			bool GetFullscreen()
-			{
-				CheckName("Fullscreen");
-				CheckAssign();
-
-				if (TryGetNextBool(out bool value)) {
-					return value;
-				}
-
-				//TODO: Exception
-				throw new Exception("Invalid config file");
-			}
-
-			void CheckName(string name)
-			{
-				if (GetNextToken(char.IsLetter) != name) {
-					//TODO: Exception
-					throw new Exception("Invalid config file");
-				}
-			}
-
-			void CheckAssign()
-			{
-				if (GetNextToken() != "=") {
-					//TODO: Exception
-					throw new Exception("Invalid config file");
-				}
-			}
-
-			bool TryGetNextFloat(out float value)
-			{
-				string valueString;
-				if ((valueString = GetNextToken()) != "" && float.TryParse(valueString, out value)) {
-					return true;
-				}
-
-				value = float.NaN;
-				return false;
-			}
-
-			bool TryGetNextInt(out int value)
-			{
-				string valueString;
-				if ((valueString = GetNextToken()) != "" && int.TryParse(valueString, out value)) {
-					return true;
-				}
-
-				value = -1;
-				return false;
-			}
-
-			bool TryGetNextBool(out bool value)
-			{
-				string valueString;
-				if ((valueString = GetNextToken()) != "" && bool.TryParse(valueString, out value)) {
-					return true;
-				}
-
-				value = false;
-				return false;
-			}
-
-			string GetNextToken(Predicate<char> check = null)
-			{
-				SkipWhitespace();
-				StringBuilder stringBuilder = new StringBuilder();
-				while (MoveNextChar() && !char.IsWhiteSpace(CurrentChar)) {
-					//If CurrentChar does not pass the aditional check
-					if (!(check?.Invoke(CurrentChar) ?? true)) {
-						break;
-					}
-
-					stringBuilder.Append(CurrentChar);
-				}
-
-				SkipWhitespace();
-				return stringBuilder.ToString();
-			}
-
-			void SkipWhitespace()
-			{
-				while (MoveNextChar() && char.IsWhiteSpace(CurrentChar)) {
-
-				}
-			}
-
-			bool MoveNextChar()
-			{
-				if (++index < filledIndex) {
-					return true;
-				}
-
-				filledIndex = reader.Read(buffer, 0, BufferSize);
-
-				if (filledIndex != 0) return true;
-
-				endOfFile = true;
-				return false;
-			}
-
-			public Parser(AppOptions toFill)
-			{
-				this.options = toFill;
-			}
-		}
-
-		const string UnitRenderDistanceTag = "UnitRenderDistance";
-		public float UnitRenderDistance { get; set; }
-
-		const string ProjectileRenderDistanceTag = "UnitRenderDistance";
-		public float ProjectileRenderDistance { get; set; }
-
-		public float TerrainRenderDistance { get; set; }
-
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 3)]
 		public IntVector2 Resolution { get; set; }
 
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 4)]
 		public bool Fullscreen { get; set; }
 
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 5)]
+		public bool Borderless { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 6)]
+		public bool Resizable { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 7)]
+		public bool HighDPI { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 8)]
+		public bool VSync { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 9)]
+		public bool TripleBuffer { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 10)]
+		public int Multisample { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 11)]
+		public int Monitor { get; set; }
+
+		//TODO: Dont know what this does
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 12)]
+		public int RefreshRateCap { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 13)]
 		public bool DebugHUD { get; set; }
 		//TODO: Other things
 
+
+
 		public static AppOptions LoadFrom(Stream stream)
 		{
-			var newOptions = new AppOptions();
-			var parser = new Parser(newOptions);
 
-			parser.ParseFrom(stream);
-
-			parser.Dispose();
-
+			var serializer = new DataContractSerializer(typeof(AppOptions));
+			
+			//TODO: Catch
+			AppOptions newOptions = (AppOptions)serializer.ReadObject(stream);
 			return newOptions;
 		}
 
 		public void SaveTo(Stream stream)
 		{
-			var writer = new StreamWriter(stream);
-
-			writer.WriteLine($"")
+			XmlWriterSettings settings = new XmlWriterSettings
+										{
+											Indent = true,
+											CloseOutput = true
+										};
+			using (XmlWriter writer = XmlWriter.Create(stream, settings)) {
+				var serializer = new DataContractSerializer(typeof(AppOptions));
+				serializer.WriteObject(writer, this);
+			}
 		}
 
-    }
+		public static AppOptions GetDefaultAppOptions()
+		{
+			return new AppOptions()
+					{
+						UnitDrawDistance = 200,
+						ProjectileDrawDistance = 200,
+						TerrainDrawDistance = 200,
+						Resolution = new IntVector2(1024,768),
+						Fullscreen = false,
+						Borderless = false,
+						Resizable = false,
+						HighDPI = false,
+						VSync = false,
+						TripleBuffer = false,
+						Multisample = 1,
+						Monitor = 0,
+						RefreshRateCap = 0,
+						DebugHUD = true
+					};
+		}
+
+	}
 }

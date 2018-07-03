@@ -23,57 +23,57 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg9HYW1lU3RhdGUucHJvdG8SDk1IVXJoby5TdG9yYWdlGg9VcmhvVHlwZXMu",
-            "cHJvdG8aE1BsdWdpblN0b3JhZ2UucHJvdG8iiQIKB1N0TGV2ZWwSIgoDbWFw",
+            "cHJvdG8aE1BsdWdpblN0b3JhZ2UucHJvdG8i9gEKB1N0TGV2ZWwSIgoDbWFw",
             "GAEgASgLMhUuTUhVcmhvLlN0b3JhZ2UuU3RNYXASJQoFdW5pdHMYAiADKAsy",
             "Fi5NSFVyaG8uU3RvcmFnZS5TdFVuaXQSLQoJYnVpbGRpbmdzGAMgAygLMhou",
             "TUhVcmhvLlN0b3JhZ2UuU3RCdWlsZGluZxIpCgdwbGF5ZXJzGAQgAygLMhgu",
             "TUhVcmhvLlN0b3JhZ2UuU3RQbGF5ZXISMQoLcHJvamVjdGlsZXMYBSADKAsy",
-            "HC5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUSEQoJZ2FtZVNwZWVkGAYg",
-            "ASgCEhMKC3BhY2thZ2VOYW1lGAcgASgJInQKBlN0VGlsZRIPCgd1bml0SURz",
-            "GAIgAygFEhIKCnRpbGVUeXBlSUQYAyABKAUSNQoPdG9wTGVmdFBvc2l0aW9u",
-            "GAQgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEg4KBmhlaWdo",
-            "dBgFIAEoAiLPAQoMU3RCb3JkZXJUaWxlEhIKCnRpbGVUeXBlSUQYASABKAUS",
-            "NQoPdG9wTGVmdFBvc2l0aW9uGAIgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJ",
-            "bnRWZWN0b3IyEhUKDXRvcExlZnRIZWlnaHQYAyABKAISFgoOdG9wUmlnaHRI",
-            "ZWlnaHQYBCABKAISFQoNYm90TGVmdEhlaWdodBgFIAEoAhIWCg5ib3RSaWdo",
-            "dEhlaWdodBgGIAEoAhIWCg5zcGxpdERpcmVjdGlvbhgHIAEoCCJOCgtTdE1h",
-            "cFRhcmdldBISCgppbnN0YW5jZUlEGAEgASgFEisKCHBvc2l0aW9uGAIgASgL",
-            "MhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzItICCgZTdFVuaXQSCgoCaWQY",
-            "ASABKAUSDgoGdHlwZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RWZWN0b3IzEhAKCHBsYXllcklEGAQgASgFEhQKDHRh",
-            "cmdldFVuaXRJRBgFIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhv",
-            "LlN0b3JhZ2UuUGx1Z2luRGF0YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0YRgH",
-            "IAMoCzIwLk1IVXJoby5TdG9yYWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9uZW50",
-            "RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5",
-            "GAEgASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2lu",
-            "RGF0YToCOAEiyAIKDFN0UHJvamVjdGlsZRIKCgJpZBgBIAEoBRIOCgZ0eXBl",
-            "SUQYAiABKAUSKwoIcG9zaXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5T",
-            "dFZlY3RvcjMSEAoIcGxheWVySUQYBCABKAUSLgoKdXNlclBsdWdpbhgFIAEo",
-            "CzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGESVAoUZGVmYXVsdENvbXBv",
-            "bmVudERhdGEYBiADKAsyNi5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUu",
-            "RGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50",
-            "RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJo",
-            "by5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIscCCgpTdEJ1aWxkaW5nEgoKAmlk",
-            "GAEgASgFEg4KBnR5cGVJRBgCIAEoBRIuCghsb2NhdGlvbhgDIAEoCzIcLk1I",
-            "VXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIQCghwbGF5ZXJJRBgEIAEoBRIu",
-            "Cgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0",
-            "YRJSChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzI0Lk1IVXJoby5TdG9y",
-            "YWdlLlN0QnVpbGRpbmcuRGVmYXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlE",
-            "ZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1",
-            "ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGE6AjgBIr0BCghT",
-            "dFBsYXllchIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSJgoFY29sb3IY",
-            "AyABKAsyFy5NSFVyaG8uU3RvcmFnZS5TdENvbG9yEg8KB3VuaXRJRHMYBCAD",
-            "KAUSEwoLYnVpbGRpbmdJRHMYBSADKAUSFwoPZnJpZW5kUGxheWVySURzGAYg",
-            "AygFEi4KCnVzZXJQbHVnaW4YByABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVn",
-            "aW5EYXRhIsMBCgVTdE1hcBIqCgRzaXplGAEgASgLMhwuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RJbnRWZWN0b3IyEiUKBXRpbGVzGAIgAygLMhYuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RUaWxlEjEKC2JvcmRlclRpbGVzGAMgAygLMhwuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RCb3JkZXJUaWxlEjQKD21hcFJhbmdlVGFyZ2V0cxgEIAMoCzIbLk1I",
-            "VXJoby5TdG9yYWdlLlN0TWFwVGFyZ2V0YgZwcm90bzM="));
+            "HC5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUSEwoLcGFja2FnZU5hbWUY",
+            "BiABKAkidAoGU3RUaWxlEg8KB3VuaXRJRHMYAiADKAUSEgoKdGlsZVR5cGVJ",
+            "RBgDIAEoBRI1Cg90b3BMZWZ0UG9zaXRpb24YBCABKAsyHC5NSFVyaG8uU3Rv",
+            "cmFnZS5TdEludFZlY3RvcjISDgoGaGVpZ2h0GAUgASgCIs8BCgxTdEJvcmRl",
+            "clRpbGUSEgoKdGlsZVR5cGVJRBgBIAEoBRI1Cg90b3BMZWZ0UG9zaXRpb24Y",
+            "AiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISFQoNdG9wTGVm",
+            "dEhlaWdodBgDIAEoAhIWCg50b3BSaWdodEhlaWdodBgEIAEoAhIVCg1ib3RM",
+            "ZWZ0SGVpZ2h0GAUgASgCEhYKDmJvdFJpZ2h0SGVpZ2h0GAYgASgCEhYKDnNw",
+            "bGl0RGlyZWN0aW9uGAcgASgIIk4KC1N0TWFwVGFyZ2V0EhIKCmluc3RhbmNl",
+            "SUQYASABKAUSKwoIcG9zaXRpb24YAiABKAsyGS5NSFVyaG8uU3RvcmFnZS5T",
+            "dFZlY3RvcjMi0gIKBlN0VW5pdBIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiAB",
+            "KAUSKwoIcG9zaXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3Rv",
+            "cjMSEAoIcGxheWVySUQYBCABKAUSFAoMdGFyZ2V0VW5pdElEGAUgASgFEi4K",
+            "CnVzZXJQbHVnaW4YBiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRh",
+            "Ek4KFGRlZmF1bHRDb21wb25lbnREYXRhGAcgAygLMjAuTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RVbml0LkRlZmF1bHRDb21wb25lbnREYXRhRW50cnkaVwoZRGVmYXVs",
+            "dENvbXBvbmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoFdmFsdWUYAiAB",
+            "KAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASLIAgoMU3RQcm9q",
+            "ZWN0aWxlEgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIrCghwb3NpdGlv",
+            "bhgDIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMxIQCghwbGF5ZXJJ",
+            "RBgEIAEoBRIuCgp1c2VyUGx1Z2luGAUgASgLMhouTUhVcmhvLlN0b3JhZ2Uu",
+            "UGx1Z2luRGF0YRJUChRkZWZhdWx0Q29tcG9uZW50RGF0YRgGIAMoCzI2Lk1I",
+            "VXJoby5TdG9yYWdlLlN0UHJvamVjdGlsZS5EZWZhdWx0Q29tcG9uZW50RGF0",
+            "YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5GAEg",
+            "ASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0",
+            "YToCOAEixwIKClN0QnVpbGRpbmcSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIg",
+            "ASgFEi4KCGxvY2F0aW9uGAMgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRW",
+            "ZWN0b3IyEhAKCHBsYXllcklEGAQgASgFEi4KCnVzZXJQbHVnaW4YBiABKAsy",
+            "Gi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhElIKFGRlZmF1bHRDb21wb25l",
+            "bnREYXRhGAcgAygLMjQuTUhVcmhvLlN0b3JhZ2UuU3RCdWlsZGluZy5EZWZh",
+            "dWx0Q29tcG9uZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRh",
+            "RW50cnkSCwoDa2V5GAEgASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0",
+            "b3JhZ2UuUGx1Z2luRGF0YToCOAEivQEKCFN0UGxheWVyEgoKAmlkGAEgASgF",
+            "Eg4KBnR5cGVJRBgCIAEoBRImCgVjb2xvchgDIAEoCzIXLk1IVXJoby5TdG9y",
+            "YWdlLlN0Q29sb3ISDwoHdW5pdElEcxgEIAMoBRITCgtidWlsZGluZ0lEcxgF",
+            "IAMoBRIXCg9mcmllbmRQbGF5ZXJJRHMYBiADKAUSLgoKdXNlclBsdWdpbhgH",
+            "IAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGEiwwEKBVN0TWFwEioK",
+            "BHNpemUYASABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISJQoF",
+            "dGlsZXMYAiADKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFRpbGUSMQoLYm9yZGVy",
+            "VGlsZXMYAyADKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEJvcmRlclRpbGUSNAoP",
+            "bWFwUmFuZ2VUYXJnZXRzGAQgAygLMhsuTUhVcmhvLlN0b3JhZ2UuU3RNYXBU",
+            "YXJnZXRiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Buildings", "Players", "Projectiles", "GameSpeed", "PackageName" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Buildings", "Players", "Projectiles", "PackageName" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitIDs", "TileTypeID", "TopLeftPosition", "Height" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMapTarget), global::MHUrho.Storage.StMapTarget.Parser, new[]{ "InstanceID", "Position" }, null, null, null),
@@ -117,7 +117,6 @@ namespace MHUrho.Storage {
       buildings_ = other.buildings_.Clone();
       players_ = other.players_.Clone();
       projectiles_ = other.projectiles_.Clone();
-      gameSpeed_ = other.gameSpeed_;
       packageName_ = other.packageName_;
     }
 
@@ -177,19 +176,8 @@ namespace MHUrho.Storage {
       get { return projectiles_; }
     }
 
-    /// <summary>Field number for the "gameSpeed" field.</summary>
-    public const int GameSpeedFieldNumber = 6;
-    private float gameSpeed_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public float GameSpeed {
-      get { return gameSpeed_; }
-      set {
-        gameSpeed_ = value;
-      }
-    }
-
     /// <summary>Field number for the "packageName" field.</summary>
-    public const int PackageNameFieldNumber = 7;
+    public const int PackageNameFieldNumber = 6;
     private string packageName_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string PackageName {
@@ -217,7 +205,6 @@ namespace MHUrho.Storage {
       if(!buildings_.Equals(other.buildings_)) return false;
       if(!players_.Equals(other.players_)) return false;
       if(!projectiles_.Equals(other.projectiles_)) return false;
-      if (GameSpeed != other.GameSpeed) return false;
       if (PackageName != other.PackageName) return false;
       return true;
     }
@@ -230,7 +217,6 @@ namespace MHUrho.Storage {
       hash ^= buildings_.GetHashCode();
       hash ^= players_.GetHashCode();
       hash ^= projectiles_.GetHashCode();
-      if (GameSpeed != 0F) hash ^= GameSpeed.GetHashCode();
       if (PackageName.Length != 0) hash ^= PackageName.GetHashCode();
       return hash;
     }
@@ -250,12 +236,8 @@ namespace MHUrho.Storage {
       buildings_.WriteTo(output, _repeated_buildings_codec);
       players_.WriteTo(output, _repeated_players_codec);
       projectiles_.WriteTo(output, _repeated_projectiles_codec);
-      if (GameSpeed != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(GameSpeed);
-      }
       if (PackageName.Length != 0) {
-        output.WriteRawTag(58);
+        output.WriteRawTag(50);
         output.WriteString(PackageName);
       }
     }
@@ -270,9 +252,6 @@ namespace MHUrho.Storage {
       size += buildings_.CalculateSize(_repeated_buildings_codec);
       size += players_.CalculateSize(_repeated_players_codec);
       size += projectiles_.CalculateSize(_repeated_projectiles_codec);
-      if (GameSpeed != 0F) {
-        size += 1 + 4;
-      }
       if (PackageName.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(PackageName);
       }
@@ -294,9 +273,6 @@ namespace MHUrho.Storage {
       buildings_.Add(other.buildings_);
       players_.Add(other.players_);
       projectiles_.Add(other.projectiles_);
-      if (other.GameSpeed != 0F) {
-        GameSpeed = other.GameSpeed;
-      }
       if (other.PackageName.Length != 0) {
         PackageName = other.PackageName;
       }
@@ -333,11 +309,7 @@ namespace MHUrho.Storage {
             projectiles_.AddEntriesFrom(input, _repeated_projectiles_codec);
             break;
           }
-          case 53: {
-            GameSpeed = input.ReadFloat();
-            break;
-          }
-          case 58: {
+          case 50: {
             PackageName = input.ReadString();
             break;
           }

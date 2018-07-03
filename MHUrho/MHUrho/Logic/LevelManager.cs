@@ -47,7 +47,7 @@ namespace MHUrho.Logic
 		/// </summary>
 		public static LevelManager CurrentLevel { get; private set; }
 
-		public float GameSpeed { get; set; } = 1f;
+		public MyGame App { get; private set; }
 
 		public Map Map { get; private set; }
 
@@ -85,7 +85,7 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(CameraController camera, Octree octree) {
+		protected LevelManager(MyGame app, CameraController camera, Octree octree) {
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
 			this.buildings = new Dictionary<int, IBuilding>();
@@ -95,6 +95,7 @@ namespace MHUrho.Logic
 			this.nodeToEntity = new Dictionary<Node, IEntity>();
 			this.rng = new Random();
 
+			this.App = app;
 			this.Camera = camera;
 			this.octree = octree;
 			this.DefaultComponentFactory = new DefaultComponentFactory();
@@ -134,7 +135,7 @@ namespace MHUrho.Logic
 
 
 
-				level = new LevelManager(cameraController, octree);
+				level = new LevelManager(game, cameraController, octree);
 
 				level.Minimap = new Minimap(level, 4);
 
@@ -265,7 +266,6 @@ namespace MHUrho.Logic
 
 		public StLevel Save() {
 			StLevel level = new StLevel() {
-				GameSpeed = this.GameSpeed,
 				Map = this.Map.Save(),
 				PackageName = PackageManager.Instance.ActiveGame.Name
 			};
@@ -649,7 +649,7 @@ namespace MHUrho.Logic
 			LoadSceneParts(game, scene);
 			cameraController = LoadCamera(game, scene);
 
-			CurrentLevel = new LevelManager(cameraController, octree);
+			CurrentLevel = new LevelManager(game, cameraController, octree);
 
 		}
 
@@ -675,8 +675,8 @@ namespace MHUrho.Logic
 					zone.SetBoundingBox(new BoundingBox(-1000.0f, 1000.0f));
 					zone.AmbientColor = new Color(0.5f, 0.5f, 0.5f);
 					zone.FogColor = new Color(0.7f, 0.7f, 0.7f);
-					zone.FogStart = 50;
-					zone.FogEnd = 100;
+					zone.FogStart = game.Config.TerrainDrawDistance / 2;
+					zone.FogEnd = game.Config.TerrainDrawDistance;
 				}
 			}
 			

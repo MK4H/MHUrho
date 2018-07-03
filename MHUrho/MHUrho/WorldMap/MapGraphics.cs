@@ -574,7 +574,7 @@ namespace MHUrho.WorldMap
 					this.vertexBuffer = new VertexBufferWrapper(this,vb);
 					this.indexBuffer = new IndexBufferWrapper(this,ib);
 
-					SetModel();
+					SetModel(map.LevelManager);
 				}
 
 				static VertexBuffer InitializeVertexBuffer(uint numVerticies)
@@ -643,7 +643,7 @@ namespace MHUrho.WorldMap
 
 				
 
-				void SetModel()
+				void SetModel(ILevelManager level)
 				{
 					MyGame.InvokeOnMainSafe(SetModelImpl);
 
@@ -653,7 +653,7 @@ namespace MHUrho.WorldMap
 						staticModel.Model = model;
 						staticModel.SetMaterial(graphics.material);
 						//TODO: Draw distance
-						staticModel.DrawDistance = 200;
+						staticModel.DrawDistance = level.App.Config.TerrainDrawDistance;
 					}
 				}
 			}

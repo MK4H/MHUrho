@@ -17,8 +17,6 @@ namespace MHUrho
 
 		public string ConfigFilePath { get; protected set; }
 
-		protected string DefaultConfigFilePath;
-
 		public static string CorrectRelativePath(string relativePath) {
 			if (relativePath == null) {
 				return null;
@@ -65,14 +63,12 @@ namespace MHUrho
 		protected FileManager(
 			List<string> packagePaths,
 			string configFilePath,
-			string defaultConfigFilePath,
 			string staticDirPath,
 			string dynamicDirPath,
 			string logPath) {
 
 			this.PackagePaths = packagePaths;
 			this.ConfigFilePath = configFilePath;
-			this.DefaultConfigFilePath = defaultConfigFilePath;
 			this.StaticDirPath = staticDirPath;
 			this.DynamicDirPath = dynamicDirPath;
 			this.LogPath = logPath;

@@ -110,6 +110,7 @@ namespace MHUrho.EntityInfo
 				billboardSet.Sorted = false;
 				billboardSet.Material = coloredHealthbars[entity.Player];
 				billboardSet.Scaled = false;
+				billboardSet.DrawDistance = level.App.Config.UnitDrawDistance;
 
 				billboardIndex = 0;
 			}

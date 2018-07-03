@@ -10,8 +10,7 @@ message StLevel {
 	repeated StBuilding buildings = 3;
 	repeated StPlayer players = 4;
 	repeated StProjectile projectiles = 5;
-	float gameSpeed = 6;
-	string packageName = 7;
+	string packageName = 6;
 }
 
 

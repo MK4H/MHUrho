@@ -53,7 +53,7 @@ namespace MHUrho.Logic
 			public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
 				//TODO: Check if there is already a Unit component on this node, if there is, throw exception
 
-				var centerNode = CreateBasicNodeStructure(unitNode, type);
+				var centerNode = CreateBasicNodeStructure(unitNode, level, type);
 
 				unitNode.Position = new Vector3(tile.Center.X,
 												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
@@ -123,7 +123,7 @@ namespace MHUrho.Logic
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}
 
-				var centerNode = CreateBasicNodeStructure(legNode, type);
+				var centerNode = CreateBasicNodeStructure(legNode, level, type);
 
 				var unitID = storedUnit.Id;
 
@@ -168,11 +168,11 @@ namespace MHUrho.Logic
 				}
 			}
 
-			static Node CreateBasicNodeStructure(Node legNode, UnitType type) {
+			static Node CreateBasicNodeStructure(Node legNode, ILevelManager level, UnitType type) {
 				var centerNode = legNode.CreateChild("UnitCenter");
 
 				AddRigidBody(centerNode);
-				var model = AddModel(centerNode, type);
+				var model = AddModel(centerNode, level, type);
 				AddAnimationController(centerNode);
 
 				centerNode.Position = new Vector3(0, 0, 0);
@@ -193,10 +193,12 @@ namespace MHUrho.Logic
 				rigidBody.UseGravity = false;
 			}
 
-			static StaticModel AddModel(Node node, UnitType type) {
+			static StaticModel AddModel(Node node, ILevelManager level, UnitType type) {
 				var animatedModel = type.Model.AddModel(node);
 				type.Material.ApplyMaterial(animatedModel);
 				animatedModel.CastShadows = false;
+
+				animatedModel.DrawDistance = level.App.Config.UnitDrawDistance;
 				return animatedModel;
 			}
 

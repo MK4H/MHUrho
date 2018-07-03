@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AppOptions xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/MHUrho.StartupManagement">
+  <UnitDrawDistance>100</UnitDrawDistance>
+  <ProjectileDrawDistance>100</ProjectileDrawDistance>
+  <TerrainDrawDistance>200</TerrainDrawDistance>
+  <Resolution xmlns:d2p1="http://schemas.datacontract.org/2004/07/Urho">
+    <d2p1:X>1024</d2p1:X>
+    <d2p1:Y>768</d2p1:Y>
+  </Resolution>
+  <Fullscreen>false</Fullscreen>
+  <Borderless>false</Borderless>
+  <Resizable>false</Resizable>
+  <HighDPI>false</HighDPI>
+  <VSync>false</VSync>
+  <TripleBuffer>false</TripleBuffer>
+  <Multisample>1</Multisample>
+  <Monitor>0</Monitor>
+  <RefreshRateCap>0</RefreshRateCap>
+  <DebugHUD>true</DebugHUD>
+</AppOptions>
