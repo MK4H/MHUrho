@@ -67,10 +67,12 @@ namespace MHUrho.Logic
 
 		public IGameController Input { get; protected set; }
 
-		public CameraController Camera { get; private set; }
-		
+		public CameraMover Camera { get; private set; }
 
-		Octree octree;
+		//TODO: Platform independent
+		ICameraController cameraController;
+
+		readonly Octree octree;
 
 		readonly Dictionary<int, IUnit> units;
 		readonly Dictionary<int, IPlayer> players;
@@ -85,7 +87,7 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(MyGame app, CameraController camera, Octree octree) {
+		protected LevelManager(MyGame app, CameraMover camera, Octree octree) {
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
 			this.buildings = new Dictionary<int, IBuilding>();
@@ -106,7 +108,7 @@ namespace MHUrho.Logic
 
 			Scene scene = null;
 			Octree octree = null;
-			CameraController cameraController = null;
+			CameraMover cameraMover = null;
 			LevelManager level = null;
 			List<ILoader> loaders = new List<ILoader>();
 			Node mapNode = null;
@@ -131,11 +133,11 @@ namespace MHUrho.Logic
 				octree = scene.CreateComponent<Octree>();
 
 				LoadSceneParts(game, scene);
-				cameraController = LoadCamera(game, scene);
+				cameraMover = LoadCamera(game, scene);
 
 
 
-				level = new LevelManager(game, cameraController, octree);
+				level = new LevelManager(game, cameraMover, octree);
 
 				level.Minimap = new Minimap(level, 4);
 
@@ -189,8 +191,8 @@ namespace MHUrho.Logic
 					loaders.Add(playerLoader);
 				}
 				//TODO: Move this inside the foreach
-				level.Input = game.menuController.GetGameController(cameraController, level, octree, firstPlayer);
-
+				level.Input = game.ControllerFactory.CreateGameController(cameraMover, level, octree, firstPlayer);
+				level.cameraController = game.ControllerFactory.CreateCameraController(level.Input, cameraMover);
 
 				//Connect references
 				foreach (var loader in loaders) {
@@ -226,7 +228,7 @@ namespace MHUrho.Logic
 		/// <returns>Loaded default level</returns>
 		public static async Task<LevelManager> LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName)
 		{
-			InitializeLevel(game, gamePackageName, out Scene scene, out CameraController cameraController);
+			InitializeLevel(game, gamePackageName, out Scene scene, out CameraMover cameraMover);
 
 			Node mapNode = scene.CreateChild("MapNode");
 
@@ -246,7 +248,9 @@ namespace MHUrho.Logic
 				scene.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
 				CurrentLevel.Input =
-					game.menuController.GetGameController(cameraController, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
+					game.ControllerFactory.CreateGameController(cameraMover, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
+
+				CurrentLevel.cameraController = game.ControllerFactory.CreateCameraController(CurrentLevel.Input, cameraMover);
 
 				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
 
@@ -635,7 +639,7 @@ namespace MHUrho.Logic
 			Update?.Invoke(timeStep);
 		}
 
-		static void InitializeLevel(MyGame game, string gamePackageName, out Scene scene, out CameraController cameraController)
+		static void InitializeLevel(MyGame game, string gamePackageName, out Scene scene, out CameraMover cameraMover)
 		{
 			PackageManager.Instance.LoadPackage(gamePackageName);
 
@@ -647,9 +651,9 @@ namespace MHUrho.Logic
 			physics.Enabled = true;
 
 			LoadSceneParts(game, scene);
-			cameraController = LoadCamera(game, scene);
+			cameraMover = LoadCamera(game, scene);
 
-			CurrentLevel = new LevelManager(game, cameraController, octree);
+			CurrentLevel = new LevelManager(game, cameraMover, octree);
 
 		}
 
@@ -684,17 +688,17 @@ namespace MHUrho.Logic
 			
 		}
 
-		static CameraController LoadCamera(MyGame game, Scene scene) {
+		static CameraMover LoadCamera(MyGame game, Scene scene) {
 			// Camera
 
-			CameraController cameraController = CameraController.GetCameraController(scene);
+			CameraMover cameraMover = CameraMover.GetCameraController(scene);
 
 			// Viewport
-			var viewport = new Viewport(game.Context, scene, cameraController.Camera, null);
+			var viewport = new Viewport(game.Context, scene, cameraMover.Camera, null);
 			viewport.SetClearColor(Color.White);
 			game.Renderer.SetViewport(0, viewport);
 
-			return cameraController;
+			return cameraMover;
 		}
 
 		const int MaxTries = 10000000;

@@ -13,7 +13,7 @@ namespace MHUrho.Input
 {
 	public delegate void OnCameraMove(Vector3 movement, Vector2 rotation, float timeStep);
 
-	public class CameraController : Component {
+	public class CameraMover : Component {
 
 		public bool SmoothMovement { get; set; } = true;
 
@@ -33,9 +33,9 @@ namespace MHUrho.Input
 
 		public float StaticVerticalMovement => staticMovement.Y;
 
-		public float StaticYaw => staticRotation.Y;
+		public float StaticYaw => staticRotation.X;
 
-		public float StaticPitch => staticRotation.X;
+		public float StaticPitch => staticRotation.Y;
 
 		public Camera Camera { get; private set; }
 
@@ -52,8 +52,6 @@ namespace MHUrho.Input
 		/// For storing the default camera holder while following unit or other things
 		/// </summary>
 		Node defaultCameraHolder;
-
-		Vector3 storedFixedOffset;
 		
 		/// <summary>
 		/// Point on the ground
@@ -85,55 +83,43 @@ namespace MHUrho.Input
 
 		const float NearZero = 0.001f;
 
-		public static CameraController GetCameraController(Scene scene) {
+		public static CameraMover GetCameraController(Scene scene) {
 			Node cameraHolder = scene.CreateChild(name: "CameraHolder");
 			Node cameraNode = cameraHolder.CreateChild(name: "camera");
 			Camera camera = cameraNode.CreateComponent<Camera>();
 
-			CameraController controller = cameraNode.CreateComponent<CameraController>();
-			controller.cameraHolder = cameraHolder;
-			controller.cameraNode = cameraNode;
-			controller.Camera = camera;
-			controller.defaultCameraHolder = cameraHolder;
+			CameraMover mover = cameraNode.CreateComponent<CameraMover>();
+			mover.cameraHolder = cameraHolder;
+			mover.cameraNode = cameraNode;
+			mover.Camera = camera;
+			mover.defaultCameraHolder = cameraHolder;
 			
 
 			cameraNode.Position = new Vector3(0, 10, -5);
 			cameraNode.LookAt(cameraHolder.WorldPosition, Vector3.UnitY);
 
-			controller.worldDirection = cameraNode.WorldDirection;
-			controller.cameraDistance = cameraNode.Position.Length;
+			mover.worldDirection = cameraNode.WorldDirection;
+			mover.cameraDistance = cameraNode.Position.Length;
 
-			return controller;
+			return mover;
 		}
 
-		public CameraController() {
+		public CameraMover() {
 			this.ReceiveSceneUpdates = true;
 		}
 
 
-		public void AddVerticalMovement(float movement)
+		public void AddDecayingVerticalMovement(float movement)
 		{
 			decayingMovement.Y += movement;
 		}
 
-		public void SetVerticalSpeed(float movement)
+		public void SetStaticVerticalSpeed(float movement)
 		{
 			staticMovement.Y = movement;
 		}
 
-		public void SoftResetVerticalSpeed(float movement)
-		{
-			if (staticMovement.Y == movement) {
-				staticMovement.Y = 0;
-			}
-		}
-
-		public void HardResetVerticalSpeed()
-		{
-			staticMovement.Y = 0;
-		}
-
-		public void AddHorizontalMovement(Vector2 movement)
+		public void AddDecayingHorizontalMovement(Vector2 movement)
 		{
 			StopFollowing();
 
@@ -141,134 +127,69 @@ namespace MHUrho.Input
 			decayingMovement.Z += movement.Y;
 		}
 
-		public void SetHorizontalMovement(Vector2 movement)
+		public void SetStaticHorizontalMovement(Vector2 movement)
 		{
 			staticMovement.X = movement.X;
 			staticMovement.Z = movement.Y;
 		}
 
-		public void SoftResetHorizontalMovement(Vector2 movement)
-		{
-			if (staticMovement.X == movement.X && staticMovement.Z == movement.Y) {
-				staticMovement.X = 0;
-				staticMovement.Z = 0;
-			}
-		}
-
-		public void HardResetHorizontalMovement()
-		{
-			staticMovement.X = 0;
-			staticMovement.Z = 0;
-		}
-
-		public void AddMovement(Vector3 movement)
+		public void AddDecayingMovement(Vector3 movement)
 		{
 			decayingMovement += movement;
 		}
 
-		public void SetMovement(Vector3 movement)
+		public void SetStaticMovement(Vector3 movement)
 		{
 			staticMovement = movement;
 		}
 
-		public void SoftResetMovement(Vector3 movement)
+		public void AddStaticYawChange(float yaw)
 		{
-			if (staticMovement == movement) {
-				staticMovement = Vector3.Zero;
-			}
+			decayingRotation.X += yaw;
 		}
 
-		public void HardResetMovement()
+		public void SetStaticYawChange(float yaw)
 		{
-			staticMovement = Vector3.Zero;
+			staticRotation.X = yaw;
 		}
 
-		public void AddYaw(float yaw)
-		{
-			decayingRotation.Y += yaw;
-		}
-
-		public void SetYaw(float yaw)
-		{
-			staticRotation.Y = yaw;
-		}
-
-		public void SoftResetYaw(float yaw)
-		{
-			if (staticRotation.Y == yaw) {
-				staticRotation.Y = 0;
-			}
-		}
-
-		public void HardResetYaw()
-		{
-			staticRotation.Y = 0;
-		}
-
-		public void AddPitch(float pitch)
+		public void AddDecayingPitchChange(float pitch)
 		{ 
-			decayingRotation.X += pitch;
+			decayingRotation.Y += pitch;
 		}
 
-		public void SetPitch(float pitch)
+		public void SetStaticPitchChange(float pitch)
 		{
-			staticRotation.X = pitch;
+			staticRotation.Y = pitch;
 		}
 
-		public void SoftResetPitch(float pitch)
-		{
-			if (staticRotation.X == pitch) {
-				staticRotation.X = 0;
-			}
-		}
-
-		public void HardResetPitch(float pitch)
-		{
-			staticRotation.X = 0;
-		}
-
-		public void AddRotation(Vector2 rotation)
+		/// <summary>
+		/// Adds <paramref name="rotation"/> to decaying rotation, which decays with (is divided by) <see cref="Drag"/> every tick
+		/// </summary>
+		/// <param name="rotation">The initial rotation of the camera, <see cref="Vector2.X"/> is yaw, <see cref="Vector2.Y"/> is pitch</param>
+		public void AddDecayingRotation(Vector2 rotation)
 		{
 			decayingRotation += rotation;
 		}
 
-		public void SetRotation(Vector2 rotation)
+		/// <summary>
+		/// Sets the static rotation of the camera, which will rotate every tick based on <see cref="staticRotation"/> + <see cref="decayingRotation"/>
+		/// Has the same value until set otherwise
+		/// </summary>
+		/// <param name="rotation">The rotation of the camera, <see cref="Vector2.X"/> is yaw, <see cref="Vector2.Y"/> is pitch</param>
+		public void SetStaticRotation(Vector2 rotation)
 		{
 			staticRotation = rotation;
 		}
 
-		public void SoftResetRotation(Vector2 rotation)
-		{
-			if (staticRotation == rotation) {
-				staticRotation = Vector2.Zero;
-			}
-		}
-
-		public void HardResetRotation()
-		{
-			staticRotation = Vector2.Zero;
-		}
-
-		public void AddZoom(float zoom)
+		public void AddDecayingZoomChange(float zoom)
 		{
 			decayingZoom += zoom;
 		}
 
-		public void SetZoom(float zoom)
+		public void SetStaticZoomChange(float zoom)
 		{
 			staticZoom = zoom;
-		}
-
-		public void SoftResetZoom(float zoom)
-		{
-			if (staticZoom == zoom) {
-				staticZoom = 0;
-			}
-		}
-
-		public void HardResetZoom()
-		{
-			staticZoom = 0;
 		}
 
 		public void StopAllCameraMovement()
@@ -460,17 +381,17 @@ namespace MHUrho.Input
 
 
 		void RotateCameraFixed(Vector2 rot) {
-			cameraNode.RotateAround(new Vector3(0,0,0), Quaternion.FromAxisAngle(Vector3.UnitY, rot.Y), TransformSpace.Parent);
+			cameraNode.RotateAround(new Vector3(0,0,0), Quaternion.FromAxisAngle(Vector3.UnitY, rot.X), TransformSpace.Parent);
 
 
-			if ((5 < cameraNode.Rotation.PitchAngle && rot.X < 0) || (cameraNode.Rotation.PitchAngle < 85 && rot.X > 0)) {
-				cameraNode.RotateAround(new Vector3(0, 0, 0), Quaternion.FromAxisAngle(cameraNode.WorldRight, rot.X), TransformSpace.Parent);
+			if ((5 < cameraNode.Rotation.PitchAngle && rot.Y < 0) || (cameraNode.Rotation.PitchAngle < 85 && rot.Y > 0)) {
+				cameraNode.RotateAround(new Vector3(0, 0, 0), Quaternion.FromAxisAngle(cameraNode.WorldRight, rot.Y), TransformSpace.Parent);
 			}
 		}
 
 		void RotateCameraFree(Vector2 rot) {
-			cameraNode.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, -rot.Y),TransformSpace.Parent);
-			cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Right, rot.X),TransformSpace.Parent);
+			cameraNode.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, rot.X),TransformSpace.Parent);
+			cameraNode.Rotate(Quaternion.FromAxisAngle(cameraNode.Right, rot.Y),TransformSpace.Parent);
 		}
 
 		void CorrectWorldDirection()

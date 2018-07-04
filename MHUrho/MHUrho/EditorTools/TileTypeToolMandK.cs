@@ -134,7 +134,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
 			if (selected != null && mouseButtonDown) {
 				var newCenterTile = input.GetTileUnderCursor();
 				if (newCenterTile != null && newCenterTile != centerTile) {

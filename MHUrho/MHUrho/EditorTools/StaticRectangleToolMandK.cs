@@ -61,7 +61,7 @@ namespace MHUrho.EditorTools
 			fixedCenter = null;
 		}
 
-		void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
 			if (fixedCenter != null) {
 				Map.HighlightRectangle(fixedCenter, Size,  Color.Green);
 				return;

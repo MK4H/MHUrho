@@ -120,7 +120,7 @@ namespace MHUrho.EditorTools
 			validMouseDown = false;
 		}
 
-		void MouseMove(MouseMovedEventArgs e) {
+		void MouseMove(MHUrhoMouseMovedEventArgs e) {
 			MouseAndCameraMove();
 		}
 

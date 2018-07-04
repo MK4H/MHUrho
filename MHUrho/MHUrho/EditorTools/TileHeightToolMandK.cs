@@ -83,7 +83,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		void MouseMove(MouseMovedEventArgs e) {
+		void MouseMove(MHUrhoMouseMovedEventArgs e) {
 			if (mouseButtonDown) {
 				Map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
 			}

@@ -27,6 +27,5 @@ namespace MHUrho.Input
 		void Enable();
 
 		void Disable();
-
 	}
 }

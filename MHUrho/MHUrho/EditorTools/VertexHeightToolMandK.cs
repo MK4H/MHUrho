@@ -114,7 +114,7 @@ namespace MHUrho.EditorTools {
 			}
 		}
 
-		void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
 			if (mode == Mode.Moving) {
 				Map.ChangeHeight(verticies, -e.DY * Sensitivity);
 			}

@@ -33,7 +33,7 @@ namespace MHUrho.Input
 
 		public bool UIPressed { get; set; }
 
-		readonly CameraController cameraController;
+		readonly CameraMover cameraMover;
 		readonly Octree octree;
 		
 
@@ -44,8 +44,8 @@ namespace MHUrho.Input
 
 		
 
-		public GameTouchController(MyGame game, ILevelManager level, Octree octree, Player player, CameraController cameraController, float sensitivity = 0.1f) : base(game) {
-			this.cameraController = cameraController;
+		public GameTouchController(MyGame game, ILevelManager level, Octree octree, Player player, CameraMover cameraMover, float sensitivity = 0.1f) : base(game) {
+			this.cameraMover = cameraMover;
 			this.Sensitivity = sensitivity;
 			this.Level = level;
 			this.octree = octree;
@@ -63,13 +63,13 @@ namespace MHUrho.Input
 		public void SwitchToContinuousMovement() {
 			ContinuousMovement = true;
 
-			cameraController.SmoothMovement = true;
+			cameraMover.SmoothMovement = true;
 		}
 
 		public void SwitchToDiscontinuousMovement() {
 			ContinuousMovement = false;
 
-			cameraController.SmoothMovement = true;
+			cameraMover.SmoothMovement = true;
 			
 		}
 
@@ -83,7 +83,7 @@ namespace MHUrho.Input
 			if (!UIPressed) {
 				activeTouches.Add(e.TouchID, new Vector2(e.X, e.Y));
 
-				var clickedRay = cameraController.Camera.GetScreenRay(e.X / (float)UI.Root.Width,
+				var clickedRay = cameraMover.Camera.GetScreenRay(e.X / (float)UI.Root.Width,
 																	  e.Y / (float)UI.Root.Height);
 
 				if (DoOnlySingleRaycasts) {
@@ -107,8 +107,8 @@ namespace MHUrho.Input
 		protected override void TouchEnd(TouchEndEventArgs e) {
 			activeTouches.Remove(e.TouchID);
 
-			cameraController.AddHorizontalMovement(cameraController.StaticHorizontalMovement);
-			cameraController.HardResetHorizontalMovement();
+			cameraMover.AddDecayingHorizontalMovement(cameraMover.StaticHorizontalMovement);
+			cameraMover.SetStaticHorizontalMovement(Vector2.Zero);
 		}
 
 		protected override void TouchMove(TouchMoveEventArgs e) {
@@ -135,11 +135,11 @@ namespace MHUrho.Input
 			if (ContinuousMovement) {
 				var movement = (new Vector2(e.X, e.Y) - activeTouches[e.TouchID]) * Sensitivity;
 				movement.Y = -movement.Y;
-				cameraController.SetHorizontalMovement(movement);
+				cameraMover.SetStaticHorizontalMovement(movement);
 			}
 			else {
 				var movement = new Vector2(e.DX, -e.DY) * Sensitivity;
-				cameraController.AddHorizontalMovement(movement);
+				cameraMover.AddDecayingHorizontalMovement(movement);
 			}
 		}
 

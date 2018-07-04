@@ -33,7 +33,7 @@ namespace MHUrho.Logic {
 
 		IGameController Input { get; }
 
-		CameraController Camera { get; }
+		CameraMover Camera { get; }
 
 		IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
 

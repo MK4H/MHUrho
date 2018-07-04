@@ -31,6 +31,8 @@ namespace MHUrho
 
 		public IMenuController menuController;
 
+		public ControllerFactory ControllerFactory { get; private set; }
+
 		static int mainThreadID;
 
 		MonoDebugHud monoDebugHud;
@@ -112,17 +114,17 @@ namespace MHUrho
 
 			if (Platform == Platforms.Android ||
 				Platform == Platforms.iOS) {
-				menuController = new MenuTouchController(this);
+				ControllerFactory = new TouchFactory(this);
 			}
 			else {
-				menuController = new MenuMandKController(this);
+				ControllerFactory = new MandKFactory(this);
 			}
-			
+
+			menuController = ControllerFactory.CreateMenuController();
 
 
 
 
-			
 		}
 
 		void SetConfigOptions()

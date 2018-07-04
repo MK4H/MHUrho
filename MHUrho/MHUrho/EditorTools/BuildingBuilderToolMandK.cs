@@ -129,7 +129,7 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		void OnMouseMove(MouseMovedEventArgs e) {
+		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
 			HighlightBuildingRectangle();
 		}
 

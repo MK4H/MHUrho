@@ -23,8 +23,8 @@ namespace MHUrho.Input
 			UI = new MandKMenuUI(game);
 		}
 
-		public IGameController GetGameController(CameraController cameraController, ILevelManager levelManager, Octree octree, Player player) {
-			return new GameMandKController(Game, levelManager, octree, player, cameraController);
+		public IGameController GetGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player) {
+			return new GameMandKController(Game, levelManager, octree, player, cameraMover);
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {
@@ -35,19 +35,19 @@ namespace MHUrho.Input
 
 		}
 
-		protected override void MouseButtonDown(MouseButtonDownEventArgs e) {
+		protected override void MouseButtonDown(Urho.MouseButtonDownEventArgs e) {
 
 		}
 
-		protected override void MouseButtonUp(MouseButtonUpEventArgs e) { 
+		protected override void MouseButtonUp(Urho.MouseButtonUpEventArgs e) { 
 
 		}
 
-		protected override void MouseMoved(MouseMovedEventArgs e) {
+		protected override void MouseMoved(Urho.MouseMovedEventArgs e) {
 
 		}
 
-		protected override void MouseWheel(MouseWheelEventArgs e) {
+		protected override void MouseWheel(Urho.MouseWheelEventArgs e) {
 
 		}
 
