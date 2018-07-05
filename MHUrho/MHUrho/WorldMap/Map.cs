@@ -1210,6 +1210,11 @@ namespace MHUrho.WorldMap
 			return tile.GetHeightAt(x, y);
 		}
 
+		public float GetHeightAt(Vector2 position)
+		{
+			return GetHeightAt(position.X, position.Y);
+		}
+
 		public Vector3 GetUpDirectionAt(float x, float y) 
 		{
 			return GetUpDirectionAt(new Vector2(x, y));

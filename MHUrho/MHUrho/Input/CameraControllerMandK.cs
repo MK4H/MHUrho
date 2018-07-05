@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Helpers;
+using MHUrho.UserInterface;
 using MHUrho.Logic;
 using Urho;
 using Urho.Gui;
@@ -26,11 +27,14 @@ namespace MHUrho.Input
 		
 		readonly GameMandKController input;
 
+		readonly MandKGameUI ui;
+
 		readonly CameraMover camera;
 
-		public CameraControllerMandK(GameMandKController input, CameraMover cameraMover)
+		public CameraControllerMandK(GameMandKController input, MandKGameUI ui, CameraMover cameraMover)
 		{
 			this.input = input;
+			this.ui = ui;
 			this.camera = cameraMover;
 			this.CameraRotationSensitivity = 10.0f;
 			this.CameraScrollSensitivity = 10.0f;
@@ -137,7 +141,9 @@ namespace MHUrho.Input
 
 		void OnMouseWheel(MouseWheelEventArgs e)
 		{
-			camera.AddDecayingZoomChange(e.Wheel * WheelSensitivity);
+			if (!ui.UIHovering) {
+				camera.AddDecayingZoomChange(e.Wheel * WheelSensitivity);
+			}
 		}
 
 		void OnMouseMoved(MHUrhoMouseMovedEventArgs e)

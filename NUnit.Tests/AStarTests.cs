@@ -620,6 +620,11 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public float GetHeightAt(Vector2 position)
+			{
+				throw new NotImplementedException();
+			}
+
 			public Vector3 GetUpDirectionAt(float x, float y)
 			{
 				throw new NotImplementedException();

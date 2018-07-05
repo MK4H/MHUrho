@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.EditorTools;
+using MHUrho.Helpers;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -22,13 +23,17 @@ namespace MHUrho.UserInterface
 
 		public GameMandKController InputCtl { get; protected set; }
 
-		IPlayer player => InputCtl.Player;
+		public bool UIHovering => hovering > 0;
+
+		IPlayer Player => InputCtl.Player;
+
+		CameraMover cameraMover;
 
 		
 		readonly UIElement toolSelection;
 		readonly UIElement selectionBar;
 		readonly UIElement playerSelection;
-		readonly BorderImage minimap;
+		readonly Button minimap;
 
 		UIElement selectionBarSelected;
 		UIElement selectedToolButton;
@@ -37,10 +42,15 @@ namespace MHUrho.UserInterface
 
 		int hovering = 0;
 
-		public MandKGameUI(MyGame game, GameMandKController input) 
+		bool minimapHover = false;
+		IntVector2 minimapClickPos;
+		Vector2 previousCameraMovement;
+
+		public MandKGameUI(MyGame game, GameMandKController input, CameraMover cameraMover) 
 			:base(game, input.Level)
 		{
 			this.InputCtl = input;
+			this.cameraMover = cameraMover;
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
 			//TODO: User texture
@@ -88,14 +98,22 @@ namespace MHUrho.UserInterface
 			playerSelection.HoverEnd += UIHoverEnd;
 
 
-			minimap = UI.Root.CreateBorderImage();
-
+			minimap = UI.Root.CreateButton();
 
 			minimap.Texture = Level.Minimap.Texture;
 			minimap.MinSize = new IntVector2(minimap.Texture.Width, minimap.Texture.Height);		
 			minimap.Size = minimap.MinSize;
 			minimap.HorizontalAlignment = HorizontalAlignment.Center;
 			minimap.VerticalAlignment = VerticalAlignment.Center;
+			minimap.Pressed += MinimapPressed;
+			minimap.Released += MinimapReleased;
+			minimap.HoverBegin += UIHoverBegin;
+			minimap.HoverBegin += MinimapHoverBegin;
+			minimap.HoverEnd += UIHoverEnd;
+			minimap.HoverEnd += MinimapHoverEnd;
+
+			InputCtl.MouseWheelMoved += MouseWheel;
+
 		}
 
 		public void Dispose() {
@@ -272,19 +290,14 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		void UIHoverBegin(HoverBeginEventArgs e) {
+		void UIHoverBegin(HoverBeginEventArgs e)
+		{
 			hovering++;
-			InputCtl.UIHovering = true;
-
-			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
 		}
 
-		void UIHoverEnd(HoverEndEventArgs e) {
-			if (--hovering == 0) {
-				InputCtl.UIHovering = false;
-			}
-
-			Urho.IO.Log.Write(LogLevel.Debug, $"UIHovering :{hovering}");
+		void UIHoverEnd(HoverEndEventArgs e)
+		{
+			hovering--;
 		}
 
 		void ClearDelegates() {
@@ -292,6 +305,14 @@ namespace MHUrho.UserInterface
 			selectionBar.HoverEnd -= UIHoverEnd;
 			toolSelection.HoverBegin -= UIHoverBegin;
 			toolSelection.HoverEnd -= UIHoverEnd;
+
+			minimap.Pressed -= MinimapPressed;
+			minimap.Released -= MinimapReleased;
+			minimap.HoverBegin -= UIHoverBegin;
+			minimap.HoverBegin -= MinimapHoverBegin;
+			minimap.HoverEnd -= UIHoverEnd;
+			minimap.HoverEnd -= MinimapHoverEnd;
+			InputCtl.MouseWheelMoved -= MouseWheel;
 
 			foreach (var button in selectionBar.Children) {
 				button.HoverBegin -= Button_HoverBegin;
@@ -334,5 +355,67 @@ namespace MHUrho.UserInterface
 			}
 		}
 
+		void MinimapPressed(PressedEventArgs e)
+		{
+			minimapClickPos = minimap.ScreenToElement(InputCtl.CursorPosition);
+
+			Vector2? worldPosition = Level.Minimap.MinimapToWorld(minimapClickPos);
+
+			if (worldPosition.HasValue) {
+				cameraMover.MoveTo(worldPosition.Value);
+			}
+
+			Level.Minimap.Refresh();
+			InputCtl.MouseMove += MinimapMouseMove;
+		}
+
+		void MinimapReleased(ReleasedEventArgs e)
+		{
+			InputCtl.MouseMove -= MinimapMouseMove;
+
+			StopCameraMovement();
+		}
+
+
+		void MinimapHoverBegin(HoverBeginEventArgs e)
+		{
+			minimapHover = true;
+		}
+
+		void MinimapHoverEnd(HoverEndEventArgs e)
+		{
+			minimapHover = false;
+			InputCtl.MouseMove -= MinimapMouseMove;
+
+			StopCameraMovement();
+		}
+
+		void MinimapMouseMove(MHUrhoMouseMovedEventArgs e)
+		{
+			Vector2 newMovement = (minimap.ScreenToElement(e.CursorPosition) - minimapClickPos).ToVector2();
+			newMovement.Y = -newMovement.Y;
+			cameraMover.SetStaticHorizontalMovement(cameraMover.StaticHorizontalMovement + (newMovement - previousCameraMovement));
+
+			previousCameraMovement = newMovement;
+		}
+
+		void StopCameraMovement()
+		{
+
+			var cameraMovement = cameraMover.StaticHorizontalMovement - previousCameraMovement;
+			cameraMovement.X = FloatHelpers.FloatsEqual(cameraMovement.X, 0) ? 0 : cameraMovement.X;
+			cameraMovement.Y = FloatHelpers.FloatsEqual(cameraMovement.Y, 0) ? 0 : cameraMovement.Y;
+
+			cameraMover.SetStaticHorizontalMovement(cameraMovement);
+
+			previousCameraMovement = Vector2.Zero;
+		}
+
+		void MouseWheel(MouseWheelEventArgs e)
+		{
+			if (!minimapHover) return;
+
+			Level.Minimap.Zoom(e.Wheel);
+		}
 	}
 }

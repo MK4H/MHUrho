@@ -32,6 +32,16 @@ namespace MHUrho.Helpers
 			return new IntVector2((int)Math.Round(vector2.X), (int)Math.Round(vector2.Y));
 		}
 
+		public static IntVector2 FloorToIntVector2(this Vector2 vector2)
+		{
+			return new IntVector2((int)Math.Floor(vector2.X), (int)Math.Floor(vector2.Y));
+		}
+
+		public static IntVector2 CeilingToIntVector2(this Vector2 vector2)
+		{
+			return new IntVector2((int)Math.Ceiling(vector2.X), (int)Math.Ceiling(vector2.Y));
+		}
+
 		public static bool IsNear(this Vector2 vector2, Vector2 other, float tolerance)
 		{
 			var diff = vector2 - other;

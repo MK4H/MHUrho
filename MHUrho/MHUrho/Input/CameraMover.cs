@@ -8,6 +8,7 @@ using Urho.IO;
 
 using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.WorldMap;
 
 namespace MHUrho.Input
 {
@@ -48,6 +49,8 @@ namespace MHUrho.Input
 		public event OnCameraMove OnFixedMove;
 		public event OnCameraMove OnFreeFloatMove;
 
+		IMap map;
+
 		/// <summary>
 		/// For storing the default camera holder while following unit or other things
 		/// </summary>
@@ -83,7 +86,10 @@ namespace MHUrho.Input
 
 		const float NearZero = 0.001f;
 
-		public static CameraMover GetCameraController(Scene scene) {
+		const float FreeFloatHeightOffset = 0.2f;
+		const float MinZoomDistance = 0.5f;
+
+		public static CameraMover GetCameraController(Scene scene, IMap map) {
 			Node cameraHolder = scene.CreateChild(name: "CameraHolder");
 			Node cameraNode = cameraHolder.CreateChild(name: "camera");
 			Camera camera = cameraNode.CreateComponent<Camera>();
@@ -93,7 +99,7 @@ namespace MHUrho.Input
 			mover.cameraNode = cameraNode;
 			mover.Camera = camera;
 			mover.defaultCameraHolder = cameraHolder;
-			
+			mover.map = map;
 
 			cameraNode.Position = new Vector3(0, 10, -5);
 			cameraNode.LookAt(cameraHolder.WorldPosition, Vector3.UnitY);
@@ -192,6 +198,29 @@ namespace MHUrho.Input
 			staticZoom = zoom;
 		}
 
+		public void MoveTo(Vector2 worldPosition)
+		{
+			StopFollowing();
+
+			//TODO: signal movement
+
+			if (map.IsInside(worldPosition)) {
+				cameraHolder.Position = new Vector3(worldPosition.X, map.GetHeightAt(worldPosition), worldPosition.Y);
+			}
+			else {
+				worldPosition = RoundPositionToMap(worldPosition);
+				cameraHolder.Position = new Vector3(worldPosition.X, map.GetHeightAt(worldPosition), worldPosition.Y);
+			}
+			
+		}
+
+		public void MoveBy(Vector2 worldDelta)
+		{
+			//Need to stop following so the cameraHolder is the correct one
+			StopFollowing();
+			MoveTo(cameraHolder.WorldPosition.XZ2() + worldDelta);
+		}
+
 		public void StopAllCameraMovement()
 		{
 			staticMovement = Vector3.Zero;
@@ -207,14 +236,17 @@ namespace MHUrho.Input
 				fixedPosition = cameraNode.Position;
 				fixedRotation = cameraNode.Rotation;
 
-				cameraHolder.Position = cameraNode.WorldPosition.XZ();
-				cameraNode.Position = new Vector3(0,cameraNode.Position.Y, 0);
+				cameraHolder.Position = RoundPositionToMap(cameraNode.WorldPosition, FreeFloatHeightOffset);
+				cameraNode.Position = new Vector3(0, 0, 0);
 			}
 		}
 
 		public void SwitchToFixed() {
 			if (FreeFloat) {
 				FreeFloat = false;
+
+				cameraHolder.Position = RoundPositionToMap(cameraHolder.Position - fixedPosition);
+
 				//Restore the fixed position relative to holder
 				cameraNode.Position = fixedPosition;
 				cameraNode.Rotation = fixedRotation;
@@ -351,7 +383,17 @@ namespace MHUrho.Input
 			var worldDelta = Vector3.Normalize(cameraNode.WorldDirection.XZ()) * deltaZ + 
 							Vector3.Normalize(cameraNode.Right.XZ()) * deltaX;
 
-			cameraHolder.Translate(worldDelta,TransformSpace.World);
+
+			var newPosition = cameraHolder.Position + worldDelta;
+			
+			if (map.IsInside(newPosition.XZ2())) {
+				newPosition.Y = map.GetHeightAt(newPosition.XZ2());
+				cameraHolder.Position = newPosition;
+			}
+			else {
+				Vector2 newPositionXZ = RoundPositionToMap(newPosition.XZ2());
+				cameraHolder.Position = new Vector3(newPositionXZ.X, map.GetHeightAt(newPositionXZ), newPositionXZ.Y);
+			}
 		}
 
 		/// <summary>
@@ -361,21 +403,35 @@ namespace MHUrho.Input
 		void MoveVertical(float delta) {
 			var position = cameraNode.Position;
 			position.Y += delta / cameraHolder.Scale.Y;
-			cameraNode.Position = position;
-			cameraNode.LookAt(cameraHolder.WorldPosition, Vector3.UnitY);
-			//Log.Write(LogLevel.Debug, $"Camera position: {cameraNode.WorldPosition}");
+
+			if (position.Y > 0.5f) {
+				cameraNode.Position = position;
+				cameraNode.LookAt(cameraHolder.WorldPosition, Vector3.UnitY);
+			}
 		}
 
 		void Zoom(float delta)
 		{
-			cameraNode.Position += Vector3.Divide(Vector3.Normalize(cameraNode.Position) * (-delta), cameraHolder.Scale);
+			Vector3 newPosition = cameraNode.Position + Vector3.Divide(Vector3.Normalize(cameraNode.Position) * (-delta), cameraHolder.Scale);
+
+			/*If distance to holder (which is at 0,0,0) is less than min allowed distance
+			 or the vector changed quadrant, which means it went through 0,0,0
+			 */
+
+			if (newPosition.Length < MinZoomDistance ||
+				newPosition.Y < 0) {
+				cameraNode.Position = Vector3.Normalize(cameraNode.Position) * MinZoomDistance;
+			}
+			else {
+				cameraNode.Position = newPosition;
+			}
 		}
 
 		void MoveRelativeToLookingDirection(Vector3 delta) {
 			if (delta != Vector3.Zero) {
 				delta = cameraNode.WorldRotation * delta;
-				cameraNode.Translate(new Vector3(0, delta.Y, 0), TransformSpace.Parent);
-				cameraHolder.Translate(new Vector3(delta.X, 0, delta.Z), TransformSpace.Parent);
+
+				cameraHolder.Position = RoundPositionToMap(cameraHolder.Position + delta, FreeFloatHeightOffset);
 			}
 		}
 
@@ -405,6 +461,50 @@ namespace MHUrho.Input
 		{
 			CorrectWorldDirection();
 		}
+
+		Vector2 RoundPositionToMap(Vector2 position)
+		{
+			if (position.X < map.Left) {
+				position.X = map.Left;
+			}
+			else if (position.X > map.Left + map.Width) {
+				position.X = map.Left + map.Width - 0.01f; ;
+			}
+
+			if (position.Y < map.Top) {
+				position.Y = map.Top;
+			}
+			else if (position.Y > map.Top + map.Length) {
+				position.Y = map.Top + map.Length - 0.01f;
+			}
+
+			return position;
+		}
+
+		Vector3 RoundPositionToMap(Vector3 position, float minOffsetHeight = 0, float minOffsetBorder = 0)
+		{
+			if (position.X < map.Left + minOffsetBorder) {
+				position.X = map.Left + minOffsetBorder;
+			}
+			else if (position.X > map.Left + map.Width - minOffsetBorder) {
+				position.X = map.Left + map.Width - 0.01f - minOffsetBorder; 
+			}
+
+			if (position.Z < map.Top + minOffsetBorder) {
+				position.Z = map.Top + minOffsetBorder;
+			}
+			else if (position.Z > map.Top + map.Length - minOffsetBorder) {
+				position.Z = map.Top + map.Length - 0.01f - minOffsetBorder;
+			}
+
+			float height = map.GetHeightAt(position.X, position.Z);
+			if (position.Y <= height + minOffsetHeight) {
+				position.Y = height + minOffsetHeight;
+			}
+
+			return position;
+		}
+
 
 	}
 }

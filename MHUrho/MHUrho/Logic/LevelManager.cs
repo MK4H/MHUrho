@@ -87,7 +87,7 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(MyGame app, CameraMover camera, Octree octree) {
+		protected LevelManager(MyGame app, Octree octree) {
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
 			this.buildings = new Dictionary<int, IBuilding>();
@@ -98,7 +98,6 @@ namespace MHUrho.Logic
 			this.rng = new Random();
 
 			this.App = app;
-			this.Camera = camera;
 			this.octree = octree;
 			this.DefaultComponentFactory = new DefaultComponentFactory();
 			ReceiveSceneUpdates = true;
@@ -120,6 +119,8 @@ namespace MHUrho.Logic
 			loaders.Add(mapLoader);
 			level.Map = mapLoader.Map;
 
+			MyGame.InvokeOnMainSafe(CreateCamera);
+
 			MyGame.InvokeOnMainSafe(LoadEntities);
 
 			return level;
@@ -133,16 +134,18 @@ namespace MHUrho.Logic
 				octree = scene.CreateComponent<Octree>();
 
 				LoadSceneParts(game, scene);
-				cameraMover = LoadCamera(game, scene);
 
-
-
-				level = new LevelManager(game, cameraMover, octree);
+				level = new LevelManager(game, octree);
 
 				level.Minimap = new Minimap(level, 4);
 
 				//Load data
 				mapNode = scene.CreateChild("MapNode");
+			}
+
+			void CreateCamera()
+			{
+				level.Camera = LoadCamera(game, scene, level.Map);
 			}
 
 			void LoadEntities()
@@ -228,7 +231,7 @@ namespace MHUrho.Logic
 		/// <returns>Loaded default level</returns>
 		public static async Task<LevelManager> LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName)
 		{
-			InitializeLevel(game, gamePackageName, out Scene scene, out CameraMover cameraMover);
+			InitializeLevel(game, gamePackageName, out Scene scene);
 
 			Node mapNode = scene.CreateChild("MapNode");
 
@@ -237,9 +240,16 @@ namespace MHUrho.Logic
 
 			CurrentLevel.Minimap = new Minimap(CurrentLevel, 4);
 
+			MyGame.InvokeOnMainSafe(CreateCamera);
+
 			MyGame.InvokeOnMainSafe(StartLevel);
 
 			return CurrentLevel;
+
+			void CreateCamera()
+			{
+				CurrentLevel.Camera = LoadCamera(game, scene, map);
+			}
 
 			void StartLevel()
 			{
@@ -248,9 +258,9 @@ namespace MHUrho.Logic
 				scene.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
 				CurrentLevel.Input =
-					game.ControllerFactory.CreateGameController(cameraMover, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
+					game.ControllerFactory.CreateGameController(CurrentLevel.Camera, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
 
-				CurrentLevel.cameraController = game.ControllerFactory.CreateCameraController(CurrentLevel.Input, cameraMover);
+				CurrentLevel.cameraController = game.ControllerFactory.CreateCameraController(CurrentLevel.Input, CurrentLevel.Camera);
 
 				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
 
@@ -639,7 +649,7 @@ namespace MHUrho.Logic
 			Update?.Invoke(timeStep);
 		}
 
-		static void InitializeLevel(MyGame game, string gamePackageName, out Scene scene, out CameraMover cameraMover)
+		static void InitializeLevel(MyGame game, string gamePackageName, out Scene scene)
 		{
 			PackageManager.Instance.LoadPackage(gamePackageName);
 
@@ -651,9 +661,8 @@ namespace MHUrho.Logic
 			physics.Enabled = true;
 
 			LoadSceneParts(game, scene);
-			cameraMover = LoadCamera(game, scene);
 
-			CurrentLevel = new LevelManager(game, cameraMover, octree);
+			CurrentLevel = new LevelManager(game, octree);
 
 		}
 
@@ -688,10 +697,10 @@ namespace MHUrho.Logic
 			
 		}
 
-		static CameraMover LoadCamera(MyGame game, Scene scene) {
+		static CameraMover LoadCamera(MyGame game, Scene scene, IMap map) {
 			// Camera
 
-			CameraMover cameraMover = CameraMover.GetCameraController(scene);
+			CameraMover cameraMover = CameraMover.GetCameraController(scene, map);
 
 			// Viewport
 			var viewport = new Viewport(game.Context, scene, cameraMover.Camera, null);

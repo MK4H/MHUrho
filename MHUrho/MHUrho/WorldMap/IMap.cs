@@ -431,6 +431,8 @@ namespace MHUrho.WorldMap {
 
 		float GetHeightAt(float x, float y);
 
+		float GetHeightAt(Vector2 position);
+
 		Vector3 GetUpDirectionAt(float x, float y);
 
 		Vector3 GetUpDirectionAt(Vector2 position);

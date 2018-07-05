@@ -39,7 +39,11 @@ namespace MHUrho.WorldMap
 		/// In both width and height, because tiles are square even in the minimap
 		/// </summary>
 		int pixelsPerTile = 8;
+
 		IntVector2 topLeftPosition = new IntVector2(1,1);
+
+		int TilesPerColumn => image.Height / pixelsPerTile;
+		int TilesPerRow => image.Width / pixelsPerTile;
 
 		
 		public Minimap(ILevelManager level, float refreshRate)
@@ -57,8 +61,8 @@ namespace MHUrho.WorldMap
 
 		public void Refresh()
 		{
+			timeToRefresh = 1.0f / RefreshRate;
 			MoveTo(Level.Camera.PositionXZ.ToIntVector2());
-			int tilesPerColumn = image.Height / pixelsPerTile;
 
 			unsafe {
 				uint* imageData = (uint*)image.Data;
@@ -70,7 +74,7 @@ namespace MHUrho.WorldMap
 				*/
 
 				//One axis has to be inverted, because what works on screen ([0,0] top left corner) does not work in the 3D world
-				IntVector2 tileMapLocation = topLeftPosition + new IntVector2(0, tilesPerColumn - 1);
+				IntVector2 tileMapLocation = topLeftPosition + new IntVector2(0, TilesPerColumn - 1);
 				int tilePixelXIndex = 0, tilePixelYIndex = 0;
 				uint color = GetTileColor(tileMapLocation);
 				for (int y = 0; y < image.Height; y++) {
@@ -113,7 +117,6 @@ namespace MHUrho.WorldMap
 		{
 			timeToRefresh -= timeStep;
 			if (timeToRefresh < 0) {
-				timeToRefresh = 1.0f / RefreshRate;
 				Refresh();
 			}
 		}
@@ -128,23 +131,74 @@ namespace MHUrho.WorldMap
 			MoveTo(centerTile.MapLocation);
 		}
 
-		public bool ZoomIn(int times = 1) {
-			pixelsPerTile = pixelsPerTile << times;
-
-			if (pixelsPerTile <= image.Height && pixelsPerTile > 0) return true;
-
-			pixelsPerTile = image.Height;
-			return false;
-		}
-
-		public bool ZoomOut(int times = 1)
+		/// <summary>
+		/// TODO: summary
+		/// </summary>
+		/// <param name="times">How much zoom, + is zoom in, - is zoom out</param>
+		/// <returns>true if it is possible to zoom further in the given direction, false if not</returns>
+		public bool Zoom(int times)
 		{
-			pixelsPerTile = pixelsPerTile >> times;
-			if (pixelsPerTile > 0) return true;
-			pixelsPerTile = 1;
-			return false;
+			pixelsPerTile = times >= 0 ? pixelsPerTile << times : pixelsPerTile >> -times;
+
+			if (pixelsPerTile > image.Height) {
+				pixelsPerTile = image.Height;
+				return false;
+			}
+
+			if (pixelsPerTile < 1) {
+				pixelsPerTile = 1;
+				return false;
+			}
+
+			return true;
 		}
 
+		public Vector2? MinimapToWorld(IntVector2 minimapPosition)
+		{
+			IntVector2 tilesOffset = minimapPosition / pixelsPerTile;
+			//Invert Y coord, because i made minimap wrong
+			tilesOffset.Y = -tilesOffset.Y;
+
+			IntVector2 minimapTopLeft = topLeftPosition + new IntVector2(0, TilesPerColumn - 1);
+
+			IntVector2 targetTopLeftPosition = minimapTopLeft + tilesOffset;
+
+			if (!Map.IsInside(targetTopLeftPosition)) {
+				return null;
+			}
+
+			if (pixelsPerTile != 1) {
+				IntVector2 offsetInTile = new IntVector2(minimapPosition.X % pixelsPerTile, minimapPosition.Y % pixelsPerTile);
+				return targetTopLeftPosition.ToVector2() +
+						new Vector2((1.0f / pixelsPerTile) * offsetInTile.X, (1.0f / pixelsPerTile) * offsetInTile.Y);
+			}
+			else {
+				return Map.GetTileByTopLeftCorner(targetTopLeftPosition).Center;
+			}
+ 
+		}
+
+		public IntVector2? WorldToMinimap(Vector2 worldPosition)
+		{
+			IntRect mapRectangle = new IntRect(topLeftPosition.X,
+													topLeftPosition.Y,
+													topLeftPosition.X + TilesPerRow - 1,
+													topLeftPosition.Y + TilesPerColumn - 1);
+
+			if (!mapRectangle.Contains(worldPosition)) {
+				return null;
+			}
+
+			IntVector2 tileTopLeft = Map.GetContainingTile(worldPosition).TopLeft;
+
+			Vector2 inTileOffset = new Vector2(worldPosition.X - tileTopLeft.X, -(worldPosition.Y - tileTopLeft.Y));
+
+			IntVector2 minimapTopLeft = topLeftPosition + new IntVector2(0, TilesPerColumn - 1);
+
+			IntVector2 minimapTileTopLeft = new IntVector2(tileTopLeft.X - minimapTopLeft.X, minimapTopLeft.Y - tileTopLeft.Y);
+
+			return minimapTileTopLeft + (inTileOffset * pixelsPerTile).FloorToIntVector2();
+		}
 
 		protected uint GetTileColor(IntVector2 tileMapLocation)
 		{

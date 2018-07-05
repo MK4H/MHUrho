@@ -44,9 +44,9 @@ namespace MHUrho.Input
 
 		public bool DoOnlySingleRaycasts { get; set; }
 
-		public bool UIHovering { get; set; }
-
 		public ILevelManager Level { get; private set; }
+
+		public IntVector2 CursorPosition => UI.CursorPosition;
 
 		public event OnMouseMove MouseMove;
 		public event OnMouseDown MouseDown;
@@ -80,7 +80,7 @@ namespace MHUrho.Input
 			this.Level = level;
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;
-			this.UIManager = new MandKGameUI(game, this);
+			this.UIManager = new MandKGameUI(game, this, cameraMover);
 			this.keyDownActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
 			this.keyUpActions = new Dictionary<Key, Action<KeyUpEventArgs>>();
 			this.keyRepeatActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
