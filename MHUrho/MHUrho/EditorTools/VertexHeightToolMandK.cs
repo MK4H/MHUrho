@@ -31,7 +31,7 @@ namespace MHUrho.EditorTools {
 
 		bool enabled;
 
-		public VertexHeightToolMandK(GameMandKController input)
+		public VertexHeightToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera)
 			:base(input)
 		{
 

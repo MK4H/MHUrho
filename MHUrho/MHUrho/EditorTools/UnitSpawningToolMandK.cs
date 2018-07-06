@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -22,7 +23,7 @@ namespace MHUrho.EditorTools
 
 		bool enabled;
 
-		public UnitSpawningToolMandK(GameMandKController input)
+		public UnitSpawningToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera)
 			:base(input)
 		{
 

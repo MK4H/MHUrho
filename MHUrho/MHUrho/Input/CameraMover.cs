@@ -89,7 +89,7 @@ namespace MHUrho.Input
 		const float FreeFloatHeightOffset = 0.2f;
 		const float MinZoomDistance = 0.5f;
 
-		public static CameraMover GetCameraController(Scene scene, IMap map) {
+		public static CameraMover GetCameraController(Scene scene, IMap map, Vector2 initialPosition) {
 			Node cameraHolder = scene.CreateChild(name: "CameraHolder");
 			Node cameraNode = cameraHolder.CreateChild(name: "camera");
 			Camera camera = cameraNode.CreateComponent<Camera>();
@@ -100,6 +100,8 @@ namespace MHUrho.Input
 			mover.Camera = camera;
 			mover.defaultCameraHolder = cameraHolder;
 			mover.map = map;
+
+			cameraHolder.Position = new Vector3(initialPosition.X, map.GetHeightAt(initialPosition), initialPosition.Y);
 
 			cameraNode.Position = new Vector3(0, 10, -5);
 			cameraNode.LookAt(cameraHolder.WorldPosition, Vector3.UnitY);
@@ -367,6 +369,11 @@ namespace MHUrho.Input
 				}
 			}
 
+			//Correct height if the terrain changed
+			if (!Following && !FreeFloat) {
+				cameraHolder.Position = new Vector3(cameraHolder.Position.X, map.GetHeightAt(cameraHolder.Position.XZ2()), cameraHolder.Position.Z);
+			}
+
 			worldDirection = cameraNode.WorldDirection;
 			cameraDistance = cameraNode.Position.Length;
 		}
@@ -504,7 +511,6 @@ namespace MHUrho.Input
 
 			return position;
 		}
-
 
 	}
 }

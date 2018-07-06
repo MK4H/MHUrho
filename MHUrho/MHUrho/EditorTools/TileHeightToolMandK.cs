@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Input;
 using MHUrho.Logic;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -17,6 +18,7 @@ namespace MHUrho.EditorTools
 
 		//private List<Button> buttons;
 		GameMandKController input;
+		MandKGameUI ui;
 
 		StaticRectangleToolMandK highlight;
 
@@ -25,11 +27,12 @@ namespace MHUrho.EditorTools
 
 		ITile centerTile;
 
-		public TileHeightToolMandK(GameMandKController input)
+		public TileHeightToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera)
 			: base(input)
 		{
 			this.input = input;
-			highlight = new StaticRectangleToolMandK(input, new IntVector2(3, 3));
+			this.ui = ui;
+			highlight = new StaticRectangleToolMandK(input, ui, camera, new IntVector2(3, 3));
 		}
 
 		public override void Enable() {
@@ -66,6 +69,8 @@ namespace MHUrho.EditorTools
 		
 
 		void MouseDown(MouseButtonDownEventArgs e) {
+			if (ui.UIHovering) return;
+
 			centerTile = input.GetTileUnderCursor();
 			if (centerTile != null) {
 				input.HideCursor();
@@ -75,6 +80,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void MouseUp(MouseButtonUpEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (centerTile != null) {
 				input.ShowCursor(new Vector3(centerTile.Center.X, Map.GetTerrainHeightAt(centerTile.Center), centerTile.Center.Y));
 				mouseButtonDown = false;

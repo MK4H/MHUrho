@@ -145,7 +145,8 @@ namespace MHUrho.Logic
 
 			void CreateCamera()
 			{
-				level.Camera = LoadCamera(game, scene, level.Map);
+				//TODO:Maybe Save camera position
+				level.Camera = LoadCamera(game, scene, level.Map, new Vector2(10,10));
 			}
 
 			void LoadEntities()
@@ -248,7 +249,7 @@ namespace MHUrho.Logic
 
 			void CreateCamera()
 			{
-				CurrentLevel.Camera = LoadCamera(game, scene, map);
+				CurrentLevel.Camera = LoadCamera(game, scene, map, new Vector2(10,10));
 			}
 
 			void StartLevel()
@@ -697,10 +698,10 @@ namespace MHUrho.Logic
 			
 		}
 
-		static CameraMover LoadCamera(MyGame game, Scene scene, IMap map) {
+		static CameraMover LoadCamera(MyGame game, Scene scene, IMap map, Vector2 cameraPosition) {
 			// Camera
 
-			CameraMover cameraMover = CameraMover.GetCameraController(scene, map);
+			CameraMover cameraMover = CameraMover.GetCameraController(scene, map, cameraPosition);
 
 			// Viewport
 			var viewport = new Viewport(game.Context, scene, cameraMover.Camera, null);

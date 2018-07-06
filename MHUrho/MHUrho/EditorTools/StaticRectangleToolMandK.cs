@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using MHUrho.Input;
 using MHUrho.Logic;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -17,15 +18,19 @@ namespace MHUrho.EditorTools
 		public IntVector2 Size { get; set; }
 
 		GameMandKController input;
+		MandKGameUI ui;
+		CameraMover camera;
 
 		bool enabled;
 
 		ITile fixedCenter;
 
-		public StaticRectangleToolMandK(GameMandKController input, IntVector2 size)
+		public StaticRectangleToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera, IntVector2 size)
 			: base(input)
 		{
+			this.ui = ui;
 			this.input = input;
+			this.camera = camera;
 			this.Size = size;
 		}
 
@@ -37,6 +42,7 @@ namespace MHUrho.EditorTools
 			if (enabled) return;
 
 			input.MouseMove += OnMouseMove;
+			camera.OnFixedMove += OnCameraMove;
 			enabled = true;
 			
 		}
@@ -49,6 +55,7 @@ namespace MHUrho.EditorTools
 			if (!enabled) return;
 
 			input.MouseMove -= OnMouseMove;
+			camera.OnFixedMove -= OnCameraMove;
 			Map.DisableHighlight();
 			enabled = false;
 		}
@@ -59,6 +66,16 @@ namespace MHUrho.EditorTools
 
 		public void FreeHighlight() {
 			fixedCenter = null;
+		}
+
+		void OnCameraMove(Vector3 movement, Vector2 rotation, float timeStep)
+		{
+			if (fixedCenter != null) return;
+
+			var centerTile = input.GetTileUnderCursor();
+			if (centerTile != null) {
+				Map.HighlightRectangle(centerTile, Size, Color.Green);
+			}
 		}
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {

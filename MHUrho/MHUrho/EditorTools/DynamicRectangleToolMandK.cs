@@ -7,6 +7,7 @@ using Urho.Gui;
 using Urho;
 using MHUrho.Input;
 using MHUrho.Logic;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools
@@ -22,6 +23,7 @@ namespace MHUrho.EditorTools
 		public event HandleSingleClick SingleClickHandler;
 
 		readonly GameMandKController input;
+		readonly CameraMover camera;
 
 		IntVector2 mouseDownPos;
 		IntVector2 lastMousePos;
@@ -31,10 +33,11 @@ namespace MHUrho.EditorTools
 
 		bool enabled;
 
-		public DynamicRectangleToolMandK(GameMandKController input)
+		public DynamicRectangleToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera)
 			: base(input)
 		{
 			this.input = input;
+			this.camera = camera;
 		}
 
 		public override void Enable() {
@@ -48,7 +51,7 @@ namespace MHUrho.EditorTools
 			input.MouseDown += MouseDown;
 			input.MouseUp += MouseUp;
 			input.MouseMove += MouseMove;
-			Level.Camera.OnFixedMove += CameraMove;
+			camera.OnFixedMove += CameraMove;
 			
 			enabled = true;
 		}
@@ -59,7 +62,8 @@ namespace MHUrho.EditorTools
 			input.MouseDown -= MouseDown;
 			input.MouseUp -= MouseUp;
 			input.MouseMove -= MouseMove;
-			
+			camera.OnFixedMove -= CameraMove;
+
 			enabled = false;
 		}
 

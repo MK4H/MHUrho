@@ -289,6 +289,7 @@ namespace MHUrho.Input
 				cameraType = CameraMovementType.FreeFloat;
 				input.HideCursor();
 				input.Level.Map.DisableHighlight();
+				//TODO: Disable tools
 			}
 		}
 

@@ -7,6 +7,7 @@ using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.UnitComponents;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -82,14 +83,14 @@ namespace MHUrho.EditorTools
 
 		bool enabled;
 
-		public UnitSelectorToolMandK(GameMandKController input)
+		public UnitSelectorToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera)
 			:base(input)
 		{
 			this.input = input;
 			this.selected = new Dictionary<UnitType, SelectedInfo>();
 			this.buttons = new Dictionary<Button, UnitType>();
 
-			this.dynamicHighlight = new DynamicRectangleToolMandK(input);
+			this.dynamicHighlight = new DynamicRectangleToolMandK(input, ui, camera);
 		}
 
 		public override void Enable() {

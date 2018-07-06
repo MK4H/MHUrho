@@ -89,12 +89,12 @@ namespace MHUrho.Input
 
 			Enable();
 
-			UIManager.AddTool(new VertexHeightToolMandK(this));
-			UIManager.AddTool(new TileTypeToolMandK(this));
-			UIManager.AddTool(new TileHeightToolMandK(this));
-			UIManager.AddTool(new UnitSelectorToolMandK(this));
-			UIManager.AddTool(new UnitSpawningToolMandK(this));
-			UIManager.AddTool(new BuildingBuilderToolMandK(this));
+			UIManager.AddTool(new VertexHeightToolMandK(this, UIManager, cameraMover));
+			UIManager.AddTool(new TileTypeToolMandK(this, UIManager, cameraMover));
+			UIManager.AddTool(new TileHeightToolMandK(this, UIManager, cameraMover));
+			UIManager.AddTool(new UnitSelectorToolMandK(this, UIManager, cameraMover));
+			UIManager.AddTool(new UnitSpawningToolMandK(this, UIManager, cameraMover));
+			UIManager.AddTool(new BuildingBuilderToolMandK(this, UIManager, cameraMover));
 
 		}
 
@@ -154,7 +154,16 @@ namespace MHUrho.Input
 
 		public void HideCursor() {
 			UI.Cursor.Visible = false;
+			IntVector2 prevCursorPosition = CursorPosition;
 			UI.Cursor.Position = new IntVector2(UI.Root.Width / 2, UI.Root.Height / 2);
+
+
+			if (IsBorder(prevCursorPosition)) {
+				List<ScreenBorder> prevBorders = GetBorders(prevCursorPosition);
+				foreach (var prevBorder in prevBorders) {
+					LeftScreenBorder?.Invoke(prevBorder);
+				}
+			}
 		}
 
 		/// <summary>
@@ -166,6 +175,14 @@ namespace MHUrho.Input
 				var screenPoint = camera.Camera.WorldToScreenPoint(abovePoint.Value);
 				UI.Cursor.Position = new IntVector2((int)(UI.Root.Width * screenPoint.X), (int)(UI.Root.Height * screenPoint.Y));
 			}
+
+			if (IsBorder(UI.Cursor.Position)) {
+				List<ScreenBorder> borders = GetBorders(UI.Cursor.Position);
+				foreach (var border in borders) {
+					EnteredScreenBorder?.Invoke(border);
+				}
+			}
+
 			UI.Cursor.Visible = true;
 		}
 

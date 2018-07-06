@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -26,13 +27,13 @@ namespace MHUrho.EditorTools
 		bool mouseButtonDown;
 		bool enabled;
 
-		public TileTypeToolMandK(GameMandKController input)
+		public TileTypeToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera)
 			: base(input)
 		{
 
 			this.input = input;
 			this.tileTypeButtons = new Dictionary<Button, TileType>();
-			this.highlight = new StaticRectangleToolMandK(input, new IntVector2(3,3));
+			this.highlight = new StaticRectangleToolMandK(input, ui, camera, new IntVector2(3,3));
 
 			foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
 				var tileImage = tileType.GetImage().ConvertToRGBA();
