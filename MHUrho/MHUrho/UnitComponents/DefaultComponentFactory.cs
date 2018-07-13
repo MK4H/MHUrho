@@ -47,7 +47,6 @@ namespace MHUrho.UnitComponents
 			loaders.Add(UnitSelector.ComponentID, new UnitSelector.Loader());
 			loaders.Add(WorldWalker.ComponentID, new WorldWalker.Loader());
 			loaders.Add(Shooter.ComponentID, new Shooter.Loader());
-			loaders.Add(ActionQueue.ComponentID, new ActionQueue.Loader());
 			loaders.Add(BallisticProjectile.ComponentID, new BallisticProjectile.Loader());
 			loaders.Add(StaticRangeTarget.ComponentID, new StaticRangeTarget.Loader());
 			loaders.Add(MovingRangeTarget.ComponentID, new MovingRangeTarget.Loader());
@@ -60,7 +59,6 @@ namespace MHUrho.UnitComponents
 			map.Add(UnitSelector.ComponentName, UnitSelector.ComponentID);
 			map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
 			map.Add(Shooter.ComponentName, Shooter.ComponentID);
-			map.Add(ActionQueue.ComponentName, ActionQueue.ComponentID);
 			map.Add(BallisticProjectile.ComponentName, BallisticProjectile.ComponentID);
 			map.Add(StaticRangeTarget.ComponentName, StaticRangeTarget.ComponentID);
 			map.Add(MovingRangeTarget.ComponentName, MovingRangeTarget.ComponentID);

@@ -13,7 +13,6 @@ namespace MHUrho.UnitComponents
 	public enum DefaultComponents {
 		Shooter,
 		UnitSelector,
-		WorkQueue,
 		WorldWalker,
 		UnpoweredFlier,
 		StaticRangeTarget,
@@ -26,7 +25,7 @@ namespace MHUrho.UnitComponents
 
 	//TODO: Rename this
 	internal interface IByTypeQueryable {
-		void AddedToEntity(Entity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
+		void AddedToEntity(IEntity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
 
 		bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
 	}
@@ -39,7 +38,7 @@ namespace MHUrho.UnitComponents
 
 		public abstract PluginData SaveState();
 
-		public Entity Entity { get; private set; }
+		public IEntity Entity { get; private set; }
 
 		public IPlayer Player => Entity.Player;
 
@@ -55,7 +54,7 @@ namespace MHUrho.UnitComponents
 			this.Level = level;
 		}
 
-		void IByTypeQueryable.AddedToEntity(Entity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+		void IByTypeQueryable.AddedToEntity(IEntity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 
 			/*
 			 * If called from OnAttachedToNode, entity will already be set

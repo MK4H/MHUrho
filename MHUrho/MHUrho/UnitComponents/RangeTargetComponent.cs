@@ -11,11 +11,14 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents {
 
+	public delegate void TargetMoved(IRangeTarget target);
 
 	public interface IRangeTarget {
 		int InstanceID { get; set; }
 
 		bool Moving { get; }
+
+		event TargetMoved OnTargetMoved;
 
 		Vector3 CurrentPosition { get; }
 
@@ -27,6 +30,7 @@ namespace MHUrho.UnitComponents {
 	}
 
 	public abstract class RangeTargetComponent : DefaultComponent, IRangeTarget {
+
 		public interface IShooter {
 			void OnTargetDestroy(IRangeTarget target);
 		}
@@ -35,6 +39,7 @@ namespace MHUrho.UnitComponents {
 		public int InstanceID { get; set; }
 
 		public abstract bool Moving { get; }
+		public event TargetMoved OnTargetMoved;
 
 		public abstract Vector3 CurrentPosition { get; }
 
@@ -46,7 +51,7 @@ namespace MHUrho.UnitComponents {
 			shooters = new List<IShooter>();
 		}
 
-		protected RangeTargetComponent(int ID,ILevelManager level) 
+		protected RangeTargetComponent(int ID, ILevelManager level) 
 			: base(level)
 		{
 			this.InstanceID = ID;
@@ -54,6 +59,11 @@ namespace MHUrho.UnitComponents {
 		}
 
 		public abstract IEnumerator<Waypoint> GetWaypoints();
+
+		public void TargetMoved(IEntity entity)
+		{
+			OnTargetMoved?.Invoke(this);
+		}
 
 		/// <summary>
 		/// Adds a shooter to be notified when this target dies

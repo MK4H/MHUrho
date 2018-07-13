@@ -45,7 +45,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class EggProjectileInstance : ProjectileInstancePlugin, BallisticProjectile.INotificationReceiver {
+	public class EggProjectileInstance : ProjectileInstancePlugin{
 
 		BallisticProjectile flier;
 		readonly EggProjectileType myType;
@@ -59,7 +59,7 @@ namespace DefaultPackage
 			:base(level, projectile)
 		{
 			this.myType = myType;
-			this.flier = BallisticProjectile.GetInstanceFor(this, level);
+			this.flier = BallisticProjectile.CreateNew(level);
 			projectile.AddComponent(flier);
 		}
 

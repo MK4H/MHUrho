@@ -20,7 +20,6 @@ namespace DefaultPackage
 
 		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
-		ProjectileType projectileType;
 
 		public override bool IsMyType(string unitTypeName) {
 			return unitTypeName == "TestUnit";
@@ -33,7 +32,7 @@ namespace DefaultPackage
 		
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
-			return new TestUnitInstance(level, unit, projectileType);
+			return new TestUnitInstance(level, unit);
 		}
 
 		public override UnitInstancePlugin GetInstanceForLoading() {
@@ -46,39 +45,45 @@ namespace DefaultPackage
 		}
 
 		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
-			projectileType = PackageManager.Instance
-										   .ActiveGame
-										   .GetProjectileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "projectileType")),
-															  true);
+
 		}
 	}
 
 	public class TestUnitInstance : UnitInstancePlugin, 
-									WorldWalker.INotificationReceiver, 
-									UnitSelector.INotificationReceiver,
-									MovingMeeleAttacker.INotificationReceiver
+									WorldWalker.IUser, 
+									MovingMeeleAttacker.IUser
 	{
 		WorldWalker walker;
 		MovingMeeleAttacker meele;
 
 		HealthBar healthbar;
+		float health;
 
 		public TestUnitInstance() {
 
 		}
 
-		public TestUnitInstance(ILevelManager level, IUnit unit, ProjectileType projectileType)
+		public TestUnitInstance(ILevelManager level, IUnit unit)
 			:base(level, unit)
 		{
-			this.walker = WorldWalker.GetInstanceFor(this, level);
-			this.meele = MovingMeeleAttacker.CreateNew(this, level);
+			this.walker = WorldWalker.CreateNew(this, level);
+			this.meele = MovingMeeleAttacker.CreateNew(this, level, true, new IntVector2(20,20),0.2f, 0.5f, 1);
+			this.meele.Attacked += Attacked;
+			this.meele.TargetInRange += TargetInRange;
+
+			var selector = UnitSelector.CreateNew(level);
+			selector.Ordered += OnUnitOrdered;
 
 			unit.AddComponent(walker);
-			unit.AddComponent(UnitSelector.CreateNew(this, level));
+			unit.AddComponent(selector);
+			unit.AddComponent(meele);
 
-
-			Init(100);
+			health = 100;
+			
+			Init();
 		}
+
+
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage) {
 
@@ -91,7 +96,15 @@ namespace DefaultPackage
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
-			throw new NotImplementedException();
+			health -= 10;
+
+			if (health < 0) {
+				Unit.RemoveFromLevel();
+			}
+			else {
+				healthbar.SetHealth(health);
+			}
+			
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -109,26 +122,6 @@ namespace DefaultPackage
 		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
 		{
 			return (to - from).Length;
-		}
-
-		public void OnMovementStarted(WorldWalker walker) {
-
-		}
-
-		public void OnMovementFinished(WorldWalker walker) {
-
-		}
-
-		public void OnMovementFailed(WorldWalker walker) {
-
-		}
-
-		public void OnUnitSelected(UnitSelector selector) {
-
-		}
-
-		public void OnUnitDeselected(UnitSelector selector) {
-
 		}
 
 		public void OnUnitOrdered(UnitSelector selector, Order order) {
@@ -158,9 +151,9 @@ namespace DefaultPackage
 
 		}
 
-		void Init(float health)
+		void Init()
 		{
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 20, 0), new Vector2(0.8f, 0.4f), health);
+			healthbar = new HealthBar(Level, Unit, new Vector3(0, 1, 0), new Vector2(0.5f, 0.1f), health);
 		}
 
 		public bool IsInRange(MeeleAttacker attacker, IEntity target)
@@ -173,17 +166,37 @@ namespace DefaultPackage
 			target.HitBy(Unit);
 		}
 
-		public IEntity PickTarget(List<IEntity> possibleTargets)
+		public IUnit PickTarget(List<IUnit> possibleTargets)
 		{
-			return possibleTargets.Aggregate((e1, e2) => Vector3.Distance(Unit.Position, e1.Position) <
-														Vector3.Distance(Unit.Position, e2.Position)
-															? e1
-															: e2);
+			return possibleTargets.Count == 0
+						? null
+						: possibleTargets.Aggregate((e1, e2) => Vector3.Distance(Unit.Position, e1.Position) <
+																Vector3.Distance(Unit.Position, e2.Position)
+																	? e1
+																	: e2);
 		}
 
 		public void MoveTo(Vector3 position)
 		{
 			walker.GoTo(Map.PathFinding.GetClosestNode(position));
+		}
+
+		void TargetInRange(MeeleAttacker attacker, IEntity target)
+		{
+			walker.Stop();
+		}
+
+		public void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
+		{
+			getTime = GetTime;
+			getMinimalAproximatedTime = GetMinimalAproximatedTime;
+		}
+
+		public void GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget)
+		{
+			moveTo = MoveTo;
+			isInRange = IsInRange;
+			pickTarget = PickTarget;
 		}
 	}
 }

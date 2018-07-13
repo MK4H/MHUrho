@@ -11,9 +11,16 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	internal delegate void UnitSelectedDelegate(UnitSelector unitSelector);
-	internal delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
-	internal delegate void UnitOrderedDelegate(UnitSelector unitSelector, Order order);
+	public delegate void UnitSelectedDelegate(UnitSelector unitSelector);
+	public delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="selector"></param>
+	/// <param name="order">Contains an Executed flag, which is true if some method before consumed the command, and false if it did not
+	/// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
+	public delegate void UnitOrderedDelegate(UnitSelector unitSelector, Order order);
 
 
 
@@ -36,15 +43,10 @@ namespace MHUrho.UnitComponents
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
-					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-				}
-
+				
 				var dataReader = new SequentialPluginDataReader(storedData, level);
 
-				UnitSelector = new UnitSelector(notificationReceiver, level)
+				UnitSelector = new UnitSelector(level)
 								{
 									Enabled = dataReader.GetNext<bool>()
 								};
@@ -64,21 +66,6 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver {
-			void OnUnitSelected(UnitSelector selector);
-
-			void OnUnitDeselected(UnitSelector selector);
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="selector"></param>
-			/// <param name="order">Contains an Executed flag, which is true if some method before consumed the command, and false if it did not
-			/// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
-			void OnUnitOrdered(UnitSelector selector, Order order);
-
-		}
-
 		public static string ComponentName = nameof(UnitSelector);
 		public static DefaultComponents ComponentID = DefaultComponents.UnitSelector;
 
@@ -87,33 +74,22 @@ namespace MHUrho.UnitComponents
 
 		public IUnit Unit => (IUnit)Entity;
 
-		internal event UnitSelectedDelegate UnitSelected;
-		internal event UnitDeselectedDelegate UnitDeselected;
-		internal event UnitOrderedDelegate Ordered;
+		public event UnitSelectedDelegate UnitSelected;
+		public event UnitDeselectedDelegate UnitDeselected;
+		
+		
+		public event UnitOrderedDelegate Ordered;
 
 
-		readonly INotificationReceiver notificationReceiver;
-
-
-		protected UnitSelector(INotificationReceiver notificationReceiver,ILevelManager level) 
+		protected UnitSelector(ILevelManager level) 
 			:base(level)
 		{
-			this.notificationReceiver = notificationReceiver;
-
-			UnitSelected += notificationReceiver.OnUnitSelected;
-			UnitDeselected += notificationReceiver.OnUnitDeselected;
-			Ordered += notificationReceiver.OnUnitOrdered;
 
 		}
 
-		public static UnitSelector CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T: UnitInstancePlugin, INotificationReceiver {
-
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
-			}
-
-			return new UnitSelector(instancePlugin, level);
+		public static UnitSelector CreateNew(ILevelManager level)
+		{
+			return new UnitSelector(level);
 		}
 
 		/// <summary>

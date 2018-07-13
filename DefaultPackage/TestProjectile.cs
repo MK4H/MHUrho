@@ -47,7 +47,7 @@ namespace DefaultPackage
 
 	}
 
-	public class TestProjectileInstance : ProjectileInstancePlugin, BallisticProjectile.INotificationReceiver {
+	public class TestProjectileInstance : ProjectileInstancePlugin {
 		static readonly Random seedRng = new Random();
 
 		BallisticProjectile flier;
@@ -73,7 +73,7 @@ namespace DefaultPackage
 			:base (level, projectile)
 		{
 			this.rng = new Random(seedRng.Next());
-			flier = BallisticProjectile.GetInstanceFor(this, level);
+			flier = BallisticProjectile.CreateNew(level);
 			projectile.AddComponent(flier);
 			myType = type;
 		}

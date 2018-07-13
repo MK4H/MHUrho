@@ -31,12 +31,7 @@ namespace MHUrho.UnitComponents
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
-					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-				}
-
+				
 				var sequentialData = new SequentialPluginDataReader(storedData, level);
 				sequentialData.MoveNext();
 				int instanceID = sequentialData.GetCurrent<int>();
@@ -46,7 +41,7 @@ namespace MHUrho.UnitComponents
 				bool enabled = sequentialData.GetCurrent<bool>();
 				sequentialData.MoveNext();
 
-				StaticRangeTarget = new StaticRangeTarget(instanceID, level, position, notificationReceiver)
+				StaticRangeTarget = new StaticRangeTarget(instanceID, level, position)
 									{
 										Enabled = enabled
 									};
@@ -66,9 +61,6 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver {
-
-		}
 
 
 		public static string ComponentName = nameof(StaticRangeTarget);
@@ -80,30 +72,22 @@ namespace MHUrho.UnitComponents
 
 		public override Vector3 CurrentPosition { get; }
 
-		INotificationReceiver notificationReceiver;
 
-		protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position, INotificationReceiver notificationReceiver)
+		protected StaticRangeTarget(int instanceID, ILevelManager level, Vector3 position)
 			: base(instanceID, level)
 		{
 			this.CurrentPosition = position;
-			this.notificationReceiver = notificationReceiver;
 		}
 
-		protected StaticRangeTarget(ILevelManager level, Vector3 position, INotificationReceiver notificationReceiver) 
+		protected StaticRangeTarget(ILevelManager level, Vector3 position) 
 			:base(level)
 		{
 			this.CurrentPosition = position;
-			this.notificationReceiver = notificationReceiver;
 		}
 
-		public static StaticRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level, Vector3 position)
-			where T : InstancePlugin, INotificationReceiver {
+		public static StaticRangeTarget CreateNew(ILevelManager level, Vector3 position) {
 
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
-			}
-
-			var newTarget = new StaticRangeTarget(level, position, instancePlugin);
+			var newTarget = new StaticRangeTarget(level, position);
 
 			((LevelManager)level).RegisterRangeTarget(newTarget);
 

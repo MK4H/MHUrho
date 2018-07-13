@@ -14,6 +14,8 @@ namespace MHUrho.WorldMap
 		public int InstanceID { get; set; }
 
 		public bool Moving => false;
+		//Map targets never move
+		public event TargetMoved OnTargetMoved;
 
 		public Vector3 CurrentPosition { get; }
 

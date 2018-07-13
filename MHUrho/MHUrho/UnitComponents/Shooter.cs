@@ -13,9 +13,13 @@ using Urho.Physics;
 
 namespace MHUrho.UnitComponents
 {
-	internal delegate void HostileTargetAquiredDelegate(Shooter shooter);
-	internal delegate void ShotReloadedDelegate(Shooter shooter);
-	internal delegate void ShotFiredDelegate(Shooter shooter, IProjectile projectile);
+	public delegate void TargetAquiredDelegate(Shooter shooter);
+	public delegate void ShotReloadedDelegate(Shooter shooter);
+	public delegate void BeforeShotFiredDelegate(Shooter shooter);
+	public delegate void TargetLostDelegate(Shooter shooter, IRangeTarget target);
+	public delegate void TargetDestroyedDelegate(Shooter shooter, IRangeTarget target);
+	public delegate void ShotFiredDelegate(Shooter shooter, IProjectile projectile);
+	public delegate Vector3 GetSourceOffsetDelegate(Shooter shooter);
 
 	public class Shooter : DefaultComponent, RangeTargetComponent.IShooter
 	{
@@ -50,10 +54,10 @@ namespace MHUrho.UnitComponents
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
+				var user = plugin as IUser;
+				if (user == null) {
 					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
 				var sequentialDataReader = new SequentialPluginDataReader(storedData, level);
@@ -65,17 +69,21 @@ namespace MHUrho.UnitComponents
 				var searchDelay = sequentialDataReader.GetNext<float>();
 				targetID = sequentialDataReader.GetNext<int>();
 				var enabled = sequentialDataReader.GetNext<bool>();
-				Shooter = new Shooter(level,
-									notificationReceiver,
-									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-									rateOfFire) {
-													SearchForTarget = searchForTarget,
-													TargetSearchDelay = targetSearchDelay,
-													shotDelay = shotDelay,
-													searchDelay = searchDelay,
-													Enabled = enabled
 
-												};
+				user.GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
+
+				Shooter = new Shooter(level,
+									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
+									rateOfFire,
+									getSourceOffset)
+						{
+							SearchForTarget = searchForTarget,
+							TargetSearchDelay = targetSearchDelay,
+							shotDelay = shotDelay,
+							searchDelay = searchDelay,
+							Enabled = enabled
+
+						};
 			}
 
 			public override  void ConnectReferences(LevelManager level)
@@ -98,17 +106,8 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-
-		public interface INotificationReceiver {
-			void OnTargetAcquired(Shooter shooter);
-
-			void BeforeShotFired(Shooter shooter);
-
-			void AfterShotFired(Shooter shooter, IProjectile projectile);
-
-			void OnShotReloaded(Shooter shooter);
-
-			Vector3 GetSourceOffset(Shooter shooter);
+		public interface IUser {
+			void GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
 		}
 
 		public static string ComponentName = nameof(Shooter);
@@ -127,38 +126,34 @@ namespace MHUrho.UnitComponents
 
 		public IRangeTarget Target { get; private set; }
 
-		internal event HostileTargetAquiredDelegate OnTargetAcquired;
-		internal event ShotReloadedDelegate OnShotReloaded;
-		internal event ShotFiredDelegate OnShotFired;
+		public event TargetAquiredDelegate OnTargetAcquired;
+		public event ShotReloadedDelegate OnShotReloaded;
+		public event BeforeShotFiredDelegate OnBeforeShotFired;
+		public event TargetLostDelegate OnTargetLost;
+		public event TargetDestroyedDelegate OnTargetDestroyed;
+		public event ShotFiredDelegate OnShotFired;
 
-
+		readonly GetSourceOffsetDelegate getSourceOffset;
 		
 
 		float shotDelay;
 		float searchDelay;
 
-		ProjectileType projectileType;
-
-
-		INotificationReceiver notificationReceiver;
+		readonly ProjectileType projectileType;
 
 
 		protected Shooter(ILevelManager level,
-						INotificationReceiver notificationReceiver,
 						ProjectileType projectileType,
-						float rateOfFire) 
+						float rateOfFire,
+						GetSourceOffsetDelegate getSourceOffset) 
 			:base(level)
 		{
-			this.notificationReceiver = notificationReceiver;
-
-			OnShotFired += notificationReceiver.AfterShotFired;
-			OnTargetAcquired += notificationReceiver.OnTargetAcquired;
-			OnShotReloaded += notificationReceiver.OnShotReloaded;
 
 			this.projectileType = projectileType;
 			this.RateOfFire = rateOfFire;
 			this.shotDelay = 60 / RateOfFire;
 			this.searchDelay = 0;
+			this.getSourceOffset = getSourceOffset;
 			ReceiveSceneUpdates = true;
 		}
 
@@ -166,16 +161,19 @@ namespace MHUrho.UnitComponents
 										   ILevelManager level,
 										   ProjectileType projectileType,
 										   float rateOfFire)
-			where T : InstancePlugin, INotificationReceiver {
+			where T : InstancePlugin, IUser
+		{
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new Shooter(level, 
-							   instancePlugin, 
-							   projectileType, 
-							   rateOfFire);
+			((IUser) instancePlugin).GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
+
+			return new Shooter(level,
+								projectileType,
+								rateOfFire,
+								getSourceOffset);
 		}
 
 		
@@ -196,6 +194,11 @@ namespace MHUrho.UnitComponents
 			return true;
 		}
 
+		public bool CanShootAt(IRangeTarget target)
+		{
+			return projectileType.IsInRange(Entity.Position, target);
+		}
+
 		public void StopShooting() {
 			Target?.RemoveShooter(this);
 			Target = null;
@@ -204,6 +207,7 @@ namespace MHUrho.UnitComponents
 		public void OnTargetDestroy(IRangeTarget target) {
 			Debug.Assert(this.Target == target);
 			this.Target = null;
+			OnTargetDestroyed?.Invoke(this, target);
 		}
 
 		protected override void OnDeleted() {
@@ -251,14 +255,17 @@ namespace MHUrho.UnitComponents
 			if (Target == null) {
 				return;
 			}
-			//TODO: Delegate
-			notificationReceiver.BeforeShotFired(this);
 
-			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + notificationReceiver.GetSourceOffset(this), Player, Target);
+			OnBeforeShotFired?.Invoke(this);
+
+			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + getSourceOffset(this), Player, Target);
 			//Could not fire on the target
 			if (projectile == null) {
+				var previousTarget = Target;
 				Target.RemoveShooter(this);
 				Target = null;
+
+				OnTargetLost?.Invoke(this, previousTarget);
 				return;
 			}
 

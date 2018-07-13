@@ -53,10 +53,9 @@ namespace DefaultPackage
 	}
 
 	public class ChickenInstance : UnitInstancePlugin, 
-									WorldWalker.INotificationReceiver, 
-									UnitSelector.INotificationReceiver, 
-									Shooter.INotificationReceiver,
-									MovingRangeTarget.INotificationReceiver{
+									WorldWalker.IUser, 
+									Shooter.IUser,
+									MovingRangeTarget.IUser{
 
 		class PathVisitor : NodeVisitor {
 			readonly ChickenInstance chicken;
@@ -154,6 +153,13 @@ namespace DefaultPackage
 		float hp;
 		HealthBar healthbar;
 
+		IRangeTarget explicitTarget;
+		bool targetMoved = false;
+
+		const float timeBetweenTests = 1.0f;
+		float shootTestTimer = timeBetweenTests;
+
+
 		public ChickenInstance()
 		{
 			pathVisitor = new PathVisitor(this);
@@ -162,17 +168,31 @@ namespace DefaultPackage
 		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
 			:base(level,unit) {
 			animationController = unit.CreateComponent<AnimationController>();
-			Walker = WorldWalker.GetInstanceFor(this,level);
+			Walker = WorldWalker.CreateNew(this,level);
 			Shooter = Shooter.CreateNew(this, level,type.ProjectileType, 20);
 			Shooter.SearchForTarget = true;
 			Shooter.TargetSearchDelay = 2;
+
+			var selector = UnitSelector.CreateNew(level);
+
 			unit.AddComponent(Walker);
 			unit.AddComponent(Shooter);
-			unit.AddComponent(UnitSelector.CreateNew(this, level));
-			unit.AddComponent(MovingRangeTarget.CreateNew(this, level));
+			unit.AddComponent(selector);
+			unit.AddComponent(MovingRangeTarget.CreateNew(this, level, new Vector3(0, 0.5f, 0)));
 			
 			unit.AlwaysVertical = true;
 			pathVisitor = new PathVisitor(this);
+
+			Walker.OnMovementStarted += OnMovementStarted;
+			Walker.OnMovementEnded += OnMovementFinished;
+			Walker.OnMovementFailed += OnMovementFailed;
+
+			selector.Ordered += OnUnitOrdered;
+			selector.UnitSelected += OnUnitSelected;
+
+			Shooter.OnBeforeShotFired += BeforeShotFired;
+			Shooter.OnTargetAcquired += OnTargetAcquired;
+			Shooter.OnTargetDestroyed += OnTargetDestroyed;
 
 			hp = 100;
 			Init(hp);
@@ -197,15 +217,7 @@ namespace DefaultPackage
 			Init(hp);
 		}
 
-		public bool GetTime(INode from, INode to, out float time)
-		{
-			return from.Accept(pathVisitor, to, out time);
-		}
 
-		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
-		{
-			return (from.XZ2() - to.XZ2()).Length / 2;
-		}
 
 		public override void OnHit(IEntity other, object userData)
 		{
@@ -237,7 +249,23 @@ namespace DefaultPackage
 				return;
 			}
 
-			if (Shooter.Target != null) {
+			if (explicitTarget != null) {
+				shootTestTimer -= timeStep;
+				if (shootTestTimer < 0) {
+					shootTestTimer = timeBetweenTests;
+
+					if (Shooter.CanShootAt(explicitTarget)) {
+						Walker.Stop();
+						Shooter.ShootAt(explicitTarget);
+					}
+					else if (explicitTarget.Moving && targetMoved) {
+						targetMoved = false;
+						Walker.GoTo(Map.PathFinding.GetClosestNode(explicitTarget.CurrentPosition));
+					}
+				}
+			}
+
+			if (Shooter.Target != null && !Walker.MovementStarted) {
 				var targetPos = Shooter.Target.CurrentPosition;
 
 				var diff = Unit.Position - targetPos;
@@ -246,8 +274,17 @@ namespace DefaultPackage
 			}
 		}
 
+		bool GetTime(INode from, INode to, out float time)
+		{
+			return from.Accept(pathVisitor, to, out time);
+		}
 
-		public void OnMovementStarted(WorldWalker walker) {
+		float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
+		{
+			return (from.XZ2() - to.XZ2()).Length / 2;
+		}
+
+		void OnMovementStarted(WorldWalker walker) {
 			animationController.PlayExclusive("Chicken/Models/Walk.ani", 0, true);
 			animationController.SetSpeed("Chicken/Models/Walk.ani", 2);
 
@@ -255,47 +292,48 @@ namespace DefaultPackage
 			Shooter.SearchForTarget = false;
 		}
 
-		public void OnMovementFinished(WorldWalker walker) {
+		void OnMovementFinished(WorldWalker walker) {
 			animationController.Stop("Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
 		}
 
-		public void OnMovementFailed(WorldWalker walker) {
+		void OnMovementFailed(WorldWalker walker) {
 			animationController.Stop("Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
 		}
 
-		public void OnUnitSelected(UnitSelector selector) {
+		void OnUnitSelected(UnitSelector selector) {
 			if (!Walker.MovementStarted) {
 				animationController.Play("Chicken/Models/Idle.ani", 0, true);
 			}
 		}
 
-		public void OnUnitDeselected(UnitSelector selector) {
-
-		}
-
-		public void OnUnitOrdered(UnitSelector selector, Order order) {
+		void OnUnitOrdered(UnitSelector selector, Order order) {
 			order.Executed = false;
 			if (order.PlatformOrder) {
 				switch (order) {
 					case MoveOrder moveOrder:
+						Shooter.StopShooting();
+						Shooter.SearchForTarget = true;
+						explicitTarget = null;
 						order.Executed = Walker.GoTo(moveOrder.Target);
 						break;
 					case AttackOrder attackOrder:
-						IRangeTarget rangeTarget;
-						if (Unit.Player.IsEnemy(attackOrder.Target.Player) && ((rangeTarget = attackOrder.Target.GetDefaultComponent<RangeTargetComponent>()) != null)) {
-							order.Executed = Shooter.ShootAt(rangeTarget) || Walker.GoTo(Map.PathFinding.GetClosestNode(rangeTarget.CurrentPosition));
+						Shooter.StopShooting();
+
+						if (Unit.Player.IsEnemy(attackOrder.Target.Player) && (SetExplicitTarget(attackOrder.Target) != null)) {
+							order.Executed = Shooter.ShootAt(explicitTarget) || Walker.GoTo(Map.PathFinding.GetClosestNode(explicitTarget.CurrentPosition));
+						}
+
+						if (order.Executed) {
+							Shooter.SearchForTarget = false;
 						}
 						break;
 				}
 			}
 		}
 
-
-
-
-		public void OnTargetAcquired(Shooter shooter) {
+		void OnTargetAcquired(Shooter shooter) {
 			var targetPos = shooter.Target.CurrentPosition;
 
 			var diff = Unit.Position - targetPos;
@@ -303,7 +341,7 @@ namespace DefaultPackage
 			Unit.FaceTowards(Unit.Position + diff);
 		}
 
-		public void BeforeShotFired(Shooter shooter) {
+		void BeforeShotFired(Shooter shooter) {
 			var targetPos = shooter.Target.CurrentPosition;
 
 			var diff = Unit.Position - targetPos;
@@ -311,29 +349,28 @@ namespace DefaultPackage
 			Unit.FaceTowards(Unit.Position + diff);
 		}
 
-		public void AfterShotFired(Shooter shooter, IProjectile projectile) {
+		void OnTargetDestroyed(Shooter shooter, IRangeTarget target)
+		{
+			if (explicitTarget != null) {
+				Debug.Assert(target == explicitTarget);
 
+				explicitTarget = null;
+				targetMoved = false;
+			}
 		}
 
-		public void OnShotReloaded(Shooter shooter) {
-
-		}
-
-		public Vector3 GetSourceOffset(Shooter forShooter) 
+		Vector3 GetSourceOffset(Shooter forShooter) 
 		{
 			return Unit.Backward * 0.7f + new Vector3(0,0.7f,0);
 		}
 
-		public Vector3 GetCurrentPosition(MovingRangeTarget movingRangeTarget) {
-			return Unit.Position + new Vector3(0, 0.5f, 0);
-		}
 
 		public override void Dispose()
 		{
 			healthbar.Dispose();
 		}
 
-		IEnumerator<Waypoint> MovingRangeTarget.INotificationReceiver.GetWaypoints(MovingRangeTarget movingRangeTarget)
+		IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget movingRangeTarget)
 		{
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
@@ -343,5 +380,37 @@ namespace DefaultPackage
 			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), health);
 		}
 
+		public void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
+		{
+			getTime = GetTime;
+			getMinimalAproximatedTime = GetMinimalAproximatedTime;
+		}
+
+		public void GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset)
+		{
+			getSourceOffset = GetSourceOffset;
+		}
+
+		public void GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints)
+		{
+			getWaypoints = GetWaypoints;
+		}
+
+		IRangeTarget SetExplicitTarget(IEntity targetEntity)
+		{
+			IRangeTarget target = targetEntity.GetDefaultComponent<RangeTargetComponent>();
+
+			if (target == null) return null;
+
+			explicitTarget = target;
+			target.OnTargetMoved += ExplicitTargetMoved;
+
+			return target;
+		}
+
+		void ExplicitTargetMoved(IRangeTarget target)
+		{
+			targetMoved = true;
+		}
 	}
 }

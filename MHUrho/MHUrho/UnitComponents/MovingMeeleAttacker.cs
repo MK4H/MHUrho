@@ -10,6 +10,13 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
+	public delegate void MoveTo(Vector3 position);
+
+	/// <summary>
+	/// A component that can check for targets in a rectangle of size <see cref="MeeleAttacker.SearchRectangleSize"/>,
+	/// if it finds a target or is given target explicitly by <see cref="MeeleAttacker.Attack(IEntity)"/>,
+	/// pathfinds to the target and if in range, raises <see cref="MeeleAttacker.Attacked"/> event every <see cref="MeeleAttacker.TimeBetweenAttacks"/> seconds
+	/// </summary>
     public class MovingMeeleAttacker : MeeleAttacker
     {
 		internal class Loader : DefaultComponentLoader{
@@ -27,44 +34,58 @@ namespace MHUrho.UnitComponents
 			public static PluginData SaveState(MovingMeeleAttacker movingMeele)
 			{
 				var writer = new SequentialPluginDataWriter(movingMeele.Level);
-				writer.StoreNext(movingMeele.AttackIfInRange);
-				writer.StoreNext(movingMeele.AttacksPerSecond);
-				writer.StoreNext(movingMeele.TargetSearchRectangleSize);
+				writer.StoreNext(movingMeele.SearchForTarget);
+				writer.StoreNext(movingMeele.SearchRectangleSize);
+				writer.StoreNext(movingMeele.TimeBetweenSearches);
+				writer.StoreNext(movingMeele.timeBetweenPositionChecks);
+				writer.StoreNext(movingMeele.TimeBetweenAttacks);
 				writer.StoreNext(movingMeele.Enabled);
 				writer.StoreNext(movingMeele.Target.ID);
-				writer.StoreNext(movingMeele.timeBetweenPositionChecks);
-				writer.StoreNext(movingMeele.timeToNextAttack);
+
+				writer.StoreNext(movingMeele.TimeToNextSearch);
 				writer.StoreNext(movingMeele.timeToNextPositionCheck);
+				writer.StoreNext(movingMeele.TimeToNextAttack);
 				return writer.PluginData;
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData)
 			{
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
+				var user = plugin as IUser;
+				if (user == null) {
 					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
 				var reader = new SequentialPluginDataReader(storedData, level);
-				var attackIfInRange = reader.GetNext<bool>();
-				var attacksPerSecond = reader.GetNext<float>();
+				var searchForTarget = reader.GetNext<bool>();
 				var targetSearchRectangleSize = reader.GetNext<IntVector2>();
+				var timeBetweenSearches = reader.GetNext<float>();
+				var timeBetweenPositionChecks = reader.GetNext<float>();
+				var timeBetweenAttacks = reader.GetNext<float>();
+				
 				var enabled = reader.GetNext<bool>();
 				targetID = reader.GetNext<int>();
-				var timeBetweenPositionChecks = reader.GetNext<float>();
-				var timeToNextAttack = reader.GetNext<float>();
+
+				var timeToNextSearch = reader.GetNext<float>();
 				var timeToNextPositionCheck = reader.GetNext<float>();
+				var timeToNextAttack = reader.GetNext<float>();
+
+				user.GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget);
 
 				MovingMeele = new MovingMeeleAttacker(level,
-													 notificationReceiver,
-													 attackIfInRange,
-													 attacksPerSecond,
+													 searchForTarget,
 													 targetSearchRectangleSize,
-													 enabled,
+													 timeBetweenSearches,
 													 timeBetweenPositionChecks,
+													 timeBetweenAttacks,
+													 enabled,
+													 timeToNextSearch,
+													 timeToNextPositionCheck,
 													 timeToNextAttack,
-													 timeToNextPositionCheck);
+													 moveTo,
+													 isInRange,
+													 pickTarget
+													 );
 
 			}
 
@@ -86,9 +107,8 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver : IBaseNotificationReceiver {
-
-			void MoveTo(Vector3 position);
+		public interface IUser {
+			void GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget);
 		}
 
 		public static string ComponentName = nameof(MovingMeeleAttacker);
@@ -98,53 +118,108 @@ namespace MHUrho.UnitComponents
 
 		public override DefaultComponents ComponentTypeID => ComponentID;
 
-
-		protected override IBaseNotificationReceiver BaseNotificationReceiver => notificationReceiver;
-
-
 		Vector3 previousTargetPosition;
 
+		MoveTo moveTo;
 
 		float timeBetweenPositionChecks;
 		float timeToNextPositionCheck;
 
-		INotificationReceiver notificationReceiver;
 
-		protected MovingMeeleAttacker(ILevelManager level, INotificationReceiver notificationReceiver)
-			: base(level)
+
+		protected MovingMeeleAttacker(ILevelManager level,
+									bool searchForTarget,
+									IntVector2 searchRectangleSize,
+									float timeBetweenSearches,
+									float timeBetweenPositionChecks,
+									float timeBetweenAttacks,
+									bool enabled,
+									MoveTo moveTo,
+									IsInRange isInRange,
+									PickTarget pickTarget
+									)
+			:base(level,searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, isInRange, pickTarget)
 		{
-			this.notificationReceiver = notificationReceiver;
+			this.Enabled = enabled;
+			this.moveTo = moveTo;
+			this.timeBetweenPositionChecks = timeBetweenPositionChecks;
+			this.timeToNextPositionCheck = timeBetweenPositionChecks;
+
+			this.ReceiveSceneUpdates = true;
 		}
 
 		protected MovingMeeleAttacker(ILevelManager level,
-									INotificationReceiver notificationReceiver,
-									bool attackIfInRange,
-									float attacksPerSecond,
-									IntVector2 targetSearchRectangleSize,
-									bool enabled,
+									bool searchForTarget,
+									IntVector2 searchRectangleSize,
+									float timeBetweenSearches,
 									float timeBetweenPositionChecks,
+									float timeBetweenAttacks,
+									bool enabled,
+									float timeToNextSearch,
+									float timeToNextPositionCheck,
 									float timeToNextAttack,
-									float timeToNextPositionCheck)
-			:base(level)
+									MoveTo moveTo,
+									IsInRange isInRange,
+									PickTarget pickTarget
+		)
+			: base(level, 
+					searchForTarget,
+					searchRectangleSize,
+					timeBetweenSearches, 
+					timeBetweenAttacks,
+					timeToNextSearch,
+					timeToNextAttack,
+					isInRange,
+					pickTarget)
 		{
-			this.notificationReceiver = notificationReceiver;
-			this.AttackIfInRange = attackIfInRange;
-			this.AttacksPerSecond = attacksPerSecond;
-			this.TargetSearchRectangleSize = targetSearchRectangleSize;
 			this.Enabled = enabled;
+			this.moveTo = moveTo;
 			this.timeBetweenPositionChecks = timeBetweenPositionChecks;
-			this.timeToNextAttack = timeToNextAttack;
 			this.timeToNextPositionCheck = timeToNextPositionCheck;
+
+			this.ReceiveSceneUpdates = true;
 		}
 
-		public static MovingMeeleAttacker CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T : InstancePlugin, INotificationReceiver
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="instancePlugin"></param>
+		/// <param name="level"></param>
+		/// <param name="searchForTarget"></param>
+		/// <param name="searchRectangleSize">The size of the rectangle with the Entity in the center that will be checked for possible targets</param>
+		/// <param name="timeBetweenSearches">Time between searching the rectangle of size <paramref name="searchRectangleSize"/> if <paramref name="searchForTarget"/> is true</param>
+		/// <param name="timeBetweenPositionChecks">Time between the attacker checks if the targets position changed and recalculates its path</param>
+		/// <param name="timeBetweenAttacks">Time between each attack</param>
+		/// <returns></returns>
+		public static MovingMeeleAttacker CreateNew<T>(T instancePlugin, 
+														ILevelManager level, 
+														bool searchForTarget,
+														IntVector2 searchRectangleSize,
+														float timeBetweenSearches,
+														float timeBetweenPositionChecks,
+														float timeBetweenAttacks
+														)
+			where T : InstancePlugin, IUser
 		{
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new MovingMeeleAttacker(level, instancePlugin);
+			((IUser) instancePlugin).GetMandatoryDelegates(out MoveTo moveTo,
+															out IsInRange isInRange,
+															out PickTarget pickTarget);
+
+			return new MovingMeeleAttacker(level,
+											searchForTarget,
+											searchRectangleSize,
+											timeBetweenSearches,
+											timeBetweenPositionChecks,
+											timeBetweenAttacks,
+											true,
+											moveTo,
+											isInRange,
+											pickTarget);
 		}
 
 		public override PluginData SaveState()
@@ -155,18 +230,14 @@ namespace MHUrho.UnitComponents
 		protected override void OnUpdateChecked(float timeStep)
 		{
 			if (Target == null) {
-				SearchForTargetInRange();
+				SearchForTargetInRange(timeStep);
 			}
 
 			//If attacker has a target, and the target is out of range
 			if (Target != null && !TryAttack(timeStep)) {
 
-				timeToNextPositionCheck -= timeStep;
-				if (timeToNextPositionCheck > 0) return;
+				CheckTargetPosition(timeStep);
 
-				timeToNextPositionCheck = timeBetweenPositionChecks;
-				CheckTargetPosition();
-				
 			}
 
 			
@@ -187,11 +258,16 @@ namespace MHUrho.UnitComponents
 			return removed;
 		}
 
-		void CheckTargetPosition()
+		void CheckTargetPosition(float timeStep)
 		{
+			timeToNextPositionCheck -= timeStep;
+			if (timeToNextPositionCheck > 0) return;
+
+			timeToNextPositionCheck = timeBetweenPositionChecks;
+
 			//TODO: Intersect
 			if (Target.Position != previousTargetPosition) {
-				notificationReceiver.MoveTo(Target.Position);
+				moveTo(Target.Position);
 				previousTargetPosition = Target.Position;
 			}
 		}

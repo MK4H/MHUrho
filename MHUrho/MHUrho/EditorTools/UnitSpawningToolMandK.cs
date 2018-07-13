@@ -35,10 +35,12 @@ namespace MHUrho.EditorTools
 			foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
 				var unitIcon = unitType.Icon;
 
-				var buttonTexture = new Texture2D();
-				buttonTexture.FilterMode = TextureFilterMode.Nearest;
+				var buttonTexture = new Texture2D
+									{
+										FilterMode = TextureFilterMode.Nearest
+									};
 				buttonTexture.SetNumLevels(1);
-				buttonTexture.SetSize(unitIcon.Width, unitIcon.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
+				buttonTexture.SetSize(unitIcon.Width, unitIcon.Height, Graphics.RGBAFormat, TextureUsage.Static);
 				buttonTexture.SetData(unitIcon);
 
 

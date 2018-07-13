@@ -37,7 +37,7 @@ namespace DefaultPackage
 		}
 	}
 
-	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.INotificationReceiver {
+	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.IUser {
 
 		class PathVisitor : NodeVisitor {
 			TestWorkerInstance worker;
@@ -105,11 +105,12 @@ namespace DefaultPackage
 		readonly PathVisitor pathVisitor;
 
 		public TestWorkerInstance(ILevelManager level, IUnit unit) : base(level, unit) {
-			walker = WorldWalker.GetInstanceFor(this, level);
+			walker = WorldWalker.CreateNew(this, level);
 			unit.AddComponent(walker);
 
 			this.pathVisitor = new PathVisitor(this);
-			
+
+			walker.OnMovementEnded += OnMovementFinished;
 		}
 
 		public TestWorkerInstance() {
@@ -162,9 +163,6 @@ namespace DefaultPackage
 			return (to - from).Length;
 		}
 
-		public void OnMovementStarted(WorldWalker walker) {
-
-		}
 
 		public void OnMovementFinished(WorldWalker walker) {
 			if (homeGoing) {
@@ -179,13 +177,16 @@ namespace DefaultPackage
 			}
 		}
 
-		public void OnMovementFailed(WorldWalker walker) {
-
-		}
 
 		public override void Dispose()
 		{
 
+		}
+
+		public void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
+		{
+			getTime = GetTime;
+			getMinimalAproximatedTime = GetMinimalAproximatedTime;
 		}
 	}
 }

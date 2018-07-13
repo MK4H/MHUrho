@@ -10,6 +10,7 @@ using MHUrho.Control;
 using MHUrho.UnitComponents;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace DefaultPackage
@@ -55,6 +56,21 @@ namespace DefaultPackage
 			public IRangeTarget NextTarget { get; set; }
 
 			public float TimeToNextTargetCheck { get; set; }
+
+			public void TrySetTarget(IRangeTarget newTarget, IMap map)
+			{
+				if (Chicken.Shooter.Target != null) {
+					return;
+				}
+
+				NextTarget = newTarget;
+				if (!Chicken.Shooter.ShootAt(NextTarget)) {
+					Chicken.Walker.GoTo(map.PathFinding.GetClosestNode(newTarget.CurrentPosition));
+				}
+				else {
+					Chicken.Walker.Stop();
+				}
+			}
 
 			public ChickenWrapper(ChickenInstance chicken)
 			{
@@ -116,18 +132,9 @@ namespace DefaultPackage
 				case 1:
 					var newTarget = FindTargets(spawnPoint).FirstOrDefault();
 					if (newTarget == null) return;
-					foreach (var chicken in chickens) {
-						if (chicken.Chicken.Shooter.Target != null) {
-							continue;
-						}
 
-						chicken.NextTarget = newTarget;
-						if (!chicken.Chicken.Shooter.ShootAt(chicken.NextTarget)) {
-							chicken.Chicken.Walker.GoTo(Map.PathFinding.GetClosestNode(newTarget.CurrentPosition));
-						}
-						else {
-							chicken.Chicken.Walker.Stop();
-						}
+					foreach (var chicken in chickens) {
+						
 						
 					}
 					break;

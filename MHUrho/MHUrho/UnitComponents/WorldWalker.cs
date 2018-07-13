@@ -13,11 +13,12 @@ using Urho;
 namespace MHUrho.UnitComponents
 {
 
-	internal delegate void MovementStartedDelegate(WorldWalker walker);
+	public delegate void MovementStartedDelegate(WorldWalker walker);
 
-	internal delegate void MovementEndedDelegate(WorldWalker walker);
+	public delegate void MovementEndedDelegate(WorldWalker walker);
 
-	internal delegate void MovementFailedDelegate(WorldWalker walker);
+	public delegate void MovementFailedDelegate(WorldWalker walker);
+
 
 	public class WorldWalker : DefaultComponent {
 
@@ -46,10 +47,10 @@ namespace MHUrho.UnitComponents
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as INotificationReceiver;
+				var notificationReceiver = plugin as IUser;
 				if (notificationReceiver == null) {
 					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
 				var indexedData = new IndexedPluginDataReader(storedData, level);
@@ -76,17 +77,8 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver {
-
-			bool GetTime(INode from, INode to, out float time);
-
-			float GetMinimalAproximatedTime(Vector3 from, Vector3 to);
-
-			void OnMovementStarted(WorldWalker walker);
-
-			void OnMovementFinished(WorldWalker walker);
-
-			void OnMovementFailed(WorldWalker walker);
+		public interface IUser {
+			void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime);
 		}
 
 		public static string ComponentName = nameof(WorldWalker);
@@ -99,19 +91,20 @@ namespace MHUrho.UnitComponents
 		public bool MovementFinished { get; private set; }
 		public bool MovementFailed { get; private set; }
 
-		internal event MovementStartedDelegate OnMovementStarted;
-		internal event MovementEndedDelegate OnMovementEnded;
-		internal event MovementFailedDelegate OnMovementFailed;
+		public event MovementStartedDelegate OnMovementStarted;
+		public event MovementEndedDelegate OnMovementEnded;
+		public event MovementFailedDelegate OnMovementFailed;
 
 
 		public IUnit Unit => (IUnit) Entity;
 
-		INotificationReceiver notificationReceiver;
+		readonly GetTime getTime;
+		readonly GetMinimalAproxTime getMinimalAproximatedTime;
 
 		Path path;
 
-		public static WorldWalker GetInstanceFor<T>(T instancePlugin, ILevelManager level)
-			where T : UnitInstancePlugin, INotificationReceiver {
+		public static WorldWalker CreateNew<T>(T instancePlugin, ILevelManager level)
+			where T : UnitInstancePlugin, IUser {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
@@ -120,26 +113,25 @@ namespace MHUrho.UnitComponents
 			return new WorldWalker(instancePlugin, level);
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver,ILevelManager level) 
+		protected WorldWalker(IUser user,ILevelManager level) 
 			:base(level)
 		{
 			ReceiveSceneUpdates = true;
-			this.notificationReceiver = notificationReceiver;
+
 			Enabled = false;
 
-			OnMovementStarted += notificationReceiver.OnMovementStarted;
-			OnMovementEnded += notificationReceiver.OnMovementFinished;
-			OnMovementFailed += notificationReceiver.OnMovementFailed;
+			user.GetMandatoryDelegates(out getTime, out getMinimalAproximatedTime);
 		}
 
-		protected WorldWalker(INotificationReceiver notificationReceiver, ILevelManager level, bool activated, Path path)
+		protected WorldWalker(IUser user, ILevelManager level, bool activated, Path path)
 			:base(level)
 		{
 
 			ReceiveSceneUpdates = true;
-			this.notificationReceiver = notificationReceiver;
 			this.path = path;
 			this.Enabled = activated;
+
+			user.GetMandatoryDelegates(out getTime, out getMinimalAproximatedTime);
 		}
 
 
@@ -168,8 +160,8 @@ namespace MHUrho.UnitComponents
 			var newPath = Path.FromTo(Unit.Position, 
 									targetNode, 
 									Map, 
-									notificationReceiver.GetTime,
-									notificationReceiver.GetMinimalAproximatedTime);
+									getTime,
+									getMinimalAproximatedTime);
 			if (newPath == null) {
 				MovementStarted = true;
 				OnMovementStarted?.Invoke(this);
@@ -183,7 +175,9 @@ namespace MHUrho.UnitComponents
 
 		public void Stop()
 		{
-			ReachedDestination();
+			if (MovementStarted && !MovementFinished && !MovementFailed) {
+				ReachedDestination();
+			}
 		}
 
 		public IEnumerator<Waypoint> GetRestOfThePath()
@@ -212,7 +206,7 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			if (!path.WaypointReached(notificationReceiver.GetTime)) {
+			if (!path.WaypointReached(getTime)) {
 				ReachedDestination();
 			}
 		}
@@ -248,7 +242,7 @@ namespace MHUrho.UnitComponents
 				case MovementType.None:
 					return false;
 				case MovementType.Teleport:
-					if (path.Update(Unit.Position, timeStep, notificationReceiver.GetTime)) {
+					if (path.Update(Unit.Position, timeStep, getTime)) {
 						//Still can teleport
 
 						//Check timeout
@@ -266,7 +260,7 @@ namespace MHUrho.UnitComponents
 					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
 
 
-					if (path.Update(newPosition, timeStep, notificationReceiver.GetTime)) {
+					if (path.Update(newPosition, timeStep, getTime)) {
 						//Can still move towards the waypoint
 						bool reachedWaypoint = false;
 						if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
@@ -287,8 +281,8 @@ namespace MHUrho.UnitComponents
 			var newPath = Path.FromTo(Unit.Position,
 									path.GetTarget(),
 									Map,
-									notificationReceiver.GetTime,
-									 notificationReceiver.GetMinimalAproximatedTime);
+									getTime,
+									 getMinimalAproximatedTime);
 
 			if (newPath == null) {
 				//Cant get there

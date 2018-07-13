@@ -11,6 +11,9 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
+	public delegate IEnumerator<Waypoint> GetWaypointsDelegate(MovingRangeTarget target);
+
+
 	public class MovingRangeTarget : RangeTargetComponent {
 
 		internal class Loader : DefaultComponentLoader {
@@ -27,25 +30,26 @@ namespace MHUrho.UnitComponents
 				var sequentialData = new SequentialPluginDataWriter(movingRangeTarget.Level);
 				sequentialData.StoreNext(movingRangeTarget.InstanceID);
 				sequentialData.StoreNext(movingRangeTarget.Enabled);
+				sequentialData.StoreNext(movingRangeTarget.offset);
 				return sequentialData.PluginData;
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
+				var user = plugin as IUser;
+				if (user == null) {
 					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
 				var sequentialData = new SequentialPluginDataReader(storedData, level);
-				sequentialData.MoveNext();
-				int instanceID = sequentialData.GetCurrent<int>();
-				sequentialData.MoveNext();
-				bool enabled = sequentialData.GetCurrent<bool>();
-				sequentialData.MoveNext();
 
+				int instanceID = sequentialData.GetNext<int>();
+				bool enabled = sequentialData.GetNext<bool>();
+				Vector3 offset = sequentialData.GetNext<Vector3>();
 
-				MovingRangeTarget = new MovingRangeTarget(instanceID, level, notificationReceiver) {Enabled = enabled};
+				user.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
+
+				MovingRangeTarget = new MovingRangeTarget(instanceID, level, offset, getWaypoints) {Enabled = enabled};
 				level.LoadRangeTarget(MovingRangeTarget);
 			}
 
@@ -63,11 +67,9 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver {
+		public interface IUser {
 
-			IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget target);
-
-			Vector3 GetCurrentPosition(MovingRangeTarget target);
+			void GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
 
 		}
 
@@ -78,35 +80,48 @@ namespace MHUrho.UnitComponents
 
 		public override bool Moving => true;
 
-		public override Vector3 CurrentPosition => notificationReceiver.GetCurrentPosition(this);
+		public override Vector3 CurrentPosition => Entity.Position + Entity.Node.Rotation * offset;
 
-		INotificationReceiver notificationReceiver;
+		readonly GetWaypointsDelegate getWaypoints;
 
-		protected MovingRangeTarget(ILevelManager level, INotificationReceiver notificationReceiver)
+		/// <summary>
+		/// Offset from <see cref="IEntity.Position"/> in the entity space (rotates with entity)
+		/// </summary>
+		readonly Vector3 offset;
+
+		protected MovingRangeTarget(ILevelManager level, Vector3 offset, GetWaypointsDelegate getWaypoints)
 			:base(level)
 		{
-			this.notificationReceiver = notificationReceiver;
+			this.offset = offset;
+			//TODO: Check that delegates are not null
+			this.getWaypoints = getWaypoints;
+
 		}
 
-		protected MovingRangeTarget(int ID, ILevelManager level, INotificationReceiver notificationReceiver)
+		protected MovingRangeTarget(int ID, ILevelManager level, Vector3 offset, GetWaypointsDelegate getWaypoints)
 			: base(ID, level)
 		{
-			this.notificationReceiver = notificationReceiver;
+			this.offset = offset;
+			//TODO: Check that delegates are not null
+			this.getWaypoints = getWaypoints;
 		}
 
-		public static MovingRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T : InstancePlugin, INotificationReceiver {
+		public static MovingRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level, Vector3 offset)
+			where T : InstancePlugin, IUser {
 
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
-			var newTarget = new MovingRangeTarget(level, instancePlugin);
+
+			instancePlugin.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
+
+			var newTarget = new MovingRangeTarget(level, offset, getWaypoints);
 			((LevelManager)level).RegisterRangeTarget(newTarget);
 			return newTarget;
 		}
 
 		public override IEnumerator<Waypoint> GetWaypoints() {
-			return notificationReceiver.GetWaypoints(this);
+			return getWaypoints(this);
 		}
 
 		public override PluginData SaveState() {
@@ -116,9 +131,13 @@ namespace MHUrho.UnitComponents
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
 			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(MovingRangeTarget), entityDefaultComponents);
+
+			Entity.PositionChanged += TargetMoved;
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			Entity.PositionChanged -= TargetMoved;
+
 			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
 			bool removed = RemovedFromEntity(typeof(MovingRangeTarget), entityDefaultComponents);
 			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");

@@ -26,39 +26,49 @@ namespace MHUrho.UnitComponents
 			public static PluginData SaveState(StaticMeeleAttacker staticMeele)
 			{
 				var writer = new SequentialPluginDataWriter(staticMeele.Level);
-				writer.StoreNext(staticMeele.AttackIfInRange);
-				writer.StoreNext(staticMeele.AttacksPerSecond);
-				writer.StoreNext(staticMeele.TargetSearchRectangleSize);
+				writer.StoreNext(staticMeele.SearchForTarget);
+				writer.StoreNext(staticMeele.SearchRectangleSize);
+				writer.StoreNext(staticMeele.TimeBetweenSearches);
+				writer.StoreNext(staticMeele.TimeBetweenAttacks);
+				
 				writer.StoreNext(staticMeele.Enabled);
 				writer.StoreNext(staticMeele.Target.ID);
-				writer.StoreNext(staticMeele.timeToNextAttack);
+				writer.StoreNext(staticMeele.TimeToNextSearch);
+				writer.StoreNext(staticMeele.TimeToNextAttack);
 				return writer.PluginData;
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData)
 			{
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
+				var user = plugin as IUser;
+				if (user == null) {
 					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(MovingMeeleAttacker.INotificationReceiver)} interface", nameof(plugin));
+						ArgumentException($"provided plugin does not implement the {nameof(MovingMeeleAttacker.IUser)} interface", nameof(plugin));
 				}
 
 				var reader = new SequentialPluginDataReader(storedData, level);
-				var attackIfInRange = reader.GetNext<bool>();
-				var attacksPerSecond = reader.GetNext<float>();
-				var targetSearchRectangleSize = reader.GetNext<IntVector2>();
+				var searchForTarget = reader.GetNext<bool>();
+				var searchRectangleSize = reader.GetNext<IntVector2>();
+				var timeBetweenSearches = reader.GetNext<float>();
+				var timeBetweenAttacks = reader.GetNext<float>();
+				
 				var enabled = reader.GetNext<bool>();
 				targetID = reader.GetNext<int>();
+				var timeToNextSearch = reader.GetNext<float>();
 				var timeToNextAttack = reader.GetNext<float>();
 
+				user.GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
 
 				StaticMeele = new StaticMeeleAttacker(level,
-													notificationReceiver,
-													attackIfInRange,
-													attacksPerSecond,
-													targetSearchRectangleSize,
+													searchForTarget,
+													searchRectangleSize,
+													timeBetweenSearches,
+													timeBetweenAttacks,
 													enabled,
-													timeToNextAttack);
+													timeToNextSearch,
+													timeToNextAttack,
+													isInRange,
+													pickTarget);
 			}
 
 			public override void ConnectReferences(LevelManager level)
@@ -77,8 +87,8 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver : IBaseNotificationReceiver {
-
+		public interface IUser {
+			void GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
 		}
 
 		public static string ComponentName = nameof(StaticMeeleAttacker);
@@ -88,42 +98,52 @@ namespace MHUrho.UnitComponents
 
 		public override DefaultComponents ComponentTypeID => ComponentID;
 
-		protected override IBaseNotificationReceiver BaseNotificationReceiver => notificationReceiver;
 
-		INotificationReceiver notificationReceiver;
-
-		protected StaticMeeleAttacker(ILevelManager level, INotificationReceiver notificationReceiver)
-			:base(level)
+		protected StaticMeeleAttacker(ILevelManager level,
+									bool searchForTarget,
+									IntVector2 searchRectangleSize,
+									float timeBetweenSearches,
+									float timeBetweenAttacks,
+									IsInRange isInRange, 
+									PickTarget pickTarget)
+			:base(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks,  isInRange, pickTarget)	
 		{
-			this.notificationReceiver = notificationReceiver;
+			this.ReceiveSceneUpdates = true;
 		}
 
 		protected StaticMeeleAttacker(ILevelManager level,
-									INotificationReceiver notificationReceiver,
-									bool attackIfInRange,
-									float attacksPerSecond,
-									IntVector2 targetSearchRectangleSize,
+									bool searchForTarget,
+									IntVector2 searchRectangleSize,
+									float timeBetweenSearches,
+									float timeBetweenAttacks,
 									bool enabled,
-									float timeToNextAttack)
-			:base(level)
+									float timeToNextSearch,
+									float timeToNextAttack,
+									IsInRange isInRange,
+									PickTarget pickTarget)
+			:base(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, timeToNextSearch, timeToNextAttack,  isInRange, pickTarget)
 		{
-			this.notificationReceiver = notificationReceiver;
-			this.AttackIfInRange = attackIfInRange;
-			this.AttacksPerSecond = attacksPerSecond;
-			this.TargetSearchRectangleSize = targetSearchRectangleSize;
 			this.Enabled = enabled;
-			this.timeToNextAttack = timeToNextAttack;
 
+			this.ReceiveSceneUpdates = true;
 		}
 
-		public static StaticMeeleAttacker CreateNew<T>(T instancePlugin, ILevelManager level)
-			where T : InstancePlugin, INotificationReceiver
+		public static StaticMeeleAttacker CreateNew<T>(T instancePlugin,
+														ILevelManager level,
+														bool searchForTarget, 
+														IntVector2 searchRectangleSize,
+														float timeBetweenSearches,
+														float timeBetweenAttacks
+														)
+			where T : InstancePlugin, IUser
 		{
 			if (instancePlugin == null) {
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			return new StaticMeeleAttacker(level, instancePlugin);
+			((IUser)instancePlugin).GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
+
+			return new StaticMeeleAttacker(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, isInRange, pickTarget);
 		}
 
 		public override PluginData SaveState()
@@ -134,7 +154,7 @@ namespace MHUrho.UnitComponents
 		protected override void OnUpdateChecked(float timeStep)
 		{
 			if (Target == null) {
-				SearchForTargetInRange();
+				SearchForTargetInRange(timeStep);
 			}
 
 			if (Target != null) {

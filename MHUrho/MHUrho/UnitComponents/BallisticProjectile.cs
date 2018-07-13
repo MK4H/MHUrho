@@ -12,6 +12,9 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
+	/// <summary>
+	/// Projectile component that gets that moves the projectile along a ballistic trajectory
+	/// </summary>
 	public class BallisticProjectile : DefaultComponent
 	{
 		internal class Loader : DefaultComponentLoader {
@@ -32,11 +35,6 @@ namespace MHUrho.UnitComponents
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
-					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
-				}
 
 				var sequentialData = new SequentialPluginDataReader(storedData, level);
 				var movement = sequentialData.GetCurrent<Vector3>();
@@ -44,8 +42,7 @@ namespace MHUrho.UnitComponents
 				var enabled = sequentialData.GetCurrent<bool>();
 				sequentialData.MoveNext();
 
-				BallisticProjectile = new BallisticProjectile(notificationReceiver,
-															level,
+				BallisticProjectile = new BallisticProjectile(level,
 															movement,
 															enabled);
 
@@ -65,10 +62,6 @@ namespace MHUrho.UnitComponents
 		}
 
 
-		public interface INotificationReceiver {
-
-		}
-
 		public static DefaultComponents ComponentID = DefaultComponents.UnpoweredFlier;
 		public static string ComponentName = nameof(BallisticProjectile);
 
@@ -80,37 +73,25 @@ namespace MHUrho.UnitComponents
 
 		public IProjectile Projectile => (IProjectile)Entity;
 
-		INotificationReceiver notificationReceiver;
-
-		protected BallisticProjectile(INotificationReceiver notificationReceiver,
-							  ILevelManager level) 
+		protected BallisticProjectile(ILevelManager level) 
 			:base(level)
 		{
 			ReceiveSceneUpdates = true;
-			this.notificationReceiver = notificationReceiver;
 		}
 
-		protected BallisticProjectile(INotificationReceiver notificationReceiver,
-								 ILevelManager level,
-								 Vector3 movement,
-								 bool enabled) 
+		protected BallisticProjectile(ILevelManager level,
+									Vector3 movement,
+									bool enabled) 
 			: base(level)
 		{
 			ReceiveSceneUpdates = true;
-			this.notificationReceiver = notificationReceiver;
 			this.Movement = movement;
 			this.Enabled = enabled;
 		}
 
-		public static BallisticProjectile GetInstanceFor<T>(T instancePlugin, 
-													   ILevelManager level)
-			where T : InstancePlugin, INotificationReceiver
+		public static BallisticProjectile CreateNew(ILevelManager level)
 		{
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
-			}
-
-			return new BallisticProjectile(instancePlugin, level);
+			return new BallisticProjectile(level);
 		}
 
 		/// <summary>
@@ -356,13 +337,12 @@ namespace MHUrho.UnitComponents
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			base.AddedToEntity(entityDefaultComponents);
-			
-
 			if (Entity != null && !(Entity is IProjectile)) {
 				throw new InvalidOperationException("Cannot add BallisticProjectile to Entity that is not a projectile");
 			}
 
+			base.AddedToEntity(entityDefaultComponents);
+		
 			AddedToEntity(typeof(BallisticProjectile), entityDefaultComponents);
 		}
 
