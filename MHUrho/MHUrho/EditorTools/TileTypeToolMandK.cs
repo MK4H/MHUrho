@@ -17,7 +17,8 @@ namespace MHUrho.EditorTools
 
 		Dictionary<Button, TileType> tileTypeButtons;
 
-		GameMandKController input;
+		readonly GameMandKController input;
+		readonly MandKGameUI ui;
 
 		StaticRectangleToolMandK highlight;
 
@@ -32,6 +33,7 @@ namespace MHUrho.EditorTools
 		{
 
 			this.input = input;
+			this.ui = ui;
 			this.tileTypeButtons = new Dictionary<Button, TileType>();
 			this.highlight = new StaticRectangleToolMandK(input, ui, camera, new IntVector2(3,3));
 
@@ -120,6 +122,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseDown(MouseButtonDownEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (selected != null) {
 				centerTile = input.GetTileUnderCursor();
 				if (centerTile != null) {
@@ -130,12 +134,16 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseUp(MouseButtonUpEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (selected != null) {
 				mouseButtonDown = false;
 			}
 		}
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (selected != null && mouseButtonDown) {
 				var newCenterTile = input.GetTileUnderCursor();
 				if (newCenterTile != null && newCenterTile != centerTile) {

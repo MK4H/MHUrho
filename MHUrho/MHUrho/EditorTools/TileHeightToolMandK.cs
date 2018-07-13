@@ -17,8 +17,8 @@ namespace MHUrho.EditorTools
 		const float Sensitivity = 0.01f;
 
 		//private List<Button> buttons;
-		GameMandKController input;
-		MandKGameUI ui;
+		readonly GameMandKController input;
+		readonly MandKGameUI ui;
 
 		StaticRectangleToolMandK highlight;
 
@@ -91,6 +91,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void MouseMove(MHUrhoMouseMovedEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (mouseButtonDown) {
 				Map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
 			}

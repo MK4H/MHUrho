@@ -18,6 +18,7 @@ namespace MHUrho.EditorTools
 		Dictionary<Button, UnitType> unitTypeButtons;
 
 		GameMandKController input;
+		readonly MandKGameUI ui;
 
 		Button selected;
 
@@ -28,6 +29,7 @@ namespace MHUrho.EditorTools
 		{
 
 			this.input = input;
+			this.ui = ui;
 			this.unitTypeButtons = new Dictionary<Button, UnitType>();
 
 			foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
@@ -106,9 +108,16 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseDown(MouseButtonDownEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (selected != null) {
 
 				foreach (var result in input.CursorRaycast()) {
+					//Spawn only at buildings or map, not units, projectiles etc.
+					if (!Level.TryGetBuilding(result.Node, out IBuilding dontCare) && !Level.Map.IsRaycastToMap(result)) {
+						continue;
+					}
+
 					//Spawn at the first possible raycast hit
 					if (Level.SpawnUnit(unitTypeButtons[selected], 
 										 Map.GetContainingTile(result.Position),

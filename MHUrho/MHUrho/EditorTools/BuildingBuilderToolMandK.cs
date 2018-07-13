@@ -18,7 +18,8 @@ namespace MHUrho.EditorTools
 
 		Dictionary<Button, BuildingType> buildingTypeButtons;
 
-		GameMandKController input;
+		readonly GameMandKController input;
+		readonly MandKGameUI ui;
 
 		Button selected;
 
@@ -28,6 +29,7 @@ namespace MHUrho.EditorTools
 			: base(input)
 		{
 			this.input = input;
+			this.ui = ui;
 			this.buildingTypeButtons = new Dictionary<Button, BuildingType>();
 
 			foreach (var buildingType in PackageManager.Instance.ActiveGame.BuildingTypes) {
@@ -115,8 +117,7 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseDown(MouseButtonDownEventArgs e) {
-			if (selected == null) return;
-
+			if (selected == null || ui.UIHovering) return;
 
 			var tile = input.GetTileUnderCursor();
 			if (tile == null) return;
@@ -131,6 +132,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
+			if (ui.UIHovering) return;
+
 			HighlightBuildingRectangle();
 		}
 

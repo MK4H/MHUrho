@@ -107,7 +107,6 @@ namespace MHUrho.Logic
 
 			Scene scene = null;
 			Octree octree = null;
-			CameraMover cameraMover = null;
 			LevelManager level = null;
 			List<ILoader> loaders = new List<ILoader>();
 			Node mapNode = null;
@@ -195,8 +194,8 @@ namespace MHUrho.Logic
 					loaders.Add(playerLoader);
 				}
 				//TODO: Move this inside the foreach
-				level.Input = game.ControllerFactory.CreateGameController(cameraMover, level, octree, firstPlayer);
-				level.cameraController = game.ControllerFactory.CreateCameraController(level.Input, cameraMover);
+				level.Input = game.ControllerFactory.CreateGameController(level.Camera, level, octree, firstPlayer);
+				level.cameraController = game.ControllerFactory.CreateCameraController(level.Input, level.Camera);
 
 				//Connect references
 				foreach (var loader in loaders) {

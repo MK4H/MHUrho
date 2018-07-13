@@ -213,7 +213,7 @@ namespace DefaultPackage
 			for (int y = Building.Rectangle.Top; y < Building.Rectangle.Bottom; y++) {
 				for (int x = Building.Rectangle.Left; x < Building.Rectangle.Right; x++) {
 					ITile tile = Map.GetTileByTopLeftCorner(x, y);
-					Vector3 position = new Vector3(tile.Center.X, GetHeightAt(tile.Center.X, tile.Center.Y).Value, tile.Center.Y);
+					Vector3 position = new Vector3(tile.Center.X, Map.GetTerrainHeightAt(tile.Center) + GetHeightAt(tile.Center.X, tile.Center.Y).Value, tile.Center.Y);
 					pathfindingNodes.Add(tile,
 										Map.PathFinding.CreateBuildingNode(Building, position, null));
 				}

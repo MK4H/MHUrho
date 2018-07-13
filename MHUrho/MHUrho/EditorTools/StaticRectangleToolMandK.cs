@@ -17,9 +17,9 @@ namespace MHUrho.EditorTools
 
 		public IntVector2 Size { get; set; }
 
-		GameMandKController input;
-		MandKGameUI ui;
-		CameraMover camera;
+		readonly GameMandKController input;
+		readonly MandKGameUI ui;
+		readonly CameraMover camera;
 
 		bool enabled;
 
@@ -70,7 +70,7 @@ namespace MHUrho.EditorTools
 
 		void OnCameraMove(Vector3 movement, Vector2 rotation, float timeStep)
 		{
-			if (fixedCenter != null) return;
+			if (ui.UIHovering || fixedCenter != null) return;
 
 			var centerTile = input.GetTileUnderCursor();
 			if (centerTile != null) {
@@ -79,6 +79,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (fixedCenter != null) {
 				Map.HighlightRectangle(fixedCenter, Size,  Color.Green);
 				return;

@@ -23,6 +23,7 @@ namespace MHUrho.EditorTools
 		public event HandleSingleClick SingleClickHandler;
 
 		readonly GameMandKController input;
+		readonly MandKGameUI ui;
 		readonly CameraMover camera;
 
 		IntVector2 mouseDownPos;
@@ -37,6 +38,7 @@ namespace MHUrho.EditorTools
 			: base(input)
 		{
 			this.input = input;
+			this.ui = ui;
 			this.camera = camera;
 		}
 
@@ -77,6 +79,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void MouseDown(MouseButtonDownEventArgs e) {
+			if (ui.UIHovering) return;
+
 			var tile = input.GetTileUnderCursor();
 			//TODO: Raycast into a plane and get point even outside the map
 			if (tile != null) {
@@ -88,6 +92,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void MouseUp(MouseButtonUpEventArgs e) {
+			if (ui.UIHovering) return;
+
 			var tile = input.GetTileUnderCursor();
 
 			if (!validMouseDown) {
@@ -135,7 +141,7 @@ namespace MHUrho.EditorTools
 
 		void MouseAndCameraMove()
 		{
-			if (!validMouseDown) return;
+			if (!validMouseDown || ui.UIHovering) return;
 
 			var tile = input.GetTileUnderCursor();
 

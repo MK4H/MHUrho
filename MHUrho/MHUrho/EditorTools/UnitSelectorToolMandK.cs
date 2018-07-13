@@ -74,6 +74,7 @@ namespace MHUrho.EditorTools
 			select button.Key;
 
 		readonly GameMandKController input;
+		readonly MandKGameUI ui;
 
 		readonly DynamicRectangleToolMandK dynamicHighlight;
 
@@ -87,6 +88,7 @@ namespace MHUrho.EditorTools
 			:base(input)
 		{
 			this.input = input;
+			this.ui = ui;
 			this.selected = new Dictionary<UnitType, SelectedInfo>();
 			this.buttons = new Dictionary<Button, UnitType>();
 

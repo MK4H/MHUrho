@@ -192,9 +192,10 @@ namespace MHUrho.UserInterface
 				throw new ArgumentException("button is not a child of the selectionBar");
 			}
 
-			if (!button.Visible) {
-				throw new ArgumentException("Hiding already hidden button");
-			}
+			//TODO: Maybe enable this check
+			//if (!button.Visible) {
+			//	throw new ArgumentException("Hiding already hidden button");
+			//}
 
 			button.HoverBegin -= Button_HoverBegin;
 			button.HoverBegin -= UIHoverBegin;

@@ -24,7 +24,8 @@ namespace MHUrho.EditorTools {
 
 		List<Button> buttons;
 		Mode mode;
-		GameMandKController input;
+		readonly GameMandKController input;
+		readonly MandKGameUI ui;
 
 		List<IntVector2> verticies;
 		Vector3 mainPoint;
@@ -42,6 +43,7 @@ namespace MHUrho.EditorTools {
 			//buttonTexture.SetData(tileType.GetImage());
 			this.buttons = new List<Button>();
 			this.input = input;
+			this.ui = ui;
 			this.verticies = new List<IntVector2>();
 
 
@@ -115,12 +117,16 @@ namespace MHUrho.EditorTools {
 		}
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
+			if (ui.UIHovering) return;
+
 			if (mode == Mode.Moving) {
 				Map.ChangeHeight(verticies, -e.DY * Sensitivity);
 			}
 		}
 
 		void MouseDownSelect(MouseButtonDownEventArgs e) {
+			if (ui.UIHovering) return;
+
 			var raycastResult = input.CursorRaycast();
 			var vertex = Map.RaycastToVertex(raycastResult);
 			if (vertex.HasValue) {
@@ -132,6 +138,8 @@ namespace MHUrho.EditorTools {
 		}
 
 		void MouseDownMove(MouseButtonDownEventArgs e) {
+			if (ui.UIHovering) return;
+
 			SwitchFromMoving();
 		}
 
