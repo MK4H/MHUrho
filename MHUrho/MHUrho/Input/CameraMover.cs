@@ -89,8 +89,8 @@ namespace MHUrho.Input
 		const float FreeFloatHeightOffset = 0.2f;
 		const float MinZoomDistance = 0.5f;
 
-		public static CameraMover GetCameraController(Scene scene, IMap map, Vector2 initialPosition) {
-			Node cameraHolder = scene.CreateChild(name: "CameraHolder");
+		public static CameraMover GetCameraController(Node levelNode, IMap map, Vector2 initialPosition) {
+			Node cameraHolder = levelNode.CreateChild(name: "CameraHolder");
 			Node cameraNode = cameraHolder.CreateChild(name: "camera");
 			Camera camera = cameraNode.CreateComponent<Camera>();
 

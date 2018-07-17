@@ -49,6 +49,8 @@ namespace MHUrho.Logic
 
 		public MyGame App { get; private set; }
 
+		public Node LevelNode { get; private set; }
+
 		public Map Map { get; private set; }
 
 		public Minimap Minimap { get; private set; }
@@ -87,7 +89,10 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(MyGame app, Octree octree) {
+		protected LevelManager(Node levelNode, MyGame app, Octree octree)
+		{
+			this.LevelNode = levelNode;
+
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
 			this.buildings = new Dictionary<int, IBuilding>();
@@ -134,12 +139,16 @@ namespace MHUrho.Logic
 
 				LoadSceneParts(game, scene);
 
-				level = new LevelManager(game, octree);
+
+				var levelNode = scene.CreateChild("LevelNode");
+				levelNode.Enabled = false;
+				level = new LevelManager(levelNode, game, octree);
+				levelNode.AddComponent(level);
 
 				level.Minimap = new Minimap(level, 4);
 
 				//Load data
-				mapNode = scene.CreateChild("MapNode");
+				mapNode = level.LevelNode.CreateChild("MapNode");
 			}
 
 			void CreateCamera()
@@ -151,7 +160,7 @@ namespace MHUrho.Logic
 			void LoadEntities()
 			{
 				foreach (var unit in storedLevel.Units) {
-					var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, scene.CreateChild("UnitNode"), unit);
+					var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, level.LevelNode.CreateChild("UnitNode"), unit);
 					level.RegisterEntity(unitLoader.Unit);
 					level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
 					loaders.Add(unitLoader);
@@ -161,7 +170,7 @@ namespace MHUrho.Logic
 					var buildingLoader =
 						Building.Loader.StartLoading(level,
 													PackageManager.Instance,
-													scene.CreateChild("BuildingNode"),
+													level.LevelNode.CreateChild("BuildingNode"),
 													building);
 					level.RegisterEntity(buildingLoader.Building);
 					level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building);;
@@ -171,7 +180,7 @@ namespace MHUrho.Logic
 
 				foreach (var projectile in storedLevel.Projectiles) {
 					var projectileLoader = Projectile.Loader.StartLoading(level,
-																		scene.CreateChild("ProjectileNode"),
+																		level.LevelNode.CreateChild("ProjectileNode"),
 																		projectile);
 
 					level.RegisterEntity(projectileLoader.Projectile);
@@ -189,7 +198,7 @@ namespace MHUrho.Logic
 						firstPlayer = playerLoader.Player;
 					}
 
-					scene.AddComponent(playerLoader.Player);
+					level.LevelNode.AddComponent(playerLoader.Player);
 					level.players.Add(playerLoader.Player.ID, playerLoader.Player);
 					loaders.Add(playerLoader);
 				}
@@ -207,8 +216,8 @@ namespace MHUrho.Logic
 				}
 
 				CurrentLevel = level;
-				scene.AddComponent(level);
 				scene.UpdateEnabled = true;
+				level.LevelNode.Enabled = true;
 			}
 		}
 
@@ -233,7 +242,7 @@ namespace MHUrho.Logic
 		{
 			InitializeLevel(game, gamePackageName, out Scene scene);
 
-			Node mapNode = scene.CreateChild("MapNode");
+			Node mapNode = CurrentLevel.LevelNode.CreateChild("MapNode");
 
 			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize));
 			CurrentLevel.Map = map;
@@ -255,7 +264,7 @@ namespace MHUrho.Logic
 			{
 				//TODO: Temporary player, COLOR 
 				Player newPlayer = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, Color.Red);
-				scene.AddComponent(newPlayer);
+				CurrentLevel.LevelNode.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
 				CurrentLevel.Input =
 					game.ControllerFactory.CreateGameController(CurrentLevel.Camera, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
@@ -268,12 +277,12 @@ namespace MHUrho.Logic
 													CurrentLevel,
 													PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"),
 													Color.Blue);
-				scene.AddComponent(newPlayer);
+				CurrentLevel.LevelNode.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
 				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
 
-				scene.AddComponent(CurrentLevel);
 				scene.UpdateEnabled = true;
+				CurrentLevel.LevelNode.Enabled = true;
 			}
 			
 		}
@@ -346,7 +355,7 @@ namespace MHUrho.Logic
 				return null;
 			}
 
-			Node unitNode = Scene.CreateChild("Unit");
+			Node unitNode = LevelNode.CreateChild("Unit");
 
 			var newUnit = unitType.CreateNewUnit(GetNewID(entities),unitNode, this, tile, player);
 			RegisterEntity(newUnit);
@@ -369,7 +378,7 @@ namespace MHUrho.Logic
 				return null;
 			}
 
-			Node buildingNode = Scene.CreateChild("Building");
+			Node buildingNode = LevelNode.CreateChild("Building");
 
 			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), buildingNode, this, topLeft, player);
 			RegisterEntity(newBuilding);
@@ -644,15 +653,19 @@ namespace MHUrho.Logic
 		public void Pause()
 		{
 			Scene.UpdateEnabled = false;
+			LevelNode.SetEnabledRecursive(false);
 		}
 
 		public void UnPause()
 		{
 			Scene.UpdateEnabled = true;
+			LevelNode.SetEnabledRecursive(true);
 		}
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
+
+			if (!EnabledEffective) return;
 
 			Minimap.OnUpdate(timeStep);
 
@@ -672,7 +685,10 @@ namespace MHUrho.Logic
 
 			LoadSceneParts(game, scene);
 
-			CurrentLevel = new LevelManager(game, octree);
+			var levelNode = scene.CreateChild("LevelNode");
+			levelNode.Enabled = false;
+			CurrentLevel = new LevelManager(levelNode, game, octree);
+			levelNode.AddComponent(CurrentLevel);
 
 		}
 

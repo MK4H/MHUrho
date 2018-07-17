@@ -19,6 +19,8 @@ namespace MHUrho.Logic {
 
 		Scene Scene { get; }
 
+		Node LevelNode { get; }
+
 		DefaultComponentFactory DefaultComponentFactory { get; }
 
 		PackageManager PackageManager { get; }

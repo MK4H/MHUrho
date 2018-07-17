@@ -120,7 +120,7 @@ namespace MHUrho.Logic
 			}
 			else {
 				//Projectile node has to be a child of the scene directly for physics to work correctly
-				var projectileNode = level.Scene.CreateChild("Projectile");
+				var projectileNode = level.LevelNode.CreateChild("Projectile");
 				projectile = Projectile.CreateNew(newID,
 												 level,
 												 player,
