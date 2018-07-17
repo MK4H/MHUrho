@@ -93,5 +93,11 @@ namespace MHUrho.Logic {
 		bool UnRegisterRangeTarget(int ID);
 
 		bool CanSee(Vector3 source, IEntity target, bool mapBlocks = true, bool buildingsBlock = true, bool unitsBlock = false);
+
+		void Pause();
+
+		void UnPause();
+
+		void End();
 	}
 }

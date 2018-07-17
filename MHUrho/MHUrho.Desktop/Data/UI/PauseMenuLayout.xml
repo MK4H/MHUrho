@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<element type="Window" style="MainMenuWindow">
+	<attribute name="Name" value="PauseMenu" />
+	<attribute name="Position" value="400 100" />
+	<attribute name="Size" value="1024 768" />
+	<attribute name="Pivot" value="0 0" />
+	<element type="Button" style="Button">
+		<attribute name="Name" value="Save" />
+		<attribute name="Size" value="200 50" />
+		<attribute name="Min Size" value="200 50" />
+		<attribute name="Min Anchor" value="0.5 0.32" />
+		<attribute name="Max Anchor" value="0.5 0.32" />
+		<attribute name="Pivot" value="0.5 0.5" />
+		<attribute name="Enable Anchor" value="true" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="35" />
+			<attribute name="Text" value="Save" />
+		</element>
+	</element>
+	<element type="Button" style="Button">
+		<attribute name="Name" value="Load" />
+		<attribute name="Size" value="200 50" />
+		<attribute name="Min Size" value="200 50" />
+		<attribute name="Min Anchor" value="0.5 0.49" />
+		<attribute name="Max Anchor" value="0.5 0.49" />
+		<attribute name="Pivot" value="0.5 0.5" />
+		<attribute name="Enable Anchor" value="true" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="35" />
+			<attribute name="Text" value="Load" />
+		</element>
+	</element>
+	<element type="Button" style="Button">
+		<attribute name="Name" value="Options" />
+		<attribute name="Size" value="200 50" />
+		<attribute name="Min Size" value="200 50" />
+		<attribute name="Min Anchor" value="0.5 0.66" />
+		<attribute name="Max Anchor" value="0.5 0.66" />
+		<attribute name="Pivot" value="0.5 0.5" />
+		<attribute name="Enable Anchor" value="true" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="35" />
+			<attribute name="Text" value="Options" />
+		</element>
+	</element>
+	<element type="Button" style="Button">
+		<attribute name="Name" value="Exit" />
+		<attribute name="Size" value="200 50" />
+		<attribute name="Min Size" value="200 50" />
+		<attribute name="Min Anchor" value="0.5 0.83" />
+		<attribute name="Max Anchor" value="0.5 0.83" />
+		<attribute name="Pivot" value="0.5 0.5" />
+		<attribute name="Enable Anchor" value="true" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="35" />
+			<attribute name="Text" value="Exit" />
+		</element>
+	</element>
+	<element type="Button" style="Button">
+		<attribute name="Name" value="Resume" />
+		<attribute name="Size" value="200 50" />
+		<attribute name="Min Size" value="200 50" />
+		<attribute name="Min Anchor" value="0.5 0.16" />
+		<attribute name="Max Anchor" value="0.5 0.16" />
+		<attribute name="Pivot" value="0.5 0.5" />
+		<attribute name="Enable Anchor" value="true" />
+		<element type="Text">
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="35" />
+			<attribute name="Text" value="Resume" />
+		</element>
+	</element>
+</element>

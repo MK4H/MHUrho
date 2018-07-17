@@ -7,7 +7,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    public class UIManager
+    public abstract class UIManager
     {
 
 		protected readonly MyGame Game;
@@ -16,7 +16,7 @@ namespace MHUrho.UserInterface
 		protected Urho.Input Input => Game.Input;
 
 
-		public UIManager(MyGame game)
+		protected UIManager(MyGame game)
 		{
 			this.Game = game;
 		}

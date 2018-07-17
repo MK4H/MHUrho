@@ -97,17 +97,15 @@ namespace MHUrho
 			Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
 			//TODO: DEBUG
-			//Stream newConfigFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Create, FileAccess.Write);
-			//AppOptions.GetDefaultAppOptions().SaveTo(newConfigFile);
-			Files.CopyStaticToDynamic(Files.ConfigFilePath);
+			Stream newConfigFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Create, FileAccess.Write);
+			AppOptions.GetDefaultAppOptions().SaveTo(newConfigFile);
+			//Files.CopyStaticToDynamic(Files.ConfigFilePath);
 
 
 
 			Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read);
 			Config = AppOptions.LoadFrom(configFile);
 			
-			
-
 			PackageManager.CreateInstance(ResourceCache);
 
 			SetConfigOptions();
@@ -136,17 +134,7 @@ namespace MHUrho
 				monoDebugHud.Show();
 			}
 
-			Graphics.SetMode(Config.Resolution.X,
-							 Config.Resolution.Y,
-							 Config.Fullscreen,
-							 Config.Borderless,
-							 Config.Resizable,
-							 Config.HighDPI,
-							 Config.VSync,
-							 Config.TripleBuffer,
-							 Config.Multisample,
-							 Config.Monitor,
-							 Config.RefreshRateCap);
+			Config.SetGraphicsMode(Graphics);
 
 		}
 

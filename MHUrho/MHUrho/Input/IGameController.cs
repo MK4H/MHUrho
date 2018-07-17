@@ -27,5 +27,11 @@ namespace MHUrho.Input
 		void Enable();
 
 		void Disable();
+
+		void Pause();
+
+		void UnPause();
+
+		void EndLevel();
 	}
 }

@@ -15,16 +15,38 @@ namespace MHUrho.Input
 	class MenuMandKController : MandKController, IMenuController {
 
 		public InputType InputType => InputType.MouseAndKeyboard;
+		
 
-		MandKMenuUI UI;
+
+		MandKMenuUI UIController;
+
+		IGameController pausedLevelController;
 
 		public MenuMandKController(MyGame game) : base(game)
 		{
-			UI = new MandKMenuUI(game);
+			UIController = new MandKMenuUI(game, this);
 		}
 
 		public IGameController GetGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player) {
 			return new GameMandKController(Game, levelManager, octree, player, cameraMover);
+		}
+
+		public void SwitchToPauseMenu(IGameController gameController)
+		{
+			pausedLevelController = gameController;
+			UIController.SwitchToPauseMenu();
+		}
+
+		public void ResumePausedLevel()
+		{
+			pausedLevelController.UnPause();
+			pausedLevelController = null;
+		}
+
+		public void EndPausedLevel()
+		{
+			pausedLevelController.EndLevel();
+			pausedLevelController = null;
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {

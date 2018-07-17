@@ -55,7 +55,20 @@ namespace MHUrho.StartupManagement
 		public bool DebugHUD { get; set; }
 		//TODO: Other things
 
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 14)]
+		public float CameraScrollSensitivity { get; set; }
 
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 15)]
+		public float CameraRotationSensitivity { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 16)]
+		public float MouseRotationSensitivity { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 17)]
+		public float ZoomSensitivity { get; set; }
+
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 18)]
+		public bool MouseBorderCameraMovement { get; set; }
 
 		public static AppOptions LoadFrom(Stream stream)
 		{
@@ -80,6 +93,21 @@ namespace MHUrho.StartupManagement
 			}
 		}
 
+		public void SetGraphicsMode(Graphics graphics)
+		{
+			graphics.SetMode(Resolution.X,
+							Resolution.Y,
+							Fullscreen,
+							Borderless,
+							Resizable,
+							HighDPI,
+							VSync,
+							TripleBuffer,
+							Multisample,
+							Monitor,
+							RefreshRateCap);
+		}
+
 		public static AppOptions GetDefaultAppOptions()
 		{
 			return new AppOptions()
@@ -97,7 +125,12 @@ namespace MHUrho.StartupManagement
 						Multisample = 1,
 						Monitor = 0,
 						RefreshRateCap = 0,
-						DebugHUD = true
+						DebugHUD = true,
+						CameraScrollSensitivity = 10.0f,
+						CameraRotationSensitivity = 10.0f,
+						MouseRotationSensitivity = 0.5f,
+						ZoomSensitivity = 10.0f,
+						MouseBorderCameraMovement = true
 					};
 		}
 

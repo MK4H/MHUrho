@@ -87,6 +87,8 @@ namespace MHUrho.Input
 
 			cameraMover.OnFixedMove += OnViewMoved;
 
+			RegisterKeyDownAction(Key.Esc, SwitchToPause);
+
 			Enable();
 
 			UIManager.AddTool(new VertexHeightToolMandK(this, UIManager, cameraMover));
@@ -265,6 +267,22 @@ namespace MHUrho.Input
 			}
 		}
 
+		public void Pause()
+		{
+			Level.Pause();
+			Game.menuController.SwitchToPauseMenu(this);
+		}
+
+		public void UnPause()
+		{
+			Level.UnPause();
+		}
+
+		public void EndLevel()
+		{
+			Level.End();
+		}
+
 		protected override void KeyDown(KeyDownEventArgs e) {
 			if (e.Repeat) {
 				if (keyRepeatActions.TryGetValue(e.Key, out var repeatAction)) {
@@ -336,6 +354,11 @@ namespace MHUrho.Input
 		protected override void MouseWheel(MouseWheelEventArgs e)
 		{
 			MouseWheelMoved?.Invoke(e);
+		}
+
+		void SwitchToPause(KeyDownEventArgs e)
+		{
+			Pause();
 		}
 
 		void OnViewMoved(Vector3 movement, Vector2 rotation, float timeStep) {

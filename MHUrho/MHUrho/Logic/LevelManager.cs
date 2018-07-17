@@ -641,6 +641,16 @@ namespace MHUrho.Logic
 			return false;
 		}
 
+		public void Pause()
+		{
+			Scene.UpdateEnabled = false;
+		}
+
+		public void UnPause()
+		{
+			Scene.UpdateEnabled = true;
+		}
+
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
 

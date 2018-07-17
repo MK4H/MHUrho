@@ -15,6 +15,20 @@ namespace MHUrho.Input
 	class MenuTouchController : TouchController, IMenuController
 	{
 		public InputType InputType => InputType.Touch;
+		public void SwitchToPauseMenu(IGameController gameController)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void ResumePausedLevel()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void EndPausedLevel()
+		{
+			throw new NotImplementedException();
+		}
 
 		public MenuTouchController(MyGame game) : base(game) {
 			//TODO: TEMPORARY, probably move to UIManager or something

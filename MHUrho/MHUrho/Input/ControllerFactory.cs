@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using Urho;
+using Urho.Resources;
 
 namespace MHUrho.Input
 {

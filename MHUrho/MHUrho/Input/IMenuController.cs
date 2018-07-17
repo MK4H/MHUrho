@@ -16,5 +16,11 @@ namespace MHUrho.Input
 		void Enable();
 
 		void Disable();
+
+		void SwitchToPauseMenu(IGameController gameController);
+
+		void ResumePausedLevel();
+
+		void EndPausedLevel();
 	}
 }

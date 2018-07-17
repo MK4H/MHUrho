@@ -30,6 +30,20 @@ namespace MHUrho.Input
 		public bool ContinuousMovement { get; private set; } = true;
 
 		public bool DoOnlySingleRaycasts { get; set; }
+		public void Pause()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void UnPause()
+		{
+			throw new NotImplementedException();
+		}
+
+		public void EndLevel()
+		{
+			throw new NotImplementedException();
+		}
 
 		public bool UIPressed { get; set; }
 
