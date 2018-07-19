@@ -25,26 +25,25 @@ namespace MHUrho.UserInterface
 
 		public bool UIHovering => hovering > 0;
 
+		public Window CustomWindow { get; private set; }
+
 		IPlayer Player => InputCtl.Player;
 
 		CameraMover cameraMover;
 
-		
-		readonly UIElement toolSelection;
-		readonly UIElement selectionBar;
-		readonly UIElement playerSelection;
-		readonly Button minimap;
+		readonly UIElement gameUI;
 
-		UIElement selectionBarSelected;
-		UIElement selectedToolButton;
-		UIElement selectedPlayerButton;
 		
+		readonly ExpansionWindow expansionWindow;
+		readonly ExpandingSelector toolSelection;
+		readonly ExpandingSelector playerSelection;
+		readonly SelectionBar selectionBar;
+		readonly UIMinimap minimap;
 
+	
 		int hovering = 0;
 
-		bool minimapHover = false;
-		IntVector2 minimapClickPos;
-		Vector2 previousCameraMovement;
+
 
 		public MandKGameUI(MyGame game, GameMandKController input, CameraMover cameraMover) 
 			:base(game, input.Level)
@@ -56,201 +55,84 @@ namespace MHUrho.UserInterface
 			//TODO: User texture
 			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this, game);
 
-			selectionBar = UI.Root.CreateWindow();
-			selectionBar.SetStyle("windowStyle");
-			selectionBar.LayoutMode = LayoutMode.Horizontal;
-			selectionBar.LayoutSpacing = 10;
-			selectionBar.HorizontalAlignment = HorizontalAlignment.Left;
-			selectionBar.Position = new IntVector2(50, UI.Root.Height - 100);
-			selectionBar.Height = 100;
-			selectionBar.SetFixedWidth(UI.Root.Width - 100);
-			selectionBar.SetColor(Color.Yellow);
-			selectionBar.FocusMode = FocusMode.NotFocusable;
-			selectionBar.ClipChildren = true;
-			selectionBar.HoverBegin += UIHoverBegin;
-			selectionBar.HoverEnd += UIHoverEnd;
+			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/GameLayout.xml");
 
+			gameUI = UI.Root.GetChild("GameUI");
 
-			toolSelection = UI.Root.CreateWindow();
-			toolSelection.LayoutMode = LayoutMode.Vertical;
-			toolSelection.LayoutSpacing = 0;
-			toolSelection.HorizontalAlignment = HorizontalAlignment.Left;
-			toolSelection.VerticalAlignment = VerticalAlignment.Bottom;
-			toolSelection.Height = UI.Root.Height;
-			toolSelection.SetFixedWidth(50);
-			toolSelection.SetColor(Color.Blue);
-			toolSelection.FocusMode = FocusMode.NotFocusable;
-			toolSelection.ClipChildren = true;
+			CustomWindow = (Window)gameUI.GetChild("CustomWindow");
+
+			expansionWindow = new ExpansionWindow((Window)gameUI.GetChild("ExpansionWindow"));
+			expansionWindow.HoverBegin += UIHoverBegin;
+			expansionWindow.HoverEnd += UIHoverEnd;
+
+			toolSelection = new ExpandingSelector((CheckBox) gameUI.GetChild("ToolSelector"), expansionWindow);
 			toolSelection.HoverBegin += UIHoverBegin;
 			toolSelection.HoverEnd += UIHoverEnd;
-
-			playerSelection = UI.Root.CreateWindow();
-			playerSelection.LayoutMode = LayoutMode.Vertical;
-			playerSelection.LayoutSpacing = 0;
-			playerSelection.HorizontalAlignment = HorizontalAlignment.Right;
-			playerSelection.VerticalAlignment = VerticalAlignment.Bottom;
-			playerSelection.Height = UI.Root.Height;
-			playerSelection.SetFixedWidth(50);
-			playerSelection.SetColor(Color.Blue);
-			playerSelection.FocusMode = FocusMode.NotFocusable;
-			playerSelection.ClipChildren = true;
+			toolSelection.Selected += ToolSelected;
+			playerSelection = new ExpandingSelector((CheckBox)gameUI.GetChild("PlayerSelector"), expansionWindow);
 			playerSelection.HoverBegin += UIHoverBegin;
 			playerSelection.HoverEnd += UIHoverEnd;
 
+			selectionBar = new SelectionBar(gameUI);
+			selectionBar.HoverBegin += UIHoverBegin;
+			selectionBar.HoverEnd += UIHoverEnd;
 
-			minimap = UI.Root.CreateButton();
-
-			minimap.Texture = Level.Minimap.Texture;
-			minimap.MinSize = new IntVector2(minimap.Texture.Width, minimap.Texture.Height);		
-			minimap.Size = minimap.MinSize;
-			minimap.HorizontalAlignment = HorizontalAlignment.Center;
-			minimap.VerticalAlignment = VerticalAlignment.Center;
-			minimap.Pressed += MinimapPressed;
-			minimap.Released += MinimapReleased;
+			minimap = new MandKUIMinimap((Button)gameUI.GetChild("Minimap"), this, cameraMover, Level);
 			minimap.HoverBegin += UIHoverBegin;
-			minimap.HoverBegin += MinimapHoverBegin;
 			minimap.HoverEnd += UIHoverEnd;
-			minimap.HoverEnd += MinimapHoverEnd;
-
-			InputCtl.MouseWheelMoved += MouseWheel;
 
 		}
 
 		public void Dispose() {
 			ClearDelegates();
-			selectionBar.RemoveAllChildren();
-			selectionBar.Remove();
-			selectionBar.Dispose();
-			toolSelection.RemoveAllChildren();
-			toolSelection.Remove();
-			toolSelection.Dispose();
-			playerSelection.RemoveAllChildren();
-			playerSelection.Remove();
-			playerSelection.Dispose();
-			minimap.Remove();
-			minimap.Dispose();
 
-			Debug.Assert(selectionBar.IsDeleted, "Selection bar did not delete itself");
+			gameUI.RemoveAllChildren();
+			gameUI.Remove();
+			gameUI.Dispose();
+
+			Debug.Assert(gameUI.IsDeleted, "gameUI did not delete itself");
 		}
 
-		public override void EnableUI() {
-			selectionBar.Enabled = true;
-			toolSelection.Enabled = true;
-			playerSelection.Enabled = true;
-			minimap.Enabled = true;
+		public override void EnableUI()
+		{
+			gameUI.Enabled = true;
 		}
 
 		public override void DisableUI() {
-			selectionBar.Enabled = false;
-			toolSelection.Enabled = false;
-			playerSelection.Enabled = false;
-			minimap.Enabled = false;
+			gameUI.Enabled = false;
 		}
 
-		public override void ShowUI() {
-			selectionBar.Visible = true;
-			toolSelection.Visible = true;
-			playerSelection.Visible = true;
-			minimap.Visible = true;
-			
+		public override void ShowUI()
+		{
+			gameUI.Visible = true;
 		}
 
-		public override void HideUI() {
-			selectionBar.Visible = false;
-			toolSelection.Visible = false;
-			playerSelection.Visible = false;
-			minimap.Visible = false;
+		public override void HideUI()
+		{
+			gameUI.Visible = false;
 		}
 
-		
 
-		public void SelectionBarShowButtons(IEnumerable<Button> buttons) {
 
-			foreach (var button in buttons) {
-				SelectionBarShowButton(button);
-			}
+		public void SelectionBarAddElement(UIElement element) {
+			selectionBar.AddElement(element);
 		}
 
-		public void SelectionBarShowButton(Button button) {
-			if (selectionBar.FindChild(button) == uint.MaxValue) {
-				throw new ArgumentException("button is not a child of the selectionBar");
-			}
-
-			button.HoverBegin += Button_HoverBegin;
-			button.HoverBegin += UIHoverBegin;
-			button.HoverEnd += Button_HoverEnd;
-			button.HoverEnd += UIHoverEnd;
-			button.Visible = true;
+		public void SelectionBarRemoveElement(UIElement element)
+		{
+			selectionBar.RemoveElement(element);
 		}
 
-		public void SelectionBarAddButton(Button button) {
-			selectionBar.AddChild(button);
-		}
+		public override void AddTool(Tool tool)
+		{
 
-		public void SelectionBarHideButton(Button button) {
-			if (selectionBar.FindChild(button) == uint.MaxValue) {
-				throw new ArgumentException("button is not a child of the selectionBar");
-			}
+			CheckBox checkBox = new CheckBox();
+			checkBox.SetStyle("ExpansionWindowCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
 
-			//TODO: Maybe enable this check
-			//if (!button.Visible) {
-			//	throw new ArgumentException("Hiding already hidden button");
-			//}
+			checkBox.ImageRect = tool.IconRectangle;
 
-			button.HoverBegin -= Button_HoverBegin;
-			button.HoverBegin -= UIHoverBegin;
-			button.HoverEnd -= Button_HoverEnd;
-			button.HoverEnd -= UIHoverEnd;
-			button.Visible = false;
-		}
-
-		/// <summary>
-		/// Deactivates buttons and hides them
-		/// </summary>
-		public void SelectionBarClearButtons() {
-			selectionBarSelected = null;
-
-			foreach (Button button in selectionBar.Children) {
-				if (button.Visible) {
-					button.HoverBegin -= Button_HoverBegin;
-					button.HoverBegin -= UIHoverBegin;
-					button.HoverEnd -= Button_HoverEnd;
-					button.HoverEnd -= UIHoverEnd;
-					button.Visible = false;
-				}
-			}
-		}
-
-		public void Deselect() {
-			selectionBarSelected.SetColor(Color.White);
-			selectionBarSelected = null;
-		}
-
-		public void SelectButton(Button button) {
-			selectionBarSelected?.SetColor(Color.White);
-			selectionBarSelected = button;
-			selectionBarSelected.SetColor(Color.Gray);
-		}
-
-		public override void AddTool(Tool tool) {
-			var button = toolSelection.CreateButton();
-			button.SetStyle("toolButton");
-			button.Size = new IntVector2(50, 50);
-			button.HorizontalAlignment = HorizontalAlignment.Center;
-			button.VerticalAlignment = VerticalAlignment.Center;
-			button.Pressed += ToolSwitchbuttonPress;
-			button.HoverBegin += UIHoverBegin;
-			button.HoverEnd += UIHoverEnd;
-			button.FocusMode = FocusMode.ResetFocus;
-			button.MaxSize = new IntVector2(50, 50);
-			button.MinSize = new IntVector2(50, 50);
-			button.Texture = tool.Icon ?? DefaultButtonTexture;
-
-			tools.Add(button, tool);
-
-			foreach (var toolButton in tool.Buttons) {
-				selectionBar.AddChild(toolButton);
-			}
+			tools.Add(checkBox, tool);
+			toolSelection.AddCheckBox(checkBox);
 
 		}
 
@@ -259,36 +141,19 @@ namespace MHUrho.UserInterface
 		}
 
 		public override void AddPlayer(IPlayer player) {
-			var button = playerSelection.CreateButton();
-			button.SetStyle("playerButton");
-			button.Size = new IntVector2(50, 50);
-			button.HorizontalAlignment = HorizontalAlignment.Center;
-			button.VerticalAlignment = VerticalAlignment.Center;
-			button.Pressed += PlayerSwitchButtonPress;
-			button.HoverBegin += UIHoverBegin;
-			button.HoverEnd += UIHoverEnd;
-			button.FocusMode = FocusMode.ResetFocus;
-			button.MaxSize = new IntVector2(50, 50);
-			button.MinSize = new IntVector2(50, 50);
-			button.Texture = /*IPlayer.Icon ??*/ DefaultButtonTexture;
 
-			players.Add(button, player);
+			CheckBox checkBox = new CheckBox();
+			checkBox.SetStyle("ExpansionWindowCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+
+			//TODO: This
+			checkBox.ImageRect = new IntRect(0,0,50,50);
+
+			players.Add(checkBox, player);
+			playerSelection.AddCheckBox(checkBox);		
 		}
 
 		public override void RemovePlayer(IPlayer player) {
 			throw new NotImplementedException();
-		}
-
-		void Button_HoverBegin(HoverBeginEventArgs e) {
-			if (e.Element != selectionBarSelected) {
-				e.Element.SetColor(new Color(0.9f, 0.9f, 0.9f));
-			}
-		}
-
-		void Button_HoverEnd(HoverEndEventArgs e) {
-			if (e.Element != selectionBarSelected) {
-				e.Element.SetColor(Color.White);
-			}
 		}
 
 		void UIHoverBegin(HoverBeginEventArgs e)
@@ -302,121 +167,33 @@ namespace MHUrho.UserInterface
 		}
 
 		void ClearDelegates() {
+			expansionWindow.HoverBegin -= UIHoverBegin;
+			expansionWindow.HoverEnd -= UIHoverEnd;
+
 			selectionBar.HoverBegin -= UIHoverBegin;
 			selectionBar.HoverEnd -= UIHoverEnd;
 			toolSelection.HoverBegin -= UIHoverBegin;
 			toolSelection.HoverEnd -= UIHoverEnd;
 
-			minimap.Pressed -= MinimapPressed;
-			minimap.Released -= MinimapReleased;
 			minimap.HoverBegin -= UIHoverBegin;
-			minimap.HoverBegin -= MinimapHoverBegin;
 			minimap.HoverEnd -= UIHoverEnd;
-			minimap.HoverEnd -= MinimapHoverEnd;
-			InputCtl.MouseWheelMoved -= MouseWheel;
+		}
 
-			foreach (var button in selectionBar.Children) {
-				button.HoverBegin -= Button_HoverBegin;
-				button.HoverBegin -= UIHoverBegin;
-				button.HoverEnd -= Button_HoverEnd;
-				button.HoverEnd -= UIHoverEnd;
+		void ToolSelected(UIElement newSelected, UIElement oldSelected)
+		{
+			if (oldSelected != null) {
+				tools[oldSelected].Disable();
 			}
 
-			foreach (var button in toolSelection.Children) {
-				button.HoverBegin -= Button_HoverBegin;
-				button.HoverBegin -= UIHoverBegin;
-				button.HoverEnd -= Button_HoverEnd;
-				button.HoverEnd -= UIHoverEnd;
-			}
+			tools[newSelected].Enable();
 		}
 
-		void ToolSwitchbuttonPress(PressedEventArgs e) {
-			if (selectedToolButton != null) {
-				tools[selectedToolButton].Disable();
-			}
-
-			selectedToolButton = e.Element;
-			tools[selectedToolButton].Enable();
-		}
-
-		void PlayerSwitchButtonPress(PressedEventArgs e) {
-			selectedPlayerButton?.SetColor(Color.White);
-
-			foreach (var tool in tools.Values) {
-				tool.ClearPlayerSpecificState();
-			}
-
-			if (e.Element == selectedPlayerButton) {
-				//TODO: Neutral player
-			}
-			else {
-				e.Element.SetColor(selectedColor);
-				selectedPlayerButton = e.Element;
-				InputCtl.Player = players[selectedPlayerButton];
-			}
-		}
-
-		void MinimapPressed(PressedEventArgs e)
+		void PlayerSelected(UIElement newSelected, UIElement oldSelected)
 		{
-			minimapClickPos = minimap.ScreenToElement(InputCtl.CursorPosition);
-
-			Vector2? worldPosition = Level.Minimap.MinimapToWorld(minimapClickPos);
-
-			if (worldPosition.HasValue) {
-				cameraMover.MoveTo(worldPosition.Value);
-			}
-
-			Level.Minimap.Refresh();
-			InputCtl.MouseMove += MinimapMouseMove;
-		}
-
-		void MinimapReleased(ReleasedEventArgs e)
-		{
-			InputCtl.MouseMove -= MinimapMouseMove;
-
-			StopCameraMovement();
+			InputCtl.Player = players[newSelected];
 		}
 
 
-		void MinimapHoverBegin(HoverBeginEventArgs e)
-		{
-			minimapHover = true;
-		}
 
-		void MinimapHoverEnd(HoverEndEventArgs e)
-		{
-			minimapHover = false;
-			InputCtl.MouseMove -= MinimapMouseMove;
-
-			StopCameraMovement();
-		}
-
-		void MinimapMouseMove(MHUrhoMouseMovedEventArgs e)
-		{
-			Vector2 newMovement = (minimap.ScreenToElement(e.CursorPosition) - minimapClickPos).ToVector2();
-			newMovement.Y = -newMovement.Y;
-			cameraMover.SetStaticHorizontalMovement(cameraMover.StaticHorizontalMovement + (newMovement - previousCameraMovement));
-
-			previousCameraMovement = newMovement;
-		}
-
-		void StopCameraMovement()
-		{
-
-			var cameraMovement = cameraMover.StaticHorizontalMovement - previousCameraMovement;
-			cameraMovement.X = FloatHelpers.FloatsEqual(cameraMovement.X, 0) ? 0 : cameraMovement.X;
-			cameraMovement.Y = FloatHelpers.FloatsEqual(cameraMovement.Y, 0) ? 0 : cameraMovement.Y;
-
-			cameraMover.SetStaticHorizontalMovement(cameraMovement);
-
-			previousCameraMovement = Vector2.Zero;
-		}
-
-		void MouseWheel(MouseWheelEventArgs e)
-		{
-			if (!minimapHover) return;
-
-			Level.Minimap.Zoom(e.Wheel);
-		}
 	}
 }

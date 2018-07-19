@@ -8,6 +8,7 @@ using MHUrho.Storage;
 using Urho;
 using Urho.Resources;
 using MHUrho.Packaging;
+using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
@@ -15,12 +16,10 @@ namespace MHUrho.Logic
 		static readonly string IDAttributeName = "ID";
 		static readonly string NameAttributeName = "name";
 		static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";
-		static readonly XName MovementSpeedElementName = PackageManager.XMLNamespace + "movementSpeed";
+		static readonly XName IconTextureElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
 		static readonly XName MinimapColorElement = PackageManager.XMLNamespace + "minimapColor";
 
 		public int ID { get; set; }
-
-		public float MovementSpeedModifier { get; private set; }
 
 		public string Name { get; private set; }
 
@@ -30,6 +29,8 @@ namespace MHUrho.Logic
 		public Rect TextureCoords { get; private set; }
 
 		public Color MinimapColor { get; private set; }
+
+		public IntRect IconRectangle { get; private set; }
 
 		string imagePath;
 
@@ -42,7 +43,7 @@ namespace MHUrho.Logic
 			ID = xml.GetIntFromAttribute(IDAttributeName);
 			Name = xml.Attribute(NameAttributeName).Value;
 			imagePath = XmlHelpers.GetPath(xml.Element(TexturePathElementName));
-			MovementSpeedModifier = XmlHelpers.GetFloat(xml.Element(MovementSpeedElementName));
+			IconRectangle = XmlHelpers.GetIntRect(xml.Element(IconTextureElementName));
 			MinimapColor = XmlHelpers.GetColor(xml.Element(MinimapColorElement));
 			Package = package;
 		}

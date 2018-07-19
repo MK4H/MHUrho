@@ -7,6 +7,7 @@ using MHUrho.Packaging;
 using MHUrho.Plugins;
 using Urho;
 using Urho.Resources;
+using Urho.Urho2D;
 
 namespace MHUrho.Helpers
 {
@@ -21,7 +22,7 @@ namespace MHUrho.Helpers
 		public static readonly XName MaterialElementName = PackageManager.XMLNamespace + "material";
 		public static readonly XName MaterialPathElementName = PackageManager.XMLNamespace + "materialPath";
 		public static readonly XName MaterialListElementName = PackageManager.XMLNamespace + "materialListPath";
-		public static readonly XName IconPathElementName = PackageManager.XMLNamespace + "iconPath";
+		public static readonly XName IconRectangleElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
 		public static readonly XName AssemblyPathElementName = PackageManager.XMLNamespace + "assemblyPath";
 		public static readonly XName ExtensionElementName = PackageManager.XMLNamespace + "extension";
 
@@ -93,11 +94,11 @@ namespace MHUrho.Helpers
 			}
 		}
 
-		public static Image GetIcon(XElement typeXmlElement) {
-			XElement iconElement = typeXmlElement.Element(IconPathElementName);
+		public static IntRect GetIconRectangle(XElement typeXmlElement) {
+				XElement iconElement = typeXmlElement.Element(IconRectangleElementName);
 
-			//TODO: Find a way to not need RGBA conversion
-			return PackageManager.Instance.GetImage(GetPath(iconElement)).ConvertToRGBA();
+			return GetIntRect(iconElement);
+
 		}
 
 		public static XElement GetExtensionElement(XElement typeXmlElement) {
@@ -180,6 +181,14 @@ namespace MHUrho.Helpers
 			return new Vector3(	GetFloatAttribute(xmlElement, "x"),
 								GetFloatAttribute(xmlElement, "y"),
 								GetFloatAttribute(xmlElement, "z"));
+		}
+
+		public static IntRect GetIntRect(XElement element)
+		{
+			return new IntRect(GetIntAttribute(element, "left"),
+								GetIntAttribute(element, "top"),
+								GetIntAttribute(element, "right"),
+								GetIntAttribute(element, "bottom"));
 		}
 
 		public static string GetString(XElement element) {

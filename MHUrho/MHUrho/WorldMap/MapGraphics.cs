@@ -854,7 +854,7 @@ namespace MHUrho.WorldMap
 				tileRectangle.CorrectTileHeight();
 			}
 
-			public void ChangeCornerHeights(List<IntVector2> cornerPositions) {
+			public void ChangeCornerHeights(IEnumerable<IntVector2> cornerPositions) {
 				List<MapChunk> lockedChunks = new List<MapChunk>();
 
 				foreach (var corner in cornerPositions) {

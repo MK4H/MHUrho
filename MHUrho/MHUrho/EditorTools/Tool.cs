@@ -4,16 +4,14 @@ using System.Text;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
+using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
 	public abstract class Tool : IDisposable {
-		public Texture2D Icon { get; protected set; }
-
-
-		public abstract IEnumerable<Button> Buttons { get; }
+		public IntRect IconRectangle { get; protected set; }
 
 		protected readonly IGameController Input;
 
@@ -29,10 +27,9 @@ namespace MHUrho.EditorTools
 
 		public abstract void ClearPlayerSpecificState();
 
-		protected Tool(IGameController input)
+		protected Tool(IGameController input, IntRect iconRectangle)
 		{
 			this.Input = input;
-			Icon = null;
 		}
 	}
 }

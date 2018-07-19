@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -13,14 +14,13 @@ using Urho.Urho2D;
 namespace MHUrho.EditorTools
 {
 	class UnitSpawningToolMandK : UnitSpawningTool, IMandKTool {
-		public override IEnumerable<Button> Buttons => unitTypeButtons.Keys;
 
-		Dictionary<Button, UnitType> unitTypeButtons;
+		Dictionary<UIElement, UnitType> unitTypes;
 
 		GameMandKController input;
 		readonly MandKGameUI ui;
 
-		Button selected;
+		ExclusiveCheckBoxes checkBoxes;
 
 		bool enabled;
 
@@ -30,53 +30,37 @@ namespace MHUrho.EditorTools
 
 			this.input = input;
 			this.ui = ui;
-			this.unitTypeButtons = new Dictionary<Button, UnitType>();
+			this.unitTypes = new Dictionary<UIElement, UnitType>();
+			this.checkBoxes = new ExclusiveCheckBoxes();
 
 			foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
-				var unitIcon = unitType.Icon;
 
-				var buttonTexture = new Texture2D
-									{
-										FilterMode = TextureFilterMode.Nearest
-									};
-				buttonTexture.SetNumLevels(1);
-				buttonTexture.SetSize(unitIcon.Width, unitIcon.Height, Graphics.RGBAFormat, TextureUsage.Static);
-				buttonTexture.SetData(unitIcon);
+				var checkBox = new CheckBox();
+				checkBox.SetStyle("SelectionBarCheckBox");
+				checkBox.Toggled += OnUnitTypeToggled;
+				checkBox.Texture = PackageManager.Instance.ActiveGame.UnitIconTexture;
+				checkBox.ImageRect = unitType.IconRectangle;
+				checkBox.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
+				checkBox.HoverOffset = new IntVector2(2 * unitType.IconRectangle.Width(), 0);
 
-
-
-				var button = new Button();
-				button.SetStyle("UnitButton");
-				button.Size = new IntVector2(100, 100);
-				button.HorizontalAlignment = HorizontalAlignment.Center;
-				button.VerticalAlignment = VerticalAlignment.Center;
-				button.Pressed += Button_Pressed;
-				button.Texture = buttonTexture;
-				button.FocusMode = FocusMode.ResetFocus;
-				button.MaxSize = new IntVector2(100, 100);
-				button.MinSize = new IntVector2(100, 100);
-				button.Visible = false;
-
-				unitTypeButtons.Add(button, unitType);
+				unitTypes.Add(checkBox, unitType);
 			}
 		}
 
 		public override void Enable() {
 			if (enabled) return;
 
-			input.UIManager.SelectionBarShowButtons(unitTypeButtons.Keys);
+			checkBoxes.Show();
+
+			input.MouseDown += OnMouseDown;
 			enabled = true;
 		}
 
 		public override void Disable() {
 			if (!enabled) return;
 
-			if (selected != null) {
-				input.UIManager.Deselect();
-				selected = null;
-			}
+			checkBoxes.Hide();
 
-			input.UIManager.SelectionBarClearButtons();
 			input.MouseDown -= OnMouseDown;
 			enabled = false;
 
@@ -89,30 +73,21 @@ namespace MHUrho.EditorTools
 		public override void Dispose() {
 			//TODO: Maybe dont disable, or change implementation of disable to not delete currently visible buttons
 			Disable();
-			foreach (var pair in unitTypeButtons) {
-				pair.Key.Pressed -= Button_Pressed;
+			foreach (var pair in unitTypes) {
 				pair.Key.Dispose();
 			}
-			unitTypeButtons = null;
+			unitTypes = null;
 		}
 
-		void Button_Pressed(PressedEventArgs e) {
-			if (selected == e.Element) {
-				input.UIManager.Deselect();
-				selected = null;
-				input.MouseDown -= OnMouseDown;
-			}
-			else {
-				input.UIManager.SelectButton((Button)e.Element);
-				selected = (Button)e.Element;
-				input.MouseDown += OnMouseDown;
-			}
+		void OnUnitTypeToggled(ToggledEventArgs e)
+		{
+
 		}
 
 		void OnMouseDown(MouseButtonDownEventArgs e) {
 			if (ui.UIHovering) return;
 
-			if (selected != null) {
+			if (checkBoxes.Selected != null) {
 
 				foreach (var result in input.CursorRaycast()) {
 					//Spawn only at buildings or map, not units, projectiles etc.
@@ -121,7 +96,7 @@ namespace MHUrho.EditorTools
 					}
 
 					//Spawn at the first possible raycast hit
-					if (Level.SpawnUnit(unitTypeButtons[selected], 
+					if (Level.SpawnUnit(unitTypes[checkBoxes.Selected], 
 										 Map.GetContainingTile(result.Position),
 										 input.Player) != null)
 					{

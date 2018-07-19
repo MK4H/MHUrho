@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<elements>
+	<element type="ExpansionWindowCheckBox">
+		<attribute name="Blend Mode" value="alpha" />
+		<attribute name="Checked Image Offset" value="100 0" />
+		<attribute name="Hover Image Offset" value="50 0" />
+	</element>
+</elements>

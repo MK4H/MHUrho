@@ -9,6 +9,7 @@ using MHUrho.Storage;
 using MHUrho.Helpers;
 using Urho;
 using Urho.Resources;
+using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
@@ -28,7 +29,7 @@ namespace MHUrho.Logic
 
 		public MaterialWrapper Material { get; private set; }
 
-		public Image Icon { get; private set; }
+		public IntRect IconRectangle { get; private set; }
 
 		public IntVector2 Size { get; private set; }
 
@@ -49,7 +50,7 @@ namespace MHUrho.Logic
 			Name = XmlHelpers.GetName(xml);
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
-			Icon = XmlHelpers.GetIcon(xml);
+			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
 			Plugin = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,
@@ -94,7 +95,6 @@ namespace MHUrho.Logic
 
 		public void Dispose() {
 			Model?.Dispose();
-			Icon?.Dispose();
 		}
 
 

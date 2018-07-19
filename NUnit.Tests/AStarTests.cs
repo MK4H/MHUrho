@@ -572,6 +572,16 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public void ChangeHeight(IEnumerable<IntVector2> tileCorners, float heightDelta)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void ChangeHeightTo(IEnumerable<IntVector2> tileCorners, float newHeight)
+			{
+				throw new NotImplementedException();
+			}
+
 			public void ChangeHeight(List<IntVector2> tileCorners, float heightDelta)
 			{
 				throw new NotImplementedException();

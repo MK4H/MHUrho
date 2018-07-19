@@ -11,6 +11,7 @@ using MHUrho.Storage;
 using MHUrho.Plugins;
 using Urho;
 using Urho.Resources;
+using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
@@ -28,13 +29,9 @@ namespace MHUrho.Logic
 
 		public MaterialWrapper Material { get; private set; }
 
-		public IReadOnlyDictionary<int, Animation> Animations => animations;
-
-		public Image Icon { get; private set; }
+		public IntRect IconRectangle { get; private set; }
 
 		public UnitTypePlugin Plugin { get; private set; }
-
-		Dictionary<int, Animation> animations;
 
 		//TODO: More loaded properties
 
@@ -44,7 +41,7 @@ namespace MHUrho.Logic
 		/// that references this unitType back can get the reference during the loading of this instance
 		/// </summary>
 		public UnitType() {
-			animations = new Dictionary<int, Animation>();
+
 		}
 
 		/// <summary>
@@ -74,7 +71,7 @@ namespace MHUrho.Logic
 
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
-			Icon = XmlHelpers.GetIcon(xml);
+			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 									 package.PackageManager);
@@ -118,11 +115,6 @@ namespace MHUrho.Logic
 			//TODO: Release all disposable resources
 			Model.Dispose();
 			Material.Dispose();
-			Icon.Dispose();
-
-			foreach (var animation in animations.Values) {
-				animation.Dispose();
-			}
 		}
 
 

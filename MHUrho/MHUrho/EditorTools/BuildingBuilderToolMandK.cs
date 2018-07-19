@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -8,20 +9,20 @@ using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
+using Urho.Resources;
 using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
 	class BuildingBuilderToolMandK : BuildingBuilderTool, IMandKTool
 	{
-		public override IEnumerable<Button> Buttons => buildingTypeButtons.Keys;
 
-		Dictionary<Button, BuildingType> buildingTypeButtons;
+		Dictionary<UIElement, BuildingType> buildingTypes;
 
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
 
-		Button selected;
+		readonly ExclusiveCheckBoxes checkBoxes;
 
 		bool enabled;
 
@@ -30,37 +31,32 @@ namespace MHUrho.EditorTools
 		{
 			this.input = input;
 			this.ui = ui;
-			this.buildingTypeButtons = new Dictionary<Button, BuildingType>();
+			this.buildingTypes = new Dictionary<UIElement, BuildingType>();
+			this.checkBoxes = new ExclusiveCheckBoxes();
 
 			foreach (var buildingType in PackageManager.Instance.ActiveGame.BuildingTypes) {
-				var buildingIcon = buildingType.Icon;
 
-				var buttonTexture = new Texture2D();
-				buttonTexture.FilterMode = TextureFilterMode.Nearest;
-				buttonTexture.SetNumLevels(1);
-				buttonTexture.SetSize(buildingIcon.Width, buildingIcon.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-				buttonTexture.SetData(buildingIcon);
+				var checkBox = new CheckBox();
+				//TODO: Style
+				checkBox.SetStyle("SelectionBarCheckBox");
+				checkBox.Toggled += OnBuildingTypeToggled;
+				checkBox.Texture = PackageManager.Instance.ActiveGame.BuildingIconTexture;
+				checkBox.ImageRect = buildingType.IconRectangle;
+				checkBox.HoverOffset = new IntVector2(buildingType.IconRectangle.Width(), 0);
+				checkBox.HoverOffset = new IntVector2(2 * buildingType.IconRectangle.Width(), 0);
 
-				var button = new Button();
-				button.SetStyle("BuildingButton");
-				button.Size = new IntVector2(100, 100);
-				button.HorizontalAlignment = HorizontalAlignment.Center;
-				button.VerticalAlignment = VerticalAlignment.Center;
-				button.Pressed += Button_Pressed;
-				button.Texture = buttonTexture;
-				button.FocusMode = FocusMode.ResetFocus;
-				button.MaxSize = new IntVector2(100, 100);
-				button.MinSize = new IntVector2(100, 100);
-				button.Visible = false;
+				buildingTypes.Add(checkBox, buildingType);
+				checkBoxes.AddCheckBox(checkBox);
 
-				buildingTypeButtons.Add(button, buildingType);
+				ui.SelectionBarAddElement(checkBox);
 			}
 		}
 
 		public override void Enable() {
 			if (enabled) return;
 
-			input.UIManager.SelectionBarShowButtons(buildingTypeButtons.Keys);
+			checkBoxes.Show();
+
 			input.MouseDown += OnMouseDown;
 			input.MouseMove += OnMouseMove;
 			Level.Update += OnUpdate;
@@ -70,13 +66,11 @@ namespace MHUrho.EditorTools
 		public override void Disable() {
 			if (!enabled) return;
 
-			if (selected != null) {
-				input.UIManager.Deselect();
-				selected = null;
-			}
+			checkBoxes.Deselect();
+			checkBoxes.Hide();
 
 			input.UIManager.CursorTooltips.Clear();
-			input.UIManager.SelectionBarClearButtons();
+			//input.UIManager.SelectionBarClearButtons();
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMove;
 			Level.Update -= OnUpdate;
@@ -87,47 +81,43 @@ namespace MHUrho.EditorTools
 
 		public override void Dispose() {
 			Disable();
-			foreach (var pair in buildingTypeButtons) {
-				pair.Key.Pressed -= Button_Pressed;
+			foreach (var pair in buildingTypes) {
 				pair.Key.Dispose();
 			}
-			buildingTypeButtons = null;
+			buildingTypes = null;
 		}
 
 		public override void ClearPlayerSpecificState() {
 
 		}
 
-		void Button_Pressed(PressedEventArgs e) {
-			input.UIManager.CursorTooltips.Clear();
-			if (selected == e.Element) {
-				input.UIManager.Deselect();
-				selected = null;
-			}
-			else {
-				input.UIManager.SelectButton((Button)e.Element);
-				selected = (Button)e.Element;
-				var text = input.UIManager.CursorTooltips.AddText();
-				text.SetStyleAuto();
-				text.Value = "Hello world";
-				text.Position = new IntVector2(10, 0);
+		void OnBuildingTypeToggled(ToggledEventArgs e)
+		{
+			if (e.State) {
+				//TODO: THINGS
+				//var text = input.UIManager.CursorTooltips.AddText();
+				//text.SetStyleAuto();
+				//text.Value = "Hello world";
+				//text.Position = new IntVector2(10, 0);
 
-				input.UIManager.CursorTooltips.AddImage(new IntRect(0, 0, 200, 200));
+				//input.UIManager.CursorTooltips.AddImage(new IntRect(0, 0, 200, 200));
 			}
+
 		}
 
+
 		void OnMouseDown(MouseButtonDownEventArgs e) {
-			if (selected == null || ui.UIHovering) return;
+			if (checkBoxes.Selected == null || ui.UIHovering) return;
 
 			var tile = input.GetTileUnderCursor();
 			if (tile == null) return;
 
-			var buildingType = buildingTypeButtons[selected];
+			var buildingType = buildingTypes[checkBoxes.Selected];
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
 			if (buildingType.CanBuildIn(topLeft, bottomRight, Level)) {
-				LevelManager.CurrentLevel.BuildBuilding(buildingTypeButtons[selected], topLeft, input.Player);
+				LevelManager.CurrentLevel.BuildBuilding(buildingTypes[checkBoxes.Selected], topLeft, input.Player);
 			}
 		}
 
@@ -148,12 +138,12 @@ namespace MHUrho.EditorTools
 		}
 
 		void HighlightBuildingRectangle() {
-			if (selected == null) return;
+			if (checkBoxes.Selected == null) return;
 
 			var tile = input.GetTileUnderCursor();
 			if (tile == null) return;
 
-			var buildingType = buildingTypeButtons[selected];
+			var buildingType = buildingTypes[checkBoxes.Selected];
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 

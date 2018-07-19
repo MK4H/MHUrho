@@ -5,14 +5,14 @@ using System.Xml.Linq;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Storage;
+using Urho;
 using Urho.Resources;
 
 namespace MHUrho.Logic
 {
 	public class ResourceType : ILoadableType, IDisposable {
-		private const string IDAttributeName = "ID";
-		private const string NameAttribute = "name";
-		private const string IconPathElement = "iconPath";
+		const string IDAttributeName = "ID";
+		const string NameAttribute = "name";
 
 		public int ID { get; set; }
 
@@ -21,22 +21,18 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 	
-		public Image Icon { get; private set; }
+		public IntRect IconRectangle { get; private set; }
 
 		public void Load(XElement xml, GamePack package) {
 			ID = xml.GetIntFromAttribute(IDAttributeName);
 			Name = xml.Attribute(NameAttribute).Value;
-			Icon = LoadIcon(xml, package);
+			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			Package = package;
 		}
 
 		public void Dispose() {
-			Icon?.Dispose();
+
 		}
 
-		private Image LoadIcon(XElement typeElement, GamePack package) {
-			string iconPath = XmlHelpers.GetFullPathFromChild(typeElement, IconPathElement, package.XmlDirectoryPath);
-			return PackageManager.Instance.GetImage(iconPath);
-		}
 	}
 }

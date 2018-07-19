@@ -8,6 +8,7 @@ using MHUrho.Helpers;
 using MHUrho.Logic;
 using Urho;
 using Urho.Resources;
+using Urho.Urho2D;
 
 namespace MHUrho.Packaging {
 	public class GamePack {
@@ -57,6 +58,11 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<ProjectileType> ProjectileTypes => projectileTypesByName.Values;
 
+		public Texture2D ResourceIconTexture { get; private set; }
+		public Texture2D TileIconTexture { get; private set; }
+		public Texture2D UnitIconTexture { get; private set; }
+		public Texture2D BuildingIconTexture { get; private set; }
+		public Texture2D PlayerIconTexture { get; private set; }
 
 		readonly string pathToXml;
 
@@ -115,7 +121,15 @@ namespace MHUrho.Packaging {
 		public void StartLoading(XmlSchemaSet schemas) {
 			data = XDocument.Load(MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
 			//TODO: Handler and signal that resource pack is in invalid state
-			data.Validate(schemas, null);
+			try {
+				data.Validate(schemas, null);
+			}
+			catch (XmlSchemaValidationException e) {
+				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
+				//TODO: Exception
+				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+			}
+			
 
 			tileTypesByName = new Dictionary<string, TileType>();
 			unitTypesByName = new Dictionary<string, UnitType>();
@@ -331,14 +345,19 @@ namespace MHUrho.Packaging {
 		}
 
 		public void Load(XmlSchemaSet schemas) {
-			StartLoading(schemas);
+			try {
+				StartLoading(schemas);
 
-			LoadAllTileTypes();
-			LoadAllUnitTypes();
-			LoadAllBuildingTypes();
-			LoadAllProjectileTypes();
-			LoadAllResourceTypes();
-			LoadAllPlayerTypes();
+				LoadAllTileTypes();
+				LoadAllUnitTypes();
+				LoadAllBuildingTypes();
+				LoadAllProjectileTypes();
+				LoadAllResourceTypes();
+				LoadAllPlayerTypes();
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning, "Package loading failed");
+			}
 		}
 
 

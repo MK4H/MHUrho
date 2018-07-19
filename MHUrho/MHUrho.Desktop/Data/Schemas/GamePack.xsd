@@ -81,6 +81,11 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+	        <xs:element name="resourceIconTexturePath" type="xs:string"/>
+	        <xs:element name="tileIconTexturePath" type="xs:string"/>
+					<xs:element name="unitIconTexturePath" type="xs:string"/>
+	        <xs:element name="buildingIconTexturePath" type="xs:string"/>
+	        <xs:element name="playerIconTexturePath" type="xs:string"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -88,15 +93,15 @@
 
   <xs:complexType name="resourceTypeType">
     <xs:sequence>
-      <xs:element name="iconPath" type="xs:string"/>
+      <xs:element name="iconTextureRectangle" type="IntRect"/>
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="tileTypeType">
     <xs:sequence>
+	    <xs:element name="iconTextureRectangle" type="IntRect"/>
       <xs:element name="texturePath" type="xs:string"/>
-      <xs:element name="movementSpeed" type="xs:float"/>
 			<xs:element name="minimapColor" type="Color"/>
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
@@ -107,7 +112,7 @@
 	  <xs:complexContent>
 		  <xs:extension base="entityWithIconType">
 			  <xs:sequence>
-				  <xs:element name="animations" type="animationsType" minOccurs="0"/>
+					<xs:element name="manuallySpawnable" type="xs:boolean"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -125,7 +130,7 @@
 
   <xs:complexType name="playerAITypeType">
     <xs:sequence>
-      <xs:element name="iconPath" type="xs:string"/>
+      <xs:element name="iconTextureRectangle" type="IntRect"/>
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
@@ -162,7 +167,7 @@
 		<xs:complexContent>
 			<xs:extension base="entityType">
 				<xs:sequence>
-					<xs:element name="iconPath" type="xs:string"/>
+					<xs:element name="iconTextureRectangle" type="IntRect"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -205,6 +210,13 @@
     <xs:attribute name="x" use="required" type="xs:int"/>
     <xs:attribute name="y" use="required" type="xs:int"/>
   </xs:complexType>
+
+	<xs:complexType name="IntRect">
+		<xs:attribute name="left" use="required" type="xs:int"/>
+		<xs:attribute name="right" use="required" type="xs:int"/>
+		<xs:attribute name="top" use="required" type="xs:int"/>
+		<xs:attribute name="bottom" use="required" type="xs:int"/>
+	</xs:complexType>
 
   <xs:complexType name="Vector2">
     <xs:attribute name="x" use="required" type="xs:float"/>

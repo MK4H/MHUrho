@@ -476,7 +476,9 @@ namespace MHUrho.WorldMap {
 		/// </summary>
 		void DisableHighlight();
 
-		void ChangeHeight(List<IntVector2> tileCorners, float heightDelta);
+		void ChangeHeight(IEnumerable<IntVector2> tileCorners, float heightDelta);
+
+		void ChangeHeightTo(IEnumerable<IntVector2> tileCorners, float newHeight);
 
 		/// <summary>
 		/// Invokes <paramref name="action"/> for each tile with <see cref="ITile.MapLocation"/> 

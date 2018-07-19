@@ -33,5 +33,9 @@ namespace MHUrho.Input
 		void UnPause();
 
 		void EndLevel();
+
+		List<RayQueryResult> CursorRaycast();
+
+		ITile GetTileUnderCursor();
 	}
 }

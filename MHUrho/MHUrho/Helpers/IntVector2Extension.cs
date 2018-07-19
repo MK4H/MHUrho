@@ -17,5 +17,15 @@ namespace MHUrho.Helpers
 		{
 			return new Vector2(intVector2.X, intVector2.Y);
 		}
+
+		public static IntVector2 WithX(this IntVector2 intVector2, int x)
+		{
+			return new IntVector2(x, intVector2.Y);
+		}
+
+		public static IntVector2 WithY(this IntVector2 intVector2, int y)
+		{
+			return new IntVector2(intVector2.X, y);
+		}
 	}
 }

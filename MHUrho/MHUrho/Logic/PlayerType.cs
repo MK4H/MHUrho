@@ -5,7 +5,9 @@ using System.Xml.Linq;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
+using Urho;
 using Urho.Resources;
+using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
@@ -17,7 +19,7 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		public Image Icon { get; private set; }
+		public IntRect IconRectangle { get; private set; }
 
 		public PlayerAITypePlugin Plugin { get; private set; }
 
@@ -31,7 +33,7 @@ namespace MHUrho.Logic
 																	package.XmlDirectoryPath, 
 																	Name);
 
-			Icon = XmlHelpers.GetIcon(xml);
+			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 							package.PackageManager);
@@ -47,7 +49,7 @@ namespace MHUrho.Logic
 		}
 
 		public void Dispose() {
-			Icon?.Dispose();
+
 		}
 	}
 }

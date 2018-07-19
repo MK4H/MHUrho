@@ -1316,7 +1316,7 @@ namespace MHUrho.WorldMap
 			graphics.DisableHighlight();
 		}
 
-		public void ChangeHeight(List<IntVector2> tileCorners, float heightDelta) 
+		public void ChangeHeight(IEnumerable<IntVector2> tileCorners, float heightDelta) 
 		{
 
 			foreach (var tileCorner in tileCorners) {
@@ -1369,7 +1369,7 @@ namespace MHUrho.WorldMap
 			graphics.ChangeCornerHeights(tileCorners);
 		}
 
-		public void ChangeHeightTo(List<IntVector2> tileCorners, float newHeight) 
+		public void ChangeHeightTo(IEnumerable<IntVector2> tileCorners, float newHeight) 
 		{
 			throw new NotImplementedException();
 		}

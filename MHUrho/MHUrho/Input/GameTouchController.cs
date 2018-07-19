@@ -45,6 +45,16 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
+		public List<RayQueryResult> CursorRaycast()
+		{
+			throw new NotImplementedException();
+		}
+
+		public ITile GetTileUnderCursor()
+		{
+			throw new NotImplementedException();
+		}
+
 		public bool UIPressed { get; set; }
 
 		readonly CameraMover cameraMover;

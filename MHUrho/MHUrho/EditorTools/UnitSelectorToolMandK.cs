@@ -68,10 +68,6 @@ namespace MHUrho.EditorTools
 			}
 		}
 
-		public override IEnumerable<Button> Buttons =>
-			from button in buttons
-			where selected[button.Value].Count > 0
-			select button.Key;
 
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
@@ -80,7 +76,7 @@ namespace MHUrho.EditorTools
 
 		readonly Dictionary<UnitType, SelectedInfo> selected;
 
-		readonly Dictionary<Button, UnitType> buttons;
+		readonly Dictionary<UIElement, UnitType> unitTypes;
 
 		bool enabled;
 
@@ -90,7 +86,7 @@ namespace MHUrho.EditorTools
 			this.input = input;
 			this.ui = ui;
 			this.selected = new Dictionary<UnitType, SelectedInfo>();
-			this.buttons = new Dictionary<Button, UnitType>();
+			this.unitTypes = new Dictionary<UIElement, UnitType>();
 
 			this.dynamicHighlight = new DynamicRectangleToolMandK(input, ui, camera);
 		}
@@ -103,8 +99,6 @@ namespace MHUrho.EditorTools
 
 			dynamicHighlight.Enable();
 
-			input.UIManager.SelectionBarShowButtons(Buttons);
-
 			enabled = true;
 		}
 
@@ -114,8 +108,6 @@ namespace MHUrho.EditorTools
 			dynamicHighlight.SelectionHandler -= HandleAreaSelection;
 			dynamicHighlight.SingleClickHandler -= HandleSingleClick;
 			dynamicHighlight.Disable();
-
-			input.UIManager.SelectionBarClearButtons();
 
 			enabled = false;
 		}
@@ -225,7 +217,7 @@ namespace MHUrho.EditorTools
 		}
 
 		void HandleSingleClick(MouseButtonUpEventArgs e) {
-			//TODO: Check that the raycastResults are ordered by distance
+
 			foreach (var result in input.CursorRaycast()) {
 
 				if (Level.TryGetEntity(result.Node, out IEntity entity)) {
@@ -249,34 +241,14 @@ namespace MHUrho.EditorTools
 
 
 		Button CreateButton(UnitType unitType) {
-			var unitIcon = unitType.Icon;
-
-			var buttonTexture = new Texture2D();
-			buttonTexture.FilterMode = TextureFilterMode.Nearest;
-			buttonTexture.SetNumLevels(1);
-			buttonTexture.SetSize(unitIcon.Width, unitIcon.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-			buttonTexture.SetData(unitIcon);
-
-
+			var unitIcon = unitType.IconRectangle;
 
 			var button = new Button();
 			button.SetStyle("SelectedUnitButton");
-			button.Size = new IntVector2(100, 100);
-			button.HorizontalAlignment = HorizontalAlignment.Center;
-			button.VerticalAlignment = VerticalAlignment.Center;
-			//button.Pressed += Button_Pressed;
-			button.Texture = buttonTexture;
-			button.FocusMode = FocusMode.ResetFocus;
-			button.MaxSize = new IntVector2(100, 100);
-			button.MinSize = new IntVector2(100, 100);
 			button.Visible = true;
 
-			var text = button.CreateText("Count");
+			Text text = (Text)button.GetChild("Count");
 			text.Value = "1";
-			text.HorizontalAlignment = HorizontalAlignment.Center;
-			text.VerticalAlignment = VerticalAlignment.Top;
-			text.SetColor(new Color(r: 0f, g: 0f, b: 0f));
-			text.SetFont(font: PackageManager.Instance.GetFont("Fonts/Font.ttf"), size: 30);
 
 			return button;
 		}
@@ -291,7 +263,7 @@ namespace MHUrho.EditorTools
 			var unit = unitSelector.Unit;
 			if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
 				if (info.UnitSelectors.Count == 0) {
-					input.UIManager.SelectionBarShowButton(info.Button);
+					info.Button.Visible = true;
 				}
 				info.UnitSelectors.Add(unitSelector);
 				DisplayCount(info.Button, info.Count);
@@ -300,9 +272,8 @@ namespace MHUrho.EditorTools
 				//Create info instance
 				var button = CreateButton(unit.UnitType);
 				selected.Add(unit.UnitType, new SelectedInfo(button, new List<UnitSelector> { unitSelector }));
-				buttons.Add(button, unit.UnitType);
-				input.UIManager.SelectionBarAddButton(button);
-				input.UIManager.SelectionBarShowButton(button);
+				unitTypes.Add(button, unit.UnitType);
+				input.UIManager.SelectionBarAddElement(button);
 			}
 
 			unitSelector.UnitDeselected += RemoveUnit;
@@ -312,7 +283,7 @@ namespace MHUrho.EditorTools
 			var info = selected[unitSelector.Unit.UnitType];
 			info.UnitSelectors.Remove(unitSelector);
 			if (info.Count == 0) {
-				input.UIManager.SelectionBarHideButton(info.Button);
+				info.Button.Visible = false;
 			}
 			else {
 				DisplayCount(info.Button, info.Count);

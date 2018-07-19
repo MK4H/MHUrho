@@ -17,8 +17,6 @@ namespace MHUrho.EditorTools
 
 		public delegate void HandleSingleClick(MouseButtonUpEventArgs e);
 
-		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
-
 		public event HandleSelectedRectangle SelectionHandler;
 		public event HandleSingleClick SingleClickHandler;
 

@@ -91,9 +91,8 @@ namespace MHUrho.Input
 
 			Enable();
 
-			UIManager.AddTool(new VertexHeightToolMandK(this, UIManager, cameraMover));
+			UIManager.AddTool(new TerrainManipulatorToolMandK(this, UIManager, cameraMover));
 			UIManager.AddTool(new TileTypeToolMandK(this, UIManager, cameraMover));
-			UIManager.AddTool(new TileHeightToolMandK(this, UIManager, cameraMover));
 			UIManager.AddTool(new UnitSelectorToolMandK(this, UIManager, cameraMover));
 			UIManager.AddTool(new UnitSpawningToolMandK(this, UIManager, cameraMover));
 			UIManager.AddTool(new BuildingBuilderToolMandK(this, UIManager, cameraMover));

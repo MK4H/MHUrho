@@ -13,8 +13,6 @@ namespace MHUrho.EditorTools
 {
 	class StaticRectangleToolMandK : StaticRectangleTool, IMandKTool
 	{
-		public override IEnumerable<Button> Buttons => Enumerable.Empty<Button>();
-
 		public IntVector2 Size { get; set; }
 
 		readonly GameMandKController input;
