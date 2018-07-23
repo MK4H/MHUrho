@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /Report20180723-1912.diagsession
 /Report20180723-1904.diagsession
+*.diagsession
