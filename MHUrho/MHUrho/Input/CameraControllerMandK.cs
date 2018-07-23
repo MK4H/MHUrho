@@ -51,6 +51,15 @@ namespace MHUrho.Input
 			RegisterCameraControlKeys();
 		}
 
+		public void Dispose()
+		{
+			input.MouseMove -= OnMouseMoved;
+			input.MouseWheelMoved -= OnMouseWheel;
+			input.EnteredScreenBorder -= OnScreenBorderEntered;
+			input.LeftScreenBorder -= OnScreenBorderLeft;
+			camera.Dispose();
+		}
+
 		//TODO: Read from config
 		void RegisterCameraControlKeys()
 		{
@@ -293,9 +302,6 @@ namespace MHUrho.Input
 			}
 		}
 
-		public void Dispose()
-		{
-			camera.Dispose();
-		}
+		
 	}
 }

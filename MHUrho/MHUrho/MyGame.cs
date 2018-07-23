@@ -90,19 +90,24 @@ namespace MHUrho
 			return value;
 		}
 
-		protected override void Start() {
+		protected override void Start()
+		{
+			Graphics.WindowTitle = "MHUrho";
+
 			mainThreadID = Thread.CurrentThread.ManagedThreadId;
 
 			Log.Open(Files.LogPath);
 			Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
 			//TODO: DEBUG
-			Stream newConfigFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Create, FileAccess.Write);
-			AppOptions.GetDefaultAppOptions().SaveTo(newConfigFile);
-			//Files.CopyStaticToDynamic(Files.ConfigFilePath);
+			//Stream newConfigFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Create, FileAccess.Write);
+			//AppOptions.GetDefaultAppOptions().SaveTo(newConfigFile);
 
+			if (!Files.FileExists(Path.Combine(Files.DynamicDirPath,Files.ConfigFilePath))) {
+				Files.CopyStaticToDynamic(Files.ConfigFilePath);
+			}
 
-
+			//TODO: Copy from static if not present
 			Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read);
 			Config = AppOptions.LoadFrom(configFile);
 			
@@ -119,9 +124,6 @@ namespace MHUrho
 			}
 
 			menuController = ControllerFactory.CreateMenuController();
-
-
-
 
 		}
 

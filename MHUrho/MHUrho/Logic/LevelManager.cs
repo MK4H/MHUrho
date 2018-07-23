@@ -247,6 +247,7 @@ namespace MHUrho.Logic
 			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize));
 			CurrentLevel.Map = map;
 
+
 			CurrentLevel.Minimap = new Minimap(CurrentLevel, 4);
 
 			MyGame.InvokeOnMainSafe(CreateCamera);
@@ -331,13 +332,23 @@ namespace MHUrho.Logic
 
 			HealthBar.DisposeMaterials();
 			Input.Dispose();
+			cameraController.Dispose();
 			Camera.Dispose();
 			Input = null;
 			Map.Dispose();
 			Minimap.Dispose();
-			Scene.Dispose();
-			
+			octree.Dispose();
+			//TODO: Temporary
+			var scene = Scene;
+			scene.RemoveAllChildren();
+			scene.RemoveAllComponents();
+			scene.Remove();
+			scene.Dispose();
+			LevelNode.Dispose();
+			Dispose();
+
 			CurrentLevel = null;
+			GC.Collect();
 		}
 
 		

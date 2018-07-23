@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 {
 	public class UnitSelectorToolMandK : UnitSelectorTool, IMandKTool {
 
-		class SelectedInfo {
+		class SelectedInfo : IDisposable {
 			public int Count => UnitSelectors.Count;
 
 			public readonly List<UnitSelector> UnitSelectors;
@@ -34,6 +34,11 @@ namespace MHUrho.EditorTools
 			public SelectedInfo(Button button, List<UnitSelector> unitSelectors) {
 				Button = button;
 				UnitSelectors = unitSelectors;
+			}
+
+			public void Dispose()
+			{
+				Button.Dispose();
 			}
 		}
 
@@ -119,6 +124,15 @@ namespace MHUrho.EditorTools
 		public override void Dispose() {
 			Disable();
 			dynamicHighlight.Dispose();
+
+			foreach (var selectedInfo in selected.Values) {
+				selectedInfo.Dispose();
+			}
+
+			foreach (var element in unitTypes.Keys) {
+				ui.SelectionBar.RemoveChild(element);
+				element.Dispose();
+			}
 		}
 
 		public void SelectUnit(UnitSelector unitSelector)
@@ -243,7 +257,7 @@ namespace MHUrho.EditorTools
 		Button CreateButton(UnitType unitType) {
 			var unitIcon = unitType.IconRectangle;
 
-			var button = new Button();
+			var button = ui.SelectionBar.CreateButton();
 			button.SetStyle("SelectedUnitButton");
 			button.Visible = true;
 
@@ -273,7 +287,6 @@ namespace MHUrho.EditorTools
 				var button = CreateButton(unit.UnitType);
 				selected.Add(unit.UnitType, new SelectedInfo(button, new List<UnitSelector> { unitSelector }));
 				unitTypes.Add(button, unit.UnitType);
-				input.UIManager.SelectionBarAddElement(button);
 			}
 
 			unitSelector.UnitDeselected += RemoveUnit;

@@ -41,7 +41,7 @@ namespace MHUrho.EditorTools {
 			this.checkBoxes = new ExclusiveCheckBoxes();
 			this.manipulators = new Dictionary<UIElement, TerrainManipulator>();
 
-			var selectorCheckBox = new CheckBox();
+			var selectorCheckBox = ui.SelectionBar.CreateCheckBox();
 			selectorCheckBox.Name = "Selector";
 			selectorCheckBox.SetStyle("VertexHeightToolSelectingBox");
 
@@ -49,7 +49,7 @@ namespace MHUrho.EditorTools {
 			checkBoxes.AddCheckBox(selectorCheckBox);
 			manipulators.Add(selectorCheckBox, selector);
 
-			var moverCheckBox = new CheckBox();
+			var moverCheckBox = ui.SelectionBar.CreateCheckBox();
 			moverCheckBox.Name = "Mover";
 			moverCheckBox.SetStyle("VertexHeightToolMovingBox");
 
@@ -57,7 +57,7 @@ namespace MHUrho.EditorTools {
 			manipulators.Add(moverCheckBox, new VertexMover(this, selector, input, Map));
 
 
-			var tileHeightCheckBox = new CheckBox();
+			var tileHeightCheckBox = ui.SelectionBar.CreateCheckBox();
 			tileHeightCheckBox.Name = "TileHeight";
 			tileHeightCheckBox.SetStyle("TileHeightToolTileHeightBox");
 
@@ -102,6 +102,17 @@ namespace MHUrho.EditorTools {
 
 		public override void Dispose() {
 			Disable();
+			
+
+			foreach (var pair in manipulators) {
+				ui.SelectionBar.RemoveChild(pair.Key);
+				pair.Value.Dispose();
+			}
+
+
+			checkBoxes.SelectedChanged -= OnToggled;
+			checkBoxes.Dispose();
+			manipulator?.Dispose();
 		}
 
 		void OnMouseMoved(MHUrhoMouseMovedEventArgs e) {

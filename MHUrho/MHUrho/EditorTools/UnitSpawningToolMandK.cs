@@ -15,12 +15,12 @@ namespace MHUrho.EditorTools
 {
 	class UnitSpawningToolMandK : UnitSpawningTool, IMandKTool {
 
-		Dictionary<UIElement, UnitType> unitTypes;
+		Dictionary<CheckBox, UnitType> unitTypes;
 
-		GameMandKController input;
+		readonly GameMandKController input;
 		readonly MandKGameUI ui;
 
-		ExclusiveCheckBoxes checkBoxes;
+		readonly ExclusiveCheckBoxes checkBoxes;
 
 		bool enabled;
 
@@ -30,12 +30,12 @@ namespace MHUrho.EditorTools
 
 			this.input = input;
 			this.ui = ui;
-			this.unitTypes = new Dictionary<UIElement, UnitType>();
+			this.unitTypes = new Dictionary<CheckBox, UnitType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
 			foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
 
-				var checkBox = new CheckBox();
+				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnUnitTypeToggled;
 				checkBox.Texture = PackageManager.Instance.ActiveGame.UnitIconTexture;
@@ -74,9 +74,12 @@ namespace MHUrho.EditorTools
 			//TODO: Maybe dont disable, or change implementation of disable to not delete currently visible buttons
 			Disable();
 			foreach (var pair in unitTypes) {
-				pair.Key.Dispose();
+				pair.Key.Toggled -= OnUnitTypeToggled;
+				ui.SelectionBar.RemoveChild(pair.Key);
 			}
 			unitTypes = null;
+
+			checkBoxes.Dispose();
 		}
 
 		void OnUnitTypeToggled(ToggledEventArgs e)

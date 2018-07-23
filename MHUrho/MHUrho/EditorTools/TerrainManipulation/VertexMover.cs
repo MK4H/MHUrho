@@ -24,6 +24,11 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			this.input = input;
 		}
 
+		public override void Dispose()
+		{
+			selector.Dispose();
+		}
+
 		public override void OnEnabled()
 		{
 			input.HideCursor();

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AppOptions xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2004/07/MHUrho.StartupManagement">
-  <UnitDrawDistance>100</UnitDrawDistance>
-  <ProjectileDrawDistance>100</ProjectileDrawDistance>
+  <UnitDrawDistance>200</UnitDrawDistance>
+  <ProjectileDrawDistance>200</ProjectileDrawDistance>
   <TerrainDrawDistance>200</TerrainDrawDistance>
   <Resolution xmlns:d2p1="http://schemas.datacontract.org/2004/07/Urho">
     <d2p1:X>1024</d2p1:X>
@@ -17,4 +17,9 @@
   <Monitor>0</Monitor>
   <RefreshRateCap>0</RefreshRateCap>
   <DebugHUD>true</DebugHUD>
+  <CameraScrollSensitivity>10</CameraScrollSensitivity>
+  <CameraRotationSensitivity>10</CameraRotationSensitivity>
+  <MouseRotationSensitivity>0.5</MouseRotationSensitivity>
+  <ZoomSensitivity>10</ZoomSensitivity>
+  <MouseBorderCameraMovement>true</MouseBorderCameraMovement>
 </AppOptions>

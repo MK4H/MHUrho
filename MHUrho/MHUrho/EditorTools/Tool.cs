@@ -30,6 +30,7 @@ namespace MHUrho.EditorTools
 		protected Tool(IGameController input, IntRect iconRectangle)
 		{
 			this.Input = input;
+			this.IconRectangle = iconRectangle;
 		}
 	}
 }

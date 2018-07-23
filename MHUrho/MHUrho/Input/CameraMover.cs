@@ -378,6 +378,13 @@ namespace MHUrho.Input
 			cameraDistance = cameraNode.Position.Length;
 		}
 
+		protected override void OnDeleted()
+		{
+			base.OnDeleted();
+
+			Camera.Dispose();
+		}
+
 		/// <summary>
 		/// Moves camera in the XZ plane, parallel to the ground
 		/// X axis is right(+)/ left(-), 

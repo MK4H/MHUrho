@@ -287,7 +287,7 @@ namespace MHUrho.WorldMap
 					}
 				}
 
-				unsafe class VertexBufferWrapper {
+				unsafe class VertexBufferWrapper : IDisposable {
 					readonly VertexBuffer vertexBuffer;
 					readonly MapChunk chunk;
 
@@ -322,9 +322,14 @@ namespace MHUrho.WorldMap
 
 						Data = null;
 					}
+
+					public void Dispose()
+					{
+						vertexBuffer.Dispose();
+					}
 				}
 
-				unsafe class IndexBufferWrapper {
+				unsafe class IndexBufferWrapper : IDisposable {
 					readonly IndexBuffer indexBuffer;
 					readonly MapChunk chunk;
 
@@ -358,6 +363,11 @@ namespace MHUrho.WorldMap
 						indexBuffer.Unlock();
 
 						Data = null;
+					}
+
+					public void Dispose()
+					{
+						indexBuffer?.Dispose();
 					}
 				}
 
@@ -393,6 +403,9 @@ namespace MHUrho.WorldMap
 				public void Dispose()
 				{
 					model?.Dispose();
+					vertexBuffer.Dispose();
+					indexBuffer.Dispose();
+					chunkNode.Dispose();
 				}
 
 				public unsafe void ChangeTileType(int x, int y, TileType newType)
@@ -971,7 +984,9 @@ namespace MHUrho.WorldMap
 				}
 			}
 
-			public void Dispose() {
+			public void Dispose()
+			{
+				highlight?.Dispose();
 				foreach (var chunk in chunks) {
 					chunk.Dispose();
 				}

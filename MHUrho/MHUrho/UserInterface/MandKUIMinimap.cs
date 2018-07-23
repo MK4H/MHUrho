@@ -11,9 +11,6 @@ namespace MHUrho.UserInterface
 {
     class MandKUIMinimap : UIMinimap
     {
-
-
-
 		readonly MandKGameUI uiManager;
 
 		GameMandKController InputCtl => uiManager.InputCtl;
@@ -23,6 +20,13 @@ namespace MHUrho.UserInterface
 		{
 			this.uiManager = uiManager;
 			InputCtl.MouseWheelMoved += MouseWheel;
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+
+			InputCtl.MouseWheelMoved -= MouseWheel;
 		}
 
 		protected override void Pressed(PressedEventArgs e)
@@ -61,5 +65,7 @@ namespace MHUrho.UserInterface
 
 			PreviousCameraMovement = newMovement;
 		}
+
+		
 	}
 }

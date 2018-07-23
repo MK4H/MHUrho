@@ -7,7 +7,7 @@ namespace MHUrho.EditorTools
 {
 	delegate void OnSelectedDelegate(CheckBox newSelected, CheckBox oldSelected);
 
-    class ExclusiveCheckBoxes
+    class ExclusiveCheckBoxes : IDisposable
     {
 		public IEnumerable<CheckBox> CheckBoxes => checkBoxes;
 
@@ -93,5 +93,16 @@ namespace MHUrho.EditorTools
 			SelectedChanged?.Invoke(Selected, oldSelected);
 		}
 
+		public void Dispose()
+		{
+			Selected = null;
+
+			foreach (var checkBox in checkBoxes) {
+				checkBox.Toggled -= OnToggled;
+				checkBox.Dispose();
+			}
+
+			checkBoxes.Clear();
+		}
 	}
 }

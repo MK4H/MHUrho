@@ -51,7 +51,6 @@ namespace MHUrho.PathFinding
 
 			foreach (var tileNeighbour in newTileNeighbours) {
 				if (!edgeToNeighbourTile.ContainsKey(tileNeighbour)) {
-//#error REMOVE THE DUPLICATE DIAGONAL TILEEDGENODES
 					TileEdgeNode tileEdge = new TileEdgeNode(this, tileNeighbour, AStar);
 					edgeToNeighbourTile.Add(tileNeighbour, tileEdge);
 					tileNeighbour.edgeToNeighbourTile.Add(this, tileEdge);

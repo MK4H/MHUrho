@@ -101,8 +101,10 @@ namespace MHUrho.Input
 
 		public void Dispose()
 		{
-			UIManager.Dispose();
 			Disable();
+
+			UIManager.Dispose();
+			
 		}
 
 		public List<RayQueryResult> CursorRaycast() {
@@ -269,11 +271,13 @@ namespace MHUrho.Input
 		public void Pause()
 		{
 			Level.Pause();
+			UIManager.HideUI();
 			Game.menuController.SwitchToPauseMenu(this);
 		}
 
 		public void UnPause()
 		{
+			UIManager.ShowUI();
 			Level.UnPause();
 		}
 

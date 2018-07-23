@@ -25,6 +25,11 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			verticies = new List<IntVector2>();
 		}
 
+		public override void Dispose()
+		{
+			
+		}
+
 		public override void OnMouseDown(MouseButtonDownEventArgs e)
 		{
 			var raycastResult = input.CursorRaycast();

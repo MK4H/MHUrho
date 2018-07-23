@@ -7,8 +7,9 @@ using Urho.Gui;
 
 namespace MHUrho.EditorTools.TerrainManipulation
 {
-    abstract class TerrainManipulator
-    {
+    abstract class TerrainManipulator : IDisposable {
+
+		public abstract void Dispose();
 
 		public virtual void OnEnabled()
 		{

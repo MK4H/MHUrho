@@ -7,7 +7,7 @@ using Urho.Gui;
 namespace MHUrho.UserInterface
 {
 	delegate void ElementSelectedDelegate(UIElement newSelectedElement, UIElement oldSelectedElement);
-    class ExpandingSelector
+    class ExpandingSelector : IDisposable
     {
 		public bool Expanded { get; private set; }
 
@@ -41,11 +41,13 @@ namespace MHUrho.UserInterface
 			this.checkBoxes = new List<CheckBox>();
 		}
 
-		public void AddCheckBox(CheckBox box)
+		public CheckBox CreateCheckBox()
 		{
-			expansionWindow.AddChild(box);
+			CheckBox box = expansionWindow.CreateCheckBox();
 			checkBoxes.Add(box);
 			box.Toggled += ExpandedBoxToggled;
+
+			return box;
 		}
 
 		public void RemoveCheckBox(CheckBox box)
@@ -66,7 +68,7 @@ namespace MHUrho.UserInterface
 			}
 
 			box.Toggled -= ExpandedBoxToggled;
-			expansionWindow.RmoveChild(box);
+			expansionWindow.RemoveCheckBox(box);
 		}
 
 		void MainBoxToggled(ToggledEventArgs e)
@@ -117,13 +119,16 @@ namespace MHUrho.UserInterface
 			}
 
 			Expanded = false;
+			checkBox.Checked = false;
 		}
 
 		void SelectedBox(CheckBox box)
 		{
-			UIElement oldSelected = currentSelected;
+			CheckBox oldSelected = currentSelected;
 
-			currentSelected.Checked = false;
+			if (oldSelected != null) {
+				oldSelected.Checked = false;
+			}
 			currentSelected = box;
 
 			checkBox.Texture = box.Texture;
@@ -148,6 +153,19 @@ namespace MHUrho.UserInterface
 		void OnHoverEnd(HoverEndEventArgs e)
 		{
 			HoverEnd?.Invoke(e);
+		}
+
+		public void Dispose()
+		{
+			checkBox.Toggled -= MainBoxToggled;
+			checkBox.Dispose();
+			defaultTexture.Dispose();
+			currentSelected?.Dispose();
+
+			foreach (var box in checkBoxes) {
+				box.Toggled -= ExpandedBoxToggled;
+				box.Dispose();
+			}
 		}
 	}
 }

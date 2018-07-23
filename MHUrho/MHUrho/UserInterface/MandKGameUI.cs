@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.EditorTools;
@@ -27,6 +28,8 @@ namespace MHUrho.UserInterface
 
 		public Window CustomWindow { get; private set; }
 
+		public SelectionBar SelectionBar { get; private set; }
+
 		IPlayer Player => InputCtl.Player;
 
 		CameraMover cameraMover;
@@ -37,7 +40,6 @@ namespace MHUrho.UserInterface
 		readonly ExpansionWindow expansionWindow;
 		readonly ExpandingSelector toolSelection;
 		readonly ExpandingSelector playerSelection;
-		readonly SelectionBar selectionBar;
 		readonly UIMinimap minimap;
 
 	
@@ -55,9 +57,11 @@ namespace MHUrho.UserInterface
 			//TODO: User texture
 			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this, game);
 
+			UI.Root.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
 			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/GameLayout.xml");
 
 			gameUI = UI.Root.GetChild("GameUI");
+			
 
 			CustomWindow = (Window)gameUI.GetChild("CustomWindow");
 
@@ -73,9 +77,9 @@ namespace MHUrho.UserInterface
 			playerSelection.HoverBegin += UIHoverBegin;
 			playerSelection.HoverEnd += UIHoverEnd;
 
-			selectionBar = new SelectionBar(gameUI);
-			selectionBar.HoverBegin += UIHoverBegin;
-			selectionBar.HoverEnd += UIHoverEnd;
+			SelectionBar = new SelectionBar(gameUI);
+			SelectionBar.HoverBegin += UIHoverBegin;
+			SelectionBar.HoverEnd += UIHoverEnd;
 
 			minimap = new MandKUIMinimap((Button)gameUI.GetChild("Minimap"), this, cameraMover, Level);
 			minimap.HoverBegin += UIHoverBegin;
@@ -85,6 +89,28 @@ namespace MHUrho.UserInterface
 
 		public void Dispose() {
 			ClearDelegates();
+
+			foreach (var tool in tools) {
+				toolSelection.RemoveCheckBox((CheckBox) tool.Key);
+				tool.Key.Dispose();
+				tool.Value.Dispose();
+			}
+
+			tools.Clear();
+
+			foreach (var player in players) {
+				playerSelection.RemoveCheckBox((CheckBox)player.Key);
+				player.Key.Dispose();
+			}
+
+			players.Clear();
+
+			CustomWindow.Dispose();
+			expansionWindow.Dispose();
+			toolSelection.Dispose();
+			playerSelection.Dispose();
+			SelectionBar.Dispose();
+			minimap.Dispose();
 
 			gameUI.RemoveAllChildren();
 			gameUI.Remove();
@@ -112,48 +138,53 @@ namespace MHUrho.UserInterface
 			gameUI.Visible = false;
 		}
 
-
-
-		public void SelectionBarAddElement(UIElement element) {
-			selectionBar.AddElement(element);
-		}
-
-		public void SelectionBarRemoveElement(UIElement element)
-		{
-			selectionBar.RemoveElement(element);
-		}
-
 		public override void AddTool(Tool tool)
 		{
 
-			CheckBox checkBox = new CheckBox();
-			checkBox.SetStyle("ExpansionWindowCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+			CheckBox checkBox = toolSelection.CreateCheckBox();
+			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+			checkBox.Visible = true;
 
 			checkBox.ImageRect = tool.IconRectangle;
 
 			tools.Add(checkBox, tool);
-			toolSelection.AddCheckBox(checkBox);
 
 		}
 
 		public override void RemoveTool(Tool tool) {
-			throw new NotImplementedException();
+			UIElement toolElement = tools.Where((pair) => pair.Value == tool).Select((pair) => pair.Key).FirstOrDefault();
+
+			if (toolElement == null) {
+				throw new ArgumentException("Could not remove tool that was not previously added", nameof(tool));
+			}
+
+			toolSelection.RemoveCheckBox((CheckBox) toolElement);
+
+			tools.Remove(toolElement);
 		}
 
-		public override void AddPlayer(IPlayer player) {
+		public override void AddPlayer(IPlayer player)
+		{
 
-			CheckBox checkBox = new CheckBox();
+			CheckBox checkBox = playerSelection.CreateCheckBox();
 			checkBox.SetStyle("ExpansionWindowCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
 
 			//TODO: This
 			checkBox.ImageRect = new IntRect(0,0,50,50);
 
-			players.Add(checkBox, player);
-			playerSelection.AddCheckBox(checkBox);		
+			players.Add(checkBox, player);		
 		}
 
 		public override void RemovePlayer(IPlayer player) {
-			throw new NotImplementedException();
+			UIElement playerElement = players.Where((pair) => pair.Value == player).Select((pair) => pair.Key).FirstOrDefault();
+
+			if (playerElement == null) {
+				throw new ArgumentException("Could not remove player that was not previously added", nameof(player));
+			}
+
+			playerSelection.RemoveCheckBox((CheckBox)playerElement);
+
+			players.Remove(playerElement);
 		}
 
 		void UIHoverBegin(HoverBeginEventArgs e)
@@ -170,10 +201,15 @@ namespace MHUrho.UserInterface
 			expansionWindow.HoverBegin -= UIHoverBegin;
 			expansionWindow.HoverEnd -= UIHoverEnd;
 
-			selectionBar.HoverBegin -= UIHoverBegin;
-			selectionBar.HoverEnd -= UIHoverEnd;
 			toolSelection.HoverBegin -= UIHoverBegin;
 			toolSelection.HoverEnd -= UIHoverEnd;
+			toolSelection.Selected -= ToolSelected;
+
+			playerSelection.HoverBegin -= UIHoverBegin;
+			playerSelection.HoverEnd -= UIHoverEnd;
+
+			SelectionBar.HoverBegin -= UIHoverBegin;
+			SelectionBar.HoverEnd -= UIHoverEnd;
 
 			minimap.HoverBegin -= UIHoverBegin;
 			minimap.HoverEnd -= UIHoverEnd;

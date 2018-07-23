@@ -5,7 +5,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class ExpansionWindow
+    class ExpansionWindow : IDisposable
     {
 		public bool Visible {
 			get => window.Visible;
@@ -32,12 +32,17 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		public void AddChild(UIElement element)
+		public CheckBox CreateCheckBox(string name = "")
 		{
-			window.AddChild(element);
+			return window.CreateCheckBox(name);
 		}
 
-		public void RmoveChild(UIElement element)
+		public CheckBox GetChild(string name)
+		{
+			return (CheckBox) window.GetChild(name);
+		}
+
+		public void RemoveCheckBox(CheckBox element)
 		{
 			window.RemoveChild(element);
 		}
@@ -51,5 +56,12 @@ namespace MHUrho.UserInterface
 		{
 			HoverEnd?.Invoke(e);
 		}
-    }
+
+		public void Dispose()
+		{
+			window.HoverBegin -= OnHoverBegin;
+			window.HoverEnd -= OnHoverEnd;
+			window?.Dispose();
+		}
+	}
 }

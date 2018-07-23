@@ -15,14 +15,14 @@ namespace MHUrho.EditorTools
 {
 	class TileTypeToolMandK : TileTypeTool, IMandKTool { 
 
-		Dictionary<UIElement, TileType> tileTypes;
+		Dictionary<CheckBox, TileType> tileTypes;
 
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
 
-		StaticRectangleToolMandK highlight;
+		readonly StaticRectangleToolMandK highlight;
 
-		ExclusiveCheckBoxes checkBoxes;
+		readonly ExclusiveCheckBoxes checkBoxes;
 
 		ITile centerTile;
 
@@ -35,13 +35,13 @@ namespace MHUrho.EditorTools
 
 			this.input = input;
 			this.ui = ui;
-			this.tileTypes = new Dictionary<UIElement, TileType>();
+			this.tileTypes = new Dictionary<CheckBox, TileType>();
 			this.highlight = new StaticRectangleToolMandK(input, ui, camera, new IntVector2(3,3));
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
 			foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
-				
-				var checkBox = new CheckBox();
+
+				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnTileTypeToggled;
 				checkBox.Texture = PackageManager.Instance.ActiveGame.TileIconTexture;
@@ -88,9 +88,13 @@ namespace MHUrho.EditorTools
 			//TODO: Maybe dont disable, or change implementation of disable to not delete currently visible buttons
 			Disable();
 			foreach (var pair in tileTypes) {
-				pair.Key.Dispose();
+				pair.Key.Toggled -= OnTileTypeToggled;
+				ui.SelectionBar.RemoveChild(pair.Key);
 			}
 			tileTypes = null;
+
+			highlight.Dispose();
+			checkBoxes.Dispose();
 		}
 
 		void OnTileTypeToggled(ToggledEventArgs e) {

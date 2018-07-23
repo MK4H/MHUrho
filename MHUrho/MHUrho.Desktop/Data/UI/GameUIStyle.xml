@@ -1,7 +1,59 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <elements>
-	<element type="ExpansionWindowCheckBox">
+	<element type="BorderImage">
 		<attribute name="Blend Mode" value="alpha" />
+	</element>
+
+	<element type="MainCheckBox" style="BorderImage">
+		<attribute name="Min Size" value="50 50" />
+		<attribute name="Max Size" value="50 50" />
+		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Checked Image Offset" value="100 0" />
+		<attribute name="Hover Image Offset" value="50 0" />
+	</element>
+	<element type="Button" style="BorderImage">
+		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Pressed Image Offset" value="32 0" />
+		<attribute name="Hover Image Offset" value="16 0" />
+		<attribute name="Pressed Child Offset" value="-1 1" />
+	</element>
+	<element type="Window" style="BorderImage">
+		<attribute name="Border" value="4 4 4 4" />
+	</element>
+	<element type="ToolSelectorBox" style="MainCheckBox" auto="false">
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 0 50 50"/>
+	</element>
+	<element type="PlayerSelectorBox" style="MainCheckBox" auto="false">
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 50 50 100"/>
+	</element>
+	<element type="ExpansionWindowCheckBox" style="MainCheckBox">
+		<attribute name="Checked Image Offset" value="100 0" />
+		<attribute name="Hover Image Offset" value="50 0" />
+	</element>
+	<element type="CustomWindow" style="Window" auto="false">
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 100 16 116"/>
+	</element>
+	<element type="LeftButton" style="Button" auto="false">
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 116 16 132"/>
+	</element>
+	<element type="RightButton" style="Button" auto="false">
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 132 16 148"/>
+	</element>
+	<element type="ToolCheckBox" style="ExpansionWindowCheckBox">
+		<attribute name="Texture" value="Texture2D;Textures/ToolIcons.png"/>
+		<attribute name="Image Rect" value="0 0 50 50"/>
+	</element>
+	<element type="SelectionBarCheckBox" style="BorderImage">
+		<attribute name="Min Size" value="100 100" />
+		<attribute name="Max Size" value="100 100" />
+		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 0 50 50"/>
 		<attribute name="Checked Image Offset" value="100 0" />
 		<attribute name="Hover Image Offset" value="50 0" />
 	</element>

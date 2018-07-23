@@ -32,8 +32,9 @@ namespace MHUrho.EditorTools
 			this.Size = size;
 		}
 
-		public override void Dispose() {
-
+		public override void Dispose()
+		{
+			Disable();
 		}
 
 		public override void Enable() {

@@ -60,6 +60,11 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			}
 		}
 
+		public override void Dispose()
+		{
+			highlight.Dispose();
+		}
+
 		public override void OnEnabled()
 		{
 			highlight.Enable();

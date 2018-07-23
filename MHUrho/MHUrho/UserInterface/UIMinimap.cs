@@ -9,7 +9,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    abstract class UIMinimap {
+    abstract class UIMinimap : IDisposable {
 		public event Action<HoverBeginEventArgs> HoverBegin;
 		public event Action<HoverEndEventArgs> HoverEnd;
 
@@ -66,5 +66,15 @@ namespace MHUrho.UserInterface
 			PreviousCameraMovement = Vector2.Zero;
 		}
 
+		public virtual void Dispose()
+		{
+			Button.Pressed -= Pressed;
+			Button.Released -= Released;
+			Button.HoverBegin -= OnHoverBegin;
+			Button.HoverEnd -= OnHoverEnd;
+
+			Button.Dispose();
+			CameraMover.Dispose();
+		}
 	}
 }

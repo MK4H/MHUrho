@@ -7,11 +7,14 @@ using MHUrho.Helpers;
 
 namespace MHUrho.UserInterface
 {
-    class SelectionBar {
+    public class SelectionBar : IDisposable {
+
+		public IReadOnlyList<UIElement> Children => buttonHolder.Children;
+
 		readonly Window wholeWindow;
 		readonly UIElement buttonHolder;
-		readonly Button LeftButton;
-		readonly Button RightButton;
+		readonly Button leftButton;
+		readonly Button rightButton;
 		readonly Window centralWindow;
 
 		public event Action<HoverBeginEventArgs> HoverBegin;
@@ -19,14 +22,14 @@ namespace MHUrho.UserInterface
 
 		public SelectionBar(UIElement gameUI)
 		{
-			wholeWindow = (Window)gameUI.GetChild("ToolButtons");
+			wholeWindow = (Window)gameUI.GetChild("SelectionBar");
 			wholeWindow.HoverBegin += OnHoverBegin;
 			wholeWindow.HoverEnd += OnHoverEnd;
 
-			LeftButton = (Button)wholeWindow.GetChild("LeftButton", true);
-			LeftButton.Pressed += ScrollButtonPressed;
-			RightButton = (Button)wholeWindow.GetChild("RightButton", true);
-			RightButton.Pressed += ScrollButtonPressed;
+			leftButton = (Button)wholeWindow.GetChild("LeftButton", true);
+			leftButton.Pressed += ScrollButtonPressed;
+			rightButton = (Button)wholeWindow.GetChild("RightButton", true);
+			rightButton.Pressed += ScrollButtonPressed;
 
 			
 
@@ -37,23 +40,98 @@ namespace MHUrho.UserInterface
 		public void ChangeWidth(int newWidth)
 		{
 			wholeWindow.Width = newWidth;
-			centralWindow.Width = wholeWindow.Width - LeftButton.Width - RightButton.Width;
+			centralWindow.Width = wholeWindow.Width - leftButton.Width - rightButton.Width;
 		}
 
-
-		public void AddElement(UIElement element)
+		public BorderImage CreateBorderImage(string name = "", uint index = 4294967295)
 		{
-			buttonHolder.AddChild(element);
+			return buttonHolder.CreateBorderImage(name, index);
 		}
 
-		public void RemoveElement(UIElement element)
+		public Button CreateButton(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateButton(name, index);
+		}
+
+		public CheckBox CreateCheckBox(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateCheckBox(name, index);
+		}
+
+		public DropDownList CreateDropDownList(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateDropDownList(name, index);
+		}
+
+		public LineEdit CreateLineEdit(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateLineEdit(name, index);
+		}
+
+		public ListView CreateListView(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateListView(name, index);
+		}
+
+		public Menu CreateMenu(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateMenu(name, index);
+		}
+
+		public ScrollBar CreateScrollBar(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateScrollBar(name, index);
+		}
+
+		public ScrollView CreateScrollView(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateScrollView(name, index);
+		}
+
+		public Slider CreateSlider(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateSlider(name, index);
+		}
+
+		public Sprite CreateSprite(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateSprite(name, index);
+		}
+
+		public Text CreateText(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateText(name, index);
+		}
+
+		public ToolTip CreateToolTip(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateToolTip(name, index);
+		}
+
+		public Window CreateWindow(string name = "", uint index = 4294967295)
+		{
+			return buttonHolder.CreateWindow(name, index);
+		}
+
+		public void RemoveChild(UIElement element)
 		{
 			if (!element.IsChildOf(buttonHolder)) {
-				throw new ArgumentException("Button was not in the selectionBar", nameof(element));
+				throw new ArgumentException("Button was not a child of the SelectionBar", nameof(element));
 			}
 
 			buttonHolder.RemoveChild(element);
 		}
+
+		public UIElement GetChild(uint index)
+		{
+			return buttonHolder.GetChild(index);
+		}
+
+		public UIElement GetChild(string name, bool recursive = false)
+		{
+			return buttonHolder.GetChild(name, recursive);
+		}
+
 		void ScrollButtonPressed(PressedEventArgs e)
 		{
 			if (buttonHolder.Size.X < centralWindow.Size.X) {
@@ -92,6 +170,21 @@ namespace MHUrho.UserInterface
 		void OnHoverEnd(HoverEndEventArgs e)
 		{
 			HoverEnd?.Invoke(e);
+		}
+
+		public void Dispose()
+		{
+			wholeWindow.HoverBegin -= OnHoverBegin;
+			wholeWindow.HoverEnd -= OnHoverEnd;
+
+			leftButton.Pressed -= ScrollButtonPressed;
+			rightButton.Pressed -= ScrollButtonPressed;
+
+			wholeWindow.Dispose();
+			buttonHolder.Dispose();
+			leftButton.Dispose();
+			rightButton.Dispose();
+			centralWindow.Dispose();
 		}
 	}
 }

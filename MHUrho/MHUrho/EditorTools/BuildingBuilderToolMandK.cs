@@ -17,7 +17,7 @@ namespace MHUrho.EditorTools
 	class BuildingBuilderToolMandK : BuildingBuilderTool, IMandKTool
 	{
 
-		Dictionary<UIElement, BuildingType> buildingTypes;
+		Dictionary<CheckBox, BuildingType> buildingTypes;
 
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
@@ -31,12 +31,12 @@ namespace MHUrho.EditorTools
 		{
 			this.input = input;
 			this.ui = ui;
-			this.buildingTypes = new Dictionary<UIElement, BuildingType>();
+			this.buildingTypes = new Dictionary<CheckBox, BuildingType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
 			foreach (var buildingType in PackageManager.Instance.ActiveGame.BuildingTypes) {
 
-				var checkBox = new CheckBox();
+				var checkBox = ui.SelectionBar.CreateCheckBox();
 				//TODO: Style
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnBuildingTypeToggled;
@@ -47,8 +47,6 @@ namespace MHUrho.EditorTools
 
 				buildingTypes.Add(checkBox, buildingType);
 				checkBoxes.AddCheckBox(checkBox);
-
-				ui.SelectionBarAddElement(checkBox);
 			}
 		}
 
@@ -82,8 +80,11 @@ namespace MHUrho.EditorTools
 		public override void Dispose() {
 			Disable();
 			foreach (var pair in buildingTypes) {
-				pair.Key.Dispose();
+				pair.Key.Toggled -= OnBuildingTypeToggled;
+				ui.SelectionBar.RemoveChild(pair.Key);
 			}
+
+			checkBoxes.Dispose();
 			buildingTypes = null;
 		}
 
