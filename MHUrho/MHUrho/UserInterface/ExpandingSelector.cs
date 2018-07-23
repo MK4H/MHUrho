@@ -35,9 +35,13 @@ namespace MHUrho.UserInterface
 
 			//TODO: Style
 			checkBox.Toggled += MainBoxToggled;
+			checkBox.HoverBegin += OnHoverBegin;
+			checkBox.HoverEnd += OnHoverEnd;
 
 			//TODO: Style
 			this.expansionWindow = expansionWindow;
+			expansionWindow.VisibilityChanged += OnExpansionWindowVisibilityChanged;
+
 			this.checkBoxes = new List<CheckBox>();
 		}
 
@@ -94,14 +98,11 @@ namespace MHUrho.UserInterface
 			}
 
 			SelectedBox((CheckBox) e.Element);
-
-			checkBox.HoverBegin += OnHoverBegin;
-			checkBox.HoverEnd += OnHoverEnd;
 		}
 
 		void ShowExpansionWindow()
 		{
-			expansionWindow.Visible = true;
+			expansionWindow.Show();
 			expansionWindow.HideAll();
 
 			foreach (var box in checkBoxes) {
@@ -113,7 +114,7 @@ namespace MHUrho.UserInterface
 
 		void HideExpansionWindow()
 		{
-			expansionWindow.Visible = false;
+			expansionWindow.Hide();
 			foreach (var box in checkBoxes) {
 				box.Visible = false;
 			}
@@ -155,9 +156,20 @@ namespace MHUrho.UserInterface
 			HoverEnd?.Invoke(e);
 		}
 
+		void OnExpansionWindowVisibilityChanged(ExpansionWindow e)
+		{
+			if (Expanded && e.Visible) {
+				HideExpansionWindow();
+				e.Show();
+			}
+		}
+
 		public void Dispose()
 		{
 			checkBox.Toggled -= MainBoxToggled;
+			checkBox.HoverBegin -= OnHoverBegin;
+			checkBox.HoverEnd -= OnHoverEnd;
+			expansionWindow.VisibilityChanged -= OnExpansionWindowVisibilityChanged;
 			checkBox.Dispose();
 			defaultTexture.Dispose();
 			currentSelected?.Dispose();

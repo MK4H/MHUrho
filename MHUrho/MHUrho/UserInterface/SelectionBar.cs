@@ -28,89 +28,132 @@ namespace MHUrho.UserInterface
 
 			leftButton = (Button)wholeWindow.GetChild("LeftButton", true);
 			leftButton.Pressed += ScrollButtonPressed;
+			leftButton.HoverBegin += OnHoverBegin;
+			leftButton.HoverEnd += OnHoverEnd;
 			rightButton = (Button)wholeWindow.GetChild("RightButton", true);
 			rightButton.Pressed += ScrollButtonPressed;
+			rightButton.HoverBegin += OnHoverBegin;
+			rightButton.HoverEnd += OnHoverEnd;
 
-			
+
 
 			buttonHolder = wholeWindow.GetChild("ButtonHolder", true);
+			buttonHolder.HoverBegin += OnHoverBegin;
+			buttonHolder.HoverEnd += OnHoverEnd;
 			centralWindow = (Window)buttonHolder.Parent;
+			centralWindow.HoverBegin += OnHoverBegin;
+			centralWindow.HoverEnd += OnHoverEnd;
 		}
 
 		public void ChangeWidth(int newWidth)
 		{
+			wholeWindow.MaxWidth = newWidth;
+			wholeWindow.MinWidth = newWidth;
 			wholeWindow.Width = newWidth;
-			centralWindow.Width = wholeWindow.Width - leftButton.Width - rightButton.Width;
+
+			int centralWindowWidth = wholeWindow.Width - leftButton.Width - rightButton.Width;
+
+			centralWindow.MaxWidth = centralWindowWidth;
+			centralWindow.MinWidth = centralWindowWidth;
+			centralWindow.Width = centralWindowWidth;
 		}
 
 		public BorderImage CreateBorderImage(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateBorderImage(name, index);
+			BorderImage newBorderImage = buttonHolder.CreateBorderImage(name, index);
+			InitElement(newBorderImage);
+			return newBorderImage;
 		}
 
 		public Button CreateButton(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateButton(name, index);
+			Button newButton = buttonHolder.CreateButton(name, index);
+			InitElement(newButton);
+			return newButton;
 		}
 
 		public CheckBox CreateCheckBox(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateCheckBox(name, index);
+			CheckBox newCheckBox = buttonHolder.CreateCheckBox(name, index);
+			InitElement(newCheckBox);
+			return newCheckBox;
 		}
 
 		public DropDownList CreateDropDownList(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateDropDownList(name, index);
+			DropDownList newDropDownList = buttonHolder.CreateDropDownList(name, index);
+			InitElement(newDropDownList);
+			return newDropDownList;
 		}
 
 		public LineEdit CreateLineEdit(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateLineEdit(name, index);
+			LineEdit newLineEdit = buttonHolder.CreateLineEdit(name, index);
+			InitElement(newLineEdit);
+			return newLineEdit;
 		}
 
 		public ListView CreateListView(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateListView(name, index);
+			ListView newListView = buttonHolder.CreateListView(name, index);
+			InitElement(newListView);
+			return newListView;
 		}
 
 		public Menu CreateMenu(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateMenu(name, index);
+			Menu newMenu = buttonHolder.CreateMenu(name, index);
+			InitElement(newMenu);
+			return newMenu;
 		}
 
 		public ScrollBar CreateScrollBar(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateScrollBar(name, index);
+			ScrollBar newScrollBar = buttonHolder.CreateScrollBar(name, index);
+			InitElement(newScrollBar);
+			return newScrollBar;
 		}
 
 		public ScrollView CreateScrollView(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateScrollView(name, index);
+			ScrollView newScrollView = buttonHolder.CreateScrollView(name, index);
+			InitElement(newScrollView);
+			return newScrollView;
 		}
 
 		public Slider CreateSlider(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateSlider(name, index);
+			Slider newSlider = buttonHolder.CreateSlider(name, index);
+			InitElement(newSlider);
+			return newSlider;
 		}
 
 		public Sprite CreateSprite(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateSprite(name, index);
+			Sprite newSprite = buttonHolder.CreateSprite(name, index);
+			InitElement(newSprite);
+			return newSprite;
 		}
 
 		public Text CreateText(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateText(name, index);
+			Text newText = buttonHolder.CreateText(name, index);
+			InitElement(newText);
+			return newText;
 		}
 
 		public ToolTip CreateToolTip(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateToolTip(name, index);
+			ToolTip newToolTip = buttonHolder.CreateToolTip(name, index);
+			InitElement(newToolTip);
+			return newToolTip;
 		}
 
 		public Window CreateWindow(string name = "", uint index = 4294967295)
 		{
-			return buttonHolder.CreateWindow(name, index);
+			Window newWindow = buttonHolder.CreateWindow(name, index);
+			InitElement(newWindow);
+			return newWindow;
 		}
 
 		public void RemoveChild(UIElement element)
@@ -118,7 +161,8 @@ namespace MHUrho.UserInterface
 			if (!element.IsChildOf(buttonHolder)) {
 				throw new ArgumentException("Button was not a child of the SelectionBar", nameof(element));
 			}
-
+			element.HoverBegin -= OnHoverBegin;
+			element.HoverEnd -= OnHoverEnd;
 			buttonHolder.RemoveChild(element);
 		}
 
@@ -178,13 +222,31 @@ namespace MHUrho.UserInterface
 			wholeWindow.HoverEnd -= OnHoverEnd;
 
 			leftButton.Pressed -= ScrollButtonPressed;
+			leftButton.HoverBegin -= OnHoverBegin;
+			leftButton.HoverEnd -= OnHoverEnd;
+
 			rightButton.Pressed -= ScrollButtonPressed;
+			rightButton.HoverBegin -= OnHoverBegin;
+			rightButton.HoverEnd -= OnHoverEnd;
+
+			buttonHolder.HoverBegin -= OnHoverBegin;
+			buttonHolder.HoverEnd -= OnHoverEnd;
+
+			centralWindow.HoverBegin -= OnHoverBegin;
+			centralWindow.HoverEnd -= OnHoverEnd;
 
 			wholeWindow.Dispose();
 			buttonHolder.Dispose();
 			leftButton.Dispose();
 			rightButton.Dispose();
 			centralWindow.Dispose();
+		}
+
+		void InitElement(UIElement element)
+		{
+			element.Visible = false;
+			element.HoverBegin += OnHoverBegin;
+			element.HoverEnd += OnHoverEnd;
 		}
 	}
 }

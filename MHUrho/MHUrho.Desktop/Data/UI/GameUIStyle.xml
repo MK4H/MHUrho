@@ -19,6 +19,8 @@
 	</element>
 	<element type="Window" style="BorderImage">
 		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Image Rect" value="0 100 16 116"/>
 	</element>
 	<element type="ToolSelectorBox" style="MainCheckBox" auto="false">
 		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
@@ -33,8 +35,12 @@
 		<attribute name="Hover Image Offset" value="50 0" />
 	</element>
 	<element type="CustomWindow" style="Window" auto="false">
-		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
-		<attribute name="Image Rect" value="0 100 16 116"/>
+
+	</element>
+	<element type="SelectionBarWindow" style="Window" auto="false">
+
+	</element>
+	<element type="ExpansionWindow" style="Window" auto="false">
 	</element>
 	<element type="LeftButton" style="Button" auto="false">
 		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>

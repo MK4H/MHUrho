@@ -5,15 +5,15 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
+
     class ExpansionWindow : IDisposable
     {
-		public bool Visible {
-			get => window.Visible;
-			set => window.Visible = value;
-		}
+		public bool Visible => window.Visible;
 
 		public event Action<HoverBeginEventArgs> HoverBegin;
 		public event Action<HoverEndEventArgs> HoverEnd;
+
+		public event Action<ExpansionWindow> VisibilityChanged;
 
 		readonly Window window;
 
@@ -34,7 +34,11 @@ namespace MHUrho.UserInterface
 
 		public CheckBox CreateCheckBox(string name = "")
 		{
-			return window.CreateCheckBox(name);
+			var newCheckBox = window.CreateCheckBox(name);
+			newCheckBox.Visible = false;
+			newCheckBox.HoverBegin += OnHoverBegin;
+			newCheckBox.HoverEnd += OnHoverEnd;
+			return newCheckBox;
 		}
 
 		public CheckBox GetChild(string name)
@@ -44,7 +48,21 @@ namespace MHUrho.UserInterface
 
 		public void RemoveCheckBox(CheckBox element)
 		{
+			element.HoverBegin -= OnHoverBegin;
+			element.HoverEnd -= OnHoverEnd;
 			window.RemoveChild(element);
+		}
+
+		public void Show()
+		{
+			window.Visible = true;
+			VisibilityChanged?.Invoke(this);
+		}
+
+		public void Hide()
+		{
+			window.Visible = false;
+			VisibilityChanged?.Invoke(this);
 		}
 
 		void OnHoverBegin(HoverBeginEventArgs e)

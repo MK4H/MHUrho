@@ -64,8 +64,11 @@ namespace MHUrho.UserInterface
 			
 
 			CustomWindow = (Window)gameUI.GetChild("CustomWindow");
+			CustomWindow.HoverBegin += UIHoverBegin;
+			CustomWindow.HoverEnd += UIHoverEnd;
 
 			expansionWindow = new ExpansionWindow((Window)gameUI.GetChild("ExpansionWindow"));
+			expansionWindow.Hide();
 			expansionWindow.HoverBegin += UIHoverBegin;
 			expansionWindow.HoverEnd += UIHoverEnd;
 
@@ -143,7 +146,6 @@ namespace MHUrho.UserInterface
 
 			CheckBox checkBox = toolSelection.CreateCheckBox();
 			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
-			checkBox.Visible = true;
 
 			checkBox.ImageRect = tool.IconRectangle;
 
@@ -190,14 +192,19 @@ namespace MHUrho.UserInterface
 		void UIHoverBegin(HoverBeginEventArgs e)
 		{
 			hovering++;
+			Urho.IO.Log.Write(LogLevel.Debug, $"Hovering: {hovering}");
 		}
 
 		void UIHoverEnd(HoverEndEventArgs e)
 		{
 			hovering--;
+			Urho.IO.Log.Write(LogLevel.Debug, $"Hovering: {hovering}");
 		}
 
 		void ClearDelegates() {
+			CustomWindow.HoverBegin -= UIHoverBegin;
+			CustomWindow.HoverEnd -= UIHoverEnd;
+
 			expansionWindow.HoverBegin -= UIHoverBegin;
 			expansionWindow.HoverEnd -= UIHoverEnd;
 
