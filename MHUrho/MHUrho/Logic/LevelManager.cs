@@ -108,7 +108,7 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
-		public static async Task<LevelManager> Load(MyGame game, StLevel storedLevel) {
+		public static async Task<LevelManager> Load(MyGame game, StLevel storedLevel, LoadingWatcher loadingProgress) {
 
 			Scene scene = null;
 			Octree octree = null;
@@ -119,7 +119,7 @@ namespace MHUrho.Logic
 			MyGame.InvokeOnMainSafe(StartLoadingInMain);
 
 
-			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, storedLevel.Map));
+			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, storedLevel.Map, loadingProgress));
 			loaders.Add(mapLoader);
 			level.Map = mapLoader.Map;
 
@@ -127,12 +127,14 @@ namespace MHUrho.Logic
 
 			MyGame.InvokeOnMainSafe(LoadEntities);
 
+			loadingProgress.FinishedLoading();
 			return level;
 
 			void StartLoadingInMain()
 			{
-				PackageManager.Instance.LoadPackage(storedLevel.PackageName);
+				PackageManager.Instance.LoadPackage(storedLevel.PackageName, loadingProgress);
 
+				loadingProgress.EnterPhase("Initializing level");
 				scene = new Scene(game.Context);
 				scene.UpdateEnabled = false;
 				octree = scene.CreateComponent<Octree>();
@@ -159,6 +161,7 @@ namespace MHUrho.Logic
 
 			void LoadEntities()
 			{
+				loadingProgress.EnterPhase("Loading units");
 				foreach (var unit in storedLevel.Units) {
 					var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, level.LevelNode.CreateChild("UnitNode"), unit);
 					level.RegisterEntity(unitLoader.Unit);
@@ -166,6 +169,7 @@ namespace MHUrho.Logic
 					loaders.Add(unitLoader);
 				}
 
+				loadingProgress.EnterPhase("Loading buildings");
 				foreach (var building in storedLevel.Buildings) {
 					var buildingLoader =
 						Building.Loader.StartLoading(level,
@@ -178,6 +182,7 @@ namespace MHUrho.Logic
 
 				}
 
+				loadingProgress.EnterPhase("Loading projectiles");
 				foreach (var projectile in storedLevel.Projectiles) {
 					var projectileLoader = Projectile.Loader.StartLoading(level,
 																		level.LevelNode.CreateChild("ProjectileNode"),
@@ -188,6 +193,7 @@ namespace MHUrho.Logic
 					loaders.Add(projectileLoader);
 				}
 
+				loadingProgress.EnterPhase("Loading players");
 				//TODO: Remove this
 				Player firstPlayer = null;
 
@@ -206,14 +212,18 @@ namespace MHUrho.Logic
 				level.Input = game.ControllerFactory.CreateGameController(level.Camera, level, octree, firstPlayer);
 				level.cameraController = game.ControllerFactory.CreateCameraController(level.Input, level.Camera);
 
+				loadingProgress.EnterPhase("Connecting references");
 				//Connect references
 				foreach (var loader in loaders) {
 					loader.ConnectReferences(level);
 				}
 
+				loadingProgress.EnterPhase("Finishing loading");
 				foreach (var loader in loaders) {
 					loader.FinishLoading();
 				}
+
+				loadingProgress.EnterPhase("Starting level");
 
 				CurrentLevel = level;
 				scene.UpdateEnabled = true;
@@ -221,9 +231,9 @@ namespace MHUrho.Logic
 			}
 		}
 
-		public static async Task<LevelManager> LoadFrom(MyGame game, Stream stream, bool leaveOpen = false) {
+		public static async Task<LevelManager> LoadFrom(MyGame game, Stream stream, LoadingWatcher loadingProgress, bool leaveOpen = false) {
 			var storedLevel = await Task.Run<StLevel>(() => StLevel.Parser.ParseFrom(stream));
-			LevelManager level = await Load(game, storedLevel);
+			LevelManager level = await Load(game, storedLevel, loadingProgress);
 
 			if (!leaveOpen) {
 				stream.Close();
@@ -238,13 +248,18 @@ namespace MHUrho.Logic
 		/// <param name="mapSize">Size of the map to create</param>
 		/// <param name="packages">packages to load</param>
 		/// <returns>Loaded default level</returns>
-		public static async Task<LevelManager> LoadDefaultLevel(MyGame game, IntVector2 mapSize, string gamePackageName)
+		public static async Task<LevelManager> LoadDefaultLevel(MyGame game, 
+																IntVector2 mapSize, 
+																string gamePackageName,
+																LoadingWatcher loadingProgress)
 		{
-			InitializeLevel(game, gamePackageName, out Scene scene);
+			loadingProgress.EnterPhase("Initializing level");
+			InitializeLevel(game, gamePackageName, out Scene scene, loadingProgress);
 
+			loadingProgress.EnterPhase("Loading map");
 			Node mapNode = CurrentLevel.LevelNode.CreateChild("MapNode");
 
-			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize));
+			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize, loadingProgress));
 			CurrentLevel.Map = map;
 
 
@@ -252,8 +267,11 @@ namespace MHUrho.Logic
 
 			MyGame.InvokeOnMainSafe(CreateCamera);
 
+			loadingProgress.EnterPhase("Starting level");
 			MyGame.InvokeOnMainSafe(StartLevel);
 
+			loadingProgress.IncrementProgress(100);
+			loadingProgress.FinishedLoading();
 			return CurrentLevel;
 
 			void CreateCamera()
@@ -683,10 +701,14 @@ namespace MHUrho.Logic
 			Update?.Invoke(timeStep);
 		}
 
-		static void InitializeLevel(MyGame game, string gamePackageName, out Scene scene)
+		static void InitializeLevel(MyGame game, 
+									string gamePackageName,
+									out Scene scene, 
+									LoadingWatcher loadingProgress)
 		{
-			PackageManager.Instance.LoadPackage(gamePackageName);
+			PackageManager.Instance.LoadPackage(gamePackageName, loadingProgress);
 
+			loadingProgress.EnterPhase("Initializing level");
 			scene = new Scene(game.Context);
 			scene.UpdateEnabled = false;
 			var octree = scene.CreateComponent<Octree>();

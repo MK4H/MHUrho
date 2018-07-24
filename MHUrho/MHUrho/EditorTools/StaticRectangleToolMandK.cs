@@ -42,6 +42,7 @@ namespace MHUrho.EditorTools
 
 			input.MouseMove += OnMouseMove;
 			camera.OnFixedMove += OnCameraMove;
+			ui.HoverBegin += OnUIHoverBegin;
 			enabled = true;
 			
 		}
@@ -55,6 +56,7 @@ namespace MHUrho.EditorTools
 
 			input.MouseMove -= OnMouseMove;
 			camera.OnFixedMove -= OnCameraMove;
+			ui.HoverBegin -= OnUIHoverBegin;
 			Map.DisableHighlight();
 			enabled = false;
 		}
@@ -90,6 +92,11 @@ namespace MHUrho.EditorTools
 				Map.HighlightRectangle(centerTile, Size, Color.Green);
 			}
 
+		}
+
+		void OnUIHoverBegin()
+		{
+			Map.DisableHighlight();
 		}
 	}
 }

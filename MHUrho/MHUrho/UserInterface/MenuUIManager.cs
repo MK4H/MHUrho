@@ -15,9 +15,10 @@ namespace MHUrho.UserInterface
     {
 		public IMenuController MenuController { get; private set; }
 
-		protected readonly MainMenu mainMenu;
-		protected readonly Options options;
-		protected readonly PauseMenu pauseMenu;
+		public MainMenu MainMenu { get; private set; }
+		public Options Options { get; private set; }
+		public PauseMenu PauseMenu { get; private set; }
+		public LoadingScreen LoadingScreen { get; private set; }
 
 		protected MenuScreen currentScreen;
 
@@ -26,36 +27,43 @@ namespace MHUrho.UserInterface
 		protected MenuUIManager(MyGame game, IMenuController menuController)
 			: base(game)
 		{
-			UI.Root.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MHUrhoStyle.xml"));
+			UI.Root.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml"));
 
 			this.MenuController = menuController;
 
-			mainMenu = new MainMenu(game, this);
-			options = new Options(game, this);
-			pauseMenu = new PauseMenu(game, this);
+			MainMenu = new MainMenu(game, this);
+			Options = new Options(game, this);
+			PauseMenu = new PauseMenu(game, this);
+			LoadingScreen = new LoadingScreen(game, this);
 
 			previousScreens = new Stack<MenuScreen>();
 
-			currentScreen = mainMenu;
+			currentScreen = MainMenu;
 
-			mainMenu.Show();
-			options.Hide();
-			pauseMenu.Hide();
+			MainMenu.Show();
+			Options.Hide();
+			PauseMenu.Hide();
+			LoadingScreen.Hide();
 		}
 
 		public void SwitchToMainMenu()
 		{
-			SwitchToScreen(mainMenu);
+			SwitchToScreen(MainMenu);
 		}
 
 		public void SwitchToPauseMenu()
 		{
-			SwitchToScreen(pauseMenu);
+			SwitchToScreen(PauseMenu);
 		}
 
 		public void SwitchToOptions()
 		{
-			SwitchToScreen(options);
+			SwitchToScreen(Options);
+		}
+
+		public void SwitchToLoadingScreen()
+		{
+			SwitchToScreen(LoadingScreen);
 		}
 
 		public void SwitchBack()

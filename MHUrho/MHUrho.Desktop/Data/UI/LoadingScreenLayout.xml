@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<element type="Window" style="LoadingScreenWindow">
+	<attribute name="Name" value="LoadingScreen" />
+	<attribute name="Size" value="1024 768" />
+	<attribute name="Pivot" value="0 0" />
+	<element type="BorderImage" style="ProgressBar">
+		<attribute name="Name" value="ProgressBar" />
+		<attribute name="Position" value="0 -20" />
+		<attribute name="Size" value="900 32" />
+		<attribute name="Min Size" value="900 32" />
+		<attribute name="Max Size" value="900 32" />
+		<attribute name="Min Anchor" value="0.5 1" />
+		<attribute name="Max Anchor" value="0.5 1" />
+		<attribute name="Min Offset" value="0 -20" />
+		<attribute name="Pivot" value="0.5 1" />
+		<attribute name="Layout Mode" value="Horizontal" />
+		<attribute name="Layout Border" value="2 2 2 2" />
+		<element type="BorderImage" style="ProgressBarKnob">
+			<attribute name="Name" value="ProgressBarKnob" />
+			<attribute name="Min Size" value="10 28" />
+			<attribute name="Max Size" value="10 2147483647" />
+			<attribute name="Pivot" value="0 0" />
+		</element>
+	</element>
+	<element type="Text">
+		<attribute name="Name" value="Text" />
+		<attribute name="Position" value="0 -60" />
+		<attribute name="Min Anchor" value="0.5 1" />
+		<attribute name="Max Anchor" value="0.5 1" />
+		<attribute name="Min Offset" value="0 -60" />
+		<attribute name="Pivot" value="0.5 1" />
+		<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Font Size" value="30" />
+		<attribute name="Text Alignment" value="Center" />
+	</element>
+</element>

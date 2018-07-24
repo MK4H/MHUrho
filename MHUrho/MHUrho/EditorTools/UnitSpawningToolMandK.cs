@@ -35,15 +35,20 @@ namespace MHUrho.EditorTools
 
 			foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
 
+				if (!unitType.IsManuallySpawnable) {
+					continue;
+				}
+
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnUnitTypeToggled;
 				checkBox.Texture = PackageManager.Instance.ActiveGame.UnitIconTexture;
 				checkBox.ImageRect = unitType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
-				checkBox.HoverOffset = new IntVector2(2 * unitType.IconRectangle.Width(), 0);
+				checkBox.CheckedOffset = new IntVector2(2 * unitType.IconRectangle.Width(), 0);
 
 				unitTypes.Add(checkBox, unitType);
+				checkBoxes.AddCheckBox(checkBox);
 			}
 		}
 

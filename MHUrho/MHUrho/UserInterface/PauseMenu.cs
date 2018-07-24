@@ -20,7 +20,7 @@ namespace MHUrho.UserInterface
 		public PauseMenu(MyGame game, MenuUIManager menuUIManager)
 			: base(game, menuUIManager)
 		{
-			this.game = game;
+			this.Game = game;
 
 			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/PauseMenuLayout.xml");
 

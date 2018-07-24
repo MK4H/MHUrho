@@ -12,6 +12,9 @@ namespace MHUrho.UserInterface
     {
 		public CursorTooltips CursorTooltips { get; protected set; }
 
+		public event Action HoverBegin;
+		public event Action HoverEnd;
+
 		protected Dictionary<UIElement, Tool> tools;
 		protected Dictionary<UIElement, IPlayer> players;
 
@@ -40,5 +43,15 @@ namespace MHUrho.UserInterface
 		public abstract void ShowUI();
 
 		public abstract void HideUI();
+
+		protected void OnHoverBegin()
+		{
+			HoverBegin?.Invoke();
+		}
+
+		protected void OnHoverEnd()
+		{
+			HoverEnd?.Invoke();
+		}
 	}
 }

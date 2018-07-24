@@ -27,6 +27,8 @@ namespace MHUrho.WorldMap
 			public Map Map { get; private set; }
 
 
+			LoadingWatcher loadingProgress;
+
 			/// <summary>
 			/// Loads map data from storedMap
 			/// 
@@ -38,10 +40,15 @@ namespace MHUrho.WorldMap
 			/// <param name="mapNode">Scene node of the map</param>
 			/// <param name="storedMap">Protocol Buffers class containing stored map</param>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
-			public static Loader StartLoading(LevelManager level, Node mapNode, StMap storedMap) {
-				var loader = new Loader();
+			public static Loader StartLoading(LevelManager level, Node mapNode, StMap storedMap, LoadingWatcher loadingProgress) {
+				var loader = new Loader(loadingProgress);
 				loader.Load(level, mapNode, storedMap);
 				return loader;
+			}
+
+			public Loader(LoadingWatcher loadingProgress)
+			{
+				this.loadingProgress = loadingProgress;
 			}
 
 			public void ConnectReferences(LevelManager level) {
@@ -58,7 +65,7 @@ namespace MHUrho.WorldMap
 					tile.FinishLoading();
 				}
 
-				Map.BuildGeometry();
+				Map.BuildGeometry(loadingProgress);
 			}
 
 			void Load(LevelManager level, Node mapNode, StMap storedMap) {
@@ -96,6 +103,8 @@ namespace MHUrho.WorldMap
 
 							Map.tiles[Map.GetTileIndex(x, y)] = newTile;
 						}
+
+						loadingProgress.IncrementProgress(25.0f / Map.LengthWithBorders);
 					}
 				}
 				catch (IndexOutOfRangeException e) {
@@ -358,7 +367,7 @@ namespace MHUrho.WorldMap
 		/// <param name="mapNode">Node to connect the map to</param>
 		/// <param name="size">Size of the playing field, excluding the borders</param>
 		/// <returns>Fully created map</returns>
-		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, IntVector2 size) 
+		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, IntVector2 size, LoadingWatcher loadingProgress) 
 		{
 			Map newMap = new Map(mapNode, size.X, size.Y);
 			newMap.levelManager = level;
@@ -378,10 +387,17 @@ namespace MHUrho.WorldMap
 				else {
 					newMap.tiles[i] = new Tile(tilePosition.X, tilePosition.Y, defaultTileType, newMap);
 				}
+
+				if (i % newMap.LengthWithBorders == 0) {
+					loadingProgress.IncrementProgress(25.0f / newMap.LengthWithBorders);
+				}
 			}
 
+			loadingProgress.EnterPhase("Creating pathfinding graph");
 			newMap.PathFinding = new AStar(newMap);
-			newMap.BuildGeometry();
+			loadingProgress.IncrementProgress(5);
+
+			newMap.BuildGeometry(loadingProgress);
 			return newMap;
 		}
 
@@ -1452,10 +1468,11 @@ namespace MHUrho.WorldMap
 			node.Dispose();
 		}
 
-		void BuildGeometry() 
+		void BuildGeometry(LoadingWatcher loadingProgress)
 		{
 			graphics = MapGraphics.Build(this, 
-										 new IntVector2(50, 50));
+										 new IntVector2(50, 50),
+										 loadingProgress);
 		}
 
 		int GetTileIndex(int x, int y) 

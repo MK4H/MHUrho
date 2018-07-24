@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MHUrho.Control;
+using MHUrho.Helpers;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -255,13 +256,14 @@ namespace MHUrho.EditorTools
 
 
 		Button CreateButton(UnitType unitType) {
-			var unitIcon = unitType.IconRectangle;
-
 			var button = ui.SelectionBar.CreateButton();
 			button.SetStyle("SelectedUnitButton");
-			button.Visible = true;
+			button.Texture = PackageManager.Instance.ActiveGame.UnitIconTexture;
+			button.ImageRect = unitType.IconRectangle;
+			button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
 
-			Text text = (Text)button.GetChild("Count");
+			Text text = button.CreateText("Count");
+			text.SetStyle("SelectedUnitText");
 			text.Value = "1";
 
 			return button;

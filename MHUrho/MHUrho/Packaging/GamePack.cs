@@ -344,15 +344,27 @@ namespace MHUrho.Packaging {
 			}
 		}
 
-		public void Load(XmlSchemaSet schemas) {
+		public void Load(XmlSchemaSet schemas, 
+						LoadingWatcher loadingProgress) {
 			try {
 				StartLoading(schemas);
 
+				loadingProgress.EnterPhaseWithIncrement("Loading tile types", 5);
 				LoadAllTileTypes();
+
+				loadingProgress.EnterPhaseWithIncrement("Loading unit types" , 5);
 				LoadAllUnitTypes();
+
+				loadingProgress.EnterPhaseWithIncrement("Loading building types", 5);
 				LoadAllBuildingTypes();
+
+				loadingProgress.EnterPhaseWithIncrement("Loading projectile types", 5);
 				LoadAllProjectileTypes();
+
+				loadingProgress.EnterPhaseWithIncrement("Loading resource types", 5);
 				LoadAllResourceTypes();
+
+				loadingProgress.EnterPhaseWithIncrement("Loading player types", 5);
 				LoadAllPlayerTypes();
 			}
 			catch (Exception e) {
@@ -363,6 +375,10 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<TileType> LoadAllTileTypes() {
 			CheckIfLoading();
+
+			TileIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"tileIconTexturePath")));
 
 			var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
 
@@ -384,6 +400,10 @@ namespace MHUrho.Packaging {
 		public IEnumerable<UnitType> LoadAllUnitTypes() {
 			CheckIfLoading();
 
+			UnitIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"unitIconTexturePath")));
+
 			var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
 
 			if (unitTypesElement == null) {
@@ -399,6 +419,10 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<BuildingType> LoadAllBuildingTypes() {
 			CheckIfLoading();
+
+			BuildingIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"buildingIconTexturePath")));
 
 			var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
 
@@ -436,6 +460,10 @@ namespace MHUrho.Packaging {
 		public IEnumerable<ResourceType> LoadAllResourceTypes() {
 			CheckIfLoading();
 
+			ResourceIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"resourceIconTexturePath")));
+
 			var resourceTypesElement = data.Root.Element(PackageManager.XMLNamespace + "resourceTypes");
 
 			if (resourceTypesElement == null) {
@@ -453,6 +481,10 @@ namespace MHUrho.Packaging {
 		public IEnumerable<PlayerType> LoadAllPlayerTypes()
 		{
 			CheckIfLoading();
+
+			PlayerIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"playerIconTexturePath")));
 
 			XElement playerTypes = data.Root.Element(PackageManager.XMLNamespace + "playerAITypes");
 

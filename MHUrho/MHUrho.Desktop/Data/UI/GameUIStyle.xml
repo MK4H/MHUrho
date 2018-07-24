@@ -62,5 +62,13 @@
 		<attribute name="Image Rect" value="0 0 50 50"/>
 		<attribute name="Checked Image Offset" value="100 0" />
 		<attribute name="Hover Image Offset" value="50 0" />
+		<attribute name="Focus Mode" value="NotFocusable" />
+	</element>
+	<element type="VertexHeightToolSelectingBox" style="SelectionBarCheckBox">
+		
+	</element>
+	<element type="VertexHeightToolMovingBox" style="SelectionBarCheckBox">
+	</element>
+	<element type="TileHeightToolTileHeightBox" style="SelectionBarCheckBox">
 	</element>
 </elements>

@@ -25,6 +25,7 @@ namespace MHUrho.Helpers
 		public static readonly XName IconRectangleElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
 		public static readonly XName AssemblyPathElementName = PackageManager.XMLNamespace + "assemblyPath";
 		public static readonly XName ExtensionElementName = PackageManager.XMLNamespace + "extension";
+		public static readonly XName ManuallySpawnableElementName = PackageManager.XMLNamespace + "manuallySpawnable";
 
 		/// <summary>
 		/// Gets ful path from <paramref name="pathToPackageXmlDir"/> and path contained in the child of <paramref name="xmlElement"/> of name <paramref name="childElementName"/>
@@ -103,6 +104,11 @@ namespace MHUrho.Helpers
 
 		public static XElement GetExtensionElement(XElement typeXmlElement) {
 			return typeXmlElement.Element(ExtensionElementName);
+		}
+
+		public static bool GetManuallySpawnable(XElement typeXmlElement)
+		{
+			return GetBool(typeXmlElement.Element(ManuallySpawnableElementName));
 		}
 
 		public static T LoadTypePlugin<T>(XElement typeXml, string pathToPackageXmlDir, string typeName) where T: TypePlugin {
@@ -203,6 +209,11 @@ namespace MHUrho.Helpers
 			int A = element.Attribute("A") != null ? element.GetIntFromAttribute("A") : 255;
 			//xml schema makes sure it will be of type byte
 			return Color.FromByteFormat((byte)R, (byte)G, (byte)B, (byte)A);
+		}
+
+		public static bool GetBool(XElement element)
+		{
+			return bool.Parse(element.Value);
 		}
 	}
 }

@@ -26,7 +26,6 @@ namespace MHUrho.EditorTools
 				else {
 					Hide();
 				}
-				pvisible = value;
 			}
 		}
 
@@ -67,6 +66,7 @@ namespace MHUrho.EditorTools
 			foreach (var checkBox in checkBoxes) {
 				checkBox.Visible = true;
 			}
+			pvisible = true;
 		}
 
 		public void Hide()
@@ -76,6 +76,7 @@ namespace MHUrho.EditorTools
 			foreach (var checkBox in checkBoxes) {
 				checkBox.Visible = false;
 			}
+			pvisible = false;
 		}
 
 		void OnToggled(ToggledEventArgs e)

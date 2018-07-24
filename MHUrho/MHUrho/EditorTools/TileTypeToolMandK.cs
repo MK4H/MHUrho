@@ -41,13 +41,17 @@ namespace MHUrho.EditorTools
 
 			foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
 
+				if (!tileType.IsManuallySpawnable) {
+					continue;
+				}
+
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnTileTypeToggled;
 				checkBox.Texture = PackageManager.Instance.ActiveGame.TileIconTexture;
 				checkBox.ImageRect = tileType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(tileType.IconRectangle.Width(), 0);
-				checkBox.HoverOffset = new IntVector2(2 * tileType.IconRectangle.Width(), 0);
+				checkBox.CheckedOffset = new IntVector2(2 * tileType.IconRectangle.Width(), 0);
 
 				tileTypes.Add(checkBox, tileType);
 				checkBoxes.AddCheckBox(checkBox);

@@ -35,7 +35,8 @@ namespace MHUrho.Logic
 
 		public BuildingTypePlugin Plugin { get; private set; }
 
-
+		public bool IsManuallySpawnable { get; private set; }
+		
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
 		/// It is done this way to allow cyclic references during the Load method, so anything 
@@ -51,6 +52,7 @@ namespace MHUrho.Logic
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
+			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
 			Plugin = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,

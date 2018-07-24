@@ -75,7 +75,7 @@ namespace MHUrho.Input
 			switch (obj.Element.Name) {
 				case "StartButton":
 					LevelManager.CurrentLevel?.End();
-					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), "testRP2");
+					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), "testRP2", LoadingWatcher.Ignoring);
 					break;
 				case "SaveButton":
 					//TODO: Move this elsewhere
@@ -91,7 +91,7 @@ namespace MHUrho.Input
 					using (Stream saveFile = MyGame.Files.OpenDynamicFile("savedGame.save",
 																		   System.IO.FileMode.Open,
 																		   FileAccess.Read)) {
-						LevelManager.Load(Game, StLevel.Parser.ParseFrom(saveFile));
+						LevelManager.Load(Game, StLevel.Parser.ParseFrom(saveFile), LoadingWatcher.Ignoring);
 					}
 
 					break;

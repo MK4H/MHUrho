@@ -18,7 +18,7 @@ namespace MHUrho.UserInterface
 		public Options(MyGame game, MenuUIManager menuUIManager)
 			: base(game, menuUIManager)
 		{
-			this.game = game;
+			this.Game = game;
 
 			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/OptionsLayout.xml");
 
@@ -36,16 +36,16 @@ namespace MHUrho.UserInterface
 			FillWindowTypes();
 
 			InitializeSlider("UnitDrawDistanceSlider",
-							(args) => { game.Config.UnitDrawDistance = args.Value; },
-							game.Config.UnitDrawDistance);
+							(args) => { Game.Config.UnitDrawDistance = args.Value; },
+							Game.Config.UnitDrawDistance);
 
 			InitializeSlider("ProjectileDrawDistanceSlider",
-							(args) => { game.Config.ProjectileDrawDistance = args.Value; },
-							game.Config.ProjectileDrawDistance);
+							(args) => { Game.Config.ProjectileDrawDistance = args.Value; },
+							Game.Config.ProjectileDrawDistance);
 
 			InitializeSlider("TerrainDrawDistanceSlider",
-							(args) => { game.Config.TerrainDrawDistance = args.Value; },
-							game.Config.TerrainDrawDistance);
+							(args) => { Game.Config.TerrainDrawDistance = args.Value; },
+							Game.Config.TerrainDrawDistance);
 
 
 
@@ -60,52 +60,52 @@ namespace MHUrho.UserInterface
 
 			InitializeDropDownList("Resolution",
 									(args) => {
-										game.Config.Resolution = resolutions[args.Selection];
+										Game.Config.Resolution = resolutions[args.Selection];
 									},
-									(uint)resolutions.IndexOf(game.Config.Resolution));
+									(uint)resolutions.IndexOf(Game.Config.Resolution));
 
 			InitializeDropDownList("WindowType",
 									(args) => {
 										switch (args.Selection) {
 											case 0: // Windowed
-												game.Config.Borderless = false;
-												game.Config.Fullscreen = false;
+												Game.Config.Borderless = false;
+												Game.Config.Fullscreen = false;
 
 												break;
 											case 1: // Borderless windowed
-												game.Config.Borderless = true;
-												game.Config.Fullscreen = false;
+												Game.Config.Borderless = true;
+												Game.Config.Fullscreen = false;
 												break;
 											case 2: // Fullscreen
-												game.Config.Borderless = false;
-												game.Config.Fullscreen = true;
+												Game.Config.Borderless = false;
+												Game.Config.Fullscreen = true;
 												break;
 											default:
 												throw new ArgumentOutOfRangeException(nameof(args.Selection), "Invalid selection");
 
 										}
 									},
-									(uint)(game.Config.Fullscreen ? 2 : (game.Config.Borderless ? 1 : 0))
+									(uint)(Game.Config.Fullscreen ? 2 : (Game.Config.Borderless ? 1 : 0))
 								 );
 
 			InitializeCheckbox("HighDPI",
-								(args) => { game.Config.HighDPI = args.State; },
-								game.Config.HighDPI);
+								(args) => { Game.Config.HighDPI = args.State; },
+								Game.Config.HighDPI);
 
 			InitializeCheckbox("TripleBuffer",
-								(args) => { game.Config.TripleBuffer = args.State; },
-								game.Config.TripleBuffer);
+								(args) => { Game.Config.TripleBuffer = args.State; },
+								Game.Config.TripleBuffer);
 
 			InitializeCheckbox("VSync",
-								(args) => { game.Config.VSync = args.State; },
-								game.Config.VSync);
+								(args) => { Game.Config.VSync = args.State; },
+								Game.Config.VSync);
 
 			InitializeCheckbox("DebugHUD",
-								(args) => { game.Config.DebugHUD = args.State; },
-								game.Config.DebugHUD);
+								(args) => { Game.Config.DebugHUD = args.State; },
+								Game.Config.DebugHUD);
 
 			//TODO: Let player confirm and save to file
-			((Button)window.GetChild("Save", true)).Released += (args) => { game.Config.SetGraphicsMode(game.Graphics); };
+			((Button)window.GetChild("Save", true)).Released += (args) => { Game.Config.SetGraphicsMode(Game.Graphics); };
 			((Button)window.GetChild("Exit", true)).Released += (args) => { MenuUIManager.SwitchBack(); };
 		}
 

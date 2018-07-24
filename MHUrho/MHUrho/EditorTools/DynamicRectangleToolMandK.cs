@@ -52,7 +52,7 @@ namespace MHUrho.EditorTools
 			input.MouseUp += MouseUp;
 			input.MouseMove += MouseMove;
 			camera.OnFixedMove += CameraMove;
-			
+
 			enabled = true;
 		}
 
@@ -90,14 +90,12 @@ namespace MHUrho.EditorTools
 		}
 
 		void MouseUp(MouseButtonUpEventArgs e) {
-			if (ui.UIHovering) return;
-
-			var tile = input.GetTileUnderCursor();
 
 			if (!validMouseDown) {
 				return;
 			}
-			
+
+			var tile = input.GetTileUnderCursor();
 
 			if (!rectangle && tile != null) {
 				SingleClickHandler?.Invoke(e);
@@ -139,7 +137,7 @@ namespace MHUrho.EditorTools
 
 		void MouseAndCameraMove()
 		{
-			if (!validMouseDown || ui.UIHovering) return;
+			if (!validMouseDown) return;
 
 			var tile = input.GetTileUnderCursor();
 
@@ -149,7 +147,7 @@ namespace MHUrho.EditorTools
 			}
 
 
-			if (validMouseDown && tile.MapLocation != mouseDownPos) {
+			if (tile.MapLocation != mouseDownPos) {
 				var endTilePos = tile.MapLocation;
 				var topLeft = new IntVector2(Math.Min(mouseDownPos.X, endTilePos.X),
 											Math.Min(mouseDownPos.Y, endTilePos.Y));
@@ -161,5 +159,7 @@ namespace MHUrho.EditorTools
 				rectangle = true;
 			}
 		}
+
+
 	}
 }

@@ -70,8 +70,10 @@ namespace MHUrho.Packaging
 			}
 		}
 
-		public void LoadPackage(string packageName) {
-
+		public void LoadPackage(string packageName, 
+								LoadingWatcher loadingProgress)
+		{
+			loadingProgress.EnterPhaseWithIncrement("Clearing previous games", 5);
 			if (ActiveGame != null) {
 				UnloadPackage(ActiveGame);
 				ActiveGame = null;
@@ -81,7 +83,7 @@ namespace MHUrho.Packaging
 
 			resourceCache.AddResourceDir(ActiveGame.XmlDirectoryPath,1);
 
-			ActiveGame.Load(schemas);
+			ActiveGame.Load(schemas, loadingProgress);
 		}
 
 		public GamePack GetGamePack(string name) {

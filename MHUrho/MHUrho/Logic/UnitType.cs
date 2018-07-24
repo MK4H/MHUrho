@@ -33,6 +33,8 @@ namespace MHUrho.Logic
 
 		public UnitTypePlugin Plugin { get; private set; }
 
+		public bool IsManuallySpawnable { get; private set; }
+
 		//TODO: More loaded properties
 
 		/// <summary>
@@ -72,7 +74,8 @@ namespace MHUrho.Logic
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
-			
+			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
+
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 									 package.PackageManager);
 		}

@@ -36,6 +36,10 @@ namespace MHUrho.EditorTools
 
 			foreach (var buildingType in PackageManager.Instance.ActiveGame.BuildingTypes) {
 
+				if (!buildingType.IsManuallySpawnable) {
+					continue;
+				}
+
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				//TODO: Style
 				checkBox.SetStyle("SelectionBarCheckBox");
@@ -43,7 +47,7 @@ namespace MHUrho.EditorTools
 				checkBox.Texture = PackageManager.Instance.ActiveGame.BuildingIconTexture;
 				checkBox.ImageRect = buildingType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(buildingType.IconRectangle.Width(), 0);
-				checkBox.HoverOffset = new IntVector2(2 * buildingType.IconRectangle.Width(), 0);
+				checkBox.CheckedOffset = new IntVector2(2 * buildingType.IconRectangle.Width(), 0);
 
 				buildingTypes.Add(checkBox, buildingType);
 				checkBoxes.AddCheckBox(checkBox);
@@ -58,6 +62,7 @@ namespace MHUrho.EditorTools
 			input.MouseDown += OnMouseDown;
 			input.MouseMove += OnMouseMove;
 			Level.Update += OnUpdate;
+			ui.HoverBegin += UIHoverBegin;
 			enabled = true;
 		}
 
@@ -68,10 +73,10 @@ namespace MHUrho.EditorTools
 			checkBoxes.Hide();
 
 			input.UIManager.CursorTooltips.Clear();
-			//input.UIManager.SelectionBarClearButtons();
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMove;
 			Level.Update -= OnUpdate;
+			ui.HoverBegin -= UIHoverBegin;
 
 			Map.DisableHighlight();
 			enabled = false;
@@ -129,6 +134,8 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnUpdate(float timeStep) {
+			if (ui.UIHovering) return;
+
 			HighlightBuildingRectangle();
 		}
 
@@ -150,6 +157,11 @@ namespace MHUrho.EditorTools
 
 			Color color = buildingType.CanBuildIn(topLeft, bottomRight, Level) ? Color.Green : Color.Red;
 			Map.HighlightRectangle(topLeft, bottomRight, color);
+		}
+
+		void UIHoverBegin()
+		{
+			Map.DisableHighlight();
 		}
 	}
 }

@@ -103,6 +103,7 @@
 	    <xs:element name="iconTextureRectangle" type="IntRect"/>
       <xs:element name="texturePath" type="xs:string"/>
 			<xs:element name="minimapColor" type="Color"/>
+	    <xs:element name="manuallySpawnable" type="xs:boolean"/>
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
     <xs:attribute name="ID" use="required" type="xs:int"/>
@@ -112,7 +113,7 @@
 	  <xs:complexContent>
 		  <xs:extension base="entityWithIconType">
 			  <xs:sequence>
-					<xs:element name="manuallySpawnable" type="xs:boolean"/>
+					
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -168,6 +169,7 @@
 			<xs:extension base="entityType">
 				<xs:sequence>
 					<xs:element name="iconTextureRectangle" type="IntRect"/>
+					<xs:element name="manuallySpawnable" type="xs:boolean"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>

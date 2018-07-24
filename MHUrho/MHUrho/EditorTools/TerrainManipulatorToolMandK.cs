@@ -96,8 +96,8 @@ namespace MHUrho.EditorTools {
 
 		public override void DeselectManipulator()
 		{
-			manipulator?.OnDisabled();
-			manipulator = null;
+			//Calls this.OnToggled which does the actual deselecting
+			checkBoxes.Deselect();
 		}
 
 		public override void Dispose() {
@@ -139,6 +139,7 @@ namespace MHUrho.EditorTools {
 		{
 			if (oldCheckBox != null) {
 				manipulators[oldCheckBox].OnDisabled();
+				manipulator = null;
 			}
 
 			if (newCheckBox != null) {

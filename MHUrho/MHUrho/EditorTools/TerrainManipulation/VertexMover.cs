@@ -34,6 +34,11 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			input.HideCursor();
 		}
 
+		public override void OnDisabled()
+		{
+			input.ShowCursor();
+		}
+
 		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
 		{
 			map.ChangeHeight(selector.SelectedVerticies, -e.DY * Sensitivity);
@@ -41,6 +46,7 @@ namespace MHUrho.EditorTools.TerrainManipulation
 
 		public override void OnMouseDown(MouseButtonDownEventArgs e)
 		{
+			//Calls OnDisabled, which shows cursor
 			tool.DeselectManipulator();
 		}
 	}

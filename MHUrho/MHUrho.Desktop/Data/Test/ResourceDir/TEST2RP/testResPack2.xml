@@ -9,14 +9,16 @@
 	</playerAITypes>
   <tileTypes>
     <defaultTileType name="Default" ID="1">
-	    <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
+	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
       <texturePath>xamarin.png</texturePath>
 			<minimapColor R="102" G="194" B="255"/>
+	    <manuallySpawnable>true</manuallySpawnable>
     </defaultTileType>
     <tileType name="Sand" ID="2">
-	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
+	    <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
       <texturePath>sand.jpg</texturePath>
 	    <minimapColor R="255" G="210" B="77"/>
+	    <manuallySpawnable>true</manuallySpawnable>
     </tileType>
   </tileTypes>
   <unitTypes>
@@ -103,12 +105,13 @@
         <tileType>Sand</tileType>
       </extension>
 	    <iconTextureRectangle left="0" top="300" right="100" bottom="400"/>
+	    <manuallySpawnable>true</manuallySpawnable>
 	    <size x="3" y="3"/>
     </buildingType>
   </buildingTypes>
-	<resourceIconTexturePath>Textures/resourceIcons.png</resourceIconTexturePath>
+	<resourceIconTexturePath>Textures/tileIcons.png</resourceIconTexturePath>
 	<tileIconTexturePath>Textures/tileIcons.png</tileIconTexturePath>
 	<unitIconTexturePath>Textures/entityIcons.png</unitIconTexturePath>
 	<buildingIconTexturePath>Textures/entityIcons.png</buildingIconTexturePath>
-	<playerIconTexturePath>Textures/playerIcons.png</playerIconTexturePath>
+	<playerIconTexturePath>Textures/tileIcons.png</playerIconTexturePath>
 </gamePack>

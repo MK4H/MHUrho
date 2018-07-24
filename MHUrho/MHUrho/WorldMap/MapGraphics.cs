@@ -771,7 +771,8 @@ namespace MHUrho.WorldMap
 			/// of <paramref name="map"/> has to be divisible by <paramref name="chunkSize"/></param>
 			/// <returns></returns>
 			public static MapGraphics Build(Map map,
-											IntVector2 chunkSize)
+											IntVector2 chunkSize,
+											LoadingWatcher loadingProgress)
 			{
 				IntVector2 mapSize = new IntVector2(map.Width, map.Length);
 
@@ -781,8 +782,13 @@ namespace MHUrho.WorldMap
 				}
 
 				MapGraphics graphics = new MapGraphics(map, chunkSize, mapSize);
+
+				loadingProgress.EnterPhase("Creating terrain texture");
 				graphics.CreateMaterial();
-				graphics.CreateModel();
+				loadingProgress.IncrementProgress(5);
+
+				loadingProgress.EnterPhase("Creating map geometry");
+				graphics.CreateModel(loadingProgress);
 
 				return graphics;
 			}
@@ -1040,13 +1046,15 @@ namespace MHUrho.WorldMap
 				material = PackageManager.Instance.GetMaterialFromImage(mapImage);
 			}
 
-			void CreateModel()
+			void CreateModel(LoadingWatcher loadingProgress)
 			{
 				for (int y = 0; y < numberOfChunks.Y; y++) {
 					for (int x = 0; x < numberOfChunks.X; x++) {
 						IntVector2 chunkTopLeftCorner = new IntVector2(x * chunkSize.X + map.Left, y * chunkSize.Y + map.Top);
 						chunks.Add(new MapChunk(map, this, chunkTopLeftCorner));
 					}
+
+					loadingProgress.IncrementProgress(25.0f / numberOfChunks.Y);
 				}
 			}
 

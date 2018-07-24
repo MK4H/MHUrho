@@ -10,14 +10,14 @@ namespace MHUrho.UserInterface
 		public abstract bool Visible { get; set; }
 
 		protected MenuUIManager MenuUIManager;
-		protected MyGame game;
+		protected MyGame Game;
 
-		protected UI UI => game.UI;
+		protected UI UI => Game.UI;
 
 		protected MenuScreen(MyGame game, MenuUIManager menuUIManager)
 		{
 			this.MenuUIManager = menuUIManager;
-			this.game = game;
+			this.Game = game;
 		}
 
 		public abstract void Show();

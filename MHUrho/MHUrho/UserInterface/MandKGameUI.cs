@@ -191,14 +191,18 @@ namespace MHUrho.UserInterface
 
 		void UIHoverBegin(HoverBeginEventArgs e)
 		{
+			if (hovering == 0) {
+				OnHoverBegin();
+			}
 			hovering++;
-			Urho.IO.Log.Write(LogLevel.Debug, $"Hovering: {hovering}");
 		}
 
 		void UIHoverEnd(HoverEndEventArgs e)
 		{
 			hovering--;
-			Urho.IO.Log.Write(LogLevel.Debug, $"Hovering: {hovering}");
+			if (hovering == 0) {
+				OnHoverEnd();
+			}
 		}
 
 		void ClearDelegates() {

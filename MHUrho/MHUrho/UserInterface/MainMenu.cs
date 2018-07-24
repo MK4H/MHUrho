@@ -20,7 +20,6 @@ namespace MHUrho.UserInterface
 		public MainMenu(MyGame game, MenuUIManager menuUIManager)
 			: base(game, menuUIManager)
 		{
-			this.game = game;
 			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/FirstTryMenu.xml");
 			window = (Window)UI.Root.GetChild("MainMenu");
 
@@ -39,7 +38,8 @@ namespace MHUrho.UserInterface
 					window.Visible = false;
 					LevelManager.CurrentLevel?.End();
 					//DO NOT WAIT, let the ui thread respond to user
-					LevelManager.LoadDefaultLevel(game, new IntVector2(400, 400), "testRP2");
+					LevelManager.LoadDefaultLevel(Game, new IntVector2(400, 400), "testRP2", MenuUIManager.LoadingScreen.GetLoadingWatcher());
+					MenuUIManager.SwitchToLoadingScreen();
 					break;
 				case "OptionsButton":
 					MenuUIManager.SwitchToOptions();
@@ -49,7 +49,7 @@ namespace MHUrho.UserInterface
 					break;
 				case "ExitButton":
 					//DO NOT WAIT, THIS IS CORRECT
-					game.Exit();
+					Game.Exit();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(obj.Element), "Unknown button on the MainMenu screen");
