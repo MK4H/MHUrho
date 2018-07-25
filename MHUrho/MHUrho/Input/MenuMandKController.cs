@@ -49,6 +49,11 @@ namespace MHUrho.Input
 			pausedLevelController = null;
 		}
 
+		public void SavePausedLevel(Stream toStream)
+		{
+			pausedLevelController.Level.SaveTo(toStream);
+		}
+
 		protected override void KeyUp(KeyUpEventArgs e) {
 
 		}

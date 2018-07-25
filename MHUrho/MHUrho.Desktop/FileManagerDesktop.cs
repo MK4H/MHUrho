@@ -17,10 +17,16 @@ namespace MHUrho.Desktop {
 				"config.xml",
 				Directory.GetCurrentDirectory(),
 				Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
-				Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"));
+				Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"),
+				"SavedGames");
 
 			if (!Directory.Exists(fileManager.DynamicDirPath)) {
 				Directory.CreateDirectory(fileManager.DynamicDirPath);
+			}
+
+			if (!Directory.Exists(fileManager.SaveGameDirAbsolutePath))
+			{
+				Directory.CreateDirectory(fileManager.SaveGameDirAbsolutePath);
 			}
 
 			File.Create(fileManager.LogPath).Dispose();
@@ -32,8 +38,9 @@ namespace MHUrho.Desktop {
 									string configFilePath, 
 									string staticDirPath,
 									string dynamicDirPath,
-									string logFilePath)
-			: base(packagePaths, configFilePath, staticDirPath, dynamicDirPath, logFilePath) {
+									string logFilePath,
+									string saveDirPath)
+			: base(packagePaths, configFilePath, staticDirPath, dynamicDirPath, logFilePath, saveDirPath) {
 
 		}
 
@@ -84,5 +91,14 @@ namespace MHUrho.Desktop {
 			return File.Exists(path);
 		}
 
+		public override IEnumerable<string> GetFilesInDirectory(string dirPath)
+		{
+			return Directory.EnumerateFiles(dirPath);
+		}
+
+		public override void DeleteDynamicFile(string relativePath)
+		{
+			File.Delete(Path.Combine(DynamicDirPath, relativePath));
+		}
 	}
 }

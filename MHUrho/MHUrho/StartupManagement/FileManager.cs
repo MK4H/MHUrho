@@ -17,6 +17,14 @@ namespace MHUrho
 
 		public string ConfigFilePath { get; protected set; }
 
+		/// <summary>
+		/// Path to the directory containing saved games
+		/// Relative to <see cref="DynamicDirPath"/>
+		/// </summary>
+		public string SaveGameDirPath { get; protected set; }
+
+		public string SaveGameDirAbsolutePath => Path.Combine(DynamicDirPath, SaveGameDirPath);
+
 		public static string CorrectRelativePath(string relativePath) {
 			if (relativePath == null) {
 				return null;
@@ -60,18 +68,24 @@ namespace MHUrho
 
 		public abstract bool FileExists(string path);
 
+		public abstract IEnumerable<string> GetFilesInDirectory(string dirPath);
+
+		public abstract void DeleteDynamicFile(string relativePath);
+
 		protected FileManager(
 			List<string> packagePaths,
 			string configFilePath,
 			string staticDirPath,
 			string dynamicDirPath,
-			string logPath) {
+			string logPath,
+			string saveDirPath) {
 
 			this.PackagePaths = packagePaths;
 			this.ConfigFilePath = configFilePath;
 			this.StaticDirPath = staticDirPath;
 			this.DynamicDirPath = dynamicDirPath;
 			this.LogPath = logPath;
+			this.SaveGameDirPath = saveDirPath;
 		}
 
 	}

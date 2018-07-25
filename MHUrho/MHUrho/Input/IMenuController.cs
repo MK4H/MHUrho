@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
@@ -22,5 +23,7 @@ namespace MHUrho.Input
 		void ResumePausedLevel();
 
 		void EndPausedLevel();
+
+		void SavePausedLevel(Stream toStream);
 	}
 }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using MHUrho.Input;
 using MHUrho.Packaging;
+using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 using Urho;
@@ -36,6 +38,10 @@ namespace MHUrho.Logic {
 		IGameController Input { get; }
 
 		CameraMover Camera { get; }
+
+		StLevel Save();
+
+		void SaveTo(Stream stream, bool leaveOpen = false);
 
 		IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
 

@@ -32,9 +32,7 @@ namespace MHUrho.UserInterface
 																MenuUIManager.MenuController.ResumePausedLevel();
 															};
 
-			((Button)window.GetChild("Save")).Released += (args) => { //TODO: Save screen
-
-														};
+			((Button)window.GetChild("Save")).Released += (args) => { MenuUIManager.SwitchToSaveGame(); };
 
 			((Button)window.GetChild("Load")).Released += (args) => { //TODO: Load screen
 

@@ -108,6 +108,9 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\UI\SaveLayout.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="shield_grey.ico" />
     <None Include="App.config" />
     <Content Include="..\..\DefaultPackage\bin\Debug\netstandard2.0\DefaultPackage.dll">

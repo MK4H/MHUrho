@@ -13,6 +13,11 @@
 		<attribute name="Image Rect" value="0 0 1920 1080" />
 		<attribute name="Border" value="4 4 4 4" />
 	</element>
+	<element type="SaveScreenWindow" style="Window" auto="false">
+		<attribute name="Texture" value="Texture2D;Textures/TempBackground.png"/>
+		<attribute name="Image Rect" value="0 0 1920 1080" />
+		<attribute name="Border" value="4 4 4 4" />
+	</element>
 	<element type="MainMenuButton" style="BorderImage">
 		<attribute name="Border" value="4 4 4 4" />
 		<attribute name="Pressed Image Offset" value="16 0" />
@@ -36,10 +41,49 @@
 		<attribute name="Font Size" value="35" />
 		<attribute name="Color" value="0.85 0.85 0.85" />
 	</element>
+	<element type="BackButton" style="Button" auto="false">
+		<attribute name="Image Rect" value="0 176 16 192" />
+	</element>
+	<element type="DisabledButton" style="Button" auto="false">
+		<attribute name="Image Rect" value="0 208 16 224" />
+	</element>
+	<element type="FilePickLineEdit" style="BorderImage" auto="false">
+		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Image Rect" value="80 0 96 16" />
+		<attribute name="Hover Image Offset" value="16 0" />
+		<!-- Background color of the hover image IS the hover color of LineEdit -->
+		<element type="Text" internal="true">
+			<attribute name="Color" value="0.9 1 0.9 1" />
+			<attribute name="Selection Color" value="0.3 0.4 0.7 1" />
+			<attribute name="Vert Alignment" value="Center" />
+		</element>
+		<element type="BorderImage" internal="true">
+			<attribute name="Size" value="4 16" />
+			<attribute name="Priority" value="1" />
+			<attribute name="Image Rect" value="48 0 52 16" />
+			<attribute name="Vert Alignment" value="Center" />
+		</element>
+	</element>
+	<element type="FileListView" style="ScrollView" auto="false">
+		<element type="BorderImage" internal="true">
+			<element internal="true">
+				<attribute name="Layout Mode" value="Vertical" />
+			</element>
+		</element>
+	</element>
+	<element type="SaveButton" style="Button" auto="false">
+
+	</element>
+	<element type="DeleteButton" style="Button" auto="false">
+		<attribute name="Image Rect" value="0 192 16 208" />
+	</element>
 	<element type="Text">
 		<attribute name="Font" value="Font;Fonts/Anonymous Pro.ttf" />
 		<attribute name="Font Size" value="11" />
 		<attribute name="Color" value="0.85 0.85 0.85" />
+	</element>
+	<element type="PoPuPWindow" style="Window" auto="false">
+		<attribute name="Image Rect" value="0 192 16 208" />
 	</element>
 	<element type="CheckBox" style="BorderImage">
 		<attribute name="Min Size" value="16 16" />
@@ -110,17 +154,25 @@
         <attribute name="Checked Image Offset" value="16 0" />
         <attribute name="Hover Image Offset" value="0 16" />
     </element>
-     <element type="ScrollBar">
+
+	<element type="Button" style="BorderImage">
+		<attribute name="Image Rect" value="0 160 16 176" />
+		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Pressed Image Offset" value="32 0" />
+		<attribute name="Hover Image Offset" value="16 0" />
+		<attribute name="Pressed Child Offset" value="-1 1" />
+	</element>
+	<element type="ScrollBar">
         <attribute name="Min Size" value="16 16" />
-        <attribute name="Left Image Rect" value="32 32 48 48" />
-        <attribute name="Up Image Rect" value="0 32 16 48" />
-        <attribute name="Right Image Rect" value="48 32 64 48" />
-        <attribute name="Down Image Rect" value="16 32 32 48" />
+        <attribute name="Left Image Rect" value="0 128 16 144" />
+        <attribute name="Up Image Rect" value="0 96 16 112" />
+        <attribute name="Right Image Rect" value="0 144 16 160" />
+        <attribute name="Down Image Rect" value="0 112 16 128" />
         <element type="Button" internal="true">
             <attribute name="Size" value="16 16" />
             <attribute name="Border" value="4 4 4 4" />
-            <attribute name="Pressed Image Offset" value="64 0" />
-            <attribute name="Hover Image Offset" value="0 16" />
+            <attribute name="Pressed Image Offset" value="32 0" />
+            <attribute name="Hover Image Offset" value="16 0" />
         </element>
         <element type="Slider" internal="true">
             <attribute name="Size" value="16 16" />
@@ -128,8 +180,8 @@
         <element type="Button" internal="true">
             <attribute name="Size" value="16 16" />
             <attribute name="Border" value="4 4 4 4" />
-            <attribute name="Pressed Image Offset" value="64 0" />
-            <attribute name="Hover Image Offset" value="0 16" />
+            <attribute name="Pressed Image Offset" value="32 0" />
+            <attribute name="Hover Image Offset" value="16 0" />
         </element>
     </element>
     <element type="ScrollView">
@@ -140,9 +192,9 @@
             <attribute name="Size" value="16 0" />
         </element>
         <element type="BorderImage" internal="true">
-            <attribute name="Image Rect" value="48 0 64 16" />
+            <attribute name="Image Rect" value="0 80 16 96" />
             <attribute name="Border" value="4 4 4 4" />
-            <attribute name="Hover Image Offset" value="16 16" />
+            <attribute name="Hover Image Offset" value="0 0" />
             <attribute name="Clip Border" value="2 2 2 2" />
         </element>
     </element>
@@ -170,7 +222,7 @@
         <attribute name="Border" value="4 4 4 4" />
         <attribute name="Resize Border" value="8 8 8 8" />
     </element>
-    <element type="DialogWindow" style="Window" auto="false">
+     <element type="DialogWindow" style="Window" auto="false">
         <attribute name="Is Movable" value="true" />
         <attribute name="Modal Shade Color" value="0.3 0.4 0.7 0.4" />
         <attribute name="Modal Frame Color" value="0.3 0.4 0.7" />
