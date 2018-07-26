@@ -231,7 +231,8 @@ namespace MHUrho.Logic
 			}
 		}
 
-		public static async Task<LevelManager> LoadFrom(MyGame game, Stream stream, LoadingWatcher loadingProgress, bool leaveOpen = false) {
+		public static async Task<LevelManager> LoadFrom(MyGame game, Stream stream, LoadingWatcher loadingProgress, bool leaveOpen = false)
+		{
 			var storedLevel = await Task.Run<StLevel>(() => StLevel.Parser.ParseFrom(stream));
 			LevelManager level = await Load(game, storedLevel, loadingProgress);
 
@@ -337,6 +338,10 @@ namespace MHUrho.Logic
 		public void SaveTo(Stream stream, bool leaveOpen = false) {
 			var storedLevel = Save();
 			storedLevel.WriteTo(new Google.Protobuf.CodedOutputStream(stream, leaveOpen));
+
+			if (!leaveOpen) {
+				stream.Close();
+			}
 		}
 
 		public void End()

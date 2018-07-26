@@ -29,6 +29,8 @@ namespace MHUrho.WorldMap
 
 			LoadingWatcher loadingProgress;
 
+			List<ILoader> tileLoaders;
+
 			/// <summary>
 			/// Loads map data from storedMap
 			/// 
@@ -49,11 +51,12 @@ namespace MHUrho.WorldMap
 			public Loader(LoadingWatcher loadingProgress)
 			{
 				this.loadingProgress = loadingProgress;
+				tileLoaders = new List<ILoader>();
 			}
 
 			public void ConnectReferences(LevelManager level) {
-				foreach (var tile in Map.tiles) {
-					tile.ConnectReferences(level);
+				foreach (var loader in tileLoaders) {
+					loader.ConnectReferences(level);
 				}
 			}
 
@@ -61,8 +64,8 @@ namespace MHUrho.WorldMap
 			/// Builds geometry and releases stored data
 			/// </summary>
 			public void FinishLoading() {
-				foreach (var tile in Map.tiles) {
-					tile.FinishLoading();
+				foreach (var loader in tileLoaders) {
+					loader.FinishLoading();
 				}
 
 				Map.BuildGeometry(loadingProgress);
@@ -83,14 +86,14 @@ namespace MHUrho.WorldMap
 
 					for (int y = 0; y < Map.LengthWithBorders; y++) {
 						for (int x = 0; x < Map.WidthWithBorders; x++) {
-							ITile newTile;
+							ITileLoader newTileLoader;
 							if (Map.IsBorder(x, y)) {
 								if (!borderTiles.MoveNext()) {
 									//TODO: Exception
 									throw new Exception("Corrupted save file");
 								}
 
-								newTile = new BorderTile(borderTiles.Current, Map);
+								newTileLoader = BorderTile.Loader.StartLoading(borderTiles.Current, Map);
 							}
 							else {
 								if (!tiles.MoveNext()) {
@@ -98,10 +101,11 @@ namespace MHUrho.WorldMap
 									throw new Exception("Corrupted save file");
 								}
 
-								newTile = Tile.StartLoading(tiles.Current, Map);
+								newTileLoader = Tile.Loader.StartLoading(tiles.Current, Map);
 							}
 
-							Map.tiles[Map.GetTileIndex(x, y)] = newTile;
+							tileLoaders.Add(newTileLoader);
+							Map.tiles[Map.GetTileIndex(x, y)] = newTileLoader.Tile;
 						}
 
 						loadingProgress.IncrementProgress(25.0f / Map.LengthWithBorders);
@@ -126,11 +130,59 @@ namespace MHUrho.WorldMap
 		}
 
 		class BorderTile : ITile {
+
+			internal class Loader : ITileLoader {
+
+				ITile ITileLoader.Tile => Tile;
+
+				public BorderTile Tile { get; private set; }
+
+
+				protected Loader(BorderTile tile)
+				{
+					this.Tile = tile;
+				}
+
+				public static StBorderTile Save(BorderTile borderTile)
+				{
+					var stBorderTile = new StBorderTile();
+					stBorderTile.TopLeftPosition = borderTile.TopLeft.ToStIntVector2();
+					stBorderTile.TopLeftHeight = borderTile.TopLeftHeight;
+					stBorderTile.TopRightHeight = borderTile.TopRightHeight;
+					stBorderTile.BotLeftHeight = borderTile.BottomLeftHeight;
+					stBorderTile.BotRightHeight = borderTile.BottomRightHeight;
+					return stBorderTile;
+				}
+
+				/// <summary>
+				/// Loads everything apart from thigs referenced by ID
+				/// 
+				/// After everything had it StartLoading called, call ConnectReferences on everything
+				/// </summary>
+				/// <param name="storedTile">Image of the tile</param>
+				/// <param name="map">Map this tile is in</param>
+				/// <returns>Partially initialized tile</returns>
+				public static Loader StartLoading(StBorderTile storedTile, Map map)
+				{
+					return new Loader(new BorderTile(storedTile, map));
+				}
+
+				public void ConnectReferences(LevelManager level)
+				{
+
+				}
+
+				public void FinishLoading()
+				{
+
+				}
+			}
+
 			IBuilding ITile.Building => throw new InvalidOperationException("Cannot add building to Border tile");
 
 			IReadOnlyList<IUnit> ITile.Units => throw new InvalidOperationException("Cannot add unit to Border tile");
 
-			public TileType Type { get; private set; }
+			public TileType Type => throw new InvalidOperationException("Cnnot get type of a BorderTile");
 
 
 			public IntRect MapArea { get; private set; }
@@ -178,16 +230,7 @@ namespace MHUrho.WorldMap
 			public BorderType BorderType { get; private set; }
 
 			
-
-			StBorderTile storage;
-
-			public void ConnectReferences(ILevelManager level) {
-				Type = PackageManager.Instance.ActiveGame.GetTileType(storage.TileTypeID);
-			}
-
-			public void FinishLoading() {
-				storage = null;
-			}
+			
 
 			void ITile.AddUnit(IUnit unit) {
 				throw new InvalidOperationException("Cannot add unit to Border tile");
@@ -208,20 +251,14 @@ namespace MHUrho.WorldMap
 				throw new InvalidOperationException("Cannot save BorderTile as a tile");
 			}
 
-			public StBorderTile Save() {
-				var stBorderTile = new StBorderTile();
-				stBorderTile.TopLeftPosition = TopLeft.ToStIntVector2();
-				stBorderTile.TileTypeID = Type.ID;
-				stBorderTile.TopLeftHeight = TopLeftHeight;
-				stBorderTile.TopRightHeight = TopRightHeight;
-				stBorderTile.BotLeftHeight = BottomLeftHeight;
-				stBorderTile.BotRightHeight = BottomRightHeight;
-
-				return stBorderTile;
+			public StBorderTile Save()
+			{
+				return Loader.Save(this);
 			}
 
-			public void ChangeType(TileType newType) {
-				Type = newType;
+			void ITile.ChangeType(TileType newType)
+			{
+				throw new InvalidOperationException("Cannot change the type of a BorderTile");
 			}
 
 			public void ChangeTopLeftHeight(float heightDelta) {
@@ -259,7 +296,6 @@ namespace MHUrho.WorldMap
 			}
 
 			public BorderTile(StBorderTile stBorderTile, Map map) {
-				this.storage = stBorderTile;
 				this.MapArea = new IntRect(stBorderTile.TopLeftPosition.X, 
 										   stBorderTile.TopLeftPosition.Y, 
 										   stBorderTile.TopLeftPosition.X + 1, 
@@ -272,9 +308,8 @@ namespace MHUrho.WorldMap
 				BorderType = map.GetBorderType(this.MapLocation);
 			}
 
-			public BorderTile(int x, int y, TileType tileType, BorderType borderType, Map map) {
+			public BorderTile(int x, int y, BorderType borderType, Map map) {
 				MapArea = new IntRect(x, y, x + 1, y + 1);
-				this.Type = tileType;
 				this.BorderType = borderType;
 				this.TopLeftHeight = 0;
 				this.TopRightHeight = 0;
@@ -382,7 +417,7 @@ namespace MHUrho.WorldMap
 					Debug.Assert(borderType != BorderType.None,
 								 "Error in implementation of IsBorder or GetBorderType");
 
-					newMap.tiles[i] = new BorderTile(tilePosition.X, tilePosition.Y, defaultTileType, borderType, newMap);
+					newMap.tiles[i] = new BorderTile(tilePosition.X, tilePosition.Y, borderType, newMap);
 				}
 				else {
 					newMap.tiles[i] = new Tile(tilePosition.X, tilePosition.Y, defaultTileType, newMap);

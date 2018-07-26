@@ -15,13 +15,83 @@ namespace MHUrho.Logic
 		public const int ImageWidth = 100;
 		public const int ImageHeight = 100;
 
+		internal class Loader : ITileLoader {
 
+			ITile ITileLoader.Tile => Tile;
+
+			public Tile Tile { get; private set; }
+			/// <summary>
+			/// Holds the image of the tile between the steps of loading
+			/// </summary>
+			StTile storedTile;
+
+			protected Loader(StTile storedTile, Tile tile)
+			{
+				this.storedTile = storedTile;
+			}
+
+			public static StTile Save(Tile tile)
+			{
+				
+				var storedTile = new StTile();
+				storedTile.TopLeftPosition = tile.TopLeft.ToStIntVector2();
+				storedTile.Height = tile.TopLeftHeight;
+				storedTile.TileTypeID = tile.Type.ID;
+
+				foreach (var passingUnit in tile.Units) {
+					storedTile.UnitIDs.Add(passingUnit.ID);
+				}
+
+				return storedTile;
+				
+			}
+
+			/// <summary>
+			/// Loads everything apart from thigs referenced by ID
+			/// 
+			/// After everything had it StartLoading called, call ConnectReferences on everything
+			/// </summary>
+			/// <param name="storedTile">Image of the tile</param>
+			/// <param name="map">Map this tile is in</param>
+			/// <returns>Partially initialized tile</returns>
+			public static Loader StartLoading(StTile storedTile, Map map)
+			{
+				return new Loader(storedTile, new Tile(storedTile, map));
+			}
+
+			/// <summary>
+			/// Continues loading by connecting references
+			/// </summary>
+			public void ConnectReferences(LevelManager level)
+			{
+				Tile.Type = PackageManager.Instance.ActiveGame.GetTileType(storedTile.TileTypeID);
+
+				if (storedTile.UnitIDs.Count != 0) {
+					Tile.units = new List<IUnit>();
+				}
+
+				foreach (var unit in storedTile.UnitIDs) {
+					Tile.units.Add(level.GetUnit(unit));
+				}
+
+				//TODO: Connect buildings
+				//foreach (var building in storage.Buil) {
+
+				//}
+
+			}
+
+			public void FinishLoading()
+			{
+				storedTile = null;
+			}
+		}
 
 
 		/// <summary>
 		/// Units inside the tile
 		/// </summary>
-		public IReadOnlyList<IUnit> Units => units;
+		public IReadOnlyList<IUnit> Units => units ?? new List<IUnit>();
 
 		public IBuilding Building{ get; private set;}
 
@@ -73,74 +143,28 @@ namespace MHUrho.Logic
 		public IMap Map { get; private set; }
 
 		/// <summary>
-		/// Stores tile image between the steps of loading
-		/// After loading is set to null to reclaim resources
+		/// List of units present on this tile, is NULL if there are no units on this tile
 		/// </summary>
-		StTile storage;
-
 		List<IUnit> units;
 
-		public StTile Save() {
-			var storedTile = new StTile();
-			storedTile.TopLeftPosition = TopLeft.ToStIntVector2();
-			storedTile.Height = TopLeftHeight;
-			storedTile.TileTypeID = Type.ID;
-
-			foreach (var passingUnit in Units) {
-				storedTile.UnitIDs.Add(passingUnit.ID);
-			}
-
-			return storedTile;
+		public StTile Save()
+		{
+			return Loader.Save(this);
 		}
 		
-		/// <summary>
-		/// Loads everything apart from thigs referenced by ID
-		/// 
-		/// After everything had it StartLoading called, call ConnectReferences on everything
-		/// </summary>
-		/// <param name="storedTile">Image of the tile</param>
-		/// <param name="map">Map this tile is in</param>
-		/// <returns>Partially initialized tile</returns>
-		public static Tile StartLoading(StTile storedTile, Map map) {
-			return new Tile(storedTile, map);
-		}
-
-		/// <summary>
-		/// Continues loading by connecting references
-		/// </summary>
-		public void ConnectReferences(ILevelManager level) {
-			Type = PackageManager.Instance.ActiveGame.GetTileType(storage.TileTypeID);
-
-
-			foreach (var unit in storage.UnitIDs) {
-				units.Add(level.GetUnit(unit));
-			}
-
-			//TODO: Connect buildings
-			//foreach (var building in storage.Buil) {
-				
-			//}
-			
-		}
-
-		public void FinishLoading() {
-			storage = null;
-		}
-
 		protected Tile(StTile storedTile, IMap map) {
-			this.storage = storedTile;
 			this.MapArea = new IntRect(storedTile.TopLeftPosition.X, 
 									   storedTile.TopLeftPosition.Y, 
 									   storedTile.TopLeftPosition.X + 1, 
 									   storedTile.TopLeftPosition.Y + 1);
 			this.TopLeftHeight = storedTile.Height;
 			this.Map = map;
-			units = new List<IUnit>();
+			units = null;
 		}
 
 		public Tile(int x, int y, TileType tileType, Map map) {
 			MapArea = new IntRect(x, y, x + 1, y + 1);
-			units = new List<IUnit>();
+			units = null;
 			this.Type = tileType;
 			this.TopLeftHeight = 0;
 			this.Map = map;
@@ -148,6 +172,10 @@ namespace MHUrho.Logic
 
 		public void AddUnit(IUnit unit)
 		{
+			//Lazy allocation
+			if (units == null) {
+				units = new List<IUnit>();
+			}
 			units.Add(unit);
 		}
 
@@ -159,6 +187,9 @@ namespace MHUrho.Logic
 		{
 			//TODO: Error, unit not present
 			units.Remove(unit);
+			if (units.Count == 0) {
+				units = null;
+			}
 		}
 
 		public void AddBuilding(IBuilding building) {

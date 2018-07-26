@@ -31,51 +31,50 @@ namespace MHUrho.Storage {
             "HC5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUSEwoLcGFja2FnZU5hbWUY",
             "BiABKAkidAoGU3RUaWxlEg8KB3VuaXRJRHMYAiADKAUSEgoKdGlsZVR5cGVJ",
             "RBgDIAEoBRI1Cg90b3BMZWZ0UG9zaXRpb24YBCABKAsyHC5NSFVyaG8uU3Rv",
-            "cmFnZS5TdEludFZlY3RvcjISDgoGaGVpZ2h0GAUgASgCIs8BCgxTdEJvcmRl",
-            "clRpbGUSEgoKdGlsZVR5cGVJRBgBIAEoBRI1Cg90b3BMZWZ0UG9zaXRpb24Y",
-            "AiABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISFQoNdG9wTGVm",
-            "dEhlaWdodBgDIAEoAhIWCg50b3BSaWdodEhlaWdodBgEIAEoAhIVCg1ib3RM",
-            "ZWZ0SGVpZ2h0GAUgASgCEhYKDmJvdFJpZ2h0SGVpZ2h0GAYgASgCEhYKDnNw",
-            "bGl0RGlyZWN0aW9uGAcgASgIIk4KC1N0TWFwVGFyZ2V0EhIKCmluc3RhbmNl",
-            "SUQYASABKAUSKwoIcG9zaXRpb24YAiABKAsyGS5NSFVyaG8uU3RvcmFnZS5T",
-            "dFZlY3RvcjMi0gIKBlN0VW5pdBIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiAB",
-            "KAUSKwoIcG9zaXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3Rv",
-            "cjMSEAoIcGxheWVySUQYBCABKAUSFAoMdGFyZ2V0VW5pdElEGAUgASgFEi4K",
-            "CnVzZXJQbHVnaW4YBiABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRh",
-            "Ek4KFGRlZmF1bHRDb21wb25lbnREYXRhGAcgAygLMjAuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RVbml0LkRlZmF1bHRDb21wb25lbnREYXRhRW50cnkaVwoZRGVmYXVs",
-            "dENvbXBvbmVudERhdGFFbnRyeRILCgNrZXkYASABKAUSKQoFdmFsdWUYAiAB",
-            "KAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhOgI4ASLIAgoMU3RQcm9q",
-            "ZWN0aWxlEgoKAmlkGAEgASgFEg4KBnR5cGVJRBgCIAEoBRIrCghwb3NpdGlv",
-            "bhgDIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMxIQCghwbGF5ZXJJ",
-            "RBgEIAEoBRIuCgp1c2VyUGx1Z2luGAUgASgLMhouTUhVcmhvLlN0b3JhZ2Uu",
-            "UGx1Z2luRGF0YRJUChRkZWZhdWx0Q29tcG9uZW50RGF0YRgGIAMoCzI2Lk1I",
-            "VXJoby5TdG9yYWdlLlN0UHJvamVjdGlsZS5EZWZhdWx0Q29tcG9uZW50RGF0",
-            "YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5GAEg",
-            "ASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0",
-            "YToCOAEixwIKClN0QnVpbGRpbmcSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIg",
-            "ASgFEi4KCGxvY2F0aW9uGAMgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRW",
-            "ZWN0b3IyEhAKCHBsYXllcklEGAQgASgFEi4KCnVzZXJQbHVnaW4YBiABKAsy",
-            "Gi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhElIKFGRlZmF1bHRDb21wb25l",
-            "bnREYXRhGAcgAygLMjQuTUhVcmhvLlN0b3JhZ2UuU3RCdWlsZGluZy5EZWZh",
-            "dWx0Q29tcG9uZW50RGF0YUVudHJ5GlcKGURlZmF1bHRDb21wb25lbnREYXRh",
-            "RW50cnkSCwoDa2V5GAEgASgFEikKBXZhbHVlGAIgASgLMhouTUhVcmhvLlN0",
-            "b3JhZ2UuUGx1Z2luRGF0YToCOAEivQEKCFN0UGxheWVyEgoKAmlkGAEgASgF",
-            "Eg4KBnR5cGVJRBgCIAEoBRImCgVjb2xvchgDIAEoCzIXLk1IVXJoby5TdG9y",
-            "YWdlLlN0Q29sb3ISDwoHdW5pdElEcxgEIAMoBRITCgtidWlsZGluZ0lEcxgF",
-            "IAMoBRIXCg9mcmllbmRQbGF5ZXJJRHMYBiADKAUSLgoKdXNlclBsdWdpbhgH",
-            "IAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRhdGEiwwEKBVN0TWFwEioK",
-            "BHNpemUYASABKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEludFZlY3RvcjISJQoF",
-            "dGlsZXMYAiADKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFRpbGUSMQoLYm9yZGVy",
-            "VGlsZXMYAyADKAsyHC5NSFVyaG8uU3RvcmFnZS5TdEJvcmRlclRpbGUSNAoP",
-            "bWFwUmFuZ2VUYXJnZXRzGAQgAygLMhsuTUhVcmhvLlN0b3JhZ2UuU3RNYXBU",
-            "YXJnZXRiBnByb3RvMw=="));
+            "cmFnZS5TdEludFZlY3RvcjISDgoGaGVpZ2h0GAUgASgCIqMBCgxTdEJvcmRl",
+            "clRpbGUSNQoPdG9wTGVmdFBvc2l0aW9uGAEgASgLMhwuTUhVcmhvLlN0b3Jh",
+            "Z2UuU3RJbnRWZWN0b3IyEhUKDXRvcExlZnRIZWlnaHQYAiABKAISFgoOdG9w",
+            "UmlnaHRIZWlnaHQYAyABKAISFQoNYm90TGVmdEhlaWdodBgEIAEoAhIWCg5i",
+            "b3RSaWdodEhlaWdodBgFIAEoAiJOCgtTdE1hcFRhcmdldBISCgppbnN0YW5j",
+            "ZUlEGAEgASgFEisKCHBvc2l0aW9uGAIgASgLMhkuTUhVcmhvLlN0b3JhZ2Uu",
+            "U3RWZWN0b3IzItICCgZTdFVuaXQSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIg",
+            "ASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0",
+            "b3IzEhAKCHBsYXllcklEGAQgASgFEhQKDHRhcmdldFVuaXRJRBgFIAEoBRIu",
+            "Cgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0",
+            "YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzIwLk1IVXJoby5TdG9y",
+            "YWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5GlcKGURlZmF1",
+            "bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5GAEgASgFEikKBXZhbHVlGAIg",
+            "ASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YToCOAEiyAIKDFN0UHJv",
+            "amVjdGlsZRIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSKwoIcG9zaXRp",
+            "b24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMSEAoIcGxheWVy",
+            "SUQYBCABKAUSLgoKdXNlclBsdWdpbhgFIAEoCzIaLk1IVXJoby5TdG9yYWdl",
+            "LlBsdWdpbkRhdGESVAoUZGVmYXVsdENvbXBvbmVudERhdGEYBiADKAsyNi5N",
+            "SFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUuRGVmYXVsdENvbXBvbmVudERh",
+            "dGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgB",
+            "IAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRh",
+            "dGE6AjgBIscCCgpTdEJ1aWxkaW5nEgoKAmlkGAEgASgFEg4KBnR5cGVJRBgC",
+            "IAEoBRIuCghsb2NhdGlvbhgDIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50",
+            "VmVjdG9yMhIQCghwbGF5ZXJJRBgEIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgL",
+            "MhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJSChRkZWZhdWx0Q29tcG9u",
+            "ZW50RGF0YRgHIAMoCzI0Lk1IVXJoby5TdG9yYWdlLlN0QnVpbGRpbmcuRGVm",
+            "YXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0",
+            "YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5T",
+            "dG9yYWdlLlBsdWdpbkRhdGE6AjgBIr0BCghTdFBsYXllchIKCgJpZBgBIAEo",
+            "BRIOCgZ0eXBlSUQYAiABKAUSJgoFY29sb3IYAyABKAsyFy5NSFVyaG8uU3Rv",
+            "cmFnZS5TdENvbG9yEg8KB3VuaXRJRHMYBCADKAUSEwoLYnVpbGRpbmdJRHMY",
+            "BSADKAUSFwoPZnJpZW5kUGxheWVySURzGAYgAygFEi4KCnVzZXJQbHVnaW4Y",
+            "ByABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhIsMBCgVTdE1hcBIq",
+            "CgRzaXplGAEgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEiUK",
+            "BXRpbGVzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2UuU3RUaWxlEjEKC2JvcmRl",
+            "clRpbGVzGAMgAygLMhwuTUhVcmhvLlN0b3JhZ2UuU3RCb3JkZXJUaWxlEjQK",
+            "D21hcFJhbmdlVGFyZ2V0cxgEIAMoCzIbLk1IVXJoby5TdG9yYWdlLlN0TWFw",
+            "VGFyZ2V0YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Buildings", "Players", "Projectiles", "PackageName" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitIDs", "TileTypeID", "TopLeftPosition", "Height" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TileTypeID", "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight", "SplitDirection" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMapTarget), global::MHUrho.Storage.StMapTarget.Parser, new[]{ "InstanceID", "Position" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
@@ -543,13 +542,11 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StBorderTile(StBorderTile other) : this() {
-      tileTypeID_ = other.tileTypeID_;
       TopLeftPosition = other.topLeftPosition_ != null ? other.TopLeftPosition.Clone() : null;
       topLeftHeight_ = other.topLeftHeight_;
       topRightHeight_ = other.topRightHeight_;
       botLeftHeight_ = other.botLeftHeight_;
       botRightHeight_ = other.botRightHeight_;
-      splitDirection_ = other.splitDirection_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -557,19 +554,8 @@ namespace MHUrho.Storage {
       return new StBorderTile(this);
     }
 
-    /// <summary>Field number for the "tileTypeID" field.</summary>
-    public const int TileTypeIDFieldNumber = 1;
-    private int tileTypeID_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TileTypeID {
-      get { return tileTypeID_; }
-      set {
-        tileTypeID_ = value;
-      }
-    }
-
     /// <summary>Field number for the "topLeftPosition" field.</summary>
-    public const int TopLeftPositionFieldNumber = 2;
+    public const int TopLeftPositionFieldNumber = 1;
     private global::MHUrho.Storage.StIntVector2 topLeftPosition_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::MHUrho.Storage.StIntVector2 TopLeftPosition {
@@ -580,7 +566,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "topLeftHeight" field.</summary>
-    public const int TopLeftHeightFieldNumber = 3;
+    public const int TopLeftHeightFieldNumber = 2;
     private float topLeftHeight_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float TopLeftHeight {
@@ -591,7 +577,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "topRightHeight" field.</summary>
-    public const int TopRightHeightFieldNumber = 4;
+    public const int TopRightHeightFieldNumber = 3;
     private float topRightHeight_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float TopRightHeight {
@@ -602,7 +588,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "botLeftHeight" field.</summary>
-    public const int BotLeftHeightFieldNumber = 5;
+    public const int BotLeftHeightFieldNumber = 4;
     private float botLeftHeight_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float BotLeftHeight {
@@ -613,24 +599,13 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "botRightHeight" field.</summary>
-    public const int BotRightHeightFieldNumber = 6;
+    public const int BotRightHeightFieldNumber = 5;
     private float botRightHeight_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float BotRightHeight {
       get { return botRightHeight_; }
       set {
         botRightHeight_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "splitDirection" field.</summary>
-    public const int SplitDirectionFieldNumber = 7;
-    private bool splitDirection_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool SplitDirection {
-      get { return splitDirection_; }
-      set {
-        splitDirection_ = value;
       }
     }
 
@@ -647,26 +622,22 @@ namespace MHUrho.Storage {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (TileTypeID != other.TileTypeID) return false;
       if (!object.Equals(TopLeftPosition, other.TopLeftPosition)) return false;
       if (TopLeftHeight != other.TopLeftHeight) return false;
       if (TopRightHeight != other.TopRightHeight) return false;
       if (BotLeftHeight != other.BotLeftHeight) return false;
       if (BotRightHeight != other.BotRightHeight) return false;
-      if (SplitDirection != other.SplitDirection) return false;
       return true;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (TileTypeID != 0) hash ^= TileTypeID.GetHashCode();
       if (topLeftPosition_ != null) hash ^= TopLeftPosition.GetHashCode();
       if (TopLeftHeight != 0F) hash ^= TopLeftHeight.GetHashCode();
       if (TopRightHeight != 0F) hash ^= TopRightHeight.GetHashCode();
       if (BotLeftHeight != 0F) hash ^= BotLeftHeight.GetHashCode();
       if (BotRightHeight != 0F) hash ^= BotRightHeight.GetHashCode();
-      if (SplitDirection != false) hash ^= SplitDirection.GetHashCode();
       return hash;
     }
 
@@ -677,42 +648,31 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (TileTypeID != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(TileTypeID);
-      }
       if (topLeftPosition_ != null) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(10);
         output.WriteMessage(TopLeftPosition);
       }
       if (TopLeftHeight != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(21);
         output.WriteFloat(TopLeftHeight);
       }
       if (TopRightHeight != 0F) {
-        output.WriteRawTag(37);
+        output.WriteRawTag(29);
         output.WriteFloat(TopRightHeight);
       }
       if (BotLeftHeight != 0F) {
-        output.WriteRawTag(45);
+        output.WriteRawTag(37);
         output.WriteFloat(BotLeftHeight);
       }
       if (BotRightHeight != 0F) {
-        output.WriteRawTag(53);
+        output.WriteRawTag(45);
         output.WriteFloat(BotRightHeight);
-      }
-      if (SplitDirection != false) {
-        output.WriteRawTag(56);
-        output.WriteBool(SplitDirection);
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (TileTypeID != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TileTypeID);
-      }
       if (topLeftPosition_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(TopLeftPosition);
       }
@@ -728,9 +688,6 @@ namespace MHUrho.Storage {
       if (BotRightHeight != 0F) {
         size += 1 + 4;
       }
-      if (SplitDirection != false) {
-        size += 1 + 1;
-      }
       return size;
     }
 
@@ -738,9 +695,6 @@ namespace MHUrho.Storage {
     public void MergeFrom(StBorderTile other) {
       if (other == null) {
         return;
-      }
-      if (other.TileTypeID != 0) {
-        TileTypeID = other.TileTypeID;
       }
       if (other.topLeftPosition_ != null) {
         if (topLeftPosition_ == null) {
@@ -760,9 +714,6 @@ namespace MHUrho.Storage {
       if (other.BotRightHeight != 0F) {
         BotRightHeight = other.BotRightHeight;
       }
-      if (other.SplitDirection != false) {
-        SplitDirection = other.SplitDirection;
-      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -773,35 +724,27 @@ namespace MHUrho.Storage {
           default:
             input.SkipLastField();
             break;
-          case 8: {
-            TileTypeID = input.ReadInt32();
-            break;
-          }
-          case 18: {
+          case 10: {
             if (topLeftPosition_ == null) {
               topLeftPosition_ = new global::MHUrho.Storage.StIntVector2();
             }
             input.ReadMessage(topLeftPosition_);
             break;
           }
-          case 29: {
+          case 21: {
             TopLeftHeight = input.ReadFloat();
             break;
           }
-          case 37: {
+          case 29: {
             TopRightHeight = input.ReadFloat();
             break;
           }
-          case 45: {
+          case 37: {
             BotLeftHeight = input.ReadFloat();
             break;
           }
-          case 53: {
+          case 45: {
             BotRightHeight = input.ReadFloat();
-            break;
-          }
-          case 56: {
-            SplitDirection = input.ReadBool();
             break;
           }
         }

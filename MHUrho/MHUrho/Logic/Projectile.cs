@@ -15,7 +15,7 @@ namespace MHUrho.Logic
 	public class Projectile : Entity, IProjectile {
 		internal class Loader : ILoader {
 
-			public Projectile Projectile;
+			public Projectile Projectile { get; private set; }
 
 			List<DefaultComponentLoader> componentLoaders;
 

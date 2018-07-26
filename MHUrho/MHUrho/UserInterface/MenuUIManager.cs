@@ -19,8 +19,8 @@ namespace MHUrho.UserInterface
 		public Options Options { get; private set; }
 		public PauseMenu PauseMenu { get; private set; }
 		public LoadingScreen LoadingScreen { get; private set; }
-		public SaveGameScreen SaveScreen { get; private set; }
-
+		public SaveGameScreen SaveGameScreen { get; private set; }
+		public LoadGameScreen LoadGameScreen { get; private set; }
 
 		protected MenuScreen currentScreen;
 
@@ -37,7 +37,8 @@ namespace MHUrho.UserInterface
 			Options = new Options(game, this);
 			PauseMenu = new PauseMenu(game, this);
 			LoadingScreen = new LoadingScreen(game, this);
-			SaveScreen = new SaveGameScreen(game, this);
+			SaveGameScreen = new SaveGameScreen(game, this);
+			LoadGameScreen = new LoadGameScreen(game, this);
 
 			previousScreens = new Stack<MenuScreen>();
 
@@ -47,7 +48,8 @@ namespace MHUrho.UserInterface
 			Options.Hide();
 			PauseMenu.Hide();
 			LoadingScreen.Hide();
-			SaveScreen.Hide();
+			SaveGameScreen.Hide();
+			LoadGameScreen.Hide();
 		}
 
 		public void SwitchToMainMenu()
@@ -72,7 +74,12 @@ namespace MHUrho.UserInterface
 
 		public void SwitchToSaveGame()
 		{
-			SwitchToScreen(SaveScreen);
+			SwitchToScreen(SaveGameScreen);
+		}
+
+		public void SwitchToLoadGame()
+		{
+			SwitchToScreen(LoadGameScreen);
 		}
 
 		public void SwitchBack()

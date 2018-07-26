@@ -23,13 +23,12 @@ message StTile {
 }
 
 message StBorderTile {
-	int32 tileTypeID = 1;
-	StIntVector2 topLeftPosition = 2;
-	float topLeftHeight = 3;
-	float topRightHeight = 4;
-	float botLeftHeight = 5;
-	float botRightHeight = 6;
-	bool splitDirection = 7;
+	StIntVector2 topLeftPosition = 1;
+	float topLeftHeight = 2;
+	float topRightHeight = 3;
+	float botLeftHeight = 4;
+	float botRightHeight = 5;
+
 }
 
 message StMapTarget {

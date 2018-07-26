@@ -37,6 +37,16 @@ namespace MHUrho.Input
 			UIController.SwitchToPauseMenu();
 		}
 
+		public void LoadLevel(Stream stream)
+		{
+			if (pausedLevelController != null) {
+				EndPausedLevel();
+			}
+
+			LevelManager.LoadFrom(Game, stream, UIController.LoadingScreen.GetLoadingWatcher());
+			UIController.SwitchToLoadingScreen();
+		}
+
 		public void ResumePausedLevel()
 		{
 			pausedLevelController.UnPause();

@@ -105,6 +105,13 @@ namespace MHUrho.EditorTools
 
 			dynamicHighlight.Enable();
 
+			foreach (var type in selected.Values) {
+				if (type.Count != 0) {
+					type.Button.Visible = true;
+				}
+
+			}
+
 			enabled = true;
 		}
 
@@ -114,6 +121,10 @@ namespace MHUrho.EditorTools
 			dynamicHighlight.SelectionHandler -= HandleAreaSelection;
 			dynamicHighlight.SingleClickHandler -= HandleSingleClick;
 			dynamicHighlight.Disable();
+
+			foreach (var type in selected.Values) {
+				type.Button.Visible = false;
+			}
 
 			enabled = false;
 		}
@@ -125,10 +136,6 @@ namespace MHUrho.EditorTools
 		public override void Dispose() {
 			Disable();
 			dynamicHighlight.Dispose();
-
-			foreach (var selectedInfo in selected.Values) {
-				selectedInfo.Dispose();
-			}
 
 			foreach (var element in unitTypes.Keys) {
 				ui.SelectionBar.RemoveChild(element);
@@ -261,6 +268,7 @@ namespace MHUrho.EditorTools
 			button.Texture = PackageManager.Instance.ActiveGame.UnitIconTexture;
 			button.ImageRect = unitType.IconRectangle;
 			button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
+			button.PressedOffset = new IntVector2(unitType.IconRectangle.Width() * 2, 0);
 
 			Text text = button.CreateText("Count");
 			text.SetStyle("SelectedUnitText");
@@ -289,6 +297,8 @@ namespace MHUrho.EditorTools
 				var button = CreateButton(unit.UnitType);
 				selected.Add(unit.UnitType, new SelectedInfo(button, new List<UnitSelector> { unitSelector }));
 				unitTypes.Add(button, unit.UnitType);
+
+				button.Visible = true;
 			}
 
 			unitSelector.UnitDeselected += RemoveUnit;

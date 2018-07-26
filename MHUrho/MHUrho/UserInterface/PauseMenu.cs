@@ -34,9 +34,7 @@ namespace MHUrho.UserInterface
 
 			((Button)window.GetChild("Save")).Released += (args) => { MenuUIManager.SwitchToSaveGame(); };
 
-			((Button)window.GetChild("Load")).Released += (args) => { //TODO: Load screen
-
-														};
+			((Button)window.GetChild("Load")).Released += (args) => { MenuUIManager.SwitchToLoadGame(); };
 
 			((Button)window.GetChild("Options")).Released += (args) => { MenuUIManager.SwitchToOptions(); };
 

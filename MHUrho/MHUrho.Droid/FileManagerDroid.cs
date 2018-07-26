@@ -76,6 +76,16 @@ namespace MHUrho.Droid {
 			return System.IO.File.Exists(path);
 		}
 
+		public override IEnumerable<string> GetFilesInDirectory(string dirPath)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void DeleteDynamicFile(string relativePath)
+		{
+			throw new NotImplementedException();
+		}
+
 		public static FileManagerDroid LoadConfig(AssetManager assetManager) {
 			//TODO: Load config files
 			return new FileManagerDroid(
@@ -91,7 +101,8 @@ namespace MHUrho.Droid {
 					"TODO",
 					"/apk",
 					System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),
-					System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log")){
+					System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log"),
+					"SavedGames"){
 			PackagePaths = packagePaths;
 			this.assetManager = assetManager;
 		}

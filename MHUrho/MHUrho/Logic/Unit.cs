@@ -24,7 +24,7 @@ namespace MHUrho.Logic
 	public class Unit : Entity, IUnit {
 		internal class Loader : ILoader {
 		   
-			public Unit Unit;
+			public Unit Unit { get; private set; }
 
 			List<DefaultComponentLoader> componentLoaders;
 

@@ -25,5 +25,7 @@ namespace MHUrho.Input
 		void EndPausedLevel();
 
 		void SavePausedLevel(Stream toStream);
+
+		void LoadLevel(Stream fromStream);
 	}
 }

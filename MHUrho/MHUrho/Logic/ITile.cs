@@ -77,13 +77,6 @@ namespace MHUrho.Logic
 
 		IMap Map { get; }
 
-		/// <summary>
-		/// Continues loading by connecting references
-		/// </summary>
-		void ConnectReferences(ILevelManager level);
-
-		void FinishLoading();
-
 		void AddUnit(IUnit unit);
 
 		/// <summary>

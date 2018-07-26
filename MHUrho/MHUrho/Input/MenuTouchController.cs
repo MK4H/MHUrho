@@ -35,6 +35,11 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
+		public void LoadLevel(Stream fromStream)
+		{
+			throw new NotImplementedException();
+		}
+
 		public MenuTouchController(MyGame game) : base(game) {
 			//TODO: TEMPORARY, probably move to UIManager or something
 

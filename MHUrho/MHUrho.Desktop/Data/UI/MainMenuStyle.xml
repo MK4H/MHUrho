@@ -49,7 +49,7 @@
 	</element>
 	<element type="FilePickLineEdit" style="BorderImage" auto="false">
 		<attribute name="Border" value="4 4 4 4" />
-		<attribute name="Image Rect" value="80 0 96 16" />
+		<attribute name="Image Rect" value="0 80 16 96" />
 		<attribute name="Hover Image Offset" value="16 0" />
 		<!-- Background color of the hover image IS the hover color of LineEdit -->
 		<element type="Text" internal="true">
@@ -60,7 +60,7 @@
 		<element type="BorderImage" internal="true">
 			<attribute name="Size" value="4 16" />
 			<attribute name="Priority" value="1" />
-			<attribute name="Image Rect" value="48 0 52 16" />
+			<attribute name="Image Rect" value="0 224 4 240" />
 			<attribute name="Vert Alignment" value="Center" />
 		</element>
 	</element>
@@ -72,6 +72,9 @@
 		</element>
 	</element>
 	<element type="SaveButton" style="Button" auto="false">
+
+	</element>
+	<element type="LoadButton" style="Button" auto="false">
 
 	</element>
 	<element type="DeleteButton" style="Button" auto="false">
@@ -117,8 +120,8 @@
     </element>
     <element type="LineEdit" style="BorderImage">
         <attribute name="Border" value="4 4 4 4" />
-        <attribute name="Image Rect" value="64 0 80 16" />
-        <attribute name="Hover Image Offset" value="0 16" />    <!-- Background color of the hover image IS the hover color of LineEdit -->
+        <attribute name="Image Rect" value="0 80 16 96" />
+        <attribute name="Hover Image Offset" value="16 0" />    <!-- Background color of the hover image IS the hover color of LineEdit -->
         <element type="Text" internal="true">
             <attribute name="Color" value="0.9 1 0.9 1" />
             <attribute name="Selection Color" value="0.3 0.4 0.7 1" />
@@ -127,7 +130,7 @@
         <element type="BorderImage" internal="true">
             <attribute name="Size" value="4 16" />
             <attribute name="Priority" value="1" />
-            <attribute name="Image Rect" value="12 0 16 16" />
+            <attribute name="Image Rect" value="0 224 4 240" />
             <attribute name="Vert Alignment" value="Center" />
         </element>
     </element>
