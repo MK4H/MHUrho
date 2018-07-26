@@ -40,7 +40,7 @@ namespace MHUrho.UnitComponents
 				writer.StoreNext(movingMeele.timeBetweenPositionChecks);
 				writer.StoreNext(movingMeele.TimeBetweenAttacks);
 				writer.StoreNext(movingMeele.Enabled);
-				writer.StoreNext(movingMeele.Target.ID);
+				writer.StoreNext(movingMeele.Target?.ID ?? 0);
 
 				writer.StoreNext(movingMeele.TimeToNextSearch);
 				writer.StoreNext(movingMeele.timeToNextPositionCheck);
@@ -91,9 +91,7 @@ namespace MHUrho.UnitComponents
 
 			public override void ConnectReferences(LevelManager level)
 			{
-				MovingMeele.Target = level.GetEntity(targetID);
-				//TODO: Runtime check in release to find corrupted save files
-				Debug.Assert(MovingMeele.Target != null, "Saved entity ID was not valid");
+				MovingMeele.Target = targetID == 0 ? null : level.GetEntity(targetID);
 			}
 
 			public override void FinishLoading()

@@ -73,7 +73,7 @@ namespace MHUrho.UnitComponents
 
 			public override void ConnectReferences(LevelManager level)
 			{
-				StaticMeele.Target = level.GetEntity(targetID);
+				StaticMeele.Target = targetID == 0 ? null : level.GetEntity(targetID);
 			}
 
 			public override void FinishLoading()

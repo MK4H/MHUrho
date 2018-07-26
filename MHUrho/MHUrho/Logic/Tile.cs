@@ -27,6 +27,7 @@ namespace MHUrho.Logic
 
 			protected Loader(StTile storedTile, Tile tile)
 			{
+				this.Tile = tile;
 				this.storedTile = storedTile;
 			}
 

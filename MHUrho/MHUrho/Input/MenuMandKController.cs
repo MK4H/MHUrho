@@ -37,13 +37,17 @@ namespace MHUrho.Input
 			UIController.SwitchToPauseMenu();
 		}
 
-		public void LoadLevel(Stream stream)
+		public void LoadLevel(string fromPath)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
-			LevelManager.LoadFrom(Game, stream, UIController.LoadingScreen.GetLoadingWatcher());
+			using (Stream stream = MyGame.Files.OpenDynamicFile(fromPath, System.IO.FileMode.Open, FileAccess.Read)) {
+				//This is correct, dont await, leave UI responsive
+				LevelManager.Load(Game, StLevel.Parser.ParseFrom(stream), UIController.LoadingScreen.GetLoadingWatcher());
+			}
+			
 			UIController.SwitchToLoadingScreen();
 		}
 
@@ -59,9 +63,11 @@ namespace MHUrho.Input
 			pausedLevelController = null;
 		}
 
-		public void SavePausedLevel(Stream toStream)
+		public void SavePausedLevel(string toPath)
 		{
-			pausedLevelController.Level.SaveTo(toStream);
+			using (var output = new Google.Protobuf.CodedOutputStream(MyGame.Files.OpenDynamicFile(toPath, System.IO.FileMode.Create, FileAccess.Write))) {
+				pausedLevelController.Level.Save().WriteTo(output);
+			}
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {

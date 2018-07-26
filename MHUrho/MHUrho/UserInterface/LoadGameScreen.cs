@@ -71,9 +71,7 @@ namespace MHUrho.UserInterface
 
 			string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
 
-			//TODO: Try catch
-			Stream stream = MyGame.Files.OpenDynamicFile(newRelativePath, FileMode.Open, FileAccess.Read);
-			MenuUIManager.MenuController.LoadLevel(stream);
+			MenuUIManager.MenuController.LoadLevel(newRelativePath);
 		}
 
 

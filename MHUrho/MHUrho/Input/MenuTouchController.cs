@@ -30,12 +30,12 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public void SavePausedLevel(Stream toStream)
+		public void SavePausedLevel(string toPath)
 		{
 			throw new NotImplementedException();
 		}
 
-		public void LoadLevel(Stream fromStream)
+		public void LoadLevel(string fromPath)
 		{
 			throw new NotImplementedException();
 		}

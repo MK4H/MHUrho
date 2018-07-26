@@ -67,8 +67,7 @@ namespace MHUrho.UserInterface
 			}
 			else {
 				string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
-				Stream file = MyGame.Files.OpenDynamicFile(newFilePath, FileMode.CreateNew, FileAccess.Write);
-				MenuUIManager.MenuController.SavePausedLevel(file);
+				MenuUIManager.MenuController.SavePausedLevel(newFilePath);
 				MenuUIManager.SwitchBack();
 			}
 		}
@@ -79,8 +78,7 @@ namespace MHUrho.UserInterface
 			if (!confirmed) return;
 
 			string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
-			Stream file = MyGame.Files.OpenDynamicFile(newFilePath, FileMode.Create, FileAccess.Write);
-			MenuUIManager.MenuController.SavePausedLevel(file);
+			MenuUIManager.MenuController.SavePausedLevel(newFilePath);
 			MenuUIManager.SwitchBack();
 		}
 
