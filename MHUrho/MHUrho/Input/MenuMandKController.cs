@@ -43,10 +43,11 @@ namespace MHUrho.Input
 				EndPausedLevel();
 			}
 
-			using (Stream stream = MyGame.Files.OpenDynamicFile(fromPath, System.IO.FileMode.Open, FileAccess.Read)) {
-				//This is correct, dont await, leave UI responsive
-				LevelManager.Load(Game, StLevel.Parser.ParseFrom(stream), UIController.LoadingScreen.GetLoadingWatcher());
-			}
+			//This is correct, dont await, leave UI responsive
+			LevelManager.LoadFrom(Game, 
+								MyGame.Files.OpenDynamicFile(fromPath, System.IO.FileMode.Open, FileAccess.Read),
+								UIController.LoadingScreen.GetLoadingWatcher());
+			
 			
 			UIController.SwitchToLoadingScreen();
 		}
@@ -65,9 +66,7 @@ namespace MHUrho.Input
 
 		public void SavePausedLevel(string toPath)
 		{
-			using (var output = new Google.Protobuf.CodedOutputStream(MyGame.Files.OpenDynamicFile(toPath, System.IO.FileMode.Create, FileAccess.Write))) {
-				pausedLevelController.Level.Save().WriteTo(output);
-			}
+			pausedLevelController.Level.SaveTo(MyGame.Files.OpenDynamicFile(toPath, System.IO.FileMode.Create, FileAccess.Write));
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {

@@ -337,10 +337,8 @@ namespace MHUrho.Logic
 
 		public void SaveTo(Stream stream, bool leaveOpen = false) {
 			var storedLevel = Save();
-			storedLevel.WriteTo(new Google.Protobuf.CodedOutputStream(stream, leaveOpen));
-
-			if (!leaveOpen) {
-				stream.Close();
+			using (var output = new Google.Protobuf.CodedOutputStream(stream, leaveOpen)) {
+				storedLevel.WriteTo(output);
 			}
 		}
 
