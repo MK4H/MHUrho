@@ -30,10 +30,7 @@ namespace MHUrho.UserInterface
 
 			Button backButton = (Button)window.GetChild("BackButton", true);
 
-
-			PopUpConfirmation confirmationWindow = new PopUpConfirmation((Window)window.GetChild("DialogWindow"));
-
-			InitUIElements(window, loadLineEdit, deleteButton, backButton, fileView, confirmationWindow);
+			InitUIElements(window, loadLineEdit, deleteButton, backButton, fileView);
 
 		}
 

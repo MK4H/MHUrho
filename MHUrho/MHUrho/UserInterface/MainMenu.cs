@@ -24,6 +24,7 @@ namespace MHUrho.UserInterface
 			window = (Window)UI.Root.GetChild("MainMenu");
 
 			((Button)window.GetChild("StartButton", true)).Released += ButtonPressed;
+			((Button) window.GetChild("LoadButton", true)).Released += ButtonPressed;
 			((Button)window.GetChild("OptionsButton", true)).Released += ButtonPressed;
 			((Button)window.GetChild("AboutButton", true)).Released += ButtonPressed;
 			((Button)window.GetChild("ExitButton", true)).Released += ButtonPressed;
@@ -40,10 +41,13 @@ namespace MHUrho.UserInterface
 					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), "testRP2", MenuUIManager.LoadingScreen.GetLoadingWatcher());
 					MenuUIManager.SwitchToLoadingScreen();
 					break;
+				case "LoadButton":
+					MenuUIManager.SwitchToLoadGame();
+					break;
 				case "OptionsButton":
 					MenuUIManager.SwitchToOptions();
 					break;
-				case "LoadButton":
+				case "AboutButton":
 
 					break;
 				case "ExitButton":

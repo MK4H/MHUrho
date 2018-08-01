@@ -49,8 +49,6 @@ namespace MHUrho.UserInterface
 
 		protected string MatchSelected;
 
-		protected PopUpConfirmation ConfirmationWindow;
-
 		protected FilePickScreen(MyGame game,MenuUIManager menuUIManager)
 			: base(game, menuUIManager)
 		{
@@ -60,15 +58,13 @@ namespace MHUrho.UserInterface
 									LineEdit lineEdit,
 									Button deleteButton,
 									Button backButton,
-									ListView fileView,
-									PopUpConfirmation popUpConfirmation)
+									ListView fileView)
 		{
 			this.Window = window;
 			this.LineEdit = lineEdit;
 			this.DeleteButton = deleteButton;
 			this.FileView = fileView;
 			this.BackButton = backButton;
-			this.ConfirmationWindow = popUpConfirmation;
 
 			LineEdit.TextChanged += NameEditTextChanged;
 			DeleteButton.Pressed += DeleteButton_Pressed;
@@ -148,9 +144,9 @@ namespace MHUrho.UserInterface
 			if (MatchSelected == null) return;
 
 			DisableInput();
-			ConfirmationWindow.RequestConfirmation("Deleting file",
-													$"Do you really want to delete the file \"{MatchSelected}\"?",
-													DeleteFile);
+			MenuUIManager.PopUpConfirmation.RequestConfirmation("Deleting file",
+																$"Do you really want to delete the file \"{MatchSelected}\"?",
+																DeleteFile);
 
 
 		}

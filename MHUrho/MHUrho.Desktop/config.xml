@@ -3,9 +3,11 @@
   <UnitDrawDistance>200</UnitDrawDistance>
   <ProjectileDrawDistance>200</ProjectileDrawDistance>
   <TerrainDrawDistance>200</TerrainDrawDistance>
-  <Resolution xmlns:d2p1="http://schemas.datacontract.org/2004/07/Urho">
-    <d2p1:X>1024</d2p1:X>
-    <d2p1:Y>768</d2p1:Y>
+  <Resolution>
+    <Value xmlns:d3p1="http://schemas.datacontract.org/2004/07/Urho">
+      <d3p1:X>1024</d3p1:X>
+      <d3p1:Y>768</d3p1:Y>
+    </Value>
   </Resolution>
   <Fullscreen>false</Fullscreen>
   <Borderless>false</Borderless>

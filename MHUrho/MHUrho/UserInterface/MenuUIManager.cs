@@ -22,6 +22,8 @@ namespace MHUrho.UserInterface
 		public SaveGameScreen SaveGameScreen { get; private set; }
 		public LoadGameScreen LoadGameScreen { get; private set; }
 
+		public PopUpConfirmation PopUpConfirmation { get; private set; }
+
 		protected MenuScreen currentScreen;
 
 		protected Stack<MenuScreen> previousScreens;
@@ -39,6 +41,7 @@ namespace MHUrho.UserInterface
 			LoadingScreen = new LoadingScreen(game, this);
 			SaveGameScreen = new SaveGameScreen(game, this);
 			LoadGameScreen = new LoadGameScreen(game, this);
+			PopUpConfirmation = new PopUpConfirmation(game, this);
 
 			previousScreens = new Stack<MenuScreen>();
 

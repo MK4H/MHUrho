@@ -31,9 +31,7 @@ namespace MHUrho.UserInterface
 			Button backButton = (Button) window.GetChild("BackButton", true);
 
 
-			PopUpConfirmation confirmationWindow = new PopUpConfirmation((Window)window.GetChild("DialogWindow"));
-
-			InitUIElements(window, saveNameEdit, deleteButton, backButton, fileView,  confirmationWindow);
+			InitUIElements(window, saveNameEdit, deleteButton, backButton, fileView);
 
 		}
 
@@ -61,9 +59,9 @@ namespace MHUrho.UserInterface
 
 			if (MyGame.Files.FileExists(newAbsoluteFilePath)) {
 				DisableInput();
-				ConfirmationWindow.RequestConfirmation("Overriding file",
-														$"Do you really want to override the file \"{MatchSelected}\"?",
-														OverrideFile);
+				MenuUIManager.PopUpConfirmation.RequestConfirmation("Overriding file",
+																	$"Do you really want to override the file \"{MatchSelected}\"?",
+																	OverrideFile);
 			}
 			else {
 				string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);

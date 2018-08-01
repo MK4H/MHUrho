@@ -1,12 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers;
+using MHUrho.StartupManagement;
 using Urho;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class Options : MenuScreen {
+	
+
+	class Options : MenuScreen {
+
+
+		enum WindowTypeEnum {
+			Windowed = 0,
+			BorderlessWindowed = 1,
+			Fullscreen = 2
+		}
+
+
+
 		public override bool Visible {
 			get => window.Visible;
 			set => window.Visible = value;
@@ -14,6 +28,32 @@ namespace MHUrho.UserInterface
 
 		readonly Window window;
 
+		
+
+		//NOTE: Maybe change this to proper variables
+		Slider UnitDrawDistance => (Slider)window.GetChild("UnitDrawDistanceSlider", true);
+
+		Slider ProjectileDrawDistance => (Slider) window.GetChild("ProjectileDrawDistanceSlider", true);
+
+		Slider TerrainDrawDistance => (Slider) window.GetChild("TerrainDrawDistanceSlider", true);
+
+		DropDownList Resolutions => (DropDownList) window.GetChild("Resolution", true);
+
+		DropDownList WindowTypes => (DropDownList) window.GetChild("WindowType", true);
+
+		CheckBox HighDPI => (CheckBox) window.GetChild("HighDPI", true);
+
+		CheckBox TripleBuffer => (CheckBox)window.GetChild("TripleBuffer", true);
+
+		CheckBox VSync => (CheckBox)window.GetChild("VSync", true);
+
+		CheckBox DebugHUD => (CheckBox)window.GetChild("DebugHUD", true);
+
+		LineEdit MultiSample => (LineEdit) window.GetChild("MultiSample", true);
+
+		LineEdit RefreshRate => (LineEdit) window.GetChild("RefreshRate", true);
+
+		bool changed;
 
 		public Options(MyGame game, MenuUIManager menuUIManager)
 			: base(game, menuUIManager)
@@ -25,7 +65,22 @@ namespace MHUrho.UserInterface
 			window = (Window)UI.Root.GetChild("Options");
 			window.Visible = false;
 
+			((Button)window.GetChild("Save", true)).Released += SaveButton_Released;
+			((Button)window.GetChild("Exit", true)).Released += BackButton_Released;
+
 			InitializeOptions();
+		}
+
+		public override void Show()
+		{
+			SetValues(Game.Config);
+			changed = false;
+			Visible = true;
+		}
+
+		public override void Hide()
+		{
+			Visible = false;
 		}
 
 		void InitializeOptions()
@@ -35,101 +90,56 @@ namespace MHUrho.UserInterface
 			FillResolutions();
 			FillWindowTypes();
 
-			InitializeSlider("UnitDrawDistanceSlider",
-							(args) => { Game.Config.UnitDrawDistance = args.Value; },
-							Game.Config.UnitDrawDistance);
+			UnitDrawDistance.SliderChanged += (args) => { Game.Config.UnitDrawDistance = args.Value; changed = true; };
+			ProjectileDrawDistance.SliderChanged += (args) => {
+														Game.Config.ProjectileDrawDistance = args.Value;
+														changed = true;
+													};
 
-			InitializeSlider("ProjectileDrawDistanceSlider",
-							(args) => { Game.Config.ProjectileDrawDistance = args.Value; },
-							Game.Config.ProjectileDrawDistance);
+			TerrainDrawDistance.SliderChanged += (args) => {
+													Game.Config.TerrainDrawDistance = args.Value;
+													changed = true;
+												};
 
-			InitializeSlider("TerrainDrawDistanceSlider",
-							(args) => { Game.Config.TerrainDrawDistance = args.Value; },
-							Game.Config.TerrainDrawDistance);
+			Resolutions.ItemSelected += (args) => {
+											Game.Config.Resolution = Game.Config.SupportedResolutions[args.Selection];
+											changed = true;
+										};
 
+			WindowTypes.ItemSelected += (args) => {
+											//Unknown value defaults to Windowed
+											Game.Config.Borderless = WindowTypeToBorderless((WindowTypeEnum) args.Selection);
+											Game.Config.Fullscreen = WindowTypeToFullscreen((WindowTypeEnum) args.Selection);
+											changed = true;
+										};
 
+			HighDPI.Toggled += (args) => {
+									Game.Config.HighDPI = args.State;
+									changed = true;
+								};
 
-			List<IntVector2> resolutions = new List<IntVector2>
-											{
-												new IntVector2(800,600),
-												new IntVector2(1024,768),
-												new IntVector2(1920,1080)
-											};
+			TripleBuffer.Toggled += (args) => {
+										Game.Config.TripleBuffer = args.State;
+										changed = true;
+									};
 
+			VSync.Toggled += (args) => {
+								Game.Config.VSync = args.State;
+								changed = true;
+							};
 
+			DebugHUD.Toggled += (args) => {
+									Game.Config.DebugHUD = args.State;
+									changed = true;
+								};
 
-			InitializeDropDownList("Resolution",
-									(args) => {
-										Game.Config.Resolution = resolutions[args.Selection];
-									},
-									(uint)resolutions.IndexOf(Game.Config.Resolution));
-
-			InitializeDropDownList("WindowType",
-									(args) => {
-										switch (args.Selection) {
-											case 0: // Windowed
-												Game.Config.Borderless = false;
-												Game.Config.Fullscreen = false;
-
-												break;
-											case 1: // Borderless windowed
-												Game.Config.Borderless = true;
-												Game.Config.Fullscreen = false;
-												break;
-											case 2: // Fullscreen
-												Game.Config.Borderless = false;
-												Game.Config.Fullscreen = true;
-												break;
-											default:
-												throw new ArgumentOutOfRangeException(nameof(args.Selection), "Invalid selection");
-
-										}
-									},
-									(uint)(Game.Config.Fullscreen ? 2 : (Game.Config.Borderless ? 1 : 0))
-								 );
-
-			InitializeCheckbox("HighDPI",
-								(args) => { Game.Config.HighDPI = args.State; },
-								Game.Config.HighDPI);
-
-			InitializeCheckbox("TripleBuffer",
-								(args) => { Game.Config.TripleBuffer = args.State; },
-								Game.Config.TripleBuffer);
-
-			InitializeCheckbox("VSync",
-								(args) => { Game.Config.VSync = args.State; },
-								Game.Config.VSync);
-
-			InitializeCheckbox("DebugHUD",
-								(args) => { Game.Config.DebugHUD = args.State; },
-								Game.Config.DebugHUD);
-
-			//TODO: Let player confirm and save to file
-			((Button)window.GetChild("Save", true)).Released += (args) => { Game.Config.SetGraphicsMode(Game.Graphics); };
-			((Button)window.GetChild("Exit", true)).Released += (args) => { MenuUIManager.SwitchBack(); };
+			//Initializes values
+			SetValues(Game.Config);
 		}
 
-		void InitializeSlider(string name, Action<SliderChangedEventArgs> action, float initialValue)
-		{
-			Slider slider = (Slider)window.GetChild(name, true);
-			slider.Value = initialValue;
-			slider.SliderChanged += action;
-		}
-
-		void InitializeDropDownList(string name, Action<ItemSelectedEventArgs> action, uint initialSelection)
-		{
-			DropDownList dropDownList = (DropDownList)window.GetChild(name, true);
-			dropDownList.ItemSelected += action;
-			dropDownList.Selection = initialSelection;
-		}
-
-		void InitializeCheckbox(string name, Action<ToggledEventArgs> action, bool boxChecked)
-		{
-			CheckBox checkbox = (CheckBox)window.GetChild(name, true);
-			checkbox.Toggled += action;
-			checkbox.Checked = boxChecked;
-		}
-
+		/// <summary>
+		/// Links sliders with their LineEdits
+		/// </summary>
 		void LinkSliders()
 		{
 			var sliders = new List<string>
@@ -143,13 +153,14 @@ namespace MHUrho.UserInterface
 				Slider slider = (Slider)window.GetChild(name + "Slider", true);
 				LineEdit edit = (LineEdit)window.GetChild(name + "Edit", true);
 
-				slider.SliderChanged += (args) => { edit.Text = ((int)args.Value).ToString(); };
+				slider.SliderChanged += (args) => { edit.Text = ((int)args.Value).ToString(); changed = true; };
 
 				edit.TextChanged += (args) => {
 					//TODO: Read max and min values for this slider
 					if ((!int.TryParse(args.Text, out int value) || value < 0 || 100 < value) && args.Text != "") {
 						((LineEdit)args.Element).Text = ((int)slider.Value).ToString();
 					}
+					changed = true;
 
 				};
 
@@ -167,6 +178,7 @@ namespace MHUrho.UserInterface
 					else {
 						slider.Value = value;
 					}
+					changed = true;
 				};
 
 			}
@@ -175,21 +187,17 @@ namespace MHUrho.UserInterface
 
 		void FillResolutions()
 		{
-			DropDownList list = (DropDownList)window.GetChild("Resolution", true);
-			var resolutions = new List<string>
-							{
-								"800x600",
-								"1024x768",
-								"1920x1080"
-							};
-			foreach (var resolution in resolutions) {
+			var resolutionsElement = Resolutions;
+
+			foreach (var resolution in Game.Config.SupportedResolutions) {
 				Text text = new Text {
-					Value = resolution
+					Value = resolution.ToString()
 				};
 
 
-				list.AddItem(text);
+				resolutionsElement.AddItem(text);
 
+				//TODO: Text style
 				text.SetStyleAuto();
 			}
 
@@ -197,34 +205,152 @@ namespace MHUrho.UserInterface
 
 		void FillWindowTypes()
 		{
-			DropDownList list = (DropDownList)window.GetChild("WindowType", true);
-			var windowTypes = new List<string>
-							{
-								"Windowed",
-								"Borderless windowed",
-								"Fullscreen"
-							};
+			var windowTypes = new List<string>();
+			windowTypes.Insert((int) WindowTypeEnum.Windowed, WindowTypeToString(WindowTypeEnum.Windowed));
+			windowTypes.Insert((int)WindowTypeEnum.BorderlessWindowed, WindowTypeToString(WindowTypeEnum.BorderlessWindowed));
+			windowTypes.Insert((int)WindowTypeEnum.Fullscreen, WindowTypeToString(WindowTypeEnum.Fullscreen));
+
+			var windowTypesElement = WindowTypes;
+
 			foreach (var type in windowTypes) {
 				Text text = new Text {
 					Value = type
 				};
 
 
-				list.AddItem(text);
+				windowTypesElement.AddItem(text);
 
+				//TODO: Text style
 				text.SetStyleAuto();
 			}
 		}
 
-
-		public override void Show()
+		void SaveButton_Released(ReleasedEventArgs args)
 		{
-			Visible = true;
+			if (changed) {
+				Game.Config.SetGraphicsMode(Game.Graphics);
+				MenuUIManager.PopUpConfirmation.RequestConfirmation("Save options",
+																	"Do you wish to save these settings ?",
+																	SaveConfirmation,
+																	TimeSpan.FromSeconds(10));
+			}
+			else {
+				SaveConfirmation(true);
+			}
+			
 		}
 
-		public override void Hide()
+		void BackButton_Released(ReleasedEventArgs args)
 		{
-			Visible = false;
+			if (changed) {
+				MenuUIManager.PopUpConfirmation.RequestConfirmation("Exit options",
+																	"Do you wish to revert these settings to their previous state?",
+																	ExitConfirmation);
+			}
+			else {
+				ExitConfirmation(true);
+			}
+		}
+
+		void ExitConfirmation(bool confirmed)
+		{
+			if (confirmed) {
+				if (changed) {
+					Game.Config.Reload();
+					SetValues(Game.Config);
+				}
+				changed = false;
+				MenuUIManager.SwitchBack();
+			}
+		}
+
+		void SaveConfirmation(bool confirmed)
+		{
+			if (confirmed) {
+				if (changed) {
+					Game.Config.Save();
+					changed = false;
+				}
+				MenuUIManager.SwitchBack();
+			}
+			else {
+				if (changed) {
+					Game.Config.Reload();
+					SetValues(Game.Config);
+					Game.Config.SetGraphicsMode(Game.Graphics);
+					changed = false;
+				}
+			}
+		}
+
+		void SetValues(AppOptions options)
+		{
+			UnitDrawDistance.Range = options.MaxDrawDistance - options.MinDrawDistance;
+			UnitDrawDistance.Value = options.UnitDrawDistance;
+
+			ProjectileDrawDistance.Range = options.MaxDrawDistance - options.MinDrawDistance;
+			ProjectileDrawDistance.Value = options.ProjectileDrawDistance;
+
+			TerrainDrawDistance.Range = options.MaxDrawDistance - options.MinDrawDistance;
+			TerrainDrawDistance.Value = options.TerrainDrawDistance;
+
+			Resolutions.Selection = (uint)Game.Config.SupportedResolutions.IndexOf(Game.Config.Resolution);
+			
+			WindowTypes.Selection = (uint)FullscreenAndBorderlessToWindowType(options.Fullscreen, options.Borderless);
+
+			HighDPI.Checked = options.HighDPI;
+
+			TripleBuffer.Checked = options.TripleBuffer;
+
+			VSync.Checked = options.VSync;
+
+			DebugHUD.Checked = options.DebugHUD;
+
+			MultiSample.Text = options.Multisample.ToString();
+
+			RefreshRate.Text = options.RefreshRateCap.ToString();
+		}
+
+		string WindowTypeToString(WindowTypeEnum windowType)
+		{
+			switch (windowType) {
+				case WindowTypeEnum.Windowed:
+					return "Windowed";
+				case WindowTypeEnum.BorderlessWindowed:
+					return "Borderless windowed";
+				case WindowTypeEnum.Fullscreen:
+					return "Fullscreen";
+				default:
+					throw new ArgumentOutOfRangeException(nameof(windowType), windowType, null);
+			}
+		}
+
+		bool WindowTypeToFullscreen(WindowTypeEnum windowType)
+		{
+			return windowType == WindowTypeEnum.Fullscreen;
+		}
+
+		bool WindowTypeToBorderless(WindowTypeEnum windowType)
+		{
+			return windowType == WindowTypeEnum.BorderlessWindowed;
+		}
+
+		WindowTypeEnum FullscreenAndBorderlessToWindowType(bool fullscreen, bool borderless)
+		{
+			if (!fullscreen && !borderless) {
+				return WindowTypeEnum.Windowed;
+			}
+
+			if (!fullscreen && borderless) {
+				return WindowTypeEnum.BorderlessWindowed;
+			}
+
+			if (fullscreen && !borderless) {
+				return WindowTypeEnum.Fullscreen;
+			}
+
+			throw new ArgumentOutOfRangeException(nameof(fullscreen) + " and " + nameof(borderless),
+												"Borderless fullscrean is invalid combination");
 		}
 	}
 }

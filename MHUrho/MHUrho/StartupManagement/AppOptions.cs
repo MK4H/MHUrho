@@ -9,8 +9,20 @@ using Urho;
 namespace MHUrho.StartupManagement
 {
 	[DataContract]
-    public class AppOptions
-    {
+    public class AppOptions {
+		//NOTE: Could store this in the config file as well
+		public float MaxDrawDistance => 1000;
+		public float MinDrawDistance => 100;
+
+
+		static readonly List<Resolution> SupportedResolutionsStatic  = new List<Resolution>
+																		{
+																			new Resolution(1024,768),
+																		};
+
+		public IReadOnlyList<Resolution> SupportedResolutions => SupportedResolutionsStatic;
+
+
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 0)]
 		public float UnitDrawDistance { get; set; }
 
@@ -21,7 +33,7 @@ namespace MHUrho.StartupManagement
 		public float TerrainDrawDistance { get; set; }
 
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 3)]
-		public IntVector2 Resolution { get; set; }
+		public Resolution Resolution { get; set; }
 
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 4)]
 		public bool Fullscreen { get; set; }
@@ -70,6 +82,7 @@ namespace MHUrho.StartupManagement
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 18)]
 		public bool MouseBorderCameraMovement { get; set; }
 
+
 		public static AppOptions LoadFrom(Stream stream)
 		{
 
@@ -78,6 +91,23 @@ namespace MHUrho.StartupManagement
 			//TODO: Catch
 			AppOptions newOptions = (AppOptions)serializer.ReadObject(stream);
 			return newOptions;
+		}
+
+		public void Reload()
+		{
+			using (Stream configFile =
+				MyGame.Files.OpenDynamicFile(MyGame.Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
+				AppOptions reloadedOptions = LoadFrom(configFile);
+				Copy(reloadedOptions);
+			}
+		}
+
+		public void Save()
+		{
+			using (Stream configFile =
+				MyGame.Files.OpenDynamicFile(MyGame.Files.ConfigFilePath, System.IO.FileMode.Truncate, FileAccess.Write)) {
+				SaveTo(configFile);
+			}		
 		}
 
 		public void SaveTo(Stream stream)
@@ -95,8 +125,8 @@ namespace MHUrho.StartupManagement
 
 		public void SetGraphicsMode(Graphics graphics)
 		{
-			graphics.SetMode(Resolution.X,
-							Resolution.Y,
+			graphics.SetMode(Resolution.Width,
+							Resolution.Height,
 							Fullscreen,
 							Borderless,
 							Resizable,
@@ -115,7 +145,7 @@ namespace MHUrho.StartupManagement
 						UnitDrawDistance = 200,
 						ProjectileDrawDistance = 200,
 						TerrainDrawDistance = 200,
-						Resolution = new IntVector2(1024,768),
+						Resolution = new Resolution(1024,768),
 						Fullscreen = false,
 						Borderless = false,
 						Resizable = false,
@@ -134,5 +164,47 @@ namespace MHUrho.StartupManagement
 					};
 		}
 
+
+		void Copy(AppOptions other)
+		{
+			UnitDrawDistance = other.UnitDrawDistance;
+
+			ProjectileDrawDistance = other.ProjectileDrawDistance;
+
+			TerrainDrawDistance = other.TerrainDrawDistance;
+
+			Resolution = other.Resolution;
+
+			Fullscreen = other.Fullscreen;
+
+			Borderless = other.Borderless;
+
+			Resizable = other.Resizable;
+
+			HighDPI = other.HighDPI;
+
+			VSync = other.VSync;
+
+			TripleBuffer = other.TripleBuffer;
+
+			Multisample = other.Multisample;
+
+			Monitor = other.Monitor;
+
+			RefreshRateCap = other.RefreshRateCap;
+
+			DebugHUD = other.DebugHUD;
+
+			CameraScrollSensitivity = other.CameraScrollSensitivity;
+
+			CameraRotationSensitivity = other.CameraRotationSensitivity;
+
+			MouseRotationSensitivity = other.MouseRotationSensitivity;
+
+			ZoomSensitivity = other.ZoomSensitivity;
+
+			MouseBorderCameraMovement = other.MouseBorderCameraMovement;
+
+		}
 	}
 }

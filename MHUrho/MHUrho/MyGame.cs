@@ -108,8 +108,10 @@ namespace MHUrho
 			}
 
 			//TODO: Copy from static if not present
-			Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read);
-			Config = AppOptions.LoadFrom(configFile);
+			using (Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
+				Config = AppOptions.LoadFrom(configFile);
+			}
+				
 			
 			PackageManager.CreateInstance(ResourceCache);
 
