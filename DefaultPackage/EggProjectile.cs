@@ -25,13 +25,14 @@ namespace DefaultPackage
 			Speed = XmlHelpers.GetFloat(speedElement);
 		}
 
-		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile) {
-			return new EggProjectileInstance(level, projectile, this);
+		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile)
+		{
+			return EggProjectileInstance.CreateNew(level, projectile, this);
 		}
 
-		public override ProjectileInstancePlugin GetInstanceForLoading()
+		public override ProjectileInstancePlugin GetInstanceForLoading(ILevelManager level, IProjectile projectile)
 		{
-			return new EggProjectileInstance(this);
+			return EggProjectileInstance.GetInstanceForLoading(level, projectile, this);
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
@@ -50,17 +51,27 @@ namespace DefaultPackage
 		BallisticProjectile flier;
 		readonly EggProjectileType myType;
 
-		public EggProjectileInstance(EggProjectileType myType)
+		public static EggProjectileInstance CreateNew(ILevelManager level, IProjectile projectile, EggProjectileType type)
 		{
-			this.myType = myType;
+			var instance = new EggProjectileInstance(level, projectile, type);
+			instance.flier = BallisticProjectile.CreateNew(level);
+			projectile.AddComponent(instance.flier);
+
+			return instance;
+		}
+
+		public static EggProjectileInstance GetInstanceForLoading(ILevelManager level,
+																IProjectile projectile,
+																EggProjectileType type)
+		{
+			return new EggProjectileInstance(level, projectile, type);
 		}
 
 		public EggProjectileInstance(ILevelManager level, IProjectile projectile, EggProjectileType myType)
 			:base(level, projectile)
 		{
 			this.myType = myType;
-			this.flier = BallisticProjectile.CreateNew(level);
-			projectile.AddComponent(flier);
+
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
@@ -68,10 +79,9 @@ namespace DefaultPackage
 			
 		}
 
-		public override void LoadState(ILevelManager level, IProjectile projectile, PluginDataWrapper pluginData) {
-			this.Level = level;
-			this.projectile = projectile;
-			this.flier = projectile.GetDefaultComponent<BallisticProjectile>();
+		public override void LoadState(PluginDataWrapper pluginData)
+		{
+			this.flier = Projectile.GetDefaultComponent<BallisticProjectile>();
 		}
 
 		public override void ReInitialize(ILevelManager level) {
@@ -92,14 +102,14 @@ namespace DefaultPackage
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
-			if (hitEntity is IBuilding || hitEntity.Player != projectile.Player) {
-				projectile.RemoveFromLevel();
+			if (hitEntity is IBuilding || hitEntity.Player != Projectile.Player) {
+				Projectile.RemoveFromLevel();
 			}	
 		}
 
 		public override void OnTerrainHit()
 		{
-			projectile.RemoveFromLevel();
+			Projectile.RemoveFromLevel();
 		}
 
 		public override void Dispose()
@@ -110,7 +120,7 @@ namespace DefaultPackage
 		bool ShootMovingTarget(IRangeTarget target)
 		{
 			int numSolutions = BallisticProjectile.GetVectorsForMovingTarget(target,
-																			projectile.Position,
+																			Projectile.Position,
 																			myType.Speed,
 																			out Vector3 lowVector,
 																			out Vector3 highVector);
@@ -126,7 +136,7 @@ namespace DefaultPackage
 		bool ShootStaticTarget(IRangeTarget target) {
 			if (BallisticProjectile.GetTimesAndVectorsForStaticTarget(
 									target.CurrentPosition,
-									projectile.Position,
+									Projectile.Position,
 									myType.Speed,
 									out var lowTime,
 									out var lowVector,

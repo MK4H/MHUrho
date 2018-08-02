@@ -7,9 +7,9 @@ using Urho;
 
 namespace MHUrho.EditorTools
 {
-	abstract class StaticRectangleTool : Tool
+	abstract class StaticSquareTool : Tool
 	{
-		protected StaticRectangleTool(IGameController input)
+		protected StaticSquareTool(IGameController input)
 			: base(input, new IntRect(0,0,0,0))
 		{
 

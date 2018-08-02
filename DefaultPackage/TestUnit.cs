@@ -31,12 +31,14 @@ namespace DefaultPackage
 
 		
 
-		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
-			return new TestUnitInstance(level, unit);
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
+		{
+			return TestUnitInstance.CreateNew(level, unit);
 		}
 
-		public override UnitInstancePlugin GetInstanceForLoading() {
-			return new TestUnitInstance();
+		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit)
+		{
+			return TestUnitInstance.GetInstanceForLoading(level, unit);
 		}
 
 
@@ -59,43 +61,62 @@ namespace DefaultPackage
 		HealthBar healthbar;
 		float health;
 
-		public TestUnitInstance() {
+		public static TestUnitInstance CreateNew(ILevelManager level, IUnit unit)
+		{
+			var plugin = new TestUnitInstance(level, unit);
+			plugin.walker = WorldWalker.CreateNew(plugin, level);
+			plugin.meele = MovingMeeleAttacker.CreateNew(plugin, level, true, new IntVector2(20, 20), 0.2f, 0.5f, 1);
+			var selector = UnitSelector.CreateNew(level);
 
+			unit.AddComponent(plugin.walker);
+			unit.AddComponent(selector);
+			unit.AddComponent(plugin.meele);
+
+			plugin.health = 100;
+
+			plugin.Init(selector, plugin.meele);
+
+			return plugin;
 		}
 
-		public TestUnitInstance(ILevelManager level, IUnit unit)
+		public static TestUnitInstance GetInstanceForLoading(ILevelManager level, IUnit unit)
+		{
+			return new TestUnitInstance(level, unit);
+		}
+
+		protected TestUnitInstance(ILevelManager level, IUnit unit)
 			:base(level, unit)
 		{
-			this.walker = WorldWalker.CreateNew(this, level);
-			this.meele = MovingMeeleAttacker.CreateNew(this, level, true, new IntVector2(20,20),0.2f, 0.5f, 1);
-			this.meele.Attacked += Attacked;
-			this.meele.TargetInRange += TargetInRange;
 
-			var selector = UnitSelector.CreateNew(level);
-			selector.Ordered += OnUnitOrdered;
 
-			unit.AddComponent(walker);
-			unit.AddComponent(selector);
-			unit.AddComponent(meele);
-
-			health = 100;
-			
-			Init();
 		}
 
 
 
-		public override void SaveState(PluginDataWrapper pluginDataStorage) {
+		public override void SaveState(PluginDataWrapper pluginDataStorage)
+		{
+			var writer = pluginDataStorage.GetWriterForWrappedSequentialData();
 
+			writer.StoreNext(health);
 		}
 
-		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
-			this.Level = level;
-			walker = unit.GetDefaultComponent<WorldWalker>();
+		public override void LoadState(PluginDataWrapper pluginData) {
+			walker = Unit.GetDefaultComponent<WorldWalker>();
+			meele = Unit.GetDefaultComponent<MovingMeeleAttacker>();
+
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			health = reader.GetNext<float>();
+
+			Init(Unit.GetDefaultComponent<UnitSelector>(),
+				meele);
 		}
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
+			if (byEntity.Player == Unit.Player) {
+				return;
+			}
+
 			health -= 10;
 
 			if (health < 0) {
@@ -113,37 +134,7 @@ namespace DefaultPackage
 
 
 
-		public bool GetTime(INode from, INode to, out float time)
-		{
-			time = (to.Position - from.Position).Length;
-			return true;
-		}
-
-		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
-		{
-			return (to - from).Length;
-		}
-
-		public void OnUnitOrdered(UnitSelector selector, Order order) {
-			if (order.PlatformOrder) {
-				switch (order) {
-					case MoveOrder moveOrder:
-						order.Executed = walker.GoTo(moveOrder.Target);
-						break;
-					case AttackOrder attackOrder:
-						if (attackOrder.Target.Player != Unit.Player ) {
-							meele.Attack(attackOrder.Target);
-							order.Executed = true;
-						}
-						
-						break;
-					case ShootOrder shootOrder:
-						order.Executed = false;
-						break;
-				}
-			}
-			
-		}
+	
 
 
 		public override void Dispose()
@@ -151,22 +142,51 @@ namespace DefaultPackage
 
 		}
 
-		void Init()
+		
+		
+
+		
+
+		void WorldWalker.IUser.GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
 		{
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 1, 0), new Vector2(0.5f, 0.1f), health);
+			getTime = GetTime;
+			getMinimalAproximatedTime = GetMinimalAproximatedTime;
 		}
 
-		public bool IsInRange(MeeleAttacker attacker, IEntity target)
+		bool GetTime(INode from, INode to, out float time)
 		{
-			return Vector3.Distance(Unit.Position, target.Position) < 1;
+			time = (to.Position - from.Position).Length;
+			return true;
 		}
 
-		public void Attacked(MeeleAttacker attacker, IEntity target)
+		float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
 		{
-			target.HitBy(Unit);
+			return (to - from).Length;
 		}
 
-		public IUnit PickTarget(List<IUnit> possibleTargets)
+		void OnUnitOrdered(UnitSelector selector, Order order)
+		{
+			if (order.PlatformOrder) {
+				switch (order) {
+					case MoveOrder moveOrder:
+						order.Executed = walker.GoTo(moveOrder.Target);
+						break;
+					case AttackOrder attackOrder:
+						if (attackOrder.Target.Player != Unit.Player) {
+							meele.Attack(attackOrder.Target);
+							order.Executed = true;
+						}
+
+						break;
+					case ShootOrder shootOrder:
+						order.Executed = false;
+						break;
+				}
+			}
+
+		}
+
+		IUnit PickTarget(List<IUnit> possibleTargets)
 		{
 			return possibleTargets.Count == 0
 						? null
@@ -176,9 +196,35 @@ namespace DefaultPackage
 																	: e2);
 		}
 
-		public void MoveTo(Vector3 position)
+		bool IsInRange(MeeleAttacker attacker, IEntity target)
+		{
+			return Vector3.Distance(Unit.Position, target.Position) < 1;
+		}
+
+		void Attacked(MeeleAttacker attacker, IEntity target)
+		{
+			target.HitBy(Unit);
+		}
+
+		void MovingMeeleAttacker.IUser.GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget)
+		{
+			moveTo = MoveTo;
+			isInRange = IsInRange;
+			pickTarget = PickTarget;
+		}
+
+		void MoveTo(Vector3 position)
 		{
 			walker.GoTo(Map.PathFinding.GetClosestNode(position));
+		}
+
+		void Init(UnitSelector selector, MovingMeeleAttacker meeleAttacker)
+		{
+			healthbar = new HealthBar(Level, Unit, new Vector3(0, 1, 0), new Vector2(0.5f, 0.1f), health);
+			selector.Ordered += OnUnitOrdered;
+			meele.Attacked += Attacked;
+			meele.TargetInRange += TargetInRange;
+
 		}
 
 		void TargetInRange(MeeleAttacker attacker, IEntity target)
@@ -186,17 +232,6 @@ namespace DefaultPackage
 			walker.Stop();
 		}
 
-		public void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
-		{
-			getTime = GetTime;
-			getMinimalAproximatedTime = GetMinimalAproximatedTime;
-		}
-
-		public void GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget)
-		{
-			moveTo = MoveTo;
-			isInRange = IsInRange;
-			pickTarget = PickTarget;
-		}
+		
 	}
 }

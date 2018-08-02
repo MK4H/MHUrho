@@ -79,12 +79,12 @@ namespace MHUrho.Logic
 			return projectile;
 		}
 
-		public ProjectileInstancePlugin GetNewInstancePlugin(Projectile projectile, ILevelManager levelManager) {
-			return typePlugin.CreateNewInstance(levelManager, projectile);
+		public ProjectileInstancePlugin GetNewInstancePlugin(IProjectile projectile, ILevelManager level) {
+			return typePlugin.CreateNewInstance(level, projectile);
 		}
 
-		public ProjectileInstancePlugin GetInstancePluginForLoading() {
-			return typePlugin.GetInstanceForLoading();
+		public ProjectileInstancePlugin GetInstancePluginForLoading(IProjectile projectile, ILevelManager level) {
+			return typePlugin.GetInstanceForLoading(level, projectile);
 		}
 
 		public bool IsInRange(Vector3 source, IRangeTarget target) {

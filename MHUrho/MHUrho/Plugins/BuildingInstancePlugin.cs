@@ -17,19 +17,6 @@ namespace MHUrho.Plugins
 			this.Building = building;
 		}
 
-		protected BuildingInstancePlugin() {
-
-		}
-
-		/// <summary>
-		/// Loads instance into the state saved in <paramref name="pluginData"/>
-		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="building"></param>
-		/// <param name="pluginData">stored state of the building plugin</param>
-		/// <returns>Instance loaded into saved state</returns>
-		public abstract void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData);
-
 		public virtual float? GetHeightAt(float x, float y)
 		{
 			return null;

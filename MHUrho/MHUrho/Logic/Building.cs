@@ -116,7 +116,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Building.BuildingPlugin.LoadState(level, Building, new PluginDataWrapper(storedBuilding.UserPlugin, level));
+				Building.BuildingPlugin.LoadState(new PluginDataWrapper(storedBuilding.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
@@ -148,7 +148,7 @@ namespace MHUrho.Logic
 								Vector3.Zero,
 								Quaternion.Identity);
 
-				Building.BuildingPlugin = type.GetInstancePluginForLoading();
+				Building.BuildingPlugin = type.GetInstancePluginForLoading(Building, level);
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
 					var componentLoader = 

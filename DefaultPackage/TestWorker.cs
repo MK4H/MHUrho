@@ -18,12 +18,14 @@ namespace DefaultPackage
 			return typeName == "TestWorker";
 		}
 
-		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
-			return new TestWorkerInstance(level, unit);
+		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
+		{
+			return TestWorkerInstance.CreateNew(level, unit);
 		}
 
-		public override UnitInstancePlugin GetInstanceForLoading() {
-			return new TestWorkerInstance();
+		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit)
+		{
+			return TestWorkerInstance.GetInstanceForLoading(level, unit);
 		}
 
 
@@ -104,16 +106,24 @@ namespace DefaultPackage
 
 		readonly PathVisitor pathVisitor;
 
-		public TestWorkerInstance(ILevelManager level, IUnit unit) : base(level, unit) {
-			walker = WorldWalker.CreateNew(this, level);
-			unit.AddComponent(walker);
+		public static TestWorkerInstance CreateNew(ILevelManager level, IUnit unit)
+		{
+			var instance = new TestWorkerInstance(level, unit);
+			instance.walker = WorldWalker.CreateNew(instance, level);
+			unit.AddComponent(instance.walker);
 
-			this.pathVisitor = new PathVisitor(this);
-
-			walker.OnMovementEnded += OnMovementFinished;
+			instance.walker.OnMovementEnded += instance.OnMovementFinished;
+			return instance;
 		}
 
-		public TestWorkerInstance() {
+		public static TestWorkerInstance GetInstanceForLoading(ILevelManager level, IUnit unit)
+		{
+			return new TestWorkerInstance(level, unit);
+		}
+
+		protected TestWorkerInstance(ILevelManager level, IUnit unit) 
+			: base(level, unit) {
+			
 			this.pathVisitor = new PathVisitor(this);
 		}
 
@@ -135,15 +145,13 @@ namespace DefaultPackage
 			indexedData.Store(2, homeGoing);
 		}
 
-		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
-			this.Level = level;
-			this.Unit = unit;
+		public override void LoadState( PluginDataWrapper pluginData) {
 			this.started = true;
 
 			var indexedData = pluginData.GetReaderForWrappedIndexedData();
-			WorkedBuilding = (TestBuildingInstance)level.GetBuilding(indexedData.Get<int>(1)).BuildingPlugin;
+			WorkedBuilding = (TestBuildingInstance)Level.GetBuilding(indexedData.Get<int>(1)).BuildingPlugin;
 			homeGoing = indexedData.Get<bool>(2);
-			walker = unit.GetDefaultComponent<WorldWalker>();
+			walker = Unit.GetDefaultComponent<WorldWalker>();
 		}
 
 

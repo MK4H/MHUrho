@@ -26,7 +26,7 @@ namespace MHUrho.UserInterface
 
 		public bool UIHovering => hovering > 0;
 
-		public Window CustomWindow { get; private set; }
+		public CustomElementsWindow CustomWindow { get; private set; }
 
 		public SelectionBar SelectionBar { get; private set; }
 
@@ -63,7 +63,7 @@ namespace MHUrho.UserInterface
 			gameUI = UI.Root.GetChild("GameUI");
 			
 
-			CustomWindow = (Window)gameUI.GetChild("CustomWindow");
+			CustomWindow = new CustomElementsWindow((Window)gameUI.GetChild("CustomWindow"));
 			CustomWindow.HoverBegin += UIHoverBegin;
 			CustomWindow.HoverEnd += UIHoverEnd;
 

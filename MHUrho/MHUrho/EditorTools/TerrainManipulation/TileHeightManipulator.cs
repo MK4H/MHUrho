@@ -15,7 +15,7 @@ namespace MHUrho.EditorTools.TerrainManipulation
 
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
-		readonly StaticRectangleToolMandK highlight;
+		readonly StaticSquareToolMandK highlight;
 		readonly IMap map;
 
 		bool mouseButtonDown;
@@ -27,7 +27,7 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			this.input = input;
 			this.ui = ui;
 			this.map = map;
-			highlight = new StaticRectangleToolMandK(input, ui, camera, new IntVector2(3, 3));
+			highlight = new StaticSquareToolMandK(input, ui, camera, 3);
 		}
 
 		public override void OnMouseDown(MouseButtonDownEventArgs e)

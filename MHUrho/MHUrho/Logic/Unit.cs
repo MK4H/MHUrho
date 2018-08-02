@@ -134,7 +134,7 @@ namespace MHUrho.Logic
 				// to this class, and for that i need to set the Position here
 				legNode.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
 
-				Unit.UnitPlugin = type.GetInstancePluginForLoading();
+				Unit.UnitPlugin = type.GetInstancePluginForLoading(Unit, level);
 
 				foreach (var defaultComponent in storedUnit.DefaultComponentData) {
 					var componentLoader =
@@ -159,7 +159,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Unit.UnitPlugin.LoadState(level, Unit, new PluginDataWrapper(storedUnit.UserPlugin, level));
+				Unit.UnitPlugin.LoadState(new PluginDataWrapper(storedUnit.UserPlugin, level));
 			}
 
 			public void FinishLoading() {

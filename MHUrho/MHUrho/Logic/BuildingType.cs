@@ -79,12 +79,12 @@ namespace MHUrho.Logic
 			return CanBuildIn(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), level);
 		}
  
-		public BuildingInstancePlugin GetNewInstancePlugin(Building building, ILevelManager level) {
+		public BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {
 			return Plugin.CreateNewInstance(level, building);
 		}
 
-		public BuildingInstancePlugin GetInstancePluginForLoading() {
-			return Plugin.GetInstanceForLoading();
+		public BuildingInstancePlugin GetInstancePluginForLoading(IBuilding building, ILevelManager level) {
+			return Plugin.GetInstanceForLoading(level, building);
 		}
 
 		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft) {

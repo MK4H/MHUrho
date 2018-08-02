@@ -929,16 +929,16 @@ namespace MHUrho.WorldMap
 		public void ChangeTileType(ITile centerTile, IntVector2 rectangleSize, TileType newType) 
 		{
 			IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
-			IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1,1));
+			IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1, 1));
 			SquishToMap(ref topLeft, ref bottomRight);
 
 			ForEachInRectangle(topLeft, bottomRight, (tile) => { tile.ChangeType(newType); });
 			graphics.ChangeTileType(topLeft, bottomRight, newType);
 		}
 
-		public void ChangeTileHeight(ITile tile, float heightDelta) 
+		public void ChangeTileHeight(ITile tile, float heightDelta)
 		{
-			throw new NotImplementedException();
+			ChangeTileHeight(tile, new IntVector2(1, 1), heightDelta);
 		}
 
 		/// <summary>
@@ -1040,7 +1040,7 @@ namespace MHUrho.WorldMap
 
 			//COPYING IS FREQUENT SOURCE OF ERRORS
 			IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
-			IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1, 1));
+			IntVector2 bottomRight = topLeft + (rectangleSize - new IntVector2(1,1));
 			SquishToMap(ref topLeft, ref bottomRight);
 
 			//Make the rectangle larger, to include the surrounding tiles
@@ -1322,7 +1322,7 @@ namespace MHUrho.WorldMap
 
 		public void HighlightRectangle(ITile center, IntVector2 size, Func<ITile, Color> getColor) {
 			IntVector2 topLeft = center.TopLeft - (size / 2);
-			IntVector2 bottomRight = center.TopLeft + (size / 2);
+			IntVector2 bottomRight = topLeft + (size - new IntVector2(1, 1));
 			HighlightRectangle(topLeft, bottomRight, getColor);
 		}
 
@@ -1352,7 +1352,7 @@ namespace MHUrho.WorldMap
 
 		public void HighlightRectangleBorder(ITile center, IntVector2 size, Color color) {
 			IntVector2 topLeft = center.TopLeft - (size / 2);
-			IntVector2 bottomRight = center.TopLeft + (size / 2);
+			IntVector2 bottomRight = topLeft + (size - new IntVector2(1, 1));
 			HighlightRectangleBorder(topLeft, bottomRight, color);
 		}
 
@@ -1747,5 +1747,6 @@ namespace MHUrho.WorldMap
 			}
 			return null;
 		}
+
 	}
 }

@@ -9,7 +9,7 @@ namespace MHUrho.Plugins
     public abstract class PlayerAITypePlugin : TypePlugin {
 		public abstract PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player);
 
-		public abstract PlayerAIInstancePlugin GetInstanceForLoading();
+		public abstract PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player);
 
 	}
 }

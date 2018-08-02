@@ -8,27 +8,18 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Plugins
 {
-    public abstract class PlayerAIInstancePlugin
+    public abstract class PlayerAIInstancePlugin : InstancePlugin
     {
-		public ILevelManager Level { get; protected set; }
-
-		public Map Map => Level.Map;
 
 		protected IPlayer Player;
 
-		protected PlayerAIInstancePlugin(ILevelManager level) {
-			this.Level = level;
+		protected PlayerAIInstancePlugin(ILevelManager level, IPlayer player)
+			:base(level)
+		{
+
+			this.Player = player;
 		}
 
-		protected PlayerAIInstancePlugin() {
-
-		}
-
-		public abstract void OnUpdate(float timeStep);
-
-		public abstract void SaveState(PluginDataWrapper pluginData);
-
-		public abstract void LoadState(ILevelManager level, IPlayer player, PluginDataWrapper pluginData);
 
 		public virtual void OnBuildingDestroyed(IBuilding building)
 		{

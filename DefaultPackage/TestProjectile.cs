@@ -19,13 +19,14 @@ namespace DefaultPackage
 			return typeName == "TestProjectile";
 		}
 
-		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile) {
-			return new TestProjectileInstance(level, projectile, this);
+		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile)
+		{
+			return TestProjectileInstance.CreateNew(level, projectile, this);
 		}
 
-		public override ProjectileInstancePlugin GetInstanceForLoading()
+		public override ProjectileInstancePlugin GetInstanceForLoading(ILevelManager level, IProjectile projectile)
 		{
-			return new TestProjectileInstance(this);
+			return TestProjectileInstance.GetInstanceForLoading(level, projectile, this);
 		}
 
 		public override bool IsInRange(Vector3 source, IRangeTarget target) {
@@ -63,19 +64,25 @@ namespace DefaultPackage
 		bool despawning;
 		float timeToDespawn = 6;
 
-		public TestProjectileInstance(TestProjectileType type)
+		public static TestProjectileInstance CreateNew(ILevelManager level, IProjectile projectile, TestProjectileType type)
+		{
+			var instance = new TestProjectileInstance(level, projectile, type);
+			instance.flier = BallisticProjectile.CreateNew(level);
+			projectile.AddComponent(instance.flier);
+
+			return instance;
+		}
+
+		public static TestProjectileInstance GetInstanceForLoading(ILevelManager level, IProjectile projectile, TestProjectileType type)
+		{
+			return new TestProjectileInstance(level, projectile, type);
+		}
+
+		protected TestProjectileInstance(ILevelManager level, IProjectile projectile, TestProjectileType type)
+			:base(level, projectile)
 		{
 			this.myType = type;
 			this.rng = new Random(seedRng.Next());
-		}
-
-		public TestProjectileInstance(ILevelManager level, IProjectile projectile, TestProjectileType type)
-			:base (level, projectile)
-		{
-			this.rng = new Random(seedRng.Next());
-			flier = BallisticProjectile.CreateNew(level);
-			projectile.AddComponent(flier);
-			myType = type;
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -84,7 +91,7 @@ namespace DefaultPackage
 				timeToDespawn -= timeStep;
 
 				if (timeToDespawn < 0) {
-					projectile.RemoveFromLevel();
+					Projectile.RemoveFromLevel();
 					return;
 				}
 			}
@@ -99,14 +106,14 @@ namespace DefaultPackage
 
 				movement = new Quaternion((float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5, (float)rng.NextDouble() * 5) * movement;
 
-				var newProjectile = Level.SpawnProjectile(projectile.ProjectileType, projectile.Position, projectile.Player,  movement);
+				var newProjectile = Level.SpawnProjectile(Projectile.ProjectileType, Projectile.Position, Projectile.Player,  movement);
 				((TestProjectileInstance) newProjectile.ProjectilePlugin).splits = 0;
 				
 			}
 
 			if (splits != 0) {
 				splits = 0;
-				projectile.RemoveFromLevel();
+				Projectile.RemoveFromLevel();
 			}
 			
 		}
@@ -120,10 +127,8 @@ namespace DefaultPackage
 			sequential.StoreNext(timeToDespawn);
 		}
 
-		public override void LoadState(ILevelManager level, IProjectile projectile, PluginDataWrapper pluginData) {
-			this.Level = level;
-			this.projectile = projectile;
-			this.flier = projectile.GetDefaultComponent<BallisticProjectile>();
+		public override void LoadState(PluginDataWrapper pluginData) {
+			this.flier = Projectile.GetDefaultComponent<BallisticProjectile>();
 
 			var sequential = pluginData.GetReaderForWrappedSequentialData();
 			sequential.MoveNext();
@@ -142,13 +147,13 @@ namespace DefaultPackage
 			splits = 10;
 			timeToDespawn = 6;
 			despawning = false;
-			projectile.TriggerCollisions = true;
+			Projectile.TriggerCollisions = true;
 		}
 
 		public override bool ShootProjectile(IRangeTarget target) {
 			
 			if (BallisticProjectile.GetTimesAndVectorsForStaticTarget(target.CurrentPosition,
-																	projectile.Position,
+																	Projectile.Position,
 																	myType.Speed,
 																	out var lowTime,
 																	out var lowVector,
@@ -168,13 +173,13 @@ namespace DefaultPackage
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
-			projectile.RemoveFromLevel();
+			Projectile.RemoveFromLevel();
 		}
 
 		public override void OnTerrainHit()
 		{
 			despawning = true;
-			projectile.TriggerCollisions = false;
+			Projectile.TriggerCollisions = false;
 		}
 
 		public override void Dispose()

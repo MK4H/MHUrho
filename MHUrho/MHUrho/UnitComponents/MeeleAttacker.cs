@@ -47,7 +47,25 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public IEntity Target { get; protected set; }
+
+		IEntity pTarget;
+		public IEntity Target {
+			get => pTarget;
+			protected set {
+				if (value == pTarget) {
+					return;
+				}
+
+				if (pTarget != null) {
+					pTarget.OnRemoval -= OnTargetDeath;
+				}
+
+				if (value != null) {
+					value.OnRemoval += OnTargetDeath;
+				}
+
+				pTarget = value;
+			} }
 
 		public event Attacked Attacked;
 		public event TargetInRange TargetInRange;
@@ -115,6 +133,11 @@ namespace MHUrho.UnitComponents
 			Target = entity;
 		}
 
+		public void StopAttacking()
+		{
+			Target = null;
+		}
+
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents)
 		{
 			base.AddedToEntity(entityDefaultComponents);
@@ -176,9 +199,16 @@ namespace MHUrho.UnitComponents
 									});
 
 			Target = PickTarget(unitsInRange);
-			TargetFound?.Invoke(this, Target);
+			if (Target != null) {
+				Target.OnRemoval += OnTargetDeath;
+				TargetFound?.Invoke(this, Target);
+			}
+			
 		}
 
-		
+		void OnTargetDeath()
+		{
+			Target = null;
+		}
 	}
 }

@@ -234,6 +234,10 @@ namespace MHUrho.Input
 		public void SwitchToFree() {
 			if (!FreeFloat) {
 				FreeFloat = true;
+
+				StopAllCameraMovement();
+				StopFollowing();
+
 				//Save the fixed position relative to holder
 				fixedPosition = cameraNode.Position;
 				fixedRotation = cameraNode.Rotation;
@@ -246,6 +250,8 @@ namespace MHUrho.Input
 		public void SwitchToFixed() {
 			if (FreeFloat) {
 				FreeFloat = false;
+
+				StopAllCameraMovement();
 
 				cameraHolder.Position = RoundPositionToMap(cameraHolder.Position - fixedPosition);
 

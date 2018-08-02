@@ -38,12 +38,12 @@ namespace DefaultPackage
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
-			return new TestAIPlayer(level, player,this);
+			return TestAIPlayer.CreateNew(level, player,this);
 		}
 
-		public override PlayerAIInstancePlugin GetInstanceForLoading()
+		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
-			return new TestAIPlayer(this);
+			return TestAIPlayer.GetInstanceForLoading(level, player, this);
 		}
 	}
 
@@ -88,18 +88,25 @@ namespace DefaultPackage
 		int state = 0;
 		float logicTimeout;
 
-		public TestAIPlayer(TestAIPlayerType type)
+		public static TestAIPlayer CreateNew(ILevelManager level, IPlayer player, TestAIPlayerType type)
+		{
+			var instance = new TestAIPlayer(level, player, type);
+			instance.spawnPoint = (level.Map.TopLeft + level.Map.BottomRight) / 2;
+
+			return instance;
+		}
+
+		public static TestAIPlayer GetInstanceForLoading(ILevelManager level, IPlayer player, TestAIPlayerType type)
+		{
+			return new TestAIPlayer(level, player, type);
+		}
+
+		protected TestAIPlayer(ILevelManager level, IPlayer player, TestAIPlayerType type)
+			:base(level, player)
 		{
 			this.type = type;
 			chickens = new List<ChickenWrapper>();
-		}
 
-		public TestAIPlayer(ILevelManager level, IPlayer player, TestAIPlayerType type)
-			:this(type)
-		{
-			this.Level = level;
-			this.Player = player;
-			spawnPoint = (Map.TopLeft + Map.BottomRight) / 2;
 		}
 
 		public override void OnUpdate(float timeStep)
@@ -151,17 +158,19 @@ namespace DefaultPackage
 			indexedData.Store(3, from chicken in chickens select chicken.Chicken.Unit.ID);
 		}
 
-		public override void LoadState(ILevelManager level, IPlayer player, PluginDataWrapper pluginData)
+		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var indexedData = pluginData.GetReaderForWrappedIndexedData();
-
-			this.Level = level;
-			this.Player = player;
 
 			state = indexedData.Get<int>(1);
 			spawnPoint = indexedData.Get<IntVector2>(2);
 			chickens = new List<ChickenWrapper>(from unit in indexedData.Get<IEnumerable<int>>(3)
-												select new ChickenWrapper((ChickenInstance)level.GetUnit(unit).Plugin));
+												select new ChickenWrapper((ChickenInstance)Level.GetUnit(unit).Plugin));
+
+		}
+
+		public override void Dispose()
+		{
 
 		}
 

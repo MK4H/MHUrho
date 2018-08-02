@@ -31,9 +31,13 @@ namespace MHUrho.Plugins
 
 		/// <summary>
 		/// Creates instance of <see cref="UnitInstancePlugin"/> that will be loaded by <see cref="UnitInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>
+		/// The <paramref name="unit"/> is NOT LOADED, there are no components or data loaded, load data in <see cref="UnitInstancePlugin.LoadState(ILevelManager, IUnit, PluginDataWrapper)"/>
+		///	The <paramref name="unit"/> is provided just to store the reference
 		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="unit">Unit belonging to the instance plugin</param>
 		/// <returns></returns>
-		public abstract UnitInstancePlugin GetInstanceForLoading();
+		public abstract UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit);
 
 
 		/// <summary>

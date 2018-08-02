@@ -83,9 +83,7 @@ namespace MHUrho.Logic
 					componentLoader.ConnectReferences(level);
 				}
 
-				Projectile.ProjectilePlugin.LoadState(level,
-											Projectile,
-											new PluginDataWrapper(storedProjectile.UserPlugin, level));
+				Projectile.ProjectilePlugin.LoadState(new PluginDataWrapper(storedProjectile.UserPlugin, level));
 
 
 			}
@@ -117,7 +115,7 @@ namespace MHUrho.Logic
 
 				node.NodeCollisionStart += Projectile.CollisionHandler;
 
-				Projectile.ProjectilePlugin = Projectile.ProjectileType.GetInstancePluginForLoading();
+				Projectile.ProjectilePlugin = Projectile.ProjectileType.GetInstancePluginForLoading(Projectile, level);
 
 				foreach (var defaultComponent in storedProjectile.DefaultComponentData) {
 					var componentLoader =

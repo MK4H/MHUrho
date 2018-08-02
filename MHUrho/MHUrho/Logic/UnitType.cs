@@ -110,8 +110,8 @@ namespace MHUrho.Logic
 			return Plugin.CreateNewInstance(level, unit);
 		}
 
-		public UnitInstancePlugin GetInstancePluginForLoading() {
-			return Plugin.GetInstanceForLoading();
+		public UnitInstancePlugin GetInstancePluginForLoading(IUnit unit, ILevelManager level) {
+			return Plugin.GetInstanceForLoading(level, unit);
 		}
 
 		public void Dispose() {

@@ -20,7 +20,7 @@ namespace MHUrho.EditorTools
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
 
-		readonly StaticRectangleToolMandK highlight;
+		readonly StaticSquareToolMandK highlight;
 
 		readonly ExclusiveCheckBoxes checkBoxes;
 
@@ -36,7 +36,7 @@ namespace MHUrho.EditorTools
 			this.input = input;
 			this.ui = ui;
 			this.tileTypes = new Dictionary<CheckBox, TileType>();
-			this.highlight = new StaticRectangleToolMandK(input, ui, camera, new IntVector2(3,3));
+			this.highlight = new StaticSquareToolMandK(input, ui, camera, 3);
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
 			foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {

@@ -38,8 +38,8 @@ namespace DefaultPackage
 			return new ChickenInstance(level, unit, this);
 		}
 
-		public override UnitInstancePlugin GetInstanceForLoading() {
-			return new ChickenInstance();
+		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit) {
+			return new ChickenInstance(level, unit);
 		}
 
 
@@ -160,7 +160,8 @@ namespace DefaultPackage
 		float shootTestTimer = timeBetweenTests;
 
 
-		public ChickenInstance()
+		public ChickenInstance(ILevelManager level, IUnit unit)
+			:base(level, unit)
 		{
 			pathVisitor = new PathVisitor(this);
 		}
@@ -183,16 +184,7 @@ namespace DefaultPackage
 			unit.AlwaysVertical = true;
 			pathVisitor = new PathVisitor(this);
 
-			Walker.OnMovementStarted += OnMovementStarted;
-			Walker.OnMovementEnded += OnMovementFinished;
-			Walker.OnMovementFailed += OnMovementFailed;
-
-			selector.Ordered += OnUnitOrdered;
-			selector.UnitSelected += OnUnitSelected;
-
-			Shooter.OnBeforeShotFired += BeforeShotFired;
-			Shooter.OnTargetAcquired += OnTargetAcquired;
-			Shooter.OnTargetDestroyed += OnTargetDestroyed;
+			RegisterEvents(Walker, Shooter, selector);
 
 			hp = 100;
 			Init(hp);
@@ -204,13 +196,13 @@ namespace DefaultPackage
 			sequentialData.StoreNext(hp);
 		}
 
-		public override void LoadState(ILevelManager level, IUnit unit, PluginDataWrapper pluginData) {
-			this.Level = level;
-			this.Unit = unit;
-			unit.AlwaysVertical = true;
-			animationController = unit.CreateComponent<AnimationController>();
-			Walker = unit.GetDefaultComponent<WorldWalker>();
-			Shooter = unit.GetDefaultComponent<Shooter>();
+		public override void LoadState(PluginDataWrapper pluginData) {
+			Unit.AlwaysVertical = true;
+			animationController = Unit.CreateComponent<AnimationController>();
+			Walker = Unit.GetDefaultComponent<WorldWalker>();
+			Shooter = Unit.GetDefaultComponent<Shooter>();
+
+			RegisterEvents(Walker, Shooter, Unit.GetDefaultComponent<UnitSelector>());
 
 			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
 			hp = sequentialData.GetNext<float>();
@@ -272,6 +264,27 @@ namespace DefaultPackage
 
 				Unit.FaceTowards(Unit.Position + diff);
 			}
+		}
+
+		public override void Dispose()
+		{
+			healthbar.Dispose();
+		}
+
+		void WorldWalker.IUser.GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
+		{
+			getTime = GetTime;
+			getMinimalAproximatedTime = GetMinimalAproximatedTime;
+		}
+
+		void Shooter.IUser.GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset)
+		{
+			getSourceOffset = GetSourceOffset;
+		}
+
+		void MovingRangeTarget.IUser.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints)
+		{
+			getWaypoints = GetWaypoints;
 		}
 
 		bool GetTime(INode from, INode to, out float time)
@@ -365,10 +378,7 @@ namespace DefaultPackage
 		}
 
 
-		public override void Dispose()
-		{
-			healthbar.Dispose();
-		}
+		
 
 		IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget movingRangeTarget)
 		{
@@ -380,21 +390,7 @@ namespace DefaultPackage
 			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), health);
 		}
 
-		public void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
-		{
-			getTime = GetTime;
-			getMinimalAproximatedTime = GetMinimalAproximatedTime;
-		}
-
-		public void GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset)
-		{
-			getSourceOffset = GetSourceOffset;
-		}
-
-		public void GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints)
-		{
-			getWaypoints = GetWaypoints;
-		}
+	
 
 		IRangeTarget SetExplicitTarget(IEntity targetEntity)
 		{
@@ -411,6 +407,22 @@ namespace DefaultPackage
 		void ExplicitTargetMoved(IRangeTarget target)
 		{
 			targetMoved = true;
+		}
+
+		void RegisterEvents(WorldWalker walker, Shooter shooter, UnitSelector selector)
+		{
+			walker.OnMovementStarted += OnMovementStarted;
+			walker.OnMovementEnded += OnMovementFinished;
+			walker.OnMovementFailed += OnMovementFailed;
+
+			
+
+			shooter.OnBeforeShotFired += BeforeShotFired;
+			shooter.OnTargetAcquired += OnTargetAcquired;
+			shooter.OnTargetDestroyed += OnTargetDestroyed;
+
+			selector.Ordered += OnUnitOrdered;
+			selector.UnitSelected += OnUnitSelected;
 		}
 	}
 }

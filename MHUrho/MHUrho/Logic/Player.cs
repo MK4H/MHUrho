@@ -81,7 +81,7 @@ namespace MHUrho.Logic
 					Player.friends.Add(level.GetPlayer(friendID));
 				}
 				//TODO: Human player type
-				Player.Plugin?.LoadState(level, Player, new PluginDataWrapper(storedPlayer.UserPlugin, level));
+				Player.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
@@ -95,7 +95,7 @@ namespace MHUrho.Logic
 				}
 				else {
 					Player = new Player(storedPlayer.Id, level, storedPlayer.Color.ToColor());
-					Player.Plugin = type.GetInstancePluginForLoading();
+					Player.Plugin = type.GetInstancePluginForLoading(Player, level);
 				}
 				
 			}

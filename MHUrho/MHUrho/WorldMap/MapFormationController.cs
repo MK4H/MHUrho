@@ -51,9 +51,10 @@ namespace MHUrho.WorldMap
 
 			bool executed = false;
 			while (units.IsValid()) {
-				if (!MoveToFormation(units.Current)) continue;
+				if (MoveToFormation(units.Current)) {
+					executed = true;
+				}
 
-				executed = true;
 				if (!units.TryMoveNext()) {
 					break;
 				}

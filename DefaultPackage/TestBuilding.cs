@@ -42,8 +42,8 @@ namespace DefaultPackage
 			return new TestBuildingInstance(level, building, workers);
 		}
 
-		public override BuildingInstancePlugin GetInstanceForLoading() {
-			return new TestBuildingInstance();
+		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building) {
+			return new TestBuildingInstance(level, building);
 		}
 
 		public override bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level) {
@@ -113,9 +113,6 @@ namespace DefaultPackage
 
 		float timeToNextResource = timeBetweenResourceSpawns;
 
-		public TestBuildingInstance() {
-
-		}
 
 		public TestBuildingInstance(ILevelManager level, IBuilding building, IUnit[] workers)
 			:base(level, building)
@@ -129,6 +126,12 @@ namespace DefaultPackage
 			}
 
 			AddPathfindingNodes();
+		}
+
+		public TestBuildingInstance(ILevelManager level, IBuilding building)
+			:base(level, building)
+		{
+
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -153,16 +156,14 @@ namespace DefaultPackage
 			sequentialData.StoreNext(timeToNextResource);
 		}
 
-		public override void LoadState(ILevelManager level, IBuilding building, PluginDataWrapper pluginData) {
-			this.Level = level;
-			this.Building = building;
+		public override void LoadState(PluginDataWrapper pluginData) {
 
 			var reader = pluginData.GetReaderForWrappedSequentialData();
 			reader.MoveNext();
 			workers = new TestWorkerInstance[reader.GetCurrent<int>()];
 			reader.MoveNext();
 			for (int i = 0; i < workers.Length; i++) {
-				workers[i] = (TestWorkerInstance)level.GetUnit(reader.GetCurrent<int>()).UnitPlugin;
+				workers[i] = (TestWorkerInstance)Level.GetUnit(reader.GetCurrent<int>()).UnitPlugin;
 				reader.MoveNext();
 			}
 

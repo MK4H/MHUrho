@@ -26,7 +26,7 @@ namespace MHUrho.Plugins
 		/// Creates instance of <see cref="ProjectileInstancePlugin"/> that will be loaded by <see cref="ProjectileInstancePlugin.LoadState(ILevelManager, Projectile, PluginDataWrapper)"/>
 		/// </summary>
 		/// <returns>New instance, that will be loaded in the next step</returns>
-		public abstract ProjectileInstancePlugin GetInstanceForLoading();
+		public abstract ProjectileInstancePlugin GetInstanceForLoading(ILevelManager level, IProjectile projectile);
 
 		public abstract bool IsInRange(Vector3 source, IRangeTarget target);
 	}

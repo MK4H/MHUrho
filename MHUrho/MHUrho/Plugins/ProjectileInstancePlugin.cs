@@ -10,26 +10,15 @@ namespace MHUrho.Plugins
 {
 	public abstract class ProjectileInstancePlugin : InstancePlugin
 	{
-		protected IProjectile projectile;
+		protected IProjectile Projectile;
 
 		protected ProjectileInstancePlugin(ILevelManager level, IProjectile projectile) 
 			:base(level)
 		{
-			this.projectile = projectile;
+			this.Projectile = projectile;
 		}
 
-		protected ProjectileInstancePlugin() {
 
-		}
-
-		/// <summary>
-		/// Loads instance into the state saved in <paramref name="pluginData"/>
-		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="projectile"></param>
-		/// <param name="pluginData">stored state of the building plugin</param>
-		/// <returns>Instance loaded into saved state</returns>
-		public abstract void LoadState(ILevelManager level, IProjectile projectile, PluginDataWrapper pluginData);
 
 		/// <summary>
 		/// Reinitializes this instance into default state, to allow for projectile pooling

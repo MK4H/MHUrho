@@ -72,6 +72,8 @@ namespace MHUrho.EditorTools {
 
 			checkBoxes.Show();
 
+			manipulator?.OnEnabled();
+
 			input.MouseDown += OnMouseDown;
 			input.MouseMove += OnMouseMoved;
 			input.MouseUp += OnMouseUp;
@@ -83,7 +85,8 @@ namespace MHUrho.EditorTools {
 
 			checkBoxes.Hide();
 
-			input.ShowCursor();
+			manipulator?.OnDisabled();
+
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMoved;
 			input.MouseUp -= OnMouseUp;

@@ -44,8 +44,8 @@ namespace MHUrho.Logic
 			return Plugin.CreateNewInstance(level, player);
 		}
 
-		public PlayerAIInstancePlugin GetInstancePluginForLoading() {
-			return Plugin.GetInstanceForLoading();
+		public PlayerAIInstancePlugin GetInstancePluginForLoading(IPlayer player, ILevelManager level) {
+			return Plugin.GetInstanceForLoading(level, player);
 		}
 
 		public void Dispose() {
