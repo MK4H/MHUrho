@@ -87,6 +87,8 @@
 	</element>
 	<element type="TileHeightToolTileHeightBox" style="SelectionBarCheckBox">
 	</element>
+	<element type="TerrainSmoothingToolCheckBox" style="SelectionBarCheckBox">
+	</element>
 	<element type="SelectedUnitButton" style="SelectionBarButton">
 		
 	</element>

@@ -75,6 +75,37 @@ namespace MHUrho.UserInterface
 			expansionWindow.RemoveCheckBox(box);
 		}
 
+		public void Select(CheckBox box)
+		{
+			if (!checkBoxes.Contains(box)) {
+				throw new ArgumentException("Checkbox was not part of this expandingSelector", nameof(box));
+			}
+
+			if (box == currentSelected) {
+				return;
+			}
+
+			SelectedBox(box);
+		}
+
+		public void Deselect()
+		{
+			if (currentSelected == null) {
+				return;
+			}
+
+			var oldSelected = currentSelected;
+			oldSelected.Checked = false;
+			currentSelected = null;
+
+			checkBox.Texture = defaultTexture;
+			checkBox.ImageRect = defaultImageRect;
+
+			HideExpansionWindow();
+
+			Selected?.Invoke(null, oldSelected);
+		}
+
 		void MainBoxToggled(ToggledEventArgs e)
 		{
 			//Toggled

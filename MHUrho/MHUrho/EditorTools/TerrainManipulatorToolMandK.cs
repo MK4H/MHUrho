@@ -64,6 +64,13 @@ namespace MHUrho.EditorTools {
 			checkBoxes.AddCheckBox(tileHeightCheckBox);
 			manipulators.Add(tileHeightCheckBox, new TileHeightManipulator(input, ui, camera, Map));
 
+			var terrainSmoothingCheckBox = ui.SelectionBar.CreateCheckBox();
+			terrainSmoothingCheckBox.Name = "TerrainSmoothing";
+			terrainSmoothingCheckBox.SetStyle("TerrainSmoothingToolCheckBox");
+
+			checkBoxes.AddCheckBox(terrainSmoothingCheckBox);
+			manipulators.Add(terrainSmoothingCheckBox, new TerrainSmoothingManipulator(input, ui, camera, Map));
+
 			checkBoxes.SelectedChanged += OnToggled;
 		}
 

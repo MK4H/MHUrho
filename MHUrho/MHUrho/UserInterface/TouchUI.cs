@@ -109,6 +109,16 @@ namespace MHUrho.UserInterface
 			throw new NotImplementedException();
 		}
 
+		public override void SelectTool(Tool tool)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void DeselectTools()
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void AddPlayer(IPlayer player) {
 			throw new NotImplementedException();
 		}

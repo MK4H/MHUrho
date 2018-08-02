@@ -10,22 +10,6 @@ using Urho.Gui;
 
 namespace MHUrho.WorldMap {
 
-	/// <summary>
-	/// Gets new height of the top left corner of the tile [x,y] from previous height and position of this corner
-	/// Can and WILL BE CALLED MULTIPLE TIMES FOR THE SAME X,Y COORDINATES
-	/// 
-	/// Used in a rectangle, for 3x3 rectangle of tiles called 4x4 times, to change even the bottom and right sides
-	/// of the bottom and right tiles
-	/// 
-	/// So for 3x3 rectangle with top left [0,0] it is called even at [3,0],[0,3] and [3,3]
-	/// </summary>
-	/// <param name="previousHeight">Previous height of the tile corner</param>
-	/// <param name="x">X coord of the tile corner</param>
-	/// <param name="y">Y coord of the tile corner</param>
-	/// <returns>New height of the tile top left corner</returns>
-	public delegate float ChangeTileHeightDelegate(float previousHeight, int x, int y);
-
-
 
 	/// <summary>
 	/// Gets new height of the [x,y] tile corner from previous height and position of the corner
@@ -386,6 +370,12 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
 		IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle);
 
+		//TODO: Comment
+		IEnumerable<ITile> GetTilesAroundCorner(int x, int y);
+
+		//TODO: Comment
+		IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords);
+
 		/// <summary>
 		/// Returns whether the <paramref name="rayQueryResult"/> is the Map (the ray hit the map), or if it the ray hit something else
 		/// </summary>
@@ -419,7 +409,7 @@ namespace MHUrho.WorldMap {
 
 		void ChangeTileHeight(ITile centerTile,
 							IntVector2 rectangleSize,
-							ChangeTileHeightDelegate newHeightFunction);
+							ChangeCornerHeightDelegate newHeightFunction);
 
 		float GetTerrainHeightAt(int x, int y);
 

@@ -165,6 +165,20 @@ namespace MHUrho.UserInterface
 			tools.Remove(toolElement);
 		}
 
+		public override void SelectTool(Tool tool)
+		{
+			foreach (var pair in tools) {
+				if (pair.Value == tool) {
+					toolSelection.Select((CheckBox)pair.Key);
+				}
+			}
+		}
+
+		public override void DeselectTools()
+		{
+			toolSelection.Deselect();
+		}
+
 		public override void AddPlayer(IPlayer player)
 		{
 
@@ -232,7 +246,10 @@ namespace MHUrho.UserInterface
 				tools[oldSelected].Disable();
 			}
 
-			tools[newSelected].Enable();
+			if (newSelected != null) {
+				tools[newSelected].Enable();
+			}
+			
 		}
 
 		void PlayerSelected(UIElement newSelected, UIElement oldSelected)

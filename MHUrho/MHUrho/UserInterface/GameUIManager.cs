@@ -32,6 +32,10 @@ namespace MHUrho.UserInterface
 
 		public abstract void RemoveTool(Tool tool);
 
+		public abstract void SelectTool(Tool tool);
+
+		public abstract void DeselectTools();
+
 		public abstract void AddPlayer(IPlayer player);
 
 		public abstract void RemovePlayer(IPlayer player);

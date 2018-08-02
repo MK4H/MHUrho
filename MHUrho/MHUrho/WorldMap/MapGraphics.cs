@@ -18,7 +18,7 @@ namespace MHUrho.WorldMap
 
 		class MapGraphics : IDisposable {
 
-			const float HighlightHeightAboveTerain = 0.005f;
+			const float HighlightHeightAboveTerain = 0.02f;
 
 			static Vector3 HighlightAboveTerrainOffset = new Vector3(0, HighlightHeightAboveTerain, 0);
 

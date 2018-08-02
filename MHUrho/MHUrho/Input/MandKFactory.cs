@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.EditorTools;
 using MHUrho.Logic;
 using Urho;
 
@@ -29,6 +30,16 @@ namespace MHUrho.Input
 		public override IMenuController CreateMenuController()
 		{
 			return new MenuMandKController(game);
+		}
+
+		public override ToolManager CreateToolManager(IGameController gameController, CameraMover cameraMover)
+		{
+			var typedController = gameController as GameMandKController;
+			if (typedController == null) {
+				throw new ArgumentException("Wrong type of game controller", nameof(gameController));
+			}
+
+			return new ToolManagerMandK(typedController, typedController.UIManager, cameraMover);
 		}
 	}
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MHUrho.Control;
+using MHUrho.EditorTools;
 using MHUrho.EntityInfo;
 using MHUrho.Input;
 using MHUrho.Packaging;
@@ -70,6 +71,8 @@ namespace MHUrho.Logic
 		public IGameController Input { get; protected set; }
 
 		public CameraMover Camera { get; private set; }
+
+		public ToolManager ToolManager { get; private set; }
 
 		//TODO: Platform independent
 		ICameraController cameraController;
@@ -211,6 +214,7 @@ namespace MHUrho.Logic
 				//TODO: Move this inside the foreach
 				level.Input = game.ControllerFactory.CreateGameController(level.Camera, level, octree, firstPlayer);
 				level.cameraController = game.ControllerFactory.CreateCameraController(level.Input, level.Camera);
+				level.ToolManager = game.ControllerFactory.CreateToolManager(level.Input, level.Camera);
 
 				loadingProgress.EnterPhase("Connecting references");
 				//Connect references
@@ -290,6 +294,7 @@ namespace MHUrho.Logic
 					game.ControllerFactory.CreateGameController(CurrentLevel.Camera, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
 
 				CurrentLevel.cameraController = game.ControllerFactory.CreateCameraController(CurrentLevel.Input, CurrentLevel.Camera);
+				CurrentLevel.ToolManager = game.ControllerFactory.CreateToolManager(CurrentLevel.Input, CurrentLevel.Camera);
 
 				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
 

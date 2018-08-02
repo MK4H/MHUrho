@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MHUrho.EditorTools;
 using MHUrho.Input;
 using MHUrho.Packaging;
 using MHUrho.Storage;
@@ -38,6 +39,8 @@ namespace MHUrho.Logic {
 		IGameController Input { get; }
 
 		CameraMover Camera { get; }
+
+		ToolManager ToolManager { get; }
 
 		StLevel Save();
 

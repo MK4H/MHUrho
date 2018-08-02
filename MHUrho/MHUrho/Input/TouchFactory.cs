@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.EditorTools;
 using MHUrho.Logic;
 using Urho;
 
@@ -28,6 +29,11 @@ namespace MHUrho.Input
 		public override IMenuController CreateMenuController()
 		{
 			return new MenuTouchController(game);
+		}
+
+		public override ToolManager CreateToolManager(IGameController gameController, CameraMover cameraMover)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
