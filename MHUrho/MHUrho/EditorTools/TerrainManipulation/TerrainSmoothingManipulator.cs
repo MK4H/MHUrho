@@ -46,13 +46,19 @@ namespace MHUrho.EditorTools.TerrainManipulation
 		{
 			mouseButtonDown = true;
 			smoothedCenter = input.GetTileUnderCursor();
-			map.ChangeTileHeight(smoothedCenter, highlight.Size, CalculateTileHeight);
+			if (smoothedCenter != null) {
+				map.ChangeTileHeight(smoothedCenter, highlight.Size, CalculateTileHeight);
+			}
 		}
 
 		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
 		{
 			if (mouseButtonDown) {
 				ITile centerTile = input.GetTileUnderCursor();
+				if (centerTile == null) {
+					return;
+				}
+
 				if (smoothedCenter != centerTile) {
 					map.ChangeTileHeight(centerTile, highlight.Size, CalculateTileHeight);
 					smoothedCenter = centerTile;

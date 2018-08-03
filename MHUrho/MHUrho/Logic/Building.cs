@@ -87,7 +87,7 @@ namespace MHUrho.Logic
 				foreach (var component in building.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
 					if (defaultComponent != null) {
-						stBuilding.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
+						stBuilding.DefaultComponents.Add(defaultComponent.SaveState());
 					}
 				}
 
@@ -150,11 +150,10 @@ namespace MHUrho.Logic
 
 				Building.BuildingPlugin = type.GetInstancePluginForLoading(Building, level);
 
-				foreach (var defaultComponent in storedBuilding.DefaultComponentData) {
+				foreach (var defaultComponent in storedBuilding.DefaultComponents) {
 					var componentLoader = 
 						level.DefaultComponentFactory
-							.StartLoadingComponent(defaultComponent.Key,
-													defaultComponent.Value,
+							.StartLoadingComponent(defaultComponent,
 													level,
 													Building.BuildingPlugin);
 

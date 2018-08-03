@@ -427,6 +427,16 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public IEnumerable<ITile> GetTilesAroundCorner(int x, int y)
+			{
+				throw new NotImplementedException();
+			}
+
+			public IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords)
+			{
+				throw new NotImplementedException();
+			}
+
 			public bool IsRaycastToMap(RayQueryResult rayQueryResult)
 			{
 				throw new NotImplementedException();
@@ -477,10 +487,11 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, ChangeTileHeightDelegate newHeightFunction)
+			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, ChangeCornerHeightDelegate newHeightFunction)
 			{
 				throw new NotImplementedException();
 			}
+
 
 			public float GetTerrainHeightAt(int x, int y) {
 				throw new NotImplementedException();

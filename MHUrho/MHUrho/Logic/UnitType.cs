@@ -80,6 +80,11 @@ namespace MHUrho.Logic
 									 package.PackageManager);
 		}
 
+		public void ClearCache()
+		{
+			//TODO: If i add any cache dependent on current level, clear it here
+		}
+
 
 		public bool CanSpawnAt(ITile tile) {
 			return Plugin.CanSpawnAt(tile);

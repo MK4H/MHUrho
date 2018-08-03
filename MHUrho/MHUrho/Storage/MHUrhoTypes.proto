@@ -17,3 +17,84 @@ message StPathEnumerator {
 message StPath {
 	repeated StWaypoint waypoints = 1;
 }
+
+message StDefaultComponent{
+	oneof component{
+		StWorldWalker worldWalker = 1;
+		StBallisticProjectile ballisticProjectile = 2;
+		StMovingMeeleAttacker movingMeeleAttacker = 3;
+		StStaticMeeleAttacker staticMeeleAttacker = 4;
+		StMovingRangeTarget movingRangeTarget = 5;
+		StStaticRangeTarget staticRangeTarget = 6;
+		StShooter shooter = 7;
+		StUnitSelector unitSelector = 8;
+		StClicker clicker = 9;
+	}
+}
+
+message StWorldWalker {
+	bool enabled = 1;
+	StPath path = 2;
+}
+
+message StBallisticProjectile {
+	bool enabled = 1;
+	StVector3 movement = 2;
+}
+
+
+
+message StMovingMeeleAttacker {
+	bool enabled = 1;
+	bool searchForTarget = 2;
+	StIntVector2 searchRectangleSize = 3;
+	float timeBetweenSearches = 4;
+	float timeBetweenPositionChecks = 5;
+	float timeBetweenAttacks = 6;
+	int32 targetID = 7;
+	float timeToNextSearch = 8;
+	float timeToNextPositionCheck = 9;
+	float timeToNextAttack = 10;
+}
+
+message StStaticMeeleAttacker {
+	bool enabled = 1;
+	bool searchForTarget = 2;
+	StIntVector2 searchRectangleSize = 3;
+	float timeBetweenSearches = 4;
+	float timeBetweenAttacks = 5;
+	int32 targetID = 6;
+	float timeToNextSearch = 7;
+	float timeToNextAttack = 8;
+}
+
+message StMovingRangeTarget {
+	bool enabled = 1;
+	int32 instanceID = 2;
+	StVector3 offset = 3;
+}
+
+message StStaticRangeTarget {
+	bool enabled = 1;
+	int32 instanceID = 2;
+	StVector3 position = 3;
+}
+
+message StShooter {
+	bool enabled = 1;
+	int32 projectileTypeID = 2;
+	float rateOfFire = 3;
+	bool searchForTarget = 4;
+	float targetSearchDelay = 5;
+	float shotDelay = 6;
+	float searchDelay = 7;
+	int32 targetID = 8;
+}
+
+message StUnitSelector {
+	bool enabled = 1;
+}
+
+message StClicker {
+	bool enabled = 1;
+}

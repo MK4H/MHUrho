@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.Storage;
@@ -23,22 +24,24 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(StaticMeeleAttacker staticMeele)
+			public static StDefaultComponent SaveState(StaticMeeleAttacker staticMeele)
 			{
-				var writer = new SequentialPluginDataWriter(staticMeele.Level);
-				writer.StoreNext(staticMeele.SearchForTarget);
-				writer.StoreNext(staticMeele.SearchRectangleSize);
-				writer.StoreNext(staticMeele.TimeBetweenSearches);
-				writer.StoreNext(staticMeele.TimeBetweenAttacks);
-				
-				writer.StoreNext(staticMeele.Enabled);
-				writer.StoreNext(staticMeele.Target.ID);
-				writer.StoreNext(staticMeele.TimeToNextSearch);
-				writer.StoreNext(staticMeele.TimeToNextAttack);
-				return writer.PluginData;
+				var storedStaticMeeleAttacker = new StStaticMeeleAttacker
+												{
+													Enabled = staticMeele.Enabled,
+													SearchForTarget = staticMeele.SearchForTarget,
+													SearchRectangleSize = staticMeele.SearchRectangleSize.ToStIntVector2(),
+													TimeBetweenAttacks = staticMeele.TimeBetweenAttacks,
+													TimeBetweenSearches = staticMeele.TimeBetweenSearches,
+													TimeToNextAttack = staticMeele.TimeToNextAttack,
+													TimeToNextSearch = staticMeele.TimeToNextSearch,
+													TargetID = staticMeele.Target?.ID ?? 0
+												};
+
+				return new StDefaultComponent {StaticMeeleAttacker = storedStaticMeeleAttacker};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData)
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
 			{
 				var user = plugin as IUser;
 				if (user == null) {
@@ -46,29 +49,26 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(MovingMeeleAttacker.IUser)} interface", nameof(plugin));
 				}
 
-				var reader = new SequentialPluginDataReader(storedData, level);
-				var searchForTarget = reader.GetNext<bool>();
-				var searchRectangleSize = reader.GetNext<IntVector2>();
-				var timeBetweenSearches = reader.GetNext<float>();
-				var timeBetweenAttacks = reader.GetNext<float>();
-				
-				var enabled = reader.GetNext<bool>();
-				targetID = reader.GetNext<int>();
-				var timeToNextSearch = reader.GetNext<float>();
-				var timeToNextAttack = reader.GetNext<float>();
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.StaticMeeleAttacker) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
+
+				var storedStaticMeeleAttacker = storedData.StaticMeeleAttacker;
 
 				user.GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
 
 				StaticMeele = new StaticMeeleAttacker(level,
-													searchForTarget,
-													searchRectangleSize,
-													timeBetweenSearches,
-													timeBetweenAttacks,
-													enabled,
-													timeToNextSearch,
-													timeToNextAttack,
+													storedStaticMeeleAttacker.SearchForTarget,
+													storedStaticMeeleAttacker.SearchRectangleSize.ToIntVector2(),
+													storedStaticMeeleAttacker.TimeBetweenSearches,
+													storedStaticMeeleAttacker.TimeBetweenAttacks,
+													storedStaticMeeleAttacker.Enabled,
+													storedStaticMeeleAttacker.TimeToNextSearch,
+													storedStaticMeeleAttacker.TimeToNextAttack,
 													isInRange,
 													pickTarget);
+
+				targetID = storedStaticMeeleAttacker.TargetID;
 			}
 
 			public override void ConnectReferences(LevelManager level)
@@ -90,14 +90,6 @@ namespace MHUrho.UnitComponents
 		public interface IUser {
 			void GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
 		}
-
-		public static string ComponentName = nameof(StaticMeeleAttacker);
-		public static DefaultComponents ComponentID = DefaultComponents.StaticMeele;
-
-		public override string ComponentTypeName => ComponentName;
-
-		public override DefaultComponents ComponentTypeID => ComponentID;
-
 
 		protected StaticMeeleAttacker(ILevelManager level,
 									bool searchForTarget,
@@ -146,7 +138,7 @@ namespace MHUrho.UnitComponents
 			return new StaticMeeleAttacker(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, isInRange, pickTarget);
 		}
 
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}

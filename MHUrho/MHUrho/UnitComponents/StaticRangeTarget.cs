@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
@@ -23,27 +24,31 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(StaticRangeTarget staticRangeTarget) {
-				var sequentialData = new SequentialPluginDataWriter(staticRangeTarget.Level);
-				sequentialData.StoreNext(staticRangeTarget.InstanceID);
-				sequentialData.StoreNext(staticRangeTarget.CurrentPosition);
-				return sequentialData.PluginData;
+			public static StDefaultComponent SaveState(StaticRangeTarget staticRangeTarget)
+			{
+				var storedStaticRangeTarget = new StStaticRangeTarget
+											{
+												Enabled = staticRangeTarget.Enabled,
+												InstanceID = staticRangeTarget.InstanceID,
+												Position = staticRangeTarget.CurrentPosition.ToStVector3()
+											};
+
+				return new StDefaultComponent {StaticRangeTarget = storedStaticRangeTarget};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				
-				var sequentialData = new SequentialPluginDataReader(storedData, level);
-				sequentialData.MoveNext();
-				int instanceID = sequentialData.GetCurrent<int>();
-				sequentialData.MoveNext();
-				Vector3 position = sequentialData.GetCurrent<Vector3>();
-				sequentialData.MoveNext();
-				bool enabled = sequentialData.GetCurrent<bool>();
-				sequentialData.MoveNext();
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
 
-				StaticRangeTarget = new StaticRangeTarget(instanceID, level, position)
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.StaticRangeTarget) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
+
+				var storedStaticRangeTarget = storedData.StaticRangeTarget;
+
+				StaticRangeTarget = new StaticRangeTarget(storedStaticRangeTarget.InstanceID,
+														level, 
+														storedStaticRangeTarget.Position.ToVector3())
 									{
-										Enabled = enabled
+										Enabled = storedStaticRangeTarget.Enabled
 									};
 				level.LoadRangeTarget(StaticRangeTarget);
 			}
@@ -60,13 +65,6 @@ namespace MHUrho.UnitComponents
 				return new Loader();
 			}
 		}
-
-
-
-		public static string ComponentName = nameof(StaticRangeTarget);
-		public static DefaultComponents ComponentID = DefaultComponents.StaticRangeTarget;
-		public override string ComponentTypeName => ComponentName;
-		public override DefaultComponents ComponentTypeID => ComponentID;
 
 		public override bool Moving => false;
 
@@ -94,7 +92,7 @@ namespace MHUrho.UnitComponents
 			return newTarget;
 		}
 
-		public override PluginData SaveState() {
+		public override StDefaultComponent SaveState() {
 			return Loader.SaveState(this);
 		}
 

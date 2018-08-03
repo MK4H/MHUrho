@@ -30,6 +30,8 @@ namespace MHUrho.Logic
 
 		readonly Queue<Projectile> projectilePool;
 
+		bool enablePooling = true;
+
 		ProjectileTypePlugin typePlugin;
 
 		public ProjectileType() {
@@ -49,6 +51,17 @@ namespace MHUrho.Logic
 																		  Name);
 			typePlugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 								  package.PackageManager);
+		}
+
+		public void ClearCache()
+		{
+			enablePooling = false;
+			foreach (var projectile in projectilePool) {
+				projectile.Dispose();
+			}
+
+			projectilePool.Clear();
+			enablePooling = true;
 		}
 
 
@@ -101,7 +114,7 @@ namespace MHUrho.Logic
 		}
 
 		internal bool ProjectileDespawn(Projectile projectile) {
-			if (projectilePool.Count >= 124) return false;
+			if (projectilePool.Count >= 124 || !enablePooling) return false;
 
 			projectilePool.Enqueue(projectile);
 			return true;

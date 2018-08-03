@@ -10,5 +10,12 @@ namespace MHUrho.EditorTools
 		protected List<Tool> Tools = new List<Tool>();
 
 		public abstract void DisableTools();
+
+		public virtual void ClearPlayerSpecificState()
+		{
+			foreach (var tool in Tools) {
+				tool.ClearPlayerSpecificState();
+			}
+		}
 	}
 }

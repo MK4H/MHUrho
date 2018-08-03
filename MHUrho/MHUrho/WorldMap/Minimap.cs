@@ -213,12 +213,12 @@ namespace MHUrho.WorldMap
 
 			foreach (var unit in tile.Units) {
 				if (unit != null) {
-					return unit.Player.Color.ToUInt();
+					return unit.Player.Insignia.Color.ToUInt();
 				}
 			}
 
 			if (tile.Building != null) {
-				return tile.Building.Player.Color.ToUInt();
+				return tile.Building.Player.Insignia.Color.ToUInt();
 			}
 
 			return tile.Type.MinimapColor.ToUInt();

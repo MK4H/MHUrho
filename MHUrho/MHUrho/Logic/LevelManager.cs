@@ -287,7 +287,7 @@ namespace MHUrho.Logic
 			void StartLevel()
 			{
 				//TODO: Temporary player, COLOR 
-				Player newPlayer = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, Color.Red);
+				Player newPlayer = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, PlayerInsignia.Insignias[0]);
 				CurrentLevel.LevelNode.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
 				CurrentLevel.Input =
@@ -301,7 +301,7 @@ namespace MHUrho.Logic
 				newPlayer = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players),
 													CurrentLevel,
 													PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"),
-													Color.Blue);
+													PlayerInsignia.Insignias[1]);
 				CurrentLevel.LevelNode.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
 				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
@@ -356,6 +356,7 @@ namespace MHUrho.Logic
 				thing.Dispose();
 			}
 
+			PackageManager.ActiveGame.ClearCaches();
 			HealthBar.DisposeMaterials();
 			Input.Dispose();
 			cameraController.Dispose();
@@ -780,7 +781,7 @@ namespace MHUrho.Logic
 		const int MaxTries = 10000000;
 		int GetNewID<T>(IDictionary<int, T> dictionary) {
 			int id, i = 0;
-			while (dictionary.ContainsKey(id = rng.Next()) && id == 0) {
+			while (dictionary.ContainsKey(id = rng.Next()) || id == 0) {
 				i++;
 				if (i > MaxTries) {
 					//TODO: Exception

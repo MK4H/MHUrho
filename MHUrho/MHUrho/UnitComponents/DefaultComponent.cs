@@ -32,11 +32,7 @@ namespace MHUrho.UnitComponents
 
 	public abstract class DefaultComponent : Component, IByTypeQueryable {
 
-		public abstract DefaultComponents ComponentTypeID{ get; }
-
-		public abstract string ComponentTypeName { get; }
-
-		public abstract PluginData SaveState();
+		public abstract StDefaultComponent SaveState();
 
 		public IEntity Entity { get; private set; }
 

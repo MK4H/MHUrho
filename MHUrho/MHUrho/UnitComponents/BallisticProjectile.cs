@@ -27,24 +27,28 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(BallisticProjectile ballisticProjectile) {
-				var sequentialData = new SequentialPluginDataWriter(ballisticProjectile.Level);
-				sequentialData.StoreNext(ballisticProjectile.Movement);
-				sequentialData.StoreNext(ballisticProjectile.Enabled);
-				return sequentialData.PluginData;
+			public static StDefaultComponent SaveState(BallisticProjectile ballisticProjectile)
+			{
+				var storedProjectile = new StBallisticProjectile
+										{
+											Enabled = ballisticProjectile.Enabled,
+											Movement = ballisticProjectile.Movement.ToStVector3()
+										};
+
+				return new StDefaultComponent {BallisticProjectile = storedProjectile};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.BallisticProjectile) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
 
-				var sequentialData = new SequentialPluginDataReader(storedData, level);
-				var movement = sequentialData.GetCurrent<Vector3>();
-				sequentialData.MoveNext();
-				var enabled = sequentialData.GetCurrent<bool>();
-				sequentialData.MoveNext();
+				var storedBallisticProjectile = storedData.BallisticProjectile;
+			
 
 				BallisticProjectile = new BallisticProjectile(level,
-															movement,
-															enabled);
+															storedBallisticProjectile.Movement.ToVector3(),
+															storedBallisticProjectile.Enabled);
 
 			}
 
@@ -61,13 +65,6 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-
-		public static DefaultComponents ComponentID = DefaultComponents.UnpoweredFlier;
-		public static string ComponentName = nameof(BallisticProjectile);
-
-		public override DefaultComponents ComponentTypeID => ComponentID;
-
-		public override string ComponentTypeName => ComponentName;
 
 		public Vector3 Movement { get; private set; }
 
@@ -320,7 +317,7 @@ namespace MHUrho.UnitComponents
 			Movement = initialMovement;
 		}
 
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}

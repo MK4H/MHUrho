@@ -3,6 +3,7 @@ package MHUrho.Storage;
 
 import "UrhoTypes.proto";
 import "PluginStorage.proto";
+import "MHUrhoTypes.proto";
 
 message StLevel {
 	StMap map = 1;
@@ -12,8 +13,6 @@ message StLevel {
 	repeated StProjectile projectiles = 5;
 	string packageName = 6;
 }
-
-
 
 message StTile {
 	repeated int32 unitIDs = 2;
@@ -43,7 +42,7 @@ message StUnit {
 	int32 playerID = 4;
 	int32 targetUnitID = 5;
 	PluginData userPlugin = 6;
-	map<int32 ,PluginData> defaultComponentData = 7;
+	repeated StDefaultComponent defaultComponents = 7;
 }
 
 message StProjectile {
@@ -52,7 +51,7 @@ message StProjectile {
 	StVector3 position = 3;
 	int32 playerID = 4;
 	PluginData userPlugin = 5;
-	map<int32, PluginData> defaultComponentData = 6;
+	repeated StDefaultComponent defaultComponents = 6;
 }
 
 message StBuilding {
@@ -61,14 +60,14 @@ message StBuilding {
 	StIntVector2 location = 3;
 	int32 playerID = 4;
 	PluginData userPlugin = 6;
-	map<int32 ,PluginData> defaultComponentData = 7;
+	repeated StDefaultComponent defaultComponents = 7;
 }
 
 message StPlayer {
 	int32 id = 1;
 	int32 typeID = 2;
+	int32 insigniaID = 3;
 	//TODO: Redundant references both ways, could just store it in building/unit and connect it from there
-	StColor color = 3;
 	repeated int32 unitIDs = 4;
 	repeated int32 buildingIDs = 5;
 	repeated int32 friendPlayerIDs = 6;

@@ -36,54 +36,54 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(Shooter shooter)
+			public static StDefaultComponent SaveState(Shooter shooter)
 			{
-				var sequentialData = new SequentialPluginDataWriter(shooter.Level);
+				var storedShooter = new StShooter
+									{
+										Enabled = shooter.Enabled,
+										ProjectileTypeID = shooter.projectileType.ID,
+										RateOfFire = shooter.RateOfFire,
+										SearchDelay = shooter.searchDelay,
+										SearchForTarget = shooter.SearchForTarget,
+										ShotDelay = shooter.shotDelay,
+										TargetID = shooter.Target?.InstanceID ?? 0,
+										TargetSearchDelay = shooter.TargetSearchDelay
+									};
 
-				sequentialData.StoreNext<float>(shooter.RateOfFire);
-				sequentialData.StoreNext<int>(shooter.projectileType.ID);
-				sequentialData.StoreNext<bool>(shooter.SearchForTarget);
-				sequentialData.StoreNext<float>(shooter.TargetSearchDelay);
-				sequentialData.StoreNext<float>(shooter.shotDelay);
-				sequentialData.StoreNext<float>(shooter.searchDelay);
-				sequentialData.StoreNext<int>(shooter.Target?.InstanceID ?? 0);
-				sequentialData.StoreNext<bool>(shooter.Enabled);
 				
 
-				return sequentialData.PluginData;
+				return new StDefaultComponent{Shooter = storedShooter};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
 				var user = plugin as IUser;
 				if (user == null) {
 					throw new
 						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
-				var sequentialDataReader = new SequentialPluginDataReader(storedData, level);
-				var rateOfFire = sequentialDataReader.GetNext<float>();
-				var projectileTypeID = sequentialDataReader.GetNext<int>();
-				var searchForTarget = sequentialDataReader.GetNext<bool>();
-				var targetSearchDelay = sequentialDataReader.GetNext<float>();
-				var shotDelay = sequentialDataReader.GetNext<float>();
-				var searchDelay = sequentialDataReader.GetNext<float>();
-				targetID = sequentialDataReader.GetNext<int>();
-				var enabled = sequentialDataReader.GetNext<bool>();
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.Shooter) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
+
+				var storedShooter = storedData.Shooter;
 
 				user.GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
 
 				Shooter = new Shooter(level,
-									level.PackageManager.ActiveGame.GetProjectileType(projectileTypeID),
-									rateOfFire,
+									level.PackageManager.ActiveGame.GetProjectileType(storedShooter.ProjectileTypeID),
+									storedShooter.RateOfFire,
 									getSourceOffset)
 						{
-							SearchForTarget = searchForTarget,
-							TargetSearchDelay = targetSearchDelay,
-							shotDelay = shotDelay,
-							searchDelay = searchDelay,
-							Enabled = enabled
+							SearchForTarget = storedShooter.SearchForTarget,
+							TargetSearchDelay = storedShooter.TargetSearchDelay,
+							shotDelay = storedShooter.ShotDelay,
+							searchDelay = storedShooter.SearchDelay,
+							Enabled = storedShooter.Enabled
 
-						};
+				};
+
+				targetID = storedShooter.TargetID;
 			}
 
 			public override  void ConnectReferences(LevelManager level)
@@ -110,10 +110,6 @@ namespace MHUrho.UnitComponents
 			void GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
 		}
 
-		public static string ComponentName = nameof(Shooter);
-		public static DefaultComponents ComponentID = DefaultComponents.Shooter;
-		public override string ComponentTypeName => ComponentName;
-		public override DefaultComponents ComponentTypeID => ComponentID;
 
 		/// <summary>
 		/// Shots per minute
@@ -177,7 +173,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}

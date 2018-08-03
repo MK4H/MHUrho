@@ -8,5 +8,7 @@ namespace MHUrho.Packaging
 {
 	public interface ILoadableType : IIDNameAndPackage {
 		void Load(XElement xml, GamePack package);
+
+		void ClearCache();
 	}
 }

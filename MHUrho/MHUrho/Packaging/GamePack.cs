@@ -58,6 +58,14 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<ProjectileType> ProjectileTypes => projectileTypesByName.Values;
 
+		public int ResourceTypeCount => resourceTypesByName.Count;
+
+		public IEnumerable<ResourceType> ResourceTypes => resourceTypesByName.Values;
+
+		public int PlayerAITypesCount => playerAITypesByName.Count;
+
+		public IEnumerable<PlayerType> PlayerTypes => playerAITypesByName.Values;
+
 		public Texture2D ResourceIconTexture { get; private set; }
 		public Texture2D TileIconTexture { get; private set; }
 		public Texture2D UnitIconTexture { get; private set; }
@@ -525,6 +533,34 @@ namespace MHUrho.Packaging {
 			buildingTypesByID = null;
 			projectileTypesByID = null;
 			resourceTypesByID = null;
+		}
+
+		public void ClearCaches()
+		{
+
+			foreach (var tileType in  TileTypes) {
+				tileType.ClearCache();
+			}
+
+			foreach (var unitType in UnitTypes) {
+				unitType.ClearCache();
+			}
+
+			foreach (var buildingType in BuildingTypes) {
+				buildingType.ClearCache();
+			}
+
+			foreach (var projectileType in ProjectileTypes) {
+				projectileType.ClearCache();
+			}
+
+			foreach (var resourceType in ResourceTypes) {
+				resourceType.ClearCache();
+			}
+
+			foreach (var playerType in PlayerTypes) {
+				playerType.ClearCache();
+			};
 		}
 
 		/// <summary>

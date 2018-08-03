@@ -23,63 +23,55 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg9HYW1lU3RhdGUucHJvdG8SDk1IVXJoby5TdG9yYWdlGg9VcmhvVHlwZXMu",
-            "cHJvdG8aE1BsdWdpblN0b3JhZ2UucHJvdG8i9gEKB1N0TGV2ZWwSIgoDbWFw",
-            "GAEgASgLMhUuTUhVcmhvLlN0b3JhZ2UuU3RNYXASJQoFdW5pdHMYAiADKAsy",
-            "Fi5NSFVyaG8uU3RvcmFnZS5TdFVuaXQSLQoJYnVpbGRpbmdzGAMgAygLMhou",
-            "TUhVcmhvLlN0b3JhZ2UuU3RCdWlsZGluZxIpCgdwbGF5ZXJzGAQgAygLMhgu",
-            "TUhVcmhvLlN0b3JhZ2UuU3RQbGF5ZXISMQoLcHJvamVjdGlsZXMYBSADKAsy",
-            "HC5NSFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUSEwoLcGFja2FnZU5hbWUY",
-            "BiABKAkidAoGU3RUaWxlEg8KB3VuaXRJRHMYAiADKAUSEgoKdGlsZVR5cGVJ",
-            "RBgDIAEoBRI1Cg90b3BMZWZ0UG9zaXRpb24YBCABKAsyHC5NSFVyaG8uU3Rv",
-            "cmFnZS5TdEludFZlY3RvcjISDgoGaGVpZ2h0GAUgASgCIqMBCgxTdEJvcmRl",
-            "clRpbGUSNQoPdG9wTGVmdFBvc2l0aW9uGAEgASgLMhwuTUhVcmhvLlN0b3Jh",
-            "Z2UuU3RJbnRWZWN0b3IyEhUKDXRvcExlZnRIZWlnaHQYAiABKAISFgoOdG9w",
-            "UmlnaHRIZWlnaHQYAyABKAISFQoNYm90TGVmdEhlaWdodBgEIAEoAhIWCg5i",
-            "b3RSaWdodEhlaWdodBgFIAEoAiJOCgtTdE1hcFRhcmdldBISCgppbnN0YW5j",
-            "ZUlEGAEgASgFEisKCHBvc2l0aW9uGAIgASgLMhkuTUhVcmhvLlN0b3JhZ2Uu",
-            "U3RWZWN0b3IzItICCgZTdFVuaXQSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIg",
-            "ASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0",
-            "b3IzEhAKCHBsYXllcklEGAQgASgFEhQKDHRhcmdldFVuaXRJRBgFIAEoBRIu",
-            "Cgp1c2VyUGx1Z2luGAYgASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0",
-            "YRJOChRkZWZhdWx0Q29tcG9uZW50RGF0YRgHIAMoCzIwLk1IVXJoby5TdG9y",
-            "YWdlLlN0VW5pdC5EZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5GlcKGURlZmF1",
-            "bHRDb21wb25lbnREYXRhRW50cnkSCwoDa2V5GAEgASgFEikKBXZhbHVlGAIg",
-            "ASgLMhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YToCOAEiyAIKDFN0UHJv",
-            "amVjdGlsZRIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSKwoIcG9zaXRp",
-            "b24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMSEAoIcGxheWVy",
-            "SUQYBCABKAUSLgoKdXNlclBsdWdpbhgFIAEoCzIaLk1IVXJoby5TdG9yYWdl",
-            "LlBsdWdpbkRhdGESVAoUZGVmYXVsdENvbXBvbmVudERhdGEYBiADKAsyNi5N",
-            "SFVyaG8uU3RvcmFnZS5TdFByb2plY3RpbGUuRGVmYXVsdENvbXBvbmVudERh",
-            "dGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0YUVudHJ5EgsKA2tleRgB",
-            "IAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdpbkRh",
-            "dGE6AjgBIscCCgpTdEJ1aWxkaW5nEgoKAmlkGAEgASgFEg4KBnR5cGVJRBgC",
-            "IAEoBRIuCghsb2NhdGlvbhgDIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50",
-            "VmVjdG9yMhIQCghwbGF5ZXJJRBgEIAEoBRIuCgp1c2VyUGx1Z2luGAYgASgL",
-            "MhouTUhVcmhvLlN0b3JhZ2UuUGx1Z2luRGF0YRJSChRkZWZhdWx0Q29tcG9u",
-            "ZW50RGF0YRgHIAMoCzI0Lk1IVXJoby5TdG9yYWdlLlN0QnVpbGRpbmcuRGVm",
-            "YXVsdENvbXBvbmVudERhdGFFbnRyeRpXChlEZWZhdWx0Q29tcG9uZW50RGF0",
-            "YUVudHJ5EgsKA2tleRgBIAEoBRIpCgV2YWx1ZRgCIAEoCzIaLk1IVXJoby5T",
-            "dG9yYWdlLlBsdWdpbkRhdGE6AjgBIr0BCghTdFBsYXllchIKCgJpZBgBIAEo",
-            "BRIOCgZ0eXBlSUQYAiABKAUSJgoFY29sb3IYAyABKAsyFy5NSFVyaG8uU3Rv",
-            "cmFnZS5TdENvbG9yEg8KB3VuaXRJRHMYBCADKAUSEwoLYnVpbGRpbmdJRHMY",
-            "BSADKAUSFwoPZnJpZW5kUGxheWVySURzGAYgAygFEi4KCnVzZXJQbHVnaW4Y",
-            "ByABKAsyGi5NSFVyaG8uU3RvcmFnZS5QbHVnaW5EYXRhIsMBCgVTdE1hcBIq",
-            "CgRzaXplGAEgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEiUK",
-            "BXRpbGVzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2UuU3RUaWxlEjEKC2JvcmRl",
-            "clRpbGVzGAMgAygLMhwuTUhVcmhvLlN0b3JhZ2UuU3RCb3JkZXJUaWxlEjQK",
-            "D21hcFJhbmdlVGFyZ2V0cxgEIAMoCzIbLk1IVXJoby5TdG9yYWdlLlN0TWFw",
-            "VGFyZ2V0YgZwcm90bzM="));
+            "cHJvdG8aE1BsdWdpblN0b3JhZ2UucHJvdG8aEU1IVXJob1R5cGVzLnByb3Rv",
+            "IvYBCgdTdExldmVsEiIKA21hcBgBIAEoCzIVLk1IVXJoby5TdG9yYWdlLlN0",
+            "TWFwEiUKBXVuaXRzGAIgAygLMhYuTUhVcmhvLlN0b3JhZ2UuU3RVbml0Ei0K",
+            "CWJ1aWxkaW5ncxgDIAMoCzIaLk1IVXJoby5TdG9yYWdlLlN0QnVpbGRpbmcS",
+            "KQoHcGxheWVycxgEIAMoCzIYLk1IVXJoby5TdG9yYWdlLlN0UGxheWVyEjEK",
+            "C3Byb2plY3RpbGVzGAUgAygLMhwuTUhVcmhvLlN0b3JhZ2UuU3RQcm9qZWN0",
+            "aWxlEhMKC3BhY2thZ2VOYW1lGAYgASgJInQKBlN0VGlsZRIPCgd1bml0SURz",
+            "GAIgAygFEhIKCnRpbGVUeXBlSUQYAyABKAUSNQoPdG9wTGVmdFBvc2l0aW9u",
+            "GAQgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEg4KBmhlaWdo",
+            "dBgFIAEoAiKjAQoMU3RCb3JkZXJUaWxlEjUKD3RvcExlZnRQb3NpdGlvbhgB",
+            "IAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIVCg10b3BMZWZ0",
+            "SGVpZ2h0GAIgASgCEhYKDnRvcFJpZ2h0SGVpZ2h0GAMgASgCEhUKDWJvdExl",
+            "ZnRIZWlnaHQYBCABKAISFgoOYm90UmlnaHRIZWlnaHQYBSABKAIiTgoLU3RN",
+            "YXBUYXJnZXQSEgoKaW5zdGFuY2VJRBgBIAEoBRIrCghwb3NpdGlvbhgCIAEo",
+            "CzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMyLoAQoGU3RVbml0EgoKAmlk",
+            "GAEgASgFEg4KBnR5cGVJRBgCIAEoBRIrCghwb3NpdGlvbhgDIAEoCzIZLk1I",
+            "VXJoby5TdG9yYWdlLlN0VmVjdG9yMxIQCghwbGF5ZXJJRBgEIAEoBRIUCgx0",
+            "YXJnZXRVbml0SUQYBSABKAUSLgoKdXNlclBsdWdpbhgGIAEoCzIaLk1IVXJo",
+            "by5TdG9yYWdlLlBsdWdpbkRhdGESPQoRZGVmYXVsdENvbXBvbmVudHMYByAD",
+            "KAsyIi5NSFVyaG8uU3RvcmFnZS5TdERlZmF1bHRDb21wb25lbnQi2AEKDFN0",
+            "UHJvamVjdGlsZRIKCgJpZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSKwoIcG9z",
+            "aXRpb24YAyABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMSEAoIcGxh",
+            "eWVySUQYBCABKAUSLgoKdXNlclBsdWdpbhgFIAEoCzIaLk1IVXJoby5TdG9y",
+            "YWdlLlBsdWdpbkRhdGESPQoRZGVmYXVsdENvbXBvbmVudHMYBiADKAsyIi5N",
+            "SFVyaG8uU3RvcmFnZS5TdERlZmF1bHRDb21wb25lbnQi2QEKClN0QnVpbGRp",
+            "bmcSCgoCaWQYASABKAUSDgoGdHlwZUlEGAIgASgFEi4KCGxvY2F0aW9uGAMg",
+            "ASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEhAKCHBsYXllcklE",
+            "GAQgASgFEi4KCnVzZXJQbHVnaW4YBiABKAsyGi5NSFVyaG8uU3RvcmFnZS5Q",
+            "bHVnaW5EYXRhEj0KEWRlZmF1bHRDb21wb25lbnRzGAcgAygLMiIuTUhVcmhv",
+            "LlN0b3JhZ2UuU3REZWZhdWx0Q29tcG9uZW50IqkBCghTdFBsYXllchIKCgJp",
+            "ZBgBIAEoBRIOCgZ0eXBlSUQYAiABKAUSEgoKaW5zaWduaWFJRBgDIAEoBRIP",
+            "Cgd1bml0SURzGAQgAygFEhMKC2J1aWxkaW5nSURzGAUgAygFEhcKD2ZyaWVu",
+            "ZFBsYXllcklEcxgGIAMoBRIuCgp1c2VyUGx1Z2luGAcgASgLMhouTUhVcmhv",
+            "LlN0b3JhZ2UuUGx1Z2luRGF0YSLDAQoFU3RNYXASKgoEc2l6ZRgBIAEoCzIc",
+            "Lk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIlCgV0aWxlcxgCIAMoCzIW",
+            "Lk1IVXJoby5TdG9yYWdlLlN0VGlsZRIxCgtib3JkZXJUaWxlcxgDIAMoCzIc",
+            "Lk1IVXJoby5TdG9yYWdlLlN0Qm9yZGVyVGlsZRI0Cg9tYXBSYW5nZVRhcmdl",
+            "dHMYBCADKAsyGy5NSFVyaG8uU3RvcmFnZS5TdE1hcFRhcmdldGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevel), global::MHUrho.Storage.StLevel.Parser, new[]{ "Map", "Units", "Buildings", "Players", "Projectiles", "PackageName" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StTile), global::MHUrho.Storage.StTile.Parser, new[]{ "UnitIDs", "TileTypeID", "TopLeftPosition", "Height" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBorderTile), global::MHUrho.Storage.StBorderTile.Parser, new[]{ "TopLeftPosition", "TopLeftHeight", "TopRightHeight", "BotLeftHeight", "BotRightHeight" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMapTarget), global::MHUrho.Storage.StMapTarget.Parser, new[]{ "InstanceID", "Position" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponentData" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "Id", "TypeID", "Color", "UnitIDs", "BuildingIDs", "FriendPlayerIDs", "UserPlugin" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnit), global::MHUrho.Storage.StUnit.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "TargetUnitID", "UserPlugin", "DefaultComponents" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "UserPlugin", "DefaultComponents" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponents" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "Id", "TypeID", "InsigniaID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs", "UserPlugin" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles", "MapRangeTargets" }, null, null, null)
           }));
     }
@@ -934,7 +926,7 @@ namespace MHUrho.Storage {
       playerID_ = other.playerID_;
       targetUnitID_ = other.targetUnitID_;
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
-      defaultComponentData_ = other.defaultComponentData_.Clone();
+      defaultComponents_ = other.defaultComponents_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1008,14 +1000,14 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "defaultComponentData" field.</summary>
-    public const int DefaultComponentDataFieldNumber = 7;
-    private static readonly pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec _map_defaultComponentData_codec
-        = new pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec(pb::FieldCodec.ForInt32(8), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.PluginData.Parser), 58);
-    private readonly pbc::MapField<int, global::MHUrho.Storage.PluginData> defaultComponentData_ = new pbc::MapField<int, global::MHUrho.Storage.PluginData>();
+    /// <summary>Field number for the "defaultComponents" field.</summary>
+    public const int DefaultComponentsFieldNumber = 7;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StDefaultComponent> _repeated_defaultComponents_codec
+        = pb::FieldCodec.ForMessage(58, global::MHUrho.Storage.StDefaultComponent.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent> defaultComponents_ = new pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<int, global::MHUrho.Storage.PluginData> DefaultComponentData {
-      get { return defaultComponentData_; }
+    public pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent> DefaultComponents {
+      get { return defaultComponents_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1037,7 +1029,7 @@ namespace MHUrho.Storage {
       if (PlayerID != other.PlayerID) return false;
       if (TargetUnitID != other.TargetUnitID) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
-      if (!DefaultComponentData.Equals(other.DefaultComponentData)) return false;
+      if(!defaultComponents_.Equals(other.defaultComponents_)) return false;
       return true;
     }
 
@@ -1050,7 +1042,7 @@ namespace MHUrho.Storage {
       if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
       if (TargetUnitID != 0) hash ^= TargetUnitID.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
-      hash ^= DefaultComponentData.GetHashCode();
+      hash ^= defaultComponents_.GetHashCode();
       return hash;
     }
 
@@ -1085,7 +1077,7 @@ namespace MHUrho.Storage {
         output.WriteRawTag(50);
         output.WriteMessage(UserPlugin);
       }
-      defaultComponentData_.WriteTo(output, _map_defaultComponentData_codec);
+      defaultComponents_.WriteTo(output, _repeated_defaultComponents_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1109,7 +1101,7 @@ namespace MHUrho.Storage {
       if (userPlugin_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
       }
-      size += defaultComponentData_.CalculateSize(_map_defaultComponentData_codec);
+      size += defaultComponents_.CalculateSize(_repeated_defaultComponents_codec);
       return size;
     }
 
@@ -1142,7 +1134,7 @@ namespace MHUrho.Storage {
         }
         UserPlugin.MergeFrom(other.UserPlugin);
       }
-      defaultComponentData_.Add(other.defaultComponentData_);
+      defaultComponents_.Add(other.defaultComponents_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1184,7 +1176,7 @@ namespace MHUrho.Storage {
             break;
           }
           case 58: {
-            defaultComponentData_.AddEntriesFrom(input, _map_defaultComponentData_codec);
+            defaultComponents_.AddEntriesFrom(input, _repeated_defaultComponents_codec);
             break;
           }
         }
@@ -1222,7 +1214,7 @@ namespace MHUrho.Storage {
       Position = other.position_ != null ? other.Position.Clone() : null;
       playerID_ = other.playerID_;
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
-      defaultComponentData_ = other.defaultComponentData_.Clone();
+      defaultComponents_ = other.defaultComponents_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1285,14 +1277,14 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "defaultComponentData" field.</summary>
-    public const int DefaultComponentDataFieldNumber = 6;
-    private static readonly pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec _map_defaultComponentData_codec
-        = new pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec(pb::FieldCodec.ForInt32(8), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.PluginData.Parser), 50);
-    private readonly pbc::MapField<int, global::MHUrho.Storage.PluginData> defaultComponentData_ = new pbc::MapField<int, global::MHUrho.Storage.PluginData>();
+    /// <summary>Field number for the "defaultComponents" field.</summary>
+    public const int DefaultComponentsFieldNumber = 6;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StDefaultComponent> _repeated_defaultComponents_codec
+        = pb::FieldCodec.ForMessage(50, global::MHUrho.Storage.StDefaultComponent.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent> defaultComponents_ = new pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<int, global::MHUrho.Storage.PluginData> DefaultComponentData {
-      get { return defaultComponentData_; }
+    public pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent> DefaultComponents {
+      get { return defaultComponents_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1313,7 +1305,7 @@ namespace MHUrho.Storage {
       if (!object.Equals(Position, other.Position)) return false;
       if (PlayerID != other.PlayerID) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
-      if (!DefaultComponentData.Equals(other.DefaultComponentData)) return false;
+      if(!defaultComponents_.Equals(other.defaultComponents_)) return false;
       return true;
     }
 
@@ -1325,7 +1317,7 @@ namespace MHUrho.Storage {
       if (position_ != null) hash ^= Position.GetHashCode();
       if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
-      hash ^= DefaultComponentData.GetHashCode();
+      hash ^= defaultComponents_.GetHashCode();
       return hash;
     }
 
@@ -1356,7 +1348,7 @@ namespace MHUrho.Storage {
         output.WriteRawTag(42);
         output.WriteMessage(UserPlugin);
       }
-      defaultComponentData_.WriteTo(output, _map_defaultComponentData_codec);
+      defaultComponents_.WriteTo(output, _repeated_defaultComponents_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1377,7 +1369,7 @@ namespace MHUrho.Storage {
       if (userPlugin_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
       }
-      size += defaultComponentData_.CalculateSize(_map_defaultComponentData_codec);
+      size += defaultComponents_.CalculateSize(_repeated_defaultComponents_codec);
       return size;
     }
 
@@ -1407,7 +1399,7 @@ namespace MHUrho.Storage {
         }
         UserPlugin.MergeFrom(other.UserPlugin);
       }
-      defaultComponentData_.Add(other.defaultComponentData_);
+      defaultComponents_.Add(other.defaultComponents_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1445,7 +1437,7 @@ namespace MHUrho.Storage {
             break;
           }
           case 50: {
-            defaultComponentData_.AddEntriesFrom(input, _map_defaultComponentData_codec);
+            defaultComponents_.AddEntriesFrom(input, _repeated_defaultComponents_codec);
             break;
           }
         }
@@ -1483,7 +1475,7 @@ namespace MHUrho.Storage {
       Location = other.location_ != null ? other.Location.Clone() : null;
       playerID_ = other.playerID_;
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
-      defaultComponentData_ = other.defaultComponentData_.Clone();
+      defaultComponents_ = other.defaultComponents_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1546,14 +1538,14 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "defaultComponentData" field.</summary>
-    public const int DefaultComponentDataFieldNumber = 7;
-    private static readonly pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec _map_defaultComponentData_codec
-        = new pbc::MapField<int, global::MHUrho.Storage.PluginData>.Codec(pb::FieldCodec.ForInt32(8), pb::FieldCodec.ForMessage(18, global::MHUrho.Storage.PluginData.Parser), 58);
-    private readonly pbc::MapField<int, global::MHUrho.Storage.PluginData> defaultComponentData_ = new pbc::MapField<int, global::MHUrho.Storage.PluginData>();
+    /// <summary>Field number for the "defaultComponents" field.</summary>
+    public const int DefaultComponentsFieldNumber = 7;
+    private static readonly pb::FieldCodec<global::MHUrho.Storage.StDefaultComponent> _repeated_defaultComponents_codec
+        = pb::FieldCodec.ForMessage(58, global::MHUrho.Storage.StDefaultComponent.Parser);
+    private readonly pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent> defaultComponents_ = new pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<int, global::MHUrho.Storage.PluginData> DefaultComponentData {
-      get { return defaultComponentData_; }
+    public pbc::RepeatedField<global::MHUrho.Storage.StDefaultComponent> DefaultComponents {
+      get { return defaultComponents_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1574,7 +1566,7 @@ namespace MHUrho.Storage {
       if (!object.Equals(Location, other.Location)) return false;
       if (PlayerID != other.PlayerID) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
-      if (!DefaultComponentData.Equals(other.DefaultComponentData)) return false;
+      if(!defaultComponents_.Equals(other.defaultComponents_)) return false;
       return true;
     }
 
@@ -1586,7 +1578,7 @@ namespace MHUrho.Storage {
       if (location_ != null) hash ^= Location.GetHashCode();
       if (PlayerID != 0) hash ^= PlayerID.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
-      hash ^= DefaultComponentData.GetHashCode();
+      hash ^= defaultComponents_.GetHashCode();
       return hash;
     }
 
@@ -1617,7 +1609,7 @@ namespace MHUrho.Storage {
         output.WriteRawTag(50);
         output.WriteMessage(UserPlugin);
       }
-      defaultComponentData_.WriteTo(output, _map_defaultComponentData_codec);
+      defaultComponents_.WriteTo(output, _repeated_defaultComponents_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1638,7 +1630,7 @@ namespace MHUrho.Storage {
       if (userPlugin_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
       }
-      size += defaultComponentData_.CalculateSize(_map_defaultComponentData_codec);
+      size += defaultComponents_.CalculateSize(_repeated_defaultComponents_codec);
       return size;
     }
 
@@ -1668,7 +1660,7 @@ namespace MHUrho.Storage {
         }
         UserPlugin.MergeFrom(other.UserPlugin);
       }
-      defaultComponentData_.Add(other.defaultComponentData_);
+      defaultComponents_.Add(other.defaultComponents_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1706,7 +1698,7 @@ namespace MHUrho.Storage {
             break;
           }
           case 58: {
-            defaultComponentData_.AddEntriesFrom(input, _map_defaultComponentData_codec);
+            defaultComponents_.AddEntriesFrom(input, _repeated_defaultComponents_codec);
             break;
           }
         }
@@ -1741,7 +1733,7 @@ namespace MHUrho.Storage {
     public StPlayer(StPlayer other) : this() {
       id_ = other.id_;
       typeID_ = other.typeID_;
-      Color = other.color_ != null ? other.Color.Clone() : null;
+      insigniaID_ = other.insigniaID_;
       unitIDs_ = other.unitIDs_.Clone();
       buildingIDs_ = other.buildingIDs_.Clone();
       friendPlayerIDs_ = other.friendPlayerIDs_.Clone();
@@ -1775,17 +1767,14 @@ namespace MHUrho.Storage {
       }
     }
 
-    /// <summary>Field number for the "color" field.</summary>
-    public const int ColorFieldNumber = 3;
-    private global::MHUrho.Storage.StColor color_;
-    /// <summary>
-    ///TODO: Redundant references both ways, could just store it in building/unit and connect it from there
-    /// </summary>
+    /// <summary>Field number for the "insigniaID" field.</summary>
+    public const int InsigniaIDFieldNumber = 3;
+    private int insigniaID_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::MHUrho.Storage.StColor Color {
-      get { return color_; }
+    public int InsigniaID {
+      get { return insigniaID_; }
       set {
-        color_ = value;
+        insigniaID_ = value;
       }
     }
 
@@ -1794,6 +1783,9 @@ namespace MHUrho.Storage {
     private static readonly pb::FieldCodec<int> _repeated_unitIDs_codec
         = pb::FieldCodec.ForInt32(34);
     private readonly pbc::RepeatedField<int> unitIDs_ = new pbc::RepeatedField<int>();
+    /// <summary>
+    ///TODO: Redundant references both ways, could just store it in building/unit and connect it from there
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<int> UnitIDs {
       get { return unitIDs_; }
@@ -1845,7 +1837,7 @@ namespace MHUrho.Storage {
       }
       if (Id != other.Id) return false;
       if (TypeID != other.TypeID) return false;
-      if (!object.Equals(Color, other.Color)) return false;
+      if (InsigniaID != other.InsigniaID) return false;
       if(!unitIDs_.Equals(other.unitIDs_)) return false;
       if(!buildingIDs_.Equals(other.buildingIDs_)) return false;
       if(!friendPlayerIDs_.Equals(other.friendPlayerIDs_)) return false;
@@ -1858,7 +1850,7 @@ namespace MHUrho.Storage {
       int hash = 1;
       if (Id != 0) hash ^= Id.GetHashCode();
       if (TypeID != 0) hash ^= TypeID.GetHashCode();
-      if (color_ != null) hash ^= Color.GetHashCode();
+      if (InsigniaID != 0) hash ^= InsigniaID.GetHashCode();
       hash ^= unitIDs_.GetHashCode();
       hash ^= buildingIDs_.GetHashCode();
       hash ^= friendPlayerIDs_.GetHashCode();
@@ -1881,9 +1873,9 @@ namespace MHUrho.Storage {
         output.WriteRawTag(16);
         output.WriteInt32(TypeID);
       }
-      if (color_ != null) {
-        output.WriteRawTag(26);
-        output.WriteMessage(Color);
+      if (InsigniaID != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(InsigniaID);
       }
       unitIDs_.WriteTo(output, _repeated_unitIDs_codec);
       buildingIDs_.WriteTo(output, _repeated_buildingIDs_codec);
@@ -1903,8 +1895,8 @@ namespace MHUrho.Storage {
       if (TypeID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeID);
       }
-      if (color_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Color);
+      if (InsigniaID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(InsigniaID);
       }
       size += unitIDs_.CalculateSize(_repeated_unitIDs_codec);
       size += buildingIDs_.CalculateSize(_repeated_buildingIDs_codec);
@@ -1926,11 +1918,8 @@ namespace MHUrho.Storage {
       if (other.TypeID != 0) {
         TypeID = other.TypeID;
       }
-      if (other.color_ != null) {
-        if (color_ == null) {
-          color_ = new global::MHUrho.Storage.StColor();
-        }
-        Color.MergeFrom(other.Color);
+      if (other.InsigniaID != 0) {
+        InsigniaID = other.InsigniaID;
       }
       unitIDs_.Add(other.unitIDs_);
       buildingIDs_.Add(other.buildingIDs_);
@@ -1959,11 +1948,8 @@ namespace MHUrho.Storage {
             TypeID = input.ReadInt32();
             break;
           }
-          case 26: {
-            if (color_ == null) {
-              color_ = new global::MHUrho.Storage.StColor();
-            }
-            input.ReadMessage(color_);
+          case 24: {
+            InsigniaID = input.ReadInt32();
             break;
           }
           case 34:

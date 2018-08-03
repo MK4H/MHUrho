@@ -32,35 +32,33 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(WorldWalker walker) {
-				var storageData = new IndexedPluginDataWriter(walker.Level);
-				if (walker.Enabled) {
-					storageData.Store(1, true);
-
-					storageData.Store(2, walker.path);
-				}
-				else {
-					storageData.Store(1, false);
-				}
-
-				return storageData.PluginData;
+			public static StDefaultComponent SaveState(WorldWalker walker)
+			{
+				var storedWalker = new StWorldWalker
+									{
+										Enabled = walker.Enabled,
+										Path = walker.path?.Save()
+									};
+				return new StDefaultComponent {WorldWalker = storedWalker};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				var notificationReceiver = plugin as IUser;
-				if (notificationReceiver == null) {
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
+				var user = plugin as IUser;
+				if (user == null) {
 					throw new
 						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
-				var indexedData = new IndexedPluginDataReader(storedData, level);
-				var activated = indexedData.Get<bool>(1);
-				Path path = null;
-				if (activated) {
-					path = indexedData.Get<Path>(2);
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.WorldWalker) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
 				}
 
-				Walker = new WorldWalker(notificationReceiver, level, activated, path);
+				var storedWorldWalker = storedData.WorldWalker;
+
+				Walker = new WorldWalker(user, 
+										level, 
+										storedWorldWalker.Enabled,
+										storedWorldWalker.Path != null ? Path.Load(storedWorldWalker.Path, level) : null);
 
 			}
 
@@ -80,12 +78,6 @@ namespace MHUrho.UnitComponents
 		public interface IUser {
 			void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime);
 		}
-
-		public static string ComponentName = nameof(WorldWalker);
-		public static DefaultComponents ComponentID = DefaultComponents.WorldWalker;
-
-		public override string ComponentTypeName => ComponentName;
-		public override DefaultComponents ComponentTypeID => ComponentID;
 
 		public bool MovementStarted { get; private set; }
 		public bool MovementFinished { get; private set; }
@@ -137,7 +129,7 @@ namespace MHUrho.UnitComponents
 
 
 
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}

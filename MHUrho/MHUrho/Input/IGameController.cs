@@ -16,7 +16,7 @@ namespace MHUrho.Input
 
 		ILevelManager Level { get; }
 
-		IPlayer Player { get; set; }
+		IPlayer Player { get; }
 
 		bool Enabled { get; }
 
@@ -37,5 +37,7 @@ namespace MHUrho.Input
 		List<RayQueryResult> CursorRaycast();
 
 		ITile GetTileUnderCursor();
+
+		void ChangeControllingPlayer(IPlayer newControllingPlayer);
 	}
 }

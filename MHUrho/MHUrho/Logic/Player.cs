@@ -32,7 +32,7 @@ namespace MHUrho.Logic
 									{
 										Id = player.ID,
 										TypeID = player.type?.ID ?? 0,
-										Color = player.Color.ToStColor()
+										InsigniaID = player.Insignia.ID
 									};
 
 
@@ -91,10 +91,10 @@ namespace MHUrho.Logic
 			void Load(LevelManager level, PlayerType type) {
 				//TODO: Human player type
 				if (type == null) {
-					Player = Player.CreateNewHumanPlayer(storedPlayer.Id, level, storedPlayer.Color.ToColor());
+					Player = Player.CreateNewHumanPlayer(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
 				}
 				else {
-					Player = new Player(storedPlayer.Id, level, storedPlayer.Color.ToColor());
+					Player = new Player(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
 					Player.Plugin = type.GetInstancePluginForLoading(Player, level);
 				}
 				
@@ -103,7 +103,7 @@ namespace MHUrho.Logic
 
 		public new int ID { get; }
 
-		public Color Color { get; private set; }
+		public PlayerInsignia Insignia { get; private set; }
 
 		public PlayerAIInstancePlugin Plugin { get; private set; }
 
@@ -120,7 +120,7 @@ namespace MHUrho.Logic
 
 		ILevelManager level;
 
-		protected Player(int id, ILevelManager level, Color color) {
+		protected Player(int id, ILevelManager level, PlayerInsignia insignia) {
 			ReceiveSceneUpdates = true;
 
 			this.ID = id;
@@ -129,24 +129,24 @@ namespace MHUrho.Logic
 			resources = new Dictionary<ResourceType, int>();
 			friends = new HashSet<IPlayer>();
 			this.level = level;
-			this.Color = color;
+			this.Insignia = insignia;
 		}
 
-		protected Player(int id, ILevelManager level, PlayerType type, Color color)
-			:this(id, level, color)
+		protected Player(int id, ILevelManager level, PlayerType type, PlayerInsignia insignia)
+			:this(id, level, insignia)
 		{
 			this.type = type;
 			this.Plugin = type.GetNewInstancePlugin(this, level);
 		}
 
-		public static Player CreateNewAIPlayer(int id, ILevelManager level, PlayerType type, Color color)
+		public static Player CreateNewAIPlayer(int id, ILevelManager level, PlayerType type, PlayerInsignia insignia)
 		{
-			return new Player(id, level, type, color);
+			return new Player(id, level, type, insignia);
 		}
 
-		public static Player CreateNewHumanPlayer(int id, ILevelManager level, Color color)
+		public static Player CreateNewHumanPlayer(int id, ILevelManager level, PlayerInsignia insignia)
 		{
-			return new Player(id, level, color);
+			return new Player(id, level, insignia);
 		}
 
 		public StPlayer Save()

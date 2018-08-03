@@ -28,13 +28,62 @@ namespace MHUrho.Storage {
             "bnRUeXBlGAMgASgFIkcKEFN0UGF0aEVudW1lcmF0b3ISJAoEcGF0aBgBIAEo",
             "CzIWLk1IVXJoby5TdG9yYWdlLlN0UGF0aBINCgVpbmRleBgCIAEoBSI3CgZT",
             "dFBhdGgSLQoJd2F5cG9pbnRzGAEgAygLMhouTUhVcmhvLlN0b3JhZ2UuU3RX",
-            "YXlwb2ludGIGcHJvdG8z"));
+            "YXlwb2ludCLBBAoSU3REZWZhdWx0Q29tcG9uZW50EjQKC3dvcmxkV2Fsa2Vy",
+            "GAEgASgLMh0uTUhVcmhvLlN0b3JhZ2UuU3RXb3JsZFdhbGtlckgAEkQKE2Jh",
+            "bGxpc3RpY1Byb2plY3RpbGUYAiABKAsyJS5NSFVyaG8uU3RvcmFnZS5TdEJh",
+            "bGxpc3RpY1Byb2plY3RpbGVIABJEChNtb3ZpbmdNZWVsZUF0dGFja2VyGAMg",
+            "ASgLMiUuTUhVcmhvLlN0b3JhZ2UuU3RNb3ZpbmdNZWVsZUF0dGFja2VySAAS",
+            "RAoTc3RhdGljTWVlbGVBdHRhY2tlchgEIAEoCzIlLk1IVXJoby5TdG9yYWdl",
+            "LlN0U3RhdGljTWVlbGVBdHRhY2tlckgAEkAKEW1vdmluZ1JhbmdlVGFyZ2V0",
+            "GAUgASgLMiMuTUhVcmhvLlN0b3JhZ2UuU3RNb3ZpbmdSYW5nZVRhcmdldEgA",
+            "EkAKEXN0YXRpY1JhbmdlVGFyZ2V0GAYgASgLMiMuTUhVcmhvLlN0b3JhZ2Uu",
+            "U3RTdGF0aWNSYW5nZVRhcmdldEgAEiwKB3Nob290ZXIYByABKAsyGS5NSFVy",
+            "aG8uU3RvcmFnZS5TdFNob290ZXJIABI2Cgx1bml0U2VsZWN0b3IYCCABKAsy",
+            "Hi5NSFVyaG8uU3RvcmFnZS5TdFVuaXRTZWxlY3RvckgAEiwKB2NsaWNrZXIY",
+            "CSABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdENsaWNrZXJIAEILCgljb21wb25l",
+            "bnQiRgoNU3RXb3JsZFdhbGtlchIPCgdlbmFibGVkGAEgASgIEiQKBHBhdGgY",
+            "AiABKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFBhdGgiVQoVU3RCYWxsaXN0aWNQ",
+            "cm9qZWN0aWxlEg8KB2VuYWJsZWQYASABKAgSKwoIbW92ZW1lbnQYAiABKAsy",
+            "GS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMivwIKFVN0TW92aW5nTWVlbGVB",
+            "dHRhY2tlchIPCgdlbmFibGVkGAEgASgIEhcKD3NlYXJjaEZvclRhcmdldBgC",
+            "IAEoCBI5ChNzZWFyY2hSZWN0YW5nbGVTaXplGAMgASgLMhwuTUhVcmhvLlN0",
+            "b3JhZ2UuU3RJbnRWZWN0b3IyEhsKE3RpbWVCZXR3ZWVuU2VhcmNoZXMYBCAB",
+            "KAISIQoZdGltZUJldHdlZW5Qb3NpdGlvbkNoZWNrcxgFIAEoAhIaChJ0aW1l",
+            "QmV0d2VlbkF0dGFja3MYBiABKAISEAoIdGFyZ2V0SUQYByABKAUSGAoQdGlt",
+            "ZVRvTmV4dFNlYXJjaBgIIAEoAhIfChd0aW1lVG9OZXh0UG9zaXRpb25DaGVj",
+            "axgJIAEoAhIYChB0aW1lVG9OZXh0QXR0YWNrGAogASgCIvsBChVTdFN0YXRp",
+            "Y01lZWxlQXR0YWNrZXISDwoHZW5hYmxlZBgBIAEoCBIXCg9zZWFyY2hGb3JU",
+            "YXJnZXQYAiABKAgSOQoTc2VhcmNoUmVjdGFuZ2xlU2l6ZRgDIAEoCzIcLk1I",
+            "VXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIbChN0aW1lQmV0d2VlblNlYXJj",
+            "aGVzGAQgASgCEhoKEnRpbWVCZXR3ZWVuQXR0YWNrcxgFIAEoAhIQCgh0YXJn",
+            "ZXRJRBgGIAEoBRIYChB0aW1lVG9OZXh0U2VhcmNoGAcgASgCEhgKEHRpbWVU",
+            "b05leHRBdHRhY2sYCCABKAIiZQoTU3RNb3ZpbmdSYW5nZVRhcmdldBIPCgdl",
+            "bmFibGVkGAEgASgIEhIKCmluc3RhbmNlSUQYAiABKAUSKQoGb2Zmc2V0GAMg",
+            "ASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzImcKE1N0U3RhdGljUmFu",
+            "Z2VUYXJnZXQSDwoHZW5hYmxlZBgBIAEoCBISCgppbnN0YW5jZUlEGAIgASgF",
+            "EisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3Iz",
+            "IrgBCglTdFNob290ZXISDwoHZW5hYmxlZBgBIAEoCBIYChBwcm9qZWN0aWxl",
+            "VHlwZUlEGAIgASgFEhIKCnJhdGVPZkZpcmUYAyABKAISFwoPc2VhcmNoRm9y",
+            "VGFyZ2V0GAQgASgIEhkKEXRhcmdldFNlYXJjaERlbGF5GAUgASgCEhEKCXNo",
+            "b3REZWxheRgGIAEoAhITCgtzZWFyY2hEZWxheRgHIAEoAhIQCgh0YXJnZXRJ",
+            "RBgIIAEoBSIhCg5TdFVuaXRTZWxlY3RvchIPCgdlbmFibGVkGAEgASgIIhwK",
+            "CVN0Q2xpY2tlchIPCgdlbmFibGVkGAEgASgIYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWaypoint), global::MHUrho.Storage.StWaypoint.Parser, new[]{ "Position", "Time", "MovementType" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPathEnumerator), global::MHUrho.Storage.StPathEnumerator.Parser, new[]{ "Path", "Index" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPath), global::MHUrho.Storage.StPath.Parser, new[]{ "Waypoints" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPath), global::MHUrho.Storage.StPath.Parser, new[]{ "Waypoints" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StDefaultComponent), global::MHUrho.Storage.StDefaultComponent.Parser, new[]{ "WorldWalker", "BallisticProjectile", "MovingMeeleAttacker", "StaticMeeleAttacker", "MovingRangeTarget", "StaticRangeTarget", "Shooter", "UnitSelector", "Clicker" }, new[]{ "Component" }, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWorldWalker), global::MHUrho.Storage.StWorldWalker.Parser, new[]{ "Enabled", "Path" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBallisticProjectile), global::MHUrho.Storage.StBallisticProjectile.Parser, new[]{ "Enabled", "Movement" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMovingMeeleAttacker), global::MHUrho.Storage.StMovingMeeleAttacker.Parser, new[]{ "Enabled", "SearchForTarget", "SearchRectangleSize", "TimeBetweenSearches", "TimeBetweenPositionChecks", "TimeBetweenAttacks", "TargetID", "TimeToNextSearch", "TimeToNextPositionCheck", "TimeToNextAttack" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StStaticMeeleAttacker), global::MHUrho.Storage.StStaticMeeleAttacker.Parser, new[]{ "Enabled", "SearchForTarget", "SearchRectangleSize", "TimeBetweenSearches", "TimeBetweenAttacks", "TargetID", "TimeToNextSearch", "TimeToNextAttack" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMovingRangeTarget), global::MHUrho.Storage.StMovingRangeTarget.Parser, new[]{ "Enabled", "InstanceID", "Offset" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StStaticRangeTarget), global::MHUrho.Storage.StStaticRangeTarget.Parser, new[]{ "Enabled", "InstanceID", "Position" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StShooter), global::MHUrho.Storage.StShooter.Parser, new[]{ "Enabled", "ProjectileTypeID", "RateOfFire", "SearchForTarget", "TargetSearchDelay", "ShotDelay", "SearchDelay", "TargetID" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnitSelector), global::MHUrho.Storage.StUnitSelector.Parser, new[]{ "Enabled" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StClicker), global::MHUrho.Storage.StClicker.Parser, new[]{ "Enabled" }, null, null, null)
           }));
     }
     #endregion
@@ -472,6 +521,2372 @@ namespace MHUrho.Storage {
             break;
           case 10: {
             waypoints_.AddEntriesFrom(input, _repeated_waypoints_codec);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StDefaultComponent : pb::IMessage<StDefaultComponent> {
+    private static readonly pb::MessageParser<StDefaultComponent> _parser = new pb::MessageParser<StDefaultComponent>(() => new StDefaultComponent());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StDefaultComponent> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StDefaultComponent() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StDefaultComponent(StDefaultComponent other) : this() {
+      switch (other.ComponentCase) {
+        case ComponentOneofCase.WorldWalker:
+          WorldWalker = other.WorldWalker.Clone();
+          break;
+        case ComponentOneofCase.BallisticProjectile:
+          BallisticProjectile = other.BallisticProjectile.Clone();
+          break;
+        case ComponentOneofCase.MovingMeeleAttacker:
+          MovingMeeleAttacker = other.MovingMeeleAttacker.Clone();
+          break;
+        case ComponentOneofCase.StaticMeeleAttacker:
+          StaticMeeleAttacker = other.StaticMeeleAttacker.Clone();
+          break;
+        case ComponentOneofCase.MovingRangeTarget:
+          MovingRangeTarget = other.MovingRangeTarget.Clone();
+          break;
+        case ComponentOneofCase.StaticRangeTarget:
+          StaticRangeTarget = other.StaticRangeTarget.Clone();
+          break;
+        case ComponentOneofCase.Shooter:
+          Shooter = other.Shooter.Clone();
+          break;
+        case ComponentOneofCase.UnitSelector:
+          UnitSelector = other.UnitSelector.Clone();
+          break;
+        case ComponentOneofCase.Clicker:
+          Clicker = other.Clicker.Clone();
+          break;
+      }
+
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StDefaultComponent Clone() {
+      return new StDefaultComponent(this);
+    }
+
+    /// <summary>Field number for the "worldWalker" field.</summary>
+    public const int WorldWalkerFieldNumber = 1;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StWorldWalker WorldWalker {
+      get { return componentCase_ == ComponentOneofCase.WorldWalker ? (global::MHUrho.Storage.StWorldWalker) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.WorldWalker;
+      }
+    }
+
+    /// <summary>Field number for the "ballisticProjectile" field.</summary>
+    public const int BallisticProjectileFieldNumber = 2;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StBallisticProjectile BallisticProjectile {
+      get { return componentCase_ == ComponentOneofCase.BallisticProjectile ? (global::MHUrho.Storage.StBallisticProjectile) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.BallisticProjectile;
+      }
+    }
+
+    /// <summary>Field number for the "movingMeeleAttacker" field.</summary>
+    public const int MovingMeeleAttackerFieldNumber = 3;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StMovingMeeleAttacker MovingMeeleAttacker {
+      get { return componentCase_ == ComponentOneofCase.MovingMeeleAttacker ? (global::MHUrho.Storage.StMovingMeeleAttacker) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.MovingMeeleAttacker;
+      }
+    }
+
+    /// <summary>Field number for the "staticMeeleAttacker" field.</summary>
+    public const int StaticMeeleAttackerFieldNumber = 4;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StStaticMeeleAttacker StaticMeeleAttacker {
+      get { return componentCase_ == ComponentOneofCase.StaticMeeleAttacker ? (global::MHUrho.Storage.StStaticMeeleAttacker) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.StaticMeeleAttacker;
+      }
+    }
+
+    /// <summary>Field number for the "movingRangeTarget" field.</summary>
+    public const int MovingRangeTargetFieldNumber = 5;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StMovingRangeTarget MovingRangeTarget {
+      get { return componentCase_ == ComponentOneofCase.MovingRangeTarget ? (global::MHUrho.Storage.StMovingRangeTarget) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.MovingRangeTarget;
+      }
+    }
+
+    /// <summary>Field number for the "staticRangeTarget" field.</summary>
+    public const int StaticRangeTargetFieldNumber = 6;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StStaticRangeTarget StaticRangeTarget {
+      get { return componentCase_ == ComponentOneofCase.StaticRangeTarget ? (global::MHUrho.Storage.StStaticRangeTarget) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.StaticRangeTarget;
+      }
+    }
+
+    /// <summary>Field number for the "shooter" field.</summary>
+    public const int ShooterFieldNumber = 7;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StShooter Shooter {
+      get { return componentCase_ == ComponentOneofCase.Shooter ? (global::MHUrho.Storage.StShooter) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.Shooter;
+      }
+    }
+
+    /// <summary>Field number for the "unitSelector" field.</summary>
+    public const int UnitSelectorFieldNumber = 8;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StUnitSelector UnitSelector {
+      get { return componentCase_ == ComponentOneofCase.UnitSelector ? (global::MHUrho.Storage.StUnitSelector) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.UnitSelector;
+      }
+    }
+
+    /// <summary>Field number for the "clicker" field.</summary>
+    public const int ClickerFieldNumber = 9;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StClicker Clicker {
+      get { return componentCase_ == ComponentOneofCase.Clicker ? (global::MHUrho.Storage.StClicker) component_ : null; }
+      set {
+        component_ = value;
+        componentCase_ = value == null ? ComponentOneofCase.None : ComponentOneofCase.Clicker;
+      }
+    }
+
+    private object component_;
+    /// <summary>Enum of possible cases for the "component" oneof.</summary>
+    public enum ComponentOneofCase {
+      None = 0,
+      WorldWalker = 1,
+      BallisticProjectile = 2,
+      MovingMeeleAttacker = 3,
+      StaticMeeleAttacker = 4,
+      MovingRangeTarget = 5,
+      StaticRangeTarget = 6,
+      Shooter = 7,
+      UnitSelector = 8,
+      Clicker = 9,
+    }
+    private ComponentOneofCase componentCase_ = ComponentOneofCase.None;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ComponentOneofCase ComponentCase {
+      get { return componentCase_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearComponent() {
+      componentCase_ = ComponentOneofCase.None;
+      component_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StDefaultComponent);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StDefaultComponent other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(WorldWalker, other.WorldWalker)) return false;
+      if (!object.Equals(BallisticProjectile, other.BallisticProjectile)) return false;
+      if (!object.Equals(MovingMeeleAttacker, other.MovingMeeleAttacker)) return false;
+      if (!object.Equals(StaticMeeleAttacker, other.StaticMeeleAttacker)) return false;
+      if (!object.Equals(MovingRangeTarget, other.MovingRangeTarget)) return false;
+      if (!object.Equals(StaticRangeTarget, other.StaticRangeTarget)) return false;
+      if (!object.Equals(Shooter, other.Shooter)) return false;
+      if (!object.Equals(UnitSelector, other.UnitSelector)) return false;
+      if (!object.Equals(Clicker, other.Clicker)) return false;
+      if (ComponentCase != other.ComponentCase) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (componentCase_ == ComponentOneofCase.WorldWalker) hash ^= WorldWalker.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.BallisticProjectile) hash ^= BallisticProjectile.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.MovingMeeleAttacker) hash ^= MovingMeeleAttacker.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.StaticMeeleAttacker) hash ^= StaticMeeleAttacker.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.MovingRangeTarget) hash ^= MovingRangeTarget.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.StaticRangeTarget) hash ^= StaticRangeTarget.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.Shooter) hash ^= Shooter.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.UnitSelector) hash ^= UnitSelector.GetHashCode();
+      if (componentCase_ == ComponentOneofCase.Clicker) hash ^= Clicker.GetHashCode();
+      hash ^= (int) componentCase_;
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (componentCase_ == ComponentOneofCase.WorldWalker) {
+        output.WriteRawTag(10);
+        output.WriteMessage(WorldWalker);
+      }
+      if (componentCase_ == ComponentOneofCase.BallisticProjectile) {
+        output.WriteRawTag(18);
+        output.WriteMessage(BallisticProjectile);
+      }
+      if (componentCase_ == ComponentOneofCase.MovingMeeleAttacker) {
+        output.WriteRawTag(26);
+        output.WriteMessage(MovingMeeleAttacker);
+      }
+      if (componentCase_ == ComponentOneofCase.StaticMeeleAttacker) {
+        output.WriteRawTag(34);
+        output.WriteMessage(StaticMeeleAttacker);
+      }
+      if (componentCase_ == ComponentOneofCase.MovingRangeTarget) {
+        output.WriteRawTag(42);
+        output.WriteMessage(MovingRangeTarget);
+      }
+      if (componentCase_ == ComponentOneofCase.StaticRangeTarget) {
+        output.WriteRawTag(50);
+        output.WriteMessage(StaticRangeTarget);
+      }
+      if (componentCase_ == ComponentOneofCase.Shooter) {
+        output.WriteRawTag(58);
+        output.WriteMessage(Shooter);
+      }
+      if (componentCase_ == ComponentOneofCase.UnitSelector) {
+        output.WriteRawTag(66);
+        output.WriteMessage(UnitSelector);
+      }
+      if (componentCase_ == ComponentOneofCase.Clicker) {
+        output.WriteRawTag(74);
+        output.WriteMessage(Clicker);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (componentCase_ == ComponentOneofCase.WorldWalker) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(WorldWalker);
+      }
+      if (componentCase_ == ComponentOneofCase.BallisticProjectile) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BallisticProjectile);
+      }
+      if (componentCase_ == ComponentOneofCase.MovingMeeleAttacker) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MovingMeeleAttacker);
+      }
+      if (componentCase_ == ComponentOneofCase.StaticMeeleAttacker) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(StaticMeeleAttacker);
+      }
+      if (componentCase_ == ComponentOneofCase.MovingRangeTarget) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MovingRangeTarget);
+      }
+      if (componentCase_ == ComponentOneofCase.StaticRangeTarget) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(StaticRangeTarget);
+      }
+      if (componentCase_ == ComponentOneofCase.Shooter) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Shooter);
+      }
+      if (componentCase_ == ComponentOneofCase.UnitSelector) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(UnitSelector);
+      }
+      if (componentCase_ == ComponentOneofCase.Clicker) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Clicker);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StDefaultComponent other) {
+      if (other == null) {
+        return;
+      }
+      switch (other.ComponentCase) {
+        case ComponentOneofCase.WorldWalker:
+          if (WorldWalker == null) {
+            WorldWalker = new global::MHUrho.Storage.StWorldWalker();
+          }
+          WorldWalker.MergeFrom(other.WorldWalker);
+          break;
+        case ComponentOneofCase.BallisticProjectile:
+          if (BallisticProjectile == null) {
+            BallisticProjectile = new global::MHUrho.Storage.StBallisticProjectile();
+          }
+          BallisticProjectile.MergeFrom(other.BallisticProjectile);
+          break;
+        case ComponentOneofCase.MovingMeeleAttacker:
+          if (MovingMeeleAttacker == null) {
+            MovingMeeleAttacker = new global::MHUrho.Storage.StMovingMeeleAttacker();
+          }
+          MovingMeeleAttacker.MergeFrom(other.MovingMeeleAttacker);
+          break;
+        case ComponentOneofCase.StaticMeeleAttacker:
+          if (StaticMeeleAttacker == null) {
+            StaticMeeleAttacker = new global::MHUrho.Storage.StStaticMeeleAttacker();
+          }
+          StaticMeeleAttacker.MergeFrom(other.StaticMeeleAttacker);
+          break;
+        case ComponentOneofCase.MovingRangeTarget:
+          if (MovingRangeTarget == null) {
+            MovingRangeTarget = new global::MHUrho.Storage.StMovingRangeTarget();
+          }
+          MovingRangeTarget.MergeFrom(other.MovingRangeTarget);
+          break;
+        case ComponentOneofCase.StaticRangeTarget:
+          if (StaticRangeTarget == null) {
+            StaticRangeTarget = new global::MHUrho.Storage.StStaticRangeTarget();
+          }
+          StaticRangeTarget.MergeFrom(other.StaticRangeTarget);
+          break;
+        case ComponentOneofCase.Shooter:
+          if (Shooter == null) {
+            Shooter = new global::MHUrho.Storage.StShooter();
+          }
+          Shooter.MergeFrom(other.Shooter);
+          break;
+        case ComponentOneofCase.UnitSelector:
+          if (UnitSelector == null) {
+            UnitSelector = new global::MHUrho.Storage.StUnitSelector();
+          }
+          UnitSelector.MergeFrom(other.UnitSelector);
+          break;
+        case ComponentOneofCase.Clicker:
+          if (Clicker == null) {
+            Clicker = new global::MHUrho.Storage.StClicker();
+          }
+          Clicker.MergeFrom(other.Clicker);
+          break;
+      }
+
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            global::MHUrho.Storage.StWorldWalker subBuilder = new global::MHUrho.Storage.StWorldWalker();
+            if (componentCase_ == ComponentOneofCase.WorldWalker) {
+              subBuilder.MergeFrom(WorldWalker);
+            }
+            input.ReadMessage(subBuilder);
+            WorldWalker = subBuilder;
+            break;
+          }
+          case 18: {
+            global::MHUrho.Storage.StBallisticProjectile subBuilder = new global::MHUrho.Storage.StBallisticProjectile();
+            if (componentCase_ == ComponentOneofCase.BallisticProjectile) {
+              subBuilder.MergeFrom(BallisticProjectile);
+            }
+            input.ReadMessage(subBuilder);
+            BallisticProjectile = subBuilder;
+            break;
+          }
+          case 26: {
+            global::MHUrho.Storage.StMovingMeeleAttacker subBuilder = new global::MHUrho.Storage.StMovingMeeleAttacker();
+            if (componentCase_ == ComponentOneofCase.MovingMeeleAttacker) {
+              subBuilder.MergeFrom(MovingMeeleAttacker);
+            }
+            input.ReadMessage(subBuilder);
+            MovingMeeleAttacker = subBuilder;
+            break;
+          }
+          case 34: {
+            global::MHUrho.Storage.StStaticMeeleAttacker subBuilder = new global::MHUrho.Storage.StStaticMeeleAttacker();
+            if (componentCase_ == ComponentOneofCase.StaticMeeleAttacker) {
+              subBuilder.MergeFrom(StaticMeeleAttacker);
+            }
+            input.ReadMessage(subBuilder);
+            StaticMeeleAttacker = subBuilder;
+            break;
+          }
+          case 42: {
+            global::MHUrho.Storage.StMovingRangeTarget subBuilder = new global::MHUrho.Storage.StMovingRangeTarget();
+            if (componentCase_ == ComponentOneofCase.MovingRangeTarget) {
+              subBuilder.MergeFrom(MovingRangeTarget);
+            }
+            input.ReadMessage(subBuilder);
+            MovingRangeTarget = subBuilder;
+            break;
+          }
+          case 50: {
+            global::MHUrho.Storage.StStaticRangeTarget subBuilder = new global::MHUrho.Storage.StStaticRangeTarget();
+            if (componentCase_ == ComponentOneofCase.StaticRangeTarget) {
+              subBuilder.MergeFrom(StaticRangeTarget);
+            }
+            input.ReadMessage(subBuilder);
+            StaticRangeTarget = subBuilder;
+            break;
+          }
+          case 58: {
+            global::MHUrho.Storage.StShooter subBuilder = new global::MHUrho.Storage.StShooter();
+            if (componentCase_ == ComponentOneofCase.Shooter) {
+              subBuilder.MergeFrom(Shooter);
+            }
+            input.ReadMessage(subBuilder);
+            Shooter = subBuilder;
+            break;
+          }
+          case 66: {
+            global::MHUrho.Storage.StUnitSelector subBuilder = new global::MHUrho.Storage.StUnitSelector();
+            if (componentCase_ == ComponentOneofCase.UnitSelector) {
+              subBuilder.MergeFrom(UnitSelector);
+            }
+            input.ReadMessage(subBuilder);
+            UnitSelector = subBuilder;
+            break;
+          }
+          case 74: {
+            global::MHUrho.Storage.StClicker subBuilder = new global::MHUrho.Storage.StClicker();
+            if (componentCase_ == ComponentOneofCase.Clicker) {
+              subBuilder.MergeFrom(Clicker);
+            }
+            input.ReadMessage(subBuilder);
+            Clicker = subBuilder;
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StWorldWalker : pb::IMessage<StWorldWalker> {
+    private static readonly pb::MessageParser<StWorldWalker> _parser = new pb::MessageParser<StWorldWalker>(() => new StWorldWalker());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StWorldWalker> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StWorldWalker() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StWorldWalker(StWorldWalker other) : this() {
+      enabled_ = other.enabled_;
+      Path = other.path_ != null ? other.Path.Clone() : null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StWorldWalker Clone() {
+      return new StWorldWalker(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "path" field.</summary>
+    public const int PathFieldNumber = 2;
+    private global::MHUrho.Storage.StPath path_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StPath Path {
+      get { return path_; }
+      set {
+        path_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StWorldWalker);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StWorldWalker other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (!object.Equals(Path, other.Path)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (path_ != null) hash ^= Path.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (path_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Path);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (path_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Path);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StWorldWalker other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.path_ != null) {
+        if (path_ == null) {
+          path_ = new global::MHUrho.Storage.StPath();
+        }
+        Path.MergeFrom(other.Path);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 18: {
+            if (path_ == null) {
+              path_ = new global::MHUrho.Storage.StPath();
+            }
+            input.ReadMessage(path_);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StBallisticProjectile : pb::IMessage<StBallisticProjectile> {
+    private static readonly pb::MessageParser<StBallisticProjectile> _parser = new pb::MessageParser<StBallisticProjectile>(() => new StBallisticProjectile());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StBallisticProjectile> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[5]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StBallisticProjectile() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StBallisticProjectile(StBallisticProjectile other) : this() {
+      enabled_ = other.enabled_;
+      Movement = other.movement_ != null ? other.Movement.Clone() : null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StBallisticProjectile Clone() {
+      return new StBallisticProjectile(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "movement" field.</summary>
+    public const int MovementFieldNumber = 2;
+    private global::MHUrho.Storage.StVector3 movement_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Movement {
+      get { return movement_; }
+      set {
+        movement_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StBallisticProjectile);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StBallisticProjectile other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (!object.Equals(Movement, other.Movement)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (movement_ != null) hash ^= Movement.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (movement_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Movement);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (movement_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Movement);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StBallisticProjectile other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.movement_ != null) {
+        if (movement_ == null) {
+          movement_ = new global::MHUrho.Storage.StVector3();
+        }
+        Movement.MergeFrom(other.Movement);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 18: {
+            if (movement_ == null) {
+              movement_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(movement_);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StMovingMeeleAttacker : pb::IMessage<StMovingMeeleAttacker> {
+    private static readonly pb::MessageParser<StMovingMeeleAttacker> _parser = new pb::MessageParser<StMovingMeeleAttacker>(() => new StMovingMeeleAttacker());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StMovingMeeleAttacker> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[6]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMovingMeeleAttacker() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMovingMeeleAttacker(StMovingMeeleAttacker other) : this() {
+      enabled_ = other.enabled_;
+      searchForTarget_ = other.searchForTarget_;
+      SearchRectangleSize = other.searchRectangleSize_ != null ? other.SearchRectangleSize.Clone() : null;
+      timeBetweenSearches_ = other.timeBetweenSearches_;
+      timeBetweenPositionChecks_ = other.timeBetweenPositionChecks_;
+      timeBetweenAttacks_ = other.timeBetweenAttacks_;
+      targetID_ = other.targetID_;
+      timeToNextSearch_ = other.timeToNextSearch_;
+      timeToNextPositionCheck_ = other.timeToNextPositionCheck_;
+      timeToNextAttack_ = other.timeToNextAttack_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMovingMeeleAttacker Clone() {
+      return new StMovingMeeleAttacker(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "searchForTarget" field.</summary>
+    public const int SearchForTargetFieldNumber = 2;
+    private bool searchForTarget_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool SearchForTarget {
+      get { return searchForTarget_; }
+      set {
+        searchForTarget_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "searchRectangleSize" field.</summary>
+    public const int SearchRectangleSizeFieldNumber = 3;
+    private global::MHUrho.Storage.StIntVector2 searchRectangleSize_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StIntVector2 SearchRectangleSize {
+      get { return searchRectangleSize_; }
+      set {
+        searchRectangleSize_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeBetweenSearches" field.</summary>
+    public const int TimeBetweenSearchesFieldNumber = 4;
+    private float timeBetweenSearches_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeBetweenSearches {
+      get { return timeBetweenSearches_; }
+      set {
+        timeBetweenSearches_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeBetweenPositionChecks" field.</summary>
+    public const int TimeBetweenPositionChecksFieldNumber = 5;
+    private float timeBetweenPositionChecks_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeBetweenPositionChecks {
+      get { return timeBetweenPositionChecks_; }
+      set {
+        timeBetweenPositionChecks_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeBetweenAttacks" field.</summary>
+    public const int TimeBetweenAttacksFieldNumber = 6;
+    private float timeBetweenAttacks_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeBetweenAttacks {
+      get { return timeBetweenAttacks_; }
+      set {
+        timeBetweenAttacks_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "targetID" field.</summary>
+    public const int TargetIDFieldNumber = 7;
+    private int targetID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int TargetID {
+      get { return targetID_; }
+      set {
+        targetID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeToNextSearch" field.</summary>
+    public const int TimeToNextSearchFieldNumber = 8;
+    private float timeToNextSearch_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeToNextSearch {
+      get { return timeToNextSearch_; }
+      set {
+        timeToNextSearch_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeToNextPositionCheck" field.</summary>
+    public const int TimeToNextPositionCheckFieldNumber = 9;
+    private float timeToNextPositionCheck_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeToNextPositionCheck {
+      get { return timeToNextPositionCheck_; }
+      set {
+        timeToNextPositionCheck_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeToNextAttack" field.</summary>
+    public const int TimeToNextAttackFieldNumber = 10;
+    private float timeToNextAttack_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeToNextAttack {
+      get { return timeToNextAttack_; }
+      set {
+        timeToNextAttack_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StMovingMeeleAttacker);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StMovingMeeleAttacker other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (SearchForTarget != other.SearchForTarget) return false;
+      if (!object.Equals(SearchRectangleSize, other.SearchRectangleSize)) return false;
+      if (TimeBetweenSearches != other.TimeBetweenSearches) return false;
+      if (TimeBetweenPositionChecks != other.TimeBetweenPositionChecks) return false;
+      if (TimeBetweenAttacks != other.TimeBetweenAttacks) return false;
+      if (TargetID != other.TargetID) return false;
+      if (TimeToNextSearch != other.TimeToNextSearch) return false;
+      if (TimeToNextPositionCheck != other.TimeToNextPositionCheck) return false;
+      if (TimeToNextAttack != other.TimeToNextAttack) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (SearchForTarget != false) hash ^= SearchForTarget.GetHashCode();
+      if (searchRectangleSize_ != null) hash ^= SearchRectangleSize.GetHashCode();
+      if (TimeBetweenSearches != 0F) hash ^= TimeBetweenSearches.GetHashCode();
+      if (TimeBetweenPositionChecks != 0F) hash ^= TimeBetweenPositionChecks.GetHashCode();
+      if (TimeBetweenAttacks != 0F) hash ^= TimeBetweenAttacks.GetHashCode();
+      if (TargetID != 0) hash ^= TargetID.GetHashCode();
+      if (TimeToNextSearch != 0F) hash ^= TimeToNextSearch.GetHashCode();
+      if (TimeToNextPositionCheck != 0F) hash ^= TimeToNextPositionCheck.GetHashCode();
+      if (TimeToNextAttack != 0F) hash ^= TimeToNextAttack.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (SearchForTarget != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(SearchForTarget);
+      }
+      if (searchRectangleSize_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(SearchRectangleSize);
+      }
+      if (TimeBetweenSearches != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(TimeBetweenSearches);
+      }
+      if (TimeBetweenPositionChecks != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(TimeBetweenPositionChecks);
+      }
+      if (TimeBetweenAttacks != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(TimeBetweenAttacks);
+      }
+      if (TargetID != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(TargetID);
+      }
+      if (TimeToNextSearch != 0F) {
+        output.WriteRawTag(69);
+        output.WriteFloat(TimeToNextSearch);
+      }
+      if (TimeToNextPositionCheck != 0F) {
+        output.WriteRawTag(77);
+        output.WriteFloat(TimeToNextPositionCheck);
+      }
+      if (TimeToNextAttack != 0F) {
+        output.WriteRawTag(85);
+        output.WriteFloat(TimeToNextAttack);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (SearchForTarget != false) {
+        size += 1 + 1;
+      }
+      if (searchRectangleSize_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(SearchRectangleSize);
+      }
+      if (TimeBetweenSearches != 0F) {
+        size += 1 + 4;
+      }
+      if (TimeBetweenPositionChecks != 0F) {
+        size += 1 + 4;
+      }
+      if (TimeBetweenAttacks != 0F) {
+        size += 1 + 4;
+      }
+      if (TargetID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TargetID);
+      }
+      if (TimeToNextSearch != 0F) {
+        size += 1 + 4;
+      }
+      if (TimeToNextPositionCheck != 0F) {
+        size += 1 + 4;
+      }
+      if (TimeToNextAttack != 0F) {
+        size += 1 + 4;
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StMovingMeeleAttacker other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.SearchForTarget != false) {
+        SearchForTarget = other.SearchForTarget;
+      }
+      if (other.searchRectangleSize_ != null) {
+        if (searchRectangleSize_ == null) {
+          searchRectangleSize_ = new global::MHUrho.Storage.StIntVector2();
+        }
+        SearchRectangleSize.MergeFrom(other.SearchRectangleSize);
+      }
+      if (other.TimeBetweenSearches != 0F) {
+        TimeBetweenSearches = other.TimeBetweenSearches;
+      }
+      if (other.TimeBetweenPositionChecks != 0F) {
+        TimeBetweenPositionChecks = other.TimeBetweenPositionChecks;
+      }
+      if (other.TimeBetweenAttacks != 0F) {
+        TimeBetweenAttacks = other.TimeBetweenAttacks;
+      }
+      if (other.TargetID != 0) {
+        TargetID = other.TargetID;
+      }
+      if (other.TimeToNextSearch != 0F) {
+        TimeToNextSearch = other.TimeToNextSearch;
+      }
+      if (other.TimeToNextPositionCheck != 0F) {
+        TimeToNextPositionCheck = other.TimeToNextPositionCheck;
+      }
+      if (other.TimeToNextAttack != 0F) {
+        TimeToNextAttack = other.TimeToNextAttack;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 16: {
+            SearchForTarget = input.ReadBool();
+            break;
+          }
+          case 26: {
+            if (searchRectangleSize_ == null) {
+              searchRectangleSize_ = new global::MHUrho.Storage.StIntVector2();
+            }
+            input.ReadMessage(searchRectangleSize_);
+            break;
+          }
+          case 37: {
+            TimeBetweenSearches = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            TimeBetweenPositionChecks = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            TimeBetweenAttacks = input.ReadFloat();
+            break;
+          }
+          case 56: {
+            TargetID = input.ReadInt32();
+            break;
+          }
+          case 69: {
+            TimeToNextSearch = input.ReadFloat();
+            break;
+          }
+          case 77: {
+            TimeToNextPositionCheck = input.ReadFloat();
+            break;
+          }
+          case 85: {
+            TimeToNextAttack = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StStaticMeeleAttacker : pb::IMessage<StStaticMeeleAttacker> {
+    private static readonly pb::MessageParser<StStaticMeeleAttacker> _parser = new pb::MessageParser<StStaticMeeleAttacker>(() => new StStaticMeeleAttacker());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StStaticMeeleAttacker> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[7]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StStaticMeeleAttacker() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StStaticMeeleAttacker(StStaticMeeleAttacker other) : this() {
+      enabled_ = other.enabled_;
+      searchForTarget_ = other.searchForTarget_;
+      SearchRectangleSize = other.searchRectangleSize_ != null ? other.SearchRectangleSize.Clone() : null;
+      timeBetweenSearches_ = other.timeBetweenSearches_;
+      timeBetweenAttacks_ = other.timeBetweenAttacks_;
+      targetID_ = other.targetID_;
+      timeToNextSearch_ = other.timeToNextSearch_;
+      timeToNextAttack_ = other.timeToNextAttack_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StStaticMeeleAttacker Clone() {
+      return new StStaticMeeleAttacker(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "searchForTarget" field.</summary>
+    public const int SearchForTargetFieldNumber = 2;
+    private bool searchForTarget_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool SearchForTarget {
+      get { return searchForTarget_; }
+      set {
+        searchForTarget_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "searchRectangleSize" field.</summary>
+    public const int SearchRectangleSizeFieldNumber = 3;
+    private global::MHUrho.Storage.StIntVector2 searchRectangleSize_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StIntVector2 SearchRectangleSize {
+      get { return searchRectangleSize_; }
+      set {
+        searchRectangleSize_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeBetweenSearches" field.</summary>
+    public const int TimeBetweenSearchesFieldNumber = 4;
+    private float timeBetweenSearches_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeBetweenSearches {
+      get { return timeBetweenSearches_; }
+      set {
+        timeBetweenSearches_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeBetweenAttacks" field.</summary>
+    public const int TimeBetweenAttacksFieldNumber = 5;
+    private float timeBetweenAttacks_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeBetweenAttacks {
+      get { return timeBetweenAttacks_; }
+      set {
+        timeBetweenAttacks_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "targetID" field.</summary>
+    public const int TargetIDFieldNumber = 6;
+    private int targetID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int TargetID {
+      get { return targetID_; }
+      set {
+        targetID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeToNextSearch" field.</summary>
+    public const int TimeToNextSearchFieldNumber = 7;
+    private float timeToNextSearch_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeToNextSearch {
+      get { return timeToNextSearch_; }
+      set {
+        timeToNextSearch_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "timeToNextAttack" field.</summary>
+    public const int TimeToNextAttackFieldNumber = 8;
+    private float timeToNextAttack_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TimeToNextAttack {
+      get { return timeToNextAttack_; }
+      set {
+        timeToNextAttack_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StStaticMeeleAttacker);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StStaticMeeleAttacker other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (SearchForTarget != other.SearchForTarget) return false;
+      if (!object.Equals(SearchRectangleSize, other.SearchRectangleSize)) return false;
+      if (TimeBetweenSearches != other.TimeBetweenSearches) return false;
+      if (TimeBetweenAttacks != other.TimeBetweenAttacks) return false;
+      if (TargetID != other.TargetID) return false;
+      if (TimeToNextSearch != other.TimeToNextSearch) return false;
+      if (TimeToNextAttack != other.TimeToNextAttack) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (SearchForTarget != false) hash ^= SearchForTarget.GetHashCode();
+      if (searchRectangleSize_ != null) hash ^= SearchRectangleSize.GetHashCode();
+      if (TimeBetweenSearches != 0F) hash ^= TimeBetweenSearches.GetHashCode();
+      if (TimeBetweenAttacks != 0F) hash ^= TimeBetweenAttacks.GetHashCode();
+      if (TargetID != 0) hash ^= TargetID.GetHashCode();
+      if (TimeToNextSearch != 0F) hash ^= TimeToNextSearch.GetHashCode();
+      if (TimeToNextAttack != 0F) hash ^= TimeToNextAttack.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (SearchForTarget != false) {
+        output.WriteRawTag(16);
+        output.WriteBool(SearchForTarget);
+      }
+      if (searchRectangleSize_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(SearchRectangleSize);
+      }
+      if (TimeBetweenSearches != 0F) {
+        output.WriteRawTag(37);
+        output.WriteFloat(TimeBetweenSearches);
+      }
+      if (TimeBetweenAttacks != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(TimeBetweenAttacks);
+      }
+      if (TargetID != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(TargetID);
+      }
+      if (TimeToNextSearch != 0F) {
+        output.WriteRawTag(61);
+        output.WriteFloat(TimeToNextSearch);
+      }
+      if (TimeToNextAttack != 0F) {
+        output.WriteRawTag(69);
+        output.WriteFloat(TimeToNextAttack);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (SearchForTarget != false) {
+        size += 1 + 1;
+      }
+      if (searchRectangleSize_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(SearchRectangleSize);
+      }
+      if (TimeBetweenSearches != 0F) {
+        size += 1 + 4;
+      }
+      if (TimeBetweenAttacks != 0F) {
+        size += 1 + 4;
+      }
+      if (TargetID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TargetID);
+      }
+      if (TimeToNextSearch != 0F) {
+        size += 1 + 4;
+      }
+      if (TimeToNextAttack != 0F) {
+        size += 1 + 4;
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StStaticMeeleAttacker other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.SearchForTarget != false) {
+        SearchForTarget = other.SearchForTarget;
+      }
+      if (other.searchRectangleSize_ != null) {
+        if (searchRectangleSize_ == null) {
+          searchRectangleSize_ = new global::MHUrho.Storage.StIntVector2();
+        }
+        SearchRectangleSize.MergeFrom(other.SearchRectangleSize);
+      }
+      if (other.TimeBetweenSearches != 0F) {
+        TimeBetweenSearches = other.TimeBetweenSearches;
+      }
+      if (other.TimeBetweenAttacks != 0F) {
+        TimeBetweenAttacks = other.TimeBetweenAttacks;
+      }
+      if (other.TargetID != 0) {
+        TargetID = other.TargetID;
+      }
+      if (other.TimeToNextSearch != 0F) {
+        TimeToNextSearch = other.TimeToNextSearch;
+      }
+      if (other.TimeToNextAttack != 0F) {
+        TimeToNextAttack = other.TimeToNextAttack;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 16: {
+            SearchForTarget = input.ReadBool();
+            break;
+          }
+          case 26: {
+            if (searchRectangleSize_ == null) {
+              searchRectangleSize_ = new global::MHUrho.Storage.StIntVector2();
+            }
+            input.ReadMessage(searchRectangleSize_);
+            break;
+          }
+          case 37: {
+            TimeBetweenSearches = input.ReadFloat();
+            break;
+          }
+          case 45: {
+            TimeBetweenAttacks = input.ReadFloat();
+            break;
+          }
+          case 48: {
+            TargetID = input.ReadInt32();
+            break;
+          }
+          case 61: {
+            TimeToNextSearch = input.ReadFloat();
+            break;
+          }
+          case 69: {
+            TimeToNextAttack = input.ReadFloat();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StMovingRangeTarget : pb::IMessage<StMovingRangeTarget> {
+    private static readonly pb::MessageParser<StMovingRangeTarget> _parser = new pb::MessageParser<StMovingRangeTarget>(() => new StMovingRangeTarget());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StMovingRangeTarget> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[8]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMovingRangeTarget() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMovingRangeTarget(StMovingRangeTarget other) : this() {
+      enabled_ = other.enabled_;
+      instanceID_ = other.instanceID_;
+      Offset = other.offset_ != null ? other.Offset.Clone() : null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StMovingRangeTarget Clone() {
+      return new StMovingRangeTarget(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "instanceID" field.</summary>
+    public const int InstanceIDFieldNumber = 2;
+    private int instanceID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int InstanceID {
+      get { return instanceID_; }
+      set {
+        instanceID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "offset" field.</summary>
+    public const int OffsetFieldNumber = 3;
+    private global::MHUrho.Storage.StVector3 offset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Offset {
+      get { return offset_; }
+      set {
+        offset_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StMovingRangeTarget);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StMovingRangeTarget other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (InstanceID != other.InstanceID) return false;
+      if (!object.Equals(Offset, other.Offset)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (InstanceID != 0) hash ^= InstanceID.GetHashCode();
+      if (offset_ != null) hash ^= Offset.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (InstanceID != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(InstanceID);
+      }
+      if (offset_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Offset);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (InstanceID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(InstanceID);
+      }
+      if (offset_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Offset);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StMovingRangeTarget other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.InstanceID != 0) {
+        InstanceID = other.InstanceID;
+      }
+      if (other.offset_ != null) {
+        if (offset_ == null) {
+          offset_ = new global::MHUrho.Storage.StVector3();
+        }
+        Offset.MergeFrom(other.Offset);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 16: {
+            InstanceID = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            if (offset_ == null) {
+              offset_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(offset_);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StStaticRangeTarget : pb::IMessage<StStaticRangeTarget> {
+    private static readonly pb::MessageParser<StStaticRangeTarget> _parser = new pb::MessageParser<StStaticRangeTarget>(() => new StStaticRangeTarget());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StStaticRangeTarget> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[9]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StStaticRangeTarget() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StStaticRangeTarget(StStaticRangeTarget other) : this() {
+      enabled_ = other.enabled_;
+      instanceID_ = other.instanceID_;
+      Position = other.position_ != null ? other.Position.Clone() : null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StStaticRangeTarget Clone() {
+      return new StStaticRangeTarget(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "instanceID" field.</summary>
+    public const int InstanceIDFieldNumber = 2;
+    private int instanceID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int InstanceID {
+      get { return instanceID_; }
+      set {
+        instanceID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "position" field.</summary>
+    public const int PositionFieldNumber = 3;
+    private global::MHUrho.Storage.StVector3 position_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Position {
+      get { return position_; }
+      set {
+        position_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StStaticRangeTarget);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StStaticRangeTarget other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (InstanceID != other.InstanceID) return false;
+      if (!object.Equals(Position, other.Position)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (InstanceID != 0) hash ^= InstanceID.GetHashCode();
+      if (position_ != null) hash ^= Position.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (InstanceID != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(InstanceID);
+      }
+      if (position_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(Position);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (InstanceID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(InstanceID);
+      }
+      if (position_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StStaticRangeTarget other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.InstanceID != 0) {
+        InstanceID = other.InstanceID;
+      }
+      if (other.position_ != null) {
+        if (position_ == null) {
+          position_ = new global::MHUrho.Storage.StVector3();
+        }
+        Position.MergeFrom(other.Position);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 16: {
+            InstanceID = input.ReadInt32();
+            break;
+          }
+          case 26: {
+            if (position_ == null) {
+              position_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(position_);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StShooter : pb::IMessage<StShooter> {
+    private static readonly pb::MessageParser<StShooter> _parser = new pb::MessageParser<StShooter>(() => new StShooter());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StShooter> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[10]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StShooter() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StShooter(StShooter other) : this() {
+      enabled_ = other.enabled_;
+      projectileTypeID_ = other.projectileTypeID_;
+      rateOfFire_ = other.rateOfFire_;
+      searchForTarget_ = other.searchForTarget_;
+      targetSearchDelay_ = other.targetSearchDelay_;
+      shotDelay_ = other.shotDelay_;
+      searchDelay_ = other.searchDelay_;
+      targetID_ = other.targetID_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StShooter Clone() {
+      return new StShooter(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "projectileTypeID" field.</summary>
+    public const int ProjectileTypeIDFieldNumber = 2;
+    private int projectileTypeID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int ProjectileTypeID {
+      get { return projectileTypeID_; }
+      set {
+        projectileTypeID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "rateOfFire" field.</summary>
+    public const int RateOfFireFieldNumber = 3;
+    private float rateOfFire_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float RateOfFire {
+      get { return rateOfFire_; }
+      set {
+        rateOfFire_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "searchForTarget" field.</summary>
+    public const int SearchForTargetFieldNumber = 4;
+    private bool searchForTarget_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool SearchForTarget {
+      get { return searchForTarget_; }
+      set {
+        searchForTarget_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "targetSearchDelay" field.</summary>
+    public const int TargetSearchDelayFieldNumber = 5;
+    private float targetSearchDelay_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float TargetSearchDelay {
+      get { return targetSearchDelay_; }
+      set {
+        targetSearchDelay_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "shotDelay" field.</summary>
+    public const int ShotDelayFieldNumber = 6;
+    private float shotDelay_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float ShotDelay {
+      get { return shotDelay_; }
+      set {
+        shotDelay_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "searchDelay" field.</summary>
+    public const int SearchDelayFieldNumber = 7;
+    private float searchDelay_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public float SearchDelay {
+      get { return searchDelay_; }
+      set {
+        searchDelay_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "targetID" field.</summary>
+    public const int TargetIDFieldNumber = 8;
+    private int targetID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int TargetID {
+      get { return targetID_; }
+      set {
+        targetID_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StShooter);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StShooter other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      if (ProjectileTypeID != other.ProjectileTypeID) return false;
+      if (RateOfFire != other.RateOfFire) return false;
+      if (SearchForTarget != other.SearchForTarget) return false;
+      if (TargetSearchDelay != other.TargetSearchDelay) return false;
+      if (ShotDelay != other.ShotDelay) return false;
+      if (SearchDelay != other.SearchDelay) return false;
+      if (TargetID != other.TargetID) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      if (ProjectileTypeID != 0) hash ^= ProjectileTypeID.GetHashCode();
+      if (RateOfFire != 0F) hash ^= RateOfFire.GetHashCode();
+      if (SearchForTarget != false) hash ^= SearchForTarget.GetHashCode();
+      if (TargetSearchDelay != 0F) hash ^= TargetSearchDelay.GetHashCode();
+      if (ShotDelay != 0F) hash ^= ShotDelay.GetHashCode();
+      if (SearchDelay != 0F) hash ^= SearchDelay.GetHashCode();
+      if (TargetID != 0) hash ^= TargetID.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+      if (ProjectileTypeID != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ProjectileTypeID);
+      }
+      if (RateOfFire != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(RateOfFire);
+      }
+      if (SearchForTarget != false) {
+        output.WriteRawTag(32);
+        output.WriteBool(SearchForTarget);
+      }
+      if (TargetSearchDelay != 0F) {
+        output.WriteRawTag(45);
+        output.WriteFloat(TargetSearchDelay);
+      }
+      if (ShotDelay != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(ShotDelay);
+      }
+      if (SearchDelay != 0F) {
+        output.WriteRawTag(61);
+        output.WriteFloat(SearchDelay);
+      }
+      if (TargetID != 0) {
+        output.WriteRawTag(64);
+        output.WriteInt32(TargetID);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      if (ProjectileTypeID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ProjectileTypeID);
+      }
+      if (RateOfFire != 0F) {
+        size += 1 + 4;
+      }
+      if (SearchForTarget != false) {
+        size += 1 + 1;
+      }
+      if (TargetSearchDelay != 0F) {
+        size += 1 + 4;
+      }
+      if (ShotDelay != 0F) {
+        size += 1 + 4;
+      }
+      if (SearchDelay != 0F) {
+        size += 1 + 4;
+      }
+      if (TargetID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TargetID);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StShooter other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+      if (other.ProjectileTypeID != 0) {
+        ProjectileTypeID = other.ProjectileTypeID;
+      }
+      if (other.RateOfFire != 0F) {
+        RateOfFire = other.RateOfFire;
+      }
+      if (other.SearchForTarget != false) {
+        SearchForTarget = other.SearchForTarget;
+      }
+      if (other.TargetSearchDelay != 0F) {
+        TargetSearchDelay = other.TargetSearchDelay;
+      }
+      if (other.ShotDelay != 0F) {
+        ShotDelay = other.ShotDelay;
+      }
+      if (other.SearchDelay != 0F) {
+        SearchDelay = other.SearchDelay;
+      }
+      if (other.TargetID != 0) {
+        TargetID = other.TargetID;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+          case 16: {
+            ProjectileTypeID = input.ReadInt32();
+            break;
+          }
+          case 29: {
+            RateOfFire = input.ReadFloat();
+            break;
+          }
+          case 32: {
+            SearchForTarget = input.ReadBool();
+            break;
+          }
+          case 45: {
+            TargetSearchDelay = input.ReadFloat();
+            break;
+          }
+          case 53: {
+            ShotDelay = input.ReadFloat();
+            break;
+          }
+          case 61: {
+            SearchDelay = input.ReadFloat();
+            break;
+          }
+          case 64: {
+            TargetID = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StUnitSelector : pb::IMessage<StUnitSelector> {
+    private static readonly pb::MessageParser<StUnitSelector> _parser = new pb::MessageParser<StUnitSelector>(() => new StUnitSelector());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StUnitSelector> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[11]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StUnitSelector() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StUnitSelector(StUnitSelector other) : this() {
+      enabled_ = other.enabled_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StUnitSelector Clone() {
+      return new StUnitSelector(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StUnitSelector);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StUnitSelector other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StUnitSelector other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class StClicker : pb::IMessage<StClicker> {
+    private static readonly pb::MessageParser<StClicker> _parser = new pb::MessageParser<StClicker>(() => new StClicker());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StClicker> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor.MessageTypes[12]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StClicker() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StClicker(StClicker other) : this() {
+      enabled_ = other.enabled_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StClicker Clone() {
+      return new StClicker(this);
+    }
+
+    /// <summary>Field number for the "enabled" field.</summary>
+    public const int EnabledFieldNumber = 1;
+    private bool enabled_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Enabled {
+      get { return enabled_; }
+      set {
+        enabled_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StClicker);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StClicker other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Enabled != other.Enabled) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Enabled != false) hash ^= Enabled.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Enabled != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(Enabled);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Enabled != false) {
+        size += 1 + 1;
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StClicker other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Enabled != false) {
+        Enabled = other.Enabled;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Enabled = input.ReadBool();
             break;
           }
         }

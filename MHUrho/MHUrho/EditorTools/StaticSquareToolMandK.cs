@@ -54,6 +54,7 @@ namespace MHUrho.EditorTools
 		public override void Dispose()
 		{
 			Disable();
+			sizeSlider.SliderChanged -= SizeSlider_SliderChanged;
 		}
 
 		public override void Enable() {

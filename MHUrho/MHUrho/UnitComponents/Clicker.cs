@@ -8,6 +8,14 @@ using MHUrho.Storage;
 
 namespace MHUrho.UnitComponents
 {
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="button">Pressed button</param>
+	/// <param name="buttons">Other buttons down during the button press</param>
+	/// <param name="qualifiers">Qualifiers like shift, ctrl, alt etc. </param> TODO: Provide which value is which
+	public delegate void ClickedDelegate(int button, int buttons, int qualifiers);
+
     public class Clicker : DefaultComponent
     {
 		internal class Loader : DefaultComponentLoader {
@@ -20,20 +28,27 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(Clicker clicker) {
-				var storageData = new SequentialPluginDataWriter(clicker.Level);
-				return storageData.PluginData;
+			public static StDefaultComponent SaveState(Clicker clicker)
+			{
+				var storedClicker = new StClicker
+									{
+										Enabled = clicker.Enabled
+									};
+				return new StDefaultComponent {Clicker = storedClicker};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
 
-				var notificationReceiver = plugin as INotificationReceiver;
-				if (notificationReceiver == null) {
-					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(INotificationReceiver)} interface", nameof(plugin));
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.Clicker) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
 				}
 
-				Clicker = new Clicker(notificationReceiver, level);
+				var storedClicker = storedData.Clicker;
+
+				Clicker = new Clicker(level)
+						{
+							Enabled = storedClicker.Enabled
+						};
 			}
 
 			public override void ConnectReferences(LevelManager level) {
@@ -49,42 +64,27 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface INotificationReceiver {
-			void Clicked(Clicker clicker, int button, int qualifiers);
-		}
+		public event ClickedDelegate Clicked;
 
-		public static string ComponentName = nameof(Clicker);
-		public static DefaultComponents ComponentID = DefaultComponents.Clicker;
-
-		public override string ComponentTypeName => ComponentName;
-		public override DefaultComponents ComponentTypeID => ComponentID;
-
-		INotificationReceiver notificationReceiver;
-
-		protected Clicker(INotificationReceiver notificationReceiver, ILevelManager level) 
+		protected Clicker(ILevelManager level) 
 			:base(level)
 		{
-			this.notificationReceiver = notificationReceiver;
 		}
 
-		public static Clicker CreateNew<T>(T instancePlugin, ILevelManager level) 
-			where T: InstancePlugin, INotificationReceiver
+		public static Clicker CreateNew(ILevelManager level) 
 		{
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
-			}
-
-			return new Clicker(instancePlugin, level);
+			return new Clicker(level);
 		}
 
 
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}
 
-		public void Click(int button, int qualifiers) {
-			notificationReceiver.Clicked(this, button, qualifiers);
+		public void Click(int button, int buttons, int qualifiers)
+		{
+			Clicked?.Invoke(button, buttons, qualifiers);
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {

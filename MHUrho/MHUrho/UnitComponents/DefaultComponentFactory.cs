@@ -10,16 +10,12 @@ namespace MHUrho.UnitComponents
 	public class DefaultComponentFactory
 	{
 		
-		readonly Dictionary<DefaultComponents, DefaultComponentLoader> loaders;
-
-		readonly Dictionary<string, DefaultComponents> nameToID;
+		readonly Dictionary<StDefaultComponent.ComponentOneofCase, DefaultComponentLoader> loaders;
 
 		public DefaultComponentFactory() {
-			loaders = new Dictionary<DefaultComponents, DefaultComponentLoader>();
-			nameToID = new Dictionary<string, DefaultComponents>();
+			loaders = new Dictionary<StDefaultComponent.ComponentOneofCase, DefaultComponentLoader>();
 
 			AddLoaders(loaders);
-			AddNameToIDMap(nameToID);
 
 		}
 
@@ -27,44 +23,26 @@ namespace MHUrho.UnitComponents
 
 		}
 
-		internal DefaultComponentLoader StartLoadingComponent(string name, PluginData storedComponent, LevelManager level, InstancePlugin plugin) {
-			return StartLoadingComponent(nameToID[name], storedComponent, level, plugin);
-		}
-
-		internal DefaultComponentLoader StartLoadingComponent(int ID, PluginData storedComponent, LevelManager level, InstancePlugin plugin) {
-			return StartLoadingComponent((DefaultComponents) ID, storedComponent, level, plugin);
-		}
-
-		internal DefaultComponentLoader StartLoadingComponent(DefaultComponents ID, PluginData storedComponent, LevelManager level, InstancePlugin plugin )
-		{
-			DefaultComponentLoader loader = loaders[ID].Clone();
+		internal DefaultComponentLoader StartLoadingComponent(StDefaultComponent storedComponent, LevelManager level, InstancePlugin plugin) {
+			DefaultComponentLoader loader = loaders[storedComponent.ComponentCase].Clone();
 			loader.StartLoading(level, plugin, storedComponent);
 			return loader;
 		}
 
-		void AddLoaders(IDictionary<DefaultComponents, DefaultComponentLoader> loaders) {
+		void AddLoaders(IDictionary<StDefaultComponent.ComponentOneofCase, DefaultComponentLoader> loaders) {
 			//TODO: Maybe reflection
-			loaders.Add(UnitSelector.ComponentID, new UnitSelector.Loader());
-			loaders.Add(WorldWalker.ComponentID, new WorldWalker.Loader());
-			loaders.Add(Shooter.ComponentID, new Shooter.Loader());
-			loaders.Add(BallisticProjectile.ComponentID, new BallisticProjectile.Loader());
-			loaders.Add(StaticRangeTarget.ComponentID, new StaticRangeTarget.Loader());
-			loaders.Add(MovingRangeTarget.ComponentID, new MovingRangeTarget.Loader());
-			loaders.Add(MovingMeeleAttacker.ComponentID, new MovingMeeleAttacker.Loader());
-			loaders.Add(StaticMeeleAttacker.ComponentID, new StaticMeeleAttacker.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.UnitSelector, new UnitSelector.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.WorldWalker, new WorldWalker.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.Shooter, new Shooter.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.BallisticProjectile, new BallisticProjectile.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.StaticRangeTarget, new StaticRangeTarget.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.MovingRangeTarget, new MovingRangeTarget.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.MovingMeeleAttacker, new MovingMeeleAttacker.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.StaticMeeleAttacker, new StaticMeeleAttacker.Loader());
+			loaders.Add(StDefaultComponent.ComponentOneofCase.Clicker, new Clicker.Loader());
 			//TODO: Add other components
 		}
 
-		void AddNameToIDMap(IDictionary<string, DefaultComponents> map) {
-			map.Add(UnitSelector.ComponentName, UnitSelector.ComponentID);
-			map.Add(WorldWalker.ComponentName, WorldWalker.ComponentID);
-			map.Add(Shooter.ComponentName, Shooter.ComponentID);
-			map.Add(BallisticProjectile.ComponentName, BallisticProjectile.ComponentID);
-			map.Add(StaticRangeTarget.ComponentName, StaticRangeTarget.ComponentID);
-			map.Add(MovingRangeTarget.ComponentName, MovingRangeTarget.ComponentID);
-			map.Add(MovingMeeleAttacker.ComponentName, MovingMeeleAttacker.ComponentID);
-			map.Add(StaticMeeleAttacker.ComponentName, StaticMeeleAttacker.ComponentID);
-		}
 
 	}
 }

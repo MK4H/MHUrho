@@ -36,19 +36,26 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(UnitSelector unitSelector) {
-				var sequentialData = new SequentialPluginDataWriter(unitSelector.Level);
-				sequentialData.StoreNext<bool>(unitSelector.Enabled);
-				return sequentialData.PluginData;
+			public static StDefaultComponent SaveState(UnitSelector unitSelector)
+			{
+				var storedUnitSelector = new StUnitSelector
+										{
+											Enabled = unitSelector.Enabled
+										};
+				return new StDefaultComponent {UnitSelector = storedUnitSelector};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
-				
-				var dataReader = new SequentialPluginDataReader(storedData, level);
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
+
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.UnitSelector) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
+
+				var storedUnitSelector = storedData.UnitSelector;
 
 				UnitSelector = new UnitSelector(level)
 								{
-									Enabled = dataReader.GetNext<bool>()
+									Enabled = storedUnitSelector.Enabled
 								};
 
 			}
@@ -65,12 +72,6 @@ namespace MHUrho.UnitComponents
 				return new Loader();
 			}
 		}
-
-		public static string ComponentName = nameof(UnitSelector);
-		public static DefaultComponents ComponentID = DefaultComponents.UnitSelector;
-
-		public override string ComponentTypeName => ComponentName;
-		public override DefaultComponents ComponentTypeID => ComponentID;
 
 		public IUnit Unit => (IUnit)Entity;
 
@@ -118,7 +119,7 @@ namespace MHUrho.UnitComponents
 		}
 
 
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}

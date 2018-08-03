@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.Storage;
@@ -31,24 +32,26 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(MovingMeeleAttacker movingMeele)
+			public static StDefaultComponent SaveState(MovingMeeleAttacker movingMeele)
 			{
-				var writer = new SequentialPluginDataWriter(movingMeele.Level);
-				writer.StoreNext(movingMeele.SearchForTarget);
-				writer.StoreNext(movingMeele.SearchRectangleSize);
-				writer.StoreNext(movingMeele.TimeBetweenSearches);
-				writer.StoreNext(movingMeele.timeBetweenPositionChecks);
-				writer.StoreNext(movingMeele.TimeBetweenAttacks);
-				writer.StoreNext(movingMeele.Enabled);
-				writer.StoreNext(movingMeele.Target?.ID ?? 0);
+				var storedMovingMeeleAttacker = new StMovingMeeleAttacker
+												{
+													Enabled = movingMeele.Enabled,
+													SearchForTarget = movingMeele.SearchForTarget,
+													SearchRectangleSize = movingMeele.SearchRectangleSize.ToStIntVector2(),
+													TimeBetweenSearches = movingMeele.TimeBetweenSearches,
+													TimeBetweenPositionChecks = movingMeele.timeBetweenPositionChecks,
+													TimeBetweenAttacks = movingMeele.TimeBetweenAttacks,
+													TargetID = movingMeele.Target?.ID ?? 0,
+													TimeToNextAttack = movingMeele.TimeToNextAttack,
+													TimeToNextPositionCheck = movingMeele.timeToNextPositionCheck,
+													TimeToNextSearch = movingMeele.TimeToNextSearch
+												};
 
-				writer.StoreNext(movingMeele.TimeToNextSearch);
-				writer.StoreNext(movingMeele.timeToNextPositionCheck);
-				writer.StoreNext(movingMeele.TimeToNextAttack);
-				return writer.PluginData;
+				return new StDefaultComponent{MovingMeeleAttacker = storedMovingMeeleAttacker};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData)
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
 			{
 				var user = plugin as IUser;
 				if (user == null) {
@@ -56,37 +59,32 @@ namespace MHUrho.UnitComponents
 						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
-				var reader = new SequentialPluginDataReader(storedData, level);
-				var searchForTarget = reader.GetNext<bool>();
-				var targetSearchRectangleSize = reader.GetNext<IntVector2>();
-				var timeBetweenSearches = reader.GetNext<float>();
-				var timeBetweenPositionChecks = reader.GetNext<float>();
-				var timeBetweenAttacks = reader.GetNext<float>();
-				
-				var enabled = reader.GetNext<bool>();
-				targetID = reader.GetNext<int>();
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.MovingMeeleAttacker) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
 
-				var timeToNextSearch = reader.GetNext<float>();
-				var timeToNextPositionCheck = reader.GetNext<float>();
-				var timeToNextAttack = reader.GetNext<float>();
+				var storedMovingMeeleAttacker = storedData.MovingMeeleAttacker;
+
+
 
 				user.GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget);
 
 				MovingMeele = new MovingMeeleAttacker(level,
-													 searchForTarget,
-													 targetSearchRectangleSize,
-													 timeBetweenSearches,
-													 timeBetweenPositionChecks,
-													 timeBetweenAttacks,
-													 enabled,
-													 timeToNextSearch,
-													 timeToNextPositionCheck,
-													 timeToNextAttack,
+													 storedMovingMeeleAttacker.SearchForTarget,
+													 storedMovingMeeleAttacker.SearchRectangleSize.ToIntVector2(),
+													 storedMovingMeeleAttacker.TimeBetweenSearches,
+													 storedMovingMeeleAttacker.TimeBetweenPositionChecks,
+													 storedMovingMeeleAttacker.TimeBetweenAttacks,
+													 storedMovingMeeleAttacker.Enabled,
+													 storedMovingMeeleAttacker.TimeToNextSearch,
+													 storedMovingMeeleAttacker.TimeToNextPositionCheck,
+													 storedMovingMeeleAttacker.TimeToNextAttack,
 													 moveTo,
 													 isInRange,
 													 pickTarget
 													 );
 
+				targetID = storedMovingMeeleAttacker.TargetID;
 			}
 
 			public override void ConnectReferences(LevelManager level)
@@ -109,12 +107,6 @@ namespace MHUrho.UnitComponents
 			void GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget);
 		}
 
-		public static string ComponentName = nameof(MovingMeeleAttacker);
-		public static DefaultComponents ComponentID = DefaultComponents.MovingMeele;
-
-		public override string ComponentTypeName => ComponentName;
-
-		public override DefaultComponents ComponentTypeID => ComponentID;
 
 		Vector3 previousTargetPosition;
 
@@ -220,7 +212,7 @@ namespace MHUrho.UnitComponents
 											pickTarget);
 		}
 
-		public override PluginData SaveState()
+		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}

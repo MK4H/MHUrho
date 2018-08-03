@@ -55,6 +55,11 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
+		public void ChangeControllingPlayer(IPlayer newControllingPlayer)
+		{
+			throw new NotImplementedException();
+		}
+
 		public bool UIPressed { get; set; }
 
 		readonly CameraMover cameraMover;

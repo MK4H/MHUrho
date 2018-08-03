@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
@@ -26,30 +27,39 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public static PluginData SaveState(MovingRangeTarget movingRangeTarget) {
-				var sequentialData = new SequentialPluginDataWriter(movingRangeTarget.Level);
-				sequentialData.StoreNext(movingRangeTarget.InstanceID);
-				sequentialData.StoreNext(movingRangeTarget.Enabled);
-				sequentialData.StoreNext(movingRangeTarget.offset);
-				return sequentialData.PluginData;
+			public static StDefaultComponent SaveState(MovingRangeTarget movingRangeTarget)
+			{
+				var storedMovingRangeTarget = new StMovingRangeTarget
+											{
+												Enabled = movingRangeTarget.Enabled,
+												InstanceID = movingRangeTarget.InstanceID,
+												Offset = movingRangeTarget.offset.ToStVector3()
+											};
+				return new StDefaultComponent {MovingRangeTarget = storedMovingRangeTarget};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, PluginData storedData) {
+			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
 				var user = plugin as IUser;
 				if (user == null) {
 					throw new
 						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
 				}
 
-				var sequentialData = new SequentialPluginDataReader(storedData, level);
+				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.MovingRangeTarget) {
+					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
+				}
 
-				int instanceID = sequentialData.GetNext<int>();
-				bool enabled = sequentialData.GetNext<bool>();
-				Vector3 offset = sequentialData.GetNext<Vector3>();
+				var storedMovingRangeTarget = storedData.MovingRangeTarget;
 
 				user.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
 
-				MovingRangeTarget = new MovingRangeTarget(instanceID, level, offset, getWaypoints) {Enabled = enabled};
+				MovingRangeTarget = new MovingRangeTarget(storedMovingRangeTarget.InstanceID,
+														level,
+														storedMovingRangeTarget.Offset.ToVector3(),
+														getWaypoints)
+									{
+										Enabled = storedMovingRangeTarget.Enabled
+									};
 				level.LoadRangeTarget(MovingRangeTarget);
 			}
 
@@ -73,10 +83,6 @@ namespace MHUrho.UnitComponents
 
 		}
 
-		public static string ComponentName = nameof(MovingRangeTarget);
-		public static DefaultComponents ComponentID = DefaultComponents.MovingRangeTarget;
-		public override string ComponentTypeName => ComponentName;
-		public override DefaultComponents ComponentTypeID => ComponentID;
 
 		public override bool Moving => true;
 
@@ -124,7 +130,7 @@ namespace MHUrho.UnitComponents
 			return getWaypoints(this);
 		}
 
-		public override PluginData SaveState() {
+		public override StDefaultComponent SaveState() {
 			return Loader.SaveState(this);
 		}
 

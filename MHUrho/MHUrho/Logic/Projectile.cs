@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MHUrho.Packaging;
 using MHUrho.WorldMap;
@@ -49,13 +50,23 @@ namespace MHUrho.Logic
 
 			public static StProjectile Save(Projectile projectile)
 			{
-				var stProjectile = new StProjectile {
-														Position = projectile.Node.Position.ToStVector3(),
-														PlayerID = projectile.Player.ID,
-														TypeID = projectile.ProjectileType.ID,
-														UserPlugin = new PluginData()
-													};
+				var stProjectile = new StProjectile
+									{
+										Id = projectile.ID,
+										Position = projectile.Node.Position.ToStVector3(),
+										PlayerID = projectile.Player.ID,
+										TypeID = projectile.ProjectileType.ID,
+										UserPlugin = new PluginData()
+									};
+
 				projectile.ProjectilePlugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin, projectile.Level));
+
+				foreach (var component in projectile.Node.Components) {
+					var defaultComponent = component as DefaultComponent;
+					if (defaultComponent != null) {
+						stProjectile.DefaultComponents.Add(defaultComponent.SaveState());
+					}
+				}
 
 				return stProjectile;
 			}
@@ -117,11 +128,10 @@ namespace MHUrho.Logic
 
 				Projectile.ProjectilePlugin = Projectile.ProjectileType.GetInstancePluginForLoading(Projectile, level);
 
-				foreach (var defaultComponent in storedProjectile.DefaultComponentData) {
+				foreach (var defaultComponent in storedProjectile.DefaultComponents) {
 					var componentLoader =
 						level.DefaultComponentFactory
-							.StartLoadingComponent(defaultComponent.Key,
-													defaultComponent.Value,
+							.StartLoadingComponent(defaultComponent,
 													level,
 													Projectile.ProjectilePlugin);
 
@@ -239,6 +249,7 @@ namespace MHUrho.Logic
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {
 			ID = newID;
 			Enabled = true;
+			Node.NodeCollisionStart += CollisionHandler;
 			RemovedFromLevel = false;
 			Node.Enabled = true;
 			Node.Position = position;
@@ -260,10 +271,10 @@ namespace MHUrho.Logic
 			if (RemovedFromLevel) return;
 			base.RemoveFromLevel();
 
-			Plugin.Dispose();
+			Node.NodeCollisionStart -= CollisionHandler;
 			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {
-				
+				Plugin.Dispose();
 				Node.Remove();
 				Node.Dispose();
 				Dispose();

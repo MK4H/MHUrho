@@ -79,6 +79,7 @@ namespace MHUrho.UserInterface
 			playerSelection = new ExpandingSelector((CheckBox)gameUI.GetChild("PlayerSelector"), expansionWindow);
 			playerSelection.HoverBegin += UIHoverBegin;
 			playerSelection.HoverEnd += UIHoverEnd;
+			playerSelection.Selected += PlayerSelected;
 
 			SelectionBar = new SelectionBar(gameUI);
 			SelectionBar.HoverBegin += UIHoverBegin;
@@ -183,10 +184,10 @@ namespace MHUrho.UserInterface
 		{
 
 			CheckBox checkBox = playerSelection.CreateCheckBox();
-			checkBox.SetStyle("ExpansionWindowCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+			checkBox.SetStyle("PlayerCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
 
-			//TODO: This
-			checkBox.ImageRect = new IntRect(0,0,50,50);
+
+			checkBox.ImageRect = player.Insignia.ShieldIcon;
 
 			players.Add(checkBox, player);		
 		}
@@ -254,7 +255,7 @@ namespace MHUrho.UserInterface
 
 		void PlayerSelected(UIElement newSelected, UIElement oldSelected)
 		{
-			InputCtl.Player = players[newSelected];
+			InputCtl.ChangeControllingPlayer(players[newSelected]);
 		}
 
 

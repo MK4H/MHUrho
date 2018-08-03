@@ -7,7 +7,7 @@ namespace MHUrho.Logic {
 
 		int ID { get; }
 
-		Color Color { get; }
+		PlayerInsignia Insignia { get; }
 
 		StPlayer Save();
 

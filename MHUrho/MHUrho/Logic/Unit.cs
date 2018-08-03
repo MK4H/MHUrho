@@ -67,20 +67,22 @@ namespace MHUrho.Logic
 			}
 
 			public static StUnit Save(Unit unit) {
-				var storedUnit = new StUnit();
-				storedUnit.Id = unit.ID;
-				storedUnit.Position = unit.Position.ToStVector3();
-				storedUnit.PlayerID = unit.Player.ID;
-				storedUnit.TypeID = unit.UnitType.ID;
+				var storedUnit = new StUnit
+								{
+									Id = unit.ID,
+									Position = unit.Position.ToStVector3(),
+									PlayerID = unit.Player.ID,
+									TypeID = unit.UnitType.ID,
+									UserPlugin = new PluginData()
+								};
 
 
-				storedUnit.UserPlugin = new PluginData();
 				unit.UnitPlugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin, unit.Level));
 
 				foreach (var component in unit.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
 					if (defaultComponent != null) {
-						storedUnit.DefaultComponentData.Add((int)defaultComponent.ComponentTypeID, defaultComponent.SaveState());
+						storedUnit.DefaultComponents.Add(defaultComponent.SaveState());
 					}
 				}
 
@@ -136,11 +138,10 @@ namespace MHUrho.Logic
 
 				Unit.UnitPlugin = type.GetInstancePluginForLoading(Unit, level);
 
-				foreach (var defaultComponent in storedUnit.DefaultComponentData) {
+				foreach (var defaultComponent in storedUnit.DefaultComponents) {
 					var componentLoader =
 						level.DefaultComponentFactory
-							.StartLoadingComponent(defaultComponent.Key,
-													defaultComponent.Value,
+							.StartLoadingComponent(defaultComponent,
 													level,
 													Unit.UnitPlugin);
 					componentLoaders.Add(componentLoader);

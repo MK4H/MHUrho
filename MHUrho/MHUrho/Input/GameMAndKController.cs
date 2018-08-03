@@ -33,7 +33,7 @@ namespace MHUrho.Input
 
 		public delegate void ScreenBorderEvent(ScreenBorder border);
 
-		public IPlayer Player { get; set; }
+		public IPlayer Player { get; private set; }
 
 		GameUIManager IGameController.UIManager => UIManager;
 
@@ -147,6 +147,14 @@ namespace MHUrho.Input
 			}
 			var raycast = CursorRaycast();
 			return (cachedTileUnderCursor = Level.Map.RaycastToTile(raycast));
+		}
+
+		public void ChangeControllingPlayer(IPlayer newControllingPlayer)
+		{
+			if (Player != newControllingPlayer) {
+				Level.ToolManager.ClearPlayerSpecificState();
+				Player = newControllingPlayer;
+			}	
 		}
 
 		public void HideCursor() {
@@ -303,7 +311,6 @@ namespace MHUrho.Input
 
 			MouseDown?.Invoke(e);
 			cachedTileUnderCursor = null;
-  
 		}
 
 		protected override void MouseButtonUp(MouseButtonUpEventArgs e) {

@@ -51,6 +51,11 @@ namespace MHUrho.Logic
 			Package = package;
 		}
 
+		public void ClearCache()
+		{
+			//TODO: If i add any cache dependent on current level, clear it here
+		}
+
 
 		public TileType() {
 			ID = 0;

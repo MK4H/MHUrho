@@ -76,7 +76,7 @@ namespace MHUrho.EntityInfo
 		{
 			Image image = PackageManager.Instance.GetImage("Textures/HealthBars.png").ConvertToRGBA();
 
-			uint playerColor = player.Color.ToUInt();
+			uint playerColor = player.Insignia.Color.ToUInt();
 			uint* imageData = (uint*)image.Data;
 			for (int i = 0; i < image.Width * image.Height; i++, imageData++) {
 				if (*imageData == new Color(1, 1, 1).ToUInt()) {
