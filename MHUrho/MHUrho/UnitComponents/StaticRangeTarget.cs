@@ -83,20 +83,21 @@ namespace MHUrho.UnitComponents
 			this.CurrentPosition = position;
 		}
 
-		public static StaticRangeTarget CreateNew(ILevelManager level, Vector3 position) {
+		public static StaticRangeTarget CreateNew(EntityInstancePlugin plugin, ILevelManager level, Vector3 position) {
 
-			var newTarget = new StaticRangeTarget(level, position);
+			var newInstance = new StaticRangeTarget(level, position);
 
-			((LevelManager)level).RegisterRangeTarget(newTarget);
+			((LevelManager)level).RegisterRangeTarget(newInstance);
+			plugin.Entity.AddComponent(newInstance);
 
-			return newTarget;
+			return newInstance;
 		}
 
 		public override StDefaultComponent SaveState() {
 			return Loader.SaveState(this);
 		}
 
-		public override IEnumerator<Waypoint> GetWaypoints() {
+		public override IEnumerable<Waypoint> GetFutureWaypoints() {
 			yield return new Waypoint(new TempNode(CurrentPosition), 0, MovementType.Linear);
 		}
 

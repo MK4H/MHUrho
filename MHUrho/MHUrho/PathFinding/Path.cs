@@ -163,13 +163,32 @@ namespace MHUrho.PathFinding
 		/// <returns></returns>
 		public IEnumerator<Waypoint> GetEnumerator()
 		{
-			yield return new Waypoint(new TempNode(currentPosition), 0, MovementType.Linear);
-			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
-				yield return waypoints[i];
-			}
+			return GetEnumerator(Vector3.Zero);
 		}
 
 		public IEnumerator<Waypoint> GetEnumerator(Vector3 offset)
+		{
+			for (int i = 0; i < waypoints.Count; i++) {
+				yield return waypoints[i].WithOffset(offset);
+			}
+		}
+		/// <summary>
+		/// Gets the rest of the path, beginning with the current position and
+		/// continuing with the remaining waypoints in the path
+		/// </summary>
+		/// <returns>The rest of the path beginning with the current position</returns>
+		public IEnumerable<Waypoint> GetRestOfThePath()
+		{
+			return GetRestOfThePath(Vector3.Zero);
+		}
+
+		/// <summary>
+		/// Gets the rest of the path, beginning with the current position,
+		/// all positions offseted by <paramref name="offset"/>
+		/// </summary>
+		/// <param name="offset">Offset of every position along the path</param>
+		/// <returns>The remaining part of the path, begining with the curren position, all offseted by <paramref name="offset"/></returns>
+		public IEnumerable<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
 			yield return new Waypoint(new TempNode(currentPosition), 0, MovementType.Linear).WithOffset(offset);
 			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
@@ -181,10 +200,10 @@ namespace MHUrho.PathFinding
 		/// Enumerates the waypoints that were not yet reached
 		/// </summary>
 		/// <returns></returns>
-		IEnumerator IEnumerable.GetEnumerator() {
+		IEnumerator IEnumerable.GetEnumerator()
+		{
 			return GetEnumerator();
 		}
-
 
 		public INode GetTarget() {
 			return waypoints[waypoints.Count - 1].Node;

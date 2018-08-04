@@ -54,8 +54,8 @@ namespace DefaultPackage
 		public static EggProjectileInstance CreateNew(ILevelManager level, IProjectile projectile, EggProjectileType type)
 		{
 			var instance = new EggProjectileInstance(level, projectile, type);
-			instance.flier = BallisticProjectile.CreateNew(level);
-			projectile.AddComponent(instance.flier);
+			instance.flier = BallisticProjectile.CreateNew(instance, level);
+
 
 			return instance;
 		}

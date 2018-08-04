@@ -71,9 +71,12 @@ namespace MHUrho.UnitComponents
 		{
 		}
 
-		public static Clicker CreateNew(ILevelManager level) 
+		public static Clicker CreateNew(EntityInstancePlugin plugin, ILevelManager level) 
 		{
-			return new Clicker(level);
+			var newInstance = new Clicker(level);
+			plugin.Entity.AddComponent(newInstance);
+
+			return newInstance;
 		}
 
 

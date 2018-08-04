@@ -166,7 +166,7 @@ namespace MHUrho.UnitComponents
 		/// 
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		/// <param name="instancePlugin"></param>
+		/// <param name="plugin"></param>
 		/// <param name="level"></param>
 		/// <param name="searchForTarget"></param>
 		/// <param name="searchRectangleSize">The size of the rectangle with the Entity in the center that will be checked for possible targets</param>
@@ -174,7 +174,7 @@ namespace MHUrho.UnitComponents
 		/// <param name="timeBetweenPositionChecks">Time between the attacker checks if the targets position changed and recalculates its path</param>
 		/// <param name="timeBetweenAttacks">Time between each attack</param>
 		/// <returns></returns>
-		public static MovingMeeleAttacker CreateNew<T>(T instancePlugin, 
+		public static MovingMeeleAttacker CreateNew<T>(T plugin, 
 														ILevelManager level, 
 														bool searchForTarget,
 														IntVector2 searchRectangleSize,
@@ -182,20 +182,23 @@ namespace MHUrho.UnitComponents
 														float timeBetweenPositionChecks,
 														float timeBetweenAttacks
 														)
-			where T : InstancePlugin, IUser
+			where T : EntityInstancePlugin, IUser
 		{
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
+			if (plugin == null) {
+				throw new ArgumentNullException(nameof(plugin));
 			}
 
-			return new MovingMeeleAttacker(level,
-											searchForTarget,
-											searchRectangleSize,
-											timeBetweenSearches,
-											timeBetweenPositionChecks,
-											timeBetweenAttacks,
-											true,
-											instancePlugin);
+			var newInstance = new MovingMeeleAttacker(level,
+														searchForTarget,
+														searchRectangleSize,
+														timeBetweenSearches,
+														timeBetweenPositionChecks,
+														timeBetweenAttacks,
+														true,
+														plugin);
+
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
 		public override StDefaultComponent SaveState()

@@ -143,16 +143,19 @@ namespace MHUrho.UnitComponents
 			ReceiveSceneUpdates = true;
 		}
 
-		public static Shooter CreateNew(ILevelManager level,
+		public static Shooter CreateNew(EntityInstancePlugin plugin,
+										ILevelManager level,
 										ProjectileType projectileType,
 										Vector3 sourceOffset,
 										float rateOfFire)
 		{
 
-			return new Shooter(level,
-								projectileType,
-								sourceOffset,
-								rateOfFire);
+			var newInstance =  new Shooter(level,
+											projectileType,
+											sourceOffset,
+											rateOfFire);
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
 		
@@ -160,7 +163,6 @@ namespace MHUrho.UnitComponents
 		{
 			return Loader.SaveState(this);
 		}
-
 
 
 		public bool ShootAt(IRangeTarget newTarget) {
@@ -183,6 +185,11 @@ namespace MHUrho.UnitComponents
 			Target = null;
 		}
 
+		public void ResetShotDelay()
+		{
+			shotDelay = 60 / RateOfFire;
+		}
+
 		public void OnTargetDestroy(IRangeTarget target) {
 			Debug.Assert(this.Target == target);
 			this.Target = null;
@@ -196,7 +203,28 @@ namespace MHUrho.UnitComponents
 
 		protected override void OnUpdateChecked(float timeStep)
 		{
+			SearchTarget(timeStep);
+			Shoot(timeStep);
+		}
 
+
+		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			base.AddedToEntity(entityDefaultComponents);
+
+			AddedToEntity(typeof(Shooter), entityDefaultComponents);
+
+		}
+
+		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
+			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
+			bool removed = RemovedFromEntity(typeof(Shooter), entityDefaultComponents);
+			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
+			return removed;
+		}
+
+
+		void Shoot(float timeStep)
+		{
 			if (shotDelay > 0) {
 				shotDelay -= timeStep;
 				return;
@@ -204,7 +232,47 @@ namespace MHUrho.UnitComponents
 
 			OnShotReloaded?.Invoke(this);
 
-			if (SearchForTarget && Target == null && searchDelay < 0) {
+			if (Target == null) {
+				return;
+			}
+
+			OnBeforeShotFired?.Invoke(this);
+
+			//Check if shotDelay was not reset in the OnBeforeShotFired or OnShotReloaded handlers
+			if (shotDelay > 0) {
+				return;
+			}
+
+			//Rotate the SourceOffset according to Entity world rotation
+			Vector3 worldOffset = Quaternion.FromRotationTo(Vector3.UnitZ, Entity.Forward) * SourceOffset;
+			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + worldOffset, Player, Target);
+			//Could not fire on the target
+			if (projectile == null) {
+				var previousTarget = Target;
+				Target.RemoveShooter(this);
+				Target = null;
+
+				OnTargetLost?.Invoke(this, previousTarget);
+			}
+			else {
+				OnShotFired?.Invoke(this, projectile);
+			}
+
+			ResetShotDelay();
+		}
+
+		void SearchTarget(float timeStep)
+		{
+			if (!SearchForTarget) {
+				return;
+			}
+
+			if (searchDelay >= 0) {
+				searchDelay -= timeStep;
+				return;
+			}
+
+			if (Target == null && searchDelay < 0) {
 				searchDelay = TargetSearchDelay;
 
 				//Check for target in range
@@ -226,50 +294,6 @@ namespace MHUrho.UnitComponents
 				}
 
 			}
-			else if (searchDelay >= 0){
-				searchDelay -= timeStep;
-				return;
-			}
-
-			if (Target == null) {
-				return;
-			}
-
-			OnBeforeShotFired?.Invoke(this);
-
-			//Rotate the SourceOffset according to Entity world rotation
-			Vector3 worldOffset = Quaternion.FromRotationTo(Vector3.UnitZ, Entity.Forward) * SourceOffset;
-			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + worldOffset, Player, Target);
-			//Could not fire on the target
-			if (projectile == null) {
-				var previousTarget = Target;
-				Target.RemoveShooter(this);
-				Target = null;
-
-				OnTargetLost?.Invoke(this, previousTarget);
-				return;
-			}
-
-			OnShotFired?.Invoke(this, projectile);
-
-			shotDelay = 60 / RateOfFire;
-
 		}
-
-
-		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			base.AddedToEntity(entityDefaultComponents);
-
-			AddedToEntity(typeof(Shooter), entityDefaultComponents);
-
-		}
-
-		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
-			bool removed = RemovedFromEntity(typeof(Shooter), entityDefaultComponents);
-			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
-			return removed;
-		}
-
 	}
 }

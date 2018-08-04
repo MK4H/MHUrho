@@ -231,11 +231,17 @@ namespace MHUrho.Input
 			decayingRotation = Vector2.Zero;
 		}
 
+		/// <summary>
+		/// Switches camera to free mode, freely flying above the terrain
+		/// Stops all camera movement at the time of the switch
+		/// </summary>
 		public void SwitchToFree() {
+			StopAllCameraMovement();
+
 			if (!FreeFloat) {
 				FreeFloat = true;
 
-				StopAllCameraMovement();
+				
 				StopFollowing();
 
 				//Save the fixed position relative to holder
@@ -247,11 +253,16 @@ namespace MHUrho.Input
 			}
 		}
 
+		/// <summary>
+		/// Switches camera to fixed mode, following the terrain.
+		/// Typical RTS camera
+		/// Stops all camera movement at the time of the switch
+		/// </summary>
 		public void SwitchToFixed() {
+			StopAllCameraMovement();
+
 			if (FreeFloat) {
 				FreeFloat = false;
-
-				StopAllCameraMovement();
 
 				cameraHolder.Position = RoundPositionToMap(cameraHolder.Position - fixedPosition);
 

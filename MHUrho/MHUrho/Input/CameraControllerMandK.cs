@@ -13,6 +13,37 @@ namespace MHUrho.Input
     {
 		enum CameraMovementType { Fixed, FreeFloat }
 
+		struct CameraMovements {
+			public bool MoveForward;
+			public bool MoveBackward;
+			public bool MoveLeft;
+			public bool MoveRight;
+			public bool RotateUp;
+			public bool RotateDown;
+			public bool RotateLeft;
+			public bool RotateRight;
+			public bool BorderMovementUp;
+			public bool BorderMovementDown;
+			public bool BorderMovementLeft;
+			public bool BorderMovementRight;
+
+			public void StopAll()
+			{
+				MoveForward = false;
+				MoveBackward = false;
+				MoveLeft = false;
+				MoveRight = false;
+				RotateUp = false;
+				RotateDown = false;
+				RotateLeft = false;
+				RotateRight = false;
+				BorderMovementUp = false;
+				BorderMovementDown = false;
+				BorderMovementLeft = false;
+				BorderMovementRight = false;
+			}
+		}
+
 		public float CameraScrollSensitivity { get; set; }
 
 		public float CameraRotationSensitivity { get; set; }
@@ -30,6 +61,8 @@ namespace MHUrho.Input
 		readonly MandKGameUI ui;
 
 		readonly CameraMover camera;
+
+		CameraMovements activeCameraMovement = new CameraMovements();
 
 		public CameraControllerMandK(GameMandKController input, MandKGameUI ui, CameraMover cameraMover)
 		{
@@ -92,53 +125,84 @@ namespace MHUrho.Input
 			switch (border) {
 				case ScreenBorder.Top:
 					horizontalMovement.Y += CameraScrollSensitivity;
+					activeCameraMovement.BorderMovementUp = true;
 					break;
 				case ScreenBorder.Bottom:
 					horizontalMovement.Y -= CameraScrollSensitivity;
+					activeCameraMovement.BorderMovementDown = true;
 					break;
 				case ScreenBorder.Left:
 					horizontalMovement.X -= CameraScrollSensitivity;
+					activeCameraMovement.BorderMovementLeft = true;
 					break;
 				case ScreenBorder.Right:
 					horizontalMovement.X += CameraScrollSensitivity;
+					activeCameraMovement.BorderMovementRight = true;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(border), border, null);
 			}
 
 			camera.SetStaticHorizontalMovement(horizontalMovement);
+			
 		}
 
 
 		void OnScreenBorderLeft(ScreenBorder border)
 		{
-			if (!MouseBorderCameraMovement) return;
+			if (!MouseBorderCameraMovement) {
+				return;
+			}
 
 			Vector2 horizontalMovement = camera.StaticHorizontalMovement;
 			switch (border) {
 				case ScreenBorder.Top:
+					if (!activeCameraMovement.BorderMovementUp) {
+						return;
+					}
+					activeCameraMovement.BorderMovementUp = false;
+
 					horizontalMovement.Y -= CameraScrollSensitivity;
 					if (FloatHelpers.FloatsEqual(horizontalMovement.Y, 0)) {
 						horizontalMovement.Y = 0;
 					}
+
 					break;
 				case ScreenBorder.Bottom:
+					if (!activeCameraMovement.BorderMovementDown) {
+						return;
+					}
+					activeCameraMovement.BorderMovementDown = false;
+
 					horizontalMovement.Y += CameraScrollSensitivity;
 					if (FloatHelpers.FloatsEqual(horizontalMovement.Y, 0)) {
 						horizontalMovement.Y = 0;
 					}
+
 					break;
 				case ScreenBorder.Left:
+					if (!activeCameraMovement.BorderMovementLeft) {
+						return;
+					}
+					activeCameraMovement.BorderMovementLeft = false;
+
 					horizontalMovement.X += CameraScrollSensitivity;
 					if (FloatHelpers.FloatsEqual(horizontalMovement.X, 0)) {
 						horizontalMovement.X = 0;
 					}
+
 					break;
 				case ScreenBorder.Right:
+					if (!activeCameraMovement.BorderMovementRight) {
+						return;
+					}
+					activeCameraMovement.BorderMovementRight = false;
+
 					horizontalMovement.X -= CameraScrollSensitivity;
 					if (FloatHelpers.FloatsEqual(horizontalMovement.X, 0)) {
 						horizontalMovement.X = 0;
 					}
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(border), border, null);
@@ -167,10 +231,18 @@ namespace MHUrho.Input
 			var movement = camera.StaticMovement;
 			movement.X -= CameraScrollSensitivity;
 			camera.SetStaticMovement(movement);
+
+			activeCameraMovement.MoveLeft = true;
 		}
 
 		void StopCameraMoveLeft(KeyUpEventArgs e)
 		{
+			//If the camera movement was stoped by other means, dont stop it again
+			if (!activeCameraMovement.MoveLeft) {
+				return;
+			}
+			activeCameraMovement.MoveLeft = false;
+
 			var movement = camera.StaticMovement;
 			movement.X += CameraScrollSensitivity;
 			if (FloatHelpers.FloatsEqual(movement.X, 0)) {
@@ -184,10 +256,18 @@ namespace MHUrho.Input
 			var movement = camera.StaticMovement;
 			movement.X += CameraScrollSensitivity;
 			camera.SetStaticMovement(movement);
+
+			activeCameraMovement.MoveRight = true;
 		}
 
 		void StopCameraMoveRight(KeyUpEventArgs e)
 		{
+			//If the camera movement was stoped by other means, dont stop it again
+			if (!activeCameraMovement.MoveRight) {
+				return;
+			}
+			activeCameraMovement.MoveRight = false;
+
 			var movement = camera.StaticMovement;
 			movement.X -= CameraScrollSensitivity;
 			if (FloatHelpers.FloatsEqual(movement.X, 0)) {
@@ -201,10 +281,18 @@ namespace MHUrho.Input
 			var movement = camera.StaticMovement;
 			movement.Z += CameraScrollSensitivity;
 			camera.SetStaticMovement(movement);
+
+			activeCameraMovement.MoveForward = true;
 		}
 
 		void StopCameraMoveForward(KeyUpEventArgs e)
 		{
+			//If the camera movement was stoped by other means, dont stop it again
+			if (!activeCameraMovement.MoveForward) {
+				return;
+			}
+			activeCameraMovement.MoveForward = false;
+
 			var movement = camera.StaticMovement;
 			movement.Z -= CameraScrollSensitivity;
 			if (FloatHelpers.FloatsEqual(movement.Z, 0)) {
@@ -218,10 +306,18 @@ namespace MHUrho.Input
 			var movement = camera.StaticMovement;
 			movement.Z -= CameraScrollSensitivity;
 			camera.SetStaticMovement(movement);
+
+			activeCameraMovement.MoveBackward = true;
 		}
 
 		void StopCameraMoveBackward(KeyUpEventArgs e)
 		{
+			//If the camera movement was stoped by other means, dont stop it again
+			if (!activeCameraMovement.MoveBackward) {
+				return;
+			}
+			activeCameraMovement.MoveBackward = false;
+
 			var movement = camera.StaticMovement;
 			movement.Z += CameraScrollSensitivity;
 			if (FloatHelpers.FloatsEqual(movement.Z, 0)) {
@@ -233,10 +329,17 @@ namespace MHUrho.Input
 		void StartCameraRotationRight(KeyDownEventArgs e)
 		{
 			camera.SetStaticYawChange(camera.StaticYaw + CameraRotationSensitivity);
+
+			activeCameraMovement.RotateRight = true;
 		}
 
 		void StopCameraRotationRight(KeyUpEventArgs e)
 		{
+			if (!activeCameraMovement.RotateRight) {
+				return;
+			}
+			activeCameraMovement.RotateRight = false;
+
 			var yaw = camera.StaticYaw - CameraRotationSensitivity;
 			if (FloatHelpers.FloatsEqual(yaw, 0)) {
 				yaw = 0;
@@ -247,10 +350,17 @@ namespace MHUrho.Input
 		void StartCameraRotationLeft(KeyDownEventArgs e)
 		{
 			camera.SetStaticYawChange(camera.StaticYaw - CameraRotationSensitivity);
+
+			activeCameraMovement.RotateLeft = true;
 		}
 
 		void StopCameraRotationLeft(KeyUpEventArgs e)
 		{
+			if (!activeCameraMovement.RotateLeft) {
+				return;
+			}
+			activeCameraMovement.RotateLeft = false;
+
 			var yaw = camera.StaticYaw + CameraRotationSensitivity;
 			if (FloatHelpers.FloatsEqual(yaw, 0)) {
 				yaw = 0;
@@ -261,10 +371,17 @@ namespace MHUrho.Input
 		void StartCameraRotationUp(KeyDownEventArgs e)
 		{
 			camera.SetStaticPitchChange(camera.StaticPitch + CameraRotationSensitivity);
+
+			activeCameraMovement.RotateUp = true;
 		}
 
 		void StopCameraRotationUp(KeyUpEventArgs e)
 		{
+			if (!activeCameraMovement.RotateUp) {
+				return;
+			}
+			activeCameraMovement.RotateUp = false;
+
 			var pitch = camera.StaticPitch - CameraRotationSensitivity;
 			if (FloatHelpers.FloatsEqual(pitch, 0)) {
 				pitch = 0;
@@ -275,10 +392,17 @@ namespace MHUrho.Input
 		void StartCameraRotationDown(KeyDownEventArgs e)
 		{
 			camera.SetStaticPitchChange(camera.StaticPitch - CameraRotationSensitivity);
+
+			activeCameraMovement.RotateDown = true;
 		}
 
 		void StopCameraRotationDown(KeyUpEventArgs e)
 		{
+			if (!activeCameraMovement.RotateDown) {
+				return;
+			}
+			activeCameraMovement.RotateDown = false;
+
 			var pitch = camera.StaticPitch + CameraRotationSensitivity;
 			if (FloatHelpers.FloatsEqual(pitch, 0)) {
 				pitch = 0;
@@ -288,6 +412,8 @@ namespace MHUrho.Input
 
 		void CameraSwitchMode(KeyDownEventArgs e)
 		{
+			activeCameraMovement.StopAll();
+
 			if (cameraType == CameraMovementType.FreeFloat) {
 				camera.SwitchToFixed();
 				cameraType = CameraMovementType.Fixed;
@@ -299,7 +425,6 @@ namespace MHUrho.Input
 				input.HideCursor();
 				input.Level.Map.DisableHighlight();
 				input.Level.ToolManager.DisableTools();
-				//TODO: Disable tools
 			}
 		}
 

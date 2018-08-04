@@ -17,8 +17,19 @@ namespace MHUrho.UnitComponents
 
 	public delegate void MovementEndedDelegate(WorldWalker walker);
 
+	public delegate void MovementCanceledDelegate(WorldWalker walker);
+
 	public delegate void MovementFailedDelegate(WorldWalker walker);
 
+	public delegate void PathRecalculatedDelegate(WorldWalker walker, Path oldPath, Path newPath);
+
+
+	public enum WorldWalkerState {
+		Started,
+		Finished,
+		Failed,
+		Canceled
+	}
 
 	public class WorldWalker : DefaultComponent {
 
@@ -37,7 +48,7 @@ namespace MHUrho.UnitComponents
 				var storedWalker = new StWorldWalker
 									{
 										Enabled = walker.Enabled,
-										Path = walker.path?.Save()
+										Path = walker.Path?.Save()
 									};
 				return new StDefaultComponent {WorldWalker = storedWalker};
 			}
@@ -99,29 +110,35 @@ namespace MHUrho.UnitComponents
 			float GetMinimalAproxTime(Vector3 from, Vector3 to);
 		}
 
-		public bool MovementStarted { get; private set; }
-		public bool MovementFinished { get; private set; }
-		public bool MovementFailed { get; private set; }
+		
+
+		public WorldWalkerState State { get; private set; }
+
+		public Path Path { get; private set; }
 
 		public event MovementStartedDelegate OnMovementStarted;
 		public event MovementEndedDelegate OnMovementEnded;
 		public event MovementFailedDelegate OnMovementFailed;
+		public event MovementCanceledDelegate OnMovementCanceled;
+		public event PathRecalculatedDelegate OnPathRecalculated;
 
 
 		public IUnit Unit => (IUnit) Entity;
 
 		readonly IUser user;
 
-		Path path;
+		
 
-		public static WorldWalker CreateNew<T>(T instancePlugin, ILevelManager level)
+		public static WorldWalker CreateNew<T>(T plugin, ILevelManager level)
 			where T : UnitInstancePlugin, IUser {
 
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
+			if (plugin == null) {
+				throw new ArgumentNullException(nameof(plugin));
 			}
 
-			return new WorldWalker(instancePlugin, level);
+			var newInstance = new WorldWalker(plugin, level);
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
 		protected WorldWalker(IUser user,ILevelManager level) 
@@ -139,7 +156,7 @@ namespace MHUrho.UnitComponents
 		{
 
 			ReceiveSceneUpdates = true;
-			this.path = path;
+			this.Path = path;
 			this.Enabled = activated;
 			this.user = user;
 		}
@@ -153,44 +170,42 @@ namespace MHUrho.UnitComponents
 		}
 
 		public void GoAlong(Path newPath) {
-			if (path == null) {
-				MovementStarted = true;
-				MovementFailed = false;
-				MovementFinished = false;
-
-				OnMovementStarted?.Invoke(this);
+			if (Path != null) {
+				StopMovement(WorldWalkerState.Canceled);
+				
 			}
-
-			path = newPath;
-
-			Enabled = true;			
+			
+			StartMovement(newPath);
 		}
 
-		public bool GoTo(INode targetNode) {
+		public bool GoTo(INode targetNode)
+		{
 			var newPath = Path.FromTo(Unit.Position, 
 									targetNode, 
 									Map, 
 									user.GetTime,
 									user.GetMinimalAproxTime);
 			if (newPath == null) {
-				MovementStarted = true;
-				OnMovementStarted?.Invoke(this);
-				MovementFailed = true;
-				OnMovementFailed?.Invoke(this);
+				Stop();
+				StopMovement(WorldWalkerState.Failed);
 				return false;
 			}
-			GoAlong(newPath);
-			return true;
+			else {
+				GoAlong(newPath);
+				return true;
+			}
 		}
 
 		public void Stop()
 		{
-			if (MovementStarted && !MovementFinished && !MovementFailed) {
-				ReachedDestination();
+			if (State == WorldWalkerState.Started) {
+				StopMovement(WorldWalkerState.Canceled);
 			}
+
+			State = WorldWalkerState.Canceled;
 		}
 
-		public IEnumerator<Waypoint> GetRestOfThePath()
+		public IEnumerable<Waypoint> GetRestOfThePath()
 		{
 			return GetRestOfThePath(new Vector3(0, 0, 0));
 		}
@@ -200,24 +215,24 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		/// <param name="offset">Offset from the unit feet position that every Waypoint position will be transfered by</param>
 		/// <returns>Returns the current position and the part of the path that has not been reached yet</returns>
-		public IEnumerator<Waypoint> GetRestOfThePath(Vector3 offset)
+		public IEnumerable<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
-			return path?.GetEnumerator(offset) ?? ((IEnumerable<Waypoint>)new [] {new Waypoint(new TempNode(Unit.Position), 0, MovementType.Linear).WithOffset(offset)}).GetEnumerator();
+			return Path?.GetRestOfThePath(offset) ?? new [] {new Waypoint(new TempNode(Unit.Position), 0, MovementType.Linear).WithOffset(offset)};
 		}
 
 
 
 		protected override void OnUpdateChecked(float timeStep)
 		{
-			Debug.Assert(path != null, "Target was null with scene updates enabled");
+			Debug.Assert(Path != null, "Target was null with scene updates enabled");
 
 
-			if (!MoveTowards(path.TargetWaypoint, timeStep)) {
+			if (!MoveTowards(Path.TargetWaypoint, timeStep)) {
 				return;
 			}
 
-			if (!path.WaypointReached(user.GetTime)) {
-				ReachedDestination();
+			if (!Path.WaypointReached(user.GetTime)) {
+				StopMovement(WorldWalkerState.Finished);
 			}
 		}
 
@@ -252,7 +267,7 @@ namespace MHUrho.UnitComponents
 				case MovementType.None:
 					return false;
 				case MovementType.Teleport:
-					if (path.Update(Unit.Position, timeStep, user.GetTime)) {
+					if (Path.Update(Unit.Position, timeStep, user.GetTime)) {
 						//Still can teleport
 
 						//Check timeout
@@ -270,7 +285,7 @@ namespace MHUrho.UnitComponents
 					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
 
 
-					if (path.Update(newPosition, timeStep, user.GetTime)) {
+					if (Path.Update(newPosition, timeStep, user.GetTime)) {
 						//Can still move towards the waypoint
 						bool reachedWaypoint = false;
 						if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
@@ -289,19 +304,18 @@ namespace MHUrho.UnitComponents
 
 			//Recalculate path
 			var newPath = Path.FromTo(Unit.Position,
-									path.GetTarget(),
+									Path.GetTarget(),
 									Map,
 									user.GetTime,
 									 user.GetMinimalAproxTime);
 
 			if (newPath == null) {
 				//Cant get there
-				MovementFailed = true;
-				OnMovementFailed?.Invoke(this);
-				ReachedDestination();
+				StopMovement(WorldWalkerState.Failed);
 			}
 			else {
-				path = newPath;
+				OnPathRecalculated?.Invoke(this, Path, newPath);
+				Path = newPath;
 			}
 			return false;
 		}
@@ -336,13 +350,32 @@ namespace MHUrho.UnitComponents
 					 Math.Sign(currDiff.Z) == Math.Sign(nextDiff.Z));
 		}
 
-		void ReachedDestination() {
-			MovementFinished = true;
-			MovementStarted = false;
-			MovementFailed = false;
-			path = null;
+		void StartMovement(Path newPath)
+		{
+			Path = newPath;
+			Enabled = true;
+			State = WorldWalkerState.Started;
+			OnMovementStarted?.Invoke(this);
+		}
+
+		void StopMovement(WorldWalkerState endState)
+		{
+			State = endState;
+			switch (endState) {
+				case WorldWalkerState.Finished:
+					OnMovementEnded?.Invoke(this);
+					break;
+				case WorldWalkerState.Failed:
+					OnMovementFailed?.Invoke(this);
+					break;
+				case WorldWalkerState.Canceled:
+					OnMovementCanceled?.Invoke(this);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(endState), endState, null);
+			}
+			Path = null;
 			Enabled = false;
-			OnMovementEnded?.Invoke(this);
 		}
 	}
 }

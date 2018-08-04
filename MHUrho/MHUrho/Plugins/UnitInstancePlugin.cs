@@ -9,12 +9,12 @@ using MHUrho.UnitComponents;
 namespace MHUrho.Plugins
 {
 
-	public abstract class UnitInstancePlugin : InstancePlugin {
+	public abstract class UnitInstancePlugin : EntityInstancePlugin {
 
-		public IUnit Unit { get; protected set; }
+		public IUnit Unit { get; private set; }
 
 		protected UnitInstancePlugin(ILevelManager level, IUnit unit) 
-			:base(level)
+			:base(level, unit)
 		{
 			this.Unit = unit;
 		}

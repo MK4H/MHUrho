@@ -76,7 +76,13 @@ namespace MHUrho.UnitComponents
 
 		public interface IUser {
 
-			IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget target);
+			/// <summary>
+			/// Gets waypoints beginning with the current position with the time 0,
+			/// and all the remaining waypoints
+			/// </summary>
+			/// <param name="target"></param>
+			/// <returns></returns>
+			IEnumerable<Waypoint> GetFutureWaypoints(MovingRangeTarget target);
 		}
 
 
@@ -105,22 +111,23 @@ namespace MHUrho.UnitComponents
 			this.offset = offset;
 		}
 
-		public static MovingRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level, Vector3 offset)
-			where T : InstancePlugin, IUser {
+		public static MovingRangeTarget CreateNew<T>(T plugin, ILevelManager level, Vector3 offset)
+			where T : EntityInstancePlugin, IUser {
 
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
+			if (plugin == null) {
+				throw new ArgumentNullException(nameof(plugin));
 			}
 
 
 
-			var newTarget = new MovingRangeTarget(level, instancePlugin, offset);
-			((LevelManager)level).RegisterRangeTarget(newTarget);
-			return newTarget;
+			var newInstance = new MovingRangeTarget(level, plugin, offset);
+			((LevelManager)level).RegisterRangeTarget(newInstance);
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
-		public override IEnumerator<Waypoint> GetWaypoints() {
-			return user.GetWaypoints(this);
+		public override IEnumerable<Waypoint> GetFutureWaypoints() {
+			return user.GetFutureWaypoints(this);
 		}
 
 		public override StDefaultComponent SaveState() {

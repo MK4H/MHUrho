@@ -115,25 +115,28 @@ namespace MHUrho.UnitComponents
 			this.ReceiveSceneUpdates = true;
 		}
 
-		public static StaticMeeleAttacker CreateNew<T>(T instancePlugin,
+		public static StaticMeeleAttacker CreateNew<T>(T plugin,
 														ILevelManager level,
 														bool searchForTarget, 
 														IntVector2 searchRectangleSize,
 														float timeBetweenSearches,
 														float timeBetweenAttacks
 														)
-			where T : InstancePlugin, IUser
+			where T : EntityInstancePlugin, IUser
 		{
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
+			if (plugin == null) {
+				throw new ArgumentNullException(nameof(plugin));
 			}
 
-			return new StaticMeeleAttacker(level,
-											searchForTarget,
-											searchRectangleSize,
-											timeBetweenSearches,
-											timeBetweenAttacks,
-											instancePlugin);
+			var newInstance =  new StaticMeeleAttacker(level,
+															searchForTarget,
+															searchRectangleSize,
+															timeBetweenSearches,
+															timeBetweenAttacks,
+															plugin);
+
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
 		public override StDefaultComponent SaveState()

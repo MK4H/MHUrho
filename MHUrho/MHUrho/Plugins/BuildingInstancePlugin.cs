@@ -9,11 +9,11 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class BuildingInstancePlugin : InstancePlugin {
+	public abstract class BuildingInstancePlugin : EntityInstancePlugin {
 		public IBuilding Building { get; protected set; }
 
 		protected BuildingInstancePlugin(ILevelManager level, IBuilding building) 
-			:base (level) {
+			:base (level, building) {
 			this.Building = building;
 		}
 

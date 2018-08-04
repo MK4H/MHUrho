@@ -88,9 +88,11 @@ namespace MHUrho.UnitComponents
 
 		}
 
-		public static UnitSelector CreateNew(ILevelManager level)
+		public static UnitSelector CreateNew(UnitInstancePlugin plugin, ILevelManager level)
 		{
-			return new UnitSelector(level);
+			var newInstance = new UnitSelector(level);
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
 		/// <summary>

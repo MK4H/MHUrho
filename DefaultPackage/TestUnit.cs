@@ -67,12 +67,10 @@ namespace DefaultPackage
 			var plugin = new TestUnitInstance(level, unit);
 			plugin.walker = WorldWalker.CreateNew(plugin, level);
 			plugin.meele = MovingMeeleAttacker.CreateNew(plugin, level, true, new IntVector2(20, 20), 0.2f, 0.5f, 1);
-			var selector = UnitSelector.CreateNew(level);
-			var rangeTarget = MovingRangeTarget.CreateNew(plugin, level, new Vector3(0,0.25f,0));
+			var selector = UnitSelector.CreateNew(plugin, level);
+			MovingRangeTarget.CreateNew(plugin, level, new Vector3(0,0.25f,0));
 
-			unit.AddComponent(plugin.walker);
-			unit.AddComponent(selector);
-			unit.AddComponent(plugin.meele);
+
 
 			plugin.health = 100;
 
@@ -225,7 +223,7 @@ namespace DefaultPackage
 																	: e2);
 		}
 
-		public IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget target)
+		public IEnumerable<Waypoint> GetFutureWaypoints(MovingRangeTarget target)
 		{
 			return walker.GetRestOfThePath(new Vector3(0,0.25f,0));
 		}

@@ -168,17 +168,15 @@ namespace DefaultPackage
 		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
 			:base(level,unit) {
 			animationController = unit.CreateComponent<AnimationController>();
-			Walker = WorldWalker.CreateNew(this,level);
-			Shooter = Shooter.CreateNew(level,type.ProjectileType, new Vector3(0,0.7f,-0.7f), 20);
+			Walker = WorldWalker.CreateNew(this, level);
+			Shooter = Shooter.CreateNew(this, level, type.ProjectileType, new Vector3(0,0.7f,-0.7f), 20);
 			Shooter.SearchForTarget = true;
 			Shooter.TargetSearchDelay = 2;
 
-			var selector = UnitSelector.CreateNew(level);
+			var selector = UnitSelector.CreateNew(this, level);
 
-			unit.AddComponent(Walker);
-			unit.AddComponent(Shooter);
-			unit.AddComponent(selector);
-			unit.AddComponent(MovingRangeTarget.CreateNew(this, level, new Vector3(0, 0.5f, 0)));
+
+			MovingRangeTarget.CreateNew(this, level, new Vector3(0, 0.5f, 0));
 			
 			unit.AlwaysVertical = true;
 			pathVisitor = new PathVisitor(this);
@@ -256,7 +254,7 @@ namespace DefaultPackage
 				}
 			}
 
-			if (Shooter.Target != null && !Walker.MovementStarted) {
+			if (Shooter.Target != null && Walker.State != WorldWalkerState.Started) {
 				var targetPos = Shooter.Target.CurrentPosition;
 
 				var diff = Unit.Position - targetPos;
@@ -292,15 +290,24 @@ namespace DefaultPackage
 		void OnMovementFinished(WorldWalker walker) {
 			animationController.Stop("Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
+			Shooter.ResetShotDelay();
 		}
 
 		void OnMovementFailed(WorldWalker walker) {
 			animationController.Stop("Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
+			Shooter.ResetShotDelay();
+		}
+
+		void OnMovementCanceled(WorldWalker walker)
+		{
+			animationController.Stop("Chicken/Models/Walk.ani");
+			Shooter.SearchForTarget = true;
+			Shooter.ResetShotDelay();
 		}
 
 		void OnUnitSelected(UnitSelector selector) {
-			if (!Walker.MovementStarted) {
+			if (Walker.State != WorldWalkerState.Started) {
 				animationController.Play("Chicken/Models/Idle.ani", 0, true);
 			}
 		}
@@ -311,7 +318,7 @@ namespace DefaultPackage
 				switch (order) {
 					case MoveOrder moveOrder:
 						Shooter.StopShooting();
-						Shooter.SearchForTarget = true;
+						Shooter.SearchForTarget = false;
 						explicitTarget = null;
 						order.Executed = Walker.GoTo(moveOrder.Target);
 						break;
@@ -355,7 +362,7 @@ namespace DefaultPackage
 				targetMoved = false;
 			}
 		}
-		IEnumerator<Waypoint> MovingRangeTarget.IUser.GetWaypoints(MovingRangeTarget movingRangeTarget)
+		IEnumerable<Waypoint> MovingRangeTarget.IUser.GetFutureWaypoints(MovingRangeTarget movingRangeTarget)
 		{
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
@@ -389,6 +396,7 @@ namespace DefaultPackage
 			walker.OnMovementStarted += OnMovementStarted;
 			walker.OnMovementEnded += OnMovementFinished;
 			walker.OnMovementFailed += OnMovementFailed;
+			walker.OnMovementCanceled += OnMovementCanceled;
 
 			
 

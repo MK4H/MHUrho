@@ -22,7 +22,12 @@ namespace MHUrho.UnitComponents {
 
 		Vector3 CurrentPosition { get; }
 
-		IEnumerator<Waypoint> GetWaypoints();
+		/// <summary>
+		/// Gets waypoints begining with the current position with time 0,
+		/// and all following waypoints to the end of the path
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<Waypoint> GetFutureWaypoints();
 
 		void AddShooter(RangeTargetComponent.IShooter shooter);
 
@@ -58,7 +63,7 @@ namespace MHUrho.UnitComponents {
 			shooters = new List<IShooter>();
 		}
 
-		public abstract IEnumerator<Waypoint> GetWaypoints();
+		public abstract IEnumerable<Waypoint> GetFutureWaypoints();
 
 		public void TargetMoved(IEntity entity)
 		{

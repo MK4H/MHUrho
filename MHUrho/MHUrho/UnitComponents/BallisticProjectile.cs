@@ -86,9 +86,11 @@ namespace MHUrho.UnitComponents
 			this.Enabled = enabled;
 		}
 
-		public static BallisticProjectile CreateNew(ILevelManager level)
+		public static BallisticProjectile CreateNew(EntityInstancePlugin plugin, ILevelManager level)
 		{
-			return new BallisticProjectile(level);
+			var newInstance =  new BallisticProjectile(level);
+			plugin.Entity.AddComponent(newInstance);
+			return newInstance;
 		}
 
 		/// <summary>
@@ -247,7 +249,7 @@ namespace MHUrho.UnitComponents
 			}
 
 
-			var waypoints = rangeTarget.GetWaypoints();
+			var waypoints = rangeTarget.GetFutureWaypoints().GetEnumerator();
 			if (!waypoints.MoveNext()) {
 				lowVector = Vector3.Zero;
 				highVector = Vector3.Zero;

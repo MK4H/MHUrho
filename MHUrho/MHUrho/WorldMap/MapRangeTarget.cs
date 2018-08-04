@@ -49,7 +49,7 @@ namespace MHUrho.WorldMap
 			return new StMapTarget {InstanceID = this.InstanceID, Position = this.CurrentPosition.ToStVector3()};
 		}
 
-		public IEnumerator<Waypoint> GetWaypoints() {
+		public IEnumerable<Waypoint> GetFutureWaypoints() {
 			yield return new Waypoint(new TempNode(CurrentPosition), 0, MovementType.Linear);
 		}
 

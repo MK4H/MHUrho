@@ -8,12 +8,12 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class ProjectileInstancePlugin : InstancePlugin
+	public abstract class ProjectileInstancePlugin : EntityInstancePlugin
 	{
-		protected IProjectile Projectile;
+		protected IProjectile Projectile { get; private set; }
 
 		protected ProjectileInstancePlugin(ILevelManager level, IProjectile projectile) 
-			:base(level)
+			:base(level, projectile)
 		{
 			this.Projectile = projectile;
 		}

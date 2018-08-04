@@ -110,7 +110,6 @@ namespace DefaultPackage
 		{
 			var instance = new TestWorkerInstance(level, unit);
 			instance.walker = WorldWalker.CreateNew(instance, level);
-			unit.AddComponent(instance.walker);
 
 			instance.walker.OnMovementEnded += instance.OnMovementFinished;
 			return instance;
