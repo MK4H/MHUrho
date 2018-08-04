@@ -11,7 +11,6 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	public delegate bool IsInRange(MeeleAttacker attacker, IEntity target);
 
 	public delegate void TargetInRange(MeeleAttacker attacker, IEntity target);
 
@@ -19,10 +18,16 @@ namespace MHUrho.UnitComponents
 
 	public delegate void TargetFound(MeeleAttacker attacker, IEntity target);
 
-	public delegate IUnit PickTarget(List<IUnit> possibleTargets);
-
 	public abstract class MeeleAttacker : DefaultComponent
 	{
+		public interface IBaseUser {
+			bool IsInRange(MeeleAttacker attacker, IEntity target);
+
+			//TODO: Maybe switch to IEntity
+			IUnit PickTarget(List<IUnit> possibleTargets);
+		}
+
+
 
 		public bool SearchForTarget { get; set; }
 
@@ -72,21 +77,20 @@ namespace MHUrho.UnitComponents
 		public event TargetFound TargetFound;
 
 
-		protected IsInRange IsInRange;
-		protected PickTarget PickTarget;
-
 		protected float TimeToNextSearch;
 		protected float TimeToNextAttack;
 
+		readonly IBaseUser user;
+
 		IntVector2 searchRectangleSize;
 
+	
 		protected MeeleAttacker(ILevelManager level,
 								bool searchForTarget,
 								IntVector2 searchRectangleSize,
 								float timeBetweenSearches,
 								float timeBetweenAttacks,
-								IsInRange isInRange, 
-								PickTarget pickTarget)
+								IBaseUser user)
 			:base(level)
 		{
 			this.SearchForTarget = searchForTarget;
@@ -97,8 +101,7 @@ namespace MHUrho.UnitComponents
 			this.TimeToNextSearch = timeBetweenSearches;
 			this.TimeToNextAttack = TimeBetweenAttacks;
 
-			this.IsInRange = isInRange;
-			this.PickTarget = pickTarget;
+			this.user = user;
 		}
 
 		/// <summary>
@@ -120,9 +123,8 @@ namespace MHUrho.UnitComponents
 								float timeBetweenAttacks,
 								float timeToNextSearch,
 								float timeToNextAttack,
-								IsInRange isInRange,
-								PickTarget pickTarget)
-			: this(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks,  isInRange, pickTarget)
+								IBaseUser user)
+			: this(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks,  user)
 		{
 			this.TimeToNextSearch = timeToNextSearch;
 			this.TimeToNextAttack = timeToNextAttack;
@@ -160,7 +162,7 @@ namespace MHUrho.UnitComponents
 		/// <returns>true if <see cref="Target"/> is in range, false if it is not</returns>
 		protected bool TryAttack(float timeStep)
 		{
-			if (IsInRange(this, Target)) {
+			if (user.IsInRange(this, Target)) {
 				TargetInRange?.Invoke(this, Target);
 				TimeToNextAttack -= timeStep;
 				if (TimeToNextAttack < 0) {
@@ -198,7 +200,7 @@ namespace MHUrho.UnitComponents
 															select unit);
 									});
 
-			Target = PickTarget(unitsInRange);
+			Target = user.PickTarget(unitsInRange);
 			if (Target != null) {
 				Target.OnRemoval += OnTargetDeath;
 				TargetFound?.Invoke(this, Target);

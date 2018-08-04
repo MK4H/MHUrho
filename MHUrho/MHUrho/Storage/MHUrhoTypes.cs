@@ -62,12 +62,13 @@ namespace MHUrho.Storage {
             "ASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzImcKE1N0U3RhdGljUmFu",
             "Z2VUYXJnZXQSDwoHZW5hYmxlZBgBIAEoCBISCgppbnN0YW5jZUlEGAIgASgF",
             "EisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3Iz",
-            "IrgBCglTdFNob290ZXISDwoHZW5hYmxlZBgBIAEoCBIYChBwcm9qZWN0aWxl",
-            "VHlwZUlEGAIgASgFEhIKCnJhdGVPZkZpcmUYAyABKAISFwoPc2VhcmNoRm9y",
-            "VGFyZ2V0GAQgASgIEhkKEXRhcmdldFNlYXJjaERlbGF5GAUgASgCEhEKCXNo",
-            "b3REZWxheRgGIAEoAhITCgtzZWFyY2hEZWxheRgHIAEoAhIQCgh0YXJnZXRJ",
-            "RBgIIAEoBSIhCg5TdFVuaXRTZWxlY3RvchIPCgdlbmFibGVkGAEgASgIIhwK",
-            "CVN0Q2xpY2tlchIPCgdlbmFibGVkGAEgASgIYgZwcm90bzM="));
+            "IukBCglTdFNob290ZXISDwoHZW5hYmxlZBgBIAEoCBIYChBwcm9qZWN0aWxl",
+            "VHlwZUlEGAIgASgFEi8KDHNvdXJjZU9mZnNldBgDIAEoCzIZLk1IVXJoby5T",
+            "dG9yYWdlLlN0VmVjdG9yMxISCgpyYXRlT2ZGaXJlGAQgASgCEhcKD3NlYXJj",
+            "aEZvclRhcmdldBgFIAEoCBIZChF0YXJnZXRTZWFyY2hEZWxheRgGIAEoAhIR",
+            "CglzaG90RGVsYXkYByABKAISEwoLc2VhcmNoRGVsYXkYCCABKAISEAoIdGFy",
+            "Z2V0SUQYCSABKAUiIQoOU3RVbml0U2VsZWN0b3ISDwoHZW5hYmxlZBgBIAEo",
+            "CCIcCglTdENsaWNrZXISDwoHZW5hYmxlZBgBIAEoCGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -81,7 +82,7 @@ namespace MHUrho.Storage {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StStaticMeeleAttacker), global::MHUrho.Storage.StStaticMeeleAttacker.Parser, new[]{ "Enabled", "SearchForTarget", "SearchRectangleSize", "TimeBetweenSearches", "TimeBetweenAttacks", "TargetID", "TimeToNextSearch", "TimeToNextAttack" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMovingRangeTarget), global::MHUrho.Storage.StMovingRangeTarget.Parser, new[]{ "Enabled", "InstanceID", "Offset" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StStaticRangeTarget), global::MHUrho.Storage.StStaticRangeTarget.Parser, new[]{ "Enabled", "InstanceID", "Position" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StShooter), global::MHUrho.Storage.StShooter.Parser, new[]{ "Enabled", "ProjectileTypeID", "RateOfFire", "SearchForTarget", "TargetSearchDelay", "ShotDelay", "SearchDelay", "TargetID" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StShooter), global::MHUrho.Storage.StShooter.Parser, new[]{ "Enabled", "ProjectileTypeID", "SourceOffset", "RateOfFire", "SearchForTarget", "TargetSearchDelay", "ShotDelay", "SearchDelay", "TargetID" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StUnitSelector), global::MHUrho.Storage.StUnitSelector.Parser, new[]{ "Enabled" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StClicker), global::MHUrho.Storage.StClicker.Parser, new[]{ "Enabled" }, null, null, null)
           }));
@@ -2374,6 +2375,7 @@ namespace MHUrho.Storage {
     public StShooter(StShooter other) : this() {
       enabled_ = other.enabled_;
       projectileTypeID_ = other.projectileTypeID_;
+      SourceOffset = other.sourceOffset_ != null ? other.SourceOffset.Clone() : null;
       rateOfFire_ = other.rateOfFire_;
       searchForTarget_ = other.searchForTarget_;
       targetSearchDelay_ = other.targetSearchDelay_;
@@ -2409,8 +2411,19 @@ namespace MHUrho.Storage {
       }
     }
 
+    /// <summary>Field number for the "sourceOffset" field.</summary>
+    public const int SourceOffsetFieldNumber = 3;
+    private global::MHUrho.Storage.StVector3 sourceOffset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 SourceOffset {
+      get { return sourceOffset_; }
+      set {
+        sourceOffset_ = value;
+      }
+    }
+
     /// <summary>Field number for the "rateOfFire" field.</summary>
-    public const int RateOfFireFieldNumber = 3;
+    public const int RateOfFireFieldNumber = 4;
     private float rateOfFire_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float RateOfFire {
@@ -2421,7 +2434,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "searchForTarget" field.</summary>
-    public const int SearchForTargetFieldNumber = 4;
+    public const int SearchForTargetFieldNumber = 5;
     private bool searchForTarget_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool SearchForTarget {
@@ -2432,7 +2445,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "targetSearchDelay" field.</summary>
-    public const int TargetSearchDelayFieldNumber = 5;
+    public const int TargetSearchDelayFieldNumber = 6;
     private float targetSearchDelay_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float TargetSearchDelay {
@@ -2443,7 +2456,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "shotDelay" field.</summary>
-    public const int ShotDelayFieldNumber = 6;
+    public const int ShotDelayFieldNumber = 7;
     private float shotDelay_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float ShotDelay {
@@ -2454,7 +2467,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "searchDelay" field.</summary>
-    public const int SearchDelayFieldNumber = 7;
+    public const int SearchDelayFieldNumber = 8;
     private float searchDelay_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float SearchDelay {
@@ -2465,7 +2478,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "targetID" field.</summary>
-    public const int TargetIDFieldNumber = 8;
+    public const int TargetIDFieldNumber = 9;
     private int targetID_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int TargetID {
@@ -2490,6 +2503,7 @@ namespace MHUrho.Storage {
       }
       if (Enabled != other.Enabled) return false;
       if (ProjectileTypeID != other.ProjectileTypeID) return false;
+      if (!object.Equals(SourceOffset, other.SourceOffset)) return false;
       if (RateOfFire != other.RateOfFire) return false;
       if (SearchForTarget != other.SearchForTarget) return false;
       if (TargetSearchDelay != other.TargetSearchDelay) return false;
@@ -2504,6 +2518,7 @@ namespace MHUrho.Storage {
       int hash = 1;
       if (Enabled != false) hash ^= Enabled.GetHashCode();
       if (ProjectileTypeID != 0) hash ^= ProjectileTypeID.GetHashCode();
+      if (sourceOffset_ != null) hash ^= SourceOffset.GetHashCode();
       if (RateOfFire != 0F) hash ^= RateOfFire.GetHashCode();
       if (SearchForTarget != false) hash ^= SearchForTarget.GetHashCode();
       if (TargetSearchDelay != 0F) hash ^= TargetSearchDelay.GetHashCode();
@@ -2528,28 +2543,32 @@ namespace MHUrho.Storage {
         output.WriteRawTag(16);
         output.WriteInt32(ProjectileTypeID);
       }
+      if (sourceOffset_ != null) {
+        output.WriteRawTag(26);
+        output.WriteMessage(SourceOffset);
+      }
       if (RateOfFire != 0F) {
-        output.WriteRawTag(29);
+        output.WriteRawTag(37);
         output.WriteFloat(RateOfFire);
       }
       if (SearchForTarget != false) {
-        output.WriteRawTag(32);
+        output.WriteRawTag(40);
         output.WriteBool(SearchForTarget);
       }
       if (TargetSearchDelay != 0F) {
-        output.WriteRawTag(45);
+        output.WriteRawTag(53);
         output.WriteFloat(TargetSearchDelay);
       }
       if (ShotDelay != 0F) {
-        output.WriteRawTag(53);
+        output.WriteRawTag(61);
         output.WriteFloat(ShotDelay);
       }
       if (SearchDelay != 0F) {
-        output.WriteRawTag(61);
+        output.WriteRawTag(69);
         output.WriteFloat(SearchDelay);
       }
       if (TargetID != 0) {
-        output.WriteRawTag(64);
+        output.WriteRawTag(72);
         output.WriteInt32(TargetID);
       }
     }
@@ -2562,6 +2581,9 @@ namespace MHUrho.Storage {
       }
       if (ProjectileTypeID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(ProjectileTypeID);
+      }
+      if (sourceOffset_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(SourceOffset);
       }
       if (RateOfFire != 0F) {
         size += 1 + 4;
@@ -2594,6 +2616,12 @@ namespace MHUrho.Storage {
       }
       if (other.ProjectileTypeID != 0) {
         ProjectileTypeID = other.ProjectileTypeID;
+      }
+      if (other.sourceOffset_ != null) {
+        if (sourceOffset_ == null) {
+          sourceOffset_ = new global::MHUrho.Storage.StVector3();
+        }
+        SourceOffset.MergeFrom(other.SourceOffset);
       }
       if (other.RateOfFire != 0F) {
         RateOfFire = other.RateOfFire;
@@ -2631,27 +2659,34 @@ namespace MHUrho.Storage {
             ProjectileTypeID = input.ReadInt32();
             break;
           }
-          case 29: {
+          case 26: {
+            if (sourceOffset_ == null) {
+              sourceOffset_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(sourceOffset_);
+            break;
+          }
+          case 37: {
             RateOfFire = input.ReadFloat();
             break;
           }
-          case 32: {
+          case 40: {
             SearchForTarget = input.ReadBool();
             break;
           }
-          case 45: {
+          case 53: {
             TargetSearchDelay = input.ReadFloat();
             break;
           }
-          case 53: {
+          case 61: {
             ShotDelay = input.ReadFloat();
             break;
           }
-          case 61: {
+          case 69: {
             SearchDelay = input.ReadFloat();
             break;
           }
-          case 64: {
+          case 72: {
             TargetID = input.ReadInt32();
             break;
           }

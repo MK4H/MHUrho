@@ -53,7 +53,8 @@ namespace DefaultPackage
 
 	public class TestUnitInstance : UnitInstancePlugin, 
 									WorldWalker.IUser, 
-									MovingMeeleAttacker.IUser
+									MovingMeeleAttacker.IUser,
+									MovingRangeTarget.IUser
 	{
 		WorldWalker walker;
 		MovingMeeleAttacker meele;
@@ -67,6 +68,7 @@ namespace DefaultPackage
 			plugin.walker = WorldWalker.CreateNew(plugin, level);
 			plugin.meele = MovingMeeleAttacker.CreateNew(plugin, level, true, new IntVector2(20, 20), 0.2f, 0.5f, 1);
 			var selector = UnitSelector.CreateNew(level);
+			var rangeTarget = MovingRangeTarget.CreateNew(plugin, level, new Vector3(0,0.25f,0));
 
 			unit.AddComponent(plugin.walker);
 			unit.AddComponent(selector);
@@ -147,19 +149,15 @@ namespace DefaultPackage
 
 		
 
-		void WorldWalker.IUser.GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
-		{
-			getTime = GetTime;
-			getMinimalAproximatedTime = GetMinimalAproximatedTime;
-		}
+	
 
-		bool GetTime(INode from, INode to, out float time)
+		bool WorldWalker.IUser.GetTime(INode from, INode to, out float time)
 		{
 			time = (to.Position - from.Position).Length;
 			return true;
 		}
 
-		float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
+		float WorldWalker.IUser.GetMinimalAproxTime(Vector3 from, Vector3 to)
 		{
 			return (to - from).Length;
 		}
@@ -186,37 +184,12 @@ namespace DefaultPackage
 
 		}
 
-		IUnit PickTarget(List<IUnit> possibleTargets)
-		{
-			return possibleTargets.Count == 0
-						? null
-						: possibleTargets.Aggregate((e1, e2) => Vector3.Distance(Unit.Position, e1.Position) <
-																Vector3.Distance(Unit.Position, e2.Position)
-																	? e1
-																	: e2);
-		}
-
-		bool IsInRange(MeeleAttacker attacker, IEntity target)
-		{
-			return Vector3.Distance(Unit.Position, target.Position) < 1;
-		}
-
 		void Attacked(MeeleAttacker attacker, IEntity target)
 		{
 			target.HitBy(Unit);
 		}
 
-		void MovingMeeleAttacker.IUser.GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget)
-		{
-			moveTo = MoveTo;
-			isInRange = IsInRange;
-			pickTarget = PickTarget;
-		}
-
-		void MoveTo(Vector3 position)
-		{
-			walker.GoTo(Map.PathFinding.GetClosestNode(position));
-		}
+		
 
 		void Init(UnitSelector selector, MovingMeeleAttacker meeleAttacker)
 		{
@@ -232,6 +205,29 @@ namespace DefaultPackage
 			walker.Stop();
 		}
 
-		
+		void MovingMeeleAttacker.IUser.MoveTo(Vector3 position)
+		{
+			walker.GoTo(Map.PathFinding.GetClosestNode(position));
+		}
+
+		bool MeeleAttacker.IBaseUser.IsInRange(MeeleAttacker attacker, IEntity target)
+		{
+			return Vector3.Distance(Unit.Position, target.Position) < 1;
+		}
+
+		IUnit MeeleAttacker.IBaseUser.PickTarget(List<IUnit> possibleTargets)
+		{
+			return possibleTargets.Count == 0
+						? null
+						: possibleTargets.Aggregate((e1, e2) => Vector3.Distance(Unit.Position, e1.Position) <
+																Vector3.Distance(Unit.Position, e2.Position)
+																	? e1
+																	: e2);
+		}
+
+		public IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget target)
+		{
+			return walker.GetRestOfThePath(new Vector3(0,0.25f,0));
+		}
 	}
 }

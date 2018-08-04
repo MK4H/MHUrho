@@ -54,7 +54,6 @@ namespace DefaultPackage
 
 	public class ChickenInstance : UnitInstancePlugin, 
 									WorldWalker.IUser, 
-									Shooter.IUser,
 									MovingRangeTarget.IUser{
 
 		class PathVisitor : NodeVisitor {
@@ -170,7 +169,7 @@ namespace DefaultPackage
 			:base(level,unit) {
 			animationController = unit.CreateComponent<AnimationController>();
 			Walker = WorldWalker.CreateNew(this,level);
-			Shooter = Shooter.CreateNew(this, level,type.ProjectileType, 20);
+			Shooter = Shooter.CreateNew(level,type.ProjectileType, new Vector3(0,0.7f,-0.7f), 20);
 			Shooter.SearchForTarget = true;
 			Shooter.TargetSearchDelay = 2;
 
@@ -271,28 +270,13 @@ namespace DefaultPackage
 			healthbar.Dispose();
 		}
 
-		void WorldWalker.IUser.GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
-		{
-			getTime = GetTime;
-			getMinimalAproximatedTime = GetMinimalAproximatedTime;
-		}
 
-		void Shooter.IUser.GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset)
-		{
-			getSourceOffset = GetSourceOffset;
-		}
-
-		void MovingRangeTarget.IUser.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints)
-		{
-			getWaypoints = GetWaypoints;
-		}
-
-		bool GetTime(INode from, INode to, out float time)
+		bool WorldWalker.IUser.GetTime(INode from, INode to, out float time)
 		{
 			return from.Accept(pathVisitor, to, out time);
 		}
 
-		float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
+		float WorldWalker.IUser.GetMinimalAproxTime(Vector3 from, Vector3 to)
 		{
 			return (from.XZ2() - to.XZ2()).Length / 2;
 		}
@@ -371,16 +355,7 @@ namespace DefaultPackage
 				targetMoved = false;
 			}
 		}
-
-		Vector3 GetSourceOffset(Shooter forShooter) 
-		{
-			return Unit.Backward * 0.7f + new Vector3(0,0.7f,0);
-		}
-
-
-		
-
-		IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget movingRangeTarget)
+		IEnumerator<Waypoint> MovingRangeTarget.IUser.GetWaypoints(MovingRangeTarget movingRangeTarget)
 		{
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}

@@ -19,7 +19,6 @@ namespace MHUrho.UnitComponents
 	public delegate void TargetLostDelegate(Shooter shooter, IRangeTarget target);
 	public delegate void TargetDestroyedDelegate(Shooter shooter, IRangeTarget target);
 	public delegate void ShotFiredDelegate(Shooter shooter, IProjectile projectile);
-	public delegate Vector3 GetSourceOffsetDelegate(Shooter shooter);
 
 	public class Shooter : DefaultComponent, RangeTargetComponent.IShooter
 	{
@@ -42,6 +41,7 @@ namespace MHUrho.UnitComponents
 									{
 										Enabled = shooter.Enabled,
 										ProjectileTypeID = shooter.projectileType.ID,
+										SourceOffset = shooter.SourceOffset.ToStVector3(),
 										RateOfFire = shooter.RateOfFire,
 										SearchDelay = shooter.searchDelay,
 										SearchForTarget = shooter.SearchForTarget,
@@ -56,24 +56,16 @@ namespace MHUrho.UnitComponents
 			}
 
 			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
-				var user = plugin as IUser;
-				if (user == null) {
-					throw new
-						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
-				}
-
 				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.Shooter) {
 					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
 				}
 
 				var storedShooter = storedData.Shooter;
 
-				user.GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
-
 				Shooter = new Shooter(level,
 									level.PackageManager.ActiveGame.GetProjectileType(storedShooter.ProjectileTypeID),
-									storedShooter.RateOfFire,
-									getSourceOffset)
+									storedShooter.SourceOffset.ToVector3(),
+									storedShooter.RateOfFire)
 						{
 							SearchForTarget = storedShooter.SearchForTarget,
 							TargetSearchDelay = storedShooter.TargetSearchDelay,
@@ -106,11 +98,6 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface IUser {
-			void GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
-		}
-
-
 		/// <summary>
 		/// Shots per minute
 		/// </summary>
@@ -119,6 +106,12 @@ namespace MHUrho.UnitComponents
 		public bool SearchForTarget { get; set; }
 
 		public float TargetSearchDelay { get; set; }
+
+		/// <summary>
+		/// Offset of the spawn point of projectiles from the <see cref="Entity.Position"/> of the owning entity
+		/// Offset is in the Entities local space, +z is forward, +x is right, +y is up in the Entities current orientation
+		/// </summary>
+		public Vector3 SourceOffset { get; set; }
 
 		public IRangeTarget Target { get; private set; }
 
@@ -129,9 +122,6 @@ namespace MHUrho.UnitComponents
 		public event TargetDestroyedDelegate OnTargetDestroyed;
 		public event ShotFiredDelegate OnShotFired;
 
-		readonly GetSourceOffsetDelegate getSourceOffset;
-		
-
 		float shotDelay;
 		float searchDelay;
 
@@ -140,36 +130,29 @@ namespace MHUrho.UnitComponents
 
 		protected Shooter(ILevelManager level,
 						ProjectileType projectileType,
-						float rateOfFire,
-						GetSourceOffsetDelegate getSourceOffset) 
+						Vector3 sourceOffset,
+						float rateOfFire) 
 			:base(level)
 		{
 
 			this.projectileType = projectileType;
+			this.SourceOffset = sourceOffset;
 			this.RateOfFire = rateOfFire;
 			this.shotDelay = 60 / RateOfFire;
 			this.searchDelay = 0;
-			this.getSourceOffset = getSourceOffset;
 			ReceiveSceneUpdates = true;
 		}
 
-		public static Shooter CreateNew<T>(T instancePlugin, 
-										   ILevelManager level,
-										   ProjectileType projectileType,
-										   float rateOfFire)
-			where T : InstancePlugin, IUser
+		public static Shooter CreateNew(ILevelManager level,
+										ProjectileType projectileType,
+										Vector3 sourceOffset,
+										float rateOfFire)
 		{
-
-			if (instancePlugin == null) {
-				throw new ArgumentNullException(nameof(instancePlugin));
-			}
-
-			((IUser) instancePlugin).GetMandatoryDelegates(out GetSourceOffsetDelegate getSourceOffset);
 
 			return new Shooter(level,
 								projectileType,
-								rateOfFire,
-								getSourceOffset);
+								sourceOffset,
+								rateOfFire);
 		}
 
 		
@@ -254,7 +237,9 @@ namespace MHUrho.UnitComponents
 
 			OnBeforeShotFired?.Invoke(this);
 
-			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + getSourceOffset(this), Player, Target);
+			//Rotate the SourceOffset according to Entity world rotation
+			Vector3 worldOffset = Quaternion.FromRotationTo(Vector3.UnitZ, Entity.Forward) * SourceOffset;
+			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + worldOffset, Player, Target);
 			//Could not fire on the target
 			if (projectile == null) {
 				var previousTarget = Target;

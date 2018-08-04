@@ -76,7 +76,27 @@ namespace MHUrho.UnitComponents
 		}
 
 		public interface IUser {
-			void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime);
+
+			bool GetTime(INode from, INode to, out float time);
+
+
+			/// <summary>
+			/// Used as a heuristic for the A* algorithm
+			///
+			/// It has to be admissible, which means it must not overestimate the time
+			/// GetMinimalAproxTime has to always be lower than the optimal path time
+			///
+			/// But the closer you get it to the optimal time, the faster the A* will run
+			///
+			/// If it is not admissible, the returned path may not be optimal and the runtime of A* may be longer
+			///
+			/// If the <paramref name="from"/> and <paramref name="to"/> are in the same Tile, it should return the optimal time
+			/// as that will be used for the movement
+			/// </summary>
+			/// <param name="from"></param>
+			/// <param name="to"></param>
+			/// <returns></returns>
+			float GetMinimalAproxTime(Vector3 from, Vector3 to);
 		}
 
 		public bool MovementStarted { get; private set; }
@@ -90,8 +110,7 @@ namespace MHUrho.UnitComponents
 
 		public IUnit Unit => (IUnit) Entity;
 
-		readonly GetTime getTime;
-		readonly GetMinimalAproxTime getMinimalAproximatedTime;
+		readonly IUser user;
 
 		Path path;
 
@@ -112,7 +131,7 @@ namespace MHUrho.UnitComponents
 
 			Enabled = false;
 
-			user.GetMandatoryDelegates(out getTime, out getMinimalAproximatedTime);
+			this.user = user;
 		}
 
 		protected WorldWalker(IUser user, ILevelManager level, bool activated, Path path)
@@ -122,8 +141,7 @@ namespace MHUrho.UnitComponents
 			ReceiveSceneUpdates = true;
 			this.path = path;
 			this.Enabled = activated;
-
-			user.GetMandatoryDelegates(out getTime, out getMinimalAproximatedTime);
+			this.user = user;
 		}
 
 
@@ -152,8 +170,8 @@ namespace MHUrho.UnitComponents
 			var newPath = Path.FromTo(Unit.Position, 
 									targetNode, 
 									Map, 
-									getTime,
-									getMinimalAproximatedTime);
+									user.GetTime,
+									user.GetMinimalAproxTime);
 			if (newPath == null) {
 				MovementStarted = true;
 				OnMovementStarted?.Invoke(this);
@@ -198,7 +216,7 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			if (!path.WaypointReached(getTime)) {
+			if (!path.WaypointReached(user.GetTime)) {
 				ReachedDestination();
 			}
 		}
@@ -234,7 +252,7 @@ namespace MHUrho.UnitComponents
 				case MovementType.None:
 					return false;
 				case MovementType.Teleport:
-					if (path.Update(Unit.Position, timeStep, getTime)) {
+					if (path.Update(Unit.Position, timeStep, user.GetTime)) {
 						//Still can teleport
 
 						//Check timeout
@@ -252,7 +270,7 @@ namespace MHUrho.UnitComponents
 					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
 
 
-					if (path.Update(newPosition, timeStep, getTime)) {
+					if (path.Update(newPosition, timeStep, user.GetTime)) {
 						//Can still move towards the waypoint
 						bool reachedWaypoint = false;
 						if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
@@ -273,8 +291,8 @@ namespace MHUrho.UnitComponents
 			var newPath = Path.FromTo(Unit.Position,
 									path.GetTarget(),
 									Map,
-									getTime,
-									 getMinimalAproximatedTime);
+									user.GetTime,
+									 user.GetMinimalAproxTime);
 
 			if (newPath == null) {
 				//Cant get there

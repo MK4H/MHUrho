@@ -83,12 +83,13 @@ message StStaticRangeTarget {
 message StShooter {
 	bool enabled = 1;
 	int32 projectileTypeID = 2;
-	float rateOfFire = 3;
-	bool searchForTarget = 4;
-	float targetSearchDelay = 5;
-	float shotDelay = 6;
-	float searchDelay = 7;
-	int32 targetID = 8;
+	StVector3 sourceOffset = 3;
+	float rateOfFire = 4;
+	bool searchForTarget = 5;
+	float targetSearchDelay = 6;
+	float shotDelay = 7;
+	float searchDelay = 8;
+	int32 targetID = 9;
 }
 
 message StUnitSelector {

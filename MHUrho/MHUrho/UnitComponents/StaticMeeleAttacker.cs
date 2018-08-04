@@ -55,8 +55,6 @@ namespace MHUrho.UnitComponents
 
 				var storedStaticMeeleAttacker = storedData.StaticMeeleAttacker;
 
-				user.GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
-
 				StaticMeele = new StaticMeeleAttacker(level,
 													storedStaticMeeleAttacker.SearchForTarget,
 													storedStaticMeeleAttacker.SearchRectangleSize.ToIntVector2(),
@@ -65,8 +63,7 @@ namespace MHUrho.UnitComponents
 													storedStaticMeeleAttacker.Enabled,
 													storedStaticMeeleAttacker.TimeToNextSearch,
 													storedStaticMeeleAttacker.TimeToNextAttack,
-													isInRange,
-													pickTarget);
+													user);
 
 				targetID = storedStaticMeeleAttacker.TargetID;
 			}
@@ -87,8 +84,8 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface IUser {
-			void GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
+		public interface IUser : IBaseUser {
+			
 		}
 
 		protected StaticMeeleAttacker(ILevelManager level,
@@ -96,9 +93,8 @@ namespace MHUrho.UnitComponents
 									IntVector2 searchRectangleSize,
 									float timeBetweenSearches,
 									float timeBetweenAttacks,
-									IsInRange isInRange, 
-									PickTarget pickTarget)
-			:base(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks,  isInRange, pickTarget)	
+									IUser user)
+			:base(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, user)	
 		{
 			this.ReceiveSceneUpdates = true;
 		}
@@ -111,9 +107,8 @@ namespace MHUrho.UnitComponents
 									bool enabled,
 									float timeToNextSearch,
 									float timeToNextAttack,
-									IsInRange isInRange,
-									PickTarget pickTarget)
-			:base(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, timeToNextSearch, timeToNextAttack,  isInRange, pickTarget)
+									IUser user)
+			:base(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, timeToNextSearch, timeToNextAttack, user)
 		{
 			this.Enabled = enabled;
 
@@ -133,9 +128,12 @@ namespace MHUrho.UnitComponents
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			((IUser)instancePlugin).GetMandatoryDelegates(out IsInRange isInRange, out PickTarget pickTarget);
-
-			return new StaticMeeleAttacker(level, searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, isInRange, pickTarget);
+			return new StaticMeeleAttacker(level,
+											searchForTarget,
+											searchRectangleSize,
+											timeBetweenSearches,
+											timeBetweenAttacks,
+											instancePlugin);
 		}
 
 		public override StDefaultComponent SaveState()

@@ -12,8 +12,6 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	public delegate IEnumerator<Waypoint> GetWaypointsDelegate(MovingRangeTarget target);
-
 
 	public class MovingRangeTarget : RangeTargetComponent {
 
@@ -51,12 +49,11 @@ namespace MHUrho.UnitComponents
 
 				var storedMovingRangeTarget = storedData.MovingRangeTarget;
 
-				user.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
 
 				MovingRangeTarget = new MovingRangeTarget(storedMovingRangeTarget.InstanceID,
 														level,
-														storedMovingRangeTarget.Offset.ToVector3(),
-														getWaypoints)
+														user,
+														storedMovingRangeTarget.Offset.ToVector3())
 									{
 										Enabled = storedMovingRangeTarget.Enabled
 									};
@@ -79,8 +76,7 @@ namespace MHUrho.UnitComponents
 
 		public interface IUser {
 
-			void GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
-
+			IEnumerator<Waypoint> GetWaypoints(MovingRangeTarget target);
 		}
 
 
@@ -88,28 +84,25 @@ namespace MHUrho.UnitComponents
 
 		public override Vector3 CurrentPosition => Entity.Position + Entity.Node.Rotation * offset;
 
-		readonly GetWaypointsDelegate getWaypoints;
+		readonly IUser user;
 
 		/// <summary>
 		/// Offset from <see cref="IEntity.Position"/> in the entity space (rotates with entity)
 		/// </summary>
 		readonly Vector3 offset;
 
-		protected MovingRangeTarget(ILevelManager level, Vector3 offset, GetWaypointsDelegate getWaypoints)
+		protected MovingRangeTarget(ILevelManager level, IUser user, Vector3 offset)
 			:base(level)
 		{
+			this.user = user;
 			this.offset = offset;
-			//TODO: Check that delegates are not null
-			this.getWaypoints = getWaypoints;
-
 		}
 
-		protected MovingRangeTarget(int ID, ILevelManager level, Vector3 offset, GetWaypointsDelegate getWaypoints)
+		protected MovingRangeTarget(int ID, ILevelManager level, IUser user, Vector3 offset)
 			: base(ID, level)
 		{
+			this.user = user;
 			this.offset = offset;
-			//TODO: Check that delegates are not null
-			this.getWaypoints = getWaypoints;
 		}
 
 		public static MovingRangeTarget CreateNew<T>(T instancePlugin, ILevelManager level, Vector3 offset)
@@ -119,15 +112,15 @@ namespace MHUrho.UnitComponents
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			instancePlugin.GetMandatoryDelegates(out GetWaypointsDelegate getWaypoints);
 
-			var newTarget = new MovingRangeTarget(level, offset, getWaypoints);
+
+			var newTarget = new MovingRangeTarget(level, instancePlugin, offset);
 			((LevelManager)level).RegisterRangeTarget(newTarget);
 			return newTarget;
 		}
 
 		public override IEnumerator<Waypoint> GetWaypoints() {
-			return getWaypoints(this);
+			return user.GetWaypoints(this);
 		}
 
 		public override StDefaultComponent SaveState() {

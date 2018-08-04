@@ -11,7 +11,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-	public delegate void MoveTo(Vector3 position);
+
 
 	/// <summary>
 	/// A component that can check for targets in a rectangle of size <see cref="MeeleAttacker.SearchRectangleSize"/>,
@@ -66,9 +66,6 @@ namespace MHUrho.UnitComponents
 				var storedMovingMeeleAttacker = storedData.MovingMeeleAttacker;
 
 
-
-				user.GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget);
-
 				MovingMeele = new MovingMeeleAttacker(level,
 													 storedMovingMeeleAttacker.SearchForTarget,
 													 storedMovingMeeleAttacker.SearchRectangleSize.ToIntVector2(),
@@ -79,9 +76,7 @@ namespace MHUrho.UnitComponents
 													 storedMovingMeeleAttacker.TimeToNextSearch,
 													 storedMovingMeeleAttacker.TimeToNextPositionCheck,
 													 storedMovingMeeleAttacker.TimeToNextAttack,
-													 moveTo,
-													 isInRange,
-													 pickTarget
+													 user
 													 );
 
 				targetID = storedMovingMeeleAttacker.TargetID;
@@ -103,14 +98,16 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public interface IUser {
-			void GetMandatoryDelegates(out MoveTo moveTo, out IsInRange isInRange, out PickTarget pickTarget);
+		public interface IUser : IBaseUser {
+			void MoveTo(Vector3 position);
 		}
 
 
+		readonly IUser user;
+
 		Vector3 previousTargetPosition;
 
-		MoveTo moveTo;
+
 
 		float timeBetweenPositionChecks;
 		float timeToNextPositionCheck;
@@ -124,14 +121,12 @@ namespace MHUrho.UnitComponents
 									float timeBetweenPositionChecks,
 									float timeBetweenAttacks,
 									bool enabled,
-									MoveTo moveTo,
-									IsInRange isInRange,
-									PickTarget pickTarget
+									IUser user
 									)
-			:base(level,searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, isInRange, pickTarget)
+			:base(level,searchForTarget, searchRectangleSize, timeBetweenSearches, timeBetweenAttacks, user)
 		{
 			this.Enabled = enabled;
-			this.moveTo = moveTo;
+			this.user = user;
 			this.timeBetweenPositionChecks = timeBetweenPositionChecks;
 			this.timeToNextPositionCheck = timeBetweenPositionChecks;
 
@@ -148,9 +143,7 @@ namespace MHUrho.UnitComponents
 									float timeToNextSearch,
 									float timeToNextPositionCheck,
 									float timeToNextAttack,
-									MoveTo moveTo,
-									IsInRange isInRange,
-									PickTarget pickTarget
+									IUser user
 		)
 			: base(level, 
 					searchForTarget,
@@ -159,11 +152,10 @@ namespace MHUrho.UnitComponents
 					timeBetweenAttacks,
 					timeToNextSearch,
 					timeToNextAttack,
-					isInRange,
-					pickTarget)
+					user)
 		{
 			this.Enabled = enabled;
-			this.moveTo = moveTo;
+			this.user = user;
 			this.timeBetweenPositionChecks = timeBetweenPositionChecks;
 			this.timeToNextPositionCheck = timeToNextPositionCheck;
 
@@ -196,10 +188,6 @@ namespace MHUrho.UnitComponents
 				throw new ArgumentNullException(nameof(instancePlugin));
 			}
 
-			((IUser) instancePlugin).GetMandatoryDelegates(out MoveTo moveTo,
-															out IsInRange isInRange,
-															out PickTarget pickTarget);
-
 			return new MovingMeeleAttacker(level,
 											searchForTarget,
 											searchRectangleSize,
@@ -207,9 +195,7 @@ namespace MHUrho.UnitComponents
 											timeBetweenPositionChecks,
 											timeBetweenAttacks,
 											true,
-											moveTo,
-											isInRange,
-											pickTarget);
+											instancePlugin);
 		}
 
 		public override StDefaultComponent SaveState()
@@ -257,7 +243,7 @@ namespace MHUrho.UnitComponents
 
 			//TODO: Intersect
 			if (Target.Position != previousTargetPosition) {
-				moveTo(Target.Position);
+				user.MoveTo(Target.Position);
 				previousTargetPosition = Target.Position;
 			}
 		}

@@ -161,12 +161,12 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
-		public bool GetTime(INode from, INode to, out float time)
+		bool WorldWalker.IUser.GetTime(INode from, INode to, out float time)
 		{
 			return from.Accept(pathVisitor, to, out time);
 		}
 
-		public float GetMinimalAproximatedTime(Vector3 from, Vector3 to)
+		float WorldWalker.IUser.GetMinimalAproxTime(Vector3 from, Vector3 to)
 		{
 			return (to - from).Length;
 		}
@@ -191,10 +191,5 @@ namespace DefaultPackage
 
 		}
 
-		public void GetMandatoryDelegates(out GetTime getTime, out GetMinimalAproxTime getMinimalAproximatedTime)
-		{
-			getTime = GetTime;
-			getMinimalAproximatedTime = GetMinimalAproximatedTime;
-		}
 	}
 }
