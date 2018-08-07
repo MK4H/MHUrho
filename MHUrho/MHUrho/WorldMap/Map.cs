@@ -19,9 +19,6 @@ namespace MHUrho.WorldMap
 {
 	public partial class Map : IMap, IDisposable {
 
-
-
-
 		internal class Loader : ILoader {
 			
 			public Map Map { get; private set; }
@@ -459,6 +456,8 @@ namespace MHUrho.WorldMap
 
 			return storedMap;
 		}
+
+	
 
 		protected Map(Node mapNode, StMap storedMap)
 			:this(mapNode, storedMap.Size.X, storedMap.Size.Y) {
@@ -1158,6 +1157,16 @@ namespace MHUrho.WorldMap
 					return Vector3.Cross(topRight - botRight, botLeft - botRight);
 				}
 			}
+		}
+
+		public void HighlightCornerList(IEnumerable<IntVector2> corners, Color color)
+		{
+			HighlightCornerList(corners, (_) => color);
+		}
+
+		public void HighlightCornerList(IEnumerable<IntVector2> corners, Func<IntVector2, Color> getColor)
+		{
+			graphics.HighlightCornerList(corners, getColor);
 		}
 
 		public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)

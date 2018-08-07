@@ -74,6 +74,9 @@ namespace MHUrho.Input
 		/// </summary>
 		ITile cachedTileUnderCursor;
 
+		//For storing the cursor visibility on game pause
+		bool cursorVisible;
+
 		public GameMandKController(MyGame game, ILevelManager level, Octree octree, IPlayer player, CameraMover cameraMover) : base(game) {
 			this.camera = cameraMover;
 			this.octree = octree;
@@ -84,8 +87,9 @@ namespace MHUrho.Input
 			this.keyDownActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
 			this.keyUpActions = new Dictionary<Key, Action<KeyUpEventArgs>>();
 			this.keyRepeatActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
+			this.cursorVisible = UI.Cursor.Visible;
 
-			cameraMover.OnFixedMove += OnViewMoved;
+			cameraMover.CameraMoved += OnViewMoved;
 
 			RegisterKeyDownAction(Key.Esc, SwitchToPause);
 
@@ -159,6 +163,7 @@ namespace MHUrho.Input
 
 		public void HideCursor() {
 			UI.Cursor.Visible = false;
+			cursorVisible = false;
 			IntVector2 prevCursorPosition = CursorPosition;
 			UI.Cursor.Position = new IntVector2(UI.Root.Width / 2, UI.Root.Height / 2);
 
@@ -189,6 +194,7 @@ namespace MHUrho.Input
 			}
 
 			UI.Cursor.Visible = true;
+			cursorVisible = true;
 		}
 
 		public void AddTool(Tool tool)
@@ -272,6 +278,8 @@ namespace MHUrho.Input
 
 		public void Pause()
 		{
+			UI.Cursor.Visible = true;
+			Disable();
 			Level.Pause();
 			UIManager.HideUI();
 			Game.menuController.SwitchToPauseMenu(this);
@@ -279,6 +287,8 @@ namespace MHUrho.Input
 
 		public void UnPause()
 		{
+			UI.Cursor.Visible = cursorVisible;
+			Enable();
 			UIManager.ShowUI();
 			Level.UnPause();
 		}
@@ -323,12 +333,21 @@ namespace MHUrho.Input
 
 		protected override void MouseMoved(MouseMovedEventArgs e)
 		{
+
+
 			//Because of the software Cursor, the OS cursor stays in the middle of the screen and e.X and e.Y represent the OS cursor position 
 			//UI.CursorPosition is updated after this, so i need to move it myself
 			var args = new MHUrhoMouseMovedEventArgs(UI.CursorPosition + new IntVector2(e.DX,e.DY), e.DX, e.DY,(MouseButton) e.Buttons, e.Qualifiers);
 			
 
 			MouseMove?.Invoke(args);
+
+			//Invisible cursor cannot be on the border
+			if (!cursorVisible) {
+				cachedTileUnderCursor = null;
+				return;
+			}
+
 			IntVector2 prevMousePos = new IntVector2(args.X - args.DX, args.Y - args.DY);
 			IntVector2 mousePos = new IntVector2(args.X, args.Y);
 
@@ -349,10 +368,10 @@ namespace MHUrho.Input
 					}
 				}
 			}
-			
-			
 
-			cachedTileUnderCursor = null;	
+
+
+			cachedTileUnderCursor = null;
 		}
 
 		protected override void MouseWheel(MouseWheelEventArgs e)
@@ -365,7 +384,7 @@ namespace MHUrho.Input
 			Pause();
 		}
 
-		void OnViewMoved(Vector3 movement, Vector2 rotation, float timeStep) {
+		void OnViewMoved(CameraMovedEventArgs args) {
 			cachedTileUnderCursor = null;
 		}
 

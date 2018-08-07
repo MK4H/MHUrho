@@ -51,7 +51,7 @@ namespace MHUrho.EditorTools
 			input.MouseDown += MouseDown;
 			input.MouseUp += MouseUp;
 			input.MouseMove += MouseMove;
-			camera.OnFixedMove += CameraMove;
+			camera.CameraMoved += CameraMove;
 
 			enabled = true;
 		}
@@ -62,7 +62,7 @@ namespace MHUrho.EditorTools
 			input.MouseDown -= MouseDown;
 			input.MouseUp -= MouseUp;
 			input.MouseMove -= MouseMove;
-			camera.OnFixedMove -= CameraMove;
+			camera.CameraMoved -= CameraMove;
 
 			enabled = false;
 		}
@@ -130,7 +130,7 @@ namespace MHUrho.EditorTools
 			MouseAndCameraMove();
 		}
 
-		void CameraMove(Vector3 movement, Vector2 rotation, float timeStep)
+		void CameraMove(CameraMovedEventArgs args)
 		{
 			MouseAndCameraMove();
 		}

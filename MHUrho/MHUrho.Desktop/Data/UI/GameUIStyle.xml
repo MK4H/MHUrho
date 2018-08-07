@@ -78,20 +78,23 @@
 		<attribute name="Min Size" value="100 100" />
 		<attribute name="Max Size" value="100 100" />
 		<attribute name="Border" value="4 4 4 4" />
-		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+		<attribute name="Texture" value="Texture2D;Textures/SelectionBarToolButtons.png"/>
 		<attribute name="Image Rect" value="0 0 50 50"/>
 		<attribute name="Checked Image Offset" value="100 0" />
 		<attribute name="Hover Image Offset" value="50 0" />
 		<attribute name="Focus Mode" value="NotFocusable" />
 	</element>
 	<element type="VertexHeightToolSelectingBox" style="SelectionBarCheckBox">
-		
+		<attribute name="Image Rect" value="0 50 50 100"/>
 	</element>
 	<element type="VertexHeightToolMovingBox" style="SelectionBarCheckBox">
+		<attribute name="Image Rect" value="0 100 50 150"/>
 	</element>
 	<element type="TileHeightToolTileHeightBox" style="SelectionBarCheckBox">
+		<attribute name="Image Rect" value="0 150 50 200"/>
 	</element>
 	<element type="TerrainSmoothingToolCheckBox" style="SelectionBarCheckBox">
+		<attribute name="Image Rect" value="0 200 50 250"/>
 	</element>
 	<element type="SelectedUnitButton" style="SelectionBarButton">
 		

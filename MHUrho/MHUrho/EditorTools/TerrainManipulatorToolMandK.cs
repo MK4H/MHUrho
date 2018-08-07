@@ -18,7 +18,7 @@ namespace MHUrho.EditorTools {
 		readonly GameMandKController input;
 		readonly MandKGameUI ui;
 		readonly ExclusiveCheckBoxes checkBoxes;
-
+		readonly CameraMover camera;
 		readonly Dictionary<UIElement, TerrainManipulator> manipulators;
 
 		TerrainManipulator manipulator;
@@ -39,6 +39,7 @@ namespace MHUrho.EditorTools {
 			this.input = input;
 			this.ui = ui;
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.camera = camera;
 			this.manipulators = new Dictionary<UIElement, TerrainManipulator>();
 
 			var selectorCheckBox = ui.SelectionBar.CreateCheckBox();
@@ -84,6 +85,7 @@ namespace MHUrho.EditorTools {
 			input.MouseDown += OnMouseDown;
 			input.MouseMove += OnMouseMoved;
 			input.MouseUp += OnMouseUp;
+			camera.CameraMoved += OnCameraMove;
 			enabled = true;
 		}
 
@@ -97,6 +99,7 @@ namespace MHUrho.EditorTools {
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMoved;
 			input.MouseUp -= OnMouseUp;
+			camera.CameraMoved -= OnCameraMove;
 			enabled = false;
 		}
 
@@ -125,24 +128,32 @@ namespace MHUrho.EditorTools {
 			manipulator?.Dispose();
 		}
 
-		void OnMouseMoved(MHUrhoMouseMovedEventArgs e) {
+		void OnMouseMoved(MHUrhoMouseMovedEventArgs args) {
 			if (ui.UIHovering) return;
 
-			manipulator?.OnMouseMoved(e);
+			manipulator?.OnMouseMoved(args);
 		}
 
-		void OnMouseDown(MouseButtonDownEventArgs e)
+		void OnMouseDown(MouseButtonDownEventArgs args)
 		{
 			if (ui.UIHovering) return;
 
-			manipulator?.OnMouseDown(e);
+			manipulator?.OnMouseDown(args);
 		}
 
-		void OnMouseUp(MouseButtonUpEventArgs e)
+		void OnMouseUp(MouseButtonUpEventArgs args)
 		{
 			if (ui.UIHovering) return;
 
-			manipulator?.OnMouseUp(e);
+			manipulator?.OnMouseUp(args);
+		}
+
+		void OnCameraMove(CameraMovedEventArgs args)
+		{
+			//TODO: Dont know if this is right
+			if (ui.UIHovering) return;
+
+			manipulator?.OnCameraMove(args);
 		}
 
 		void OnToggled(CheckBox newCheckBox, CheckBox oldCheckBox)

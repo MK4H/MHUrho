@@ -26,6 +26,7 @@ namespace MHUrho.EditorTools
 		bool enabled;
 
 		ITile fixedCenter;
+		ITile previousCenter;
 
 		public StaticSquareToolMandK(GameMandKController input, MandKGameUI ui, CameraMover camera, int edgeSize)
 			: base(input)
@@ -60,8 +61,9 @@ namespace MHUrho.EditorTools
 		public override void Enable() {
 			if (enabled) return;
 
+			previousCenter = null;
 			input.MouseMove += OnMouseMove;
-			camera.OnFixedMove += OnCameraMove;
+			camera.CameraMoved += OnCameraMove;
 			ui.HoverBegin += OnUIHoverBegin;
 
 			sizeSlider.Visible = true;
@@ -77,7 +79,7 @@ namespace MHUrho.EditorTools
 			if (!enabled) return;
 
 			input.MouseMove -= OnMouseMove;
-			camera.OnFixedMove -= OnCameraMove;
+			camera.CameraMoved -= OnCameraMove;
 			ui.HoverBegin -= OnUIHoverBegin;
 			Map.DisableHighlight();
 			sizeSlider.Visible = false;
@@ -99,14 +101,11 @@ namespace MHUrho.EditorTools
 			((Slider) obj.Element).Value = sliderValue;
 		}
 
-		void OnCameraMove(Vector3 movement, Vector2 rotation, float timeStep)
+		void OnCameraMove(CameraMovedEventArgs args)
 		{
 			if (ui.UIHovering || fixedCenter != null) return;
 
-			var centerTile = input.GetTileUnderCursor();
-			if (centerTile != null) {
-				Map.HighlightRectangle(centerTile, new IntVector2(EdgeSize, EdgeSize), Color.Green);
-			}
+			HighlightSquareAndSignal();
 		}
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
@@ -117,16 +116,25 @@ namespace MHUrho.EditorTools
 				return;
 			}
 
-			var centerTile = input.GetTileUnderCursor();
-			if (centerTile != null) {
-				Map.HighlightRectangle(centerTile, new IntVector2(EdgeSize, EdgeSize), Color.Green);
-			}
+			HighlightSquareAndSignal();
 
 		}
 
 		void OnUIHoverBegin()
 		{
 			Map.DisableHighlight();
+		}
+
+		void HighlightSquareAndSignal()
+		{
+			var centerTile = input.GetTileUnderCursor();
+			if (centerTile != null) {
+				Map.HighlightRectangle(centerTile, new IntVector2(EdgeSize, EdgeSize), Color.Green);
+				if (centerTile != previousCenter) {
+					OnSquareChanged(centerTile, EdgeSize);
+					previousCenter = centerTile;
+				}
+			}
 		}
 	}
 }

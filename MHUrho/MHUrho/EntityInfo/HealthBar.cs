@@ -15,19 +15,17 @@ namespace MHUrho.EntityInfo
     public class HealthBar : IDisposable {
 
 
-		static Dictionary<IPlayer, Material> coloredHealthbars = new Dictionary<IPlayer, Material>();
-
 		BillboardSet billboardSet;
 		uint billboardIndex;
+
+		IEntity entity;
 
 		ILevelManager level;
 
 		public HealthBar(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size, float healthPercent)
 		{
 			this.level = level;
-			if (!coloredHealthbars.ContainsKey(entity.Player)) {
-				CreateHealthbar(entity.Player);
-			}
+			this.entity = entity;
 
 			AddToEntity(entity, offset, size);
 			SetHealth(healthPercent);
@@ -39,8 +37,13 @@ namespace MHUrho.EntityInfo
 			healthPercent = Math.Max(Math.Min(healthPercent, 100), 0);
 
 			var billboard = billboardSet.GetBillboardSafe(billboardIndex);
-			int imagePart = (int)healthPercent / 5;
-			billboard.Uv = new Rect(new Vector2(0, imagePart / 21.0f), new Vector2(1, (imagePart + 1) / 21.0f));
+			int imageIndex = (int)healthPercent / entity.Player.Insignia.HealthBarStepSize;
+
+			Rect uv = entity.Player.Insignia.HealthBarFullUv;
+			float offset = imageIndex / ((100.0f / entity.Player.Insignia.HealthBarStepSize) + 1);
+			uv.Min.Y += offset;
+			uv.Max.Y += offset;
+			billboard.Uv = uv;
 
 			billboardSet.Commit();
 		}
@@ -48,14 +51,6 @@ namespace MHUrho.EntityInfo
 		public void Dispose()
 		{
 			billboardSet.Dispose();
-		}
-
-		public static void DisposeMaterials()
-		{
-			foreach (var material in coloredHealthbars.Values) {
-				material.ReleaseRef();
-			}
-			coloredHealthbars = new Dictionary<IPlayer, Material>();
 		}
 
 		public void Show()
@@ -72,29 +67,11 @@ namespace MHUrho.EntityInfo
 			billboardSet.Commit();
 		}
 
-		unsafe void CreateHealthbar(IPlayer player)
-		{
-			Image image = PackageManager.Instance.GetImage("Textures/HealthBars.png").ConvertToRGBA();
-
-			uint playerColor = player.Insignia.Color.ToUInt();
-			uint* imageData = (uint*)image.Data;
-			for (int i = 0; i < image.Width * image.Height; i++, imageData++) {
-				if (*imageData == new Color(1, 1, 1).ToUInt()) {
-					*imageData = playerColor;
-				}
-			}
-
-			Material newMaterial = PackageManager.Instance.GetMaterialFromImage(image);
-			coloredHealthbars.Add(player, newMaterial);
-			//Material got deleted after the death of every unit, so i just added this additional reference
-			newMaterial.AddRef();
-		}
-
 		void AddToEntity(IEntity entity, Vector3 offset, Vector2 size)
 		{
 			billboardSet = null;
 			foreach (var component in entity.GetComponents<BillboardSet>()) {
-				if (component.Material == coloredHealthbars[entity.Player]) {
+				if (component.Material == entity.Player.Insignia.HealthBarMat) {
 					billboardSet = component;
 					billboardIndex = billboardSet.NumBillboards;
 					billboardSet.NumBillboards = billboardSet.NumBillboards + 1;
@@ -108,14 +85,13 @@ namespace MHUrho.EntityInfo
 				billboardSet.FaceCameraMode = FaceCameraMode.RotateXyz;
 				billboardSet.NumBillboards = 1;
 				billboardSet.Sorted = false;
-				billboardSet.Material = coloredHealthbars[entity.Player];
+				billboardSet.Material = entity.Player.Insignia.HealthBarMat;
 				billboardSet.Scaled = false;
-				billboardSet.DrawDistance = level.App.Config.UnitDrawDistance;
+				//TODO: BILLBOARD DRAW DISTANCE
+				billboardSet.DrawDistance = 50;
 
 				billboardIndex = 0;
 			}
-
-			
 
 
 			var billboard = billboardSet.GetBillboardSafe(billboardIndex);

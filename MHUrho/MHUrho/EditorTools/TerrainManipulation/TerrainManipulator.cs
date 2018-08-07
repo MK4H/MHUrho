@@ -21,19 +21,24 @@ namespace MHUrho.EditorTools.TerrainManipulation
 
 		}
 
-		public virtual void OnMouseDown(MouseButtonDownEventArgs e)
+		public virtual void OnMouseDown(MouseButtonDownEventArgs args)
 		{
 
 		}
 
-		public virtual void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
+		public virtual void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
 
 		}
 
-		public virtual void OnMouseUp(MouseButtonUpEventArgs e)
+		public virtual void OnMouseUp(MouseButtonUpEventArgs args)
 		{
 
 		}
-    }
+
+		public virtual void OnCameraMove(CameraMovedEventArgs args)
+		{
+
+		}
+	}
 }

@@ -42,7 +42,7 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			highlight.Disable();
 		}
 
-		public override void OnMouseDown(MouseButtonDownEventArgs e)
+		public override void OnMouseDown(MouseButtonDownEventArgs args)
 		{
 			mouseButtonDown = true;
 			smoothedCenter = input.GetTileUnderCursor();
@@ -51,23 +51,17 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			}
 		}
 
-		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
+		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
-			if (mouseButtonDown) {
-				ITile centerTile = input.GetTileUnderCursor();
-				if (centerTile == null) {
-					return;
-				}
-
-				if (smoothedCenter != centerTile) {
-					map.ChangeTileHeight(centerTile, highlight.Size, CalculateTileHeight);
-					smoothedCenter = centerTile;
-				}
-				
-			}
+			MouseOrCameraMove();
 		}
 
-		public override void OnMouseUp(MouseButtonUpEventArgs e)
+		public override void OnCameraMove(CameraMovedEventArgs args)
+		{
+			MouseOrCameraMove();
+		}
+
+		public override void OnMouseUp(MouseButtonUpEventArgs args)
 		{
 			mouseButtonDown = false;
 		}
@@ -94,6 +88,22 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			}
 
 			return result;
+		}
+
+		void MouseOrCameraMove()
+		{
+			if (mouseButtonDown) {
+				ITile centerTile = input.GetTileUnderCursor();
+				if (centerTile == null) {
+					return;
+				}
+
+				if (smoothedCenter != centerTile) {
+					map.ChangeTileHeight(centerTile, highlight.Size, CalculateTileHeight);
+					smoothedCenter = centerTile;
+				}
+
+			}
 		}
 	}
 }

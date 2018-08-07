@@ -11,8 +11,15 @@ namespace MHUrho.StartupManagement
 	[DataContract]
     public class AppOptions {
 		//NOTE: Could store this in the config file as well
-		public float MaxDrawDistance => 1000;
-		public float MinDrawDistance => 100;
+		public int MaxDrawDistance => 1000;
+		public int MinDrawDistance => 100;
+
+		public float MaxCameraScrollSensitivity => 20;
+
+		public float MaxCameraRotationSensitivity => 20;
+
+		public float MaxMouseRotationSensitivity => 0.5f;
+		public float MaxZoomSensitivity => 10.0f;
 
 
 		static readonly List<Resolution> SupportedResolutionsStatic  = new List<Resolution>

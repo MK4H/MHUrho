@@ -432,6 +432,10 @@ namespace MHUrho.WorldMap {
 		StMap Save();
 
 
+		void HighlightCornerList(IEnumerable<IntVector2> corners, Color color);
+
+		void HighlightCornerList(IEnumerable<IntVector2> corners, Func<IntVector2, Color> getColor);
+
 		void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor);
 
 		void HighlightTileList(IEnumerable<ITile> tiles, Color color);

@@ -28,7 +28,7 @@ namespace MHUrho.Logic {
 
 		PackageManager PackageManager { get; }
 
-		event OnUpdateDelegate Update;
+		bool EditorMode { get; }
 
 		IEnumerable<IUnit> Units { get; }
 
@@ -41,6 +41,8 @@ namespace MHUrho.Logic {
 		CameraMover Camera { get; }
 
 		ToolManager ToolManager { get; }
+
+		event OnUpdateDelegate Update;
 
 		StLevel Save();
 

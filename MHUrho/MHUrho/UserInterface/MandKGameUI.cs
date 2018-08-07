@@ -204,6 +204,15 @@ namespace MHUrho.UserInterface
 			players.Remove(playerElement);
 		}
 
+		public override void SelectPlayer(IPlayer player)
+		{
+			foreach (var pair in players) {
+				if (pair.Value == player) {
+					playerSelection.Select((CheckBox)pair.Key);
+				}
+			}
+		}
+
 		void UIHoverBegin(HoverBeginEventArgs e)
 		{
 			if (hovering == 0) {

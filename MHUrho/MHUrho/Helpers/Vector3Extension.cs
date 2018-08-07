@@ -16,5 +16,20 @@ namespace MHUrho.Helpers
 			var diff = (a - b).Length;
 			return diff < tolerance;
 		}
+
+		public static Vector3 WithX(this Vector3 vector, float newX)
+		{
+			return new Vector3(newX, vector.Y, vector.Z);
+		}
+
+		public static Vector3 WithY(this Vector3 vector, float newY)
+		{
+			return new Vector3(vector.X, newY, vector.Z);
+		}
+
+		public static Vector3 WithZ(this Vector3 vector, float newZ)
+		{
+			return new Vector3(vector.X, vector.Y, newZ);
+		}
 	}
 }

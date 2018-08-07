@@ -512,6 +512,16 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public void HighlightCornerList(IEnumerable<IntVector2> corners, Color color)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void HighlightCornerList(IEnumerable<IntVector2> corners, Func<IntVector2, Color> getColor)
+			{
+				throw new NotImplementedException();
+			}
+
 			public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)
 			{
 				throw new NotImplementedException();

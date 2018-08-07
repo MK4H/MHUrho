@@ -911,6 +911,19 @@ namespace MHUrho.WorldMap
 				
 			}
 
+			public void HighlightCornerList(IEnumerable<IntVector2> corners, Func<IntVector2, Color> getColor)
+			{
+				HighlightInit();
+
+				highlight.BeginGeometry(0, PrimitiveType.TriangleList);
+
+				foreach (var corner in corners) {
+					HighlightCorner(corner, getColor(corner));
+				}
+
+				HighlightCommit();
+			}
+
 			public void HighlightBorder(IntRect rectangle, Color color) {
 
 				HighlightInit();
@@ -944,24 +957,13 @@ namespace MHUrho.WorldMap
 				HighlightCommit();
 			}
 
-			public void HighlightRectangle(IntRect rectangle, Color color)
-			{
-				HighlightRectangle(rectangle, (tile) => color);
-			}
-
 			public void HighlightRectangle(IntRect rectangle, Func<ITile, Color> getColor)
 			{
 				HighlightInit();
 
-				HighlightFullRectangle(rectangle, getColor);
+				HighlightFullTileRectangle(rectangle, getColor);
 
 				HighlightCommit();
-			}
-
-			public void HighlightTileList(IEnumerable<ITile> tiles, Color color)
-			{
-
-				HighlightTileList(tiles, (tile) => color);
 			}
 
 			public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)
@@ -973,10 +975,10 @@ namespace MHUrho.WorldMap
 
 				foreach (var tile in tiles) {
 					if (map.IsTileSplitFromTopLeftToBottomRight(tile)) {
-						DefineTopLeftBotRightSplitTile(highlight, tile, getColor(tile));
+						DefineTopLeftBotRightSplitTile(tile, getColor(tile));
 					}
 					else {
-						DefineTopRightBotLeftSplitTile(highlight, tile, getColor(tile));
+						DefineTopRightBotLeftSplitTile(tile, getColor(tile));
 					}
 				}
 
@@ -1058,19 +1060,68 @@ namespace MHUrho.WorldMap
 				}
 			}
 
-			void HighlightFullRectangle(IntRect rectangle, Func<ITile, Color> getColor) {
+			void HighlightFullTileRectangle(IntRect rectangle, Func<ITile, Color> getColor) {
 				//I need triangle list because the tiles can be split in two different ways
 				// topLeft to bottomRight or topRight to bottomLeft
 				highlight.BeginGeometry(0, PrimitiveType.TriangleList);
 
 				map.ForEachInRectangle(rectangle, (tile) => {
 													  if (map.IsTileSplitFromTopLeftToBottomRight(tile)) {
-														  DefineTopLeftBotRightSplitTile(highlight, tile, getColor(tile));
+														  DefineTopLeftBotRightSplitTile(tile, getColor(tile));
 													  }
 													  else {
-														  DefineTopRightBotLeftSplitTile(highlight, tile, getColor(tile));
+														  DefineTopRightBotLeftSplitTile(tile, getColor(tile));
 													  }
 												  });
+			}
+
+			/// <summary>
+			/// Adds highlight of the <paramref name="corner"/>
+			/// Works only with <see cref="PrimitiveType.TriangleList"/>
+			/// </summary>
+			/// <param name="corner">The corner that will be highlighted in <paramref name="color"/></param>
+			/// <param name="color">Color of the highlighted rectangle</param>
+			void HighlightCorner(IntVector2 corner, Color color)
+			{
+				//TODO: Make it look nicer
+				const float tetrahedronEdgeSize = 0.1f;
+				const float tan30 = 0.57735026919f;
+				const float tan60 = 1.73205080757f;
+				const float tetrahedronHeight = 0.1f;
+
+				const float medianLength = (tetrahedronEdgeSize / 2) * tan60;
+				const float topXoffset = tetrahedronEdgeSize / 2;
+
+				//One third of the median, because median is split 1 : 2 by the center of mass
+				const float topZoffset = medianLength * (1.0f / 3.0f);
+				const float frontZoffset = medianLength * (2.0f / 3.0f);
+				//Inverted tetrahedron
+				/*
+				 *	---------
+				 *  \\    / /
+				 *   \ \/  /
+				 *    \ | /
+				 *     \|/
+				 */
+				// peak will point down
+				Vector3 peak = new Vector3(corner.X, map.GetTerrainHeightAt(corner), corner.Y);
+				Vector3 topLeft = new Vector3(peak.X - topXoffset,
+											peak.Y + tetrahedronHeight,
+											peak.Z - topZoffset);
+				Vector3 topRight = new Vector3(peak.X + topXoffset,
+												peak.Y + tetrahedronHeight,
+												peak.Z - topZoffset);
+				Vector3 front = new Vector3(peak.X,
+											peak.Y + tetrahedronHeight,
+											peak.Z + frontZoffset);
+				// top base
+				DefineHighlightTriangle(topRight, topLeft, front, color);
+				// backside
+				DefineHighlightTriangle(topLeft, peak, topRight, color);
+				// left side
+				DefineHighlightTriangle(topRight, peak, front, color);
+				// right side
+				DefineHighlightTriangle(front, peak, topLeft, color);
 			}
 
 			void HighlightInit()
@@ -1089,36 +1140,72 @@ namespace MHUrho.WorldMap
 				highlight.Commit();
 			}
 
-			void DefineTopLeftBotRightSplitTile(CustomGeometry geometry, ITile tile, Color color) {
-				geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.BottomRight3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
+			void DefineTopLeftBotRightSplitTile(ITile tile, Color color)
+			{
+				DefineHighlightTriangle(tile.TopLeft3,
+										tile.BottomLeft3,
+										tile.BottomRight3,
+										color);
 
-				geometry.DefineVertex(tile.BottomRight3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
+				DefineHighlightTriangle(tile.BottomRight3,
+										tile.TopRight3,
+										tile.TopLeft3,
+										color);
 			}
 
-			void DefineTopRightBotLeftSplitTile(CustomGeometry geometry, ITile tile, Color color) {
-				geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.TopLeft3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
+			void DefineTopRightBotLeftSplitTile(ITile tile, Color color) {
+				DefineHighlightTriangle(tile.TopRight3,
+										tile.TopLeft3,
+										tile.BottomLeft3,
+										color);
 
-				geometry.DefineVertex(tile.BottomLeft3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.BottomRight3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
-				geometry.DefineVertex(tile.TopRight3 + HighlightAboveTerrainOffset);
-				geometry.DefineColor(color);
+				DefineHighlightTriangle(tile.BottomLeft3,
+										tile.BottomRight3,
+										tile.TopRight3,
+										color);
+			}
+
+			/// <summary>
+			/// Defines a triangle with color <paramref name="color"/>
+			/// <see cref="highlight"/> must be set to <see cref="PrimitiveType.TriangleList"/>
+			/// Automatically adds <see cref="HighlightAboveTerrainOffset"/> offset to positions
+			/// </summary>
+			/// <param name="first"></param>
+			/// <param name="second"></param>
+			/// <param name="third"></param>
+			/// <param name="color"></param>
+			void DefineHighlightTriangle(Vector3 first,
+										Vector3 second,
+										Vector3 third,
+										Color color)
+			{
+				DefineHighlightTriangle(first, second, third, color, color, color);
+			}
+
+			/// <summary>
+			/// Defines a triangle with vertex colors
+			/// <see cref="highlight"/> must be set to <see cref="PrimitiveType.TriangleList"/>
+			/// Automatically adds <see cref="HighlightAboveTerrainOffset"/> offset to positions
+			/// </summary>
+			/// <param name="first"></param>
+			/// <param name="second"></param>
+			/// <param name="third"></param>
+			/// <param name="firstColor"></param>
+			/// <param name="secondColor"></param>
+			/// <param name="thirdColor"></param>
+			void DefineHighlightTriangle(Vector3 first,
+										Vector3 second,
+										Vector3 third,
+										Color firstColor,
+										Color secondColor,
+										Color thirdColor)
+			{
+				highlight.DefineVertex(first + HighlightAboveTerrainOffset);
+				highlight.DefineColor(firstColor);
+				highlight.DefineVertex(second + HighlightAboveTerrainOffset);
+				highlight.DefineColor(secondColor);
+				highlight.DefineVertex(third + HighlightAboveTerrainOffset);
+				highlight.DefineColor(thirdColor);
 			}
 
 			MapChunk GetChunk(ITile tile)

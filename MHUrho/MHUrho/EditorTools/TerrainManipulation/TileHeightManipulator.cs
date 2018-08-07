@@ -30,7 +30,7 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			highlight = new StaticSquareToolMandK(input, ui, camera, 3);
 		}
 
-		public override void OnMouseDown(MouseButtonDownEventArgs e)
+		public override void OnMouseDown(MouseButtonDownEventArgs args)
 		{ 
 
 			centerTile = input.GetTileUnderCursor();
@@ -41,7 +41,7 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			}
 		}
 
-		public override void OnMouseUp(MouseButtonUpEventArgs e)
+		public override void OnMouseUp(MouseButtonUpEventArgs args)
 		{
 
 			if (centerTile != null) {
@@ -52,11 +52,11 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			}
 		}
 
-		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
+		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
 
 			if (mouseButtonDown) {
-				map.ChangeTileHeight(centerTile, highlight.Size, -e.DY * Sensitivity);
+				map.ChangeTileHeight(centerTile, highlight.Size, -args.DY * Sensitivity);
 			}
 		}
 

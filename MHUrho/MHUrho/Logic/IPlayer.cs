@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MHUrho.EntityInfo;
 using MHUrho.Storage;
 using Urho;
 

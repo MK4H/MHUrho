@@ -31,11 +31,11 @@ namespace MHUrho.UserInterface
 		
 
 		//NOTE: Maybe change this to proper variables
-		Slider UnitDrawDistance => (Slider)window.GetChild("UnitDrawDistanceSlider", true);
+		SliderLineEditCombo UnitDrawDistance { get; set; } 
 
-		Slider ProjectileDrawDistance => (Slider) window.GetChild("ProjectileDrawDistanceSlider", true);
+		SliderLineEditCombo ProjectileDrawDistance { get; set; } 
 
-		Slider TerrainDrawDistance => (Slider) window.GetChild("TerrainDrawDistanceSlider", true);
+		SliderLineEditCombo TerrainDrawDistance { get; set; } 
 
 		DropDownList Resolutions => (DropDownList) window.GetChild("Resolution", true);
 
@@ -52,6 +52,16 @@ namespace MHUrho.UserInterface
 		LineEdit MultiSample => (LineEdit) window.GetChild("MultiSample", true);
 
 		LineEdit RefreshRate => (LineEdit) window.GetChild("RefreshRate", true);
+
+		SliderLineEditCombo CameraScroll { get; set; }
+
+		SliderLineEditCombo CameraRotation { get; set; }
+
+		SliderLineEditCombo MouseCamRotation { get; set; }
+
+		SliderLineEditCombo ZoomSpeed { get; set; }
+
+		CheckBox BorderMovement => (CheckBox) window.GetChild("BorderMoveCheckBox", true);
 
 		bool changed;
 
@@ -85,21 +95,12 @@ namespace MHUrho.UserInterface
 
 		void InitializeOptions()
 		{
-			LinkSliders();
+			InitSliders();
 
 			FillResolutions();
 			FillWindowTypes();
 
-			UnitDrawDistance.SliderChanged += (args) => { Game.Config.UnitDrawDistance = args.Value; changed = true; };
-			ProjectileDrawDistance.SliderChanged += (args) => {
-														Game.Config.ProjectileDrawDistance = args.Value;
-														changed = true;
-													};
-
-			TerrainDrawDistance.SliderChanged += (args) => {
-													Game.Config.TerrainDrawDistance = args.Value;
-													changed = true;
-												};
+			
 
 			Resolutions.ItemSelected += (args) => {
 											Game.Config.Resolution = Game.Config.SupportedResolutions[args.Selection];
@@ -133,57 +134,90 @@ namespace MHUrho.UserInterface
 									changed = true;
 								};
 
+			BorderMovement.Toggled += (args) => {
+										Game.Config.MouseBorderCameraMovement = args.State;
+										changed = true;
+									};
+
 			//Initializes values
 			SetValues(Game.Config);
 		}
 
-		/// <summary>
-		/// Links sliders with their LineEdits
-		/// </summary>
-		void LinkSliders()
+		void InitSliders()
 		{
-			var sliders = new List<string>
-						{
-							"UnitDrawDistance",
-							"ProjectileDrawDistance",
-							"TerrainDrawDistance"
-						};
+			UnitDrawDistance = new ValueSlLeCombo((Slider) window.GetChild("UnitDrawDistanceSlider", true),
+												(LineEdit) window.GetChild("UnitDrawDistanceEdit", true),
+												Game.Config.MinDrawDistance,
+												Game.Config.MaxDrawDistance);
 
-			foreach (var name in sliders) {
-				Slider slider = (Slider)window.GetChild(name + "Slider", true);
-				LineEdit edit = (LineEdit)window.GetChild(name + "Edit", true);
+			UnitDrawDistance.ValueChanged += (newValue) => {
+												Game.Config.UnitDrawDistance = newValue;
+												changed = true;
+											};
+			
 
-				slider.SliderChanged += (args) => { edit.Text = ((int)args.Value).ToString(); changed = true; };
+			ProjectileDrawDistance = new ValueSlLeCombo((Slider)window.GetChild("ProjectileDrawDistanceSlider", true),
+														(LineEdit)window.GetChild("ProjectileDrawDistanceEdit", true),
+														Game.Config.MinDrawDistance,
+														Game.Config.MaxDrawDistance);
 
-				edit.TextChanged += (args) => {
-					//TODO: Read max and min values for this slider
-					if ((!int.TryParse(args.Text, out int value) || value < 0 || 100 < value) && args.Text != "") {
-						((LineEdit)args.Element).Text = ((int)slider.Value).ToString();
-					}
-					changed = true;
+			ProjectileDrawDistance.ValueChanged += (newValue) => {
+														Game.Config.ProjectileDrawDistance = newValue;
+														changed = true;
+													};
 
-				};
 
-				edit.TextFinished += (args) => {
-					//TODO: Read max and min values for this slider
-					if (!int.TryParse(args.Text, out int value) || value < 0 || 100 < value) {
-						if (args.Text == "") {
-							slider.Value = 0;
-							((LineEdit)args.Element).Text = 0.ToString();
-						}
-						else {
-							((LineEdit)args.Element).Text = ((int)slider.Value).ToString();
-						}
-					}
-					else {
-						slider.Value = value;
-					}
-					changed = true;
-				};
 
-			}
+			TerrainDrawDistance = new ValueSlLeCombo((Slider)window.GetChild("TerrainDrawDistanceSlider", true),
+													(LineEdit)window.GetChild("TerrainDrawDistanceEdit", true),
+													Game.Config.MinDrawDistance,
+													Game.Config.MaxDrawDistance);
+
+			TerrainDrawDistance.ValueChanged += (newValue) => {
+													Game.Config.TerrainDrawDistance = newValue;
+													changed = true;
+												};
+
+
+			CameraScroll = new PercentageSlLeCombo((Slider)window.GetChild("KbCamScrollSlider", true),
+												 (LineEdit)window.GetChild("KbCamScrollEdit", true),
+												 () => Game.Config.MaxCameraScrollSensitivity);
+
+			CameraScroll.ValueChanged += (newValue) => {
+											Game.Config.CameraScrollSensitivity = newValue;
+											changed = true;
+										};
+
+			CameraRotation = new PercentageSlLeCombo((Slider)window.GetChild("KbRotSlider", true),
+													(LineEdit)window.GetChild("KbRotEdit", true),
+													 () => Game.Config.MaxCameraRotationSensitivity);
+
+			CameraRotation.ValueChanged += (newValue) => {
+											Game.Config.CameraRotationSensitivity = newValue;
+											changed = true;
+										};
+
+			MouseCamRotation = new PercentageSlLeCombo((Slider)window.GetChild("MsRotSlider", true),
+														(LineEdit)window.GetChild("MsRotEdit", true),
+													 () => Game.Config.MaxMouseRotationSensitivity);
+
+			MouseCamRotation.ValueChanged += (newValue) => {
+												Game.Config.MouseRotationSensitivity = newValue;
+												changed = true;
+											};
+
+			ZoomSpeed = new PercentageSlLeCombo((Slider) window.GetChild("ZoomSlider", true),
+												(LineEdit) window.GetChild("ZoomEdit", true),
+												() => Game.Config.MaxZoomSensitivity);
+
+
+			ZoomSpeed.ValueChanged += (newValue) => {
+										Game.Config.ZoomSensitivity = newValue;
+										changed = true;
+									};
 
 		}
+
 
 		void FillResolutions()
 		{
@@ -285,13 +319,10 @@ namespace MHUrho.UserInterface
 
 		void SetValues(AppOptions options)
 		{
-			UnitDrawDistance.Range = options.MaxDrawDistance - options.MinDrawDistance;
 			UnitDrawDistance.Value = options.UnitDrawDistance;
 
-			ProjectileDrawDistance.Range = options.MaxDrawDistance - options.MinDrawDistance;
 			ProjectileDrawDistance.Value = options.ProjectileDrawDistance;
 
-			TerrainDrawDistance.Range = options.MaxDrawDistance - options.MinDrawDistance;
 			TerrainDrawDistance.Value = options.TerrainDrawDistance;
 
 			Resolutions.Selection = (uint)Game.Config.SupportedResolutions.IndexOf(Game.Config.Resolution);
@@ -309,6 +340,16 @@ namespace MHUrho.UserInterface
 			MultiSample.Text = options.Multisample.ToString();
 
 			RefreshRate.Text = options.RefreshRateCap.ToString();
+
+			CameraScroll.Value = options.CameraScrollSensitivity;
+
+			CameraRotation.Value = options.CameraRotationSensitivity;
+
+			MouseCamRotation.Value = options.MouseRotationSensitivity;
+
+			ZoomSpeed.Value = options.ZoomSensitivity;
+
+			BorderMovement.Checked = options.MouseBorderCameraMovement;
 		}
 
 		string WindowTypeToString(WindowTypeEnum windowType)
@@ -352,5 +393,7 @@ namespace MHUrho.UserInterface
 			throw new ArgumentOutOfRangeException(nameof(fullscreen) + " and " + nameof(borderless),
 												"Borderless fullscrean is invalid combination");
 		}
+
+
 	}
 }

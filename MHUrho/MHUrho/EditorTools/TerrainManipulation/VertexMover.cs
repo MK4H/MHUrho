@@ -16,12 +16,15 @@ namespace MHUrho.EditorTools.TerrainManipulation
 		readonly IMap map;
 		readonly GameMandKController input;
 
+		bool mouseDown;
+
 		public VertexMover(TerrainManipulatorTool tool, VertexSelector selector, GameMandKController input, IMap map)
 		{
 			this.tool = tool;
 			this.selector = selector;
 			this.map = map;
 			this.input = input;
+			this.mouseDown = false;
 		}
 
 		public override void Dispose()
@@ -31,23 +34,33 @@ namespace MHUrho.EditorTools.TerrainManipulation
 
 		public override void OnEnabled()
 		{
-			input.HideCursor();
+			map.HighlightCornerList(selector.SelectedVerticies, Color.Green);
 		}
 
 		public override void OnDisabled()
 		{
+			map.DisableHighlight();
 			input.ShowCursor();
 		}
 
-		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
+		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
-			map.ChangeHeight(selector.SelectedVerticies, -e.DY * Sensitivity);
+			if (mouseDown) {
+				map.ChangeHeight(selector.SelectedVerticies, -args.DY * Sensitivity);
+				map.HighlightCornerList(selector.SelectedVerticies, Color.Green);
+			}
 		}
 
-		public override void OnMouseDown(MouseButtonDownEventArgs e)
+		public override void OnMouseDown(MouseButtonDownEventArgs args)
 		{
-			//Calls OnDisabled, which shows cursor
-			tool.DeselectManipulator();
+			mouseDown = true;
+			input.HideCursor();
+		}
+
+		public override void OnMouseUp(MouseButtonUpEventArgs args)
+		{
+			mouseDown = false;
+			input.ShowCursor();
 		}
 	}
 }

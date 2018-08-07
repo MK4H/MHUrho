@@ -60,7 +60,10 @@ namespace MHUrho.Logic
 
 		public PackageManager PackageManager => PackageManager.Instance;
 
-		public event OnUpdateDelegate Update;
+		//TODO: Editor mode
+		public bool EditorMode => throw new NotImplementedException();
+
+		
 
 		public IEnumerable<IUnit> Units => units.Values;
 
@@ -74,7 +77,8 @@ namespace MHUrho.Logic
 
 		public ToolManager ToolManager { get; private set; }
 
-		//TODO: Platform independent
+		public event OnUpdateDelegate Update;
+
 		ICameraController cameraController;
 
 		readonly Octree octree;
@@ -121,6 +125,7 @@ namespace MHUrho.Logic
 
 			MyGame.InvokeOnMainSafe(StartLoadingInMain);
 
+			PlayerInsignia.InitInsignias(PackageManager.Instance);
 
 			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, storedLevel.Map, loadingProgress));
 			loaders.Add(mapLoader);
@@ -143,7 +148,6 @@ namespace MHUrho.Logic
 				octree = scene.CreateComponent<Octree>();
 
 				LoadSceneParts(game, scene);
-
 
 				var levelNode = scene.CreateChild("LevelNode");
 				levelNode.Enabled = false;
@@ -261,6 +265,8 @@ namespace MHUrho.Logic
 			loadingProgress.EnterPhase("Initializing level");
 			InitializeLevel(game, gamePackageName, out Scene scene, loadingProgress);
 
+			PlayerInsignia.InitInsignias(PackageManager.Instance);
+
 			loadingProgress.EnterPhase("Loading map");
 			Node mapNode = CurrentLevel.LevelNode.CreateChild("MapNode");
 
@@ -286,7 +292,7 @@ namespace MHUrho.Logic
 
 			void StartLevel()
 			{
-				//TODO: Temporary player, COLOR 
+				//TODO: Temporary player creation
 				Player newPlayer = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, PlayerInsignia.Insignias[0]);
 				CurrentLevel.LevelNode.AddComponent(newPlayer);
 				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
@@ -297,6 +303,7 @@ namespace MHUrho.Logic
 				CurrentLevel.ToolManager = game.ControllerFactory.CreateToolManager(CurrentLevel.Input, CurrentLevel.Camera);
 
 				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
+				CurrentLevel.Input.UIManager.SelectPlayer(newPlayer);
 
 				newPlayer = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players),
 													CurrentLevel,
@@ -357,7 +364,6 @@ namespace MHUrho.Logic
 			}
 
 			PackageManager.ActiveGame.ClearCaches();
-			HealthBar.DisposeMaterials();
 			Input.Dispose();
 			cameraController.Dispose();
 			Camera.Dispose();

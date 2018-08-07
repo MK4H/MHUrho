@@ -24,8 +24,6 @@ namespace MHUrho.EditorTools
 
 		readonly ExclusiveCheckBoxes checkBoxes;
 
-		ITile centerTile;
-
 		bool mouseButtonDown;
 		bool enabled;
 
@@ -66,9 +64,11 @@ namespace MHUrho.EditorTools
 			highlight.Enable();
 			input.MouseDown += OnMouseDown;
 			input.MouseUp += OnMouseUp;
-			input.MouseMove += OnMouseMove;
+			highlight.SquareChanged += Highlight_SquareChanged;
 			enabled = true;
 		}
+
+		
 
 		public override void Disable() {
 			if (!enabled) return;
@@ -79,7 +79,8 @@ namespace MHUrho.EditorTools
 			highlight.Disable();
 			input.MouseDown -= OnMouseDown;
 			input.MouseUp -= OnMouseUp;
-			input.MouseMove -= OnMouseMove;
+			highlight.SquareChanged -= Highlight_SquareChanged;
+			
 			enabled = false;
 			
 		}
@@ -106,37 +107,32 @@ namespace MHUrho.EditorTools
 		}
 
 		void OnMouseDown(MouseButtonDownEventArgs e) {
+			mouseButtonDown = true;
+
 			if (ui.UIHovering) return;
 
 			if (checkBoxes.Selected != null) {
-				centerTile = input.GetTileUnderCursor();
+				var centerTile = input.GetTileUnderCursor();
 				if (centerTile != null) {
 					Map.ChangeTileType(centerTile, highlight.Size, tileTypes[checkBoxes.Selected]);
 				}
-				mouseButtonDown = true;
 			}
 		}
 
-		void OnMouseUp(MouseButtonUpEventArgs e) {
-			if (ui.UIHovering) return;
-
-			if (checkBoxes.Selected != null) {
-				mouseButtonDown = false;
-			}
-		}
-
-		void OnMouseMove(MHUrhoMouseMovedEventArgs e) {
+		void Highlight_SquareChanged(StaticSquareChangedArgs args)
+		{
+			//TODO: Dont know if i need this
 			if (ui.UIHovering) return;
 
 			if (checkBoxes.Selected != null && mouseButtonDown) {
-				var newCenterTile = input.GetTileUnderCursor();
-				if (newCenterTile != null && newCenterTile != centerTile) {
-					centerTile = newCenterTile;
-					Map.ChangeTileType(centerTile, highlight.Size, tileTypes[checkBoxes.Selected]);
-				}
+				Map.ChangeTileType(args.CenterTile, args.Size, tileTypes[checkBoxes.Selected]);
 			}
 		}
 
-		
+	
+
+		void OnMouseUp(MouseButtonUpEventArgs e) {
+			mouseButtonDown = false;
+		}
 	}
 }

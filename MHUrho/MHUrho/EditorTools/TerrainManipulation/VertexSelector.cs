@@ -30,7 +30,17 @@ namespace MHUrho.EditorTools.TerrainManipulation
 			
 		}
 
-		public override void OnMouseDown(MouseButtonDownEventArgs e)
+		public override void OnEnabled()
+		{
+			map.HighlightCornerList(SelectedVerticies, Color.Green);
+		}
+
+		public override void OnDisabled()
+		{
+			map.DisableHighlight();
+		}
+
+		public override void OnMouseDown(MouseButtonDownEventArgs args)
 		{
 			var raycastResult = input.CursorRaycast();
 			var vertex = map.RaycastToVertex(raycastResult);
@@ -39,6 +49,8 @@ namespace MHUrho.EditorTools.TerrainManipulation
 				if (!verticies.Remove(vertex.Value)) {
 					verticies.Add(vertex.Value);
 				}
+
+				map.HighlightCornerList(SelectedVerticies, Color.Green);
 			}
 		}
 	}
