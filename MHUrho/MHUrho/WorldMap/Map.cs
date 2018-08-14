@@ -39,9 +39,9 @@ namespace MHUrho.WorldMap
 			/// <param name="mapNode">Scene node of the map</param>
 			/// <param name="storedMap">Protocol Buffers class containing stored map</param>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
-			public static Loader StartLoading(LevelManager level, Node mapNode, StMap storedMap, LoadingWatcher loadingProgress) {
+			public static Loader StartLoading(LevelManager level, Node mapNode, Octree octree, StMap storedMap, LoadingWatcher loadingProgress) {
 				var loader = new Loader(loadingProgress);
-				loader.Load(level, mapNode, storedMap);
+				loader.Load(level, mapNode, octree, storedMap);
 				return loader;
 			}
 
@@ -68,8 +68,8 @@ namespace MHUrho.WorldMap
 				Map.BuildGeometry(loadingProgress);
 			}
 
-			void Load(LevelManager level, Node mapNode, StMap storedMap) {
-				Map = new Map(mapNode, storedMap);
+			void Load(LevelManager level, Node mapNode, Octree octree, StMap storedMap) {
+				Map = new Map(mapNode, octree, storedMap);
 				Map.levelManager = level;
 
 				foreach (var storedMapTarget in storedMap.MapRangeTargets) {
@@ -368,6 +368,8 @@ namespace MHUrho.WorldMap
 
 		readonly Node node;
 
+		readonly Octree octree;
+
 		MapGraphics graphics;
 
 		LevelManager levelManager;
@@ -399,9 +401,9 @@ namespace MHUrho.WorldMap
 		/// <param name="mapNode">Node to connect the map to</param>
 		/// <param name="size">Size of the playing field, excluding the borders</param>
 		/// <returns>Fully created map</returns>
-		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, IntVector2 size, LoadingWatcher loadingProgress) 
+		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IntVector2 size, LoadingWatcher loadingProgress) 
 		{
-			Map newMap = new Map(mapNode, size.X, size.Y);
+			Map newMap = new Map(mapNode, octree, size.X, size.Y);
 			newMap.levelManager = level;
 
 			TileType defaultTileType = PackageManager.Instance.ActiveGame.DefaultTileType;
@@ -459,8 +461,8 @@ namespace MHUrho.WorldMap
 
 	
 
-		protected Map(Node mapNode, StMap storedMap)
-			:this(mapNode, storedMap.Size.X, storedMap.Size.Y) {
+		protected Map(Node mapNode, Octree octree, StMap storedMap)
+			:this(mapNode, octree, storedMap.Size.X, storedMap.Size.Y) {
 
 		}
 
@@ -470,9 +472,10 @@ namespace MHUrho.WorldMap
 		/// <param name="mapNode"></param>
 		/// <param name="width">Width of the playing field without borders</param>
 		/// <param name="length">Length of the playing field without borders</param>
-		protected Map(Node mapNode, int width, int length) 
+		protected Map(Node mapNode, Octree octree, int width, int length) 
 		{
 			this.node = mapNode;
+			this.octree = octree;
 			this.TopLeft = new IntVector2(1, 1);
 			this.BottomRight = TopLeft + new IntVector2(width - 1, length - 1);
 			this.mapRangeTargets = new Dictionary<Vector3, MapRangeTarget>();
@@ -868,6 +871,22 @@ namespace MHUrho.WorldMap
 			return GetTilesAroundCorner(cornerCoords, false);
 		}
 
+		/// <summary>
+		/// Returns all results where the ray intersects the map
+		/// </summary>
+		/// <param name="ray"></param>
+		/// <param name="maxDistance"></param>
+		/// <returns></returns>
+		public IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000)
+		{
+			var results = octree.Raycast(ray: ray, maxDistance: maxDistance);
+
+			//TODO: Check it intersects from the correct side
+			return from result in results
+					where IsRaycastToMap(result)
+					select result;
+		}
+
 		public bool IsRaycastToMap(RayQueryResult rayQueryResult)
 		{
 			return graphics.IsRaycastToMap(rayQueryResult);
@@ -923,6 +942,16 @@ namespace MHUrho.WorldMap
 			}
 
 			return new IntVector2((int)cornerPosition.Value.X, (int)cornerPosition.Value.Z);
+		}
+
+		public Vector3? RaycastToWorldPosition(List<RayQueryResult> rayQueryResults)
+		{
+			return graphics.RaycastToWorldPosition(rayQueryResults);
+		}
+
+		public Vector3? RaycastToWorldPosition(RayQueryResult rayQueryResult)
+		{
+			return graphics.RaycastToWorldPosition(rayQueryResult);
 		}
 
 		public void ChangeTileType(ITile tile, TileType newType) 

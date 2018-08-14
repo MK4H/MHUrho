@@ -44,7 +44,7 @@ namespace MHUrho.Input
 
 		public Vector2 PositionXZ => state.CameraWorldPosition.XZ2();
 
-		public IEntity Followed => followingCameraState.Followed;
+		public IEntity Followed => entityFollowingCameraState.Followed;
 
 		public event OnCameraMove CameraMoved;
 
@@ -67,7 +67,7 @@ namespace MHUrho.Input
 
 
 		FixedCamera fixedCameraState;
-		FollowingCamera followingCameraState;
+		EntityFollowingCamera entityFollowingCameraState;
 		FreeFloatCamera freeFloatCameraState;
 
 		public static CameraMover GetCameraController(Node levelNode, IMap map, Vector2 initialPosition) {
@@ -77,11 +77,11 @@ namespace MHUrho.Input
 			CameraMover mover = cameraNode.CreateComponent<CameraMover>();
 			mover.Camera = camera;
 			mover.fixedCameraState = new FixedCamera(map, levelNode, cameraNode, initialPosition, mover.SwitchToState);
-			mover.followingCameraState = new FollowingCamera(map, cameraNode, mover.SwitchToState);
+			mover.entityFollowingCameraState = new EntityFollowingCamera(map, cameraNode, mover.SwitchToState);
 			mover.freeFloatCameraState = new FreeFloatCamera(map, levelNode, cameraNode, mover.SwitchToState);
 
 			mover.fixedCameraState.CameraMoved += mover.OnCameraMoved;
-			mover.followingCameraState.CameraMoved += mover.OnCameraMoved;
+			mover.entityFollowingCameraState.CameraMoved += mover.OnCameraMoved;
 			mover.freeFloatCameraState.CameraMoved += mover.OnCameraMoved;
 
 			mover.state = mover.fixedCameraState;
@@ -233,8 +233,10 @@ namespace MHUrho.Input
 		{
 			StopAllCameraMovement();
 
-			followingCameraState.SetFollowedEntity(entity);
-			SwitchToState(CameraStates.Following);
+			entityFollowingCameraState.SetFollowedEntity(entity);
+			if (state != entityFollowingCameraState) {
+				SwitchToState(CameraStates.Following);
+			}
 		}
 
 		public void StopFollowing()
@@ -262,6 +264,11 @@ namespace MHUrho.Input
 			return result;
 		}
 
+		public void ResetCamera()
+		{
+			StopAllCameraMovement();
+			state.Reset();
+		}
 
 		protected override void OnUpdate(float timeStep)
 		{
@@ -326,7 +333,7 @@ namespace MHUrho.Input
 				case CameraStates.Fixed:
 					return fixedCameraState;
 				case CameraStates.Following:
-					return followingCameraState;
+					return entityFollowingCameraState;
 				case CameraStates.FreeFloat:
 					return freeFloatCameraState;
 				default:

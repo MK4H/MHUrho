@@ -105,6 +105,7 @@ namespace MHUrho.Input
 			input.RegisterKeyDownAction(Key.R, StartCameraRotationUp);
 			input.RegisterKeyDownAction(Key.F, StartCameraRotationDown);
 			input.RegisterKeyDownAction(Key.Shift, CameraSwitchMode);
+			input.RegisterKeyDownAction(Key.Backspace, ResetCamera);
 
 			input.RegisterKeyUpAction(Key.W, StopCameraMoveForward);
 			input.RegisterKeyUpAction(Key.S, StopCameraMoveBackward);
@@ -212,21 +213,21 @@ namespace MHUrho.Input
 		}
 
 
-		void OnMouseWheel(MouseWheelEventArgs e)
+		void OnMouseWheel(MouseWheelEventArgs args)
 		{
 			if (!ui.UIHovering) {
-				camera.AddDecayingZoomChange(e.Wheel * WheelSensitivity);
+				camera.AddDecayingZoomChange(args.Wheel * WheelSensitivity);
 			}
 		}
 
-		void OnMouseMoved(MHUrhoMouseMovedEventArgs e)
+		void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
 			if (cameraType == CameraMovementType.FreeFloat) {
-				camera.AddDecayingRotation(new Vector2(e.DX, e.DY) * MouseRotationSensitivity);
+				camera.AddDecayingRotation(new Vector2(args.DX, args.DY) * MouseRotationSensitivity);
 			}
 		}
 
-		void StartCameraMoveLeft(KeyDownEventArgs e)
+		void StartCameraMoveLeft(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
 			movement.X -= CameraScrollSensitivity;
@@ -235,7 +236,7 @@ namespace MHUrho.Input
 			activeCameraMovement.MoveLeft = true;
 		}
 
-		void StopCameraMoveLeft(KeyUpEventArgs e)
+		void StopCameraMoveLeft(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
 			if (!activeCameraMovement.MoveLeft) {
@@ -251,7 +252,7 @@ namespace MHUrho.Input
 			camera.SetStaticMovement(movement);
 		}
 
-		void StartCameraMoveRight(KeyDownEventArgs e)
+		void StartCameraMoveRight(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
 			movement.X += CameraScrollSensitivity;
@@ -260,7 +261,7 @@ namespace MHUrho.Input
 			activeCameraMovement.MoveRight = true;
 		}
 
-		void StopCameraMoveRight(KeyUpEventArgs e)
+		void StopCameraMoveRight(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
 			if (!activeCameraMovement.MoveRight) {
@@ -276,7 +277,7 @@ namespace MHUrho.Input
 			camera.SetStaticMovement(movement);
 		}
 
-		void StartCameraMoveForward(KeyDownEventArgs e)
+		void StartCameraMoveForward(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
 			movement.Z += CameraScrollSensitivity;
@@ -285,7 +286,7 @@ namespace MHUrho.Input
 			activeCameraMovement.MoveForward = true;
 		}
 
-		void StopCameraMoveForward(KeyUpEventArgs e)
+		void StopCameraMoveForward(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
 			if (!activeCameraMovement.MoveForward) {
@@ -301,7 +302,7 @@ namespace MHUrho.Input
 			camera.SetStaticMovement(movement);
 		}
 
-		void StartCameraMoveBackward(KeyDownEventArgs e)
+		void StartCameraMoveBackward(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
 			movement.Z -= CameraScrollSensitivity;
@@ -310,7 +311,7 @@ namespace MHUrho.Input
 			activeCameraMovement.MoveBackward = true;
 		}
 
-		void StopCameraMoveBackward(KeyUpEventArgs e)
+		void StopCameraMoveBackward(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
 			if (!activeCameraMovement.MoveBackward) {
@@ -326,14 +327,14 @@ namespace MHUrho.Input
 			camera.SetStaticMovement(movement);
 		}
 
-		void StartCameraRotationRight(KeyDownEventArgs e)
+		void StartCameraRotationRight(KeyDownEventArgs args)
 		{
 			camera.SetStaticYawChange(camera.StaticYaw + CameraRotationSensitivity);
 
 			activeCameraMovement.RotateRight = true;
 		}
 
-		void StopCameraRotationRight(KeyUpEventArgs e)
+		void StopCameraRotationRight(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateRight) {
 				return;
@@ -347,14 +348,14 @@ namespace MHUrho.Input
 			camera.SetStaticYawChange(yaw);
 		}
 
-		void StartCameraRotationLeft(KeyDownEventArgs e)
+		void StartCameraRotationLeft(KeyDownEventArgs args)
 		{
 			camera.SetStaticYawChange(camera.StaticYaw - CameraRotationSensitivity);
 
 			activeCameraMovement.RotateLeft = true;
 		}
 
-		void StopCameraRotationLeft(KeyUpEventArgs e)
+		void StopCameraRotationLeft(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateLeft) {
 				return;
@@ -368,14 +369,14 @@ namespace MHUrho.Input
 			camera.SetStaticYawChange(yaw);
 		}
 
-		void StartCameraRotationUp(KeyDownEventArgs e)
+		void StartCameraRotationUp(KeyDownEventArgs args)
 		{
 			camera.SetStaticPitchChange(camera.StaticPitch + CameraRotationSensitivity);
 
 			activeCameraMovement.RotateUp = true;
 		}
 
-		void StopCameraRotationUp(KeyUpEventArgs e)
+		void StopCameraRotationUp(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateUp) {
 				return;
@@ -389,14 +390,14 @@ namespace MHUrho.Input
 			camera.SetStaticPitchChange(pitch);
 		}
 
-		void StartCameraRotationDown(KeyDownEventArgs e)
+		void StartCameraRotationDown(KeyDownEventArgs args)
 		{
 			camera.SetStaticPitchChange(camera.StaticPitch - CameraRotationSensitivity);
 
 			activeCameraMovement.RotateDown = true;
 		}
 
-		void StopCameraRotationDown(KeyUpEventArgs e)
+		void StopCameraRotationDown(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateDown) {
 				return;
@@ -410,7 +411,7 @@ namespace MHUrho.Input
 			camera.SetStaticPitchChange(pitch);
 		}
 
-		void CameraSwitchMode(KeyDownEventArgs e)
+		void CameraSwitchMode(KeyDownEventArgs args)
 		{
 			activeCameraMovement.StopAll();
 
@@ -428,6 +429,9 @@ namespace MHUrho.Input
 			}
 		}
 
-		
+		void ResetCamera(KeyDownEventArgs args)
+		{
+			camera.ResetCamera();
+		}
 	}
 }

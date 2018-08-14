@@ -844,6 +844,28 @@ namespace MHUrho.WorldMap
 				return new Vector3(corner.X, height, corner.Y);
 			}
 
+			public Vector3? RaycastToWorldPosition(List<RayQueryResult> rayQueryResults)
+			{
+				foreach (var rayQueryResult in rayQueryResults) {
+					Vector3? corner = RaycastToWorldPosition(rayQueryResult);
+
+					if (corner.HasValue) {
+						return corner;
+					}
+				}
+				return null;
+			}
+
+
+			public Vector3? RaycastToWorldPosition(RayQueryResult rayQueryResult)
+			{
+				if (!IsRaycastToMap(rayQueryResult)) return null;
+
+				return rayQueryResult.Position;
+			}
+
+
+
 			public void ChangeTileType(IntVector2 location, TileType newTileType) {
 				ChangeTileType(location, location, newTileType);
 			}

@@ -127,7 +127,7 @@ namespace MHUrho.Logic
 
 			PlayerInsignia.InitInsignias(PackageManager.Instance);
 
-			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, storedLevel.Map, loadingProgress));
+			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, octree, storedLevel.Map, loadingProgress));
 			loaders.Add(mapLoader);
 			level.Map = mapLoader.Map;
 
@@ -270,7 +270,7 @@ namespace MHUrho.Logic
 			loadingProgress.EnterPhase("Loading map");
 			Node mapNode = CurrentLevel.LevelNode.CreateChild("MapNode");
 
-			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, mapSize, loadingProgress));
+			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, CurrentLevel.octree, mapSize, loadingProgress));
 			CurrentLevel.Map = map;
 
 

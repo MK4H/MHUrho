@@ -72,6 +72,11 @@ namespace MHUrho.Input
 			//TODO: maybe move forward/backward
 		}
 
+		public override void Reset()
+		{
+			cameraNode.Rotate(Quaternion.FromRotationTo(cameraNode.Direction, new Vector3(0, -1, 1)), TransformSpace.World);
+		}
+
 		public override void SwitchToThis(CameraState fromState)
 		{
 			if (fromState == null) {
@@ -84,10 +89,10 @@ namespace MHUrho.Input
 			if (fromType == typeof(FreeFloatCamera)) {
 				return;
 			}
-			else if (fromType == typeof(FixedCamera) || fromType == typeof(FollowingCamera)) {
-				//Vector3 cameraWorldPosition = cameraNode.WorldPosition;
-				//cameraNode.Position = RoundPositionToMap(cameraWorldPosition, true, MinHeightOffset);
-				//TODO: Check, if it changes position acordingly or if i need to adjust it manually
+			else if (fromType == typeof(FixedCamera) || fromType == typeof(EntityFollowingCamera)) {
+
+				cameraNode.Position = RoundPositionToMap(cameraNode.WorldPosition, true, MinHeightOffset);
+				cameraNode.Rotation = cameraNode.WorldRotation;
 				cameraNode.ChangeParent(levelNode);
 			}
 			else {

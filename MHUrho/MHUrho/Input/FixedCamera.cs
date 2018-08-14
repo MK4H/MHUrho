@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MHUrho.Helpers;
 using MHUrho.WorldMap;
@@ -7,11 +8,12 @@ using Urho;
 
 namespace MHUrho.Input
 {
-    class FixedCamera : ZoomingRotatingCamera
+    class FixedCamera : PointFollowingCamera
     {
 		public override CameraMode CameraMode => CameraMode.RTS;
 
-		Vector3 storedCameraOffset;
+		Node levelNode;
+
 		bool cameraMoved;
 
 		public FixedCamera(IMap map, Node levelNode, Node cameraNode, Vector2 initialPosition, SwitchState switchState)
@@ -49,6 +51,13 @@ namespace MHUrho.Input
 			cameraMoved = true;
 		}
 
+		public override void Reset()
+		{
+			CameraNode.Position = new Vector3(0, 10, -5);
+			WantedCameraVerticalOffset = 10;
+			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
+		}
+
 		public override void PreChangesUpdate()
 		{
 			cameraMoved = false;
@@ -57,7 +66,13 @@ namespace MHUrho.Input
 
 		public override void PostChangesUpdate()
 		{
-			CameraHolder.Position = RoundPositionToMap(CameraHolder.Position, false);
+			//TODO: Signal that camera moved if the terrain moved
+			Vector2 newHolderXZPosition = RoundPositionToMap(CameraHolder.Position.XZ2());
+			CameraHolder.Position = new Vector3(newHolderXZPosition.X,
+												Map.GetTerrainHeightAt(newHolderXZPosition),
+												newHolderXZPosition.Y);
+
+
 			base.PostChangesUpdate();
 
 			if (cameraMoved) {
@@ -69,8 +84,7 @@ namespace MHUrho.Input
 		{
 			if (fromState == null) {
 				CameraNode.ChangeParent(CameraHolder);
-				CameraNode.Position = new Vector3(0, 10, -5);
-				CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
+				Reset();
 				return;
 			}
 
@@ -78,20 +92,57 @@ namespace MHUrho.Input
 			{
 				return;
 			}
-			else if (fromState is FollowingCamera followingCamera) {
-				CameraHolder.Position = followingCamera.Followed.Position;
-				SwitchToThisFromZRC(followingCamera);
+			else if (fromState is EntityFollowingCamera followingCamera) {
+				CameraHolder.Position = CameraNode.Parent.WorldPosition;
+				SwitchToThisFromPFC(followingCamera);
 
 			}
 			else if (fromState is FreeFloatCamera freeFloatCam) {
 
-				CameraHolder.Position = RoundPositionToMap(CameraNode.Position - storedCameraOffset, false);
+				//Sets the camera to look in the current direction at 45 degrees down at the ground
+				Vector2 cameraXZDirection = CameraNode.Direction.XZ2();
+				//Check for looking straight up or down, where normalize would crash
+				if (cameraXZDirection != Vector2.Zero) {
+					cameraXZDirection.Normalize();
+				}
+				else {
+					//If looking straight up or down, just look in positive Z
+					cameraXZDirection = Vector2.UnitY;
+				}
 
-				//Restore the fixed position relative to holder
-				CameraNode.Position = storedCameraOffset;
-				//TODO: Check if i need to store rotation
-				//cameraNode.Rotation = storedCameraRotation;
+				//45 degrees down
+				Vector3 newCameraDirection = Vector3.Normalize(new Vector3(cameraXZDirection.X, -1, cameraXZDirection.Y));
+
+				//Easy way of raycasting to map
+				var results = Map.RaycastToMap(new Ray(CameraNode.Position, newCameraDirection));
+
+				bool found = false;
+				foreach (var result in results) {
+					CameraHolder.Position = RoundPositionToMap(result.Position, false);
+					CameraNode.Position = CameraNode.Position - CameraHolder.Position;
+					found = true;
+					break;
+				}
+
+				//If the raycast failed (outside of the map or something)
+				if (!found) {
+					float cameraHeightAboveTerrain = CameraNode.Position.Y - Map.GetTerrainHeightAt(CameraNode.Position.XZ2());
+
+					Vector2 offset = cameraXZDirection * cameraHeightAboveTerrain;
+					Vector2 holderXZPosition = CameraNode.Position.XZ2() + offset;
+					holderXZPosition = RoundPositionToMap(holderXZPosition);
+					Vector3 holderPosition =
+						new Vector3(holderXZPosition.X, Map.GetTerrainHeightAt(holderXZPosition), holderXZPosition.Y);
+
+					CameraNode.Position = new Vector3(-offset.X, cameraHeightAboveTerrain, -offset.Y);
+					CameraHolder.Position = holderPosition;
+				}
+
+				WantedCameraVerticalOffset = CameraNode.WorldPosition.Y - CameraHolder.Position.Y;
 				CameraNode.ChangeParent(CameraHolder);
+				CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
+
+				
 			}
 			else {
 				throw new ArgumentOutOfRangeException(nameof(fromState), "Unknow camera state");
@@ -100,7 +151,7 @@ namespace MHUrho.Input
 
 		public override void SwitchFromThis(CameraState toState)
 		{
-			storedCameraOffset = CameraNode.Position;
+
 		}
 
 		protected override void SignalCameraMoved()
@@ -118,20 +169,17 @@ namespace MHUrho.Input
 		/// <param name="deltaZ">Movement of the camera in forward/backward direction</param>
 		void MoveHorizontal(float deltaX, float deltaZ)
 		{
-			var worldDelta = Vector3.Normalize(CameraNode.WorldDirection.XZ()) * deltaZ +
+			var worldDelta = Vector3.Normalize(CameraNode.Direction.XZ()) * deltaZ +
 							Vector3.Normalize(CameraNode.Right.XZ()) * deltaX;
 
 
-			var newPosition = CameraHolder.Position + worldDelta;
+			Vector2 newPosition = (CameraHolder.Position + worldDelta).XZ2();
 
-			if (Map.IsInside(newPosition.XZ2())) {
-				newPosition.Y = Map.GetHeightAt(newPosition.XZ2());
-				CameraHolder.Position = newPosition;
+			if (!Map.IsInside(newPosition)) {
+				newPosition = RoundPositionToMap(newPosition);
 			}
-			else {
-				Vector2 newPositionXZ = RoundPositionToMap(newPosition.XZ2());
-				CameraHolder.Position = new Vector3(newPositionXZ.X, Map.GetTerrainHeightAt(newPositionXZ), newPositionXZ.Y);
-			}
+
+			CameraHolder.Position = new Vector3(newPosition.X, Map.GetTerrainHeightAt(newPosition), newPosition.Y);
 		}
 
 		/// <summary>

@@ -7,11 +7,13 @@ using Urho;
 
 namespace MHUrho.Input
 {
-    class FollowingCamera : ZoomingRotatingCamera
+    class EntityFollowingCamera : PointFollowingCamera
     {
 		public override CameraMode CameraMode => CameraMode.Following;
 
 		public IEntity Followed { get; private set; }
+
+		Node levelNode;
 
 		/// <summary>
 		/// Direction of the camera so it faces the same directiong
@@ -22,7 +24,7 @@ namespace MHUrho.Input
 
 		bool cameraMoved;
 
-		public FollowingCamera(IMap map, Node cameraNode, SwitchState switchState)
+		public EntityFollowingCamera(IMap map, Node cameraNode, SwitchState switchState)
 			:base(map, cameraNode, null, switchState)
 		{
 
@@ -46,6 +48,21 @@ namespace MHUrho.Input
 		public override void MoveBy(Vector3 movement)
 		{
 			SwitchState(CameraStates.Fixed);
+		}
+
+		public override void Reset()
+		{
+			/*
+			 * calculate cameraNode.Position (relative to parent node) to be the same world offset
+			 * regardless of the new entity.Node.Scale
+			 *
+			 * Give camera some offset from the followed entity
+			*/
+			CameraNode.Position = Vector3.Divide(new Vector3(0, 10, -5), Followed.Node.Scale);
+			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
+			cameraDistance = CameraNode.Position.Length;
+			cameraWorldDirection = CameraNode.WorldDirection;
+			WantedCameraVerticalOffset = 10;
 		}
 
 		public override void PreChangesUpdate()
@@ -75,20 +92,28 @@ namespace MHUrho.Input
 
 			//If this is the initial camera state
 			if (fromState == null) {
-				//Some initial offset so it is not mashed up inside the unit
-				CameraNode.Position = new Vector3(0, 10, -5);
-				
+				Reset();
 			}
 
 			//Store the current direction so the camera does not rotate when locking to entity
 			cameraWorldDirection = CameraNode.WorldDirection;
-			/*
-			 * calculate cameraNode.Position (relative to parent node) to be the same world offset
-			 * regardless of the new entity.Node.Scale
-			*/
-			CameraNode.Position = Vector3.Divide(CameraNode.Position, Followed.Node.Scale);
+
 			CameraHolder = Followed.Node;
-			CameraNode.ChangeParent(CameraHolder);
+			if (fromState is PointFollowingCamera pfCamera) {
+				SwitchToThisFromPFC(pfCamera);
+			}
+			else {
+				/*
+				 * calculate cameraNode.Position (relative to parent node) to be the same world offset
+				 * regardless of the new entity.Node.Scale
+				 *
+				 * Give camera some offset from the followed entity
+				*/
+				CameraNode.Position = Vector3.Divide(new Vector3(0, 10, -5), Followed.Node.Scale);
+				WantedCameraVerticalOffset = 10;
+				CameraNode.ChangeParent(CameraHolder);
+			}
+		
 			cameraDistance = CameraNode.Position.Length;
 			
 
@@ -100,17 +125,15 @@ namespace MHUrho.Input
 
 		public override void SwitchFromThis(CameraState toState)
 		{
-			//Normalize the position to 1 scale
-			CameraNode.Position = Vector3.Multiply(CameraNode.Position, CameraHolder.Scale);
-			ClearFollowed();
+			ClearFollowed();			
 		}
 
 		public void SetFollowedEntity(IEntity entity)
 		{
 			//Actively following
 			if (CameraHolder != null) {
-				Followed = entity;
 				SwitchFromThis(this);
+				Followed = entity;
 				SwitchToThis(this);
 			}
 			else {
@@ -148,8 +171,10 @@ namespace MHUrho.Input
 
 		void CorrectWorldDirection()
 		{
-			Vector3 parentDirection = Quaternion.Invert(CameraHolder.WorldRotation) * cameraWorldDirection;
-			CameraNode.Position = -parentDirection * cameraDistance;
+			Vector3 localDirection = Vector3.Normalize(CameraHolder.WorldToLocal(CameraHolder.WorldPosition + cameraWorldDirection));
+			//Urho.IO.Log.Write(LogLevel.Debug, $"LocalDirection: {localDirection}");
+			CameraNode.Position = -localDirection * cameraDistance;
+			//TODO: Check retun value
 			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
 		}
 	}

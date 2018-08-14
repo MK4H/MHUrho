@@ -376,6 +376,8 @@ namespace MHUrho.WorldMap {
 		//TODO: Comment
 		IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords);
 
+		IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000);
+
 		/// <summary>
 		/// Returns whether the <paramref name="rayQueryResult"/> is the Map (the ray hit the map), or if it the ray hit something else
 		/// </summary>
@@ -387,13 +389,47 @@ namespace MHUrho.WorldMap {
 
 		ITile RaycastToTile(RayQueryResult rayQueryResult);
 
+		/// <summary>
+		/// Gets the world position of the closest vertex (tile corner)
+		/// </summary>
+		/// <param name="rayQueryResults"></param>
+		/// <returns></returns>
 		Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResults);
 
+		/// <summary>
+		/// Gets the world position of the closest vertex (tile corner)
+		/// </summary>
+		/// <param name="rayQueryResult"></param>
+		/// <returns></returns>
 		Vector3? RaycastToVertexPosition(RayQueryResult rayQueryResult);
 
+		/// <summary>
+		/// Gets the XZ location of the closest vertex (tile corner) to the ray
+		/// </summary>
+		/// <param name="rayQueryResults"></param>
+		/// <returns></returns>
 		IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResults);
 
+		/// <summary>
+		/// Gets the XZ location of the closest vertex (tile corner) to the ray
+		/// </summary>
+		/// <param name="rayQueryResult"></param>
+		/// <returns></returns>
 		IntVector2? RaycastToVertex(RayQueryResult rayQueryResult);
+
+		/// <summary>
+		/// Gets the world position of the ray intersecting the map
+		/// </summary>
+		/// <param name="rayQueryResults"></param>
+		/// <returns></returns>
+		Vector3? RaycastToWorldPosition(List<RayQueryResult> rayQueryResults);
+
+		/// <summary>
+		/// Gets the world position of the ray intersecting the map
+		/// </summary>
+		/// <param name="rayQueryResult"></param>
+		/// <returns></returns>
+		Vector3? RaycastToWorldPosition(RayQueryResult rayQueryResult);
 
 		void ChangeTileType(ITile tile, TileType newType);
 

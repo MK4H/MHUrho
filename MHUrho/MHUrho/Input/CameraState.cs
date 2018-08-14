@@ -54,6 +54,8 @@ namespace MHUrho.Input
 
 		public abstract void Zoom(float zoom);
 
+		public abstract void Reset();
+
 		public virtual void PreChangesUpdate()
 		{
 
