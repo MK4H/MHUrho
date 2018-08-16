@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<element type="Window">
+	<attribute name="Name" value="PackagePickingWindow" />
+	<attribute name="Size" value="1024 768" />
+	<attribute name="Min Size" value="1024 768" />
+	<attribute name="Pivot" value="0 0" />
+	<element type="ListView">
+		<attribute name="Name" value="PackageListView" />
+		<attribute name="Position" value="22 22" />
+		<attribute name="Size" value="980 700" />
+		<attribute name="Min Size" value="980 0" />
+		<attribute name="Pivot" value="0 0" />
+		<element type="ScrollBar" internal="true" style="none">
+			<attribute name="Size" value="980 16" />
+			<attribute name="Min Anchor" value="0 1" />
+			<attribute name="Max Anchor" value="0 1" />
+			<attribute name="Pivot" value="0 1" />
+			<attribute name="Color" value="0 0 0 0" />
+			<attribute name="Top Left Color" value="0 0 0 0" />
+			<attribute name="Top Right Color" value="0 0 0 0" />
+			<attribute name="Bottom Left Color" value="0 0 0 0" />
+			<attribute name="Bottom Right Color" value="0 0 0 0" />
+			<element type="Button" internal="true" style="none">
+				<attribute name="Pivot" value="0 0" />
+			</element>
+			<element type="Slider" internal="true" style="none">
+				<attribute name="Position" value="16 0" />
+				<attribute name="Size" value="948 16" />
+				<attribute name="Pivot" value="0 0" />
+				<element type="BorderImage" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+				</element>
+			</element>
+			<element type="Button" internal="true" style="none">
+				<attribute name="Position" value="964 0" />
+				<attribute name="Pivot" value="0 0" />
+			</element>
+		</element>
+		<element type="ScrollBar" internal="true" style="none">
+			<attribute name="Size" value="16 700" />
+			<attribute name="Min Anchor" value="1 0" />
+			<attribute name="Max Anchor" value="1 0" />
+			<attribute name="Pivot" value="1 0" />
+			<attribute name="Color" value="0 0 0 0" />
+			<attribute name="Top Left Color" value="0 0 0 0" />
+			<attribute name="Top Right Color" value="0 0 0 0" />
+			<attribute name="Bottom Left Color" value="0 0 0 0" />
+			<attribute name="Bottom Right Color" value="0 0 0 0" />
+			<element type="Button" internal="true" style="none">
+				<attribute name="Pivot" value="0 0" />
+			</element>
+			<element type="Slider" internal="true" style="none">
+				<attribute name="Position" value="0 16" />
+				<attribute name="Size" value="16 668" />
+				<attribute name="Pivot" value="0 0" />
+				<element type="BorderImage" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+				</element>
+			</element>
+			<element type="Button" internal="true" style="none">
+				<attribute name="Position" value="0 684" />
+				<attribute name="Pivot" value="0 0" />
+			</element>
+		</element>
+		<element type="BorderImage" internal="true" style="none">
+			<attribute name="Pivot" value="0 0" />
+			<element internal="true" style="none">
+				<attribute name="Pivot" value="0 0" />
+			</element>
+		</element>
+	</element>
+	<element>
+		<attribute name="Size" value="210 30" />
+		<attribute name="Min Anchor" value="1 1" />
+		<attribute name="Max Anchor" value="1 1" />
+		<attribute name="Pivot" value="1 1" />
+		<attribute name="Layout Mode" value="Horizontal" />
+		<attribute name="Layout Spacing" value="10" />
+		<element type="Button">
+			<attribute name="Name" value="PickButton" />
+			<attribute name="Min Size" value="100 30" />
+			<attribute name="Pivot" value="0 0" />
+			<element type="Text">
+				<attribute name="Min Anchor" value="0.5 0.5" />
+				<attribute name="Max Anchor" value="0.5 0.5" />
+				<attribute name="Pivot" value="0.5 0.5" />
+				<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Text" value="Pick" />
+				<attribute name="Text Alignment" value="Center" />
+			</element>
+		</element>
+		<element type="Button">
+			<attribute name="Name" value="ExitButton" />
+			<attribute name="Min Size" value="100 20" />
+			<attribute name="Pivot" value="0 0" />
+			<element type="Text">
+				<attribute name="Min Anchor" value="0.5 0.5" />
+				<attribute name="Max Anchor" value="0.5 0.5" />
+				<attribute name="Pivot" value="0.5 0.5" />
+				<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Text" value="Exit" />
+				<attribute name="Text Alignment" value="Center" />
+			</element>
+		</element>
+	</element>
+</element>

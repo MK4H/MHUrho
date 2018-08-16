@@ -30,12 +30,12 @@ namespace MHUrho.Packaging
 
 		public static PackageManager Instance { get; private set; }
 
+		public IEnumerable<IAvailablePack> AvailablePacks => availablePacks.Values;
 		
-
 		/// <summary>
 		/// Path to the schema for Resource Pack Directory xml files
 		/// </summary>
-		private static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
+		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
 
 		public GamePack ActiveGame { get; private set; }

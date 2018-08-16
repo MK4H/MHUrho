@@ -67,8 +67,7 @@ namespace MHUrho.UserInterface
 
 		public Options(MyGame game, MenuUIManager menuUIManager)
 			: base(game, menuUIManager)
-		{
-			this.Game = game;
+		{ 
 
 			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/OptionsLayout.xml");
 

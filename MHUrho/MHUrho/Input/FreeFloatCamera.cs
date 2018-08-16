@@ -44,7 +44,9 @@ namespace MHUrho.Input
 
 		public override void MoveBy(Vector2 xzMovement)
 		{
-			//TODO: THIS
+			Vector3 oldPosition = cameraNode.Position;
+			Vector3 newPosition = new Vector3(oldPosition.X + xzMovement.X, oldPosition.Y, oldPosition.Z + xzMovement.Y);
+			cameraNode.Position = RoundPositionToMap(newPosition, true, MinHeightOffset);
 			OnCameraMove();
 		}
 

@@ -11,7 +11,7 @@ using Urho.Resources;
 using Urho.Urho2D;
 
 namespace MHUrho.Packaging {
-	public class GamePack {
+	public class GamePack : IAvailablePack {
 		const string DefaultThumbnailPath = "Textures/xamarin.png";
 
 		const string TileTypeGroupName = "tileTypes";
@@ -32,7 +32,7 @@ namespace MHUrho.Packaging {
 
 		public string Description { get; private set; }
 
-		public Image Thumbnail { get; private set; }
+		public Texture2D Thumbnail { get; private set; }
 
 		public bool FullyLoaded { get; private set; }
 
@@ -110,12 +110,12 @@ namespace MHUrho.Packaging {
 											PackageManager packageManager) {
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 			pathToThumbnail = FileManager.CorrectRelativePath(pathToThumbnail);
-			var thumbnail = PackageManager.Instance.GetImage(pathToThumbnail ?? DefaultThumbnailPath);
+			var thumbnail = PackageManager.Instance.GetTexture2D(pathToThumbnail ?? DefaultThumbnailPath);
 
 			return new GamePack(name, pathToXml, description ?? "No description", thumbnail, packageManager);
 		}
 
-		protected GamePack(string name, string pathToXml, string description, Image thumbnail, PackageManager packageManager) {
+		protected GamePack(string name, string pathToXml, string description, Texture2D thumbnail, PackageManager packageManager) {
 			this.Name = name;
 			this.pathToXml = pathToXml;
 			this.Description = description;

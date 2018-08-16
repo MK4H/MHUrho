@@ -191,8 +191,6 @@ namespace MHUrho.Input
 		public void MoveBy(Vector2 xzDelta)
 		{
 			state.MoveBy(xzDelta);
-
-
 		}
 
 		public void MoveBy(Vector3 delta)

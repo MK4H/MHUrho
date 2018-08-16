@@ -21,6 +21,7 @@ namespace MHUrho.UserInterface
 		public LoadingScreen LoadingScreen { get; private set; }
 		public SaveGameScreen SaveGameScreen { get; private set; }
 		public LoadGameScreen LoadGameScreen { get; private set; }
+		public PackagePickingScreen PackagePickingScreen { get; private set; }
 
 		public PopUpConfirmation PopUpConfirmation { get; private set; }
 
@@ -41,6 +42,7 @@ namespace MHUrho.UserInterface
 			LoadingScreen = new LoadingScreen(game, this);
 			SaveGameScreen = new SaveGameScreen(game, this);
 			LoadGameScreen = new LoadGameScreen(game, this);
+			PackagePickingScreen = new PackagePickingScreen(game, this);
 			PopUpConfirmation = new PopUpConfirmation(game, this);
 
 			previousScreens = new Stack<MenuScreen>();
@@ -83,6 +85,11 @@ namespace MHUrho.UserInterface
 		public void SwitchToLoadGame()
 		{
 			SwitchToScreen(LoadGameScreen);
+		}
+
+		public void SwitchToPackagePickingScreen()
+		{
+			SwitchToScreen(PackagePickingScreen);
 		}
 
 		public void SwitchBack()
