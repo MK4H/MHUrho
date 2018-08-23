@@ -6,71 +6,121 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class LoadGameScreen : FilePickScreen
+    class LoadGameScreen : MenuScreen
     {
-		Button loadButton;
+		class Screen : FilePickScreen {
+
+			Button loadButton;
+
+			public Screen(MyGame game, MenuUIManager menuUIManager) 
+				:base(game, menuUIManager)
+			{
+				UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/LoadLayout.xml");
+
+				Window window = (Window)UI.Root.GetChild("LoadWindow");
+
+				LineEdit loadLineEdit = (LineEdit)window.GetChild("LoadLineEdit", true);
+
+				loadButton = (Button)window.GetChild("LoadButton", true);
+				loadButton.Pressed += LoadButton_Pressed;
+
+				Button deleteButton = (Button)window.GetChild("DeleteButton", true);
+
+
+				ListView fileView = (ListView)window.GetChild("FileView", true);
+
+
+				Button backButton = (Button)window.GetChild("BackButton", true);
+
+				InitUIElements(window, loadLineEdit, deleteButton, backButton, fileView);
+			}
+
+			public override void Dispose()
+			{
+				loadButton.Pressed -= LoadButton_Pressed;
+				loadButton.Dispose();
+				base.Dispose();
+			}
+
+			protected override void EnableInput()
+			{
+				base.EnableInput();
+
+				loadButton.Enabled = true;
+			}
+
+			protected override void DisableInput()
+			{
+				base.DisableInput();
+
+				loadButton.Enabled = false;
+			}
+
+			protected override void TotalMatchSelected(string newMatchSelected)
+			{
+				base.TotalMatchSelected(newMatchSelected);
+
+				loadButton.SetStyle("LoadButton");
+			}
+
+			protected override void TotalMatchDeselected()
+			{
+				base.TotalMatchDeselected();
+
+				loadButton.SetStyle("DisabledButton");
+			}
+
+			void LoadButton_Pressed(PressedEventArgs args)
+			{
+				if (MatchSelected == null) return;
+
+				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
+
+				MenuUIManager.MenuController.LoadLevel(newRelativePath);
+			}
+		}
+
+		public override bool Visible {
+			get => screen != null;
+			set {
+				if (value) {
+					Show();
+				}
+				else {
+					Hide();
+				}
+			}
+		}
+
+		readonly MyGame game;
+		readonly MenuUIManager menuUIManager;
+
+		Screen screen;
 
 		public LoadGameScreen(MyGame game, MenuUIManager menuUIManager)
-			: base(game, menuUIManager)
 		{
-			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/LoadLayout.xml");
-
-			Window window = (Window)UI.Root.GetChild("LoadWindow");
-
-			LineEdit loadLineEdit = (LineEdit)window.GetChild("LoadLineEdit", true);
-
-			loadButton = (Button)window.GetChild("LoadButton", true);
-			loadButton.Pressed += LoadButton_Pressed;
-
-			Button deleteButton = (Button)window.GetChild("DeleteButton", true);
-
-
-			ListView fileView = (ListView)window.GetChild("FileView", true);
-
-
-			Button backButton = (Button)window.GetChild("BackButton", true);
-
-			InitUIElements(window, loadLineEdit, deleteButton, backButton, fileView);
+			this.game = game;
+			this.menuUIManager = menuUIManager;
 
 		}
 
-		protected override void EnableInput()
+		public override void Show()
 		{
-			base.EnableInput();
+			if (screen != null) {
+				return;
+			}
 
-			loadButton.Enabled = true;
+			screen = new Screen(game, menuUIManager);
 		}
 
-		protected override void DisableInput()
+		public override void Hide()
 		{
-			base.DisableInput();
+			if (screen == null) {
+				return;
+			}
 
-			loadButton.Enabled = false;
+			screen.Dispose();
+			screen = null;
 		}
-
-		protected override void TotalMatchSelected(string newMatchSelected)
-		{
-			base.TotalMatchSelected(newMatchSelected);
-
-			loadButton.SetStyle("LoadButton");
-		}
-
-		protected override void TotalMatchDeselected()
-		{
-			base.TotalMatchDeselected();
-
-			loadButton.SetStyle("DisabledButton");
-		}
-
-		void LoadButton_Pressed(PressedEventArgs args)
-		{
-			if (MatchSelected == null) return;
-
-			string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
-
-			MenuUIManager.MenuController.LoadLevel(newRelativePath);
-		}
-
-
 	}
 }

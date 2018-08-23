@@ -6,80 +6,135 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class SaveGameScreen : FilePickScreen
+    class SaveGameScreen : MenuScreen
     {
-		Button saveButton;
+		class Screen : FilePickScreen {
 
-		public SaveGameScreen(MyGame game, MenuUIManager menuUIManager)
-			: base(game, menuUIManager)
-		{
-			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/SaveLayout.xml");
+			Button saveButton;
 
-			Window window = (Window)UI.Root.GetChild("SaveWindow");
+			public Screen(MyGame game, MenuUIManager menuUIManager)
+				: base(game, menuUIManager)
+			{
+				UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/SaveLayout.xml");
 
-			LineEdit saveNameEdit = (LineEdit)window.GetChild("SaveName", true);
+				Window window = (Window)UI.Root.GetChild("SaveWindow");
 
-			saveButton = (Button) window.GetChild("SaveButton", true);
-			saveButton.Pressed += SaveButton_Pressed;
+				LineEdit saveNameEdit = (LineEdit)window.GetChild("SaveName", true);
 
-			Button deleteButton = (Button) window.GetChild("DeleteButton", true);
+				saveButton = (Button)window.GetChild("SaveButton", true);
+				saveButton.Pressed += SaveButton_Pressed;
 
-
-			ListView fileView = (ListView) window.GetChild("FileView", true);
-
-
-			Button backButton = (Button) window.GetChild("BackButton", true);
+				Button deleteButton = (Button)window.GetChild("DeleteButton", true);
 
 
-			InitUIElements(window, saveNameEdit, deleteButton, backButton, fileView);
-
-		}
-
-		protected override void EnableInput()
-		{
-			base.EnableInput();
-
-			saveButton.Enabled = true;
-		}
-
-		protected override void DisableInput()
-		{
-			base.DisableInput();
-
-			saveButton.Enabled = false;
-		}
-
-		void SaveButton_Pressed(PressedEventArgs args)
-		{
-			//TODO: Pop up invalid name
-			if (LineEdit.Text == "") return;
-
-			string newAbsoluteFilePath = Path.Combine(MyGame.Files.SaveGameDirAbsolutePath, LineEdit.Text);
+				ListView fileView = (ListView)window.GetChild("FileView", true);
 
 
-			if (MyGame.Files.FileExists(newAbsoluteFilePath)) {
-				DisableInput();
-				MenuUIManager.PopUpConfirmation.RequestConfirmation("Overriding file",
-																	$"Do you really want to override the file \"{MatchSelected}\"?",
-																	OverrideFile);
+				Button backButton = (Button)window.GetChild("BackButton", true);
+
+
+				InitUIElements(window, saveNameEdit, deleteButton, backButton, fileView);
+
 			}
-			else {
+
+			public override void Dispose()
+			{
+				
+				saveButton.Pressed -= SaveButton_Pressed;
+				saveButton.Dispose();
+
+				base.Dispose();
+			}
+
+			protected override void EnableInput()
+			{
+				base.EnableInput();
+
+				saveButton.Enabled = true;
+			}
+
+			protected override void DisableInput()
+			{
+				base.DisableInput();
+
+				saveButton.Enabled = false;
+			}
+
+			void SaveButton_Pressed(PressedEventArgs args)
+			{
+				//TODO: Pop up invalid name
+				if (LineEdit.Text == "") return;
+
+				string newAbsoluteFilePath = Path.Combine(MyGame.Files.SaveGameDirAbsolutePath, LineEdit.Text);
+
+
+				if (MyGame.Files.FileExists(newAbsoluteFilePath)) {
+					DisableInput();
+					MenuUIManager.PopUpConfirmation.RequestConfirmation("Overriding file",
+																		$"Do you really want to override the file \"{MatchSelected}\"?",
+																		OverrideFile);
+				}
+				else {
+					string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
+					MenuUIManager.MenuController.SavePausedLevel(newFilePath);
+					MenuUIManager.SwitchBack();
+				}
+			}
+
+
+			void OverrideFile(bool confirmed)
+			{
+				EnableInput();
+				if (!confirmed) return;
+
 				string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
 				MenuUIManager.MenuController.SavePausedLevel(newFilePath);
 				MenuUIManager.SwitchBack();
 			}
 		}
 
-		void OverrideFile(bool confirmed)
-		{
-			EnableInput();
-			if (!confirmed) return;
-
-			string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
-			MenuUIManager.MenuController.SavePausedLevel(newFilePath);
-			MenuUIManager.SwitchBack();
+		public override bool Visible {
+			get => screen != null;
+			set {
+				if (value) {
+					Show();
+				}
+				else {
+					Hide();
+				}
+			}
 		}
 
+		readonly MyGame game;
+		readonly MenuUIManager menuUIManager;
+		Screen screen;
+
+		public SaveGameScreen(MyGame game, MenuUIManager menuUIManager)
+		{
+			this.game = game;
+			this.menuUIManager = menuUIManager;
+		}
+
+
 		
+
+		public override void Show()
+		{
+			if (screen != null) {
+				return;
+			}
+
+			screen = new Screen(game, menuUIManager);
+		}
+
+		public override void Hide()
+		{
+			if (screen == null) {
+				return;
+			}
+
+			screen.Dispose();
+			screen = null;
+		}
 	}
 }

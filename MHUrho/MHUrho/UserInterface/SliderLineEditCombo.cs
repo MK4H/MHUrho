@@ -5,13 +5,18 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    abstract class SliderLineEditCombo {
+    abstract class SliderLineEditCombo : IDisposable {
 		public event Action<float> ValueChanged;
 		public abstract float Value { get; set; }
 
 		protected virtual void OnValueChanged(float value)
 		{
 			ValueChanged?.Invoke(value);
+		}
+
+		public virtual void Dispose()
+		{
+			ValueChanged = null;
 		}
 	}
 
@@ -47,6 +52,20 @@ namespace MHUrho.UserInterface
 			lineEdit.TextChanged += EditTextChanged;
 
 			lineEdit.TextFinished += EditTextFinished;
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			slider.SliderChanged -= SliderChanged;
+
+			lineEdit.TextChanged -= EditTextChanged;
+
+			lineEdit.TextFinished -= EditTextFinished;
+
+			slider.Dispose();
+			lineEdit.Dispose();
+			maxValueGetter = null;
 		}
 
 		void SliderChanged(SliderChangedEventArgs args)
@@ -138,6 +157,18 @@ namespace MHUrho.UserInterface
 			lineEdit.TextChanged += EditTextChanged;
 
 			lineEdit.TextFinished += EditTextFinished;
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+
+
+			slider.SliderChanged -= SliderChanged;
+
+			lineEdit.TextChanged -= EditTextChanged;
+
+			lineEdit.TextFinished -= EditTextFinished;
 		}
 
 		void SliderChanged(SliderChangedEventArgs args)

@@ -6,18 +6,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    abstract class FilePickScreen : MenuScreen {
-		public override bool Visible {
-			get => Window.Visible;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
-		}
+    abstract class FilePickScreen : IDisposable {
 
 		protected struct NameTextPair : IComparable<NameTextPair> {
 			public readonly string Name;
@@ -39,6 +28,11 @@ namespace MHUrho.UserInterface
 			}
 		}
 
+		protected readonly MyGame Game;
+		protected readonly MenuUIManager MenuUIManager;
+
+		protected UI UI => Game.UI;
+
 		protected Window Window;
 		protected LineEdit LineEdit;
 		protected Button DeleteButton;
@@ -50,8 +44,28 @@ namespace MHUrho.UserInterface
 		protected string MatchSelected;
 
 		protected FilePickScreen(MyGame game,MenuUIManager menuUIManager)
-			: base(game, menuUIManager)
 		{
+			this.Game = game;
+			this.MenuUIManager = menuUIManager;
+
+			FileNames = new List<NameTextPair>();
+
+			foreach (var file in MyGame.Files.GetFilesInDirectory(MyGame.Files.SaveGameDirAbsolutePath)) {
+				FileNames.Add(new NameTextPair(Path.GetFileName(file)));
+			}
+
+			FileNames.Sort();
+			foreach (var nameText in FileNames) {
+				FileView.AddItem(nameText.Text);
+				nameText.Text.Visible = true;
+			}
+
+			MatchSelected = null;
+			TotalMatchDeselected();
+
+			LineEdit.Text = "";
+
+			Window.Visible = true;
 		}
 
 		protected void InitUIElements(Window window,
@@ -72,31 +86,13 @@ namespace MHUrho.UserInterface
 			BackButton.Pressed += BackButton_Pressed;
 		}
 
-		public override void Show()
+		public virtual void Dispose()
 		{
-			FileNames = new List<NameTextPair>();
+			LineEdit.TextChanged -= NameEditTextChanged;
+			DeleteButton.Pressed -= DeleteButton_Pressed;
+			FileView.ItemSelected -= OnFileSelected;
+			BackButton.Pressed -= BackButton_Pressed;
 
-			foreach (var file in MyGame.Files.GetFilesInDirectory(MyGame.Files.SaveGameDirAbsolutePath)) {
-				FileNames.Add(new NameTextPair(Path.GetFileName(file)));
-			}
-
-			FileNames.Sort();
-			foreach (var nameText in FileNames) {
-				FileView.AddItem(nameText.Text);
-				nameText.Text.Visible = true;
-			}
-
-			MatchSelected = null;
-			TotalMatchDeselected();
-
-			LineEdit.Text = "";
-
-			Window.Visible = true;
-
-		}
-
-		public override void Hide()
-		{
 			Window.Visible = false;
 			if (FileNames != null) {
 				foreach (var item in FileNames) {
@@ -109,7 +105,18 @@ namespace MHUrho.UserInterface
 			MatchSelected = null;
 
 			FileView.RemoveAllItems();
+
+			Window.RemoveAllChildren();
+			Window.Remove();
+
+			Game?.Dispose();
+			Window?.Dispose();
+			LineEdit?.Dispose();
+			DeleteButton?.Dispose();
+			FileView?.Dispose();
+			BackButton?.Dispose();
 		}
+
 
 		protected virtual void EnableInput()
 		{
@@ -203,6 +210,6 @@ namespace MHUrho.UserInterface
 		}
 
 
-		
+	
 	}
 }

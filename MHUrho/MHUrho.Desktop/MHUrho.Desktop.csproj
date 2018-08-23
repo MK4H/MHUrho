@@ -101,6 +101,7 @@
     <Content Include="Data\UI\GameUIStyle.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\UI\ListViewWindowLayout.xml" />
     <Content Include="Data\UI\LoadingScreenLayout.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

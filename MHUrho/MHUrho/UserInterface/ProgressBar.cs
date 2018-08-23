@@ -5,7 +5,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class ProgressBar {
+    class ProgressBar : IDisposable {
 		public bool Visible {
 			get => progressBar.Visible;
 			set {
@@ -56,9 +56,17 @@ namespace MHUrho.UserInterface
 			progressBar.Visible = false;
 		}
 
+		public void Dispose()
+		{
+			progressBar?.Dispose();
+			progressBarKnob?.Dispose();
+		}
+
 		void CorrectKnobSize()
 		{
 			progressBarKnob.MinWidth = (int)((progressBar.Width / 100.0f) * value);
 		}
-    }
+
+		
+	}
 }
