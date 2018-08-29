@@ -12,6 +12,8 @@ message StLevel {
 	repeated StPlayer players = 4;
 	repeated StProjectile projectiles = 5;
 	string packageName = 6;
+	string levelName = 7;
+	StLevelPlugin plugin = 8;
 }
 
 message StTile {
@@ -81,5 +83,8 @@ message StMap {
 	repeated StMapTarget mapRangeTargets = 4;
 }
 
-
+message StLevelPlugin {
+	string assemblyPath = 1;
+	PluginData data = 2;
+}
 

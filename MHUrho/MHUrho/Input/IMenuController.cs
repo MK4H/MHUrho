@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using Urho;
 
 namespace MHUrho.Input
@@ -26,6 +27,10 @@ namespace MHUrho.Input
 
 		void SavePausedLevel(string toPath);
 
-		void LoadLevel(string fromPath);
+		void StartLoadingLevel(LevelRep level, bool editorMode);
+
+		void StartLoadingLevel(string savePath, bool editorMode);
+
+		void StartLoadingDefaultLevel(IntVector2 mapSize);
 	}
 }

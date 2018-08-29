@@ -68,11 +68,11 @@ namespace MHUrho.UserInterface
 	class LevelPickingLevelItem : LevelPickingItem
     {
 
-		public ILevel Level { get; private set; }
+		public LevelRep Level { get; private set; }
 
 		UIElement descriptionElement;
 
-		public LevelPickingLevelItem(ILevel level, MyGame game)
+		public LevelPickingLevelItem(LevelRep level, MyGame game)
 			:base(game, level.Thumbnail, level.Name)
 		{
 			descriptionElement = Element.GetChild("DescriptionElement", true);

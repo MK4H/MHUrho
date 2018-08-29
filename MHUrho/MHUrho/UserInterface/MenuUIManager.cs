@@ -22,7 +22,10 @@ namespace MHUrho.UserInterface
 		public SaveGameScreen SaveGameScreen { get; private set; }
 		public LoadGameScreen LoadGameScreen { get; private set; }
 		public PackagePickingScreen PackagePickingScreen { get; private set; }
+		public LevelPickingScreen LevelPickingScreen { get; private set; }
+		public LevelSettingsScreen LevelSettingsScreen { get; private set; }
 
+		public LevelCreationScreen LevelCreationScreen { get; private set; }
 		public PopUpConfirmation PopUpConfirmation { get; private set; }
 
 		protected MenuScreen currentScreen;
@@ -43,6 +46,9 @@ namespace MHUrho.UserInterface
 			SaveGameScreen = new SaveGameScreen(game, this);
 			LoadGameScreen = new LoadGameScreen(game, this);
 			PackagePickingScreen = new PackagePickingScreen(game, this);
+			LevelPickingScreen = new LevelPickingScreen(game, this);
+			LevelSettingsScreen = new LevelSettingsScreen(game, this);
+			LevelCreationScreen = new LevelCreationScreen(game, this);
 			PopUpConfirmation = new PopUpConfirmation(game, this);
 
 			previousScreens = new Stack<MenuScreen>();
@@ -72,8 +78,9 @@ namespace MHUrho.UserInterface
 			SwitchToScreen(OptionsScreen);
 		}
 
-		public void SwitchToLoadingScreen()
+		public void SwitchToLoadingScreen(ILoadingWatcher loadingWatcher)
 		{
+			LoadingScreen.LoadingWatcher = loadingWatcher;
 			SwitchToScreen(LoadingScreen);
 		}
 
@@ -90,6 +97,24 @@ namespace MHUrho.UserInterface
 		public void SwitchToPackagePickingScreen()
 		{
 			SwitchToScreen(PackagePickingScreen);
+		}
+
+		public void SwitchToLevelPickingScreen(GamePack package)
+		{
+			LevelPickingScreen.Package = package;
+			SwitchToScreen(LevelPickingScreen);
+		}
+
+		public void SwitchToLevelSettingsScreen(LevelRep level)
+		{
+			LevelSettingsScreen.Level = level;
+			SwitchToScreen(LevelSettingsScreen);
+		}
+
+		public void SwitchToLevelCreationScreen(LevelRep level)
+		{
+			LevelCreationScreen.Level = level;
+			SwitchToScreen(LevelCreationScreen);
 		}
 
 		public void SwitchBack()

@@ -34,7 +34,7 @@ namespace MHUrho.EditorTools
 			this.buildingTypes = new Dictionary<CheckBox, BuildingType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
-			foreach (var buildingType in PackageManager.Instance.ActiveGame.BuildingTypes) {
+			foreach (var buildingType in PackageManager.Instance.ActivePackage.BuildingTypes) {
 
 				if (!buildingType.IsManuallySpawnable) {
 					continue;
@@ -44,7 +44,7 @@ namespace MHUrho.EditorTools
 				//TODO: Style
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnBuildingTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActiveGame.BuildingIconTexture;
+				checkBox.Texture = PackageManager.Instance.ActivePackage.BuildingIconTexture;
 				checkBox.ImageRect = buildingType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(buildingType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * buildingType.IconRectangle.Width(), 0);

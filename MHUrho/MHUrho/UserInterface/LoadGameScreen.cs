@@ -76,7 +76,7 @@ namespace MHUrho.UserInterface
 
 				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
 
-				MenuUIManager.MenuController.LoadLevel(newRelativePath);
+				MenuUIManager.MenuController.StartLoadingLevel(newRelativePath, false);
 			}
 		}
 

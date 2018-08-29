@@ -14,16 +14,29 @@ using MHUrho.Plugins;
 
 namespace MHUrho.Logic
 {
-	public class Player : Component, IPlayer {
+	class Player : Component, IPlayer {
 
-		internal class Loader : ILoader {
+		class Loader : IPlayerLoader {
 
-			public Player Player { get; private set; }
+			public Player Player => loadingPlayer;
 
-			StPlayer storedPlayer;
+			Player loadingPlayer;
 
-			protected Loader(StPlayer storedPlayer) {
+
+			readonly LevelManager level;
+			readonly StPlayer storedPlayer;
+			readonly PlayerType type;
+
+			public Loader(LevelManager level, StPlayer storedPlayer)
+			{
+				this.level = level;
 				this.storedPlayer = storedPlayer;
+
+				type = PackageManager.Instance.ActivePackage.GetPlayerAIType(storedPlayer.TypeID);
+				//TODO: HUMAN PLAYER TYPE
+				//if (type == null) {
+				//	throw new ArgumentException("Type of this player was not loaded");
+				//}
 			}
 
 			public static StPlayer Save(Player player)
@@ -55,50 +68,36 @@ namespace MHUrho.Logic
 				return storedPlayer;
 			}
 
-			public static Loader StartLoading(LevelManager level, StPlayer storedPlayer)
+			public void StartLoading()
 			{
-				var type = PackageManager.Instance.ActiveGame.GetPlayerAIType(storedPlayer.TypeID);
-				//TODO: HUMAN PLAYER TYPE
-				//if (type == null) {
-				//	throw new ArgumentException("Type of this player was not loaded");
-				//}
-
-				var loader = new Loader(storedPlayer);
-				loader.Load(level, type);
-
-				return loader;
+				//TODO: Human player type
+				if (type == null) {
+					loadingPlayer = CreateNewHumanPlayer(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
+				}
+				else {
+					loadingPlayer = new Player(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
+					loadingPlayer.Plugin = type.GetInstancePluginForLoading(loadingPlayer, level);
+				}
 			}
 
-			public void ConnectReferences(LevelManager level) {
+			public void ConnectReferences() {
 				foreach (var unitID in storedPlayer.UnitIDs) {
-					Player.AddUnit(level.GetUnit(unitID));
+					loadingPlayer.AddUnit(level.GetUnit(unitID));
 				}
 
 				foreach (var buildingID in storedPlayer.BuildingIDs) {
-					Player.AddBuilding(level.GetBuilding(buildingID));
+					loadingPlayer.AddBuilding(level.GetBuilding(buildingID));
 				}
 
 				foreach (var friendID in storedPlayer.FriendPlayerIDs) {
-					Player.friends.Add(level.GetPlayer(friendID));
+					loadingPlayer.friends.Add(level.GetPlayer(friendID));
 				}
 				//TODO: Human player type
-				Player.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
+				loadingPlayer.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
-				storedPlayer = null;
-			}
 
-			void Load(LevelManager level, PlayerType type) {
-				//TODO: Human player type
-				if (type == null) {
-					Player = Player.CreateNewHumanPlayer(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
-				}
-				else {
-					Player = new Player(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
-					Player.Plugin = type.GetInstancePluginForLoading(Player, level);
-				}
-				
 			}
 		}
 
@@ -148,6 +147,11 @@ namespace MHUrho.Logic
 		public static Player CreateNewHumanPlayer(int id, ILevelManager level, PlayerInsignia insignia)
 		{
 			return new Player(id, level, insignia);
+		}
+
+		public static IPlayerLoader GetLoader(LevelManager level, StPlayer player)
+		{
+			return new Loader(level, player);
 		}
 
 		public StPlayer Save()

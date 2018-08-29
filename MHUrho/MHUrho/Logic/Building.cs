@@ -14,20 +14,37 @@ using Urho.Physics;
 
 namespace MHUrho.Logic
 {
-	public class Building : Entity, IBuilding {
-		internal class Loader : ILoader {
-			public Building Building { get; private set; }
-			
+	class Building : Entity, IBuilding {
+		class Loader : IBuildingLoader {
+
+			public IBuilding Building => loadingBuilding;
+
+			Building loadingBuilding;
+
+			readonly LevelManager level;
+			readonly Node node;
+		
 			/// <summary>
 			/// Used to store the reference to storedBuilding between Load and ConnectReferences calls
 			/// </summary>
-			StBuilding storedBuilding;
+			readonly StBuilding storedBuilding;
+			readonly BuildingType type;
 
 			List<DefaultComponentLoader> componentLoaders;
 
-			protected Loader(StBuilding storedBuilding) {
+			public Loader(LevelManager level,
+						Node node,
+						StBuilding storedBuilding)
+			{
+				this.level = level;
+				this.node = node;
 				this.storedBuilding = storedBuilding;
 				componentLoaders = new List<DefaultComponentLoader>();
+
+				var type = PackageManager.Instance.ActivePackage.GetBuildingType(storedBuilding.TypeID);
+				if (type == null) {
+					throw new ArgumentException("Type of this building was not loaded");
+				}
 			}
 
 			/// <summary>
@@ -94,29 +111,52 @@ namespace MHUrho.Logic
 				return stBuilding;
 			}
 
-			public static Loader StartLoading(LevelManager level,
-											  PackageManager packageManager,
-											  Node node,
-											  StBuilding storedBuilding) {
-				var type = packageManager.ActiveGame.GetBuildingType(storedBuilding.TypeID);
-				if (type == null) {
-					throw new ArgumentException("Type of this building was not loaded");
+			public void StartLoading() {
+				//TODO: Check arguments - node cant have more than one Building component
+				if (type.ID != storedBuilding.TypeID) {
+					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
 				}
 
-				var loader = new Loader(storedBuilding);
-				loader.Load(level, type, node);
-				return loader;
+				AddRigidBody(node);
+				StaticModel model = AddModel(node, type, level);
+
+				loadingBuilding = new Building(level, type, storedBuilding);
+				node.AddComponent(loadingBuilding);
+
+				var center = loadingBuilding.Rectangle.Center();
+
+				node.Position = new Vector3(center.X,
+													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * node.Scale.Y,
+													center.Y);
+
+				var collider = node.CreateComponent<CollisionShape>();
+				collider.SetBox(model.BoundingBox.Size,
+								Vector3.Zero,
+								Quaternion.Identity);
+
+				loadingBuilding.BuildingPlugin = type.GetInstancePluginForLoading(loadingBuilding, level);
+
+				foreach (var defaultComponent in storedBuilding.DefaultComponents) {
+					var componentLoader =
+						level.DefaultComponentFactory
+							.StartLoadingComponent(defaultComponent,
+													level,
+													loadingBuilding.BuildingPlugin);
+
+					componentLoaders.Add(componentLoader);
+					loadingBuilding.AddComponent(componentLoader.Component);
+				}
 			}
 
 
-			public void ConnectReferences(LevelManager level) {
-				Building.Player = level.GetPlayer(storedBuilding.PlayerID);
+			public void ConnectReferences() {
+				loadingBuilding.Player = level.GetPlayer(storedBuilding.PlayerID);
 
 				foreach (var componentLoader in componentLoaders) {
-					componentLoader.ConnectReferences(level);
+					componentLoader.ConnectReferences();
 				}
 
-				Building.BuildingPlugin.LoadState(new PluginDataWrapper(storedBuilding.UserPlugin, level));
+				loadingBuilding.BuildingPlugin.LoadState(new PluginDataWrapper(storedBuilding.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
@@ -126,40 +166,7 @@ namespace MHUrho.Logic
 			}
 
 			void Load(LevelManager level, BuildingType type, Node buildingNode) {
-				//TODO: Check arguments - node cant have more than one Building component
-				if (type.ID != storedBuilding.TypeID) {
-					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
-				}
-
-				AddRigidBody(buildingNode);
-				StaticModel model = AddModel(buildingNode, type, level);
-
-				Building = new Building(level, type, storedBuilding);
-				buildingNode.AddComponent(Building);
-
-				var center = Building.Rectangle.Center();
-
-				buildingNode.Position = new Vector3(center.X, 
-													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y, 
-													center.Y);
-
-				var collider = buildingNode.CreateComponent<CollisionShape>();
-				collider.SetBox(model.BoundingBox.Size,
-								Vector3.Zero,
-								Quaternion.Identity);
-
-				Building.BuildingPlugin = type.GetInstancePluginForLoading(Building, level);
-
-				foreach (var defaultComponent in storedBuilding.DefaultComponents) {
-					var componentLoader = 
-						level.DefaultComponentFactory
-							.StartLoadingComponent(defaultComponent,
-													level,
-													Building.BuildingPlugin);
-
-					componentLoaders.Add(componentLoader);
-					Building.AddComponent(componentLoader.Component);
-				}
+				
 			}
 
 			static void AddRigidBody(Node node) {
@@ -245,6 +252,21 @@ namespace MHUrho.Logic
 			this.tiles = GetTiles();
 		}
 
+
+		public static IBuildingLoader GetLoader(LevelManager level, Node buildingNode, StBuilding storedBuilding)
+		{
+			return new Loader(level, buildingNode, storedBuilding);
+		}
+
+		public static Building CreateNew(int id,
+										IntVector2 topLeftCorner,
+										BuildingType type,
+										Node buildingNode,
+										IPlayer player,
+										ILevelManager level)
+		{
+			return Loader.CreateNew(id, topLeftCorner, type, buildingNode, player, level);
+		}
 
 		public StBuilding Save() {
 			return Loader.Save(this);

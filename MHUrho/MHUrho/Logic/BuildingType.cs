@@ -67,13 +67,13 @@ namespace MHUrho.Logic
 			//TODO: If i add any cache dependent on current level, clear it here
 		}
 
-		public Building BuildNewBuilding(int buildingID, 
+		internal IBuilding BuildNewBuilding(int buildingID, 
 										 Node buildingNode, 
 										 ILevelManager level, 
 										 IntVector2 topLeft, 
 										 IPlayer player) {
 
-			return Building.Loader.CreateNew(buildingID, topLeft, this, buildingNode, player, level);
+			return Building.CreateNew(buildingID, topLeft, this, buildingNode, player, level);
 		}
 
 		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
@@ -84,11 +84,11 @@ namespace MHUrho.Logic
 			return CanBuildIn(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), level);
 		}
  
-		public BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {
+		internal BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {
 			return Plugin.CreateNewInstance(level, building);
 		}
 
-		public BuildingInstancePlugin GetInstancePluginForLoading(IBuilding building, ILevelManager level) {
+		internal BuildingInstancePlugin GetInstancePluginForLoading(IBuilding building, ILevelManager level) {
 			return Plugin.GetInstanceForLoading(level, building);
 		}
 

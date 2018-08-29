@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -11,7 +12,7 @@ using Urho.Resources;
 using Urho.Urho2D;
 
 namespace MHUrho.Packaging {
-	public class GamePack : IAvailablePack {
+	public class GamePack : IDisposable {
 		const string DefaultThumbnailPath = "Textures/xamarin.png";
 
 		const string TileTypeGroupName = "tileTypes";
@@ -27,18 +28,15 @@ namespace MHUrho.Packaging {
 		const string PlayerAITypeGroupName = "playerAITypes";
 		const string PlayerAITypeItemName = "playerAIType";
 
-		public string Name { get; private set; }
-	  
+		public GamePackRep GamePackRep { get; private set; }
 
-		public string Description { get; private set; }
+		public string Name => GamePackRep.Name;
 
-		public Texture2D Thumbnail { get; private set; }
+		public PackageManager PackageManager => GamePackRep.PackageManager;
 
-		public bool FullyLoaded { get; private set; }
+		public string XmlDirectoryPath => GamePackRep.XmlDirectoryPath;
 
-		public string XmlDirectoryPath => System.IO.Path.GetDirectoryName(pathToXml);
-
-		public PackageManager PackageManager { get; private set; }
+		public string RootedXmlDirectoryPath => Path.Combine(MyGame.Files.DynamicDirPath, XmlDirectoryPath);
 
 		public TileType DefaultTileType { get; private set; }
 
@@ -66,14 +64,15 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<PlayerType> PlayerTypes => playerAITypesByName.Values;
 
+		public int LevelCount => levelsByName.Count;
+
+		public IEnumerable<LevelRep> Levels => levelsByName.Values;
+
 		public Texture2D ResourceIconTexture { get; private set; }
 		public Texture2D TileIconTexture { get; private set; }
 		public Texture2D UnitIconTexture { get; private set; }
 		public Texture2D BuildingIconTexture { get; private set; }
 		public Texture2D PlayerIconTexture { get; private set; }
-
-		readonly string pathToXml;
-
 	   
 		Dictionary<string, TileType> tileTypesByName;
 		Dictionary<string, UnitType> unitTypesByName;
@@ -81,6 +80,7 @@ namespace MHUrho.Packaging {
 		Dictionary<string, ProjectileType> projectileTypesByName;
 		Dictionary<string, ResourceType> resourceTypesByName;
 		Dictionary<string, PlayerType> playerAITypesByName;
+		Dictionary<string, LevelRep> levelsByName;
 
 		Dictionary<int, TileType> tileTypesByID;
 		Dictionary<int, UnitType> unitTypesByID;
@@ -91,53 +91,10 @@ namespace MHUrho.Packaging {
 
 		XDocument data;
 
-		/// <summary>
-		/// Loads data for initial resource pack managment, so the user can choose which resource packs to 
-		/// use, which to download, which to delete and so on
-		/// 
-		/// Before using this resource pack in game, you need to call LoadAll(...)
-		/// </summary>
-		/// <param name="name">Name of the resource pack</param>
-		/// <param name="pathToXml">Path to the resource pack XML description</param>
-		/// <param name="description">Human readable description of the resource pack contents for the user</param>
-		/// <param name="pathToThumbnail">Path to thumbnail to display</param>
-		/// <param name="packageManager"></param>
-		/// <returns>Initialized resource pack</returns>
-		public static GamePack InitialLoad( string name,
-											string pathToXml, 
-											string description, 
-											string pathToThumbnail,
-											PackageManager packageManager) {
-			pathToXml = FileManager.CorrectRelativePath(pathToXml);
-			pathToThumbnail = FileManager.CorrectRelativePath(pathToThumbnail);
-			var thumbnail = PackageManager.Instance.GetTexture2D(pathToThumbnail ?? DefaultThumbnailPath);
-
-			return new GamePack(name, pathToXml, description ?? "No description", thumbnail, packageManager);
-		}
-
-		protected GamePack(string name, string pathToXml, string description, Texture2D thumbnail, PackageManager packageManager) {
-			this.Name = name;
-			this.pathToXml = pathToXml;
-			this.Description = description;
-			this.Thumbnail = thumbnail;
-			this.PackageManager = packageManager;
-			this.FullyLoaded = false;
-
-
-		}
-
-		public void StartLoading(XmlSchemaSet schemas) {
-			data = XDocument.Load(MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read));
-			//TODO: Handler and signal that resource pack is in invalid state
-			try {
-				data.Validate(schemas, null);
-			}
-			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
-				//TODO: Exception
-				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
-			}
-			
+		public GamePack(string pathToXml,
+						GamePackRep gamePackRep,
+						XmlSchemaSet schemas,
+						LoadingWatcher loadingProgress) {
 
 			tileTypesByName = new Dictionary<string, TileType>();
 			unitTypesByName = new Dictionary<string, UnitType>();
@@ -153,362 +110,277 @@ namespace MHUrho.Packaging {
 			resourceTypesByID = new Dictionary<int, ResourceType>();
 			playerAITypesByID = new Dictionary<int, PlayerType>();
 
+			this.GamePackRep = gamePackRep;
+
+			pathToXml = FileManager.CorrectRelativePath(pathToXml);
+
+			try {
+				StartLoading(pathToXml, schemas);
+
+				loadingProgress.TextAndPercentageUpdate("Loading tile types", 5);
+				LoadAllTileTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading unit types", 5);
+				LoadAllUnitTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading building types", 5);
+				LoadAllBuildingTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading projectile types", 5);
+				LoadAllProjectileTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading resource types", 5);
+				LoadAllResourceTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading player types", 5);
+				LoadAllPlayerTypes();
+			}
+			//TODO: Catch only the expected exceptions
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning, "Package loading failed");
+			}
+			finally {
+				FinishLoading();
+			}
+
 		}
 
-		public void FinishLoading() {
-			bool deleted = RemoveUnused(tileTypesByName);
-			deleted = RemoveUnused(unitTypesByName) || deleted;
-			data = null;
-
-			FullyLoaded = !deleted;
-		}
-
-		public TileType GetTileType(string name, bool load = false) {
+		public TileType GetTileType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name),"Name of the tileType cannot be null");
 			}
 
-			bool found = tileTypesByName.TryGetValue(name, out TileType value);
+			if (tileTypesByName.TryGetValue(name, out TileType value)) {
+				return value;
+			}
 
-			if (load && !found) {
+			if (IsLoading()) {
 				return LoadType(name, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown tile type");
 		}
 
-		public TileType GetTileType(int ID, bool load = false) {
-			bool found = tileTypesByID.TryGetValue(ID, out TileType value);
+		public TileType GetTileType(int ID) {
 
-			if (load && !found) {
+			if (tileTypesByID.TryGetValue(ID, out TileType value)) {
+				return value;
+			}
+
+			if (IsLoading()) {
 				return LoadType(ID, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown tile type");
 		}
 
-		public UnitType GetUnitType(string name, bool load = false) {
+		public UnitType GetUnitType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the unitType cannot be null");
 			}
 
-			bool found = unitTypesByName.TryGetValue(name, out UnitType value);
+			if (unitTypesByName.TryGetValue(name, out  UnitType value)) {
+				return value;
+			}
 
-			if (load && !found) {
+			if (IsLoading()) {
 				return LoadType(name, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown unit type");
+
 		}
 
-		public UnitType GetUnitType(int ID, bool load = false) {
-			bool found = unitTypesByID.TryGetValue(ID, out UnitType value);
+		public UnitType GetUnitType(int ID) {
 
-			if (load && !found) {
+			if (unitTypesByID.TryGetValue(ID, out  UnitType value)) {
+				return value;
+			}
+
+			if (IsLoading()) {
 				return LoadType(ID, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown unit type");
+
 		}
 
-		public BuildingType GetBuildingType(string name, bool load = false) {
+		public BuildingType GetBuildingType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the buildingType cannot be null");
 			}
 
-			bool found =  buildingTypesByName.TryGetValue(name, out BuildingType value);
+			if (buildingTypesByName.TryGetValue(name, out BuildingType value)) {
+				return value;
+			}
 
-			if (load && !found) {
-				return LoadType(name, 
-								BuildingTypeGroupName, 
-								BuildingTypeItemName, 
+			if (IsLoading()) {
+				return LoadType(name,
+								BuildingTypeGroupName,
+								BuildingTypeItemName,
 								buildingTypesByName,
 								buildingTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown building type");
 		}
 
-		public BuildingType GetBuildingType(int ID, bool load = false) {
-			bool found = buildingTypesByID.TryGetValue(ID, out BuildingType value);
+		public BuildingType GetBuildingType(int ID) {
 
-			if (load && !found) {
+			if (buildingTypesByID.TryGetValue(ID, out BuildingType value)) {
+				return value;
+			}
+
+			if (IsLoading()) {
 				return LoadType(ID,
 								BuildingTypeGroupName,
 								BuildingTypeItemName,
 								buildingTypesByName,
 								buildingTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown building type");
 		}
 
-		public ProjectileType GetProjectileType(string name, bool load = false) {
+		public ProjectileType GetProjectileType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the projectileType cannot be null");
 			}
 
-			bool found = projectileTypesByName.TryGetValue(name, out ProjectileType value);
+			if (projectileTypesByName.TryGetValue(name, out ProjectileType value)) {
+				return value;
+			}
 
-			if (load && !found) {
+			if (IsLoading()) {
 				return LoadType(name,
 								ProjectileTypeGroupName,
 								ProjectileTypeItemName,
 								projectileTypesByName,
 								projectileTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown projectile type");
 		}
 
-		public ProjectileType GetProjectileType(int ID, bool load = false) {
-			bool found = projectileTypesByID.TryGetValue(ID, out ProjectileType value);
+		public ProjectileType GetProjectileType(int ID) {
 
-			if (load && !found) {
+			if (projectileTypesByID.TryGetValue(ID, out ProjectileType value)) {
+				return value;
+			}
+
+			if (IsLoading()) {
 				return LoadType(ID,
 								ProjectileTypeGroupName,
 								ProjectileTypeItemName,
 								projectileTypesByName,
 								projectileTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown projectile type");
 		}
 
-		public ResourceType GetResourceType(string name, bool load = false) {
+		public ResourceType GetResourceType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the ResourceType cannot be null");
 			}
 
-			bool found = resourceTypesByName.TryGetValue(name, out ResourceType value);
+			if (resourceTypesByName.TryGetValue(name, out ResourceType value)) {
+				return value;
+			}
 
-			if (load && !found) {
+			if (IsLoading()) {
 				return LoadType(name,
 								ResourceTypeGroupName,
 								ResourceTypeItemName,
 								resourceTypesByName,
 								resourceTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown resource type");
 		}
 
-		public ResourceType GetResourceType(int ID, bool load = false) {
-			bool found = resourceTypesByID.TryGetValue(ID, out ResourceType value);
+		public ResourceType GetResourceType(int ID) {
+			if (resourceTypesByID.TryGetValue(ID, out ResourceType value)) {
+				return value;
+			}
 
-			if (load && !found) {
+			
+			if (IsLoading()) {
 				return LoadType(ID,
 								ResourceTypeGroupName,
 								ResourceTypeItemName,
 								resourceTypesByName,
 								resourceTypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown resource type");
 		}
 
-		public PlayerType GetPlayerAIType(string name, bool load = false)
+		public PlayerType GetPlayerAIType(string name)
 		{
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the PlayerAIType cannot be null");
 			}
 
-			bool found = playerAITypesByName.TryGetValue(name, out PlayerType value);
+			if (playerAITypesByName.TryGetValue(name, out PlayerType value)) {
+				return value;
+			}
 
-			if (load && !found) {
+			if (IsLoading()) {
 				return LoadType(name,
 								PlayerAITypeGroupName,
 								PlayerAITypeItemName,
 								playerAITypesByName,
 								playerAITypesByID);
 			}
-			else {
-				return value;
-			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown player type");
 		}
 
-		public PlayerType GetPlayerAIType(int ID, bool load = false) {
-			bool found = playerAITypesByID.TryGetValue(ID, out PlayerType value);
+		public PlayerType GetPlayerAIType(int ID) {
 
-			if (load && !found) {
+			if (playerAITypesByID.TryGetValue(ID, out PlayerType value)) {
+				return value;
+			}
+
+			if (IsLoading()) {
 				return LoadType(ID, 
 								PlayerAITypeGroupName,
 								PlayerAITypeItemName,
 								playerAITypesByName,
 								playerAITypesByID);
 			}
-			else {
+			
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown player type");
+		}
+
+		public LevelRep GetLevel(string name)
+		{
+			if (name == null) {
+				throw new ArgumentNullException(nameof(name), "Name of the level cannot be null");
+			}
+
+			if (levelsByName.TryGetValue(name, out LevelRep value)) {
 				return value;
 			}
-		}
-
-		public void Load(XmlSchemaSet schemas, 
-						LoadingWatcher loadingProgress) {
-			try {
-				StartLoading(schemas);
-
-				loadingProgress.EnterPhaseWithIncrement("Loading tile types", 5);
-				LoadAllTileTypes();
-
-				loadingProgress.EnterPhaseWithIncrement("Loading unit types" , 5);
-				LoadAllUnitTypes();
-
-				loadingProgress.EnterPhaseWithIncrement("Loading building types", 5);
-				LoadAllBuildingTypes();
-
-				loadingProgress.EnterPhaseWithIncrement("Loading projectile types", 5);
-				LoadAllProjectileTypes();
-
-				loadingProgress.EnterPhaseWithIncrement("Loading resource types", 5);
-				LoadAllResourceTypes();
-
-				loadingProgress.EnterPhaseWithIncrement("Loading player types", 5);
-				LoadAllPlayerTypes();
-			}
-			catch (Exception e) {
-				Urho.IO.Log.Write(LogLevel.Warning, "Package loading failed");
+			else {
+				throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown level");
 			}
 		}
 
-
-		public IEnumerable<TileType> LoadAllTileTypes() {
-			CheckIfLoading();
-
-			TileIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"tileIconTexturePath")));
-
-			var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
-
-			if (tileTypesElement == null) {
-				//There are no tile types in this package
-				throw new InvalidOperationException("Default tile type is missing");
-			}
-
-			var defaultTileTypeElement = tileTypesElement.Element(PackageManager.XMLNamespace + "defaultTileType");
-
-			DefaultTileType = LoadType<TileType>(defaultTileTypeElement, tileTypesByName, tileTypesByID);
-
-			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return tileTypesElement.Elements(PackageManager.XMLNamespace + "tileType")
-								   .Select(element => LoadType<TileType>(element, tileTypesByName, tileTypesByID))
-								   .ToArray(); 
-		}
-
-		public IEnumerable<UnitType> LoadAllUnitTypes() {
-			CheckIfLoading();
-
-			UnitIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"unitIconTexturePath")));
-
-			var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
-
-			if (unitTypesElement == null) {
-				//There are no unit types in this package
-				return Enumerable.Empty<UnitType>();
-			}
-			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType")
-								   .Select(unitTypeElement =>
-											   LoadType<UnitType>(unitTypeElement, unitTypesByName, unitTypesByID))
-								   .ToArray();
-		}
-
-		public IEnumerable<BuildingType> LoadAllBuildingTypes() {
-			CheckIfLoading();
-
-			BuildingIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"buildingIconTexturePath")));
-
-			var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
-
-			if (buildingTypesElement == null) {
-				//There are no building types in this package
-				return Enumerable.Empty<BuildingType>();
-			}
-			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType")
-									   .Select(buildingTypeElement =>
-												   LoadType<BuildingType>(buildingTypeElement,
-																		  buildingTypesByName,
-																		  buildingTypesByID))
-									   .ToArray();
-		}
-
-		public IEnumerable<ProjectileType> LoadAllProjectileTypes() {
-			CheckIfLoading();
-
-			var projectileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "projectileTypes");
-
-			if (projectileTypesElement == null) {
-				//There are no projectile types in this package
-				return Enumerable.Empty<ProjectileType>();
-			}
-			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return projectileTypesElement.Elements(PackageManager.XMLNamespace + "projectileType")
-										 .Select(projectileTypeElement =>
-												   LoadType<ProjectileType>(projectileTypeElement,
-																			projectileTypesByName,
-																			projectileTypesByID))
-										 .ToArray();
-		}
-
-		public IEnumerable<ResourceType> LoadAllResourceTypes() {
-			CheckIfLoading();
-
-			ResourceIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"resourceIconTexturePath")));
-
-			var resourceTypesElement = data.Root.Element(PackageManager.XMLNamespace + "resourceTypes");
-
-			if (resourceTypesElement == null) {
-				return Enumerable.Empty<ResourceType>();
-			}
-
-			return resourceTypesElement.Elements(PackageManager.XMLNamespace + "resourceType")
-									   .Select(resourceTypeElement =>
-												   LoadType<ResourceType>(resourceTypeElement,
-																		  resourceTypesByName,
-																		  resourceTypesByID))
-									   .ToArray();
-		}
-
-		public IEnumerable<PlayerType> LoadAllPlayerTypes()
+		public void Dispose()
 		{
-			CheckIfLoading();
-
-			PlayerIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"playerIconTexturePath")));
-
-			XElement playerTypes = data.Root.Element(PackageManager.XMLNamespace + "playerAITypes");
-
-			if (playerTypes == null) {
-				return Enumerable.Empty<PlayerType>();
+			if (this == PackageManager.ActivePackage) {
+				//Clears the PackageManager.ActivePackage and calls this again
+				PackageManager.UnloadActivePack();
+				return;
 			}
 
-			return playerTypes.Elements(PackageManager.XMLNamespace + "playerAIType")
-							.Select(playerTypeElement =>
-										LoadType<PlayerType>(playerTypeElement,
-															playerAITypesByName,
-															playerAITypesByID))
-							.ToArray();
-		}
-
-		public void UnLoad() {
+			ResourceIconTexture.Dispose();
+			TileIconTexture.Dispose();
+			UnitIconTexture.Dispose();
+			BuildingIconTexture.Dispose();
+			PlayerIconTexture.Dispose();
 
 			foreach (var unitType in unitTypesByName.Values) {
 				unitType.Dispose();
@@ -521,18 +393,11 @@ namespace MHUrho.Packaging {
 			foreach (var projectileType in projectileTypesByName.Values) {
 				projectileType.Dispose();
 			}
+		}
 
-			tileTypesByName = null;
-			unitTypesByName = null;
-			buildingTypesByName = null;
-			projectileTypesByName = null;
-			resourceTypesByName = null;
-
-			tileTypesByID = null;
-			unitTypesByID = null;
-			buildingTypesByID = null;
-			projectileTypesByID = null;
-			resourceTypesByID = null;
+		public void UnLoad()
+		{
+			Dispose();
 		}
 
 		public void ClearCaches()
@@ -561,6 +426,192 @@ namespace MHUrho.Packaging {
 			foreach (var playerType in PlayerTypes) {
 				playerType.ClearCache();
 			};
+		}
+
+		XDocument StartLoading(string pathToXml, XmlSchemaSet schemas)
+		{
+			Stream file = null;
+			//TODO: Handler and signal that resource pack is in invalid state
+			try {
+				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				data = XDocument.Load(file);
+				data.Validate(schemas, null);
+			}
+			catch (XmlSchemaValidationException e) {
+				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
+				//TODO: Exception
+				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+			}
+			//TODO: Catch file opening failed
+			finally {
+				file?.Dispose();
+			}
+
+			return data;
+		}
+
+		IEnumerable<TileType> LoadAllTileTypes()
+		{
+			CheckIfLoading();
+
+			TileIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"tileIconTexturePath")));
+
+			var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
+
+			if (tileTypesElement == null) {
+				//There are no tile types in this package
+				throw new InvalidOperationException("Default tile type is missing");
+			}
+
+			var defaultTileTypeElement = tileTypesElement.Element(PackageManager.XMLNamespace + "defaultTileType");
+
+			DefaultTileType = LoadType<TileType>(defaultTileTypeElement, tileTypesByName, tileTypesByID);
+
+			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+			return tileTypesElement.Elements(PackageManager.XMLNamespace + "tileType")
+								   .Select(element => LoadType<TileType>(element, tileTypesByName, tileTypesByID))
+								   .ToArray();
+		}
+
+		IEnumerable<UnitType> LoadAllUnitTypes()
+		{
+			CheckIfLoading();
+
+			UnitIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"unitIconTexturePath")));
+
+			var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
+
+			if (unitTypesElement == null) {
+				//There are no unit types in this package
+				return Enumerable.Empty<UnitType>();
+			}
+			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+			return unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType")
+								   .Select(unitTypeElement =>
+											   LoadType<UnitType>(unitTypeElement, unitTypesByName, unitTypesByID))
+								   .ToArray();
+		}
+
+		IEnumerable<BuildingType> LoadAllBuildingTypes()
+		{
+			CheckIfLoading();
+
+			BuildingIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"buildingIconTexturePath")));
+
+			var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
+
+			if (buildingTypesElement == null) {
+				//There are no building types in this package
+				return Enumerable.Empty<BuildingType>();
+			}
+			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+			return buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType")
+									   .Select(buildingTypeElement =>
+												   LoadType<BuildingType>(buildingTypeElement,
+																		  buildingTypesByName,
+																		  buildingTypesByID))
+									   .ToArray();
+		}
+
+		IEnumerable<ProjectileType> LoadAllProjectileTypes()
+		{
+			CheckIfLoading();
+
+			var projectileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "projectileTypes");
+
+			if (projectileTypesElement == null) {
+				//There are no projectile types in this package
+				return Enumerable.Empty<ProjectileType>();
+			}
+			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
+			return projectileTypesElement.Elements(PackageManager.XMLNamespace + "projectileType")
+										 .Select(projectileTypeElement =>
+												   LoadType<ProjectileType>(projectileTypeElement,
+																			projectileTypesByName,
+																			projectileTypesByID))
+										 .ToArray();
+		}
+
+		IEnumerable<ResourceType> LoadAllResourceTypes()
+		{
+			CheckIfLoading();
+
+			ResourceIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"resourceIconTexturePath")));
+
+			var resourceTypesElement = data.Root.Element(PackageManager.XMLNamespace + "resourceTypes");
+
+			if (resourceTypesElement == null) {
+				return Enumerable.Empty<ResourceType>();
+			}
+
+			return resourceTypesElement.Elements(PackageManager.XMLNamespace + "resourceType")
+									   .Select(resourceTypeElement =>
+												   LoadType<ResourceType>(resourceTypeElement,
+																		  resourceTypesByName,
+																		  resourceTypesByID))
+									   .ToArray();
+		}
+
+		IEnumerable<PlayerType> LoadAllPlayerTypes()
+		{
+			CheckIfLoading();
+
+			PlayerIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
+																				"playerIconTexturePath")));
+
+			XElement playerTypes = data.Root.Element(PackageManager.XMLNamespace + "playerAITypes");
+
+			if (playerTypes == null) {
+				return Enumerable.Empty<PlayerType>();
+			}
+
+			return playerTypes.Elements(PackageManager.XMLNamespace + "playerAIType")
+							.Select(playerTypeElement =>
+										LoadType<PlayerType>(playerTypeElement,
+															playerAITypesByName,
+															playerAITypesByID))
+							.ToArray();
+		}
+
+		IEnumerable<LevelRep> LoadAllLevels()
+		{
+			CheckIfLoading();
+
+			XElement levels = data.Root.Element(PackageManager.XMLNamespace + "levels");
+
+			if (levels == null) {
+				return Enumerable.Empty<LevelRep>();
+			}
+
+			return levels.Elements(PackageManager.XMLNamespace + "level")
+						.Select(LoadLevelRep)
+						.ToArray();
+		}
+
+		void FinishLoading()
+		{
+			data = null;
+		}
+
+		void CheckIfLoading()
+		{
+			if (!IsLoading()) {
+				throw new InvalidOperationException("GamePack was not in a loading state");
+			}
+		}
+
+		bool IsLoading()
+		{
+			return data != null;
 		}
 
 		/// <summary>
@@ -624,13 +675,6 @@ namespace MHUrho.Packaging {
 			return typeElement;
 		}
 
-		void CheckIfLoading() {
-			if (data == null) {
-				throw new InvalidOperationException("Before loading things, you need to call StartLoading");
-			}
-		}
-
-		
 
 		static string GetTypeName(XElement typeElement) {
 			return typeElement.Attribute("name").Value;
@@ -712,5 +756,12 @@ namespace MHUrho.Packaging {
 			return LoadType<T>(typeElement, typesByName, typesByID);
 		}
 
+		LevelRep LoadLevelRep(XElement levelElement)
+		{
+			LevelRep newLevel = new LevelRep(this, levelElement);
+			levelsByName.Add(newLevel.Name, newLevel);
+
+			return newLevel;
+		}
 	}
 }

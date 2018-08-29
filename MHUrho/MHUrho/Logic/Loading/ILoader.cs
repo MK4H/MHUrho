@@ -4,9 +4,11 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
-	internal interface ILoader {
+	interface ILoader {
 
-		void ConnectReferences(LevelManager level);
+		void StartLoading();
+
+		void ConnectReferences();
 
 		void FinishLoading();
 	}

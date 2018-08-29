@@ -33,7 +33,7 @@ namespace MHUrho.EditorTools
 			this.unitTypes = new Dictionary<CheckBox, UnitType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
-			foreach (var unitType in PackageManager.Instance.ActiveGame.UnitTypes) {
+			foreach (var unitType in PackageManager.Instance.ActivePackage.UnitTypes) {
 
 				if (!unitType.IsManuallySpawnable) {
 					continue;
@@ -42,7 +42,7 @@ namespace MHUrho.EditorTools
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnUnitTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActiveGame.UnitIconTexture;
+				checkBox.Texture = PackageManager.Instance.ActivePackage.UnitIconTexture;
 				checkBox.ImageRect = unitType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * unitType.IconRectangle.Width(), 0);

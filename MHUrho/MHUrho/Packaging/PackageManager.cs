@@ -30,7 +30,7 @@ namespace MHUrho.Packaging
 
 		public static PackageManager Instance { get; private set; }
 
-		public IEnumerable<IAvailablePack> AvailablePacks => availablePacks.Values;
+		public IEnumerable<GamePackRep> AvailablePacks => availablePacks.Values;
 		
 		/// <summary>
 		/// Path to the schema for Resource Pack Directory xml files
@@ -38,11 +38,11 @@ namespace MHUrho.Packaging
 		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
 
-		public GamePack ActiveGame { get; private set; }
+		public GamePack ActivePackage { get; private set; }
 
 		readonly XmlSchemaSet schemas;
 
-		readonly Dictionary<string, GamePack> availablePacks = new Dictionary<string, GamePack>();
+		readonly Dictionary<string, GamePackRep> availablePacks = new Dictionary<string, GamePackRep>();
 		readonly ResourceCache resourceCache;
 
 
@@ -73,22 +73,28 @@ namespace MHUrho.Packaging
 		public void LoadPackage(string packageName, 
 								LoadingWatcher loadingProgress)
 		{
-			loadingProgress.EnterPhaseWithIncrement("Clearing previous games", 5);
-			if (ActiveGame != null) {
-				UnloadPackage(ActiveGame);
-				ActiveGame = null;
+			loadingProgress.TextAndPercentageUpdate("Clearing previous games", 5);
+			if (ActivePackage != null) {
+				UnloadActivePack();
 			}
 
-			ActiveGame = availablePacks[packageName];
+			var chosenPackage = availablePacks[packageName];
 
-			resourceCache.AddResourceDir(ActiveGame.XmlDirectoryPath,1);
+			resourceCache.AddResourceDir(chosenPackage.XmlDirectoryPath,1);
 
-			ActiveGame.Load(schemas, loadingProgress);
+			ActivePackage = chosenPackage.LoadPack(schemas, loadingProgress);
 		}
 
-		public GamePack GetGamePack(string name) {
+		public GamePackRep GetGamePack(string name) {
 			//TODO: React if it does not exist
 			return availablePacks[name];
+		}
+
+		public void UnloadActivePack()
+		{
+			var activePackage = ActivePackage;
+			ActivePackage = null;
+			UnloadPackage(activePackage);
 		}
 
 		public bool Exists(string name)
@@ -225,12 +231,16 @@ namespace MHUrho.Packaging
 		/// Pulls data about the resource packs contained in this directory from XML file
 		/// </summary>
 		/// <param name="path">Path to the XML file of Resource pack directory</param>
-		/// <param name="schema">Schema for the resource pack directory type of XML files</param>
 		/// <returns>True if successfuly read, False if there was an error while loading</returns>
 		void ParseGamePackDir(string path)
 		{
 
-			IEnumerable<GamePack> loadedPacks = null;
+			if (path == null) {
+				//TODO: Exception
+				throw new ArgumentNullException();
+			}
+
+			IEnumerable<GamePackRep> presentPacks = null;
 
 			try
 			{
@@ -239,40 +249,44 @@ namespace MHUrho.Packaging
 
 				string directoryPath = Path.GetDirectoryName(path);
 
-				loadedPacks = from packages in doc.Root.Elements(XMLNamespace + "gamePack")
-							  select GamePack.InitialLoad(packages.Attribute("name").Value,
-													//PathtoXml is relative to GamePackDir.xml directory path
-													Path.Combine(directoryPath,packages.Element(XMLNamespace + "pathToXml").Value), 
-													packages.Element(XMLNamespace + "description")?.Value,
-													packages.Element(XMLNamespace + "thumbnailPath")?.Value,
-													this);
+				presentPacks = from packagePath in doc.Root.Elements(XMLNamespace + "gamePack")
+								select new GamePackRep(Path.Combine(directoryPath, 
+																	FileManager.CorrectRelativePath(packagePath.Value)),
+														this,
+														schemas);
+				//select GamePack.InitialLoad(packages.Attribute("name").Value,
+				//				//PathtoXml is relative to GamePackDir.xml directory path
+				//				Path.Combine(directoryPath,packages.Element(XMLNamespace + "pathToXml").Value), 
+				//				packages.Element(XMLNamespace + "description")?.Value,
+				//				packages.Element(XMLNamespace + "thumbnailPath")?.Value,
+				//				this);
 			}
 			catch (IOException e)
 			{
 				//Creation of the FileStream failed, cannot load this directory
-				Log.Write(LogLevel.Warning, string.Format("Opening ResroucePack directory file at {0} failed: {1}", path,e));
+				Log.Write(LogLevel.Warning, $"Opening ResroucePack directory file at {path} failed: {e}");
 				if (Debugger.IsAttached) Debugger.Break();
 			}
 			//TODO: Exceptions
 			catch (XmlSchemaValidationException e)
 			{
 				//Invalid resource pack description file, dont load this pack directory
-				Log.Write(LogLevel.Warning, string.Format("ResroucePack directory file at {0} does not conform to the schema: {1}", path, e));
+				Log.Write(LogLevel.Warning, $"ResroucePack directory file at {path} does not conform to the schema: {e}");
 				if (Debugger.IsAttached) Debugger.Break();
 			}
 			catch (XmlException e)
 			{
 				//TODO: Alert user for corrupt file
-				Log.Write(LogLevel.Warning, string.Format("ResroucePack directory file at {0} : {1}", path, e));
+				Log.Write(LogLevel.Warning, $"ResourcePack directory file at {path} : {e}");
 				if (Debugger.IsAttached) Debugger.Break();
 			}
 
 			//If loading failed completely, dont add anything
-			if (loadedPacks == null) return;
+			if (presentPacks == null) return;
 
 			//Adds all the discovered packs into the availablePacks list
-			foreach (var loadedPack in loadedPacks) {
-				availablePacks.Add(loadedPack.Name, loadedPack);
+			foreach (var presentPack in presentPacks) {
+				availablePacks.Add(presentPack.Name, presentPack);
 			}
 
 		}

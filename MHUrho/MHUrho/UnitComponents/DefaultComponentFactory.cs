@@ -24,8 +24,8 @@ namespace MHUrho.UnitComponents
 		}
 
 		internal DefaultComponentLoader StartLoadingComponent(StDefaultComponent storedComponent, LevelManager level, InstancePlugin plugin) {
-			DefaultComponentLoader loader = loaders[storedComponent.ComponentCase].Clone();
-			loader.StartLoading(level, plugin, storedComponent);
+			DefaultComponentLoader loader = loaders[storedComponent.ComponentCase].Clone(level, plugin, storedComponent);
+			loader.StartLoading();
 			return loader;
 		}
 

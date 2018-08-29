@@ -10,7 +10,7 @@ namespace MHUrho.UserInterface
 {
     class PackageListItem : IDisposable
     {
-		public IAvailablePack Pack { get; private set; }
+		public GamePackRep Pack { get; private set; }
 
 		public UIElement Element { get; private set; }
 
@@ -25,7 +25,7 @@ namespace MHUrho.UserInterface
 		UIElement descriptionElement;
 		UIElement bottomElement;
 
-		public PackageListItem(IAvailablePack pack, MyGame game)
+		public PackageListItem(GamePackRep pack, MyGame game)
 		{
 			this.Pack = pack;
 			Element = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/AvailablePackItemLayout.xml"),

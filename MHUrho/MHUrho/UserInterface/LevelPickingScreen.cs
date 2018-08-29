@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Logic;
+using MHUrho.Packaging;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
@@ -26,7 +28,7 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				//TODO: Load levels
+				GetLevels();
 
 				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/LevelPickingLayout.xml");
 
@@ -58,9 +60,29 @@ namespace MHUrho.UserInterface
 				playButton.Dispose();
 			}
 
+			void GetLevels()
+			{
+				foreach (var level in proxy.Package.Levels) {
+					items.Add(new LevelPickingLevelItem(level, Game));
+				}
+			}
+
 			void EditButtonReleased(ReleasedEventArgs obj)
 			{
-				//TODO: Load to edit mode
+				foreach (var item in items) {
+					if (item.IsSelected) {
+						if (item is LevelPickingLevelItem levelItem) {
+							MenuUIManager.SwitchToLevelCreationScreen(levelItem.Level);
+							return;
+						}
+						else if (item is LevelPickingNewLevelItem newItem) {
+							MenuUIManager.SwitchToLevelCreationScreen(null);
+						}
+						else {
+							throw new InvalidOperationException("Edit button was pressed when it should not have been possible to press");
+						}
+					}
+				}
 			}
 
 			void PlayButtonReleased(ReleasedEventArgs args)
@@ -68,10 +90,15 @@ namespace MHUrho.UserInterface
 				foreach (var item in items) {
 					if (item.IsSelected) {
 						if (item is LevelPickingLevelItem levelItem) {
-							levelItem.Level
+							MenuUIManager.SwitchToLevelSettingsScreen(levelItem.Level);
+							return;
+						}
+						else {
+							throw new InvalidOperationException("Play button was pressed when it should not have been possible to press");
 						}
 					}
 				}
+				
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -81,6 +108,10 @@ namespace MHUrho.UserInterface
 
 			
 		}
+
+		//TODO: Check this if it is null, prohibit changing when the screen is visible etc.
+		public GamePack Package { get; set; }
+
 		public override bool Visible {
 			get => screen != null;
 			set {

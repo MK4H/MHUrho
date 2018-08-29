@@ -8,87 +8,74 @@
   <xs:element name="gamePackDirectory">
     <xs:complexType>
       <xs:sequence minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="gamePack" type="gamePackDirEntry"/>
+        <xs:element name="gamePack" type="xs:string"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="gamePack" type="gamePackFull"/>
+  <xs:element name="gamePack" type="gamePackType"/>
     
-  
-  <xs:complexType name="gamePackBase">
+  <xs:complexType name="gamePackType">
     <xs:sequence>
-      <xs:element name="description" type="xs:string" minOccurs="0"/>
-      <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
+	    <xs:element name="description" type="xs:string" minOccurs="0"/>
+	    <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
+			<xs:element name="levels" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="level" type="levelType" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="playerAITypes" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="playerAIType" type="playerAITypeType" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+      <xs:element name="resourceTypes" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="resourceType" type="resourceTypeType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="defaultTileType" type="tileTypeType" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="tileType" type="tileTypeType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="unitTypes" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="unitType" type="unitTypeType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="projectileTypes" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="projectileType" type="projectileTypeType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="buildingTypes" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="buildingType" type="buildingTypeType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="resourceIconTexturePath" type="xs:string"/>
+      <xs:element name="tileIconTexturePath" type="xs:string"/>
+			<xs:element name="unitIconTexturePath" type="xs:string"/>
+      <xs:element name="buildingIconTexturePath" type="xs:string"/>
+      <xs:element name="playerIconTexturePath" type="xs:string"/>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string"/>
-  </xs:complexType>
-
-  <xs:complexType name="gamePackDirEntry">
-    <xs:complexContent>
-      <xs:extension base="gamePackBase">
-        <xs:sequence>
-          <xs:element name="pathToXml" type="xs:string"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="gamePackFull">
-    <xs:complexContent>
-      <xs:extension base="gamePackBase">
-        <xs:sequence>
-					<xs:element name="playerAITypes" minOccurs="0" maxOccurs="1">
-						<xs:complexType>
-							<xs:sequence>
-								<xs:element name="playerAIType" type="playerAITypeType" minOccurs="0" maxOccurs="unbounded"/>
-							</xs:sequence>
-						</xs:complexType>
-					</xs:element>
-          <xs:element name="resourceTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="resourceType" type="resourceTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="defaultTileType" type="tileTypeType" minOccurs="1" maxOccurs="1"/>
-                <xs:element name="tileType" type="tileTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="unitTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="unitType" type="unitTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="projectileTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="projectileType" type="projectileTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="buildingTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="buildingType" type="buildingTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-	        <xs:element name="resourceIconTexturePath" type="xs:string"/>
-	        <xs:element name="tileIconTexturePath" type="xs:string"/>
-					<xs:element name="unitIconTexturePath" type="xs:string"/>
-	        <xs:element name="buildingIconTexturePath" type="xs:string"/>
-	        <xs:element name="playerIconTexturePath" type="xs:string"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
+	  <xs:attribute name="name" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="resourceTypeType">
@@ -180,20 +167,6 @@
 		<xs:attribute name="ID" use="required" type="xs:int"/>
 	</xs:attributeGroup>
 
-  <xs:complexType name="animationsType">
-    <xs:sequence>
-      <xs:element name="animation">
-        <xs:complexType>
-          <xs:simpleContent>
-            <xs:extension base="xs:string">
-              <xs:attribute name="ID" type="xs:int"/>
-            </xs:extension>
-          </xs:simpleContent>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-
 	<xs:complexType name="modelType">
 		<xs:sequence>
 			<xs:element name="modelPath" type="xs:string"/>
@@ -206,6 +179,16 @@
 			<xs:element name="materialPath" type="xs:string"/>
 			<xs:element name="materialListPath" type="xs:string"/>
 		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="levelType">
+		<xs:sequence>
+			<xs:element name="description" type="xs:string"/>
+			<xs:element name="thumbnail" type="xs:string"/>
+			<xs:element name="assemblyPath" type="xs:string"/>
+			<xs:element name="dataPath" type="xs:string"/>
+		</xs:sequence>
+		<xs:attribute name="name" use="required"/>
 	</xs:complexType>
 
   <xs:complexType name="IntVector2">

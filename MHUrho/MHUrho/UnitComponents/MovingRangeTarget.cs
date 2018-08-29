@@ -21,8 +21,19 @@ namespace MHUrho.UnitComponents
 
 			public MovingRangeTarget MovingRangeTarget { get; private set; }
 
+			readonly LevelManager level;
+			readonly InstancePlugin plugin;
+			readonly StDefaultComponent storedData;
+
 			public Loader() {
 
+			}
+
+			protected Loader(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
+			{
+				this.level = level;
+				this.plugin = plugin;
+				this.storedData = storedData;
 			}
 
 			public static StDefaultComponent SaveState(MovingRangeTarget movingRangeTarget)
@@ -36,7 +47,7 @@ namespace MHUrho.UnitComponents
 				return new StDefaultComponent {MovingRangeTarget = storedMovingRangeTarget};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
+			public override void StartLoading() {
 				var user = plugin as IUser;
 				if (user == null) {
 					throw new
@@ -60,7 +71,7 @@ namespace MHUrho.UnitComponents
 				level.LoadRangeTarget(MovingRangeTarget);
 			}
 
-			public override void ConnectReferences(LevelManager level) {
+			public override void ConnectReferences() {
 
 			}
 
@@ -68,9 +79,9 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public override DefaultComponentLoader Clone()
+			public override DefaultComponentLoader Clone(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
 			{
-				return new Loader();
+				return new Loader(level, plugin, storedData);
 			}
 		}
 

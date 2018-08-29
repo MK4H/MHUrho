@@ -20,8 +20,19 @@ namespace MHUrho.UnitComponents
 
 			public StaticRangeTarget StaticRangeTarget { get; private set; }
 
+			readonly LevelManager level;
+			readonly InstancePlugin plugin;
+			readonly StDefaultComponent storedData;
+
 			public Loader() {
 
+			}
+
+			protected Loader(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
+			{
+				this.level = level;
+				this.plugin = plugin;
+				this.storedData = storedData;
 			}
 
 			public static StDefaultComponent SaveState(StaticRangeTarget staticRangeTarget)
@@ -36,7 +47,7 @@ namespace MHUrho.UnitComponents
 				return new StDefaultComponent {StaticRangeTarget = storedStaticRangeTarget};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData) {
+			public override void StartLoading() {
 
 				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.StaticRangeTarget) {
 					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
@@ -53,7 +64,7 @@ namespace MHUrho.UnitComponents
 				level.LoadRangeTarget(StaticRangeTarget);
 			}
 
-			public override void ConnectReferences(LevelManager level) {
+			public override void ConnectReferences() {
 
 			}
 
@@ -61,8 +72,9 @@ namespace MHUrho.UnitComponents
 
 			}
 
-			public override DefaultComponentLoader Clone() {
-				return new Loader();
+			public override DefaultComponentLoader Clone(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
+			{
+				return new Loader(level, plugin, storedData);
 			}
 		}
 

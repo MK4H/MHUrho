@@ -23,7 +23,7 @@ namespace MHUrho.Logic
 
 	public delegate void OnUpdateDelegate(float timeStep);
 
-	internal class LevelManager : Component, ILevelManager
+	partial class LevelManager : Component, ILevelManager
 	{
 		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
 			public bool Visit(IUnit unit)
@@ -48,6 +48,8 @@ namespace MHUrho.Logic
 		/// </summary>
 		public static LevelManager CurrentLevel { get; private set; }
 
+		public LevelRep LevelRep { get; private set; }
+
 		public MyGame App { get; private set; }
 
 		public Node LevelNode { get; private set; }
@@ -60,10 +62,8 @@ namespace MHUrho.Logic
 
 		public PackageManager PackageManager => PackageManager.Instance;
 
-		//TODO: Editor mode
-		public bool EditorMode => throw new NotImplementedException();
 
-		
+		public bool EditorMode { get; private set; }
 
 		public IEnumerable<IUnit> Units => units.Values;
 
@@ -96,9 +96,10 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(Node levelNode, MyGame app, Octree octree)
+		protected LevelManager(Node levelNode, MyGame app, Octree octree, bool editorMode)
 		{
 			this.LevelNode = levelNode;
+			this.EditorMode = editorMode;
 
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
@@ -115,214 +116,15 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
-		public static async Task<LevelManager> Load(MyGame game, StLevel storedLevel, LoadingWatcher loadingProgress) {
-
-			Scene scene = null;
-			Octree octree = null;
-			LevelManager level = null;
-			List<ILoader> loaders = new List<ILoader>();
-			Node mapNode = null;
-
-			MyGame.InvokeOnMainSafe(StartLoadingInMain);
-
-			PlayerInsignia.InitInsignias(PackageManager.Instance);
-
-			var mapLoader = await Task.Run(() => Map.Loader.StartLoading(level, mapNode, octree, storedLevel.Map, loadingProgress));
-			loaders.Add(mapLoader);
-			level.Map = mapLoader.Map;
-
-			MyGame.InvokeOnMainSafe(CreateCamera);
-
-			MyGame.InvokeOnMainSafe(LoadEntities);
-
-			loadingProgress.FinishedLoading();
-			return level;
-
-			void StartLoadingInMain()
-			{
-				PackageManager.Instance.LoadPackage(storedLevel.PackageName, loadingProgress);
-
-				loadingProgress.EnterPhase("Initializing level");
-				scene = new Scene(game.Context);
-				scene.UpdateEnabled = false;
-				octree = scene.CreateComponent<Octree>();
-
-				LoadSceneParts(game, scene);
-
-				var levelNode = scene.CreateChild("LevelNode");
-				levelNode.Enabled = false;
-				level = new LevelManager(levelNode, game, octree);
-				levelNode.AddComponent(level);
-
-				level.Minimap = new Minimap(level, 4);
-
-				//Load data
-				mapNode = level.LevelNode.CreateChild("MapNode");
-			}
-
-			void CreateCamera()
-			{
-				//TODO:Maybe Save camera position
-				level.Camera = LoadCamera(game, scene, level.Map, new Vector2(10,10));
-			}
-
-			void LoadEntities()
-			{
-				loadingProgress.EnterPhase("Loading units");
-				foreach (var unit in storedLevel.Units) {
-					var unitLoader = Unit.Loader.StartLoading(level, PackageManager.Instance, level.LevelNode.CreateChild("UnitNode"), unit);
-					level.RegisterEntity(unitLoader.Unit);
-					level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
-					loaders.Add(unitLoader);
-				}
-
-				loadingProgress.EnterPhase("Loading buildings");
-				foreach (var building in storedLevel.Buildings) {
-					var buildingLoader =
-						Building.Loader.StartLoading(level,
-													PackageManager.Instance,
-													level.LevelNode.CreateChild("BuildingNode"),
-													building);
-					level.RegisterEntity(buildingLoader.Building);
-					level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building);;
-					loaders.Add(buildingLoader);
-
-				}
-
-				loadingProgress.EnterPhase("Loading projectiles");
-				foreach (var projectile in storedLevel.Projectiles) {
-					var projectileLoader = Projectile.Loader.StartLoading(level,
-																		level.LevelNode.CreateChild("ProjectileNode"),
-																		projectile);
-
-					level.RegisterEntity(projectileLoader.Projectile);
-					level.projectiles.Add(projectileLoader.Projectile.ID, projectileLoader.Projectile);
-					loaders.Add(projectileLoader);
-				}
-
-				loadingProgress.EnterPhase("Loading players");
-				//TODO: Remove this
-				Player firstPlayer = null;
-
-				foreach (var player in storedLevel.Players) {
-					var playerLoader = Player.Loader.StartLoading(level, player);
-					//TODO: If player needs controller, give him
-					if (firstPlayer == null) {
-						firstPlayer = playerLoader.Player;
-					}
-
-					level.LevelNode.AddComponent(playerLoader.Player);
-					level.players.Add(playerLoader.Player.ID, playerLoader.Player);
-					loaders.Add(playerLoader);
-				}
-				//TODO: Move this inside the foreach
-				level.Input = game.ControllerFactory.CreateGameController(level.Camera, level, octree, firstPlayer);
-				level.cameraController = game.ControllerFactory.CreateCameraController(level.Input, level.Camera);
-				level.ToolManager = game.ControllerFactory.CreateToolManager(level.Input, level.Camera);
-
-				loadingProgress.EnterPhase("Connecting references");
-				//Connect references
-				foreach (var loader in loaders) {
-					loader.ConnectReferences(level);
-				}
-
-				loadingProgress.EnterPhase("Finishing loading");
-				foreach (var loader in loaders) {
-					loader.FinishLoading();
-				}
-
-				loadingProgress.EnterPhase("Starting level");
-
-				CurrentLevel = level;
-				scene.UpdateEnabled = true;
-				level.LevelNode.Enabled = true;
-			}
-		}
-
-		public static async Task<LevelManager> LoadFrom(MyGame game, Stream stream, LoadingWatcher loadingProgress, bool leaveOpen = false)
+		public static ILevelLoader GetLoader(MyGame game)
 		{
-			var storedLevel = await Task.Run<StLevel>(() => StLevel.Parser.ParseFrom(stream));
-			LevelManager level = await Load(game, storedLevel, loadingProgress);
-
-			if (!leaveOpen) {
-				stream.Close();
-			}
-
-			return level;
-		}
-
-		/// <summary>
-		/// Loads default level to use in level builder as basis, loads specified packages plus default package
-		/// </summary>
-		/// <param name="mapSize">Size of the map to create</param>
-		/// <param name="packages">packages to load</param>
-		/// <returns>Loaded default level</returns>
-		public static async Task<LevelManager> LoadDefaultLevel(MyGame game, 
-																IntVector2 mapSize, 
-																string gamePackageName,
-																LoadingWatcher loadingProgress)
-		{
-			loadingProgress.EnterPhase("Initializing level");
-			InitializeLevel(game, gamePackageName, out Scene scene, loadingProgress);
-
-			PlayerInsignia.InitInsignias(PackageManager.Instance);
-
-			loadingProgress.EnterPhase("Loading map");
-			Node mapNode = CurrentLevel.LevelNode.CreateChild("MapNode");
-
-			Map map = await Task.Run(() => Map.CreateDefaultMap(CurrentLevel, mapNode, CurrentLevel.octree, mapSize, loadingProgress));
-			CurrentLevel.Map = map;
-
-
-			CurrentLevel.Minimap = new Minimap(CurrentLevel, 4);
-
-			MyGame.InvokeOnMainSafe(CreateCamera);
-
-			loadingProgress.EnterPhase("Starting level");
-			MyGame.InvokeOnMainSafe(StartLevel);
-
-			loadingProgress.IncrementProgress(100);
-			loadingProgress.FinishedLoading();
-			return CurrentLevel;
-
-			void CreateCamera()
-			{
-				CurrentLevel.Camera = LoadCamera(game, scene, map, new Vector2(10,10));
-			}
-
-			void StartLevel()
-			{
-				//TODO: Temporary player creation
-				Player newPlayer = Player.CreateNewHumanPlayer(CurrentLevel.GetNewID(CurrentLevel.players), CurrentLevel, PlayerInsignia.Insignias[0]);
-				CurrentLevel.LevelNode.AddComponent(newPlayer);
-				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
-				CurrentLevel.Input =
-					game.ControllerFactory.CreateGameController(CurrentLevel.Camera, CurrentLevel, scene.GetComponent<Octree>(), newPlayer);
-
-				CurrentLevel.cameraController = game.ControllerFactory.CreateCameraController(CurrentLevel.Input, CurrentLevel.Camera);
-				CurrentLevel.ToolManager = game.ControllerFactory.CreateToolManager(CurrentLevel.Input, CurrentLevel.Camera);
-
-				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
-				CurrentLevel.Input.UIManager.SelectPlayer(newPlayer);
-
-				newPlayer = Player.CreateNewAIPlayer(CurrentLevel.GetNewID(CurrentLevel.players),
-													CurrentLevel,
-													PackageManager.Instance.ActiveGame.GetPlayerAIType("TestAI"),
-													PlayerInsignia.Insignias[1]);
-				CurrentLevel.LevelNode.AddComponent(newPlayer);
-				CurrentLevel.players.Add(newPlayer.ID, newPlayer);
-				CurrentLevel.Input.UIManager.AddPlayer(newPlayer);
-
-				scene.UpdateEnabled = true;
-				CurrentLevel.LevelNode.Enabled = true;
-			}
-			
+			return new Loader(game);
 		}
 
 		public StLevel Save() {
 			StLevel level = new StLevel() {
 				Map = this.Map.Save(),
-				PackageName = PackageManager.Instance.ActiveGame.Name
+				PackageName = PackageManager.Instance.ActivePackage.Name
 			};
 
 
@@ -363,7 +165,7 @@ namespace MHUrho.Logic
 				thing.Dispose();
 			}
 
-			PackageManager.ActiveGame.ClearCaches();
+			PackageManager.ActivePackage.ClearCaches();
 			Input.Dispose();
 			cameraController.Dispose();
 			Camera.Dispose();
@@ -401,7 +203,7 @@ namespace MHUrho.Logic
 
 			Node unitNode = LevelNode.CreateChild("Unit");
 
-			var newUnit = unitType.CreateNewUnit(GetNewID(entities),unitNode, this, tile, player);
+			var newUnit = unitType.CreateNewUnit(GetNewID(entities), unitNode, this, tile, player);
 			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
@@ -716,74 +518,7 @@ namespace MHUrho.Logic
 			Update?.Invoke(timeStep);
 		}
 
-		static void InitializeLevel(MyGame game, 
-									string gamePackageName,
-									out Scene scene, 
-									LoadingWatcher loadingProgress)
-		{
-			PackageManager.Instance.LoadPackage(gamePackageName, loadingProgress);
-
-			loadingProgress.EnterPhase("Initializing level");
-			scene = new Scene(game.Context);
-			scene.UpdateEnabled = false;
-			var octree = scene.CreateComponent<Octree>();
-			var physics = scene.CreateComponent<PhysicsWorld>();
-			//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
-			physics.Enabled = true;
-
-			LoadSceneParts(game, scene);
-
-			var levelNode = scene.CreateChild("LevelNode");
-			levelNode.Enabled = false;
-			CurrentLevel = new LevelManager(levelNode, game, octree);
-			levelNode.AddComponent(CurrentLevel);
-
-		}
-
-		static void LoadSceneParts(MyGame game, Scene scene) {
-
-			// Light
-			using (Node lightNode = scene.CreateChild(name: "light")) {
-				lightNode.Rotation = new Quaternion(45, 0, 0);
-				//lightNode.Position = new Vector3(0, 5, 0);
-				using (var light = lightNode.CreateComponent<Light>()) {
-					light.LightType = LightType.Directional;
-					//light.Range = 10;
-					light.Brightness = 0.5f;
-					light.CastShadows = true;
-					light.ShadowBias = new BiasParameters(0.00025f, 0.5f);
-					light.ShadowCascade = new CascadeParameters(20.0f, 0f, 0f, 0.0f, 0.8f);
-				}
-			}
-
-			// Ambient light
-			using (var zoneNode = scene.CreateChild("Zone")) {
-				using (var zone = zoneNode.CreateComponent<Zone>()) {
-					zone.SetBoundingBox(new BoundingBox(-1000.0f, 1000.0f));
-					zone.AmbientColor = new Color(0.5f, 0.5f, 0.5f);
-					zone.FogColor = new Color(0.7f, 0.7f, 0.7f);
-					zone.FogStart = game.Config.TerrainDrawDistance / 2;
-					zone.FogEnd = game.Config.TerrainDrawDistance;
-				}
-			}
-			
-
-			
-		}
-
-		static CameraMover LoadCamera(MyGame game, Scene scene, IMap map, Vector2 cameraPosition) {
-			// Camera
-
-			CameraMover cameraMover = CameraMover.GetCameraController(scene, map, cameraPosition);
-
-			// Viewport
-			var viewport = new Viewport(game.Context, scene, cameraMover.Camera, null);
-			viewport.SetClearColor(Color.White);
-			game.Renderer.SetViewport(0, viewport);
-
-			return cameraMover;
-		}
-
+	
 		const int MaxTries = 10000000;
 		int GetNewID<T>(IDictionary<int, T> dictionary) {
 			int id, i = 0;
@@ -798,7 +533,7 @@ namespace MHUrho.Logic
 			return id;
 		}
 
-		void RegisterEntity(Entity entity)
+		void RegisterEntity(IEntity entity)
 		{
 			entities.Add(entity.ID, entity);
 			nodeToEntity.Add(entity.Node, entity);

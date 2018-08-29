@@ -37,7 +37,7 @@ namespace MHUrho.EditorTools
 			this.highlight = new StaticSquareToolMandK(input, ui, camera, 3);
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
-			foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
+			foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
 
 				if (!tileType.IsManuallySpawnable) {
 					continue;
@@ -46,7 +46,7 @@ namespace MHUrho.EditorTools
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnTileTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActiveGame.TileIconTexture;
+				checkBox.Texture = PackageManager.Instance.ActivePackage.TileIconTexture;
 				checkBox.ImageRect = tileType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(tileType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * tileType.IconRectangle.Width(), 0);

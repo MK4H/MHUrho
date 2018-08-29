@@ -783,11 +783,11 @@ namespace MHUrho.WorldMap
 
 				MapGraphics graphics = new MapGraphics(map, chunkSize, mapSize);
 
-				loadingProgress.EnterPhase("Creating terrain texture");
+				loadingProgress.TextUpdate("Creating terrain texture");
 				graphics.CreateMaterial();
-				loadingProgress.IncrementProgress(5);
+				loadingProgress.PercentageUpdate(5);
 
-				loadingProgress.EnterPhase("Creating map geometry");
+				loadingProgress.TextUpdate("Creating map geometry");
 				graphics.CreateModel(loadingProgress);
 
 				return graphics;
@@ -1025,7 +1025,7 @@ namespace MHUrho.WorldMap
 
 			void CreateMaterial() {
 				//Count for output image size
-				int tileTypeCount = PackageManager.Instance.ActiveGame.TileTypeCount;
+				int tileTypeCount = PackageManager.Instance.ActivePackage.TileTypeCount;
 
 				//TODO: Context
 				Image mapImage = new Image();
@@ -1039,7 +1039,7 @@ namespace MHUrho.WorldMap
 				int mapImageHeight = Tile.ImageHeight;
 
 				IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
-				foreach (var tileType in PackageManager.Instance.ActiveGame.TileTypes) {
+				foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
 					var tileTypeImage = tileType.GetImage();
 
 					if (tileTypeImage.Compressed) {
@@ -1078,7 +1078,7 @@ namespace MHUrho.WorldMap
 						chunks.Add(new MapChunk(map, this, chunkTopLeftCorner));
 					}
 
-					loadingProgress.IncrementProgress(25.0f / numberOfChunks.Y);
+					loadingProgress.PercentageUpdate(25.0f / numberOfChunks.Y);
 				}
 			}
 

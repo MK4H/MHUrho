@@ -437,6 +437,11 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
+			public IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000)
+			{
+				throw new NotImplementedException();
+			}
+
 			public bool IsRaycastToMap(RayQueryResult rayQueryResult)
 			{
 				throw new NotImplementedException();
@@ -468,6 +473,16 @@ namespace NUnit.Tests {
 			}
 
 			public IntVector2? RaycastToVertex(RayQueryResult rayQueryResult)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3? RaycastToWorldPosition(List<RayQueryResult> rayQueryResults)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Vector3? RaycastToWorldPosition(RayQueryResult rayQueryResult)
 			{
 				throw new NotImplementedException();
 			}

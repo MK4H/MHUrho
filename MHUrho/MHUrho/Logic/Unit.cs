@@ -21,27 +21,46 @@ namespace MHUrho.Logic
 	/// <summary>
 	/// Class representing unit, every action you want to do with the unit should go through this class
 	/// </summary>
-	public class Unit : Entity, IUnit {
-		internal class Loader : ILoader {
-		   
-			public Unit Unit { get; private set; }
+	class Unit : Entity, IUnit {
+		class Loader : IUnitLoader {
+
+			public IUnit Unit => loadingUnit;
+
+			Unit loadingUnit;
 
 			List<DefaultComponentLoader> componentLoaders;
 
+			readonly LevelManager level;
+			readonly Node node;
+			readonly UnitType type;
 			/// <summary>
 			/// Holds the image of this unit between the steps of loading
 			/// After the last step, is set to null to free the resources
 			/// In game is null
 			/// </summary>
-			StUnit storedUnit;
+			readonly StUnit storedUnit;
 
-			protected Loader(StUnit storedUnit) {
+			/// <summary>
+			/// Loads unit component from <paramref name="storedUnit"/> and all other needed components
+			///  and adds them to the <paramref name="node"/>
+			/// </summary>
+			/// <param name="level"></param>
+			/// <param name="node">scene node of the unit</param>
+			/// <param name="storedUnit">stored unit</param>
+			public Loader(LevelManager level, Node node, StUnit storedUnit) {
+				this.level = level;
+				this.node = node;
 				this.storedUnit = storedUnit;
 				this.componentLoaders = new List<DefaultComponentLoader>();
+
+				type = PackageManager.Instance.ActivePackage.GetUnitType(storedUnit.TypeID);
+				if (type == null) {
+					throw new ArgumentException("Type of this unit was not loaded");
+				}
 			}
 
 			/// <summary>
-			/// Creates new instance of the <see cref="Unit"/> component and ads it to the <paramref name="unitNode"/>
+			/// Creates new instance of the <see cref="loadingUnit"/> component and ads it to the <paramref name="unitNode"/>
 			/// Also adds the unit as PassingUnit to <paramref name="tile"/>
 			/// </summary>
 			/// <param name="id">The unique identifier of the unit, must be unique among other units</param>
@@ -90,77 +109,53 @@ namespace MHUrho.Logic
 			}
 
 			/// <summary>
-			/// Loads unit component from <paramref name="storedUnit"/> and all other needed components
-			///  and adds them to the <paramref name="node"/>
-			/// </summary>
-			/// <param name="level"></param>
-			/// <param name="packageManager">Package manager to get unitType</param>
-			/// <param name="node">scene node of the unit</param>
-			/// <param name="storedUnit">stored unit</param>
-			/// <returns>Loaded unit component, already added to the node</returns>
-			public static Loader StartLoading(LevelManager level, PackageManager packageManager, Node node, StUnit storedUnit) {
-				var type = packageManager.ActiveGame.GetUnitType(storedUnit.TypeID);
-				if (type == null) {
-					throw new ArgumentException("Type of this unit was not loaded");
-				}
-
-				var unitLoader = new Loader(storedUnit);
-				unitLoader.Load(level, type, node);
-
-				return unitLoader;
-			}
-
-			
-			/// <summary>
 			/// Loads ONLY the unit component of <paramref name="type"/> from <paramref name="storedUnit"/> and adds it to the <paramref name="legNode"/> 
 			/// If you use this, you still need to add Model, Materials and other behavior to the unit
 			/// </summary>
-			/// <param name="type"></param>
-			/// <param name="legNode"></param>
-			/// <param name="storedUnit"></param>
 			/// <returns>Loaded unit component, already added to the node</returns>
-			void Load(LevelManager level, UnitType type, Node legNode) {
+			public void StartLoading() {
 				//TODO: Check arguments - node cant have more than one Unit component
 				if (type.ID != storedUnit.TypeID) {
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}
 
-				var centerNode = CreateBasicNodeStructure(legNode, level, type);
+				var centerNode = CreateBasicNodeStructure(node, level, type);
 
 				var unitID = storedUnit.Id;
 
-				Unit = new Unit(unitID, level, type, legNode);
-				centerNode.AddComponent(Unit);
+				loadingUnit = new Unit(unitID, level, type, node);
+				centerNode.AddComponent(loadingUnit);
 
 				//This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
 				// to this class, and for that i need to set the Position here
-				legNode.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
+				node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
 
-				Unit.UnitPlugin = type.GetInstancePluginForLoading(Unit, level);
+				loadingUnit.UnitPlugin = type.GetInstancePluginForLoading(loadingUnit, level);
 
 				foreach (var defaultComponent in storedUnit.DefaultComponents) {
 					var componentLoader =
 						level.DefaultComponentFactory
 							.StartLoadingComponent(defaultComponent,
 													level,
-													Unit.UnitPlugin);
+													loadingUnit.UnitPlugin);
 					componentLoaders.Add(componentLoader);
-					Unit.AddComponent(componentLoader.Component);
+					loadingUnit.AddComponent(componentLoader.Component);
 				}
+
 			}
 
 			/// <summary>
 			/// Continues loading by connecting references and loading components
 			/// </summary>
-			public void ConnectReferences(LevelManager level) {
-				Unit.Player = level.GetPlayer(storedUnit.PlayerID);
-				Unit.Tile = level.Map.GetContainingTile(Unit.Position);
+			public void ConnectReferences() {
+				loadingUnit.Player = level.GetPlayer(storedUnit.PlayerID);
+				loadingUnit.Tile = level.Map.GetContainingTile(loadingUnit.Position);
 				
 				foreach (var componentLoader in componentLoaders) {
-					componentLoader.ConnectReferences(level);
+					componentLoader.ConnectReferences();
 				}
 
-				Unit.UnitPlugin.LoadState(new PluginDataWrapper(storedUnit.UserPlugin, level));
+				loadingUnit.UnitPlugin.LoadState(new PluginDataWrapper(storedUnit.UserPlugin, level));
 			}
 
 			public void FinishLoading() {
@@ -297,6 +292,22 @@ namespace MHUrho.Logic
 		#endregion
 
 		#region Public methods
+
+		public static IUnitLoader GetLoader(LevelManager level, Node node, StUnit storedUnit)
+		{
+			return new Loader(level, node, storedUnit);
+		}
+
+		public static Unit CreateNew(int id,
+										Node unitNode,
+										UnitType type,
+										ILevelManager level,
+										ITile tile,
+										IPlayer player)
+		{
+			return Loader.CreateNew(id, unitNode, type, level, tile, player);
+		}
+
 		public StUnit Save() {
 			return Loader.Save(this);
 		}

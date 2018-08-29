@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.UserInterface;
 using Urho;
@@ -37,19 +38,43 @@ namespace MHUrho.Input
 			UIController.SwitchToPauseMenu();
 		}
 
-		public void LoadLevel(string fromPath)
+		public void StartLoadingLevel(LevelRep level, bool editorMode)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
 			//This is correct, dont await, leave UI responsive
-			LevelManager.LoadFrom(Game, 
-								MyGame.Files.OpenDynamicFile(fromPath, System.IO.FileMode.Open, FileAccess.Read),
-								UIController.LoadingScreen.GetLoadingWatcher());
+			ILevelLoader loader = level.StartLoading(editorMode);
 			
+			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
+		}
+
+		public void StartLoadingLevel(string savePath, bool editorMode)
+		{
+			if (pausedLevelController != null) {
+				EndPausedLevel();
+			}
+
+			//This is correct, dont await, leave UI responsive
+			ILevelLoader loader = LevelManager.GetLoader(Game);
 			
-			UIController.SwitchToLoadingScreen();
+			//TODO: Try catch if file failed to open
+			loader.LoadFrom(MyGame.Files.OpenDynamicFile(savePath, System.IO.FileMode.Open, FileAccess.Read), editorMode);
+						
+			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
+		}
+
+		public void StartLoadingDefaultLevel(IntVector2 mapSize)
+		{
+			if (pausedLevelController != null) {
+				EndPausedLevel();
+			}
+
+			var loader = LevelManager.GetLoader(Game);
+
+			loader.LoadDefaultLevel(mapSize);
+			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
 		}
 
 		public void ResumePausedLevel()

@@ -30,10 +30,10 @@ namespace DefaultPackage
 
 		public override void Initialize(XElement extensionElement, PackageManager packageManager)
 		{
-			Chicken = packageManager.ActiveGame.GetUnitType("Chicken");
-			TestUnit = packageManager.ActiveGame.GetUnitType("TestUnit");
-			TestWorker = packageManager.ActiveGame.GetUnitType("TestWorker");
-			TestBuilding = packageManager.ActiveGame.GetBuildingType("TestBuilding");
+			Chicken = packageManager.ActivePackage.GetUnitType("Chicken");
+			TestUnit = packageManager.ActivePackage.GetUnitType("TestUnit");
+			TestWorker = packageManager.ActivePackage.GetUnitType("TestWorker");
+			TestBuilding = packageManager.ActivePackage.GetBuildingType("TestBuilding");
 		}
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)

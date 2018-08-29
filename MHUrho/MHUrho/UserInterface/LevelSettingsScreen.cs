@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Packaging;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
@@ -13,6 +14,8 @@ namespace MHUrho.UserInterface
 
 			MyGame Game => proxy.game;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
+
+			LevelRep Level => proxy.Level;
 
 			Window window;
 			Window customSettingsWindow;
@@ -43,7 +46,7 @@ namespace MHUrho.UserInterface
 
 			void PlayButtonReleased(ReleasedEventArgs args)
 			{
-
+				
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -79,6 +82,9 @@ namespace MHUrho.UserInterface
 				}
 			}
 		}
+
+		//TODO: Ensure that Show cannot be called with Level null, that level is not changed after show etc.
+		public LevelRep Level { get; set; }
 
 		readonly MyGame game;
 		readonly MenuUIManager menuUIManager;

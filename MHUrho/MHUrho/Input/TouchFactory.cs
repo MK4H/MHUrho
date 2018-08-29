@@ -21,7 +21,7 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player)
+		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
 		{
 			return new GameTouchController(game, levelManager, octree, player, cameraMover);
 		}

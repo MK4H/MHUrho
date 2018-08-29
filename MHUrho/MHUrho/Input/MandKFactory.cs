@@ -22,7 +22,7 @@ namespace MHUrho.Input
 			return new CameraControllerMandK(typedController, typedController.UIManager , cameraMover);
 		}
 
-		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player)
+		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
 		{
 			return new GameMandKController(game, levelManager, octree, player, cameraMover);
 		}

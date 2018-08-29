@@ -25,11 +25,21 @@ namespace MHUrho.UnitComponents
 
 			public MovingMeeleAttacker MovingMeele { get; private set; }
 
+			readonly LevelManager level;
+			readonly InstancePlugin plugin;
+			readonly StDefaultComponent storedData;
 			int targetID;
 
 			public Loader()
 			{
 
+			}
+
+			protected Loader(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
+			{
+				this.level = level;
+				this.plugin = plugin;
+				this.storedData = storedData;
 			}
 
 			public static StDefaultComponent SaveState(MovingMeeleAttacker movingMeele)
@@ -51,7 +61,7 @@ namespace MHUrho.UnitComponents
 				return new StDefaultComponent{MovingMeeleAttacker = storedMovingMeeleAttacker};
 			}
 
-			public override void StartLoading(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
+			public override void StartLoading()
 			{
 				var user = plugin as IUser;
 				if (user == null) {
@@ -82,7 +92,7 @@ namespace MHUrho.UnitComponents
 				targetID = storedMovingMeeleAttacker.TargetID;
 			}
 
-			public override void ConnectReferences(LevelManager level)
+			public override void ConnectReferences()
 			{
 				MovingMeele.Target = targetID == 0 ? null : level.GetEntity(targetID);
 			}
@@ -92,9 +102,9 @@ namespace MHUrho.UnitComponents
 				
 			}
 
-			public override DefaultComponentLoader Clone()
+			public override DefaultComponentLoader Clone(LevelManager level, InstancePlugin plugin, StDefaultComponent storedData)
 			{
-				return new Loader();
+				return new Loader(level, plugin, storedData);
 			}
 		}
 

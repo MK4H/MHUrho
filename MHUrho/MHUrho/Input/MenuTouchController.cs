@@ -35,7 +35,17 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public void LoadLevel(string fromPath)
+		public void StartLoadingLevel(LevelRep level, bool editorMode)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void StartLoadingLevel(string savePath, bool editorMode)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void StartLoadingDefaultLevel(IntVector2 mapSize)
 		{
 			throw new NotImplementedException();
 		}
@@ -74,43 +84,10 @@ namespace MHUrho.Input
 			button.SetColor(Color.Red);
 		}
 
-		public IGameController GetGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player) {
-			return new GameTouchController(Game, levelManager, octree, player, cameraMover);
-		}
-
 		//TODO: TEMPORARY, probably move to UIManager or something
-		void Button_Pressed(PressedEventArgs obj) {
-			Log.Write(LogLevel.Debug, "Button pressed");
-
-			switch (obj.Element.Name) {
-				case "StartButton":
-					LevelManager.CurrentLevel?.End();
-					LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), "testRP2", LoadingWatcher.Ignoring);
-					break;
-				case "SaveButton":
-					//TODO: Move this elsewhere
-					using (var saveFile =
-						new Google.Protobuf.CodedOutputStream(MyGame.Files.OpenDynamicFile("savedGame.save", System.IO.FileMode.Create,
-																							System.IO.FileAccess.Write))) {
-						LevelManager.CurrentLevel.Save().WriteTo(saveFile);
-					}
-					break;
-				case "LoadButton":
-					LevelManager.CurrentLevel?.End();
-
-					using (Stream saveFile = MyGame.Files.OpenDynamicFile("savedGame.save",
-																		   System.IO.FileMode.Open,
-																		   FileAccess.Read)) {
-						LevelManager.Load(Game, StLevel.Parser.ParseFrom(saveFile), LoadingWatcher.Ignoring);
-					}
-
-					break;
-				case "EndButton":
-					LevelManager.CurrentLevel?.End();
-					break;
-				default:
-					break;
-			}
+		void Button_Pressed(PressedEventArgs obj)
+		{
+			throw new NotImplementedException();
 		}
 
 		protected override void TouchBegin(TouchBeginEventArgs e) {

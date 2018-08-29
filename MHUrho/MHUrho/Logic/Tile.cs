@@ -11,23 +11,28 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-	public class Tile : ITile {
+	class Tile : ITile {
 		public const int ImageWidth = 100;
 		public const int ImageHeight = 100;
 
-		internal class Loader : ITileLoader {
+		class Loader : ITileLoader {
 
 			ITile ITileLoader.Tile => Tile;
 
 			public Tile Tile { get; private set; }
+
+			readonly LevelManager level;
+			readonly Map map;
+
 			/// <summary>
 			/// Holds the image of the tile between the steps of loading
 			/// </summary>
-			StTile storedTile;
+			readonly StTile storedTile;
 
-			protected Loader(StTile storedTile, Tile tile)
+			public Loader(LevelManager level, Map map, StTile storedTile)
 			{
-				this.Tile = tile;
+				this.level = level;
+				this.map = map;
 				this.storedTile = storedTile;
 			}
 
@@ -55,17 +60,17 @@ namespace MHUrho.Logic
 			/// <param name="storedTile">Image of the tile</param>
 			/// <param name="map">Map this tile is in</param>
 			/// <returns>Partially initialized tile</returns>
-			public static Loader StartLoading(StTile storedTile, Map map)
+			public void StartLoading()
 			{
-				return new Loader(storedTile, new Tile(storedTile, map));
+				Tile = new Tile(storedTile, map);
 			}
 
 			/// <summary>
 			/// Continues loading by connecting references
 			/// </summary>
-			public void ConnectReferences(LevelManager level)
+			public void ConnectReferences()
 			{
-				Tile.Type = PackageManager.Instance.ActiveGame.GetTileType(storedTile.TileTypeID);
+				Tile.Type = PackageManager.Instance.ActivePackage.GetTileType(storedTile.TileTypeID);
 
 				if (storedTile.UnitIDs.Count != 0) {
 					Tile.units = new List<IUnit>();
@@ -84,7 +89,7 @@ namespace MHUrho.Logic
 
 			public void FinishLoading()
 			{
-				storedTile = null;
+
 			}
 		}
 
@@ -148,10 +153,7 @@ namespace MHUrho.Logic
 		/// </summary>
 		List<IUnit> units;
 
-		public StTile Save()
-		{
-			return Loader.Save(this);
-		}
+
 		
 		protected Tile(StTile storedTile, IMap map) {
 			this.MapArea = new IntRect(storedTile.TopLeftPosition.X, 
@@ -169,6 +171,16 @@ namespace MHUrho.Logic
 			this.Type = tileType;
 			this.TopLeftHeight = 0;
 			this.Map = map;
+		}
+
+		public static ITileLoader GetLoader(LevelManager level, Map map, StTile storedTile)
+		{
+			return new Loader(level, map, storedTile);
+		}
+
+		public StTile Save()
+		{
+			return Loader.Save(this);
 		}
 
 		public void AddUnit(IUnit unit)

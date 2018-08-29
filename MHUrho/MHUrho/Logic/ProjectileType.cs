@@ -65,7 +65,7 @@ namespace MHUrho.Logic
 		}
 
 
-		public Projectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, IRangeTarget target) {
+		internal IProjectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, IRangeTarget target) {
 			var projectile = GetProjectile(newID, level, player, position);
 
 			if (!projectile.ProjectilePlugin.ShootProjectile(target)) {
@@ -76,7 +76,7 @@ namespace MHUrho.Logic
 			return projectile;
 		}
 
-		public Projectile ShootProjectile(int newID, 
+		internal IProjectile ShootProjectile(int newID, 
 										ILevelManager level,
 										IPlayer player, 
 										Vector3 position,
@@ -92,11 +92,11 @@ namespace MHUrho.Logic
 			return projectile;
 		}
 
-		public ProjectileInstancePlugin GetNewInstancePlugin(IProjectile projectile, ILevelManager level) {
+		internal ProjectileInstancePlugin GetNewInstancePlugin(IProjectile projectile, ILevelManager level) {
 			return typePlugin.CreateNewInstance(level, projectile);
 		}
 
-		public ProjectileInstancePlugin GetInstancePluginForLoading(IProjectile projectile, ILevelManager level) {
+		internal ProjectileInstancePlugin GetInstancePluginForLoading(IProjectile projectile, ILevelManager level) {
 			return typePlugin.GetInstanceForLoading(level, projectile);
 		}
 

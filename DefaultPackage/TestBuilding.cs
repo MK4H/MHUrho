@@ -31,7 +31,7 @@ namespace DefaultPackage
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building) {
-			IUnit[] workers = new Unit[2];
+			IUnit[] workers = new IUnit[2];
 			workers[0] = level.SpawnUnit(workerType,
 										 level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
 										 building.Player);
@@ -94,10 +94,9 @@ namespace DefaultPackage
 
 		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
 			workerType = PackageManager.Instance
-									   .ActiveGame
-									   .GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")),
-													true);
-			tileType = PackageManager.Instance.ActiveGame.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")), true);
+									   .ActivePackage
+									   .GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")));
+			tileType = PackageManager.Instance.ActivePackage.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")));
 		}
 	}
 

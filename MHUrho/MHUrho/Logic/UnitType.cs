@@ -69,7 +69,7 @@ namespace MHUrho.Logic
 															 package.XmlDirectoryPath,
 															 Name);
 
-			var data = Plugin.TypeData;
+			//var data = Plugin.TypeData;
 
 			Model = XmlHelpers.GetModel(xml);
 			Material = XmlHelpers.GetMaterial(xml);
@@ -99,23 +99,23 @@ namespace MHUrho.Logic
 		/// <param name="tile">tile where the unit will spawn</param>
 		/// <param name="player">owner of the unit</param>
 		/// <returns>New unit of this type</returns>
-		public Unit CreateNewUnit(int unitID,
+		internal IUnit CreateNewUnit(int unitID,
 								Node unitNode,
 								ILevelManager level,
 								ITile tile,
 								IPlayer player) {
 
 
-			return Unit.Loader.CreateNew(unitID, unitNode, this, level, tile, player);
+			return Unit.CreateNew(unitID, unitNode, this, level, tile, player);
 		}
 
 
 
-		public UnitInstancePlugin GetNewInstancePlugin(IUnit unit, ILevelManager level) {
+		internal UnitInstancePlugin GetNewInstancePlugin(IUnit unit, ILevelManager level) {
 			return Plugin.CreateNewInstance(level, unit);
 		}
 
-		public UnitInstancePlugin GetInstancePluginForLoading(IUnit unit, ILevelManager level) {
+		internal UnitInstancePlugin GetInstancePluginForLoading(IUnit unit, ILevelManager level) {
 			return Plugin.GetInstanceForLoading(level, unit);
 		}
 

@@ -13,19 +13,33 @@ using MHUrho.UnitComponents;
 
 namespace MHUrho.Logic
 {
-	public class Projectile : Entity, IProjectile {
-		internal class Loader : ILoader {
+	class Projectile : Entity, IProjectile {
+		class Loader : IProjectileLoader {
 
-			public Projectile Projectile { get; private set; }
+			public IProjectile Projectile => loadingProjectile;
+
+			Projectile loadingProjectile;
 
 			List<DefaultComponentLoader> componentLoaders;
 
-			StProjectile storedProjectile;
+			readonly LevelManager level;
+			readonly Node node;
+			readonly StProjectile storedProjectile;
+			readonly ProjectileType type;
 
-			protected Loader(StProjectile storedProjectile)
+			public Loader(LevelManager level,
+						Node node,
+						StProjectile storedProjectile)
 			{
+				this.level = level;
+				this.node = node;
 				this.storedProjectile = storedProjectile;
 				this.componentLoaders = new List<DefaultComponentLoader>();
+
+				type = PackageManager.Instance.ActivePackage.GetProjectileType(storedProjectile.TypeID);
+				if (type == null) {
+					throw new ArgumentException($"Projectile type {storedProjectile.TypeID} was not loaded");
+				}
 			}
 
 			public static Projectile CreateNew(int ID,
@@ -72,45 +86,8 @@ namespace MHUrho.Logic
 			}
 
 
-			public static Loader StartLoading(LevelManager level,
-											Node node,
-											StProjectile storedProjectile)
+			public void StartLoading()
 			{
-				var type = PackageManager.Instance.ActiveGame.GetProjectileType(storedProjectile.TypeID);
-				if (type == null) {
-					throw new ArgumentException($"Projectile type {storedProjectile.TypeID} was not loaded");
-				}
-				var loader = new Loader(storedProjectile);
-				loader.Load(level, type, node);
-
-				return loader;
-
-			}
-
-			public void ConnectReferences(LevelManager level) {
-				Projectile.Player = level.GetPlayer(storedProjectile.PlayerID);
-
-				foreach (var componentLoader in componentLoaders) {
-					componentLoader.ConnectReferences(level);
-				}
-
-				Projectile.ProjectilePlugin.LoadState(new PluginDataWrapper(storedProjectile.UserPlugin, level));
-
-
-			}
-
-			public void FinishLoading()
-			{
-				storedProjectile = null;
-
-				foreach (var componentLoader in componentLoaders) {
-					componentLoader.FinishLoading();
-				}
-			}
-
-			void Load(LevelManager level,
-					ProjectileType type,
-					Node node) {
 				if (type.ID != storedProjectile.TypeID) {
 					throw new ArgumentException("provided type is not the type of the stored projectile");
 				}
@@ -119,26 +96,47 @@ namespace MHUrho.Logic
 
 				node.Position = storedProjectile.Position.ToVector3();
 
-				Projectile = new Projectile(instanceID, level, type);
-				node.AddComponent(Projectile);
+				loadingProjectile = new Projectile(instanceID, level, type);
+				node.AddComponent(loadingProjectile);
 
-				AddBasicComponents(Projectile, level);
+				AddBasicComponents(loadingProjectile, level);
 
-				node.NodeCollisionStart += Projectile.CollisionHandler;
+				node.NodeCollisionStart += loadingProjectile.CollisionHandler;
 
-				Projectile.ProjectilePlugin = Projectile.ProjectileType.GetInstancePluginForLoading(Projectile, level);
+				loadingProjectile.ProjectilePlugin = loadingProjectile.ProjectileType.GetInstancePluginForLoading(loadingProjectile, level);
 
 				foreach (var defaultComponent in storedProjectile.DefaultComponents) {
 					var componentLoader =
 						level.DefaultComponentFactory
 							.StartLoadingComponent(defaultComponent,
 													level,
-													Projectile.ProjectilePlugin);
+													loadingProjectile.ProjectilePlugin);
 
 					componentLoaders.Add(componentLoader);
-					Projectile.AddComponent(componentLoader.Component);
+					loadingProjectile.AddComponent(componentLoader.Component);
 				}
 			}
+
+			public void ConnectReferences() {
+				loadingProjectile.Player = level.GetPlayer(storedProjectile.PlayerID);
+
+				foreach (var componentLoader in componentLoaders) {
+					componentLoader.ConnectReferences();
+				}
+
+				loadingProjectile.ProjectilePlugin.LoadState(new PluginDataWrapper(storedProjectile.UserPlugin, level));
+
+
+			}
+
+			public void FinishLoading()
+			{
+				foreach (var componentLoader in componentLoaders) {
+					componentLoader.FinishLoading();
+				}
+			}
+
+
 
 			static void AddBasicComponents(Projectile projectile, ILevelManager level)
 			{
@@ -235,8 +233,12 @@ namespace MHUrho.Logic
 		}
 
 
+		public static IProjectileLoader GetLoader(LevelManager level, Node projectileNode, StProjectile storedProjectile)
+		{
+			return new Loader(level, projectileNode, storedProjectile);
+		}
 
-		internal static Projectile CreateNew(int ID,
+		public static Projectile CreateNew(int ID,
 											ILevelManager level,
 											IPlayer player,
 											Vector3 position,

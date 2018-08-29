@@ -19,14 +19,27 @@ namespace MHUrho.WorldMap
 {
 	public partial class Map : IMap, IDisposable {
 
-		internal class Loader : ILoader {
+		class Loader : IMapLoader {
 			
 			public Map Map { get; private set; }
 
+			readonly LevelManager level;
+			readonly Node mapNode;
+			readonly Octree octree;
+			readonly StMap storedMap;
+			readonly LoadingWatcher loadingProgress;
 
-			LoadingWatcher loadingProgress;
+			readonly List<ILoader> tileLoaders;
 
-			List<ILoader> tileLoaders;
+			public Loader(LevelManager level, Node mapNode, Octree octree, StMap storedMap, LoadingWatcher loadingProgress)
+			{
+				this.level = level;
+				this.mapNode = mapNode;
+				this.octree = octree;
+				this.storedMap = storedMap;
+				this.loadingProgress = loadingProgress;
+				tileLoaders = new List<ILoader>();
+			}
 
 			/// <summary>
 			/// Loads map data from storedMap
@@ -39,36 +52,7 @@ namespace MHUrho.WorldMap
 			/// <param name="mapNode">Scene node of the map</param>
 			/// <param name="storedMap">Protocol Buffers class containing stored map</param>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
-			public static Loader StartLoading(LevelManager level, Node mapNode, Octree octree, StMap storedMap, LoadingWatcher loadingProgress) {
-				var loader = new Loader(loadingProgress);
-				loader.Load(level, mapNode, octree, storedMap);
-				return loader;
-			}
-
-			public Loader(LoadingWatcher loadingProgress)
-			{
-				this.loadingProgress = loadingProgress;
-				tileLoaders = new List<ILoader>();
-			}
-
-			public void ConnectReferences(LevelManager level) {
-				foreach (var loader in tileLoaders) {
-					loader.ConnectReferences(level);
-				}
-			}
-
-			/// <summary>
-			/// Builds geometry and releases stored data
-			/// </summary>
-			public void FinishLoading() {
-				foreach (var loader in tileLoaders) {
-					loader.FinishLoading();
-				}
-
-				Map.BuildGeometry(loadingProgress);
-			}
-
-			void Load(LevelManager level, Node mapNode, Octree octree, StMap storedMap) {
+			public void StartLoading() {
 				Map = new Map(mapNode, octree, storedMap);
 				Map.levelManager = level;
 
@@ -90,7 +74,8 @@ namespace MHUrho.WorldMap
 									throw new Exception("Corrupted save file");
 								}
 
-								newTileLoader = BorderTile.Loader.StartLoading(borderTiles.Current, Map);
+								newTileLoader = BorderTile.GetLoader(Map, borderTiles.Current);
+								
 							}
 							else {
 								if (!tiles.MoveNext()) {
@@ -98,14 +83,15 @@ namespace MHUrho.WorldMap
 									throw new Exception("Corrupted save file");
 								}
 
-								newTileLoader = Tile.Loader.StartLoading(tiles.Current, Map);
+								newTileLoader = Tile.GetLoader(level, Map, tiles.Current);
 							}
 
+							newTileLoader.StartLoading();
 							tileLoaders.Add(newTileLoader);
 							Map.tiles[Map.GetTileIndex(x, y)] = newTileLoader.Tile;
 						}
 
-						loadingProgress.IncrementProgress(25.0f / Map.LengthWithBorders);
+						loadingProgress.PercentageUpdate(25.0f / Map.LengthWithBorders);
 					}
 				}
 				catch (IndexOutOfRangeException e) {
@@ -124,20 +110,43 @@ namespace MHUrho.WorldMap
 
 				Map.PathFinding = new AStar(Map);
 			}
+
+			
+
+			public void ConnectReferences() {
+				foreach (var loader in tileLoaders) {
+					loader.ConnectReferences();
+				}
+			}
+
+			/// <summary>
+			/// Builds geometry and releases stored data
+			/// </summary>
+			public void FinishLoading() {
+				foreach (var loader in tileLoaders) {
+					loader.FinishLoading();
+				}
+
+				Map.BuildGeometry(loadingProgress);
+			}
+
 		}
 
 		class BorderTile : ITile {
 
-			internal class Loader : ITileLoader {
+			class Loader : ITileLoader {
 
 				ITile ITileLoader.Tile => Tile;
 
 				public BorderTile Tile { get; private set; }
 
+				readonly Map map;
+				readonly StBorderTile storedTile;
 
-				protected Loader(BorderTile tile)
+				public Loader(Map map, StBorderTile storedTile)
 				{
-					this.Tile = tile;
+					this.map = map;
+					this.storedTile = storedTile;
 				}
 
 				public static StBorderTile Save(BorderTile borderTile)
@@ -159,12 +168,12 @@ namespace MHUrho.WorldMap
 				/// <param name="storedTile">Image of the tile</param>
 				/// <param name="map">Map this tile is in</param>
 				/// <returns>Partially initialized tile</returns>
-				public static Loader StartLoading(StBorderTile storedTile, Map map)
+				public void StartLoading()
 				{
-					return new Loader(new BorderTile(storedTile, map));
+					Tile = new BorderTile(storedTile, map);
 				}
 
-				public void ConnectReferences(LevelManager level)
+				public void ConnectReferences()
 				{
 
 				}
@@ -226,8 +235,11 @@ namespace MHUrho.WorldMap
 
 			public BorderType BorderType { get; private set; }
 
-			
-			
+
+			public static ITileLoader GetLoader(Map map, StBorderTile storedBorderTile)
+			{
+				return new Loader(map, storedBorderTile);
+			}
 
 			void ITile.AddUnit(IUnit unit) {
 				throw new InvalidOperationException("Cannot add unit to Border tile");
@@ -406,7 +418,7 @@ namespace MHUrho.WorldMap
 			Map newMap = new Map(mapNode, octree, size.X, size.Y);
 			newMap.levelManager = level;
 
-			TileType defaultTileType = PackageManager.Instance.ActiveGame.DefaultTileType;
+			TileType defaultTileType = PackageManager.Instance.ActivePackage.DefaultTileType;
 
 			for (int i = 0; i < newMap.tiles.Length; i++) {
 				IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.WidthWithBorders);
@@ -423,16 +435,21 @@ namespace MHUrho.WorldMap
 				}
 
 				if (i % newMap.LengthWithBorders == 0) {
-					loadingProgress.IncrementProgress(25.0f / newMap.LengthWithBorders);
+					loadingProgress.PercentageUpdate(25.0f / newMap.LengthWithBorders);
 				}
 			}
 
-			loadingProgress.EnterPhase("Creating pathfinding graph");
+			loadingProgress.TextUpdate("Creating pathfinding graph");
 			newMap.PathFinding = new AStar(newMap);
-			loadingProgress.IncrementProgress(5);
+			loadingProgress.PercentageUpdate(5);
 
 			newMap.BuildGeometry(loadingProgress);
 			return newMap;
+		}
+
+		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, StMap storedMap, LoadingWatcher loadingProgress)
+		{
+			return new Loader(level, mapNode, octree, storedMap, loadingProgress);
 		}
 
 		public StMap Save() 
