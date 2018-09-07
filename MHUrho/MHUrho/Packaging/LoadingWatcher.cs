@@ -15,11 +15,15 @@ namespace MHUrho.Packaging
 		string Text { get; }
 	}
 
-	interface ILoadingSignaler {
+	public interface ILoadingSignaler {
 		LoadingWatcher GetWatcherForSubsection(float subsectionSize);
 
 		void TextUpdate(string newText);
+
 		void PercentageUpdate(float change);
+
+		void TextAndPercentageUpdate(string newText, float change);
+
 		void FinishedLoading();
 	}
 

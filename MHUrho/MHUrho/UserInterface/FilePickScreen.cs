@@ -50,7 +50,7 @@ namespace MHUrho.UserInterface
 
 			FileNames = new List<NameTextPair>();
 
-			foreach (var file in MyGame.Files.GetFilesInDirectory(MyGame.Files.SaveGameDirAbsolutePath)) {
+			foreach (var file in MyGame.Files.GetFSEntriesInDirectory(MyGame.Files.SaveGameDirAbsolutePath, true, false)) {
 				FileNames.Add(new NameTextPair(Path.GetFileName(file)));
 			}
 
@@ -207,9 +207,6 @@ namespace MHUrho.UserInterface
 		{
 			LineEdit.Text = ((Text)FileView.SelectedItem).Value;
 			TotalMatchSelected(LineEdit.Text);
-		}
-
-
-	
+		}	
 	}
 }

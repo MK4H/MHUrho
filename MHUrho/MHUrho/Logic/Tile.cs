@@ -38,11 +38,13 @@ namespace MHUrho.Logic
 
 			public static StTile Save(Tile tile)
 			{
-				
-				var storedTile = new StTile();
-				storedTile.TopLeftPosition = tile.TopLeft.ToStIntVector2();
-				storedTile.Height = tile.TopLeftHeight;
-				storedTile.TileTypeID = tile.Type.ID;
+
+				var storedTile = new StTile
+								{
+									TopLeftPosition = tile.TopLeft.ToStIntVector2(),
+									Height = tile.TopLeftHeight,
+									TileTypeID = tile.Type.ID
+								};
 
 				foreach (var passingUnit in tile.Units) {
 					storedTile.UnitIDs.Add(passingUnit.ID);

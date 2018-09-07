@@ -50,7 +50,7 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public MenuTouchController(MyGame game) : base(game) {
+		public MenuTouchController() {
 			//TODO: TEMPORARY, probably move to UIManager or something
 
 			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml");

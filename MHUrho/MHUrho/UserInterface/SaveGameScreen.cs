@@ -105,13 +105,12 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 		Screen screen;
 
-		public SaveGameScreen(MyGame game, MenuUIManager menuUIManager)
+		public SaveGameScreen(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 		}
 
@@ -124,7 +123,7 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen = new Screen(game, menuUIManager);
+			screen = new Screen(Game, menuUIManager);
 		}
 
 		public override void Hide()

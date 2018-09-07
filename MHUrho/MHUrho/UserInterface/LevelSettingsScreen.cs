@@ -12,7 +12,7 @@ namespace MHUrho.UserInterface
 
 			LevelSettingsScreen proxy;
 
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
 			LevelRep Level => proxy.Level;
@@ -86,14 +86,13 @@ namespace MHUrho.UserInterface
 		//TODO: Ensure that Show cannot be called with Level null, that level is not changed after show etc.
 		public LevelRep Level { get; set; }
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
-		public LevelSettingsScreen(MyGame game, MenuUIManager menuUIManager)
+		public LevelSettingsScreen(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 		}
 

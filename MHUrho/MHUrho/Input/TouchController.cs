@@ -10,13 +10,12 @@ namespace MHUrho.Input
 	{
 		public bool Enabled { get; private set; }
 
-		protected MyGame Game;
+		protected MyGame Game => MyGame.Instance;
 		protected Urho.Input Input => Game.Input;
 
 		protected UI UI => Game.UI;
 
-		protected TouchController(MyGame game) {
-			this.Game = game;
+		protected TouchController() {
 			Enabled = false;
 		}
 

@@ -12,7 +12,7 @@ namespace MHUrho.UserInterface
 		class Screen : IDisposable {
 
 			readonly LoadingScreen proxy;
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
 			ILoadingWatcher LoadingWatcher => proxy.LoadingWatcher;
@@ -85,14 +85,13 @@ namespace MHUrho.UserInterface
 		//TODO: Restrict setting only when not visible etc.
 		public ILoadingWatcher LoadingWatcher { get; set; }
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
-		public LoadingScreen(MyGame game, MenuUIManager menuUIManager)
+		public LoadingScreen(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 		}
 

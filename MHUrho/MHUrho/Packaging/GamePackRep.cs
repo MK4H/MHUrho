@@ -10,7 +10,7 @@ using Urho.Urho2D;
 namespace MHUrho.Packaging
 {
     public class GamePackRep {
-		static readonly XName PackageElement = PackageManager.XMLNamespace + "package";
+		static readonly XName PackageElement = PackageManager.XMLNamespace + "gamePack";
 		static readonly XName NameAttribute = "name";
 		static readonly XName DescriptionElement = PackageManager.XMLNamespace + "description";
 		static readonly XName ThumbnailElement = PackageManager.XMLNamespace + "thumbnailPath";
@@ -64,7 +64,7 @@ namespace MHUrho.Packaging
 			
 		}
 
-		public GamePack LoadPack(XmlSchemaSet schemas, LoadingWatcher loadingProgress)
+		public GamePack LoadPack(XmlSchemaSet schemas, ILoadingSignaler loadingProgress)
 		{
 			return new GamePack(pathToXml, this, schemas, loadingProgress);
 		}

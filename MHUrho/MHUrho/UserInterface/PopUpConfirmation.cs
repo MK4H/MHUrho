@@ -11,6 +11,8 @@ namespace MHUrho.UserInterface
     class PopUpConfirmation {
 		public bool Waiting => popUpWindow.Visible;
 
+		MyGame Game => MyGame.Instance;
+
 		Window popUpWindow;
 		Button confirmButton;
 		Button cancelButton;
@@ -21,10 +23,10 @@ namespace MHUrho.UserInterface
 		Action<bool> currentHandler;
 		CancellationTokenSource timeoutCancel;
 
-		public PopUpConfirmation(MyGame game, MenuUIManager uiManager)
+		public PopUpConfirmation(MenuUIManager uiManager)
 		{
-			game.UI.LoadLayoutToElement(game.UI.Root, game.ResourceCache, "UI/PopUpConfirmationLayout.xml");
-			this.popUpWindow = (Window) game.UI.Root.GetChild("PopUpConfirmationWindow");
+			Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/PopUpConfirmationLayout.xml");
+			this.popUpWindow = (Window)Game.UI.Root.GetChild("PopUpConfirmationWindow");
 			popUpWindow.Visible = false;
 
 			titleElem = (Text) popUpWindow.GetChild("Title", true);

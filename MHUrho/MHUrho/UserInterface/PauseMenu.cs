@@ -17,7 +17,7 @@ namespace MHUrho.UserInterface
 			const string ExitButton = "Exit";
 
 			readonly PauseMenu proxy;
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 			UI UI => Game.UI;
 
@@ -98,15 +98,14 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 
-		public PauseMenu(MyGame game, MenuUIManager menuUIManager)
+		public PauseMenu(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 		}
 

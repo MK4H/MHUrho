@@ -73,7 +73,8 @@ namespace MHUrho.Input
 
 		
 
-		public GameTouchController(MyGame game, ILevelManager level, Octree octree, IPlayer player, CameraMover cameraMover, float sensitivity = 0.1f) : base(game) {
+		public GameTouchController(ILevelManager level, Octree octree, IPlayer player, CameraMover cameraMover, float sensitivity = 0.1f) 
+		{
 			this.cameraMover = cameraMover;
 			this.Sensitivity = sensitivity;
 			this.Level = level;

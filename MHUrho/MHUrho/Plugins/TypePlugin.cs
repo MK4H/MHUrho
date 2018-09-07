@@ -14,7 +14,7 @@ namespace MHUrho.Plugins
 		/// Called to initialize the instance
 		/// </summary>
 		/// <param name="extensionElement">extension element of the unitType xml description or null if there is none</param>
-		/// <param name="packageManager">package manager for connecting to other entityTypes</param>
-		public abstract void Initialize(XElement extensionElement, PackageManager packageManager);
+		/// <param name="package">TODO: comment</param>
+		public abstract void Initialize(XElement extensionElement, GamePack package);
 	}
 }

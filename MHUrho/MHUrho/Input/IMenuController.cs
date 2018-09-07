@@ -28,9 +28,5 @@ namespace MHUrho.Input
 		void SavePausedLevel(string toPath);
 
 		void StartLoadingLevel(LevelRep level, bool editorMode);
-
-		void StartLoadingLevel(string savePath, bool editorMode);
-
-		void StartLoadingDefaultLevel(IntVector2 mapSize);
 	}
 }

@@ -22,8 +22,7 @@ namespace MHUrho.UserInterface
 
 		protected IMap Map => Level.Map;
 
-		protected GameUIManager(MyGame game, ILevelManager level)
-			:base(game)
+		protected GameUIManager(ILevelManager level)
 		{
 			this.Level = level;
 		}

@@ -76,7 +76,16 @@ namespace MHUrho.Droid {
 			return System.IO.File.Exists(path);
 		}
 
-		public override IEnumerable<string> GetFilesInDirectory(string dirPath)
+		public override IEnumerable<string> GetFSEntriesInDirectory(string dirPath, bool files, bool directories)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override IEnumerable<string> GetFSEntriesInDirectory(string dirPath,
+															bool files,
+															bool directories,
+															string searchPattern,
+															SearchOption searchOption)
 		{
 			throw new NotImplementedException();
 		}

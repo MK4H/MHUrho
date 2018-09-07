@@ -15,13 +15,12 @@ namespace MHUrho.Input
 
 		public float MouseSensitivity { get; set; }
 
-		protected MyGame Game;
+		protected MyGame Game => MyGame.Instance;
 
 		protected Urho.Input Input => Game.Input;
 		protected UI UI => Game.UI;
 
-		protected MandKController(MyGame game) {
-			this.Game = game;
+		protected MandKController() {
 			this.MouseSensitivity = 0.2f;
 			this.Enabled = false;
 

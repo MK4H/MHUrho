@@ -22,7 +22,7 @@ namespace MHUrho.UserInterface
 
 			readonly OptionsScreen proxy;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 
 
 			readonly Window window;
@@ -69,7 +69,6 @@ namespace MHUrho.UserInterface
 				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/OptionsLayout.xml");
 
 				window = (Window)Game.UI.Root.GetChild("Options");
-				window.Visible = false;
 
 				((Button)window.GetChild("Save", true)).Released += SaveButton_Released;
 				((Button)window.GetChild("Exit", true)).Released += BackButton_Released;
@@ -434,26 +433,32 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
-		public OptionsScreen(MyGame game, MenuUIManager menuUIManager)
+		public OptionsScreen(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 
 		}
 
 		public override void Show()
 		{
+			if (screen != null) {
+				return;
+			}
 
 			screen = new Screen(this);
 		}
 
 		public override void Hide()
 		{
+			if (screen == null) {
+				return;
+			}
+
 			screen.Dispose();
 			screen = null;
 		}

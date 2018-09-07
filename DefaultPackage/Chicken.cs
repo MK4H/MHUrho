@@ -47,8 +47,8 @@ namespace DefaultPackage
 			return true;
 		}
 
-		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
-			ProjectileType = packageManager.ActivePackage.GetProjectileType("EggProjectile");
+		public override void Initialize(XElement extensionElement, GamePack package) {
+			ProjectileType = package.GetProjectileType("EggProjectile");
 		}
 	}
 

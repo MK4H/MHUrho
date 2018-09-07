@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MHUrho.Logic;
 
-namespace MHUrho.WorldMap
+namespace MHUrho.Logic
 {
     interface ITileLoader : ILoader
     {

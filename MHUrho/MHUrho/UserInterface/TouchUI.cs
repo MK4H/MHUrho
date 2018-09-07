@@ -25,8 +25,8 @@ namespace MHUrho.UserInterface
 		private UIElement selected;
 
 
-		public TouchUI(MyGame game, GameTouchController gameTouchController)
-			:base(game, gameTouchController.Level)
+		public TouchUI(GameTouchController gameTouchController)
+			:base(gameTouchController.Level)
 		{
 			this.touchInputCtl = gameTouchController;
 		}

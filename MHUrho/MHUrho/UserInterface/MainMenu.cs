@@ -14,7 +14,7 @@ namespace MHUrho.UserInterface
 			readonly MainMenu proxy;
 
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 
 			readonly Window window;
 
@@ -22,7 +22,7 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/FirstTryMenu.xml");
+				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/MainMenuLayout.xml");
 				window = (Window)Game.UI.Root.GetChild("MainMenu");
 
 				((Button)window.GetChild("StartButton", true)).Released += ButtonPressed;
@@ -88,14 +88,13 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
-		public MainMenu(MyGame game, MenuUIManager menuUIManager)
+		public MainMenu(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 		}
 

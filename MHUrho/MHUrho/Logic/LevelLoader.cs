@@ -20,7 +20,7 @@ namespace MHUrho.Logic
 
 				protected readonly Loader Loader;
 
-				protected MyGame Game => Loader.game;
+				protected MyGame Game => MyGame.Instance;
 				protected LoadingWatcher LoadingWatcher => Loader.loadingWatcher;
 
 				protected readonly bool EditorMode;
@@ -38,8 +38,7 @@ namespace MHUrho.Logic
 				protected LevelManager InitializeLevel()
 				{
 					LoadingWatcher.TextUpdate("Initializing level");
-					var scene = new Scene(Game.Context);
-					scene.UpdateEnabled = false;
+					var scene = new Scene(Game.Context) {UpdateEnabled = false};
 					var octree = scene.CreateComponent<Octree>();
 					var physics = scene.CreateComponent<PhysicsWorld>();
 					//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
@@ -186,10 +185,8 @@ namespace MHUrho.Logic
 
 				public override async Task<ILevelManager> StartLoading()
 				{
-					await MyGame.InvokeOnMainSafeAsync(LoadPackage);
-
 					LoadingWatcher.TextUpdate("Initializing level");
-					Level = MyGame.InvokeOnMainSafe<LevelManager>(InitializeLevel);
+					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
 					PlayerInsignia.InitInsignias(PackageManager.Instance);
 
@@ -293,11 +290,6 @@ namespace MHUrho.Logic
 					}
 				}
 
-				void LoadPackage()
-				{
-					PackageManager.Instance.LoadPackage(PackageName, LoadingWatcher.GetWatcherForSubsection(20));
-				}
-
 				Task<IMapLoader> LoadMap()
 				{
 					Node mapNode = Level.LevelNode.CreateChild("MapNode");
@@ -313,43 +305,28 @@ namespace MHUrho.Logic
 				}
 			}
 
-			public ILevelManager Level => throw new NotImplementedException();
-
 			public ILoadingWatcher LoadingWatcher => loadingWatcher;
 
 			public Task<ILevelManager> CurrentLoading { get; private set; }
 
 			readonly LoadingWatcher loadingWatcher;
 
-			readonly MyGame game;
+
 
 			CommonLevelLoader loaderType;
 
-			public Loader(MyGame game)
+			public Loader()
 			{
-				this.game = game;
 				this.CurrentLoading = null;
 				loadingWatcher = new LoadingWatcher();
 			}
 
-			public Task<ILevelManager> Load(StLevel storedLevel, bool editorMode)
+			public Task<ILevelManager> Load(LevelRep levelRep, StLevel storedLevel, bool editorMode)
 			{
 				loaderType = new SavedLevelLoader(this, storedLevel, editorMode);
 
 				CurrentLoading = loaderType.StartLoading();
 				return CurrentLoading;
-			}
-
-			public async Task<ILevelManager> LoadFrom(Stream stream, bool editorMode, bool leaveOpen = false)
-			{
-				var storedLevel = await Task.Run<StLevel>(() => StLevel.Parser.ParseFrom(stream));
-				ILevelManager level = await Load(storedLevel, editorMode);
-
-				if (!leaveOpen) {
-					stream.Close();
-				}
-
-				return level;
 			}
 
 			/// <summary>
@@ -358,7 +335,7 @@ namespace MHUrho.Logic
 			/// <param name="mapSize">Size of the map to create</param>
 			/// <param name="packages">packages to load</param>
 			/// <returns>Loaded default level</returns>
-			public Task<ILevelManager> LoadDefaultLevel(IntVector2 mapSize)
+			public Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize)
 			{
 				var newLoaderType = new DefaultLevelLoader(this, mapSize);
 				loaderType = newLoaderType;

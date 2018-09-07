@@ -36,6 +36,7 @@ namespace MHUrho.UserInterface
 
 			var thumbnail = (BorderImage)checkBox.GetChild("Thumbnail", true);
 			thumbnail.Texture = pack.Thumbnail;
+			thumbnail.ImageRect = new IntRect(0, 0, pack.Thumbnail.Width, pack.Thumbnail.Height);
 
 			var name = (Text)checkBox.GetChild("NameText", true);
 			name.Value = pack.Name;
@@ -63,14 +64,17 @@ namespace MHUrho.UserInterface
 
 		public void Select()
 		{
+			//If checked changed, automatically calls CheckBoxToggled
 			checkBox.Checked = true;
 		}
 
 
 		public void Deselect()
 		{
+			//If checked changed, automatically calls CheckBoxToggled
 			checkBox.Checked = false;
 		}
+
 		void CheckBoxToggled(ToggledEventArgs args)
 		{
 			if (args.State) {

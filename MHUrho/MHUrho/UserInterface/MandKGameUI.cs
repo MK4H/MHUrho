@@ -47,18 +47,18 @@ namespace MHUrho.UserInterface
 
 
 
-		public MandKGameUI(MyGame game, GameMandKController input, CameraMover cameraMover) 
-			:base(game, input.Level)
+		public MandKGameUI(GameMandKController input, CameraMover cameraMover) 
+			:base(input.Level)
 		{
 			this.InputCtl = input;
 			this.cameraMover = cameraMover;
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
 			//TODO: User texture
-			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this, game);
+			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this);
 
 			UI.Root.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
-			UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/GameLayout.xml");
+			UI.LoadLayoutToElement(UI.Root, Game.ResourceCache, "UI/GameLayout.xml");
 
 			gameUI = UI.Root.GetChild("GameUI");
 			

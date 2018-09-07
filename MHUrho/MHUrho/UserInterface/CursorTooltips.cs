@@ -10,20 +10,19 @@ namespace MHUrho.UserInterface
     public class CursorTooltips : IDisposable
     {
 		MandKGameUI uiCtl;
-		MyGame game;
+		MyGame Game => MyGame.Instance;
 
-		protected UI UI => game.UI;
-		protected Urho.Input Input => game.Input;
+		protected UI UI => Game.UI;
+		protected Urho.Input Input => Game.Input;
 
 		readonly Texture2D images;
 
 		List<UIElement> elements = new List<UIElement>();
 
-		public CursorTooltips(Texture2D images, MandKGameUI uiCtl, MyGame game)
+		public CursorTooltips(Texture2D images, MandKGameUI uiCtl)
 		{
 			this.images = images;
 			this.uiCtl = uiCtl;
-			this.game = game;
 		}
 
 		public Text AddText()

@@ -59,7 +59,7 @@ namespace MHUrho.Logic
 																 package.XmlDirectoryPath,
 																 Name);
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-										 package.PackageManager);
+										 package);
 		}
 
 		public void ClearCache()

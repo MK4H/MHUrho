@@ -23,13 +23,13 @@ namespace MHUrho.Input
 
 		IGameController pausedLevelController;
 
-		public MenuMandKController(MyGame game) : base(game)
+		public MenuMandKController()
 		{
-			UIController = new MandKMenuUI(game, this);
+			UIController = new MandKMenuUI(this);
 		}
 
 		public IGameController GetGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player) {
-			return new GameMandKController(Game, levelManager, octree, player, cameraMover);
+			return new GameMandKController(levelManager, octree, player, cameraMover);
 		}
 
 		public void SwitchToPauseMenu(IGameController gameController)
@@ -47,33 +47,6 @@ namespace MHUrho.Input
 			//This is correct, dont await, leave UI responsive
 			ILevelLoader loader = level.StartLoading(editorMode);
 			
-			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
-		}
-
-		public void StartLoadingLevel(string savePath, bool editorMode)
-		{
-			if (pausedLevelController != null) {
-				EndPausedLevel();
-			}
-
-			//This is correct, dont await, leave UI responsive
-			ILevelLoader loader = LevelManager.GetLoader(Game);
-			
-			//TODO: Try catch if file failed to open
-			loader.LoadFrom(MyGame.Files.OpenDynamicFile(savePath, System.IO.FileMode.Open, FileAccess.Read), editorMode);
-						
-			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
-		}
-
-		public void StartLoadingDefaultLevel(IntVector2 mapSize)
-		{
-			if (pausedLevelController != null) {
-				EndPausedLevel();
-			}
-
-			var loader = LevelManager.GetLoader(Game);
-
-			loader.LoadDefaultLevel(mapSize);
 			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
 		}
 

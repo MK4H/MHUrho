@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<elements>
+	<element type="DirectoryEntry">
+		<attribute name="Font" value="Font;Fonts/Anonymous Pro.ttf" />
+		<attribute name="Font Size" value="11" />
+		<attribute name="Color" value="0.5 0.5 1" />
+	</element>
+
+	<element type="FileEntry">
+		<attribute name="Font" value="Font;Fonts/Anonymous Pro.ttf" />
+		<attribute name="Font Size" value="11" />
+		<attribute name="Color" value="0.85 0.85 0.85" />
+	</element>
+</elements>
+

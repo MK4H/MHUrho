@@ -37,6 +37,8 @@ namespace MHUrho.Packaging
 		/// </summary>
 		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
+		const string defaultIconPath = "Textures/xamarin.png";
+		public Texture2D DefaultIcon { get; private set; }
 
 		public GamePack ActivePackage { get; private set; }
 
@@ -62,7 +64,17 @@ namespace MHUrho.Packaging
 				Log.Write(LogLevel.Error, $"Error loading GamePack schema: {e}");
 				if (Debugger.IsAttached) Debugger.Break();
 				//Reading of static file of this app failed, something is horribly wrong, die
-				//TODO: Error reading static data of app
+				//TODO: Error reading static data of app, game data corrupted
+			}
+
+			try {
+				;
+				Instance.DefaultIcon = resourceCache.GetTexture2D(defaultIconPath);
+			}
+			catch (IOException e) {
+				Log.Write(LogLevel.Error, $"Error loading the default icon at {defaultIconPath}");
+				if (Debugger.IsAttached) Debugger.Break();
+				//TODO: Error loading the default icon, game corrupted
 			}
 
 			foreach (var path in MyGame.Files.PackagePaths) {
@@ -70,19 +82,27 @@ namespace MHUrho.Packaging
 			}
 		}
 
-		public void LoadPackage(string packageName, 
-								LoadingWatcher loadingProgress)
+		public GamePack LoadPackage(string packageName, 
+								ILoadingSignaler loadingProgress = null)
 		{
+			return LoadPackage(availablePacks[packageName], loadingProgress);
+		}
+
+		public GamePack LoadPackage(GamePackRep package, ILoadingSignaler loadingProgress = null)
+		{
+			if (loadingProgress == null) {
+				loadingProgress = new LoadingWatcher();
+			}
+
 			loadingProgress.TextAndPercentageUpdate("Clearing previous games", 5);
 			if (ActivePackage != null) {
 				UnloadActivePack();
 			}
 
-			var chosenPackage = availablePacks[packageName];
+			resourceCache.AddResourceDir(package.XmlDirectoryPath, 1);
 
-			resourceCache.AddResourceDir(chosenPackage.XmlDirectoryPath,1);
-
-			ActivePackage = chosenPackage.LoadPack(schemas, loadingProgress);
+			ActivePackage = package.LoadPack(schemas, loadingProgress);
+			return ActivePackage;
 		}
 
 		public GamePackRep GetGamePack(string name) {
@@ -296,5 +316,6 @@ namespace MHUrho.Packaging
 			resourceCache.RemoveResourceDir(package.XmlDirectoryPath);
 			package.UnLoad();
 		}
+
 	}
 }

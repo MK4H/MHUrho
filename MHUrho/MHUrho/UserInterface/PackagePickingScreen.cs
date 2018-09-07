@@ -13,7 +13,7 @@ namespace MHUrho.UserInterface
 		class Screen : IDisposable {
 
 			readonly PackagePickingScreen proxy;
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
 
@@ -68,7 +68,9 @@ namespace MHUrho.UserInterface
 			{
 				foreach (var item in items) {
 					if (item.Element == listView.SelectedItem) {
-
+						//TODO: Maybe switch to loading screen
+						MenuUIManager.SwitchToLevelPickingScreen(PackageManager.Instance.LoadPackage(item.Pack));
+						return;
 					}
 				}
 			}
@@ -85,6 +87,9 @@ namespace MHUrho.UserInterface
 						item.Deselect();
 					}
 				}
+
+				args.Select();
+				listView.Selection = listView.FindItem(args.Element);
 			}
 		}
 
@@ -103,14 +108,13 @@ namespace MHUrho.UserInterface
 
 
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
-		public PackagePickingScreen(MyGame game, MenuUIManager menuUIManager)
+		public PackagePickingScreen(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 		}
 

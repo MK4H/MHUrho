@@ -116,9 +116,9 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
-		public static ILevelLoader GetLoader(MyGame game)
+		public static ILevelLoader GetLoader()
 		{
-			return new Loader(game);
+			return new Loader();
 		}
 
 		public StLevel Save() {

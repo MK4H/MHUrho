@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using Urho.Gui;
+using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
@@ -14,7 +15,7 @@ namespace MHUrho.UserInterface
 
 			LevelPickingScreen proxy;
 
-			MyGame Game => proxy.game;
+			MyGame Game => proxy.Game;
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
 			Window window;
@@ -22,18 +23,22 @@ namespace MHUrho.UserInterface
 			Button editButton;
 			Button playButton;
 
-			List<LevelPickingItem> items;
+			const string newLevelItemTexturePath = "Textures/NewLevelItem.png";
+			readonly Texture2D newLevelItemTexture;
+
+			readonly List<LevelPickingItem> items;
 
 			public Screen(LevelPickingScreen proxy)
 			{
 				this.proxy = proxy;
 
-				GetLevels();
+				items = new List<LevelPickingItem>();
+
+				newLevelItemTexture = PackageManager.Instance.GetTexture2D(newLevelItemTexturePath);
 
 				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/LevelPickingLayout.xml");
 
 				window = (Window)Game.UI.Root.GetChild("LevelPickingWindow");
-				window.Visible = false;
 
 				listView = (ListView)window.GetChild("ListView");
 
@@ -43,6 +48,8 @@ namespace MHUrho.UserInterface
 				editButton.Released += EditButtonReleased;
 				playButton.Released += PlayButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
+
+				GetLevels(listView);
 			}
 
 			public void Dispose()
@@ -50,6 +57,10 @@ namespace MHUrho.UserInterface
 				editButton.Released -= EditButtonReleased;
 				playButton.Released -= PlayButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released -= BackButtonReleased;
+
+				foreach (var item in items) {
+					item.Dispose();
+				}
 
 				window.RemoveAllChildren();
 				window.Remove();
@@ -60,10 +71,12 @@ namespace MHUrho.UserInterface
 				playButton.Dispose();
 			}
 
-			void GetLevels()
+			void GetLevels(ListView listView)
 			{
+				AddItem(new LevelPickingNewLevelItem(Game, newLevelItemTexture, "Create New Level"), listView);
+				
 				foreach (var level in proxy.Package.Levels) {
-					items.Add(new LevelPickingLevelItem(level, Game));
+					AddItem(new LevelPickingLevelItem(level, Game), listView);
 				}
 			}
 
@@ -106,7 +119,32 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchBack();
 			}
 
-			
+			void ItemSelected(LevelPickingItem selectedItem)
+			{
+				foreach (var item in items) {
+					if (selectedItem != item) {
+						item.Deselect();
+					}
+				}
+
+				listView.Selection = listView.FindItem(selectedItem.Element);
+
+				if (selectedItem is LevelPickingNewLevelItem) {
+					playButton.SetStyle("DisabledButton");
+					playButton.Enabled = false;
+				}
+				else {
+					playButton.SetStyleAuto();
+					playButton.Enabled = true;
+				}
+			}
+
+			void AddItem(LevelPickingItem newItem, ListView listView)
+			{
+				items.Add(newItem);
+				newItem.Selected += ItemSelected;
+				listView.AddItem(newItem.Element);
+			}
 		}
 
 		//TODO: Check this if it is null, prohibit changing when the screen is visible etc.
@@ -124,14 +162,13 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		readonly MyGame game;
+		MyGame Game => MyGame.Instance;
 		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
-		public LevelPickingScreen(MyGame game, MenuUIManager menuUIManager)
+		public LevelPickingScreen(MenuUIManager menuUIManager)
 		{
-			this.game = game;
 			this.menuUIManager = menuUIManager;
 
 		}

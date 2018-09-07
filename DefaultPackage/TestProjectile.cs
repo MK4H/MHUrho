@@ -41,7 +41,7 @@ namespace DefaultPackage
 			
 		}
 
-		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
+		public override void Initialize(XElement extensionElement, GamePack package) {
 			var speedElement = XmlHelpers.GetChild(extensionElement, "speed");
 			Speed = XmlHelpers.GetFloat(speedElement);
 		}

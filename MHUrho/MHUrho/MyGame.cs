@@ -22,6 +22,8 @@ namespace MHUrho
 {
 	public class MyGame : Application
 	{
+		public static MyGame Instance { get; private set; }
+
 		public static FileManager Files { get; set; }
 
 		public AppOptions Config { get; private set; }
@@ -92,6 +94,7 @@ namespace MHUrho
 
 		protected override void Start()
 		{
+			Instance = this;
 			Graphics.WindowTitle = "MHUrho";
 
 			mainThreadID = Thread.CurrentThread.ManagedThreadId;
@@ -119,10 +122,10 @@ namespace MHUrho
 
 			if (Platform == Platforms.Android ||
 				Platform == Platforms.iOS) {
-				ControllerFactory = new TouchFactory(this);
+				ControllerFactory = new TouchFactory();
 			}
 			else {
-				ControllerFactory = new MandKFactory(this);
+				ControllerFactory = new MandKFactory();
 			}
 
 			menuController = ControllerFactory.CreateMenuController();

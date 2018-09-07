@@ -36,7 +36,7 @@ namespace MHUrho.Logic
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-							package.PackageManager);
+							package);
 		}
 
 		public void ClearCache()

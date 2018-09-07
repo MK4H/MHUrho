@@ -77,13 +77,13 @@ namespace MHUrho.Input
 		//For storing the cursor visibility on game pause
 		bool cursorVisible;
 
-		public GameMandKController(MyGame game, ILevelManager level, Octree octree, IPlayer player, CameraMover cameraMover) : base(game) {
+		public GameMandKController(ILevelManager level, Octree octree, IPlayer player, CameraMover cameraMover) : base() {
 			this.camera = cameraMover;
 			this.octree = octree;
 			this.Level = level;
 			this.DoOnlySingleRaycasts = true;
 			this.Player = player;
-			this.UIManager = new MandKGameUI(game, this, cameraMover);
+			this.UIManager = new MandKGameUI(this, cameraMover);
 			this.keyDownActions = new Dictionary<Key, Action<KeyDownEventArgs>>();
 			this.keyUpActions = new Dictionary<Key, Action<KeyUpEventArgs>>();
 			this.keyRepeatActions = new Dictionary<Key, Action<KeyDownEventArgs>>();

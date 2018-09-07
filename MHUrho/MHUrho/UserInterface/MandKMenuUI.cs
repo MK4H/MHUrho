@@ -15,8 +15,8 @@ namespace MHUrho.UserInterface
 {
     class MandKMenuUI : MenuUIManager {
 
-		public MandKMenuUI(MyGame game, MenuMandKController menuController )
-			: base(game, menuController)
+		public MandKMenuUI(MenuMandKController menuController )
+			: base(menuController)
 		{
 
 		}

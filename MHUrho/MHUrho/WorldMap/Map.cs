@@ -53,8 +53,7 @@ namespace MHUrho.WorldMap
 			/// <param name="storedMap">Protocol Buffers class containing stored map</param>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
 			public void StartLoading() {
-				Map = new Map(mapNode, octree, storedMap);
-				Map.levelManager = level;
+				Map = new Map(mapNode, octree, storedMap) {levelManager = level};
 
 				foreach (var storedMapTarget in storedMap.MapRangeTargets) {
 					var newTarget = MapRangeTarget.Load(level, storedMapTarget);
@@ -151,12 +150,14 @@ namespace MHUrho.WorldMap
 
 				public static StBorderTile Save(BorderTile borderTile)
 				{
-					var stBorderTile = new StBorderTile();
-					stBorderTile.TopLeftPosition = borderTile.TopLeft.ToStIntVector2();
-					stBorderTile.TopLeftHeight = borderTile.TopLeftHeight;
-					stBorderTile.TopRightHeight = borderTile.TopRightHeight;
-					stBorderTile.BotLeftHeight = borderTile.BottomLeftHeight;
-					stBorderTile.BotRightHeight = borderTile.BottomRightHeight;
+					var stBorderTile = new StBorderTile
+										{
+											TopLeftPosition = borderTile.TopLeft.ToStIntVector2(),
+											TopLeftHeight = borderTile.TopLeftHeight,
+											TopRightHeight = borderTile.TopRightHeight,
+											BotLeftHeight = borderTile.BottomLeftHeight,
+											BotRightHeight = borderTile.BottomRightHeight
+										};
 					return stBorderTile;
 				}
 
@@ -376,6 +377,11 @@ namespace MHUrho.WorldMap
 
 		public event Action<ITile> TileHeightChanged;
 
+		public static IntVector2 ChunkSize => new IntVector2(50, 50);
+		public static IntVector2 MinSize => ChunkSize;
+		public static IntVector2 MaxSize => ChunkSize * 10;
+
+
 		readonly ITile[] tiles;
 
 		readonly Node node;
@@ -415,8 +421,7 @@ namespace MHUrho.WorldMap
 		/// <returns>Fully created map</returns>
 		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IntVector2 size, LoadingWatcher loadingProgress) 
 		{
-			Map newMap = new Map(mapNode, octree, size.X, size.Y);
-			newMap.levelManager = level;
+			Map newMap = new Map(mapNode, octree, size.X, size.Y) {levelManager = level};
 
 			TileType defaultTileType = PackageManager.Instance.ActivePackage.DefaultTileType;
 
@@ -455,9 +460,11 @@ namespace MHUrho.WorldMap
 		public StMap Save() 
 		{
 			var storedMap = new StMap();
-			var stSize = new StIntVector2();
-			stSize.X = Width;
-			stSize.Y = Length;
+			var stSize = new StIntVector2
+						{
+							X = Width,
+							Y = Length
+						};
 			storedMap.Size = stSize;
 
 			foreach (var tile in tiles) {
@@ -1408,7 +1415,7 @@ namespace MHUrho.WorldMap
 		void BuildGeometry(LoadingWatcher loadingProgress)
 		{
 			graphics = MapGraphics.Build(this, 
-										 new IntVector2(50, 50),
+										 ChunkSize,
 										 loadingProgress);
 		}
 

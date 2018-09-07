@@ -12,21 +12,9 @@ using Urho.Resources;
 using Urho.Urho2D;
 
 namespace MHUrho.Packaging {
+
 	public class GamePack : IDisposable {
 		const string DefaultThumbnailPath = "Textures/xamarin.png";
-
-		const string TileTypeGroupName = "tileTypes";
-		const string TileTypeItemName = "tileType";
-		const string UnitTypeGroupName = "unitTypes";
-		const string UnitTypeItemName = "unitType";
-		const string BuildingTypeGroupName = "buildingTypes";
-		const string BuildingTypeItemName = "buildingType";
-		const string ProjectileTypeGroupName = "projectileTypes";
-		const string ProjectileTypeItemName = "projectileType";
-		const string ResourceTypeGroupName = "resourceTypes";
-		const string ResourceTypeItemName = "resourceType";
-		const string PlayerAITypeGroupName = "playerAITypes";
-		const string PlayerAITypeItemName = "playerAIType";
 
 		public GamePackRep GamePackRep { get; private set; }
 
@@ -74,27 +62,31 @@ namespace MHUrho.Packaging {
 		public Texture2D BuildingIconTexture { get; private set; }
 		public Texture2D PlayerIconTexture { get; private set; }
 	   
-		Dictionary<string, TileType> tileTypesByName;
-		Dictionary<string, UnitType> unitTypesByName;
-		Dictionary<string, BuildingType> buildingTypesByName;
-		Dictionary<string, ProjectileType> projectileTypesByName;
-		Dictionary<string, ResourceType> resourceTypesByName;
-		Dictionary<string, PlayerType> playerAITypesByName;
-		Dictionary<string, LevelRep> levelsByName;
+		readonly Dictionary<string, TileType> tileTypesByName;
+		readonly Dictionary<string, UnitType> unitTypesByName;
+		readonly Dictionary<string, BuildingType> buildingTypesByName;
+		readonly Dictionary<string, ProjectileType> projectileTypesByName;
+		readonly Dictionary<string, ResourceType> resourceTypesByName;
+		readonly Dictionary<string, PlayerType> playerAITypesByName;
+		readonly Dictionary<string, LevelRep> levelsByName;
 
-		Dictionary<int, TileType> tileTypesByID;
-		Dictionary<int, UnitType> unitTypesByID;
-		Dictionary<int, BuildingType> buildingTypesByID;
-		Dictionary<int, ProjectileType> projectileTypesByID;
-		Dictionary<int, ResourceType> resourceTypesByID;
-		Dictionary<int, PlayerType> playerAITypesByID;
+		readonly Dictionary<int, TileType> tileTypesByID;
+		readonly Dictionary<int, UnitType> unitTypesByID;
+		readonly Dictionary<int, BuildingType> buildingTypesByID;
+		readonly Dictionary<int, ProjectileType> projectileTypesByID;
+		readonly Dictionary<int, ResourceType> resourceTypesByID;
+		readonly Dictionary<int, PlayerType> playerAITypesByID;
 
+		readonly string pathToXml;
+		readonly XmlSchemaSet schemas;
 		XDocument data;
+
+		readonly string levelSavingDirPath;
 
 		public GamePack(string pathToXml,
 						GamePackRep gamePackRep,
 						XmlSchemaSet schemas,
-						LoadingWatcher loadingProgress) {
+						ILoadingSignaler loadingProgress) {
 
 			tileTypesByName = new Dictionary<string, TileType>();
 			unitTypesByName = new Dictionary<string, UnitType>();
@@ -102,6 +94,7 @@ namespace MHUrho.Packaging {
 			projectileTypesByName = new Dictionary<string, ProjectileType>();
 			resourceTypesByName = new Dictionary<string, ResourceType>();
 			playerAITypesByName = new Dictionary<string, PlayerType>();
+			levelsByName = new Dictionary<string, LevelRep>();
 
 			tileTypesByID = new Dictionary<int, TileType>();
 			unitTypesByID = new Dictionary<int, UnitType>();
@@ -111,6 +104,8 @@ namespace MHUrho.Packaging {
 			playerAITypesByID = new Dictionary<int, PlayerType>();
 
 			this.GamePackRep = gamePackRep;
+			this.schemas = schemas;
+			this.pathToXml = pathToXml;
 
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 
@@ -134,10 +129,14 @@ namespace MHUrho.Packaging {
 
 				loadingProgress.TextAndPercentageUpdate("Loading player types", 5);
 				LoadAllPlayerTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading levels", 5);
+				LoadAllLevels();
 			}
 			//TODO: Catch only the expected exceptions
 			catch (Exception e) {
-				Urho.IO.Log.Write(LogLevel.Warning, "Package loading failed");
+				Urho.IO.Log.Write(LogLevel.Warning, $"Package loading failed with: \"{e}\"");
+				throw new PackageLoadingException($"Package loading failed with: \"{e}\"", e);
 			}
 			finally {
 				FinishLoading();
@@ -155,7 +154,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(name, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
+				return LoadType(name, GamePackXml.TileTypes, GamePackXml.TileType, tileTypesByName, tileTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown tile type");
@@ -168,7 +167,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(ID, TileTypeGroupName, TileTypeItemName, tileTypesByName, tileTypesByID);
+				return LoadType(ID, GamePackXml.TileTypes, GamePackXml.TileType, tileTypesByName, tileTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown tile type");
@@ -184,7 +183,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(name, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
+				return LoadType(name, GamePackXml.UnitTypes, GamePackXml.UnitType, unitTypesByName, unitTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown unit type");
@@ -198,7 +197,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(ID, UnitTypeGroupName, UnitTypeItemName, unitTypesByName, unitTypesByID);
+				return LoadType(ID, GamePackXml.UnitTypes, GamePackXml.UnitType, unitTypesByName, unitTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown unit type");
@@ -216,8 +215,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								BuildingTypeGroupName,
-								BuildingTypeItemName,
+								GamePackXml.BuildingTypes,
+								GamePackXml.BuildingType,
 								buildingTypesByName,
 								buildingTypesByID);
 			}
@@ -233,8 +232,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(ID,
-								BuildingTypeGroupName,
-								BuildingTypeItemName,
+								GamePackXml.BuildingTypes,
+								GamePackXml.BuildingType,
 								buildingTypesByName,
 								buildingTypesByID);
 			}
@@ -253,8 +252,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								ProjectileTypeGroupName,
-								ProjectileTypeItemName,
+								GamePackXml.ProjectileTypes,
+								GamePackXml.ProjectileType,
 								projectileTypesByName,
 								projectileTypesByID);
 			}
@@ -270,8 +269,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(ID,
-								ProjectileTypeGroupName,
-								ProjectileTypeItemName,
+								GamePackXml.ProjectileTypes,
+								GamePackXml.ProjectileType,
 								projectileTypesByName,
 								projectileTypesByID);
 			}
@@ -290,8 +289,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								ResourceTypeGroupName,
-								ResourceTypeItemName,
+								GamePackXml.ResourceTypes,
+								GamePackXml.ResourceType,
 								resourceTypesByName,
 								resourceTypesByID);
 			}
@@ -307,8 +306,8 @@ namespace MHUrho.Packaging {
 			
 			if (IsLoading()) {
 				return LoadType(ID,
-								ResourceTypeGroupName,
-								ResourceTypeItemName,
+								GamePackXml.ResourceTypes,
+								GamePackXml.ResourceType,
 								resourceTypesByName,
 								resourceTypesByID);
 			}
@@ -328,8 +327,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								PlayerAITypeGroupName,
-								PlayerAITypeItemName,
+								GamePackXml.PlayerAITypes,
+								GamePackXml.PlayerAIType,
 								playerAITypesByName,
 								playerAITypesByID);
 			}
@@ -345,8 +344,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(ID, 
-								PlayerAITypeGroupName,
-								PlayerAITypeItemName,
+								GamePackXml.PlayerAITypes,
+								GamePackXml.PlayerAIType,
 								playerAITypesByName,
 								playerAITypesByID);
 			}
@@ -356,16 +355,51 @@ namespace MHUrho.Packaging {
 
 		public LevelRep GetLevel(string name)
 		{
-			if (name == null) {
-				throw new ArgumentNullException(nameof(name), "Name of the level cannot be null");
-			}
-
-			if (levelsByName.TryGetValue(name, out LevelRep value)) {
+			if (TryGetLevel(name, out LevelRep value)) {
 				return value;
 			}
 			else {
 				throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown level");
 			}
+		}
+
+		
+		public bool TryGetLevel(string name, out LevelRep value)
+		{
+			//To enable loading saved games even if their source level was deleted
+
+			if (name == null) {
+				throw new ArgumentNullException(nameof(name), "Name of the level cannot be null");
+			}
+
+			return levelsByName.TryGetValue(name, out value);
+		}
+
+		public void SaveLevel(LevelRep level)
+		{
+			var xmlData = StartLoading(pathToXml, schemas);
+			//Should not be null, because startLoading validates the xml
+			level.SaveTo(xmlData.Element(GamePackXml.Levels));
+			WriteData();
+			FinishLoading();
+		}
+
+		public string GetLevelProtoSavePath(string levelName)
+		{
+			//Just strip it to bare minimum
+			var newPath = new StringBuilder(levelSavingDirPath);
+			newPath.Append(Path.DirectorySeparatorChar);
+			foreach (var ch in levelName.Where(char.IsLetterOrDigit)) {
+				newPath.Append(ch);
+			}
+
+			var random = new Random();
+			while (MyGame.Files.FileExists(newPath.ToString())) {
+				int randomDigit = random.Next(10);
+				newPath.Append(randomDigit);
+			}
+
+			return newPath.ToString()
 		}
 
 		public void Dispose()
@@ -638,21 +672,21 @@ namespace MHUrho.Packaging {
 			return deleted;
 		}
 
-		XElement GetXmlTypeDescription(string typeName ,string groupName, string itemName) {
+		XElement GetXmlTypeDescription(string typeName ,XName groupName, XName itemName) {
 			//Load from file
 			var typeElements = (from element in data.Root
-													.Element(PackageManager.XMLNamespace + groupName)
-													.Elements(PackageManager.XMLNamespace + itemName)
+													.Element(groupName)
+													.Elements(itemName)
 										  where GetTypeName(element) == typeName
 										  select element).GetEnumerator();
 
 			return GetXmlTypeDescription(typeElements);
 		}
 
-		XElement GetXmlTypeDescription(int typeID, string groupName, string itemName) {
+		XElement GetXmlTypeDescription(int typeID, XName groupName, XName itemName) {
 			var typeElements = (from element in data.Root
-													.Element(PackageManager.XMLNamespace + groupName)
-													.Elements(PackageManager.XMLNamespace + itemName)
+													.Element(groupName)
+													.Elements(itemName)
 								where GetTypeID(element) == typeID
 								select element).GetEnumerator();
 			return GetXmlTypeDescription(typeElements);
@@ -721,8 +755,8 @@ namespace MHUrho.Packaging {
 		}
 
 		T LoadType<T>(int ID,
-					  string groupName,
-					  string itemName,
+					  XName groupName,
+					  XName itemName,
 					  IDictionary<string, T> typesByName,
 					  IDictionary<int, T> typesByID)
 			where T : ILoadableType, new()
@@ -737,8 +771,8 @@ namespace MHUrho.Packaging {
 		}
 
 		T LoadType<T>(string name,
-					  string groupName,
-					  string itemName,
+					  XName groupName,
+					  XName itemName,
 					  IDictionary<string, T> typesByName,
 					  IDictionary<int, T> typesByID) 
 			where T: ILoadableType, new()
@@ -758,10 +792,32 @@ namespace MHUrho.Packaging {
 
 		LevelRep LoadLevelRep(XElement levelElement)
 		{
-			LevelRep newLevel = new LevelRep(this, levelElement);
+			LevelRep newLevel = LevelRep.GetFromLevelPrototype(this, levelElement);
 			levelsByName.Add(newLevel.Name, newLevel);
 
 			return newLevel;
+		}
+
+		void WriteData()
+		{
+			Stream file = null;
+			//TODO: Handler and signal that resource pack is in invalid state
+			try {
+				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Write);
+				data.Validate(schemas, null);
+				data.Save(file);
+			}
+			//TODO: Other exceptions
+			catch (XmlSchemaValidationException e) {
+				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
+				//TODO: Exception
+				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+			}
+			//TODO: Catch file opening failed
+			finally {
+				file?.Dispose();
+			}
+
 		}
 	}
 }

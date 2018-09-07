@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Packaging;
+using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-	abstract class LevelPickingItem {
+	abstract class LevelPickingItem : IDisposable {
 		public UIElement Element { get; private set; }
 
 		public bool IsSelected => checkBox.Checked;
@@ -16,8 +17,7 @@ namespace MHUrho.UserInterface
 		public event Action<LevelPickingItem> Deselected;
 		public event Action<LevelPickingItem> SelectionChanged;
 
-		CheckBox checkBox;
-		UIElement descriptionElement;
+		readonly CheckBox checkBox;
 
 		protected LevelPickingItem(MyGame game, Texture2D thumbnail, string name)
 		{
@@ -29,6 +29,7 @@ namespace MHUrho.UserInterface
 
 			var thumbnailElement = (BorderImage)checkBox.GetChild("Thumbnail", true);
 			thumbnailElement.Texture = thumbnail;
+			thumbnailElement.ImageRect = new IntRect(0, 0, thumbnail.Width, thumbnail.Height);
 
 			var nameElement = (Text)checkBox.GetChild("NameText", true);
 			nameElement.Value = name;
@@ -49,6 +50,18 @@ namespace MHUrho.UserInterface
 			OnSelectionChanged();
 		}
 
+		public virtual void Select()
+		{
+			//If checked changed, automatically calls CheckBoxToggled
+			checkBox.Selected = true;
+		}
+
+		public virtual void Deselect()
+		{
+			//If checked changed, automatically calls CheckBoxToggled
+			checkBox.Selected = false;
+		}
+
 		protected virtual void OnSelected()
 		{
 			Selected?.Invoke(this);
@@ -63,6 +76,18 @@ namespace MHUrho.UserInterface
 		{
 			SelectionChanged?.Invoke(this);
 		}
+
+		public virtual void Dispose()
+		{
+			checkBox.Toggled -= CheckBoxToggled;
+
+			Element.RemoveAllChildren();
+			Element.Remove();
+
+			checkBox.Dispose();
+			Element.Dispose();
+			
+		}
 	}
 
 	class LevelPickingLevelItem : LevelPickingItem
@@ -70,7 +95,7 @@ namespace MHUrho.UserInterface
 
 		public LevelRep Level { get; private set; }
 
-		UIElement descriptionElement;
+		readonly UIElement descriptionElement;
 
 		public LevelPickingLevelItem(LevelRep level, MyGame game)
 			:base(game, level.Thumbnail, level.Name)
@@ -80,6 +105,11 @@ namespace MHUrho.UserInterface
 			((Text)Element.GetChild("DescriptionText", true)).Value = level.Description;
 		}
 
+		public override void Dispose()
+		{
+			descriptionElement.Dispose();
+			base.Dispose();
+		}
 
 		protected override void OnSelected()
 		{

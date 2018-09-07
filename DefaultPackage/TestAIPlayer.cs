@@ -28,12 +28,12 @@ namespace DefaultPackage
 			return typeName == "TestAI";
 		}
 
-		public override void Initialize(XElement extensionElement, PackageManager packageManager)
+		public override void Initialize(XElement extensionElement, GamePack package)
 		{
-			Chicken = packageManager.ActivePackage.GetUnitType("Chicken");
-			TestUnit = packageManager.ActivePackage.GetUnitType("TestUnit");
-			TestWorker = packageManager.ActivePackage.GetUnitType("TestWorker");
-			TestBuilding = packageManager.ActivePackage.GetBuildingType("TestBuilding");
+			Chicken = package.GetUnitType("Chicken");
+			TestUnit = package.GetUnitType("TestUnit");
+			TestWorker = package.GetUnitType("TestWorker");
+			TestBuilding = package.GetBuildingType("TestBuilding");
 		}
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
@@ -90,8 +90,7 @@ namespace DefaultPackage
 
 		public static TestAIPlayer CreateNew(ILevelManager level, IPlayer player, TestAIPlayerType type)
 		{
-			var instance = new TestAIPlayer(level, player, type);
-			instance.spawnPoint = (level.Map.TopLeft + level.Map.BottomRight) / 2;
+			var instance = new TestAIPlayer(level, player, type) {spawnPoint = (level.Map.TopLeft + level.Map.BottomRight) / 2};
 
 			return instance;
 		}

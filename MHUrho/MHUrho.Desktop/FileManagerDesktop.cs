@@ -91,9 +91,40 @@ namespace MHUrho.Desktop {
 			return File.Exists(path);
 		}
 
-		public override IEnumerable<string> GetFilesInDirectory(string dirPath)
+		public override IEnumerable<string> GetFSEntriesInDirectory(string dirPath, bool files, bool directories)
 		{
-			return Directory.EnumerateFiles(dirPath);
+			if (files && directories) {
+				return Directory.EnumerateFileSystemEntries(dirPath);
+			}
+			else if (files) {
+				return Directory.EnumerateFiles(dirPath);
+			}
+			else if (directories) {
+				return Directory.EnumerateDirectories(dirPath);
+			}
+			else {
+				return Enumerable.Empty<string>();
+			}
+		}
+
+		public override IEnumerable<string> GetFSEntriesInDirectory(string dirPath, bool files, bool directories, string searchPattern, SearchOption searchOption)
+		{
+			if (searchPattern == null) {
+				throw new ArgumentNullException(nameof(searchPattern), "Search pattern cannot be null");
+			}
+
+			if (files && directories) {
+				return Directory.EnumerateFileSystemEntries(dirPath, searchPattern, searchOption);
+			}
+			else if (files) {
+				return Directory.EnumerateFiles(dirPath, searchPattern, searchOption);
+			}
+			else if (directories) {
+				return Directory.EnumerateDirectories(dirPath, searchPattern, searchOption);
+			}
+			else {
+				return Enumerable.Empty<string>();
+			}
 		}
 
 		public override void DeleteDynamicFile(string relativePath)

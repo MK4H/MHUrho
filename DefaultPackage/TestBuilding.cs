@@ -92,11 +92,9 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
-		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
-			workerType = PackageManager.Instance
-									   .ActivePackage
-									   .GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")));
-			tileType = PackageManager.Instance.ActivePackage.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")));
+		public override void Initialize(XElement extensionElement, GamePack package) {
+			workerType = package.GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")));
+			tileType = package.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")));
 		}
 	}
 

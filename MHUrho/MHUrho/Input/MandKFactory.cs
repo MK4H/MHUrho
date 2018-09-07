@@ -9,11 +9,9 @@ namespace MHUrho.Input
 {
     public class MandKFactory : ControllerFactory
     {
-		readonly MyGame game;
-
-		public MandKFactory(MyGame game)
+		public MandKFactory()
 		{
-			this.game = game;
+
 		}
 
 		public override ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover)
@@ -24,12 +22,12 @@ namespace MHUrho.Input
 
 		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
 		{
-			return new GameMandKController(game, levelManager, octree, player, cameraMover);
+			return new GameMandKController(levelManager, octree, player, cameraMover);
 		}
 
 		public override IMenuController CreateMenuController()
 		{
-			return new MenuMandKController(game);
+			return new MenuMandKController();
 		}
 
 		public override ToolManager CreateToolManager(IGameController gameController, CameraMover cameraMover)

@@ -11,18 +11,14 @@ namespace MHUrho.Logic
 {
     public interface ILevelLoader
     {
-		ILevelManager Level { get; }
-
 		ILoadingWatcher LoadingWatcher { get; }
 
 		Task<ILevelManager> CurrentLoading { get; }
 	
 
-		Task<ILevelManager> Load(StLevel storedLevel, bool editorMode);
+		Task<ILevelManager> Load(LevelRep levelRep, StLevel storedLevel, bool editorMode);
 
-		Task<ILevelManager> LoadFrom(Stream stream, bool editorMode, bool leaveOpen = false);
-
-		Task<ILevelManager> LoadDefaultLevel(IntVector2 mapSize);
+		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize);
 
 	}
 }

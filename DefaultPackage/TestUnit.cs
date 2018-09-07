@@ -46,7 +46,7 @@ namespace DefaultPackage
 			return true;
 		}
 
-		public override void Initialize(XElement extensionElement, PackageManager packageManager) {
+		public override void Initialize(XElement extensionElement, GamePack package) {
 
 		}
 	}

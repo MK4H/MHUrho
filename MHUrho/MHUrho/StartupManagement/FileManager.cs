@@ -68,7 +68,24 @@ namespace MHUrho
 
 		public abstract bool FileExists(string path);
 
-		public abstract IEnumerable<string> GetFilesInDirectory(string dirPath);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="dirPath"></param>
+		/// <param name="files"></param>
+		/// <param name="directories"></param>
+		/// <param name="searchPattern">A string to match against the file names of the entries, can contain literals and wildCard characters * and ?.</param>
+		/// <param name="searchOption"></param>
+		/// <returns></returns>
+		public abstract IEnumerable<string> GetFSEntriesInDirectory(string dirPath, 
+																	bool files, 
+																	bool directories);
+
+		public abstract IEnumerable<string> GetFSEntriesInDirectory(string dirPath,
+																	bool files,
+																	bool directories,
+																	string searchPattern,
+																	SearchOption searchOption);
 
 		public abstract void DeleteDynamicFile(string relativePath);
 

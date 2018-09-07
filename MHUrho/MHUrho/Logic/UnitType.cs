@@ -77,7 +77,7 @@ namespace MHUrho.Logic
 			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-									 package.PackageManager);
+									 package);
 		}
 
 		public void ClearCache()

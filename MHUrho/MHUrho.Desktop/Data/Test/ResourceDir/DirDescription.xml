@@ -1,9 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <gamePackDirectory xmlns="http://www.MobileHold.cz/GamePack.xsd">
-  <gamePack name="testRP2">
-    <description>asdfjklasdfjlkasdkjflksdjflkjasdlkf jlksdajf lksdaj flkjsadl kfjdsalk jflkj lkjlkfj lkjlkfjdslkjf lkj lksdjl kfjl kj kljdlskf jlksdj lfkj lkj lkdsjf lkdjs f jldsj fkdsl fjlkdsjflk jlksjd flkjdslk f jlsdk fjlds jf sdjlf jlds
-	    askdlfj lkdsjflkjsdalkf jsldkf jlsdkjflksd jflksd jflks djlfkjsdalkfdslkjflskd jflskd jl kjdf lkdsjfkjdkfjdkfdk j  jflkdslkfj klsdlkfjk lsdklf klsdkl fklsjd fjsadjklf klsjdfklsdlkfjklsdjfkl jksdgiowuooqpweilkdsf ljkshfksjldahflk a</description>
-    <pathToXml>TEST2RP/testResPack2.xml</pathToXml>
-  </gamePack>
+  <gamePack>TEST2RP/testResPack2.xml</gamePack>
 
 </gamePackDirectory>

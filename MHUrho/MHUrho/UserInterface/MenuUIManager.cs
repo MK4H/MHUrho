@@ -24,32 +24,34 @@ namespace MHUrho.UserInterface
 		public PackagePickingScreen PackagePickingScreen { get; private set; }
 		public LevelPickingScreen LevelPickingScreen { get; private set; }
 		public LevelSettingsScreen LevelSettingsScreen { get; private set; }
-
 		public LevelCreationScreen LevelCreationScreen { get; private set; }
+
+
+		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
 		public PopUpConfirmation PopUpConfirmation { get; private set; }
 
 		protected MenuScreen currentScreen;
 
 		protected Stack<MenuScreen> previousScreens;
 
-		protected MenuUIManager(MyGame game, IMenuController menuController)
-			: base(game)
+		protected MenuUIManager( IMenuController menuController)
 		{
 			UI.Root.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml"));
 
 			this.MenuController = menuController;
 
-			MainMenu = new MainMenu(game, this);
-			OptionsScreen = new OptionsScreen(game, this);
-			PauseMenu = new PauseMenu(game, this);
-			LoadingScreen = new LoadingScreen(game, this);
-			SaveGameScreen = new SaveGameScreen(game, this);
-			LoadGameScreen = new LoadGameScreen(game, this);
-			PackagePickingScreen = new PackagePickingScreen(game, this);
-			LevelPickingScreen = new LevelPickingScreen(game, this);
-			LevelSettingsScreen = new LevelSettingsScreen(game, this);
-			LevelCreationScreen = new LevelCreationScreen(game, this);
-			PopUpConfirmation = new PopUpConfirmation(game, this);
+			MainMenu = new MainMenu(this);
+			OptionsScreen = new OptionsScreen(this);
+			PauseMenu = new PauseMenu(this);
+			LoadingScreen = new LoadingScreen(this);
+			SaveGameScreen = new SaveGameScreen(this);
+			LoadGameScreen = new LoadGameScreen(this);
+			PackagePickingScreen = new PackagePickingScreen(this);
+			LevelPickingScreen = new LevelPickingScreen(this);
+			LevelSettingsScreen = new LevelSettingsScreen(this);
+			LevelCreationScreen = new LevelCreationScreen(this);
+			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
+			PopUpConfirmation = new PopUpConfirmation(this);
 
 			previousScreens = new Stack<MenuScreen>();
 
