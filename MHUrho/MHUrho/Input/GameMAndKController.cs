@@ -282,7 +282,7 @@ namespace MHUrho.Input
 			Disable();
 			Level.Pause();
 			UIManager.HideUI();
-			Game.menuController.SwitchToPauseMenu(this);
+			Game.MenuController.SwitchToPauseMenu(this);
 		}
 
 		public void UnPause()

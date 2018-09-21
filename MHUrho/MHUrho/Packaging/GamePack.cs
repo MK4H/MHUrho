@@ -398,8 +398,8 @@ namespace MHUrho.Packaging {
 				int randomDigit = random.Next(10);
 				newPath.Append(randomDigit);
 			}
-
-			return newPath.ToString()
+			//TODO: THIS
+			return newPath.ToString();
 		}
 
 		public void Dispose()

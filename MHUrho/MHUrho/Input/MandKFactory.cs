@@ -16,7 +16,11 @@ namespace MHUrho.Input
 
 		public override ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover)
 		{
-			var typedController = (GameMandKController) gameController;
+			var typedController = gameController as GameMandKController;
+			if (typedController == null)
+			{
+				throw new ArgumentException("Wrong type of game controller", nameof(gameController));
+			}
 			return new CameraControllerMandK(typedController, typedController.UIManager , cameraMover);
 		}
 
@@ -28,16 +32,6 @@ namespace MHUrho.Input
 		public override IMenuController CreateMenuController()
 		{
 			return new MenuMandKController();
-		}
-
-		public override ToolManager CreateToolManager(IGameController gameController, CameraMover cameraMover)
-		{
-			var typedController = gameController as GameMandKController;
-			if (typedController == null) {
-				throw new ArgumentException("Wrong type of game controller", nameof(gameController));
-			}
-
-			return new ToolManagerMandK(typedController, typedController.UIManager, cameraMover);
 		}
 	}
 }

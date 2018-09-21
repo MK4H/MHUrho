@@ -7,8 +7,8 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class LoadingScreen : MenuScreen
-    {
+	class LoadingScreen : MenuScreen
+	{
 		class Screen : IDisposable {
 
 			readonly LoadingScreen proxy;
@@ -27,9 +27,9 @@ namespace MHUrho.UserInterface
 
 				this.proxy = proxy;
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/LoadingScreenLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadingScreenLayout.xml");
 
-				window = (Window)Game.UI.Root.GetChild("LoadingScreen");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("LoadingScreen");
 				progressBar = new ProgressBar(window.GetChild("ProgressBar"));
 				text = (Text)window.GetChild("Text");
 
@@ -40,9 +40,9 @@ namespace MHUrho.UserInterface
 
 			public void OnLoadingFinished(ILoadingWatcher finishedLoading)
 			{
-				MenuUIManager.Clear();
 				progressBar.SetValue(0);
 				text.Value = "";
+				MenuUIManager.Clear();
 			}
 
 			public void OnPercentageUpdate(float value)
@@ -111,10 +111,12 @@ namespace MHUrho.UserInterface
 			if (screen == null) {
 				return;
 			}
-			LoadingWatcher = null;
+			
 
 			screen.Dispose();
 			screen = null;
+
+			LoadingWatcher = null;
 		}
 	}
 }

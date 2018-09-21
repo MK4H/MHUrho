@@ -27,12 +27,12 @@ namespace MHUrho.Packaging
 		void FinishedLoading();
 	}
 
-    public class LoadingWatcher : ILoadingWatcher, ILoadingSignaler {
+	public class LoadingWatcher : ILoadingWatcher, ILoadingSignaler {
 
 		protected class SubsectionLoadingWatcher : LoadingWatcher {
 
 			/// <summary>
-			/// Size of the subsection 0 - 1 represantation of percentage, for easier multiplication
+			/// Size of the subsection 0 - 1 representation of percentage, for easier multiplication
 			/// </summary>
 			readonly float subsectionSize;
 			readonly LoadingWatcher parent;

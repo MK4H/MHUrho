@@ -90,8 +90,7 @@ namespace MHUrho.UserInterface
 		}
 	}
 
-	class LevelPickingLevelItem : LevelPickingItem
-    {
+	class LevelPickingLevelItem : LevelPickingItem {
 
 		public LevelRep Level { get; private set; }
 

@@ -17,8 +17,6 @@ namespace MHUrho.Input
 
 		public InputType InputType => InputType.MouseAndKeyboard;
 		
-
-
 		MandKMenuUI UIController;
 
 		IGameController pausedLevelController;

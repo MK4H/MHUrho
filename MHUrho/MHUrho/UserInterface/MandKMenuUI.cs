@@ -13,7 +13,7 @@ using Urho.IO;
 
 namespace MHUrho.UserInterface
 {
-    class MandKMenuUI : MenuUIManager {
+	class MandKMenuUI : MenuUIManager {
 
 		public MandKMenuUI(MenuMandKController menuController )
 			: base(menuController)

@@ -9,7 +9,7 @@ using Urho;
 namespace MHUrho.StartupManagement
 {
 	[DataContract]
-    public class AppOptions {
+	public class AppConfig {
 		//NOTE: Could store this in the config file as well
 		public int MaxDrawDistance => 1000;
 		public int MinDrawDistance => 100;
@@ -90,22 +90,22 @@ namespace MHUrho.StartupManagement
 		public bool MouseBorderCameraMovement { get; set; }
 
 
-		public static AppOptions LoadFrom(Stream stream)
+		public static AppConfig LoadFrom(Stream stream)
 		{
 
-			var serializer = new DataContractSerializer(typeof(AppOptions));
+			var serializer = new DataContractSerializer(typeof(AppConfig));
 			
 			//TODO: Catch
-			AppOptions newOptions = (AppOptions)serializer.ReadObject(stream);
-			return newOptions;
+			AppConfig newConfig = (AppConfig)serializer.ReadObject(stream);
+			return newConfig;
 		}
 
 		public void Reload()
 		{
 			using (Stream configFile =
 				MyGame.Files.OpenDynamicFile(MyGame.Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
-				AppOptions reloadedOptions = LoadFrom(configFile);
-				Copy(reloadedOptions);
+				AppConfig reloadedConfig = LoadFrom(configFile);
+				Copy(reloadedConfig);
 			}
 		}
 
@@ -125,7 +125,7 @@ namespace MHUrho.StartupManagement
 											CloseOutput = true
 										};
 			using (XmlWriter writer = XmlWriter.Create(stream, settings)) {
-				var serializer = new DataContractSerializer(typeof(AppOptions));
+				var serializer = new DataContractSerializer(typeof(AppConfig));
 				serializer.WriteObject(writer, this);
 			}
 		}
@@ -145,9 +145,9 @@ namespace MHUrho.StartupManagement
 							RefreshRateCap);
 		}
 
-		public static AppOptions GetDefaultAppOptions()
+		public static AppConfig GetDefaultAppOptions()
 		{
-			return new AppOptions()
+			return new AppConfig()
 					{
 						UnitDrawDistance = 200,
 						ProjectileDrawDistance = 200,
@@ -172,7 +172,7 @@ namespace MHUrho.StartupManagement
 		}
 
 
-		void Copy(AppOptions other)
+		void Copy(AppConfig other)
 		{
 			UnitDrawDistance = other.UnitDrawDistance;
 

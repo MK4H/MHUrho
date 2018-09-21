@@ -9,16 +9,27 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class LevelCreationScreen : MenuScreen
-    {
+	class LevelCreationScreen : MenuScreen {
 		class Screen : IDisposable {
 
 			class SliderDuo : IDisposable {
 
-				public IntVector2 Value => new IntVector2(X, Y);
+				public IntVector2 Value {
+					get => new IntVector2(X, Y);
+					set {
+						X = value.X;
+						Y = value.Y;
+					}
+				} 
 
-				public int X => SliderValueToRealValue(sliderX.Value, minValue.X, step.X);
-				public int Y => SliderValueToRealValue(sliderY.Value, minValue.Y, step.Y);
+				public int X {
+					get => SliderValueToRealValue(sliderX.Value, minValue.X, step.X);
+					set => sliderX.Value = RealValueToSliderValue(value, minValue.X, step.X);
+				}
+				public int Y {
+					get => SliderValueToRealValue(sliderY.Value, minValue.Y, step.Y);
+					set => sliderY.Value = RealValueToSliderValue(value, minValue.Y, step.Y);
+				}
 
 
 				readonly Slider sliderX;
@@ -29,7 +40,13 @@ namespace MHUrho.UserInterface
 
 				readonly IntVector2 minValue;
 
-				public SliderDuo(Slider sliderX, Slider sliderY, Text displayText, IntVector2 minValue, IntVector2 maxValue, IntVector2 step)
+				public SliderDuo(Slider sliderX, 
+								Slider sliderY,
+								Text displayText, 
+								IntVector2 minValue, 
+								IntVector2 maxValue, 
+								IntVector2 step,
+								IntVector2 initialValue)
 				{
 					this.sliderX = sliderX;
 					this.sliderY = sliderY;
@@ -42,6 +59,10 @@ namespace MHUrho.UserInterface
 
 					sliderX.SliderChanged += SliderValueChanged;
 					sliderY.SliderChanged += SliderValueChanged;
+
+					Value = initialValue;
+
+					UpdateDisplayText();
 				}
 
 				
@@ -69,12 +90,22 @@ namespace MHUrho.UserInterface
 						throw new ArgumentException("Unknown element in args.Element", nameof(args));
 					}
 
-					displayText.Value = $"{X}x{Y}";
+					UpdateDisplayText();
 				}
 
 				int SliderValueToRealValue(float value, int minValue, int stepSize)
 				{
 					return minValue + ((int)Math.Round(value)) * stepSize;
+				}
+
+				float RealValueToSliderValue(int value, int minValue, int stepSize)
+				{
+					return (value - minValue) / (float) stepSize;
+				}
+
+				void UpdateDisplayText()
+				{
+					displayText.Value = $"{X}x{Y}";
 				}
 			}
 
@@ -116,9 +147,10 @@ namespace MHUrho.UserInterface
 
 			string Description { get; set; }
 
-			string ThumbnailPath { get; set; }
+			string ThumbnailPath => thumbnailPathText.Value;
 
-			string AssemblyPath { get; set; }
+			//TODO: Add plugin name to pick the correct plugin from the assembly
+			string PluginPath => pluginPathText.Value;
 
 			readonly Window window;
 			readonly LineEdit nameEdit;
@@ -133,9 +165,9 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/LevelCreationLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LevelCreationLayout.xml");
 
-				window = (Window)Game.UI.Root.GetChild("LevelCreationWindow");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("LevelCreationWindow");
 
 				nameEdit = (LineEdit)window.GetChild("LevelNameEdit", true);
 				
@@ -143,7 +175,7 @@ namespace MHUrho.UserInterface
 				var sliderX = (Slider) window.GetChild("XSlider", true);
 				var sliderY = (Slider) window.GetChild("ZSlider", true);
 				var displayText = (Text) window.GetChild("DisplayText", true);
-				mapSize = new SliderDuo(sliderX, sliderY, displayText, Map.MinSize, Map.MaxSize, Map.ChunkSize);
+				mapSize = new SliderDuo(sliderX, sliderY, displayText, Map.MinSize, Map.MaxSize, Map.ChunkSize, Map.MinSize);
 
 				pluginPathButton = (Button) window.GetChild("LevelPluginButton", true);
 				thumbnailPathButton = (Button) window.GetChild("ThumbnailPathButton", true);
@@ -187,12 +219,13 @@ namespace MHUrho.UserInterface
 
 			void EditButtonReleased(ReleasedEventArgs args)
 			{
+
 				//Creating new level
 				if (proxy.Level == null) {
 					proxy.Level = LevelRep.CreateNewLevel(Name,
 														Description,
 														ThumbnailPath,
-														AssemblyPath,
+														PluginPath,
 														mapSize.Value,
 														PackageManager.Instance.ActivePackage);
 				}
@@ -271,6 +304,26 @@ namespace MHUrho.UserInterface
 					//Text should not have changed
 				}
 			}
+
+#if DEBUG
+			public void SimulateEditNewLevel(string name, string description, string thumbnailPath, string pluginPath, IntVector2 mapSize, GamePack package)
+			{
+			   
+				proxy.Level = LevelRep.CreateNewLevel(name,
+													  description,
+													  thumbnailPath,
+													  pluginPath,
+													  mapSize,
+													  package);
+				
+				MenuUIManager.MenuController.StartLoadingLevel(proxy.Level, true);
+			}
+
+			public void SimulateEditExistingLevel()
+			{
+				MenuUIManager.MenuController.StartLoadingLevel(proxy.Level, true);
+			}
+#endif
 		}
 
 		public LevelRep Level { get; set; }

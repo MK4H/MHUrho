@@ -8,8 +8,8 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-    class LevelPickingScreen : MenuScreen
-    {
+	class LevelPickingScreen : MenuScreen
+	{
 
 		class Screen : IDisposable {
 
@@ -36,9 +36,9 @@ namespace MHUrho.UserInterface
 
 				newLevelItemTexture = PackageManager.Instance.GetTexture2D(newLevelItemTexturePath);
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/LevelPickingLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LevelPickingLayout.xml");
 
-				window = (Window)Game.UI.Root.GetChild("LevelPickingWindow");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("LevelPickingWindow");
 
 				listView = (ListView)window.GetChild("ListView");
 
@@ -85,11 +85,11 @@ namespace MHUrho.UserInterface
 				foreach (var item in items) {
 					if (item.IsSelected) {
 						if (item is LevelPickingLevelItem levelItem) {
-							MenuUIManager.SwitchToLevelCreationScreen(levelItem.Level);
+							SwitchToEditingExistingLevel(levelItem.Level);
 							return;
 						}
 						else if (item is LevelPickingNewLevelItem newItem) {
-							MenuUIManager.SwitchToLevelCreationScreen(null);
+							SwitchToEditingNewLevel();
 						}
 						else {
 							throw new InvalidOperationException("Edit button was pressed when it should not have been possible to press");
@@ -103,7 +103,7 @@ namespace MHUrho.UserInterface
 				foreach (var item in items) {
 					if (item.IsSelected) {
 						if (item is LevelPickingLevelItem levelItem) {
-							MenuUIManager.SwitchToLevelSettingsScreen(levelItem.Level);
+							SwitchToPlayingLevel(levelItem.Level);
 							return;
 						}
 						else {
@@ -145,6 +145,58 @@ namespace MHUrho.UserInterface
 				newItem.Selected += ItemSelected;
 				listView.AddItem(newItem.Element);
 			}
+
+			void SwitchToEditingExistingLevel(LevelRep level)
+			{
+				MenuUIManager.SwitchToLevelCreationScreen(level);
+			}
+
+			void SwitchToEditingNewLevel()
+			{
+				MenuUIManager.SwitchToLevelCreationScreen(null);
+			}
+
+			void SwitchToPlayingLevel(LevelRep level)
+			{
+				MenuUIManager.SwitchToLevelSettingsScreen(level);
+			}
+#if DEBUG
+			public void SimulateEditPickingLevel(string levelName)
+			{
+				foreach (var item in items) {
+					if (item is LevelPickingLevelItem levelItem && levelItem.Level.Name == levelName)
+					{
+						SwitchToEditingExistingLevel(levelItem.Level);
+						return;
+					}
+				}
+
+				throw new ArgumentOutOfRangeException(nameof(levelName),
+													  levelName,
+													  "Level with this name does not exist");
+			}
+
+			public void SimulateEditPickingNewLevel()
+			{
+				SwitchToEditingNewLevel();
+			}
+
+			public void SimulatePlayPickingLevel(string levelName)
+			{
+				foreach (var item in items)
+				{
+					if (item is LevelPickingLevelItem levelItem && levelItem.Level.Name == levelName)
+					{
+						SwitchToPlayingLevel(levelItem.Level);
+						return;
+					}
+				}
+
+				throw new ArgumentOutOfRangeException(nameof(levelName),
+													  levelName,
+													  "Level with this name does not exist");
+			}
+#endif
 		}
 
 		//TODO: Check this if it is null, prohibit changing when the screen is visible etc.
@@ -180,6 +232,10 @@ namespace MHUrho.UserInterface
 			}
 
 			screen = new Screen(this);
+
+#if DEBUG
+			screen.SimulateEditPickingNewLevel();
+#endif
 		}
 
 		public override void Hide()

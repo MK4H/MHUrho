@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class SaveGameScreen : MenuScreen
-    {
+	class SaveGameScreen : MenuScreen
+	{
 		class Screen : FilePickScreen {
 
 			Button saveButton;
@@ -15,9 +16,9 @@ namespace MHUrho.UserInterface
 			public Screen(MyGame game, MenuUIManager menuUIManager)
 				: base(game, menuUIManager)
 			{
-				UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/SaveLayout.xml");
+				UI.LoadLayoutToElement(MenuUIManager.MenuRoot, game.ResourceCache, "UI/SaveLayout.xml");
 
-				Window window = (Window)UI.Root.GetChild("SaveWindow");
+				Window window = (Window)MenuUIManager.MenuRoot.GetChild("SaveWindow");
 
 				LineEdit saveNameEdit = (LineEdit)window.GetChild("SaveName", true);
 
@@ -70,9 +71,8 @@ namespace MHUrho.UserInterface
 
 				if (MyGame.Files.FileExists(newAbsoluteFilePath)) {
 					DisableInput();
-					MenuUIManager.PopUpConfirmation.RequestConfirmation("Overriding file",
-																		$"Do you really want to override the file \"{MatchSelected}\"?",
-																		OverrideFile);
+					MenuUIManager.ConfirmationPopUp.RequestConfirmation("Overriding file",
+																		$"Do you really want to override the file \"{MatchSelected}\"?").ContinueWith(OverrideFile);
 				}
 				else {
 					string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
@@ -82,10 +82,10 @@ namespace MHUrho.UserInterface
 			}
 
 
-			void OverrideFile(bool confirmed)
+			void OverrideFile(Task<bool> confirmed)
 			{
 				EnableInput();
-				if (!confirmed) return;
+				if (!confirmed.Result) return;
 
 				string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
 				MenuUIManager.MenuController.SavePausedLevel(newFilePath);

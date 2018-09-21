@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using MHUrho.Helpers;
 using MHUrho.StartupManagement;
 using Urho;
@@ -66,9 +67,9 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/OptionsLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/OptionsLayout.xml");
 
-				window = (Window)Game.UI.Root.GetChild("Options");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("Options");
 
 				((Button)window.GetChild("Save", true)).Released += SaveButton_Released;
 				((Button)window.GetChild("Exit", true)).Released += BackButton_Released;
@@ -211,10 +212,9 @@ namespace MHUrho.UserInterface
 			{
 				if (changed) {
 					Game.Config.SetGraphicsMode(Game.Graphics);
-					MenuUIManager.PopUpConfirmation.RequestConfirmation("Save options",
+					MenuUIManager.ConfirmationPopUp.RequestConfirmation("Save config",
 																		"Do you wish to save these settings ?",
-																		SaveConfirmation,
-																		TimeSpan.FromSeconds(10));
+																		TimeSpan.FromSeconds(10)).ContinueWith(SaveConfirmation);
 				}
 				else {
 					SaveConfirmation(true);
@@ -225,13 +225,17 @@ namespace MHUrho.UserInterface
 			void BackButton_Released(ReleasedEventArgs args)
 			{
 				if (changed) {
-					MenuUIManager.PopUpConfirmation.RequestConfirmation("Exit options",
-																		"Do you wish to revert these settings to their previous state?",
-																		ExitConfirmation);
+					MenuUIManager.ConfirmationPopUp.RequestConfirmation("Exit config",
+																		"Do you wish to revert these settings to their previous state?").ContinueWith(ExitConfirmation);
 				}
 				else {
 					ExitConfirmation(true);
 				}
+			}
+
+			void ExitConfirmation(Task<bool> confirmed)
+			{
+				ExitConfirmation(confirmed.Result);
 			}
 
 			void ExitConfirmation(bool confirmed)
@@ -244,6 +248,11 @@ namespace MHUrho.UserInterface
 					changed = false;
 					MenuUIManager.SwitchBack();
 				}
+			}
+
+			void SaveConfirmation(Task<bool> confirmed)
+			{
+				SaveConfirmation(confirmed.Result);
 			}
 
 			void SaveConfirmation(bool confirmed)
@@ -265,39 +274,39 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void SetValues(AppOptions options)
+			void SetValues(AppConfig config)
 			{
-				UnitDrawDistance.Value = options.UnitDrawDistance;
+				UnitDrawDistance.Value = config.UnitDrawDistance;
 
-				ProjectileDrawDistance.Value = options.ProjectileDrawDistance;
+				ProjectileDrawDistance.Value = config.ProjectileDrawDistance;
 
-				TerrainDrawDistance.Value = options.TerrainDrawDistance;
+				TerrainDrawDistance.Value = config.TerrainDrawDistance;
 
 				Resolutions.Selection = (uint)Game.Config.SupportedResolutions.IndexOf(Game.Config.Resolution);
 
-				WindowTypes.Selection = (uint)FullscreenAndBorderlessToWindowType(options.Fullscreen, options.Borderless);
+				WindowTypes.Selection = (uint)FullscreenAndBorderlessToWindowType(config.Fullscreen, config.Borderless);
 
-				HighDPI.Checked = options.HighDPI;
+				HighDPI.Checked = config.HighDPI;
 
-				TripleBuffer.Checked = options.TripleBuffer;
+				TripleBuffer.Checked = config.TripleBuffer;
 
-				VSync.Checked = options.VSync;
+				VSync.Checked = config.VSync;
 
-				DebugHUD.Checked = options.DebugHUD;
+				DebugHUD.Checked = config.DebugHUD;
 
-				MultiSample.Text = options.Multisample.ToString();
+				MultiSample.Text = config.Multisample.ToString();
 
-				RefreshRate.Text = options.RefreshRateCap.ToString();
+				RefreshRate.Text = config.RefreshRateCap.ToString();
 
-				CameraScroll.Value = options.CameraScrollSensitivity;
+				CameraScroll.Value = config.CameraScrollSensitivity;
 
-				CameraRotation.Value = options.CameraRotationSensitivity;
+				CameraRotation.Value = config.CameraRotationSensitivity;
 
-				MouseCamRotation.Value = options.MouseRotationSensitivity;
+				MouseCamRotation.Value = config.MouseRotationSensitivity;
 
-				ZoomSpeed.Value = options.ZoomSensitivity;
+				ZoomSpeed.Value = config.ZoomSensitivity;
 
-				BorderMovement.Checked = options.MouseBorderCameraMovement;
+				BorderMovement.Checked = config.MouseBorderCameraMovement;
 			}
 
 			string WindowTypeToString(WindowTypeEnum windowType)

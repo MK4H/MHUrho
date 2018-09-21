@@ -5,8 +5,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class PauseMenu : MenuScreen
-    {
+	class PauseMenu : MenuScreen {
 		class Screen : IDisposable {
 
 			const string WindowName = "PauseMenu";
@@ -26,10 +25,9 @@ namespace MHUrho.UserInterface
 			public Screen(PauseMenu proxy)
 			{
 				this.proxy = proxy;
-				UI.LoadLayoutToElement(UI.Root, Game.ResourceCache, "UI/PauseMenuLayout.xml");
+				UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PauseMenuLayout.xml");
 
-				window = (Window)UI.Root.GetChild(WindowName);
-				window.Visible = false;
+				window = (Window)MenuUIManager.MenuRoot.GetChild(WindowName);
 
 				((Button) window.GetChild(ResumeButton)).Released += ButtonReleased;
 

@@ -8,11 +8,12 @@ using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;
 using Urho.Gui;
+using Urho.Resources;
 
 namespace MHUrho.UserInterface
 {
-    abstract class MenuUIManager : UIManager
-    {
+	abstract class MenuUIManager : UIManager
+	{
 		public IMenuController MenuController { get; private set; }
 
 		public MainMenu MainMenu { get; private set; }
@@ -28,7 +29,10 @@ namespace MHUrho.UserInterface
 
 
 		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
-		public PopUpConfirmation PopUpConfirmation { get; private set; }
+		public ConfirmationPopUp ConfirmationPopUp { get; private set; }
+
+		public UIElement MenuRoot { get; private set; }
+	
 
 		protected MenuScreen currentScreen;
 
@@ -36,7 +40,8 @@ namespace MHUrho.UserInterface
 
 		protected MenuUIManager( IMenuController menuController)
 		{
-			UI.Root.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml"));
+			MenuRoot = UI.Root;
+			MenuRoot.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml"));
 
 			this.MenuController = menuController;
 
@@ -51,18 +56,13 @@ namespace MHUrho.UserInterface
 			LevelSettingsScreen = new LevelSettingsScreen(this);
 			LevelCreationScreen = new LevelCreationScreen(this);
 			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
-			PopUpConfirmation = new PopUpConfirmation(this);
+			ConfirmationPopUp = new ConfirmationPopUp(this);
 
 			previousScreens = new Stack<MenuScreen>();
 
 			currentScreen = MainMenu;
 
 			MainMenu.Show();
-			OptionsScreen.Hide();
-			PauseMenu.Hide();
-			LoadingScreen.Hide();
-			SaveGameScreen.Hide();
-			LoadGameScreen.Hide();
 		}
 
 		public void SwitchToMainMenu()
@@ -147,5 +147,6 @@ namespace MHUrho.UserInterface
 			currentScreen = newScreen;
 			newScreen.Show();
 		}
+
 	}
 }

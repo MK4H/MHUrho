@@ -29,7 +29,7 @@ namespace MHUrho.UserInterface
 	}
 
 	class FileSystemBrowsingPopUp 
-    {
+	{
 
 		class PathResult : IPathResult {
 			public string FullPath => Path.Combine(BaseDir, RelativePath);
@@ -97,6 +97,8 @@ namespace MHUrho.UserInterface
 
 			MyGame Game => MyGame.Instance;
 
+			MenuUIManager MenuUIManager => proxy.menuUIManager;
+
 			readonly FileSystemBrowsingPopUp proxy;
 
 			readonly TaskCompletionSource<IPathResult> taskCompletition;
@@ -149,9 +151,9 @@ namespace MHUrho.UserInterface
 				this.taskCompletition = taskCompletition;
 				this.cDirEntries = new List<NameTextPair>();
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/FileBrowserLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/FileBrowserLayout.xml");
 
-				window = (Window)Game.UI.Root.GetChild("FileBrowserWindow");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("FileBrowserWindow");
 				window.BringToFront();
 				pathEdit = (LineEdit)window.GetChild("PathEdit", true);
 				selectButton = (Button)window.GetChild("SelectButton", true);
@@ -485,12 +487,13 @@ namespace MHUrho.UserInterface
 			}
 		}
 
+		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 		public FileSystemBrowsingPopUp(MenuUIManager uiManager)
 		{
-
+			menuUIManager = uiManager;
 		}
 
 		/// <summary>

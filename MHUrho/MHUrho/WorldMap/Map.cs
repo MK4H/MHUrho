@@ -1571,7 +1571,7 @@ namespace MHUrho.WorldMap
 
 		bool IsBottomInnerBorderPoint(int x, int y)
 		{
-			return y == Top + Width;
+			return y == Top + Length;
 		}
 
 		bool IsBottomInnerBorderPoint(IntVector2 point)

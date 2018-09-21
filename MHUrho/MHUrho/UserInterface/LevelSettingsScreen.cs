@@ -6,8 +6,8 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class LevelSettingsScreen : MenuScreen
-    {
+	class LevelSettingsScreen : MenuScreen
+	{
 		class Screen : IDisposable {
 
 			LevelSettingsScreen proxy;
@@ -28,9 +28,9 @@ namespace MHUrho.UserInterface
 			public Screen(LevelSettingsScreen proxy)
 			{
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/LevelSettingsLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LevelSettingsLayout.xml");
 
-				window = (Window)Game.UI.Root.GetChild("LevelSettingsWindow");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("LevelSettingsWindow");
 
 				customSettingsWindow = (Window)window.GetChild("CustomSettings");
 

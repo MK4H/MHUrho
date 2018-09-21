@@ -7,8 +7,8 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class LoadGameScreen : MenuScreen
-    {
+	class LoadGameScreen : MenuScreen
+	{
 		class Screen : FilePickScreen {
 
 			Button loadButton;
@@ -16,9 +16,9 @@ namespace MHUrho.UserInterface
 			public Screen(MyGame game, MenuUIManager menuUIManager) 
 				:base(game, menuUIManager)
 			{
-				UI.LoadLayoutToElement(UI.Root, game.ResourceCache, "UI/LoadLayout.xml");
+				UI.LoadLayoutToElement(MenuUIManager.MenuRoot, game.ResourceCache, "UI/LoadLayout.xml");
 
-				Window window = (Window)UI.Root.GetChild("LoadWindow");
+				Window window = (Window)MenuUIManager.MenuRoot.GetChild("LoadWindow");
 
 				LineEdit loadLineEdit = (LineEdit)window.GetChild("LoadLineEdit", true);
 

@@ -26,12 +26,11 @@ namespace MHUrho
 
 		public static FileManager Files { get; set; }
 
-		public AppOptions Config { get; private set; }
+		public AppConfig Config { get; private set; }
 
-		[Preserve]
-		public MyGame(ApplicationOptions opts) : base(opts) { }
 
-		public IMenuController menuController;
+
+		public IMenuController MenuController { get; private set; }
 
 		public ControllerFactory ControllerFactory { get; private set; }
 
@@ -41,11 +40,20 @@ namespace MHUrho
 
 		static MyGame()
 		{
-			UnhandledException += (s, e) => {
-				if (Debugger.IsAttached)
-					Debugger.Break();
-				e.Handled = true;
-			};
+			UnhandledException += 
+				(s, e) => {
+				if (Debugger.IsAttached) {
+						Debugger.Break();
+					}
+					e.Handled = true;
+				};
+		}
+
+		[Preserve]
+		public MyGame(ApplicationOptions opts)
+			: base(opts)
+		{
+
 		}
 
 		public static bool IsMainThread(Thread thread)
@@ -96,23 +104,23 @@ namespace MHUrho
 		{
 			Instance = this;
 			Graphics.WindowTitle = "MHUrho";
-
+			
 			mainThreadID = Thread.CurrentThread.ManagedThreadId;
 
 			Log.Open(Files.LogPath);
 			Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;
 
-			//TODO: DEBUG
+			//NOTE: DEBUG
 			//Stream newConfigFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Create, FileAccess.Write);
-			//AppOptions.GetDefaultAppOptions().SaveTo(newConfigFile);
+			//AppConfig.GetDefaultAppOptions().SaveTo(newConfigFile);
 
-			if (!Files.FileExists(Path.Combine(Files.DynamicDirPath,Files.ConfigFilePath))) {
+			if (!Files.FileExists(Path.Combine(Files.DynamicDirPath, Files.ConfigFilePath))) {
 				Files.CopyStaticToDynamic(Files.ConfigFilePath);
 			}
 
 			//TODO: Copy from static if not present
 			using (Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
-				Config = AppOptions.LoadFrom(configFile);
+				Config = AppConfig.LoadFrom(configFile);
 			}
 				
 			
@@ -128,13 +136,13 @@ namespace MHUrho
 				ControllerFactory = new MandKFactory();
 			}
 
-			menuController = ControllerFactory.CreateMenuController();
+			MenuController = ControllerFactory.CreateMenuController();
 
 		}
 
 		void SetConfigOptions()
 		{
-			var monitor = Graphics.CurrentMonitor;
+			int monitor = Graphics.CurrentMonitor;
 
 			if (Config.DebugHUD) {
 				monoDebugHud = new MonoDebugHud(this);

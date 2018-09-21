@@ -7,8 +7,7 @@ using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-    class MainMenu : MenuScreen
-    {
+	class MainMenu : MenuScreen {
 		class Screen : IDisposable {
 
 			readonly MainMenu proxy;
@@ -22,8 +21,8 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				Game.UI.LoadLayoutToElement(Game.UI.Root, Game.ResourceCache, "UI/MainMenuLayout.xml");
-				window = (Window)Game.UI.Root.GetChild("MainMenu");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/MainMenuLayout.xml");
+				window = (Window)MenuUIManager.MenuRoot.GetChild("MainMenu");
 
 				((Button)window.GetChild("StartButton", true)).Released += ButtonPressed;
 				((Button)window.GetChild("LoadButton", true)).Released += ButtonPressed;
@@ -47,8 +46,13 @@ namespace MHUrho.UserInterface
 			void ButtonPressed(ReleasedEventArgs obj)
 			{
 				//Log.Write(LogLevel.Debug, "Button pressed");
+				ExecuteButtonPressAction(obj.Element.Name);
+			}
 
-				switch (obj.Element.Name) {
+			void ExecuteButtonPressAction(string buttonName)
+			{
+				switch (buttonName)
+				{
 					case "StartButton":
 
 						//DO NOT WAIT, let the ui thread respond to user
@@ -70,9 +74,16 @@ namespace MHUrho.UserInterface
 						Game.Exit();
 						break;
 					default:
-						throw new ArgumentOutOfRangeException(nameof(obj.Element), "Unknown button on the MainMenu screen");
+						throw new ArgumentOutOfRangeException(nameof(buttonName), "Unknown button on the MainMenu screen");
 				}
 			}
+
+#if DEBUG
+			public void SimulateButtonPress(string buttonName)
+			{
+				ExecuteButtonPressAction(buttonName);
+			}
+#endif
 
 		}
 
@@ -105,6 +116,10 @@ namespace MHUrho.UserInterface
 			}
 
 			screen = new Screen(this);
+
+#if DEBUG
+			screen.SimulateButtonPress("StartButton");
+#endif
 		}
 
 		public override void Hide()

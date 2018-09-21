@@ -1,74 +1,74 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="GamePackDirectory"
-    targetNamespace="http://www.MobileHold.cz/GamePack.xsd"
-    elementFormDefault="qualified"
-    xmlns="http://www.MobileHold.cz/GamePack.xsd"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.MobileHold.cz/GamePack.xsd"
+	elementFormDefault="qualified"
+	xmlns="http://www.MobileHold.cz/GamePack.xsd"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
   <xs:element name="resourcePackDirectory">
-    <xs:complexType>
-      <xs:sequence minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="resourcePack" type="resourcePackDirEntry"/>
-      </xs:sequence>
-    </xs:complexType>
+	<xs:complexType>
+	  <xs:sequence minOccurs="0" maxOccurs="unbounded">
+		<xs:element name="resourcePack" type="resourcePackDirEntry"/>
+	  </xs:sequence>
+	</xs:complexType>
   </xs:element>
   
   <xs:element name="resourcePack" type="resourcePackFull"/>
-    
+	
   
   <xs:complexType name="resourcePackBase">
-    <xs:sequence>
-      <xs:element name="description" type="xs:string" minOccurs="0"/>
-      <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string"/>
+	<xs:sequence>
+	  <xs:element name="description" type="xs:string" minOccurs="0"/>
+	  <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
+	</xs:sequence>
+	<xs:attribute name="name" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="resourcePackDirEntry">
-    <xs:complexContent>
-      <xs:extension base="resourcePackBase">
-        <xs:sequence>
-          <xs:element name="pathToXml" type="xs:string"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
+	<xs:complexContent>
+	  <xs:extension base="resourcePackBase">
+		<xs:sequence>
+		  <xs:element name="pathToXml" type="xs:string"/>
+		</xs:sequence>
+	  </xs:extension>
+	</xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="resourcePackFull">
-    <xs:complexContent>
-      <xs:extension base="resourcePackBase">
-        <xs:sequence>
-          <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="tileType" type="tileTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="unitTypes" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="unitType" type="unitTypeType" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
+	<xs:complexContent>
+	  <xs:extension base="resourcePackBase">
+		<xs:sequence>
+		  <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
+			<xs:complexType>
+			  <xs:sequence>
+				<xs:element name="tileType" type="tileTypeType" minOccurs="0" maxOccurs="unbounded"/>
+			  </xs:sequence>
+			</xs:complexType>
+		  </xs:element>
+		  <xs:element name="unitTypes" minOccurs="0" maxOccurs="1">
+			<xs:complexType>
+			  <xs:sequence>
+				<xs:element name="unitType" type="unitTypeType" minOccurs="0" maxOccurs="unbounded"/>
+			  </xs:sequence>
+			</xs:complexType>
+		  </xs:element>
+		</xs:sequence>
+	  </xs:extension>
+	</xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="tileTypeType">
-    <xs:sequence>
-      <xs:element name="texturePath" type="xs:string"/>
-      <xs:element name="movementSpeed" type="xs:float"/>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string"/>
+	<xs:sequence>
+	  <xs:element name="texturePath" type="xs:string"/>
+	  <xs:element name="movementSpeed" type="xs:float"/>
+	</xs:sequence>
+	<xs:attribute name="name" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="unitTypeType">
-    <xs:sequence>
-      <xs:element name="modelPath" type="xs:string"/>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string"/>
+	<xs:sequence>
+	  <xs:element name="modelPath" type="xs:string"/>
+	</xs:sequence>
+	<xs:attribute name="name" type="xs:string"/>
   </xs:complexType>
 </xs:schema>

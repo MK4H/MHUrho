@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using MHUrho.EditorTools;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
@@ -29,7 +30,7 @@ namespace MHUrho.Plugins
 
 				foreach (var plugin in levelPlugins) {
 					LevelLogicPlugin newPluginInstance = (LevelLogicPlugin)Activator.CreateInstance(plugin);
-					if (newPluginInstance.IsNamed(name)) {
+					if (newPluginInstance.IsMyName(name)) {
 						pluginInstance = newPluginInstance;
 						break;
 					}
@@ -49,7 +50,7 @@ namespace MHUrho.Plugins
 			return pluginInstance;
 		}
 
-		public abstract bool IsNamed(string name);
+		public abstract bool IsMyName(string logicName);
 
 		public abstract void OnUpdate(float timeStep);
 
@@ -68,6 +69,8 @@ namespace MHUrho.Plugins
 		{
 
 		}
+
+		public abstract ToolManager GetToolManager(ILevelManager levelManager);
 
 		public abstract void Dispose();
 	}

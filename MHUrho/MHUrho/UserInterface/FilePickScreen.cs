@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
@@ -151,17 +152,16 @@ namespace MHUrho.UserInterface
 			if (MatchSelected == null) return;
 
 			DisableInput();
-			MenuUIManager.PopUpConfirmation.RequestConfirmation("Deleting file",
-																$"Do you really want to delete the file \"{MatchSelected}\"?",
-																DeleteFile);
+			MenuUIManager.ConfirmationPopUp.RequestConfirmation("Deleting file",
+																$"Do you really want to delete the file \"{MatchSelected}\"?").ContinueWith(DeleteFile);
 
 
 		}
 
-		void DeleteFile(bool confirmed)
+		void DeleteFile(Task<bool> confirmed)
 		{
 			EnableInput();
-			if (!confirmed) return;
+			if (!confirmed.Result) return;
 
 			MyGame.Files.DeleteDynamicFile(Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected));
 			int index = FileNames.FindIndex((pair) => pair.Name.Equals(MatchSelected, StringComparison.CurrentCultureIgnoreCase));
