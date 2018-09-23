@@ -1008,7 +1008,7 @@ namespace MHUrho.WorldMap
 		/// </summary>
 		/// <param name="centerTile">center tile of the rectangle</param>
 		/// <param name="rectangleSize">Size of the rectangle in which the height changes</param>
-		/// <param name="heightDelta">By how much should the hight change</param>
+		/// <param name="heightDelta">By how much should the height change</param>
 		public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, float heightDelta) 
 		{
 			IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
@@ -1026,6 +1026,7 @@ namespace MHUrho.WorldMap
 
 			//Include the tiles (indexed by top left corner), whose bottom and right edges changed
 			//They are to the top and to the left of the current rectangle
+			//We did not want them before because the their top left corners (by which they are indexed) did not change
 			topLeft -= new IntVector2(1, 1);
 
 			ForEachInRectangle(topLeft, bottomRight, (tile) => {
@@ -1033,6 +1034,10 @@ namespace MHUrho.WorldMap
 														TileHeightChanged?.Invoke(tile);
 													});
 
+
+			//Squish to map again, because we needed to enlarge the rectangle to signal the tiles
+			//around the rectangle, but those may be BorderTiles, which are not represented in graphics
+			SquishToMap(ref topLeft, ref bottomRight);
 			graphics.CorrectTileHeight(topLeft, bottomRight);
 
 		}
@@ -1066,6 +1071,7 @@ namespace MHUrho.WorldMap
 									TileHeightChanged?.Invoke(tile);
 								});
 
+			SquishToMap(ref topLeft, ref bottomRight);
 			graphics.CorrectTileHeight(topLeft, bottomRight);
 		}
 

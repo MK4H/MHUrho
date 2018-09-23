@@ -330,10 +330,23 @@ namespace MHUrho.WorldMap
 
 				Node chunkNode;
 
-				IntVector2 topLeftCorner;
-				IntVector2 size => graphics.chunkSize;
+				readonly IntVector2 topLeftCorner;
 
-				int TileCount => size.X * size.Y;
+				/// <summary>
+				/// Top left corner of the bottom right tile
+				///
+				/// Tiles are referenced by their top left corner
+				/// </summary>
+				readonly IntVector2 bottomRightTileTLCorner;
+
+				/// <summary>
+				/// Size in tiles
+				///
+				/// In verticies, the size is +1 in both directions
+				/// </summary>
+				IntVector2 Size => graphics.chunkSize;
+
+				int TileCount => Size.X * Size.Y;
 
 				readonly MapGraphics graphics;
 
@@ -343,9 +356,11 @@ namespace MHUrho.WorldMap
 				{
 					this.graphics = graphics;
 					this.topLeftCorner = topLeftCorner;
+					//Because size is in tiles, this is correct position of the top left corner of the bottom right tile
+					this.bottomRightTileTLCorner = topLeftCorner + Size - new IntVector2(1,1);
 					MyGame.InvokeOnMainSafe(() => {
 												this.chunkNode = map.node.CreateChild("chunkNode");
-												chunkNode.Position = new Vector3(topLeftCorner.X + size.X / 2.0f, 0, topLeftCorner.Y + size.Y / 2.0f);
+												chunkNode.Position = new Vector3(topLeftCorner.X + Size.X / 2.0f, 0, topLeftCorner.Y + Size.Y / 2.0f);
 					});
 						
 					CreateModel(map);
@@ -362,6 +377,7 @@ namespace MHUrho.WorldMap
 				public unsafe void ChangeTileType(int x, int y, TileType newType)
 				{
 					CheckLocked();
+					CheckIsInsideChunk(x, y);
 
 					vertexBuffer.Lock();
 
@@ -377,6 +393,7 @@ namespace MHUrho.WorldMap
 				public unsafe void CorrectTileHeight(int x, int y)
 				{
 					CheckLocked();
+					CheckIsInsideChunk(x, y);
 
 					vertexBuffer.Lock();
 					indexBuffer.Lock();
@@ -420,7 +437,7 @@ namespace MHUrho.WorldMap
 
 				int GetBufferOffset(int x, int y)
 				{
-					return x - topLeftCorner.X + (y - topLeftCorner.Y) * size.X;
+					return x - topLeftCorner.X + (y - topLeftCorner.Y) * Size.X;
 				}
 
 				int GetBufferOffset(ITile tile)
@@ -432,6 +449,31 @@ namespace MHUrho.WorldMap
 				void CheckLocked()
 				{
 					if (!Locked) throw new InvalidCastException("Locked operation on unlocked chunk");
+				}
+
+				bool IsInsideChunk(int x, int y)
+				{
+					return topLeftCorner.X <= x &&
+							topLeftCorner.Y <= y &&
+							bottomRightTileTLCorner.X >= x &&
+							bottomRightTileTLCorner.Y >= y;
+				}
+
+				bool IsInsideChunk(IntVector2 point)
+				{
+					return IsInsideChunk(point.X, point.Y);
+				}
+
+				void CheckIsInsideChunk(int x, int y)
+				{
+					if (!IsInsideChunk(x, y)) {
+						throw new ArgumentOutOfRangeException("x or y",
+															"Corner was outside the chunk");
+					}
+				}
+				void CheckIsInsideChunk(IntVector2 point)
+				{
+					CheckIsInsideChunk(point.X, point.Y);
 				}
 
 				unsafe void FixBoundingBox()
@@ -490,10 +532,10 @@ namespace MHUrho.WorldMap
 
 					//4 verticies for every tile, so that we can map every tile to different texture
 					// and the same tile types to the same textures
-					uint numVerticies = (uint)(size.X * size.Y * 4);
+					uint numVerticies = (uint)(Size.X * Size.Y * 4);
 
 					//two triangles per tile, 3 indicies per triangle
-					uint numIndicies = (uint)(size.X * size.Y * 6);
+					uint numIndicies = (uint)(Size.X * Size.Y * 6);
 
 
 					VertexBuffer vb = InitializeVertexBuffer(numVerticies);
@@ -513,8 +555,8 @@ namespace MHUrho.WorldMap
 						TileInIB* inBuff = (TileInIB*)ibPointer.ToPointer();
 
 						int vertexIndex = 0;
-						for (int y = topLeftCorner.Y; y < topLeftCorner.Y + size.Y; y++) {
-							for (int x = topLeftCorner.X; x < topLeftCorner.X + size.X; x++) {
+						for (int y = topLeftCorner.Y; y < topLeftCorner.Y + Size.Y; y++) {
+							for (int x = topLeftCorner.X; x < topLeftCorner.X + Size.X; x++) {
 								ITile tile = map.GetTileByTopLeftCorner(x, y);
 								var tileInVB = new TileInVB(tile, chunkNode.Position);
 
@@ -601,11 +643,9 @@ namespace MHUrho.WorldMap
 						model.SetGeometry(0, 0, geom);
 						Vector3 topLeftCorner3 = new Vector3(topLeftCorner.X, -1, topLeftCorner.Y) - chunkNode.Position;
 						model.BoundingBox = new BoundingBox(topLeftCorner3,
-															topLeftCorner3 + new Vector3(size.X, 2, size.Y));
+															topLeftCorner3 + new Vector3(Size.X, 2, Size.Y));
 					}
 				}
-
-				
 
 				void SetModel(ILevelManager level)
 				{
@@ -634,6 +674,16 @@ namespace MHUrho.WorldMap
 
 				public RectangleOperation(IntVector2 topLeft, IntVector2 bottomRight, MapGraphics graphics)
 				{
+					if (!graphics.map.IsInside(topLeft)) {
+						throw new ArgumentOutOfRangeException(nameof(topLeft),
+															"topLeft corner was outside the displayed area of the map");
+					}
+
+					if (!graphics.map.IsInside(bottomRight)) {
+						throw new ArgumentOutOfRangeException(nameof(bottomRight),
+															"bottomRight corner was outside the displayed area of the map");
+					}
+
 					currentPosition = new IntVector2(topLeft.X - 1, topLeft.Y);
 					this.topLeft = topLeft;
 					this.bottomRight = bottomRight;
