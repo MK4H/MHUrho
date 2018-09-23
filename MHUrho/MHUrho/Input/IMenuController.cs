@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho;
 
 namespace MHUrho.Input
@@ -28,5 +29,7 @@ namespace MHUrho.Input
 		void SavePausedLevel(string toPath);
 
 		void StartLoadingLevel(LevelRep level, bool editorMode);
+
+		void ExecuteActionOnCurrentScreen(MenuScreenAction action);
 	}
 }

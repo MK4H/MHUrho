@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Gui;
@@ -10,7 +11,7 @@ using Urho.Gui;
 namespace MHUrho.UserInterface
 {
 	class LevelCreationScreen : MenuScreen {
-		class Screen : IDisposable {
+		class Screen : ScreenBase {
 
 			class SliderDuo : IDisposable {
 
@@ -109,34 +110,9 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			class PathText : IDisposable {
-				public Text Element { get; private set; }
+			
 
-				public string Value {
-					get => Element.Value;
-					set => Element.Value = value;
-				}
-
-				public bool HasDefaultValue => Value == baseValue;
-
-				readonly string baseValue;
-
-				public PathText(Text textElement)
-				{
-					this.Element = textElement;
-					baseValue = textElement.Value;
-				}
-
-				public void Dispose()
-				{
-					Element.Dispose();
-				}
-			}
-
-			LevelCreationScreen proxy;
-
-			MyGame Game => proxy.Game;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
+			readonly LevelCreationScreen proxy;
 
 			LevelRep Level {
 				get => proxy.Level;
@@ -162,6 +138,7 @@ namespace MHUrho.UserInterface
 			readonly LineEdit descriptionEdit;
 
 			public Screen(LevelCreationScreen proxy)
+				:base(proxy)
 			{
 				this.proxy = proxy;
 
@@ -196,7 +173,7 @@ namespace MHUrho.UserInterface
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
 				nameEdit.TextChanged -= NameChanged;
 				descriptionEdit.TextChanged -= DescriptionChanged;
@@ -241,7 +218,7 @@ namespace MHUrho.UserInterface
 
 			void NameChanged(TextChangedEventArgs args)
 			{
-				if (!IsNameValid(args.Text)) {
+				if (!LevelRep.IsNameValid(args.Text)) {
 					nameEdit.Text = Name;
 				}
 				Name = nameEdit.Text;
@@ -249,7 +226,7 @@ namespace MHUrho.UserInterface
 
 			void DescriptionChanged(TextChangedEventArgs args)
 			{
-				if (!IsDescriptionValid(args.Text)) {
+				if (!LevelRep.IsDescriptionValid(args.Text)) {
 					descriptionEdit.Text = Description;
 				}
 				Description = descriptionEdit.Text;
@@ -263,26 +240,6 @@ namespace MHUrho.UserInterface
 			void ThumbnailPathButtonReleased(ReleasedEventArgs args)
 			{
 				RequestPathToText(thumbnailPathText);
-			}
-
-			bool IsNameValid(string name)
-			{
-				foreach (var ch in name) {
-					if (!char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch)) {
-						return false;
-					}
-				}
-				return true;
-			}
-
-			bool IsDescriptionValid(string description)
-			{
-				foreach (var ch in description) {
-					if (!char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch) && !char.IsPunctuation(ch)) {
-						return false;
-					}
-				}
-				return true;
 			}
 
 			async void RequestPathToText(PathText pathText)
@@ -323,47 +280,74 @@ namespace MHUrho.UserInterface
 			{
 				MenuUIManager.MenuController.StartLoadingLevel(proxy.Level, true);
 			}
+
+			public void SimulateBackButtonPress()
+			{
+				MenuUIManager.SwitchBack();
+			}
 #endif
 		}
 
 		public LevelRep Level { get; set; }
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
 		}
-
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 		public LevelCreationScreen(MenuUIManager menuUIManager)
+			:base(menuUIManager)
+		{ }
+
+		public override void ExecuteAction(MenuScreenAction action)
 		{
-			this.menuUIManager = menuUIManager;
+			if (action is LevelCreationScreenAction myAction) {
+				switch (myAction.Action) {
+					case LevelCreationScreenAction.Actions.Edit:
+						if (Level == null) {
+							screen.SimulateEditNewLevel(myAction.LevelName,
+														myAction.Description,
+														myAction.ThumbnailPath,
+														myAction.PluginPath,
+														myAction.MapSize,
+														PackageManager.Instance.ActivePackage);
+						}
+						else {
+							//TODO: Simulate changing values - needs changes to the Action class too
+							screen.SimulateEditExistingLevel();
+						}
+						break;
+					case LevelCreationScreenAction.Actions.Back:
+						screen.SimulateBackButtonPress();
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+			else {
+				throw new ArgumentException("Action does not belong to the current screen", nameof(action));
+			}
 		}
 
 		public override void Show()
 		{
-			if (screen != null) {
+			if (ScreenInstance != null) {
 				return;
 			}
 
-			screen = new Screen(this);
+			ScreenInstance = new Screen(this);
 		}
 
 		public override void Hide()
 		{
+			if (ScreenInstance == null) {
+				return;
+			}
+
 			Level = null;
-			screen.Dispose();
-			screen = null;
+			base.Hide();
 		}
 	}
 }

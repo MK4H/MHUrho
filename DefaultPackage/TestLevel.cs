@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.EditorTools;
+using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.Storage;
@@ -39,9 +40,13 @@ namespace DefaultPackage
 			//TODO: This
 		}
 
-		public override ToolManager GetToolManager(ILevelManager levelManager)
+		public override ToolManager GetToolManager(ILevelManager levelManager, InputType inputType)
 		{
-			throw new NotImplementedException();
+			if (inputType != InputType.MouseAndKeyboard) {
+				throw new NotImplementedException();
+			}
+
+			return new ToolManagerMandK(levelManager);
 		}
 
 		public override void Dispose()

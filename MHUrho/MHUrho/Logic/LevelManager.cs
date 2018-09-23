@@ -16,6 +16,7 @@ using MHUrho.UnitComponents;
 using Urho.Actions;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.Plugins;
 
 
 namespace MHUrho.Logic
@@ -77,6 +78,8 @@ namespace MHUrho.Logic
 
 		public ToolManager ToolManager { get; private set; }
 
+		public LevelLogicPlugin Plugin { get; private set; }
+
 		public event OnUpdateDelegate Update;
 
 		ICameraController cameraController;
@@ -96,10 +99,12 @@ namespace MHUrho.Logic
 
 		readonly Random rng;
 
-		protected LevelManager(Node levelNode, MyGame app, Octree octree, bool editorMode)
+		protected LevelManager(Node levelNode, LevelRep levelRep, MyGame app, Octree octree, bool editorMode)
 		{
 			this.LevelNode = levelNode;
+			this.LevelRep = levelRep;
 			this.EditorMode = editorMode;
+			this.Plugin = levelRep.LevelPlugin;
 
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
@@ -512,6 +517,8 @@ namespace MHUrho.Logic
 			base.OnUpdate(timeStep);
 
 			if (!EnabledEffective) return;
+
+			Plugin.OnUpdate(timeStep);
 
 			Minimap.OnUpdate(timeStep);
 

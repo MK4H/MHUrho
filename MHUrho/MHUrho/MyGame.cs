@@ -26,6 +26,8 @@ namespace MHUrho
 
 		public static FileManager Files { get; set; }
 
+		public static StartupOptions StartupOptions { get; set; }
+
 		public AppConfig Config { get; private set; }
 
 
@@ -138,6 +140,7 @@ namespace MHUrho
 
 			MenuController = ControllerFactory.CreateMenuController();
 
+			StartupOptions.UIActions?.RunActions(this);
 		}
 
 		void SetConfigOptions()

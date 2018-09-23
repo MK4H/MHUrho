@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using MHUrho.Storage;
 using MHUrho.UserInterface;
 using Urho;
@@ -33,7 +34,7 @@ namespace MHUrho.Input
 		public void SwitchToPauseMenu(IGameController gameController)
 		{
 			pausedLevelController = gameController;
-			UIController.SwitchToPauseMenu();
+			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
 		public void StartLoadingLevel(LevelRep level, bool editorMode)
@@ -46,6 +47,11 @@ namespace MHUrho.Input
 			ILevelLoader loader = level.StartLoading(editorMode);
 			
 			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
+		}
+
+		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)
+		{
+			UIController.CurrentScreen.ExecuteAction(action);
 		}
 
 		public void ResumePausedLevel()

@@ -13,6 +13,7 @@ using Urho;
 namespace MHUrho.Logic {
 	public interface ILevelManager {
 
+		LevelRep LevelRep { get; }
 
 		MyGame App { get; }
 

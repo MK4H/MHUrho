@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
@@ -10,12 +11,9 @@ namespace MHUrho.UserInterface
 {
 	class PackagePickingScreen : MenuScreen
 	{
-		class Screen : IDisposable {
+		class Screen : ScreenBase {
 
 			readonly PackagePickingScreen proxy;
-			MyGame Game => proxy.Game;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
-
 
 			Window window;
 			ListView listView;
@@ -23,6 +21,7 @@ namespace MHUrho.UserInterface
 			List<PackageListItem> items;
 
 			public Screen(PackagePickingScreen proxy)
+				:base(proxy)
 			{
 				this.proxy = proxy;
 				this.items = new List<PackageListItem>();
@@ -46,7 +45,7 @@ namespace MHUrho.UserInterface
 				window.Visible = true;
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
 
 				listView.RemoveAllItems();
@@ -103,35 +102,50 @@ namespace MHUrho.UserInterface
 					}
 				}
 			}
+
+			public void SimulateBackButtonPress()
+			{
+				MenuUIManager.SwitchBack();
+			}
 #endif
 		}
 
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
 		}
-
-
-
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 		public PackagePickingScreen(MenuUIManager menuUIManager)
+			:base(menuUIManager)
 		{
-			this.menuUIManager = menuUIManager;
+
 		}
 
-		
+
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			if (action is PackagePickScreenAction myAction)
+			{
+				switch (myAction.Action)
+				{
+					case PackagePickScreenAction.Actions.Pick:
+						screen.SimulatePackagePick(myAction.PackageName);
+						break;
+					case PackagePickScreenAction.Actions.Back:
+						screen.SimulateBackButtonPress();
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+			else
+			{
+				throw new ArgumentException("Action does not belong to the current screen", nameof(action));
+			}
+		}
 
 		public override void Show()
 		{
@@ -141,21 +155,9 @@ namespace MHUrho.UserInterface
 
 			screen = new Screen(this);
 #if DEBUG
-			screen.SimulatePackagePick("testRP2");
+			//screen.SimulatePackagePick("testRP2");
 #endif
 
-		}
-
-
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
-			}
-
-			screen.Dispose();
-			screen = null;
 		}
 
 	}

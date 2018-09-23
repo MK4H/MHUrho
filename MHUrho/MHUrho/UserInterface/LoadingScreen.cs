@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
 	class LoadingScreen : MenuScreen
 	{
-		class Screen : IDisposable {
+		class Screen : ScreenBase {
 
 			readonly LoadingScreen proxy;
-			MyGame Game => proxy.Game;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
 			ILoadingWatcher LoadingWatcher => proxy.LoadingWatcher;
 
@@ -23,6 +22,7 @@ namespace MHUrho.UserInterface
 			Text text;
 
 			public Screen(LoadingScreen proxy)
+				:base(proxy)
 			{
 
 				this.proxy = proxy;
@@ -55,7 +55,7 @@ namespace MHUrho.UserInterface
 				text.Value = newText;
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
 				LoadingWatcher.OnTextUpdate -= OnTextUpdate;
 				LoadingWatcher.OnPercentageUpdate -= OnPercentageUpdate;
@@ -70,29 +70,26 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
-		}
-
 		//TODO: Restrict setting only when not visible etc.
 		public ILoadingWatcher LoadingWatcher { get; set; }
 
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
+		}
+
 
 		Screen screen;
 
 		public LoadingScreen(MenuUIManager menuUIManager)
+			:base(menuUIManager)
 		{
-			this.menuUIManager = menuUIManager;
+
+		}
+
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override void Show()

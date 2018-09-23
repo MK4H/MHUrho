@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho.Gui;
 using Urho.Urho2D;
 
@@ -11,12 +12,9 @@ namespace MHUrho.UserInterface
 	class LevelPickingScreen : MenuScreen
 	{
 
-		class Screen : IDisposable {
+		class Screen : ScreenBase {
 
-			LevelPickingScreen proxy;
-
-			MyGame Game => proxy.Game;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
+			readonly LevelPickingScreen proxy;
 
 			Window window;
 			ListView listView;
@@ -29,6 +27,7 @@ namespace MHUrho.UserInterface
 			readonly List<LevelPickingItem> items;
 
 			public Screen(LevelPickingScreen proxy)
+				:base(proxy)
 			{
 				this.proxy = proxy;
 
@@ -52,7 +51,7 @@ namespace MHUrho.UserInterface
 				GetLevels(listView);
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
 				editButton.Released -= EditButtonReleased;
 				playButton.Released -= PlayButtonReleased;
@@ -196,58 +195,64 @@ namespace MHUrho.UserInterface
 													  levelName,
 													  "Level with this name does not exist");
 			}
+
+			public void SimulatePressingBackButton()
+			{
+				MenuUIManager.SwitchBack();
+			}
 #endif
 		}
 
 		//TODO: Check this if it is null, prohibit changing when the screen is visible etc.
 		public GamePack Package { get; set; }
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
 		}
-
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 		public LevelPickingScreen(MenuUIManager menuUIManager)
-		{
-			this.menuUIManager = menuUIManager;
+			:base(menuUIManager)
+		{ }
 
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			if (action is LevelPickScreenAction myAction)
+			{
+				switch (myAction.Action)
+				{
+					case LevelPickScreenAction.Actions.EditNew:
+						screen.SimulateEditPickingNewLevel();
+						break;
+					case LevelPickScreenAction.Actions.Edit:
+						screen.SimulateEditPickingLevel(myAction.LevelName);
+						break;
+					case LevelPickScreenAction.Actions.Play:
+						screen.SimulatePlayPickingLevel(myAction.LevelName);
+						break;
+					case LevelPickScreenAction.Actions.Back:
+						screen.SimulatePressingBackButton();
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+			else
+			{
+				throw new ArgumentException("Action does not belong to the current screen", nameof(action));
+			}
 		}
 
 		public override void Show()
 		{
-			if (screen != null) {
+			if (ScreenInstance != null) {
 				return;
 			}
 
 			screen = new Screen(this);
-
-#if DEBUG
-			screen.SimulateEditPickingNewLevel();
-#endif
 		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
-			}
-
-			screen.Dispose();
-			screen = null;
-		}
-
-		
+	
 	}
 }

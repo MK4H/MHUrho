@@ -26,6 +26,7 @@ namespace MHUrho.UserInterface
 		public LevelPickingScreen LevelPickingScreen { get; private set; }
 		public LevelSettingsScreen LevelSettingsScreen { get; private set; }
 		public LevelCreationScreen LevelCreationScreen { get; private set; }
+		public SaveAsScreen SaveAsScreen { get; private set; }
 
 
 		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
@@ -34,7 +35,7 @@ namespace MHUrho.UserInterface
 		public UIElement MenuRoot { get; private set; }
 	
 
-		protected MenuScreen currentScreen;
+		public MenuScreen CurrentScreen { get; protected set; }
 
 		protected Stack<MenuScreen> previousScreens;
 
@@ -60,7 +61,7 @@ namespace MHUrho.UserInterface
 
 			previousScreens = new Stack<MenuScreen>();
 
-			currentScreen = MainMenu;
+			CurrentScreen = MainMenu;
 
 			MainMenu.Show();
 		}
@@ -70,8 +71,9 @@ namespace MHUrho.UserInterface
 			SwitchToScreen(MainMenu);
 		}
 
-		public void SwitchToPauseMenu()
+		public void SwitchToPauseMenu(ILevelManager level)
 		{
+			PauseMenu.PausedLevel = level;
 			SwitchToScreen(PauseMenu);
 		}
 
@@ -119,32 +121,38 @@ namespace MHUrho.UserInterface
 			SwitchToScreen(LevelCreationScreen);
 		}
 
+		public void SwitchToSaveAsScreen(ILevelManager level)
+		{
+			SaveAsScreen.Level = level;
+			SwitchToScreen(SaveAsScreen);
+		}
+
 		public void SwitchBack()
 		{
-			currentScreen.Hide();
+			CurrentScreen.Hide();
 
 			if (previousScreens.Count != 0) {
-				currentScreen = previousScreens.Pop();
-				currentScreen.Show();
+				CurrentScreen = previousScreens.Pop();
+				CurrentScreen.Show();
 			}
 		}
 
 		public void Clear()
 		{
 			previousScreens = new Stack<MenuScreen>();
-			currentScreen.Hide();
-			currentScreen = null;
+			CurrentScreen.Hide();
+			CurrentScreen = null;
 		}
 
 
 		void SwitchToScreen(MenuScreen newScreen)
 		{
-			if (currentScreen != null) {
-				currentScreen.Hide();
-				previousScreens.Push(currentScreen);
+			if (CurrentScreen != null) {
+				CurrentScreen.Hide();
+				previousScreens.Push(CurrentScreen);
 			}
 
-			currentScreen = newScreen;
+			CurrentScreen = newScreen;
 			newScreen.Show();
 		}
 

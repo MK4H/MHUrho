@@ -16,31 +16,42 @@
   <xs:element name="gamePack" type="gamePackType"/>
     
   <xs:complexType name="gamePackType">
+    <!--
+    All paths are relative to the position of the gamePack xml file
+    
+    Example:
+    gamePack xml path
+    /tmp/gamePacks/gamePack.xml
+    
+    then thumbnails/thumbnail.png is equal to /tmp/gamePacks/thumbnails/thumbnail.png
+    -->
     <xs:sequence>
 	    <xs:element name="description" type="xs:string" minOccurs="0"/>
 	    <xs:element name="pathToThumbnail" type="xs:string" minOccurs="0"/>
-			<xs:element name="levels" minOccurs="0" maxOccurs="1">
+			<xs:element name="levels">
 				<xs:complexType>
 					<xs:sequence>
-						<xs:element name="level" type="levelType" minOccurs="0" maxOccurs="unbounded"/>
+            <!--Path to save created level data-->
+					  <xs:element name="dataDirPath"/>
+					  <xs:element name="level" type="levelType" minOccurs="0" maxOccurs="unbounded"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="playerAITypes" minOccurs="0" maxOccurs="1">
+			<xs:element name="playerAITypes">
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="playerAIType" type="playerAITypeType" minOccurs="0" maxOccurs="unbounded"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-      <xs:element name="resourceTypes" minOccurs="0" maxOccurs="1">
+      <xs:element name="resourceTypes">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="resourceType" type="resourceTypeType" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="tileTypes" minOccurs="0" maxOccurs="1">
+      <xs:element name="tileTypes">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="defaultTileType" type="tileTypeType" minOccurs="1" maxOccurs="1"/>
@@ -48,21 +59,21 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="unitTypes" minOccurs="0" maxOccurs="1">
+      <xs:element name="unitTypes">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="unitType" type="unitTypeType" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="projectileTypes" minOccurs="0" maxOccurs="1">
+      <xs:element name="projectileTypes">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="projectileType" type="projectileTypeType" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="buildingTypes" minOccurs="0" maxOccurs="1">
+      <xs:element name="buildingTypes">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="buildingType" type="buildingTypeType" minOccurs="0" maxOccurs="unbounded"/>

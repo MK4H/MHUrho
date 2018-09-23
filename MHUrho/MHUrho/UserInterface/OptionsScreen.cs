@@ -13,7 +13,7 @@ namespace MHUrho.UserInterface
 
 	class OptionsScreen : MenuScreen {
 
-		class Screen : IDisposable {
+		class Screen : ScreenBase {
 			enum WindowTypeEnum {
 				Windowed = 0,
 				BorderlessWindowed = 1,
@@ -22,9 +22,6 @@ namespace MHUrho.UserInterface
 
 
 			readonly OptionsScreen proxy;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
-			MyGame Game => proxy.Game;
-
 
 			readonly Window window;
 
@@ -64,6 +61,7 @@ namespace MHUrho.UserInterface
 			bool changed;
 
 			public Screen(OptionsScreen proxy)
+				:base(proxy)
 			{
 				this.proxy = proxy;
 
@@ -103,7 +101,7 @@ namespace MHUrho.UserInterface
 				SetValues(Game.Config);
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
 				UnitDrawDistance.ValueChanged -= UnitDrawDistanceChanged;
 				ProjectileDrawDistance.ValueChanged -= ProjectileDrawDistanceChanged;
@@ -425,32 +423,23 @@ namespace MHUrho.UserInterface
 				changed = true;
 			}
 		}
-	
 
-
-
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-
-			}
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
 		}
 
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 		public OptionsScreen(MenuUIManager menuUIManager)
+			:base(menuUIManager)
 		{
-			this.menuUIManager = menuUIManager;
+		}
 
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override void Show()
@@ -461,19 +450,6 @@ namespace MHUrho.UserInterface
 
 			screen = new Screen(this);
 		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
-			}
-
-			screen.Dispose();
-			screen = null;
-		}
-
-	
-
 
 	}
 }

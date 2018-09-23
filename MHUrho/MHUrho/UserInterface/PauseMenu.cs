@@ -1,13 +1,132 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Logic;
+using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
 	class PauseMenu : MenuScreen {
-		class Screen : IDisposable {
+		abstract class Screen : ScreenBase {
 
+			protected readonly PauseMenu Proxy;
+
+			protected ILevelManager Level => Proxy.PausedLevel;
+
+
+			public Screen(PauseMenu proxy)
+				:base(proxy)
+			{
+				this.Proxy = proxy;
+			}
+
+
+
+			protected void Resume()
+			{
+				MenuUIManager.Clear();
+				MenuUIManager.MenuController.ResumePausedLevel();
+			}
+
+			protected void GoToOptions()
+			{
+				MenuUIManager.SwitchToOptions();
+			}
+
+			protected void Exit()
+			{
+				MenuUIManager.MenuController.EndPausedLevel();
+				MenuUIManager.Clear();
+				MenuUIManager.SwitchToMainMenu();
+			}
+
+		}
+
+		class EditorScreen : Screen
+		{
+			const string WindowName = "EditorPauseMenu";
+			const string ResumeButton = "Resume";
+			const string SaveButton = "Save";
+			const string SaveAsButton = "SaveAs";
+			const string OptionsButton = "Options";
+			const string ExitButton = "Exit";
+
+
+			readonly Window window;
+
+			public EditorScreen(PauseMenu proxy)
+				:base(proxy)
+			{
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/EditorPauseMenuLayout.xml");
+
+				window = (Window)MenuUIManager.MenuRoot.GetChild(WindowName);
+
+				((Button)window.GetChild(ResumeButton)).Released += ButtonReleased;
+
+				((Button)window.GetChild(SaveButton)).Released += ButtonReleased;
+
+				((Button)window.GetChild(SaveAsButton)).Released += ButtonReleased;
+
+				((Button)window.GetChild(OptionsButton)).Released += ButtonReleased;
+
+				((Button)window.GetChild(ExitButton)).Released += ButtonReleased;
+			}
+
+			void ButtonReleased(ReleasedEventArgs args)
+			{
+				switch (args.Element.Name)
+				{
+					case ResumeButton:
+						Resume();
+						break;
+					case SaveButton:
+						SaveLevelPrototype();
+						break;
+					case SaveAsButton:
+						SaveLevelPrototypeAs();
+						break;
+					case OptionsButton:
+						GoToOptions();
+						break;
+					case ExitButton:
+						Exit();
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(args.Element.Name), args.Element.Name, "Unknown button released");
+				}
+			}
+
+			void SaveLevelPrototype()
+			{
+				Level.LevelRep.SaveToGamePack();
+			}
+
+			void SaveLevelPrototypeAs()
+			{
+				MenuUIManager.SwitchToSaveAsScreen(Level);
+			}
+
+			public override void Dispose()
+			{
+				((Button)window.GetChild(ResumeButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(SaveButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(SaveAsButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(OptionsButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(ExitButton)).Released -= ButtonReleased;
+
+				window.RemoveAllChildren();
+				window.Remove();
+				window.Dispose();
+			}
+		}
+
+		class PlayScreen : Screen {
 			const string WindowName = "PauseMenu";
 			const string ResumeButton = "Resume";
 			const string SaveButton = "Save";
@@ -15,21 +134,17 @@ namespace MHUrho.UserInterface
 			const string OptionsButton = "Options";
 			const string ExitButton = "Exit";
 
-			readonly PauseMenu proxy;
-			MyGame Game => proxy.Game;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
-			UI UI => Game.UI;
 
 			readonly Window window;
 
-			public Screen(PauseMenu proxy)
+			public PlayScreen(PauseMenu proxy)
+				: base(proxy)
 			{
-				this.proxy = proxy;
-				UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PauseMenuLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PauseMenuLayout.xml");
 
 				window = (Window)MenuUIManager.MenuRoot.GetChild(WindowName);
 
-				((Button) window.GetChild(ResumeButton)).Released += ButtonReleased;
+				((Button)window.GetChild(ResumeButton)).Released += ButtonReleased;
 
 				((Button)window.GetChild(SaveButton)).Released += ButtonReleased;
 
@@ -42,31 +157,39 @@ namespace MHUrho.UserInterface
 
 			void ButtonReleased(ReleasedEventArgs args)
 			{
-				switch (args.Element.Name) {
+				switch (args.Element.Name)
+				{
 					case ResumeButton:
-						MenuUIManager.Clear();
-						MenuUIManager.MenuController.ResumePausedLevel();
+						Resume();
 						break;
 					case SaveButton:
-						MenuUIManager.SwitchToSaveGame();
+						SaveGame();
 						break;
 					case LoadButton:
-						MenuUIManager.SwitchToLoadGame();
+						LoadGame();
 						break;
 					case OptionsButton:
-						MenuUIManager.SwitchToOptions();
+						GoToOptions();
 						break;
 					case ExitButton:
-						MenuUIManager.MenuController.EndPausedLevel();
-						MenuUIManager.Clear();
-						MenuUIManager.SwitchToMainMenu();
+						Exit();
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(args.Element.Name), args.Element.Name, "Unknown button released");
 				}
 			}
 
-			public void Dispose()
+			void SaveGame()
+			{
+				MenuUIManager.SwitchToSaveGame();
+			}
+
+			void LoadGame()
+			{
+				MenuUIManager.SwitchToLoadGame();
+			}
+
+			public override void Dispose()
 			{
 				((Button)window.GetChild(ResumeButton)).Released -= ButtonReleased;
 
@@ -84,36 +207,42 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
-		}
+		public ILevelManager PausedLevel { get; set; }
 
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
+		}
 
 		Screen screen;
 
 
 		public PauseMenu(MenuUIManager menuUIManager)
+			:base(menuUIManager)
 		{
-			this.menuUIManager = menuUIManager;
+		}
+
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override void Show()
 		{
+			if (PausedLevel == null) {
+				throw new InvalidOperationException("Cannot show pause menu with PausedLevel null, you have to set PauseLevel before showing Pause Menu");
+			}
+
 			if (screen != null) {
 				return;
 			}
 
-			screen = new Screen(this);
+			if (PausedLevel.EditorMode) {
+				screen = new EditorScreen(this);
+			}
+			else {
+				screen = new PlayScreen(this);
+			}
 		}
 
 		public override void Hide()
@@ -122,8 +251,8 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen.Dispose();
-			screen = null;
+			PausedLevel = null;
+			base.Hide();
 		}
 	}
 }

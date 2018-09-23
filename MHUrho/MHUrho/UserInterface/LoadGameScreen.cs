@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
-	class LoadGameScreen : MenuScreen
+	class LoadGameScreen : FilePickScreen
 	{
-		class Screen : FilePickScreen {
+		class Screen : FilePickScreenBase {
 
 			Button loadButton;
 
-			public Screen(MyGame game, MenuUIManager menuUIManager) 
-				:base(game, menuUIManager)
+			public Screen(LoadGameScreen proxy) 
+				:base(proxy)
 			{
-				UI.LoadLayoutToElement(MenuUIManager.MenuRoot, game.ResourceCache, "UI/LoadLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadLayout.xml");
 
 				Window window = (Window)MenuUIManager.MenuRoot.GetChild("LoadWindow");
 
@@ -83,27 +84,24 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
 		}
-
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
 
 		Screen screen;
 
 		public LoadGameScreen(MenuUIManager menuUIManager)
+			:base(menuUIManager)
 		{
-			this.menuUIManager = menuUIManager;
 
+
+		}
+
+
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override void Show()
@@ -112,17 +110,7 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen = new Screen(Game, menuUIManager);
-		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
-			}
-
-			screen.Dispose();
-			screen = null;
+			screen = new Screen(this);
 		}
 	}
 }

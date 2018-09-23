@@ -37,7 +37,7 @@ namespace MHUrho.Packaging
 		/// </summary>
 		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
-		const string defaultIconPath = "Textures/xamarin.png";
+		static readonly string defaultIconPath = Path.Combine("Textures","xamarin.png");
 		public Texture2D DefaultIcon { get; private set; }
 
 		public GamePack ActivePackage { get; private set; }

@@ -28,10 +28,5 @@ namespace MHUrho.Input
 		{
 			return new MenuTouchController();
 		}
-
-		public override ToolManager CreateToolManager(IGameController gameController, CameraMover cameraMover)
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

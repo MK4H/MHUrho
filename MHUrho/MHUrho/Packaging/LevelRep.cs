@@ -13,7 +13,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.Packaging
 {
-    public class LevelRep {
+    public class LevelRep : IDisposable {
 		static readonly XName DescriptionElement = PackageManager.XMLNamespace + "description";
 		static readonly XName ThumbnailElement = PackageManager.XMLNamespace + "thumbnail";
 		static readonly XName SaveElement = PackageManager.XMLNamespace + "savePath";
@@ -192,6 +192,31 @@ namespace MHUrho.Packaging
 			state = new CreatedLevel(mapSize, this);
 		}
 
+		/// <summary>
+		/// Creates temporary clone with new name, description and thumbnail for the SaveAs call
+		/// </summary>
+		/// <param name="other"></param>
+		/// <param name="name"></param>
+		/// <param name="description"></param>
+		/// <param name="thumbnailPath"></param>
+		protected LevelRep(LevelRep other,
+							string name,
+							string description,
+							string thumbnailPath)
+		{
+			this.Name = name;
+			this.Description = description;
+			this.thumbnailPath = thumbnailPath;
+			this.LevelPluginAssemblyPath = other.LevelPluginAssemblyPath;
+			this.GamePack = other.GamePack;
+			this.savePath = GamePack.GetLevelProtoSavePath(name);
+
+			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
+			this.LevelPlugin = other.LevelPlugin;
+
+			state = other.state;
+		}
+
 		protected LevelRep(GamePack gamePack, XElement levelXmlElement)
 		{
 			this.GamePack = gamePack;
@@ -262,6 +287,30 @@ namespace MHUrho.Packaging
 			}
 		}
 
+		public static bool IsNameValid(string name)
+		{
+			foreach (var ch in name)
+			{
+				if (!char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public static bool IsDescriptionValid(string description)
+		{
+			foreach (var ch in description)
+			{
+				if (!char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch) && !char.IsPunctuation(ch))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public ILevelLoader StartLoading(bool editorMode)
 		{
 			return state.StartLoading(editorMode);
@@ -272,9 +321,22 @@ namespace MHUrho.Packaging
 			GamePack.SaveLevel(this);
 		}
 
+		public void SaveToGamePackAs(string newName, string newDescription, string newThumbnailPath)
+		{
+			LevelRep clone = new LevelRep(this, newName, newDescription, newThumbnailPath);
+			clone.SaveToGamePack();
+			clone.CloneDispose();
+		}
+
 		public void SaveTo(XElement levelsElement)
 		{
 			state.SaveTo(levelsElement);
+		}
+
+		public void Dispose()
+		{
+			CloneDispose();
+			LevelPlugin.Dispose();
 		}
 
 		static StLevel GetSave(string path)
@@ -301,6 +363,12 @@ namespace MHUrho.Packaging
 			return LevelLogicPlugin.Load(levelPluginPath, Name);
 		}
 
-		
+
+		void CloneDispose()
+		{
+			Thumbnail.Dispose();
+		}
+
+	
 	}
 }

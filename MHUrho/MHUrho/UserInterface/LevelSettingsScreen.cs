@@ -2,32 +2,31 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
 {
 	class LevelSettingsScreen : MenuScreen
 	{
-		class Screen : IDisposable {
+		class Screen :  ScreenBase {
 
-			LevelSettingsScreen proxy;
-
-			MyGame Game => proxy.Game;
-			MenuUIManager MenuUIManager => proxy.menuUIManager;
+			readonly LevelSettingsScreen proxy;
 
 			LevelRep Level => proxy.Level;
 
-			Window window;
-			Window customSettingsWindow;
-			ScrollView descriptionView;
-			BorderImage mapImage;
-			ListView playerList;
+			readonly Window window;
+			readonly Window customSettingsWindow;
+			readonly ScrollView descriptionView;
+			readonly BorderImage mapImage;
+			readonly ListView playerList;
 
 
 
 			public Screen(LevelSettingsScreen proxy)
+				:base(proxy)
 			{
-
+				this.proxy = proxy;
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LevelSettingsLayout.xml");
 
 				window = (Window)MenuUIManager.MenuRoot.GetChild("LevelSettingsWindow");
@@ -54,7 +53,7 @@ namespace MHUrho.UserInterface
 
 			}
 
-			public void Dispose()
+			public override void Dispose()
 			{
 				((Button)window.GetChild("PlayButton", true)).Released -= PlayButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released -= BackButtonReleased;
@@ -71,29 +70,25 @@ namespace MHUrho.UserInterface
 
 		}
 
-		public override bool Visible {
-			get => screen != null;
-			set {
-				if (value) {
-					Show();
-				}
-				else {
-					Hide();
-				}
-			}
-		}
-
 		//TODO: Ensure that Show cannot be called with Level null, that level is not changed after show etc.
 		public LevelRep Level { get; set; }
 
-		MyGame Game => MyGame.Instance;
-		readonly MenuUIManager menuUIManager;
+		protected override ScreenBase ScreenInstance {
+			get => screen;
+			set => screen = (Screen)value;
+		}
 
 		Screen screen;
 
 		public LevelSettingsScreen(MenuUIManager menuUIManager)
+			:base(menuUIManager)
 		{
-			this.menuUIManager = menuUIManager;
+
+		}
+
+		public override void ExecuteAction(MenuScreenAction action)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override void Show()
@@ -111,8 +106,8 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen.Dispose();
-			screen = null;
+			Level = null;
+			base.Hide();
 		}
 
 		

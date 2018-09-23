@@ -81,6 +81,9 @@ namespace MHUrho.Packaging {
 		readonly XmlSchemaSet schemas;
 		XDocument data;
 
+		/// <summary>
+		/// Directory path to save level prototypes in
+		/// </summary>
 		readonly string levelSavingDirPath;
 
 		public GamePack(string pathToXml,
@@ -110,7 +113,13 @@ namespace MHUrho.Packaging {
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 
 			try {
-				StartLoading(pathToXml, schemas);
+				XDocument xml = StartLoading(pathToXml, schemas);
+
+				//Validation in StartLoading should take care of any missing elements
+				levelSavingDirPath = FileManager.CorrectRelativePath(xml.Root
+																		.Element(PackageManager.XMLNamespace + "levels")
+																		.Element(PackageManager.XMLNamespace + "dataDirPath")
+																		.Value.Trim());
 
 				loadingProgress.TextAndPercentageUpdate("Loading tile types", 5);
 				LoadAllTileTypes();
@@ -379,7 +388,7 @@ namespace MHUrho.Packaging {
 		{
 			var xmlData = StartLoading(pathToXml, schemas);
 			//Should not be null, because startLoading validates the xml
-			level.SaveTo(xmlData.Element(GamePackXml.Levels));
+			level.SaveTo(xmlData.Root.Element(GamePackXml.Levels));
 			WriteData();
 			FinishLoading();
 		}
@@ -494,10 +503,11 @@ namespace MHUrho.Packaging {
 
 			var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
 
-			if (tileTypesElement == null) {
-				//There are no tile types in this package
-				throw new InvalidOperationException("Default tile type is missing");
-			}
+			// Changed xsd to require playerTypes element
+			//if (tileTypesElement == null) {
+			//	//There are no tile types in this package
+			//	throw new InvalidOperationException("Default tile type is missing");
+			//}
 
 			var defaultTileTypeElement = tileTypesElement.Element(PackageManager.XMLNamespace + "defaultTileType");
 
@@ -519,10 +529,12 @@ namespace MHUrho.Packaging {
 
 			var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
 
-			if (unitTypesElement == null) {
-				//There are no unit types in this package
-				return Enumerable.Empty<UnitType>();
-			}
+			// Changed xsd to require unitTypes element
+			//if (unitTypesElement == null) {
+			//	//There are no unit types in this package
+			//	return Enumerable.Empty<UnitType>();
+			//}
+
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType")
 								   .Select(unitTypeElement =>
@@ -540,10 +552,12 @@ namespace MHUrho.Packaging {
 
 			var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
 
-			if (buildingTypesElement == null) {
-				//There are no building types in this package
-				return Enumerable.Empty<BuildingType>();
-			}
+			// Changed xsd to require buildingTypes element
+			//if (buildingTypesElement == null) {
+			//	//There are no building types in this package
+			//	return Enumerable.Empty<BuildingType>();
+			//}
+
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType")
 									   .Select(buildingTypeElement =>
@@ -559,10 +573,13 @@ namespace MHUrho.Packaging {
 
 			var projectileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "projectileTypes");
 
-			if (projectileTypesElement == null) {
-				//There are no projectile types in this package
-				return Enumerable.Empty<ProjectileType>();
-			}
+			// Changed xsd to require playerTypes element
+			//if (projectileTypesElement == null) {
+			//	//There are no projectile types in this package
+			//	return Enumerable.Empty<ProjectileType>();
+			//}
+
+
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return projectileTypesElement.Elements(PackageManager.XMLNamespace + "projectileType")
 										 .Select(projectileTypeElement =>
@@ -582,9 +599,10 @@ namespace MHUrho.Packaging {
 
 			var resourceTypesElement = data.Root.Element(PackageManager.XMLNamespace + "resourceTypes");
 
-			if (resourceTypesElement == null) {
-				return Enumerable.Empty<ResourceType>();
-			}
+			// Changed xsd to require resourceTypes element
+			//if (resourceTypesElement == null) {
+			//	return Enumerable.Empty<ResourceType>();
+			//}
 
 			return resourceTypesElement.Elements(PackageManager.XMLNamespace + "resourceType")
 									   .Select(resourceTypeElement =>
@@ -604,9 +622,10 @@ namespace MHUrho.Packaging {
 
 			XElement playerTypes = data.Root.Element(PackageManager.XMLNamespace + "playerAITypes");
 
-			if (playerTypes == null) {
-				return Enumerable.Empty<PlayerType>();
-			}
+			// Changed xsd to require playerTypes element
+			//if (playerTypes == null) {
+			//	return Enumerable.Empty<PlayerType>();
+			//}
 
 			return playerTypes.Elements(PackageManager.XMLNamespace + "playerAIType")
 							.Select(playerTypeElement =>
@@ -622,9 +641,10 @@ namespace MHUrho.Packaging {
 
 			XElement levels = data.Root.Element(PackageManager.XMLNamespace + "levels");
 
-			if (levels == null) {
-				return Enumerable.Empty<LevelRep>();
-			}
+			// Changed xsd to require levels element
+			//if (levels == null) {
+			//	return Enumerable.Empty<LevelRep>();
+			//}
 
 			return levels.Elements(PackageManager.XMLNamespace + "level")
 						.Select(LoadLevelRep)

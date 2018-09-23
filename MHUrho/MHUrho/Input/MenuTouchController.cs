@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.StartupManagement;
 using MHUrho.Storage;
 using Urho;
 using Urho.Gui;
@@ -36,6 +37,11 @@ namespace MHUrho.Input
 		}
 
 		public void StartLoadingLevel(LevelRep level, bool editorMode)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)
 		{
 			throw new NotImplementedException();
 		}

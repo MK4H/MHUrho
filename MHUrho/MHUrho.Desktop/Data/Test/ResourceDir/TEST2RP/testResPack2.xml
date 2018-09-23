@@ -1,12 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
 <gamePack xmlns="http://www.MobileHold.cz/GamePack.xsd" name="testRP2">
   <description>Second test pack to test multiple resource packs</description>
+  <levels>
+    <dataDirPath>Levels</dataDirPath>
+  </levels>
 	<playerAITypes>
 		<playerAIType name="TestAI" ID="1">
 			<iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
 			<assemblyPath>DefaultPackage.dll</assemblyPath>
 		</playerAIType>
 	</playerAITypes>
+  <resourceTypes></resourceTypes>
   <tileTypes>
     <defaultTileType name="Default" ID="1">
 	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>

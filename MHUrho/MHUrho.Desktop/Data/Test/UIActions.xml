@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
+  <mainMenu>
+    <action>start</action>
+  </mainMenu>
+  <packagePicking>
+    <action>pick</action>
+    <values>
+      <packageName>testRP2</packageName>
+    </values>
+  </packagePicking>
+  <levelPicking>
+    <action>editnew</action>
+  </levelPicking>
+  <levelCreation>
+    <action>edit</action>
+    <values>
+      <levelName>New level 1</levelName>
+      <description> The best level ever</description>
+      <thumbnailPath>xamarin.png</thumbnailPath>
+      <pluginPath>DefaultPackage.dll</pluginPath>
+      <mapSize x="250" y="250"/>
+    </values>
+  </levelCreation>
+</menuActions>

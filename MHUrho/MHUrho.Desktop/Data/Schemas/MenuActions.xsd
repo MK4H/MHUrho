@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="MenuActions"
+    targetNamespace="http://www.MobileHold.cz/MenuActions.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://www.MobileHold.cz/MenuActions.xsd"
+    xmlns:mstns="http://www.MobileHold.cz/MenuActions.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:element name="menuActions">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="mainMenu" type="mainMenuType"/>
+          <xs:element name="packagePicking" type="packagePickingType"/>
+          <xs:element name="levelPicking" type="levelPickingType"/>
+          <xs:element name="levelCreation" type="levelCreationType"/>
+          <xs:element name="levelSettings" type="levelSettingsType"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="mainMenuType">
+    <xs:sequence>
+      <xs:element name="action" type="mainMenuActions"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="packagePickingType">
+    <xs:sequence>
+      <xs:element name="action" type="packagePickingActions"/>
+      <!--is not needed for back action-->
+      <xs:element name="values" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="packageName" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="levelPickingType">
+    <xs:sequence>
+      <xs:element name="action" type="levelPickingActions"/>
+      <!--is not needed for back action-->
+      <xs:element name="values" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="levelName" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="levelCreationType">
+    <xs:sequence>
+      <xs:element name="action" type="levelCreationActions"/>
+      <!--are not needed for back action-->
+      <xs:element name="values" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="levelName" type="xs:string"/>
+            <xs:element name="description" type="xs:string"/>
+            <xs:element name="thumbnailPath" type="xs:string"/>
+            <xs:element name="pluginPath" type="xs:string"/>
+            <xs:element name="mapSize" type="IntVector2"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="levelSettingsType">
+    <xs:sequence>
+      <xs:element name="action" type="levelSettingsActions"/>
+      <!--are not needed for back action-->
+      <xs:element name="values" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="mainMenuActions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="start"/>
+      <xs:enumeration value="load"/>
+      <xs:enumeration value="options"/>
+      <xs:enumeration value="about"/>
+      <xs:enumeration value="exit"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="packagePickingActions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="pick"/>
+      <xs:enumeration value="back"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="levelPickingActions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="editnew"/>
+      <xs:enumeration value="edit"/>
+      <xs:enumeration value="play"/>
+      <xs:enumeration value="back"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="levelCreationActions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="edit"/>
+      <xs:enumeration value="back"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="levelSettingsActions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="back"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="IntVector2">
+    <xs:attribute name="x" use="required" type="xs:int"/>
+    <xs:attribute name="y" use="required" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="IntRect">
+    <xs:attribute name="left" use="required" type="xs:int"/>
+    <xs:attribute name="right" use="required" type="xs:int"/>
+    <xs:attribute name="top" use="required" type="xs:int"/>
+    <xs:attribute name="bottom" use="required" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="Vector2">
+    <xs:attribute name="x" use="required" type="xs:float"/>
+    <xs:attribute name="y" use="required" type="xs:float"/>
+  </xs:complexType>
+
+  <xs:complexType name="Vector3">
+    <xs:attribute name="x" use="required" type="xs:float"/>
+    <xs:attribute name="y" use="required" type="xs:float"/>
+    <xs:attribute name="z" use="required" type="xs:float"/>
+  </xs:complexType>
+</xs:schema>

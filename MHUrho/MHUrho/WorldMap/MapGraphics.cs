@@ -22,55 +22,6 @@ namespace MHUrho.WorldMap
 
 			static Vector3 HighlightAboveTerrainOffset = new Vector3(0, HighlightHeightAboveTerain, 0);
 
-			class CornerTiles : IEnumerable<ITile>,IEnumerator<ITile> {
-				public ITile TopLeft;
-				public ITile TopRight;
-				public ITile BottomLeft;
-				public ITile BottomRight;
-
-				int state = -1;
-
-				public IEnumerator<ITile> GetEnumerator() {
-					state = -1;
-					return this;
-				}
-
-				IEnumerator IEnumerable.GetEnumerator() {
-					return GetEnumerator();
-				}
-
-				public bool MoveNext() {
-					do {
-						++state;
-					} while (state < 4 && Current == null);
-
-					return state < 4;
-				}
-
-				public void Reset() {
-					state = -1;
-				}
-
-				public ITile Current {
-					get {
-						switch (state) {
-							case 0: return TopLeft;
-							case 1: return TopRight;
-							case 2: return BottomLeft;
-							case 3: return BottomRight;
-							default:
-								throw new InvalidOperationException("Current with invalid state");
-						}
-					}
-				}
-
-				object IEnumerator.Current => Current;
-
-				public void Dispose() {
-
-				}
-			}
-
 			class MapChunk : IDisposable {
 
 				[StructLayout(LayoutKind.Sequential)]

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using MHUrho.EditorTools;
+using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
@@ -70,7 +71,7 @@ namespace MHUrho.Plugins
 
 		}
 
-		public abstract ToolManager GetToolManager(ILevelManager levelManager);
+		public abstract ToolManager GetToolManager(ILevelManager levelManager, InputType inputType);
 
 		public abstract void Dispose();
 	}
