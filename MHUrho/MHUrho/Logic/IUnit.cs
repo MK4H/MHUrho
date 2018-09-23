@@ -36,9 +36,6 @@ namespace MHUrho.Logic {
 		/// </summary>
 		UnitType UnitType { get; }
 
-
-		void ChangeType(UnitType newType);
-
 		void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false);
 
 		void MoveBy(Vector2 moveBy);

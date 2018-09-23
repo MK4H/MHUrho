@@ -5,8 +5,8 @@ using MHUrho.UserInterface;
 
 namespace MHUrho.EditorTools
 {
-	//TODO: IDisposable, now it is disposed in UI
-    public abstract class ToolManager
+
+    public abstract class ToolManager : IDisposable
     {
 		protected readonly List<Tool> Tools = new List<Tool>();
 
@@ -61,6 +61,13 @@ namespace MHUrho.EditorTools
 			//TODO: Maybe leave disposing for the caller
 			tool.Dispose();
 			return true;
+		}
+
+		public virtual void Dispose()
+		{
+			foreach (var tool in Tools) {
+				tool.Dispose();
+			}
 		}
 	}
 }

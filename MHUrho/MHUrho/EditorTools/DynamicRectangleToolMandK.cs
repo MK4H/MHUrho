@@ -117,7 +117,6 @@ namespace MHUrho.EditorTools
 				}
 
 				SelectionHandler?.Invoke(topLeft, bottomRight, e);
-				//TODO: Different highlight
 				Map.DisableHighlight();
 			}
 		  

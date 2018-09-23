@@ -95,7 +95,6 @@ namespace MHUrho.UserInterface
 			foreach (var tool in tools) {
 				toolSelection.RemoveCheckBox((CheckBox) tool.Key);
 				tool.Key.Dispose();
-				tool.Value.Dispose();
 			}
 
 			tools.Clear();

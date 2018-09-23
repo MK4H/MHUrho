@@ -12,7 +12,7 @@ using MHUrho.WorldMap;
 using Urho;
 
 namespace MHUrho.Logic {
-	public interface ILevelManager {
+	public interface ILevelManager : IDisposable {
 
 		LevelRep LevelRep { get; }
 

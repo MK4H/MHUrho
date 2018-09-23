@@ -25,7 +25,7 @@ namespace MHUrho.Logic
 
 	public delegate void OnUpdateDelegate(float timeStep);
 
-	partial class LevelManager : Component, ILevelManager
+	partial class LevelManager : Component, ILevelManager, IDisposable
 	{
 		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
 			public bool Visit(IUnit unit)
@@ -164,16 +164,18 @@ namespace MHUrho.Logic
 			}
 		}
 
-		public void End()
+		public new void Dispose()
 		{
 			List<IDisposable> toDispose = new List<IDisposable>();
 			toDispose.AddRange(entities.Values);
 
-			foreach (var thing in toDispose) {
+			foreach (var thing in toDispose)
+			{
 				thing.Dispose();
 			}
 
 			PackageManager.ActivePackage.ClearCaches();
+			ToolManager.Dispose();
 			Input.Dispose();
 			cameraController.Dispose();
 			Camera.Dispose();
@@ -181,17 +183,24 @@ namespace MHUrho.Logic
 			Map.Dispose();
 			Minimap.Dispose();
 			octree.Dispose();
-			//TODO: Temporary
-			var scene = Scene;
+
+			//Have to get the reference before i remove the level from the scene by RemoveAllChildren on the scene
+			Scene scene = Scene;
 			scene.RemoveAllChildren();
 			scene.RemoveAllComponents();
 			scene.Remove();
 			scene.Dispose();
 			LevelNode.Dispose();
-			Dispose();
+
+			base.Dispose();
 
 			CurrentLevel = null;
 			GC.Collect();
+		}
+
+		public void End()
+		{
+			Dispose();
 		}
 
 		

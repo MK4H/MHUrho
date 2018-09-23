@@ -402,12 +402,13 @@ namespace MHUrho.Packaging {
 				newPath.Append(ch);
 			}
 
+			//TODO: Better generation of random filename
 			var random = new Random();
 			while (MyGame.Files.FileExists(newPath.ToString())) {
 				int randomDigit = random.Next(10);
 				newPath.Append(randomDigit);
 			}
-			//TODO: THIS
+			
 			return newPath.ToString();
 		}
 

@@ -51,9 +51,12 @@ namespace MHUrho.Logic
 			Package = package;
 		}
 
+		/// <summary>
+		/// Clears any cache state dependent on the current level
+		/// </summary>
 		public void ClearCache()
 		{
-			//TODO: If i add any cache dependent on current level, clear it here
+			//If you add any cache dependent on current level, clear it here
 		}
 
 

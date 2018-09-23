@@ -356,11 +356,6 @@ namespace MHUrho.Logic
 			MoveTo(new Vector3(newLocation.X, Map.GetTerrainHeightAt(newLocation), newLocation.Y));
 		}
 
-		public void ChangeType(UnitType newType) {
-			Node.RemoveAllComponents();
-			//TODO: THIS
-		}
-
 		/// <summary>
 		/// Rotates the unit to face towards the <paramref name="lookPosition"/>, either directly if <see cref="AlwaysVertical"/> is false and
 		/// <paramref name="rotateAroundY"/> is false, or to its projection into current the XZ plane of the Node if either of those two are true
