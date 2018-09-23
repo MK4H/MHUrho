@@ -34,22 +34,21 @@ namespace MHUrho.UserInterface
 			Button.HoverEnd += OnHoverEnd;
 		}
 
-		protected abstract void Pressed(PressedEventArgs e);
+		protected abstract void Pressed(PressedEventArgs args);
 
-		protected abstract void Released(ReleasedEventArgs e);
+		protected abstract void Released(ReleasedEventArgs args);
 
-		protected virtual void OnHoverBegin(HoverBeginEventArgs e)
+		protected virtual void OnHoverBegin(HoverBeginEventArgs args)
 		{
 			MinimapHover = true;
-			HoverBegin?.Invoke(e);
+			HoverBegin?.Invoke(args);
 		}
 
-		protected virtual void OnHoverEnd(HoverEndEventArgs e)
+		protected virtual void OnHoverEnd(HoverEndEventArgs args)
 		{
 			MinimapHover = false;
+			HoverEnd?.Invoke(args);
 
-			StopCameraMovement();
-			HoverEnd?.Invoke(e);
 		}
 
 
