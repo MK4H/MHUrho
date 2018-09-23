@@ -274,37 +274,42 @@ namespace MHUrho.UserInterface
 
 			void SetValues(AppConfig config)
 			{
-				UnitDrawDistance.Value = config.UnitDrawDistance;
+				MyGame.InvokeOnMainSafe(SetValuesImpl);
 
-				ProjectileDrawDistance.Value = config.ProjectileDrawDistance;
+				void SetValuesImpl()
+				{
+					UnitDrawDistance.Value = config.UnitDrawDistance;
 
-				TerrainDrawDistance.Value = config.TerrainDrawDistance;
+					ProjectileDrawDistance.Value = config.ProjectileDrawDistance;
 
-				Resolutions.Selection = (uint)Game.Config.SupportedResolutions.IndexOf(Game.Config.Resolution);
+					TerrainDrawDistance.Value = config.TerrainDrawDistance;
 
-				WindowTypes.Selection = (uint)FullscreenAndBorderlessToWindowType(config.Fullscreen, config.Borderless);
+					Resolutions.Selection = (uint)Game.Config.SupportedResolutions.IndexOf(Game.Config.Resolution);
 
-				HighDPI.Checked = config.HighDPI;
+					WindowTypes.Selection = (uint)FullscreenAndBorderlessToWindowType(config.Fullscreen, config.Borderless);
 
-				TripleBuffer.Checked = config.TripleBuffer;
+					HighDPI.Checked = config.HighDPI;
 
-				VSync.Checked = config.VSync;
+					TripleBuffer.Checked = config.TripleBuffer;
 
-				DebugHUD.Checked = config.DebugHUD;
+					VSync.Checked = config.VSync;
 
-				MultiSample.Text = config.Multisample.ToString();
+					DebugHUD.Checked = config.DebugHUD;
 
-				RefreshRate.Text = config.RefreshRateCap.ToString();
+					MultiSample.Text = config.Multisample.ToString();
 
-				CameraScroll.Value = config.CameraScrollSensitivity;
+					RefreshRate.Text = config.RefreshRateCap.ToString();
 
-				CameraRotation.Value = config.CameraRotationSensitivity;
+					CameraScroll.Value = config.CameraScrollSensitivity;
 
-				MouseCamRotation.Value = config.MouseRotationSensitivity;
+					CameraRotation.Value = config.CameraRotationSensitivity;
 
-				ZoomSpeed.Value = config.ZoomSensitivity;
+					MouseCamRotation.Value = config.MouseRotationSensitivity;
 
-				BorderMovement.Checked = config.MouseBorderCameraMovement;
+					ZoomSpeed.Value = config.ZoomSensitivity;
+
+					BorderMovement.Checked = config.MouseBorderCameraMovement;
+				}
 			}
 
 			string WindowTypeToString(WindowTypeEnum windowType)
