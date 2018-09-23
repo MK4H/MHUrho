@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.EditorTools
 {
-	abstract class TileTypeTool : Tool
+	public abstract class TileTypeTool : Tool
 	{
 		protected TileTypeTool(IGameController input)
 			: base(input, new IntRect(0, 150, 50, 200))

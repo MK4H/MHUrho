@@ -674,6 +674,7 @@ namespace MHUrho.WorldMap
 
 				public RectangleOperation(IntVector2 topLeft, IntVector2 bottomRight, MapGraphics graphics)
 				{
+					//TODO: Maybe unnecessary, because chunk itself does bound checks
 					if (!graphics.map.IsInside(topLeft)) {
 						throw new ArgumentOutOfRangeException(nameof(topLeft),
 															"topLeft corner was outside the displayed area of the map");

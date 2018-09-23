@@ -150,6 +150,7 @@ namespace MHUrho.Logic
 
 					Level.cameraController = Game.ControllerFactory.CreateCameraController(Level.Input, Level.Camera);
 					Level.ToolManager = Level.Plugin.GetToolManager(Level, Level.Input.InputType);
+					Level.ToolManager.LoadTools();
 
 					Level.Input.UIManager.AddPlayer(newPlayer);
 					Level.Input.UIManager.SelectPlayer(newPlayer);
@@ -278,6 +279,8 @@ namespace MHUrho.Logic
 					Level.ToolManager = Level.Plugin.GetToolManager(Level, Level.Input.InputType);
 
 					Level.Plugin.LoadState(new PluginDataWrapper(storedLevel.Plugin.Data, Level));
+
+					Level.ToolManager.LoadTools();
 
 					LoadingWatcher.TextUpdate("Connecting references");
 					//Connect references

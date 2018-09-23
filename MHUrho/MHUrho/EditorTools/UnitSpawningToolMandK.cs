@@ -13,7 +13,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
-	class UnitSpawningToolMandK : UnitSpawningTool, IMandKTool {
+	public class UnitSpawningToolMandK : UnitSpawningTool, IMandKTool {
 
 		Dictionary<CheckBox, UnitType> unitTypes;
 

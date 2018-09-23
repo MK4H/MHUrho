@@ -6,7 +6,7 @@ using MHUrho.Logic;
 using Urho;
 
 namespace MHUrho.EditorTools {
-	abstract class TerrainManipulatorTool : Tool
+	public abstract class TerrainManipulatorTool : Tool
 	{
 		protected TerrainManipulatorTool(IGameController input)
 			: base(input, new IntRect(0, 100, 50, 150))

@@ -13,7 +13,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
-	class TileTypeToolMandK : TileTypeTool, IMandKTool { 
+	public class TileTypeToolMandK : TileTypeTool, IMandKTool { 
 
 		Dictionary<CheckBox, TileType> tileTypes;
 

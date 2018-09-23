@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.EditorTools
 {
-	abstract class DynamicRectangleTool : Tool
+	public abstract class DynamicRectangleTool : Tool
 	{
 		protected DynamicRectangleTool(IGameController input)
 			: base(input, new IntRect(0, 0, 0, 0))

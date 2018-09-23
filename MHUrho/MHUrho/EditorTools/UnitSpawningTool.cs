@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.EditorTools
 {
-	abstract class UnitSpawningTool :Tool
+	public abstract class UnitSpawningTool :Tool
 	{
 		protected UnitSpawningTool(IGameController input)
 			: base(input, new IntRect(0, 0, 50, 50))

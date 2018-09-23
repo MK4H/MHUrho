@@ -7,6 +7,7 @@ using MHUrho.Input;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
+using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
 
@@ -38,6 +39,8 @@ namespace MHUrho.Logic {
 		IEnumerable<IBuilding> Buildings { get; }
 
 		IGameController Input { get; }
+
+		GameUIManager UIManager { get; }
 
 		CameraMover Camera { get; }
 

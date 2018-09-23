@@ -11,7 +11,7 @@ using Urho.Gui;
 
 namespace MHUrho.EditorTools
 {
-	class StaticSquareToolMandK : StaticSquareTool, IMandKTool
+	public class StaticSquareToolMandK : StaticSquareTool, IMandKTool
 	{
 		public int EdgeSize { get; set; }
 

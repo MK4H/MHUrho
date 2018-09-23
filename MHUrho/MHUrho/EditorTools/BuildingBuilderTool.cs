@@ -7,7 +7,7 @@ using Urho;
 
 namespace MHUrho.EditorTools
 {
-	abstract class BuildingBuilderTool : Tool {
+	public abstract class BuildingBuilderTool : Tool {
 		protected BuildingBuilderTool(IGameController input)
 			: base(input, new IntRect(0, 50, 50, 100))
 		{

@@ -12,7 +12,7 @@ using MHUrho.EditorTools.TerrainManipulation;
 using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools {
-	class TerrainManipulatorToolMandK : TerrainManipulatorTool, IMandKTool {
+	public class TerrainManipulatorToolMandK : TerrainManipulatorTool, IMandKTool {
 
 		
 		readonly GameMandKController input;

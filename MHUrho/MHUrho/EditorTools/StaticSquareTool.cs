@@ -30,7 +30,7 @@ namespace MHUrho.EditorTools
 		}
 	}
 
-	abstract class StaticSquareTool : Tool {
+	public abstract class StaticSquareTool : Tool {
 		public event Action<StaticSquareChangedArgs> SquareChanged;
 
 		protected StaticSquareTool(IGameController input)

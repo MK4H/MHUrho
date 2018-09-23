@@ -5,9 +5,9 @@ using Urho.Gui;
 
 namespace MHUrho.EditorTools
 {
-	delegate void OnSelectedDelegate(CheckBox newSelected, CheckBox oldSelected);
+	public delegate void OnSelectedDelegate(CheckBox newSelected, CheckBox oldSelected);
 
-    class ExclusiveCheckBoxes : IDisposable
+    public class ExclusiveCheckBoxes : IDisposable
     {
 		public IEnumerable<CheckBox> CheckBoxes => checkBoxes;
 

@@ -17,6 +17,7 @@ using Urho.Actions;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using MHUrho.Plugins;
+using MHUrho.UserInterface;
 
 
 namespace MHUrho.Logic
@@ -72,7 +73,9 @@ namespace MHUrho.Logic
 
 		public IEnumerable<IBuilding> Buildings => buildings.Values;
 
-		public IGameController Input { get; protected set; }
+		public IGameController Input { get; private  set; }
+
+		public GameUIManager UIManager => Input.UIManager;
 
 		public CameraMover Camera { get; private set; }
 

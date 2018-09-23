@@ -12,7 +12,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools
 {
-	class DynamicRectangleToolMandK : DynamicRectangleTool, IMandKTool {
+	public class DynamicRectangleToolMandK : DynamicRectangleTool, IMandKTool {
 		public delegate void HandleSelectedRectangle(IntVector2 topLeft, IntVector2 bottomRight, MouseButtonUpEventArgs e);
 
 		public delegate void HandleSingleClick(MouseButtonUpEventArgs e);

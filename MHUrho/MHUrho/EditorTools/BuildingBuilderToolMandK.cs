@@ -14,7 +14,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools
 {
-	class BuildingBuilderToolMandK : BuildingBuilderTool, IMandKTool
+	public class BuildingBuilderToolMandK : BuildingBuilderTool, IMandKTool
 	{
 
 		Dictionary<CheckBox, BuildingType> buildingTypes;
