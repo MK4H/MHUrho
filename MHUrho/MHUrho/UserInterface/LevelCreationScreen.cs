@@ -207,7 +207,7 @@ namespace MHUrho.UserInterface
 														PackageManager.Instance.ActivePackage);
 				}
 
-				MenuUIManager.MenuController.StartLoadingLevel(proxy.Level, true);
+				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level);
 				
 			}
 
@@ -249,7 +249,7 @@ namespace MHUrho.UserInterface
 
 					var result = await MenuUIManager.
 										FileBrowsingPopUp.
-										Request(PackageManager.Instance.ActivePackage.RootedXmlDirectoryPath,
+										Request(PackageManager.Instance.ActivePackage.RootedDirectoryPath,
 												SelectOption.File,
 												 pathText.HasDefaultValue ? null : pathText.Value);
 					
@@ -273,12 +273,12 @@ namespace MHUrho.UserInterface
 													  mapSize,
 													  package);
 				
-				MenuUIManager.MenuController.StartLoadingLevel(proxy.Level, true);
+				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level);
 			}
 
 			public void SimulateEditExistingLevel()
 			{
-				MenuUIManager.MenuController.StartLoadingLevel(proxy.Level, true);
+				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level);
 			}
 
 			public void SimulateBackButtonPress()

@@ -135,6 +135,7 @@
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
     <xs:attribute name="ID" use="required" type="xs:int"/>
+    <xs:attribute name="category" use="required" type="playerTypeCategoryType"/>
   </xs:complexType>
 
   <xs:complexType name="projectileTypeType">
@@ -201,6 +202,14 @@
 		</xs:sequence>
 		<xs:attribute name="name" use="required"/>
 	</xs:complexType>
+
+  <xs:simpleType name="playerTypeCategoryType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="human"/>
+      <xs:enumeration value="neutral"/>
+      <xs:enumeration value="ai"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="IntVector2">
     <xs:attribute name="x" use="required" type="xs:int"/>

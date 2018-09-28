@@ -22,9 +22,17 @@ namespace MHUrho.Packaging {
 
 		public PackageManager PackageManager => GamePackRep.PackageManager;
 
-		public string XmlDirectoryPath => GamePackRep.XmlDirectoryPath;
+		/// <summary>
+		/// Path to the base directory of this package
+		///
+		/// This is the directory where the package xml file is.
+		/// </summary>
+		public string DirectoryPath => GamePackRep.XmlDirectoryPath;
 
-		public string RootedXmlDirectoryPath => Path.Combine(MyGame.Files.DynamicDirPath, XmlDirectoryPath);
+		/// <summary>
+		/// See <see cref="DirectoryPath"/>
+		/// </summary>
+		public string RootedDirectoryPath => Path.Combine(MyGame.Files.DynamicDirPath, DirectoryPath);
 
 		public TileType DefaultTileType { get; private set; }
 
@@ -56,6 +64,12 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<LevelRep> Levels => levelsByName.Values;
 
+		public IEnumerable<PlayerType> HumanPlayerTypes => GetPlayersWithTypeCategory(PlayerTypeCategory.Human);
+
+		public IEnumerable<PlayerType> NeutralPlayerTypes => GetPlayersWithTypeCategory(PlayerTypeCategory.Neutral);
+
+		public IEnumerable<PlayerType> AIPlayerTypes => GetPlayersWithTypeCategory(PlayerTypeCategory.AI);
+
 		public Texture2D ResourceIconTexture { get; private set; }
 		public Texture2D TileIconTexture { get; private set; }
 		public Texture2D UnitIconTexture { get; private set; }
@@ -83,6 +97,8 @@ namespace MHUrho.Packaging {
 
 		/// <summary>
 		/// Directory path to save level prototypes in
+		///
+		/// Relative to the <see cref="DirectoryPath"/> directory
 		/// </summary>
 		readonly string levelSavingDirPath;
 
@@ -324,7 +340,7 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown resource type");
 		}
 
-		public PlayerType GetPlayerAIType(string name)
+		public PlayerType GetPlayerType(string name)
 		{
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the PlayerAIType cannot be null");
@@ -345,7 +361,7 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown player type");
 		}
 
-		public PlayerType GetPlayerAIType(int ID) {
+		public PlayerType GetPlayerType(int ID) {
 
 			if (playerAITypesByID.TryGetValue(ID, out PlayerType value)) {
 				return value;
@@ -362,6 +378,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown player type");
 		}
 
+		public IEnumerable<PlayerType> GetPlayersWithTypeCategory(PlayerTypeCategory category)
+		{
+			return from playerType in PlayerTypes
+					where playerType.Category == category
+					select playerType;
+		}
+
 		public LevelRep GetLevel(string name)
 		{
 			if (TryGetLevel(name, out LevelRep value)) {
@@ -372,7 +395,6 @@ namespace MHUrho.Packaging {
 			}
 		}
 
-		
 		public bool TryGetLevel(string name, out LevelRep value)
 		{
 			//To enable loading saved games even if their source level was deleted
@@ -393,6 +415,14 @@ namespace MHUrho.Packaging {
 			FinishLoading();
 		}
 
+
+		/// <summary>
+		/// Returns the path to the file to which the level should be saved
+		///
+		/// The path is relative to the <see cref="DirectoryPath"/>
+		/// </summary>
+		/// <param name="levelName"></param>
+		/// <returns></returns>
 		public string GetLevelProtoSavePath(string levelName)
 		{
 			//Just strip it to bare minimum
@@ -824,7 +854,7 @@ namespace MHUrho.Packaging {
 			Stream file = null;
 			//TODO: Handler and signal that resource pack is in invalid state
 			try {
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Write);
+				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
 				data.Validate(schemas, null);
 				data.Save(file);
 			}
@@ -840,5 +870,7 @@ namespace MHUrho.Packaging {
 			}
 
 		}
+
+
 	}
 }

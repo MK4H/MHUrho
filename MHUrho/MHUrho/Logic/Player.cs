@@ -27,16 +27,35 @@ namespace MHUrho.Logic
 			readonly StPlayer storedPlayer;
 			readonly PlayerType type;
 
-			public Loader(LevelManager level, StPlayer storedPlayer)
+			public Loader(LevelManager level, StPlayer storedPlayer, PlayerType newType, bool overrideType)
 			{
 				this.level = level;
 				this.storedPlayer = storedPlayer;
 
-				type = PackageManager.Instance.ActivePackage.GetPlayerAIType(storedPlayer.TypeID);
-				//TODO: HUMAN PLAYER TYPE
-				//if (type == null) {
-				//	throw new ArgumentException("Type of this player was not loaded");
-				//}
+				if (storedPlayer.TypeID != 0 && !overrideType) {
+					throw new ArgumentException("storedPlayer had a type and the override flag was not set",
+												nameof(storedPlayer));
+				}
+
+				type = newType;
+				
+				//Clear typespecific data from the safe
+
+				storedPlayer.UserPlugin = new PluginData();
+			}
+
+			public Loader(LevelManager level, StPlayer storedPlayer, bool loadType)
+			{
+				this.level = level;
+				this.storedPlayer = storedPlayer;
+
+				if (loadType) {
+					if (storedPlayer.TypeID == 0) {
+						throw new ArgumentException("StoredPlayer had no type", nameof(storedPlayer));
+					}
+
+					type = PackageManager.Instance.ActivePackage.GetPlayerType(storedPlayer.TypeID);
+				}
 			}
 
 			public static StPlayer Save(Player player)
@@ -70,13 +89,15 @@ namespace MHUrho.Logic
 
 			public void StartLoading()
 			{
-				//TODO: Human player type
-				if (type == null) {
-					loadingPlayer = CreateNewHumanPlayer(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
-				}
-				else {
-					loadingPlayer = new Player(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
-					loadingPlayer.Plugin = type.GetInstancePluginForLoading(loadingPlayer, level);
+				loadingPlayer = new Player(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
+
+				if (type != null) {
+					if (type.ID == storedPlayer.TypeID) {
+						loadingPlayer.Plugin = type.GetInstancePluginForLoading(loadingPlayer, level);
+					}
+					else {
+						loadingPlayer.Plugin = type.GetNewInstancePlugin(loadingPlayer, level);
+					}
 				}
 			}
 
@@ -92,8 +113,13 @@ namespace MHUrho.Logic
 				foreach (var friendID in storedPlayer.FriendPlayerIDs) {
 					loadingPlayer.friends.Add(level.GetPlayer(friendID));
 				}
-				//TODO: Human player type
-				loadingPlayer.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
+
+				//If the stored data is from the same plugin type as the new type, load the data
+				// otherwise we created new fresh plugin instance, that most likely does not understand the stored data
+				if (type != null && type.ID == storedPlayer.TypeID) {
+					loadingPlayer.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
+				}
+				
 			}
 
 			public void FinishLoading() {
@@ -118,7 +144,7 @@ namespace MHUrho.Logic
 
 		readonly PlayerType type;
 
-		ILevelManager level;
+		readonly ILevelManager level;
 
 		protected Player(int id, ILevelManager level, PlayerInsignia insignia) {
 			ReceiveSceneUpdates = true;
@@ -139,19 +165,63 @@ namespace MHUrho.Logic
 			this.Plugin = type.GetNewInstancePlugin(this, level);
 		}
 
-		public static Player CreateNewAIPlayer(int id, ILevelManager level, PlayerType type, PlayerInsignia insignia)
-		{
-			return new Player(id, level, type, insignia);
-		}
-
-		public static Player CreateNewHumanPlayer(int id, ILevelManager level, PlayerInsignia insignia)
+		/// <summary>
+		/// Creates a player for level editing, where player serves only as a container of his units, buildings and resources
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="level"></param>
+		/// <param name="insignia"></param>
+		/// <returns></returns>
+		public static Player CreatePlaceholderPlayer(int id, ILevelManager level, PlayerInsignia insignia)
 		{
 			return new Player(id, level, insignia);
 		}
 
-		public static IPlayerLoader GetLoader(LevelManager level, StPlayer player)
+		/// <summary>
+		/// Loads player without the plugin and with cleared playerType
+		///
+		/// Loaded player serve only as a container of units, buildings and resources
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="storedPlayer"></param>
+		/// <returns></returns>
+		public static IPlayerLoader GetLoaderToEditor(LevelManager level, StPlayer storedPlayer)
 		{
-			return new Loader(level, player);
+			return new Loader(level, storedPlayer, false);
+		}
+
+		/// <summary>
+		/// Loads player with the type it is stored with
+		///
+		/// Throws if there is no playerType stored for the player
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="storedPlayer"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayer"/> does not contain a player type</exception>
+		public static IPlayerLoader GetLoaderStoredType(LevelManager level, StPlayer storedPlayer)
+		{
+			return new Loader(level, storedPlayer, true);
+		}
+
+		/// <summary>
+		/// Loads player with the <paramref name="fillType"/> as its new type
+		///
+		/// If <paramref name="overrideType"/> is true, overrides any existing player type stored with this player,
+		/// if it is false, throws exception if there is a playerType stored with the player
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="storedPlayer"></param>
+		/// <param name="fillType"></param>
+		/// <param name="overrideType"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayer"/> contains a playerType and the flag <paramref name="overrideType"/> was not set</exception>
+		public static IPlayerLoader GetLoaderFillType(LevelManager level,
+													StPlayer storedPlayer,
+													PlayerType fillType,
+													bool overrideType)
+		{
+			return new Loader(level, storedPlayer, fillType, overrideType);
 		}
 
 		public StPlayer Save()
@@ -257,7 +327,7 @@ namespace MHUrho.Logic
 
 		protected override void OnUpdate(float timeStep)
 		{
-			if (!EnabledEffective) return;
+			if (!EnabledEffective || !level.LevelNode.Enabled) return;
 
 			Plugin?.OnUpdate(timeStep);
 		}

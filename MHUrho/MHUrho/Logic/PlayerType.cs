@@ -11,6 +11,8 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
+	public enum PlayerTypeCategory { Human, Neutral, AI };
+
     public class PlayerType : ILoadableType, IDisposable
     {
 		public int ID { get; set; }
@@ -21,16 +23,19 @@ namespace MHUrho.Logic
 
 		public IntRect IconRectangle { get; private set; }
 
+		public PlayerTypeCategory Category { get; private set; }
+
 		public PlayerAITypePlugin Plugin { get; private set; }
 
 		public void Load(XElement xml, GamePack package)
 		{
 			ID = XmlHelpers.GetID(xml);
+			Category = StringToCategory(xml.Attribute("category").Value);
 			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
 			Plugin = XmlHelpers.LoadTypePlugin<PlayerAITypePlugin>(xml, 
-																	package.XmlDirectoryPath, 
+																	package.DirectoryPath, 
 																	Name);
 
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
@@ -58,6 +63,25 @@ namespace MHUrho.Logic
 
 		public void Dispose() {
 
+		}
+
+		static PlayerTypeCategory StringToCategory(string categoryString)
+		{
+			//Values have to match those in GamePack.xsd playerTypeCategoryType enumeration
+			if (string.Equals(categoryString, "human", StringComparison.InvariantCultureIgnoreCase)) {
+				return PlayerTypeCategory.Human;
+			}
+			else if (string.Equals(categoryString, "neutral", StringComparison.InvariantCultureIgnoreCase)) {
+				return PlayerTypeCategory.Neutral;
+			}
+			else if (string.Equals(categoryString, "ai", StringComparison.InvariantCultureIgnoreCase)) {
+				return PlayerTypeCategory.AI;
+			}
+			else {
+				throw new ArgumentOutOfRangeException(nameof(categoryString),
+													categoryString,
+													"Category string value does not match any known categories");
+			}
 		}
 	}
 }

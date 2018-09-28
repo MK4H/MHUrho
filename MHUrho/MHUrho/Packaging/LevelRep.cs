@@ -16,7 +16,7 @@ namespace MHUrho.Packaging
     public class LevelRep : IDisposable {
 		static readonly XName DescriptionElement = PackageManager.XMLNamespace + "description";
 		static readonly XName ThumbnailElement = PackageManager.XMLNamespace + "thumbnail";
-		static readonly XName SaveElement = PackageManager.XMLNamespace + "savePath";
+		static readonly XName DataPathElement = PackageManager.XMLNamespace + "dataPath";
 		static readonly XName AssemblyPathElement = PackageManager.XMLNamespace + "assemblyPath";
 
 		abstract class LevelState {
@@ -68,7 +68,9 @@ namespace MHUrho.Packaging
 				this.Context = context;
 			}
 
-			public abstract ILevelLoader StartLoading(bool editorMode);
+			public abstract ILevelLoader LoadForEditing();
+
+			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players);
 
 			public virtual void SaveTo(XElement levelsElement)
 			{
@@ -86,7 +88,7 @@ namespace MHUrho.Packaging
 
 				Stream saveFile = null;
 				try {
-					saveFile = MyGame.Files.OpenDynamicFile(SavePath, FileMode.Create, FileAccess.Write);
+					saveFile = MyGame.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
 					RunningLevel.SaveTo(saveFile);
 				}
 				//TODO: Catch just the expected exceptions
@@ -103,7 +105,7 @@ namespace MHUrho.Packaging
 												new XElement(DescriptionElement, Description),
 												new XElement(ThumbnailElement, ThumbnailPath),
 												new XElement(AssemblyPathElement, LevelPluginAssemblyPath),
-												new XElement(SaveElement, SavePath)));
+												new XElement(DataPathElement, SavePath)));
 			}
 
 
@@ -124,15 +126,16 @@ namespace MHUrho.Packaging
 				this.mapSize = mapSize;
 			}
 
-			public override ILevelLoader StartLoading(bool editorMode)
+			public override ILevelLoader LoadForEditing()
 			{
-				if (!editorMode) {
-					throw new InvalidOperationException("Cannot play a default level without editing it");
-				}
-
 				var loader = LevelManager.GetLoader();
 				loader.LoadDefaultLevel(Context, mapSize).ContinueWith(RunningLevelLoaded);
 				return loader;
+			}
+
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players)
+			{
+				throw new InvalidOperationException("Cannot play a default level");
 			}
 		}
 
@@ -144,15 +147,23 @@ namespace MHUrho.Packaging
 
 			}
 
-			public override ILevelLoader StartLoading(bool editorMode)
+			public override ILevelLoader LoadForEditing()
 			{
-				var savedLevel = GetSave(SavePath);
+				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.Load(Context, savedLevel, editorMode).ContinueWith(RunningLevelLoaded);
+				loader.LoadForEditing(Context, savedLevel).ContinueWith(RunningLevelLoaded);
 				return loader;
 			}
 
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players)
+			{
+				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
+				var loader = LevelManager.GetLoader();
+				//TODO: Maybe add failure continuation
+				loader.LoadForPlaying(Context, savedLevel, players).ContinueWith(RunningLevelLoaded);
+				return loader;
+			}
 		}
 
 		public string Name { get; private set; }
@@ -166,6 +177,8 @@ namespace MHUrho.Packaging
 		public GamePack GamePack { get; private set; }
 
 		public string LevelPluginAssemblyPath { get; private set; }
+
+		public int MaxNumberOfPlayers => LevelPlugin.NumberOfPlayers;
 
 		readonly string savePath;
 		readonly string thumbnailPath;
@@ -225,7 +238,7 @@ namespace MHUrho.Packaging
 			Description = levelXmlElement.Element(DescriptionElement).GetString();
 			thumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(ThumbnailElement));			
 			LevelPluginAssemblyPath = FileManager.CorrectRelativePath(levelXmlElement.Element(AssemblyPathElement).GetString());
-			savePath = XmlHelpers.GetPath(levelXmlElement.Element(SaveElement));
+			savePath = XmlHelpers.GetPath(levelXmlElement.Element(DataPathElement));
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
 			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
@@ -275,7 +288,7 @@ namespace MHUrho.Packaging
 		public static LevelRep GetFromSavedGame(string storedLevelPath)
 		{
 
-			StLevel storedLevel = GetSave(storedLevelPath);
+			StLevel storedLevel = GetSaveFromDynamicPath(storedLevelPath);
 
 			//TODO: Exception if pack is not present
 			var gamePack = PackageManager.Instance.LoadPackage(storedLevel.PackageName);
@@ -311,9 +324,14 @@ namespace MHUrho.Packaging
 			return true;
 		}
 
-		public ILevelLoader StartLoading(bool editorMode)
+		public ILevelLoader LoadForEditing()
 		{
-			return state.StartLoading(editorMode);
+			return state.LoadForEditing();
+		}
+
+		public ILevelLoader LoadForPlaying(PlayerSpecification players)
+		{
+			return state.LoadForPlaying(players);
 		}
 
 		public void SaveToGamePack()
@@ -339,12 +357,18 @@ namespace MHUrho.Packaging
 			LevelPlugin.Dispose();
 		}
 
-		static StLevel GetSave(string path)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path">Relative path based in <see cref="GamePack.DirectoryPath"/> of the owning gamePack</param>
+		/// <param name="package">Package from which the path is based</param>
+		/// <returns></returns>
+		static StLevel GetSaveFromPackagePath(string path, GamePack package)
 		{
 			StLevel storedLevel = null;
 			Stream saveFile = null;
 			try {
-				saveFile = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				saveFile = MyGame.Files.OpenDynamicFileInPackage(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, package);
 				storedLevel = StLevel.Parser.ParseFrom(saveFile);
 			}
 			//TODO: Exceptions from opening stream and from decoding level
@@ -355,14 +379,31 @@ namespace MHUrho.Packaging
 			return storedLevel;
 		}
 
+		static StLevel GetSaveFromDynamicPath(string path)
+		{
+			StLevel storedLevel = null;
+			Stream saveFile = null;
+			try
+			{
+				saveFile = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				storedLevel = StLevel.Parser.ParseFrom(saveFile);
+			}
+			//TODO: Exceptions from opening stream and from decoding level
+			finally
+			{
+				saveFile?.Dispose();
+			}
+
+			return storedLevel;
+		}
+
 		LevelLogicPlugin LoadLogicPlugin(string levelPluginAssemblyPath)
 		{
-			string levelPluginPath = Path.Combine(GamePack.RootedXmlDirectoryPath,
+			string levelPluginPath = Path.Combine(GamePack.RootedDirectoryPath,
 												levelPluginAssemblyPath);
 
 			return LevelLogicPlugin.Load(levelPluginPath, Name);
 		}
-
 
 		void CloneDispose()
 		{

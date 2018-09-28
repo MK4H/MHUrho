@@ -11,6 +11,8 @@ namespace MHUrho.UserInterface
     {
 		public bool Expanded { get; private set; }
 
+		public bool Enabled => checkBox.Enabled;
+
 		public event Action<HoverBeginEventArgs> HoverBegin;
 		public event Action<HoverEndEventArgs> HoverEnd;
 		public event ElementSelectedDelegate Selected;
@@ -24,8 +26,6 @@ namespace MHUrho.UserInterface
 		readonly IntRect defaultImageRect;
 
 		CheckBox currentSelected;
-
-		
 
 		public ExpandingSelector(CheckBox checkBox, ExpansionWindow expansionWindow)
 		{
@@ -77,6 +77,10 @@ namespace MHUrho.UserInterface
 
 		public void Select(CheckBox box)
 		{
+			if (!Enabled) {
+				return;
+			}
+
 			if (!checkBoxes.Contains(box)) {
 				throw new ArgumentException("Checkbox was not part of this expandingSelector", nameof(box));
 			}
@@ -90,6 +94,10 @@ namespace MHUrho.UserInterface
 
 		public void Deselect()
 		{
+			if (!Enabled) {
+				return;
+			}
+
 			if (currentSelected == null) {
 				return;
 			}
@@ -104,6 +112,17 @@ namespace MHUrho.UserInterface
 			HideExpansionWindow();
 
 			Selected?.Invoke(null, oldSelected);
+		}
+
+		public void Enable()
+		{
+			checkBox.Enabled = true;
+		}
+
+		public void Disable()
+		{
+			HideExpansionWindow();
+			checkBox.Enabled = false;
 		}
 
 		void MainBoxToggled(ToggledEventArgs e)

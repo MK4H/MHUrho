@@ -46,20 +46,66 @@ namespace MHUrho.StartupManagement
 
 		static ActionManager GetUIActions(IEnumerator<string> argsEnumerator)
 		{
-			if (!argsEnumerator.MoveNext()) {
-				throw new ArgumentException("-ui expected a xmlFilePath argument");
+			bool fromDynamic = true;
+			if (argsEnumerator.MoveNext()) {
+				//Whether to open from dynamic directory or static directory, default is static
+				
+				if (argsEnumerator.Current.Length == 1) {
+					switch (argsEnumerator.Current) {
+						case "s":
+							fromDynamic = false;
+							if (!argsEnumerator.MoveNext())
+							{
+								throw new ArgumentException("-ui missing a xmlFilePath argument, use -ui [s|d] xmlFilePath");
+							}
+							break;
+						case "d":
+							fromDynamic = true;
+							if (!argsEnumerator.MoveNext())
+							{
+								throw new ArgumentException("-ui missing a xmlFilePath argument, use -ui [s|d] xmlFilePath");
+							}
+							break;
+						default:
+							//One character path is also possible
+							break;
+					}
+				}
+			}
+			else {
+				throw new ArgumentException("-ui missing a xmlFilePath argument, use -ui [s|d] xmlFilePath");
+			}
+			
+
+			Stream file = null;
+			try {
+				file = fromDynamic
+							? MyGame.Files.OpenDynamicFile(argsEnumerator.Current,
+															System.IO.FileMode.Open,
+															System.IO.FileAccess.Read)
+							: MyGame.Files.OpenStaticFileRO(argsEnumerator.Current);
+				XDocument xmlFile = XDocument.Load(file);
+
+				try
+				{
+					return new ActionManager(xmlFile);
+				}
+				catch (IOException e)
+				{
+					//TODO: This means could not open xml schema
+					throw new ArgumentException("-ui xmlFilePath, could not read actions from the file xmlFilePath", e);
+				}
+				catch (XmlSchemaValidationException e)
+				{
+					throw new
+						ArgumentException("-ui xmlFilePath, xml did not conform to the Schemas/MenuActions.xsd schema", e);
+				}
+			}
+			finally {
+				file?.Dispose();
 			}
 
-			try {
-				return new ActionManager(argsEnumerator.Current);
-			}
-			catch (IOException e) {
-				throw new ArgumentException("-ui xmlFilePath, could not read actions from the file xmlFilePath", e);
-			}
-			catch (XmlSchemaValidationException e) {
-				throw new
-					ArgumentException("-ui xmlFilePath, xml did not conform to the Schemas/MenuActions.xsd schema", e);
-			}
+			
 		}
 	}
 
@@ -75,27 +121,22 @@ namespace MHUrho.StartupManagement
 		/// <param name="xmlFilePath"></param>
 		/// <exception cref="IOException">Occurs when the <paramref name="xmlFilePath"/> is not valid path or the file could not be opened</exception>
 		/// <exception cref="XmlSchemaValidationException">Occurs when <paramref name="xmlFilePath"/> does not conform to the schema at Schemas/MenuActions.xsd</exception>
-		public ActionManager(string xmlFilePath)
+		public ActionManager(XDocument xmlFile)
 		{
-			Stream file = null;
 			try {
-				file = MyGame.Files.OpenDynamicFile(xmlFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-				XDocument actionsXml = XDocument.Load(file);
+
 
 				var schema = new XmlSchemaSet();
 				schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
 							XmlReader.Create(MyGame.Files.OpenStaticFileRO(SchemaPath)));
 
-				actionsXml.Validate(schema, null);
+				xmlFile.Validate(schema, null);
 
-				actions = MenuScreenAction.Parse(actionsXml);
+				actions = MenuScreenAction.Parse(xmlFile);
 			}
 			catch (XmlSchemaValidationException e) {
 				//TODO: maybe log
 				throw;
-			}
-			finally {
-				file?.Dispose();
 			}
 			
 		}

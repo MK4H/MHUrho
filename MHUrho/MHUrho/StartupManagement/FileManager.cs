@@ -2,14 +2,23 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MHUrho.Packaging;
 using Urho.IO;
 
 namespace MHUrho
 {
 	public abstract class FileManager
 	{
-		//TODO: Load from config file
-		public List<string> PackagePaths { get; protected set; }
+		/// <summary>
+		/// Relative path inside the DynamicDir to the directory where the packages are stored and
+		/// the resource package directory xml file is
+		/// </summary>
+		public string PackageDirectoryPath { get; protected set; }
+
+		/// <summary>
+		/// Absolute path of the PackageDirectory <see cref="PackageDirectoryPath"/>
+		/// </summary>
+		public string PackageDirectoryAbsolutePath => Path.Combine(DynamicDirPath, PackageDirectoryPath);
 
 		public string LogPath { get; private set; }
 		public string StaticDirPath { get; protected set; }
@@ -30,10 +39,35 @@ namespace MHUrho
 				return null;
 			}
 			return Path.DirectorySeparatorChar != '/' ? relativePath.Replace('/', Path.DirectorySeparatorChar) : relativePath;
-		} 
+		}
 
 		/// <summary>
-		/// Gets stream allowing reading from static file, either directy from static file
+		/// Opens a file on the <paramref name="relativePath"/> in the <paramref name="package"/> directory
+		///
+		/// If no package is specified, the <see cref="PackageManager.ActivePackage"/> is used
+		/// </summary>
+		/// <param name="relativePath">Path of the file relative to the package directory</param>
+		/// <param name="fileMode"></param>
+		/// <param name="fileAccess"></param>
+		/// <param name="package"></param>
+		/// <returns></returns>
+		public Stream OpenDynamicFileInPackage(string relativePath,
+												System.IO.FileMode fileMode,
+												FileAccess fileAccess,
+												GamePack package = null)
+		{
+			if (package == null) {
+				package = PackageManager.Instance.ActivePackage;
+			}
+
+			string basePath = package.DirectoryPath;
+			string dynamicPath = Path.Combine(basePath, relativePath);
+
+			return OpenDynamicFile(dynamicPath, fileMode, fileAccess);
+		}
+
+		/// <summary>
+		/// Gets stream allowing reading from static file, either directly from static file
 		/// or if there exists changed copy in dynamic files, from this changed copy
 		/// </summary>
 		/// <param name="relativePath"></param>
@@ -66,7 +100,17 @@ namespace MHUrho
 		/// <param name="srcRelativePath">Source relative path in static data</param>
 		public abstract void CopyStaticToDynamic(string srcRelativePath);
 
+		/// <summary>
+		/// Creates a copy of a file or a directory with the whole subtree copied
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
+		/// <param name="overrideFiles"></param>
+		public abstract void Copy(string from, string to, bool overrideFiles);
+
 		public abstract bool FileExists(string path);
+
+		public abstract bool DirectoryExists(string path);
 
 		/// <summary>
 		/// 
@@ -90,14 +134,14 @@ namespace MHUrho
 		public abstract void DeleteDynamicFile(string relativePath);
 
 		protected FileManager(
-			List<string> packagePaths,
+			string packageDirectoryPath,
 			string configFilePath,
 			string staticDirPath,
 			string dynamicDirPath,
 			string logPath,
 			string saveDirPath) {
 
-			this.PackagePaths = packagePaths;
+			this.PackageDirectoryPath = packageDirectoryPath;
 			this.ConfigFilePath = configFilePath;
 			this.StaticDirPath = staticDirPath;
 			this.DynamicDirPath = dynamicDirPath;

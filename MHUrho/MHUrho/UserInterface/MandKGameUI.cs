@@ -30,6 +30,9 @@ namespace MHUrho.UserInterface
 
 		public SelectionBar SelectionBar { get; private set; }
 
+		public override bool ToolSelectionEnabled => toolSelection.Enabled;
+		public override bool PlayerSelectionEnabled => playerSelection.Enabled;
+
 		IPlayer Player => InputCtl.Player;
 
 		CameraMover cameraMover;
@@ -58,8 +61,8 @@ namespace MHUrho.UserInterface
 			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this);
 
 			gameUI = UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/GameLayout.xml"), PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
-			UI.Root.AddChild(gameUI);			
-			
+			UI.Root.AddChild(gameUI);
+			gameUI.Visible = false;
 
 			CustomWindow = new CustomElementsWindow((Window)gameUI.GetChild("CustomWindow"));
 			CustomWindow.HoverBegin += UIHoverBegin;
@@ -87,6 +90,7 @@ namespace MHUrho.UserInterface
 			minimap.HoverBegin += UIHoverBegin;
 			minimap.HoverEnd += UIHoverEnd;
 
+			
 		}
 
 		public void Dispose() {
@@ -119,6 +123,8 @@ namespace MHUrho.UserInterface
 
 			Debug.Assert(gameUI.IsDeleted, "gameUI did not delete itself");
 		}
+
+
 
 		public override void EnableUI()
 		{
@@ -177,6 +183,16 @@ namespace MHUrho.UserInterface
 			toolSelection.Deselect();
 		}
 
+		public override void EnableToolSelection()
+		{
+			toolSelection.Enable();
+		}
+
+		public override void DisableToolSelection()
+		{
+			toolSelection.Disable();
+		}
+
 		public override void AddPlayer(IPlayer player)
 		{
 
@@ -208,6 +224,16 @@ namespace MHUrho.UserInterface
 					playerSelection.Select((CheckBox)pair.Key);
 				}
 			}
+		}
+
+		public override void EnablePlayerSelection()
+		{
+			playerSelection.Enable();
+		}
+
+		public override void DisablePlayerSelection()
+		{
+			playerSelection.Disable();
 		}
 
 		void UIHoverBegin(HoverBeginEventArgs e)

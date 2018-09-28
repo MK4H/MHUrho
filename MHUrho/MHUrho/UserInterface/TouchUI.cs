@@ -35,6 +35,9 @@ namespace MHUrho.UserInterface
 			selectionBar.Remove();
 		}
 
+		public override bool ToolSelectionEnabled { get; }
+		public override bool PlayerSelectionEnabled { get; }
+
 		public override void AddTool(Tool tool) {
 			throw new NotImplementedException();
 		}
@@ -53,6 +56,16 @@ namespace MHUrho.UserInterface
 			throw new NotImplementedException();
 		}
 
+		public override void EnableToolSelection()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void DisableToolSelection()
+		{
+			throw new NotImplementedException();
+		}
+
 		public override void AddPlayer(IPlayer player) {
 			throw new NotImplementedException();
 		}
@@ -62,6 +75,16 @@ namespace MHUrho.UserInterface
 		}
 
 		public override void SelectPlayer(IPlayer player)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void EnablePlayerSelection()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void DisablePlayerSelection()
 		{
 			throw new NotImplementedException();
 		}

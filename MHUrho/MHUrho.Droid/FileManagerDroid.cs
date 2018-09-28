@@ -71,9 +71,19 @@ namespace MHUrho.Droid {
 			}
 		}
 
+		public override void Copy(string @from, string to, bool overrideFiles)
+		{
+			throw new NotImplementedException();
+		}
+
 		public override bool FileExists(string path)
 		{
 			return System.IO.File.Exists(path);
+		}
+
+		public override bool DirectoryExists(string path)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override IEnumerable<string> GetFSEntriesInDirectory(string dirPath, bool files, bool directories)
@@ -98,21 +108,18 @@ namespace MHUrho.Droid {
 		public static FileManagerDroid LoadConfig(AssetManager assetManager) {
 			//TODO: Load config files
 			return new FileManagerDroid(
-				new List<string>()
-				{
-					Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
-				},
+				"PackageDirectory",
 				assetManager);
 		}
 
-		protected FileManagerDroid(List<string> packagePaths, AssetManager assetManager)
-			: base( packagePaths,
+		protected FileManagerDroid(string packageDirectoryPath, AssetManager assetManager)
+			: base( packageDirectoryPath,
 					"TODO",
 					"/apk",
 					System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),
 					System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log"),
 					"SavedGames"){
-			PackagePaths = packagePaths;
+			PackageDirectoryPath = packageDirectoryPath;
 			this.assetManager = assetManager;
 		}
 

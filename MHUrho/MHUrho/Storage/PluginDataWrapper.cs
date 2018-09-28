@@ -47,7 +47,10 @@ namespace MHUrho.Storage
 		/// </summary>
 		/// <returns>Rreader for data in sequential format</returns>
 		public SequentialPluginDataReader GetReaderForWrappedSequentialData() {
-			if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
+			if (PluginData.DataStorageTypesCase == PluginData.DataStorageTypesOneofCase.None) {
+				PluginData.Sequential = new SequentialPluginData();
+			}
+			else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Sequential) {
 				throw new
 					InvalidOperationException("Cannot get SequentialReader for data that are not stored in sequential format");
 			}
@@ -72,7 +75,10 @@ namespace MHUrho.Storage
 		/// </summary>
 		/// <returns></returns>
 		public IndexedPluginDataReader GetReaderForWrappedIndexedData() {
-			if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
+			if (PluginData.DataStorageTypesCase == PluginData.DataStorageTypesOneofCase.None) {
+				PluginData.Indexed = new IndexedPluginData();
+			}
+			else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Indexed) {
 				throw new
 					InvalidOperationException("Cannot get IndexedReader for data that are not stored in indexed format");
 			}
@@ -98,7 +104,10 @@ namespace MHUrho.Storage
 		/// </summary>
 		/// <returns></returns>
 		public NamedPluginDataReader GetReaderForWrappedNamedData() {
-			if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Named) {
+			if (PluginData.DataStorageTypesCase == PluginData.DataStorageTypesOneofCase.None) {
+				PluginData.Named = new NamedPluginData();
+			}
+			else if (PluginData.DataStorageTypesCase != PluginData.DataStorageTypesOneofCase.Named) {
 				throw new
 					InvalidOperationException("Cannot get NamedReader for data that are not stored in named format");
 			}

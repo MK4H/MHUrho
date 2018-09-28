@@ -9,7 +9,7 @@
   <xs:element name="menuActions">
     <xs:complexType>
       <xs:sequence>
-        <xs:choice maxOccurs="unbounded">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element name="mainMenu" type="mainMenuType"/>
           <xs:element name="packagePicking" type="packagePickingType"/>
           <xs:element name="levelPicking" type="levelPickingType"/>

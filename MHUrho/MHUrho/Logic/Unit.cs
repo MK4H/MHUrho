@@ -419,7 +419,12 @@ namespace MHUrho.Logic
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
-			if (!EnabledEffective) return;
+			//Level.LevelNode.Enabled is here because there seems to be a bug
+			// where child nodes of level still receive updates even though 
+			// the level node is not enabled
+			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+				return;
+			}
 
 			UnitPlugin.OnUpdate(timeStep);
 		}

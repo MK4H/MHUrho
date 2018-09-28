@@ -332,7 +332,9 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep) 
 		{
 
-			if (!EnabledEffective) return;
+			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+				return;
+			}
 
 			ProjectilePlugin.OnUpdate(timeStep);
 		}

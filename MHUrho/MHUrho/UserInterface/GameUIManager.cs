@@ -14,6 +14,10 @@ namespace MHUrho.UserInterface
 		public event Action HoverBegin;
 		public event Action HoverEnd;
 
+		public abstract bool ToolSelectionEnabled { get; }
+
+		public abstract bool PlayerSelectionEnabled { get; }
+
 		protected Dictionary<UIElement, Tool> tools;
 		protected Dictionary<UIElement, IPlayer> players;
 
@@ -34,11 +38,19 @@ namespace MHUrho.UserInterface
 
 		public abstract void DeselectTools();
 
+		public abstract void EnableToolSelection();
+
+		public abstract void DisableToolSelection();
+
 		public abstract void AddPlayer(IPlayer player);
 
 		public abstract void RemovePlayer(IPlayer player);
 
 		public abstract void SelectPlayer(IPlayer player);
+
+		public abstract void EnablePlayerSelection();
+
+		public abstract void DisablePlayerSelection();
 
 		public abstract void EnableUI();
 

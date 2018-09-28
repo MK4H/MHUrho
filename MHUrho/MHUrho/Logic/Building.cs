@@ -325,7 +325,9 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep)
 		{
 			base.OnUpdate(timeStep);
-			if (!EnabledEffective) return;
+			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+				return;
+			}
 
 			BuildingPlugin.OnUpdate(timeStep);
 		}

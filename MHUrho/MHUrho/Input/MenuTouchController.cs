@@ -31,12 +31,22 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public void SavePausedLevel(string toPath)
+		public void SavePausedLevel(string fileName)
 		{
 			throw new NotImplementedException();
 		}
 
-		public void StartLoadingLevel(LevelRep level, bool editorMode)
+		public void StartLoadingLevelForEditing(LevelRep level)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void StartLoadingLevelForEditing(LevelRep level, bool editorMode)
 		{
 			throw new NotImplementedException();
 		}

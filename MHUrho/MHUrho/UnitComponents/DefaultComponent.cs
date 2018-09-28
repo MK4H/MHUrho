@@ -94,7 +94,9 @@ namespace MHUrho.UnitComponents
 		protected override void OnUpdate(float timeStep)
 		{
 			base.OnUpdate(timeStep);
-			if (IsDeleted || !EnabledEffective) return;
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
+				return;
+			}
 
 			OnUpdateChecked(timeStep);
 		}

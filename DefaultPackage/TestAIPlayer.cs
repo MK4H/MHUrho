@@ -25,7 +25,7 @@ namespace DefaultPackage
 
 		public override bool IsMyType(string typeName)
 		{
-			return typeName == "TestAI";
+			return string.Equals(typeName,"TestAI", StringComparison.InvariantCultureIgnoreCase);
 		}
 
 		public override void Initialize(XElement extensionElement, GamePack package)

@@ -80,6 +80,9 @@
 	<element type="DeleteButton" style="Button" auto="false">
 		<attribute name="Image Rect" value="0 192 16 208" />
 	</element>
+  <element type="PlayerItem" style="DropDownList">
+    <attribute name="Min Size" value="200 50"/>
+  </element>
 	<element type="Text">
 		<attribute name="Font" value="Font;Fonts/Anonymous Pro.ttf" />
 		<attribute name="Font Size" value="11" />

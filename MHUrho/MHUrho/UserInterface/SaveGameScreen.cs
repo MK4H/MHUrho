@@ -76,8 +76,7 @@ namespace MHUrho.UserInterface
 																		$"Do you really want to override the file \"{MatchSelected}\"?").ContinueWith(OverrideFile);
 				}
 				else {
-					string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
-					MenuUIManager.MenuController.SavePausedLevel(newFilePath);
+					MenuUIManager.MenuController.SavePausedLevel(LineEdit.Text);
 					MenuUIManager.SwitchBack();
 				}
 			}
@@ -88,8 +87,7 @@ namespace MHUrho.UserInterface
 				EnableInput();
 				if (!confirmed.Result) return;
 
-				string newFilePath = Path.Combine(MyGame.Files.SaveGameDirPath, LineEdit.Text);
-				MenuUIManager.MenuController.SavePausedLevel(newFilePath);
+				MenuUIManager.MenuController.SavePausedLevel(LineEdit.Text);
 				MenuUIManager.SwitchBack();
 			}
 		}

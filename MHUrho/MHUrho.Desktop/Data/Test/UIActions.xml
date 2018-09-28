@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
-  <mainMenu>
+  <!--<mainMenu>
     <action>start</action>
   </mainMenu>
   <packagePicking>
@@ -21,5 +21,5 @@
       <pluginPath>DefaultPackage.dll</pluginPath>
       <mapSize x="250" y="250"/>
     </values>
-  </levelCreation>
+  </levelCreation>-->
 </menuActions>

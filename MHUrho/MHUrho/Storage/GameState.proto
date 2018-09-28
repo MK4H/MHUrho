@@ -9,8 +9,8 @@ message StLevel {
 	StMap map = 1;
 	repeated StUnit units = 2;
 	repeated StBuilding buildings = 3;
-	repeated StPlayer players = 4;
-	repeated StProjectile projectiles = 5;
+	repeated StProjectile projectiles = 4;
+	StPlayers players = 5;
 	string packageName = 6;
 	string levelName = 7;
 	StLevelPlugin plugin = 8;
@@ -63,6 +63,12 @@ message StBuilding {
 	int32 playerID = 4;
 	PluginData userPlugin = 6;
 	repeated StDefaultComponent defaultComponents = 7;
+}
+
+message StPlayers {
+	int32 playerWithInputID = 1;
+	int32 neutralPlayerID = 2;
+	repeated StPlayer players = 3;
 }
 
 message StPlayer {

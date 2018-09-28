@@ -125,7 +125,6 @@ namespace MHUrho
 				Config = AppConfig.LoadFrom(configFile);
 			}
 				
-			
 			PackageManager.CreateInstance(ResourceCache);
 
 			SetConfigOptions();

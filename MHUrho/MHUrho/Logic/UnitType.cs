@@ -66,7 +66,7 @@ namespace MHUrho.Logic
 
 			Plugin =
 				XmlHelpers.LoadTypePlugin<UnitTypePlugin>(xml,
-															 package.XmlDirectoryPath,
+															 package.DirectoryPath,
 															 Name);
 
 			//var data = Plugin.TypeData;

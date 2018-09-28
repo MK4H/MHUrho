@@ -37,15 +37,27 @@ namespace MHUrho.Input
 			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
-		public void StartLoadingLevel(LevelRep level, bool editorMode)
+		public void StartLoadingLevelForEditing(LevelRep level)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
 			//This is correct, dont await, leave UI responsive
-			ILevelLoader loader = level.StartLoading(editorMode);
+			ILevelLoader loader = level.LoadForEditing();
 			
+			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
+		}
+
+		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players)
+		{
+			if (pausedLevelController != null)
+			{
+				EndPausedLevel();
+			}
+
+			ILevelLoader loader = level.LoadForPlaying(players);
+
 			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
 		}
 
@@ -66,9 +78,23 @@ namespace MHUrho.Input
 			pausedLevelController = null;
 		}
 
-		public void SavePausedLevel(string toPath)
+		public void SavePausedLevel(string fileName)
 		{
-			pausedLevelController.Level.SaveTo(MyGame.Files.OpenDynamicFile(toPath, System.IO.FileMode.Create, FileAccess.Write));
+			//TODO: More checks for the fileName
+			if (string.IsNullOrEmpty(fileName) || Path.GetFileName(fileName) != fileName) {
+				throw new ArgumentException("Invalid fileName for the save file", nameof(fileName));
+			}
+
+			string dynamicPath = Path.Combine(MyGame.Files.SaveGameDirPath, fileName);
+			try {
+				Stream file = MyGame.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
+				pausedLevelController.Level.SaveTo(file);
+			}
+			catch (IOException e) {
+				Urho.IO.Log.Write(LogLevel.Error, $"Saving a level failed with exception: {e}");
+				//TODO: Inform user
+				throw;
+			}
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {

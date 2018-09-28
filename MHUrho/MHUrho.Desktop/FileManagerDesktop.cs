@@ -10,10 +10,7 @@ namespace MHUrho.Desktop {
 
 		public static FileManagerDesktop LoadFileManager() {
 			var fileManager = new FileManagerDesktop(
-				new List<string>()
-				{
-					Path.Combine("Data","Test","ResourceDir","DirDescription.xml")
-				},
+				"PackageDirectory",
 				"config.xml",
 				Directory.GetCurrentDirectory(),
 				Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
@@ -29,18 +26,22 @@ namespace MHUrho.Desktop {
 				Directory.CreateDirectory(fileManager.SaveGameDirAbsolutePath);
 			}
 
+			if (!Directory.Exists(fileManager.PackageDirectoryAbsolutePath)) {
+				Directory.CreateDirectory(fileManager.PackageDirectoryAbsolutePath);
+			}
+
 			File.Create(fileManager.LogPath).Dispose();
 			
 			return fileManager;
 		}
 
-		protected FileManagerDesktop(List<string> packagePaths, 
+		protected FileManagerDesktop(string packageDirectoryPath, 
 									string configFilePath, 
 									string staticDirPath,
 									string dynamicDirPath,
 									string logFilePath,
 									string saveDirPath)
-			: base(packagePaths, configFilePath, staticDirPath, dynamicDirPath, logFilePath, saveDirPath) {
+			: base(packageDirectoryPath, configFilePath, staticDirPath, dynamicDirPath, logFilePath, saveDirPath) {
 
 		}
 
@@ -64,31 +65,63 @@ namespace MHUrho.Desktop {
 
 		public override void CopyStaticToDynamic(string srcRelativePath) {
 
-			string filePath = Path.Combine(StaticDirPath, srcRelativePath);
+			string source = Path.Combine(StaticDirPath, srcRelativePath);
+			string target = Path.Combine(DynamicDirPath, srcRelativePath);
 
-			var attr = File.GetAttributes(filePath);
+			Copy(source, target, true);	   
+		}
 
-			if (attr.HasFlag(FileAttributes.Directory)) {
+		public override void Copy(string from, string to, bool overrideFiles)
+		{
+			if (from == null) {
+				throw new ArgumentNullException(nameof(from), "From path cannot be null");
+			}
+			if (!Path.IsPathRooted(from)) {
+				throw new ArgumentException("From path has to be rooted", nameof(from));
+			}
 
+			if (to == null) {
+				throw new ArgumentNullException(nameof(to), "To path cannot be null"); 
 
-				foreach (string dirPath in Directory.GetDirectories(filePath, "*", SearchOption.AllDirectories))
-					Directory.CreateDirectory(dirPath.Replace(StaticDirPath, DynamicDirPath));
+			}
+
+			if (!Path.IsPathRooted(to)) {
+				throw new ArgumentException("To path has to be rooted", nameof(to));
+			}
+
+			from = Path.GetFullPath(from);
+			to = Path.GetFullPath(to);
+
+			var attr = File.GetAttributes(from);
+
+			if (attr.HasFlag(FileAttributes.Directory))
+			{
+				foreach (string dirPath in Directory.GetDirectories(from, "*", SearchOption.AllDirectories)) {
+					Directory.CreateDirectory(dirPath.Replace(from, to));
+				}
+					
 
 				//Copy all the files and Replaces any files with the same name
-				foreach (string subfilePath in Directory.GetFiles(filePath, "*.*", SearchOption.AllDirectories))
-					File.Copy(subfilePath, subfilePath.Replace(StaticDirPath, DynamicDirPath), true);
+				foreach (string subfilePath in Directory.GetFiles(from, "*.*", SearchOption.AllDirectories)) {
+					File.Copy(subfilePath, subfilePath.Replace(from, to), overrideFiles);
+				}
+					
 			}
-			else {
-				string newFilePath = Path.Combine(DynamicDirPath, srcRelativePath);
-				Directory.CreateDirectory(Path.GetDirectoryName(newFilePath));
-				File.Copy(filePath, newFilePath, true);
+			else
+			{
+				Directory.CreateDirectory(Path.GetDirectoryName(to));
+				File.Copy(from, to, overrideFiles);
 			}
-		   
 		}
 
 		public override bool FileExists(string path)
 		{
 			return File.Exists(path);
+		}
+
+		public override bool DirectoryExists(string path)
+		{
+			return Directory.Exists(path);
 		}
 
 		public override IEnumerable<string> GetFSEntriesInDirectory(string dirPath, bool files, bool directories)

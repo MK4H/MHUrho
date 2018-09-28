@@ -14,6 +14,8 @@ namespace DefaultPackage
 	{
 		const string Name = "TestLogic";
 
+		public override int NumberOfPlayers => 5;
+
 		public override bool IsMyName(string logicName)
 		{
 			//TODO: Real check
@@ -53,5 +55,6 @@ namespace DefaultPackage
 		{
 
 		}
+
 	}
 }

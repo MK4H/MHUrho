@@ -56,7 +56,7 @@ namespace MHUrho.Logic
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
 			Plugin = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,
-																 package.XmlDirectoryPath,
+																 package.DirectoryPath,
 																 Name);
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 										 package);

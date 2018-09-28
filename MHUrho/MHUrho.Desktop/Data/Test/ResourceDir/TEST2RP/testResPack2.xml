@@ -5,10 +5,22 @@
     <dataDirPath>Levels</dataDirPath>
   </levels>
 	<playerAITypes>
-		<playerAIType name="TestAI" ID="1">
+		<playerAIType name="TestAI" ID="1" category="ai">
 			<iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
 			<assemblyPath>DefaultPackage.dll</assemblyPath>
 		</playerAIType>
+	  <playerAIType name="testHuman1" ID="2" category="human">
+	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
+	    <assemblyPath>DefaultPackage.dll</assemblyPath>
+	  </playerAIType>
+	  <playerAIType name="testNeutral1" ID="3" category="neutral">
+	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
+	    <assemblyPath>DefaultPackage.dll</assemblyPath>
+	  </playerAIType>
+	  <playerAIType name="testNeutral2" ID="4" category="neutral">
+	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
+	    <assemblyPath>DefaultPackage.dll</assemblyPath>
+	  </playerAIType>
 	</playerAITypes>
   <resourceTypes></resourceTypes>
   <tileTypes>

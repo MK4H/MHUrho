@@ -16,7 +16,9 @@ namespace MHUrho.Logic
 		Task<ILevelManager> CurrentLoading { get; }
 	
 
-		Task<ILevelManager> Load(LevelRep levelRep, StLevel storedLevel, bool editorMode);
+		Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel);
+
+		Task<ILevelManager> LoadForPlaying(LevelRep levelRep, StLevel storedLevel, PlayerSpecification players);
 
 		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize);
 

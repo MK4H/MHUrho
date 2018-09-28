@@ -81,6 +81,8 @@ namespace MHUrho.Logic
 
 		public ToolManager ToolManager { get; private set; }
 
+		public IPlayer NeutralPlayer { get; private set; }
+
 		public LevelLogicPlugin Plugin { get; private set; }
 
 		public event OnUpdateDelegate Update;
@@ -131,11 +133,16 @@ namespace MHUrho.Logic
 
 		public StLevel Save() {
 			StLevel level = new StLevel() {
+				LevelName = LevelRep.Name,
 				Map = this.Map.Save(),
-				PackageName = PackageManager.Instance.ActivePackage.Name
+				PackageName = PackageManager.Instance.ActivePackage.Name,
+				Plugin = new StLevelPlugin()
 			};
 
 
+			level.Plugin = new StLevelPlugin {AssemblyPath = LevelRep.LevelPluginAssemblyPath, Data = new PluginData()};
+
+			Plugin?.SaveState(new PluginDataWrapper(level.Plugin.Data, this));
 
 			foreach (var unit in units.Values) {
 				level.Units.Add(unit.Save());
@@ -149,9 +156,13 @@ namespace MHUrho.Logic
 				level.Projectiles.Add(projectile.Save());
 			}
 
-
+			level.Players = new StPlayers
+							{
+								PlayerWithInputID = Input.Player.ID,
+								NeutralPlayerID = NeutralPlayer.ID
+							};
 			foreach (var player in players.Values) {
-				level.Players.Add(player.Save());
+				level.Players.Players.Add(player.Save());
 			}
 
 			return level;

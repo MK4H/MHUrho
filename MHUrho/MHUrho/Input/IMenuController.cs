@@ -26,9 +26,11 @@ namespace MHUrho.Input
 
 		void EndPausedLevel();
 
-		void SavePausedLevel(string toPath);
+		void SavePausedLevel(string fileName);
 
-		void StartLoadingLevel(LevelRep level, bool editorMode);
+		void StartLoadingLevelForEditing(LevelRep level);
+
+		void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players);
 
 		void ExecuteActionOnCurrentScreen(MenuScreenAction action);
 	}

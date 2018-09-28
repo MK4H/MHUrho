@@ -21,4 +21,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)ProtoBuf\protoc-3.5.1-win32\bin\protoc.exe --csharp_out=$(ProjectDir)Storage --proto_path=$(ProjectDir)Storage $(ProjectDir)Storage\UrhoTypes.proto $(ProjectDir)Storage\MHUrhoTypes.proto $(ProjectDir)Storage\PluginStorage.proto $(ProjectDir)Storage\GameState.proto" />
+  </Target>
 </Project>

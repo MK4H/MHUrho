@@ -1,0 +1,3 @@
+﻿This folder is used to store the ProtoBuf serialized level data of the level prototypes.
+
+This file is also here to get around the problem of Visual Studio not outputing empty folders into the output.

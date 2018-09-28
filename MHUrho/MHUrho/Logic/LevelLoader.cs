@@ -101,6 +101,31 @@ namespace MHUrho.Logic
 
 					level.Camera = cameraMover;
 				}
+
+				protected Player CreatePlaceholderPlayer()
+				{
+					var newPlayer = Player.CreatePlaceholderPlayer(Level.GetNewID(Level.players),
+																	Level,
+																	PlayerInsignia.Insignias[Level.players.Count]);
+					Level.LevelNode.AddComponent(newPlayer);
+					Level.players.Add(newPlayer.ID, newPlayer);
+
+					return newPlayer;
+				}
+
+				/// <summary>
+				/// Registers all players from <see cref="Level.Players"/> to <see cref="Level.UIManager"/>
+				/// by calling <see cref="Level.UIManager.AddPlayer"/>
+				///
+				/// Selects the player who currently has the input (<see cref="Level.Input.Player"/>)
+				/// </summary>
+				protected void RegisterPlayersToUI()
+				{
+					foreach (var player in Level.Players) {
+						Level.UIManager.AddPlayer(player);
+					}
+					Level.UIManager.SelectPlayer(Level.Input.Player);
+				}
 			}
 
 			class DefaultLevelLoader : CommonLevelLoader {
@@ -109,12 +134,29 @@ namespace MHUrho.Logic
 					:base(loader, levelRep, true)
 				{
 					this.mapSize = mapSize;
+
+					if (LevelRep.MaxNumberOfPlayers < 1) {
+						throw new ArgumentException("Level without players does not make sense", nameof(levelRep));
+					}
+
+					if (mapSize.X < Map.MinSize.X || Map.MaxSize.X < mapSize.X || 
+						mapSize.Y < Map.MinSize.Y || Map.MaxSize.Y < mapSize.Y ) {
+						throw new ArgumentOutOfRangeException(nameof(mapSize),
+															mapSize,
+															"MapSize was out of bounds set by Map.MinSize and Map.MaxSize");
+					}
+
+					if (mapSize.X % Map.ChunkSize.X != 0 || mapSize.Y % Map.ChunkSize.Y != 0) {
+						throw new ArgumentException("MapSize has to be an integer multiple of Map.ChunkSize", nameof(mapSize));
+					}
 				}
 
 				readonly IntVector2 mapSize;
 
 				public override async Task<ILevelManager> StartLoading()
 				{
+					LoadingSanityCheck();
+
 					LoadingWatcher.TextUpdate("Initializing level");
 					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
@@ -126,6 +168,12 @@ namespace MHUrho.Logic
 					Level.Minimap = new Minimap(Level, 4);
 
 					MyGame.InvokeOnMainSafe(CreateCamera);
+
+					LoadingWatcher.TextUpdate("Creating players");
+					MyGame.InvokeOnMainSafe(CreatePlayers);
+
+					LoadingWatcher.TextUpdate("Giving player controls");
+					MyGame.InvokeOnMainSafe(CreateControl);
 
 					LoadingWatcher.TextUpdate("Starting level");
 					MyGame.InvokeOnMainSafe(StartLevel);
@@ -139,30 +187,36 @@ namespace MHUrho.Logic
 					LoadCamera(Level, new Vector2(10, 10));
 				}
 
-				void StartLevel()
+				void CreatePlayers()
 				{
-					//TODO: Temporary player creation
-					Player newPlayer = Player.CreateNewHumanPlayer(Level.GetNewID(Level.players), Level, PlayerInsignia.Insignias[0]);
-					Level.LevelNode.AddComponent(newPlayer);
-					Level.players.Add(newPlayer.ID, newPlayer);
+					Player firstPlayer = CreatePlaceholderPlayer();
+					//First player gets the input and is the first one selected
 					Level.Input =
-						Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.Scene.GetComponent<Octree>(), newPlayer);
+						Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.Scene.GetComponent<Octree>(), firstPlayer);
 
+					//TODO: Give him his insignias
+					//Neutral player placeholder
+					Level.NeutralPlayer = CreatePlaceholderPlayer();
+
+					//AI player placeholders
+					for (int i = 1; i < LevelRep.MaxNumberOfPlayers; i++)
+					{
+						CreatePlaceholderPlayer();
+					}
+
+					RegisterPlayersToUI();
+				}
+
+				void CreateControl()
+				{
 					Level.cameraController = Game.ControllerFactory.CreateCameraController(Level.Input, Level.Camera);
 					Level.ToolManager = Level.Plugin.GetToolManager(Level, Level.Input.InputType);
 					Level.ToolManager.LoadTools();
+				}
 
-					Level.Input.UIManager.AddPlayer(newPlayer);
-					Level.Input.UIManager.SelectPlayer(newPlayer);
-
-					newPlayer = Player.CreateNewAIPlayer(Level.GetNewID(Level.players),
-														Level,
-														PackageManager.Instance.ActivePackage.GetPlayerAIType("TestAI"),
-														PlayerInsignia.Insignias[1]);
-					Level.LevelNode.AddComponent(newPlayer);
-					Level.players.Add(newPlayer.ID, newPlayer);
-					Level.Input.UIManager.AddPlayer(newPlayer);
-
+				void StartLevel()
+				{
+					Level.UIManager.ShowUI();
 					Level.Scene.UpdateEnabled = true;
 					Level.LevelNode.Enabled = true;
 				}
@@ -174,24 +228,29 @@ namespace MHUrho.Logic
 					//This will take a long time, run it in another thread
 					return Task.Run<Map>(() => Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, mapSize, LoadingWatcher.GetWatcherForSubsection(30)));
 				}
+
+				void LoadingSanityCheck()
+				{
+				
+				}
 			}
 
-			class SavedLevelLoader : CommonLevelLoader {
+			abstract class SavedLevelLoader : CommonLevelLoader {
 
-				public SavedLevelLoader(Loader loader, LevelRep levelRep, StLevel storedLevel, bool editorMode)
+				protected SavedLevelLoader(Loader loader, LevelRep levelRep, StLevel storedLevel, bool editorMode)
 					:base(loader, levelRep, editorMode)
 				{
-					this.storedLevel = storedLevel;
+					this.StoredLevel = storedLevel;
 				}
 
-				readonly StLevel storedLevel;
-				string PackageName => storedLevel.PackageName;
+				protected readonly StLevel StoredLevel;
+				protected string PackageName => StoredLevel.PackageName;
 
-				List<ILoader> loaders;
+				protected List<ILoader> Loaders;
 
 				public override async Task<ILevelManager> StartLoading()
 				{
-					loaders = new List<ILoader>();
+					Loaders = new List<ILoader>();
 					LoadingWatcher.TextUpdate("Initializing level");
 					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
@@ -199,38 +258,46 @@ namespace MHUrho.Logic
 
 
 					var mapLoader = await LoadMap();
-					loaders.Add(mapLoader);
+					Loaders.Add(mapLoader);
 					Level.Map = mapLoader.Map;
+					Level.Minimap = new Minimap(Level, 4);
+
 
 					MyGame.InvokeOnMainSafe(CreateCamera);
 
-					MyGame.InvokeOnMainSafe(LoadEntities);
+					//TODO: Maybe give each its own subsection watcher
+					//TODO: Add percentage updates
+					MyGame.InvokeOnMainSafe(LoadUnits);
+					MyGame.InvokeOnMainSafe(LoadBuildings);
+					MyGame.InvokeOnMainSafe(LoadProjectiles);
+					MyGame.InvokeOnMainSafe(LoadPlayers);
+					MyGame.InvokeOnMainSafe(LoadToolsAndControllers);
+					MyGame.InvokeOnMainSafe(LoadLevelPlugin);
+					MyGame.InvokeOnMainSafe(ConnectReferences);
+					MyGame.InvokeOnMainSafe(FinishLoading);
+					MyGame.InvokeOnMainSafe(StartLevel);
 
 					LoadingWatcher.FinishedLoading();
 					return Level;				
 				}
-				void CreateCamera()
-				{
-					//TODO:Maybe Save camera position
-					LoadCamera(Level, new Vector2(10, 10));
-				}
 
-				void LoadEntities()
+				protected virtual void LoadUnits()
 				{
-					//TODO: Maybe give it its own subsection watcher
-					//TODO: Add percentage updates
 					LoadingWatcher.TextUpdate("Loading units");
-					foreach (var unit in storedLevel.Units)
+					foreach (var unit in StoredLevel.Units)
 					{
 						var unitLoader = Unit.GetLoader(Level, Level.LevelNode.CreateChild("UnitNode"), unit);
 						unitLoader.StartLoading();
 						Level.RegisterEntity(unitLoader.Unit);
 						Level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
-						loaders.Add(unitLoader);
+						Loaders.Add(unitLoader);
 					}
+				}
 
+				protected virtual void LoadBuildings()
+				{
 					LoadingWatcher.TextUpdate("Loading buildings");
-					foreach (var building in storedLevel.Buildings)
+					foreach (var building in StoredLevel.Buildings)
 					{
 						var buildingLoader =
 							Building.GetLoader(Level,
@@ -239,12 +306,15 @@ namespace MHUrho.Logic
 						buildingLoader.StartLoading();
 						Level.RegisterEntity(buildingLoader.Building);
 						Level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building); ;
-						loaders.Add(buildingLoader);
+						Loaders.Add(buildingLoader);
 
 					}
+				}
 
+				protected virtual void LoadProjectiles()
+				{
 					LoadingWatcher.TextUpdate("Loading projectiles");
-					foreach (var projectile in storedLevel.Projectiles)
+					foreach (var projectile in StoredLevel.Projectiles)
 					{
 						var projectileLoader = Projectile.GetLoader(Level,
 																	Level.LevelNode.CreateChild("ProjectileNode"),
@@ -252,54 +322,66 @@ namespace MHUrho.Logic
 						projectileLoader.StartLoading();
 						Level.RegisterEntity(projectileLoader.Projectile);
 						Level.projectiles.Add(projectileLoader.Projectile.ID, projectileLoader.Projectile);
-						loaders.Add(projectileLoader);
+						Loaders.Add(projectileLoader);
 					}
+				}
 
-					LoadingWatcher.TextUpdate("Loading players");
-					//TODO: Remove this
-					Player firstPlayer = null;
+				protected abstract void LoadPlayers();
 
-					foreach (var player in storedLevel.Players)
-					{
-						var playerLoader = Player.GetLoader(Level, player);
-						playerLoader.StartLoading();
-						//TODO: If player needs controller, give him
-						if (firstPlayer == null)
-						{
-							firstPlayer = playerLoader.Player;
-						}
-
-						Level.LevelNode.AddComponent(playerLoader.Player);
-						Level.players.Add(playerLoader.Player.ID, playerLoader.Player);
-						loaders.Add(playerLoader);
-					}
-					//TODO: Move this inside the foreach
-					Level.Input = Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.octree, firstPlayer);
+				protected virtual void LoadToolsAndControllers()
+				{
 					Level.cameraController = Game.ControllerFactory.CreateCameraController(Level.Input, Level.Camera);
 					Level.ToolManager = Level.Plugin.GetToolManager(Level, Level.Input.InputType);
-
-					Level.Plugin.LoadState(new PluginDataWrapper(storedLevel.Plugin.Data, Level));
-
 					Level.ToolManager.LoadTools();
+				}
 
+				protected virtual void LoadLevelPlugin()
+				{
+					Level.Plugin.LoadState(new PluginDataWrapper(StoredLevel.Plugin.Data, Level));
+				}
+
+				protected virtual void ConnectReferences()
+				{
 					LoadingWatcher.TextUpdate("Connecting references");
 					//Connect references
-					foreach (var loader in loaders)
+					foreach (var loader in Loaders)
 					{
 						loader.ConnectReferences();
 					}
+				}
 
+				protected virtual void FinishLoading()
+				{
 					LoadingWatcher.TextUpdate("Finishing loading");
-					foreach (var loader in loaders)
+					foreach (var loader in Loaders)
 					{
 						loader.FinishLoading();
 					}
+				}
 
+				protected virtual void StartLevel()
+				{
 					LoadingWatcher.TextUpdate("Starting level");
 
 					CurrentLevel = Level;
+					Level.UIManager.ShowUI();
 					Level.Scene.UpdateEnabled = true;
 					Level.LevelNode.Enabled = true;
+				}
+
+				protected void LoadPlayer(IPlayerLoader playerLoader)
+				{
+					playerLoader.StartLoading();
+
+					Level.LevelNode.AddComponent(playerLoader.Player);
+					Level.players.Add(playerLoader.Player.ID, playerLoader.Player);
+					Loaders.Add(playerLoader);
+				}
+
+				void CreateCamera()
+				{
+					//TODO:Maybe Save camera position
+					LoadCamera(Level, new Vector2(10, 10));
 				}
 
 				Task<IMapLoader> LoadMap()
@@ -309,11 +391,124 @@ namespace MHUrho.Logic
 						var loader = Map.GetLoader(Level,
 													mapNode,
 													Level.octree,
-													storedLevel.Map,
+													StoredLevel.Map,
 													LoadingWatcher.GetWatcherForSubsection(30));
 						loader.StartLoading();
 						return loader;
 									});
+				}
+
+				
+			}
+
+			class SavedLevelPlayingLoader : SavedLevelLoader {
+
+				readonly PlayerSpecification players;
+
+				public SavedLevelPlayingLoader(Loader loader,
+												LevelRep levelRep,
+												StLevel storedLevel,
+												PlayerSpecification players)
+					: base(loader, levelRep, storedLevel, false)
+				{
+					this.players = players;
+				}
+
+				protected override void LoadPlayers()
+				{
+					LoadingWatcher.TextUpdate("Loading players");
+					//If players == null, we are loading a saved level already in play with set AIs
+					IPlayer playerWithInput = null;
+					if (players == PlayerSpecification.LoadFromSavedGame) {
+						foreach (var storedPlayer in StoredLevel.Players.Players)
+						{
+							LoadPlayer(Player.GetLoaderStoredType(Level, storedPlayer));
+						}
+
+						playerWithInput = Level.GetPlayer(StoredLevel.Players.PlayerWithInputID);
+						Level.NeutralPlayer = Level.GetPlayer(StoredLevel.Players.NeutralPlayerID);
+					}
+					//We are loading new level from a prototype or a level in play with new AIs
+					else {
+						var storedPlayer = StoredLevel.Players.Players.GetEnumerator();
+						var newPlayerInfo = players.GetEnumerator();
+						for (; storedPlayer.MoveNext() && newPlayerInfo.MoveNext();) {
+							IPlayerLoader newPlayer =
+								Player.GetLoaderFillType(Level, storedPlayer.Current, newPlayerInfo.Current.PlayerType, false);
+							LoadPlayer(newPlayer);
+
+							if (newPlayerInfo.Current.HasInput && newPlayerInfo.Current.IsNeutral)
+							{
+								throw new
+									ArgumentException("Corrupted save file, neutral player cannot have the input");
+							}
+							else if (newPlayerInfo.Current.IsNeutral) {
+								Level.NeutralPlayer = newPlayer.Player;
+							}
+							else if (newPlayerInfo.Current.HasInput) {
+								playerWithInput = newPlayer.Player;
+							}
+						}
+
+						storedPlayer.Dispose();
+						newPlayerInfo.Dispose();
+					}
+
+					if (playerWithInput == null) {
+						throw new
+							ArgumentException("Corrupted save file, no player has input");
+					}
+
+					Level.Input = Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.octree, playerWithInput);
+					RegisterPlayersToUI();
+
+
+					//Player selection is disabled by default in play mode, but it can be enabled again
+					Level.UIManager.DisablePlayerSelection();
+				}
+			}
+
+			class SavedLevelEditorLoader : SavedLevelLoader {
+				public SavedLevelEditorLoader(Loader loader, LevelRep levelRep, StLevel storedLevel)
+					: base(loader, levelRep, storedLevel, true)
+				{ }
+
+				protected override void LoadPlayers()
+				{				
+					int numberOfPlayers = 0;
+
+					foreach (var existingPlayer in StoredLevel.Players.Players) {
+						numberOfPlayers++;
+						IPlayerLoader newPlayer = Player.GetLoaderToEditor(Level, existingPlayer);
+						LoadPlayer(newPlayer);
+
+						//While editing, even the neutral player can have input
+						//When starting play, user will set who has input manually anyway
+						if (newPlayer.Player.ID == StoredLevel.Players.NeutralPlayerID) {
+							Level.NeutralPlayer = newPlayer.Player;
+						}
+						else if (newPlayer.Player.ID == StoredLevel.Players.PlayerWithInputID) {
+							Level.Input = Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.octree, newPlayer.Player);
+						}
+					}
+
+					//There will always be the neutral player and the player with input (representing the human behind the keyboard)
+					if (numberOfPlayers < 2) {
+						throw new
+							ArgumentException("Corrupted save file, there was less than 2 players (neutral or human missing)");
+					}
+
+					//Some player always has to have the input
+					if (Level.Input == null) {
+						throw new ArgumentException("Corrupted save file, no player had input");
+					}
+
+					for (; numberOfPlayers < LevelRep.MaxNumberOfPlayers; numberOfPlayers++) {
+						CreatePlaceholderPlayer();
+					}
+
+
+					RegisterPlayersToUI();
 				}
 			}
 
@@ -333,9 +528,19 @@ namespace MHUrho.Logic
 				loadingWatcher = new LoadingWatcher();
 			}
 
-			public Task<ILevelManager> Load(LevelRep levelRep, StLevel storedLevel, bool editorMode)
+			public Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel)
 			{
-				loaderType = new SavedLevelLoader(this, levelRep, storedLevel, editorMode);
+				loaderType = new SavedLevelEditorLoader(this, levelRep, storedLevel);
+
+				CurrentLoading = loaderType.StartLoading();
+				return CurrentLoading;
+			}
+
+			public Task<ILevelManager> LoadForPlaying(LevelRep levelRep,
+													StLevel storedLevel,
+													PlayerSpecification players)
+			{
+				loaderType = new SavedLevelPlayingLoader(this, levelRep, storedLevel, players);
 
 				CurrentLoading = loaderType.StartLoading();
 				return CurrentLoading;

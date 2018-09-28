@@ -30,6 +30,8 @@ namespace MHUrho.Packaging
 
 		public static PackageManager Instance { get; private set; }
 
+		public const string GamePackDirFileName = "DirDescription.xml";
+
 		public IEnumerable<GamePackRep> AvailablePacks => availablePacks.Values;
 		
 		/// <summary>
@@ -77,9 +79,7 @@ namespace MHUrho.Packaging
 				//TODO: Error loading the default icon, game corrupted
 			}
 
-			foreach (var path in MyGame.Files.PackagePaths) {
-				Instance.ParseGamePackDir(path);
-			}
+			Instance.ParseGamePackDir(Path.Combine(MyGame.Files.PackageDirectoryPath, GamePackDirFileName));
 		}
 
 		public GamePack LoadPackage(string packageName, 
@@ -99,7 +99,7 @@ namespace MHUrho.Packaging
 				UnloadActivePack();
 			}
 
-			resourceCache.AddResourceDir(package.XmlDirectoryPath, 1);
+			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
 			ActivePackage = package.LoadPack(schemas, loadingProgress);
 			return ActivePackage;
@@ -313,7 +313,7 @@ namespace MHUrho.Packaging
 
 
 		void UnloadPackage(GamePack package) {
-			resourceCache.RemoveResourceDir(package.XmlDirectoryPath);
+			resourceCache.RemoveResourceDir(package.DirectoryPath);
 			package.UnLoad();
 		}
 

@@ -99,6 +99,7 @@ namespace MHUrho.UserInterface
 		public LevelPickingLevelItem(LevelRep level, MyGame game)
 			:base(game, level.Thumbnail, level.Name)
 		{
+			this.Level = level;
 			descriptionElement = Element.GetChild("DescriptionElement", true);
 
 			((Text)Element.GetChild("DescriptionText", true)).Value = level.Description;

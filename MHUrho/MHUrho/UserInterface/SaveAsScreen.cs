@@ -94,7 +94,7 @@ namespace MHUrho.UserInterface
 
 					var result = await MenuUIManager.
 										FileBrowsingPopUp.
-										Request(PackageManager.Instance.ActivePackage.RootedXmlDirectoryPath,
+										Request(PackageManager.Instance.ActivePackage.RootedDirectoryPath,
 												SelectOption.File,
 												thumbnailPathText.HasDefaultValue ? null : thumbnailPathText.Value);
 

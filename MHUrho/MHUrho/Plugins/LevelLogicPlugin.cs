@@ -13,7 +13,7 @@ using Urho.Gui;
 namespace MHUrho.Plugins
 {
     public abstract class LevelLogicPlugin : IDisposable {
-		public int NumberOfPlayers { get; }
+		public abstract int NumberOfPlayers { get; }
 
 		public static LevelLogicPlugin Load(string fullAssemblyPath, string name)
 		{

@@ -47,7 +47,7 @@ namespace MHUrho.Logic
 			Package = package;
 
 			typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePlugin>(xml,
-																		  package.XmlDirectoryPath,
+																		  package.DirectoryPath,
 																		  Name);
 			typePlugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 								  package);
