@@ -37,7 +37,7 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/SaveLayout.xml");
+				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/SaveAsLayout.xml");
 				window = (Window) MenuUIManager.MenuRoot.GetChild("SaveAsWindow");
 				nameEdit = (LineEdit) window.GetChild("NameEdit", true);
 				thumbnailPathButton = (Button)window.GetChild("ThumbnailPathButton", true);

@@ -26,6 +26,7 @@ namespace MHUrho.UserInterface
 
 			protected void Resume()
 			{
+				Proxy.PausedLevel = null;
 				MenuUIManager.Clear();
 				MenuUIManager.MenuController.ResumePausedLevel();
 			}
@@ -38,6 +39,7 @@ namespace MHUrho.UserInterface
 			protected void Exit()
 			{
 				MenuUIManager.MenuController.EndPausedLevel();
+				Proxy.PausedLevel = null;
 				MenuUIManager.Clear();
 				MenuUIManager.SwitchToMainMenu();
 			}
@@ -243,16 +245,6 @@ namespace MHUrho.UserInterface
 			else {
 				screen = new PlayScreen(this);
 			}
-		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
-			}
-
-			PausedLevel = null;
-			base.Hide();
 		}
 	}
 }

@@ -56,6 +56,7 @@ namespace MHUrho.UserInterface
 			LevelPickingScreen = new LevelPickingScreen(this);
 			LevelSettingsScreen = new LevelSettingsScreen(this);
 			LevelCreationScreen = new LevelCreationScreen(this);
+			SaveAsScreen = new SaveAsScreen(this);
 			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
 			ConfirmationPopUp = new ConfirmationPopUp(this);
 
