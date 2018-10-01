@@ -34,7 +34,7 @@ namespace MHUrho.UserInterface
 
 
 				public bool Enabled {
-					get => sliderX.Enabled && sliderY.Enabled && displayText.Enabled;
+					get => sliderX.Enabled && sliderY.Enabled;
 					set {
 						if (value) {
 							Enable();
@@ -98,9 +98,6 @@ namespace MHUrho.UserInterface
 
 					sliderX.Enabled = true;
 					sliderY.Enabled = true;
-
-					//Dont know what this does, probably nothing, but just to be consistent
-					displayText.Enabled = true;
 				}
 
 				public void Disable() {
@@ -110,9 +107,6 @@ namespace MHUrho.UserInterface
 
 					sliderX.Enabled = false;
 					sliderY.Enabled = false;
-
-					//Dont know what this does, probably nothing, but just to be consistent
-					displayText.Enabled = false;
 				}
 
 				void SliderValueChanged(SliderChangedEventArgs args)
