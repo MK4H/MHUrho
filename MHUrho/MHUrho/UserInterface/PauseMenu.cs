@@ -84,7 +84,7 @@ namespace MHUrho.UserInterface
 						Resume();
 						break;
 					case SaveButton:
-						SaveLevelPrototype();
+						SaveLevelPrototype(true);
 						break;
 					case SaveAsButton:
 						SaveLevelPrototypeAs();
@@ -100,9 +100,9 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void SaveLevelPrototype()
+			void SaveLevelPrototype(bool overrideLevel)
 			{
-				Level.LevelRep.SaveToGamePack();
+				Level.LevelRep.SaveToGamePack(overrideLevel);
 			}
 
 			void SaveLevelPrototypeAs()

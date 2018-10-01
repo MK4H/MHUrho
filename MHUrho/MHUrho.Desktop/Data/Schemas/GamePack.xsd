@@ -199,6 +199,7 @@
 			<xs:element name="thumbnail" type="xs:string"/>
 			<xs:element name="assemblyPath" type="xs:string"/>
 			<xs:element name="dataPath" type="xs:string"/>
+      <xs:element name="mapSize" type="IntVector2"/>
 		</xs:sequence>
 		<xs:attribute name="name" use="required"/>
 	</xs:complexType>

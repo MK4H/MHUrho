@@ -18,6 +18,7 @@ namespace MHUrho.Packaging
 		static readonly XName ThumbnailElement = PackageManager.XMLNamespace + "thumbnail";
 		static readonly XName DataPathElement = PackageManager.XMLNamespace + "dataPath";
 		static readonly XName AssemblyPathElement = PackageManager.XMLNamespace + "assemblyPath";
+		static readonly XName MapSizeElement = PackageManager.XMLNamespace + "mapSize";
 
 		abstract class LevelState {
 
@@ -57,9 +58,10 @@ namespace MHUrho.Packaging
 				set => Context.LevelPluginAssemblyPath = value; 
 			}
 
+			protected IntVector2 MapSize => Context.MapSize;
 
 			protected string SavePath => Context.savePath;
-			protected string ThumbnailPath => Context.thumbnailPath;
+			protected string ThumbnailPath => Context.ThumbnailPath;
 
 			volatile protected ILevelManager RunningLevel;
 
@@ -78,12 +80,8 @@ namespace MHUrho.Packaging
 					throw new InvalidOperationException("Level was not loaded, so there is nothing to save");
 				}
 
-
-				foreach (var level in levelsElement.Elements(GamePackXml.Level)) {
-					if (level.Attribute("name").Value == Name) {
-						//TODO: Ask for override
-						level.Remove();
-					}
+				if (GamePack.TryGetLevel(Name, out LevelRep oldLevel)) {
+					throw new InvalidOperationException("Level with the same name already existed in the package");
 				}
 
 				Stream saveFile = null;
@@ -105,7 +103,8 @@ namespace MHUrho.Packaging
 												new XElement(DescriptionElement, Description),
 												new XElement(ThumbnailElement, ThumbnailPath),
 												new XElement(AssemblyPathElement, LevelPluginAssemblyPath),
-												new XElement(DataPathElement, SavePath)));
+												new XElement(DataPathElement, SavePath),
+												XmlHelpers.IntVector2ToXmlElement(MapSizeElement, MapSize)));
 			}
 
 
@@ -178,10 +177,13 @@ namespace MHUrho.Packaging
 
 		public string LevelPluginAssemblyPath { get; private set; }
 
+		public string ThumbnailPath { get; private set; }
+
+		public IntVector2 MapSize { get; private set; }
+
 		public int MaxNumberOfPlayers => LevelPlugin.NumberOfPlayers;
 
 		readonly string savePath;
-		readonly string thumbnailPath;
 
 		LevelState state;
 
@@ -194,9 +196,10 @@ namespace MHUrho.Packaging
 		{
 			this.Name = name;
 			this.Description = description;
-			this.thumbnailPath = thumbnailPath;
+			this.ThumbnailPath = thumbnailPath;
 			this.LevelPluginAssemblyPath = levelPluginAssemblyPath;
 			this.savePath = gamePack.GetLevelProtoSavePath(name);
+			this.MapSize = mapSize;
 			this.GamePack = gamePack;
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
@@ -219,13 +222,14 @@ namespace MHUrho.Packaging
 		{
 			this.Name = name;
 			this.Description = description;
-			this.thumbnailPath = thumbnailPath;
+			this.ThumbnailPath = thumbnailPath;
 			this.LevelPluginAssemblyPath = other.LevelPluginAssemblyPath;
 			this.GamePack = other.GamePack;
+			this.MapSize = other.MapSize;
 			this.savePath = GamePack.GetLevelProtoSavePath(name);
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
-			this.LevelPlugin = other.LevelPlugin;
+			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
 			state = other.state;
 		}
@@ -236,11 +240,13 @@ namespace MHUrho.Packaging
 			//TODO: Check for errors
 			Name = XmlHelpers.GetName(levelXmlElement);
 			Description = levelXmlElement.Element(DescriptionElement).GetString();
-			thumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(ThumbnailElement));			
+			ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(ThumbnailElement));			
 			LevelPluginAssemblyPath = FileManager.CorrectRelativePath(levelXmlElement.Element(AssemblyPathElement).GetString());
 			savePath = XmlHelpers.GetPath(levelXmlElement.Element(DataPathElement));
 
-			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
+			this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(MapSizeElement));
+
+			this.Thumbnail = PackageManager.Instance.GetTexture2D(ThumbnailPath);
 			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
 			state = new LoadedLevel(this);
@@ -262,6 +268,8 @@ namespace MHUrho.Packaging
 			this.Description = "Temporary level";
 			//TODO: Default thumbnail
 			//this.Thumbnail = 
+
+			this.MapSize = storedLevel.Map.Size.ToIntVector2();
 
 			this.LevelPluginAssemblyPath = storedLevel.Plugin.AssemblyPath;
 			LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
@@ -334,16 +342,28 @@ namespace MHUrho.Packaging
 			return state.LoadForPlaying(players);
 		}
 
-		public void SaveToGamePack()
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="overrideLevel"></param>
+		/// <exception cref="InvalidOperationException"/>
+		public void SaveToGamePack(bool overrideLevel)
 		{
-			GamePack.SaveLevel(this);
+			GamePack.SaveLevel(this, overrideLevel);
 		}
 
-		public void SaveToGamePackAs(string newName, string newDescription, string newThumbnailPath)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="newName"></param>
+		/// <param name="newDescription"></param>
+		/// <param name="newThumbnailPath"></param>
+		/// <param name="overrideLevel"></param>
+		/// <exception cref="InvalidOperationException"/>
+		public void SaveToGamePackAs(string newName, string newDescription, string newThumbnailPath, bool overrideLevel)
 		{
 			LevelRep clone = new LevelRep(this, newName, newDescription, newThumbnailPath);
-			clone.SaveToGamePack();
-			clone.CloneDispose();
+			clone.SaveToGamePack(overrideLevel);
 		}
 
 		public void SaveTo(XElement levelsElement)
@@ -351,9 +371,15 @@ namespace MHUrho.Packaging
 			state.SaveTo(levelsElement);
 		}
 
+		public void RemoveDataFile()
+		{
+			//TODO: Move this to state, maybe the file may not exist yet
+			MyGame.Files.DeleteDynamicFile(Path.Combine(GamePack.DirectoryPath, savePath));
+		}
+
 		public void Dispose()
 		{
-			CloneDispose();
+			Thumbnail.Dispose();
 			LevelPlugin.Dispose();
 		}
 
@@ -405,10 +431,6 @@ namespace MHUrho.Packaging
 			return LevelLogicPlugin.Load(levelPluginPath, Name);
 		}
 
-		void CloneDispose()
-		{
-			Thumbnail.Dispose();
-		}
 
 	
 	}

@@ -15,11 +15,11 @@
   <levelCreation>
     <action>edit</action>
     <values>
-      <levelName>New level 1</levelName>
-      <description> The best level ever</description>
+      <levelName>New level 2</levelName>
+      <description> The second best level ever</description>
       <thumbnailPath>xamarin.png</thumbnailPath>
       <pluginPath>DefaultPackage.dll</pluginPath>
-      <mapSize x="250" y="250"/>
+      <mapSize x="100" y="250"/>
     </values>
   </levelCreation>-->
 </menuActions>

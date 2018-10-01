@@ -33,6 +33,18 @@ namespace MHUrho.UserInterface
 				}
 
 
+				public bool Enabled {
+					get => sliderX.Enabled && sliderY.Enabled && displayText.Enabled;
+					set {
+						if (value) {
+							Enable();
+						}
+						else {
+							Disable();
+						}
+					}
+				}
+
 				readonly Slider sliderX;
 				readonly Slider sliderY;
 				readonly Text displayText;
@@ -76,6 +88,31 @@ namespace MHUrho.UserInterface
 					sliderX.Dispose();
 					sliderY.Dispose();
 					displayText.Dispose();
+				}
+
+				public void Enable()
+				{
+					if (Enabled) {
+						return;
+					}
+
+					sliderX.Enabled = true;
+					sliderY.Enabled = true;
+
+					//Dont know what this does, probably nothing, but just to be consistent
+					displayText.Enabled = true;
+				}
+
+				public void Disable() {
+					if (!Enabled) {
+						return;
+					}
+
+					sliderX.Enabled = false;
+					sliderY.Enabled = false;
+
+					//Dont know what this does, probably nothing, but just to be consistent
+					displayText.Enabled = false;
 				}
 
 				void SliderValueChanged(SliderChangedEventArgs args)
@@ -148,7 +185,6 @@ namespace MHUrho.UserInterface
 
 				nameEdit = (LineEdit)window.GetChild("LevelNameEdit", true);
 				
-
 				var sliderX = (Slider) window.GetChild("XSlider", true);
 				var sliderY = (Slider) window.GetChild("ZSlider", true);
 				var displayText = (Text) window.GetChild("DisplayText", true);
@@ -171,6 +207,20 @@ namespace MHUrho.UserInterface
 
 				((Button)window.GetChild("EditButton", true)).Released += EditButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
+
+
+				//Editing existing level, load the values and lock the unchangable ones (levelSize and plugin)
+				if (Level != null) {
+					nameEdit.Text = Level.Name;
+					mapSize.Value = Level.MapSize;
+					descriptionEdit.Text = Level.Description;
+					thumbnailPathText.Value = Level.ThumbnailPath;
+					pluginPathText.Value = Level.LevelPluginAssemblyPath;
+
+					//Disable the unchangable ones
+					pluginPathButton.Enabled = false;
+					mapSize.Enabled = false;
+				}
 			}
 
 			public override void Dispose()

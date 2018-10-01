@@ -406,8 +406,30 @@ namespace MHUrho.Packaging {
 			return levelsByName.TryGetValue(name, out value);
 		}
 
-		public void SaveLevel(LevelRep level)
+		/// <summary>
+		/// Saves the <paramref name="level"/> and adds it to the choice of levels for this gamePack
+		/// If there is another level with the same name, and the <paramref name="overrideLevel"/> is not set, throws InvalidOperationException
+		/// 
+		/// Before saving level without the <paramref name="overrideLevel"/> flag, you should check that there is no level with the same name
+		/// Use <see cref="TryGetLevel(string, out LevelRep)"/>
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="overrideLevel"></param>
+		/// <exception cref="InvalidOperationException">Thrown when a level with the same name as <paramref name="level"/> already exists and the <paramref name="overrideLevel"/> is not set</exception>
+		public void SaveLevel(LevelRep level, bool overrideLevel)
 		{
+			if (TryGetLevel(level.Name, out LevelRep oldLevel))
+			{
+				if (overrideLevel)
+				{
+					RemoveLevel(oldLevel);
+				}
+				else
+				{
+					throw new InvalidOperationException("Level with the same name already exists in the package");
+				}
+			}
+
 			var xmlData = StartLoading(pathToXml, schemas);
 			//Should not be null, because startLoading validates the xml
 			level.SaveTo(xmlData.Root.Element(GamePackXml.Levels));
@@ -415,6 +437,37 @@ namespace MHUrho.Packaging {
 			FinishLoading();
 		}
 
+
+		public void RemoveLevel(LevelRep level)
+		{
+			if (level.GamePack != this) {
+				throw new ArgumentException("The provided level was not part of this gamePack", nameof(level));
+			}
+
+			var xmlData = StartLoading(pathToXml, schemas);
+
+			if (!levelsByName.Remove(level.Name)) {
+				//This should not happen, but just to be safe
+				throw new
+					InvalidOperationException("Bug in the program, the level was not present in the levels dictionary even though it was from this gamePack");
+			}
+
+			//This should be correct thanks to xsd validation
+			XElement levels = xmlData.Root.Element("levels");
+
+			var levelElement = levels.Elements("level")
+									.FirstOrDefault(levelElem => string.Equals(levelElem.Attribute("name").Value,
+																		level.Name,
+																		StringComparison.InvariantCultureIgnoreCase));
+
+			if (levelElement == null) {
+				throw new
+					InvalidOperationException("Xml changed outside the control of the program, you should restart the program to fix this");
+			}
+
+			levelElement.Remove();
+			level.RemoveDataFile();
+		}
 
 		/// <summary>
 		/// Returns the path to the file to which the level should be saved
@@ -854,8 +907,9 @@ namespace MHUrho.Packaging {
 			Stream file = null;
 			//TODO: Handler and signal that resource pack is in invalid state
 			try {
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
+				//Validate before truncating the file
 				data.Validate(schemas, null);
+				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
 				data.Save(file);
 			}
 			//TODO: Other exceptions

@@ -210,9 +210,11 @@ namespace MHUrho.UserInterface
 			{
 				if (changed) {
 					Game.Config.SetGraphicsMode(Game.Graphics);
-					MenuUIManager.ConfirmationPopUp.RequestConfirmation("Save config",
-																		"Do you wish to save these settings ?",
-																		TimeSpan.FromSeconds(10)).ContinueWith(SaveConfirmation);
+					MenuUIManager.ConfirmationPopUp
+								.RequestConfirmation("Save config",
+													"Do you wish to save these settings ?",
+													TimeSpan.FromSeconds(10))
+								.ContinueWith(SaveConfirmation, TaskContinuationOptions.ExecuteSynchronously);
 				}
 				else {
 					SaveConfirmation(true);
@@ -223,8 +225,10 @@ namespace MHUrho.UserInterface
 			void BackButton_Released(ReleasedEventArgs args)
 			{
 				if (changed) {
-					MenuUIManager.ConfirmationPopUp.RequestConfirmation("Exit config",
-																		"Do you wish to revert these settings to their previous state?").ContinueWith(ExitConfirmation);
+					MenuUIManager.ConfirmationPopUp
+								.RequestConfirmation("Exit config",
+													"Do you wish to revert these settings to their previous state?")
+								.ContinueWith(ExitConfirmation, TaskContinuationOptions.ExecuteSynchronously);
 				}
 				else {
 					ExitConfirmation(true);

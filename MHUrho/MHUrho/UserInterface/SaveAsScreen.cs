@@ -50,6 +50,10 @@ namespace MHUrho.UserInterface
 
 				((Button)window.GetChild("SaveAsButton", true)).Released += SaveAsButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
+
+				nameEdit.Text = Level.LevelRep.Name;
+				thumbnailPathText.Value = Level.LevelRep.ThumbnailPath;
+				descriptionEdit.Text = Level.LevelRep.Description;
 			}
 
 			public override void Dispose()
@@ -108,9 +112,17 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void SaveAsButtonReleased(ReleasedEventArgs args)
+			async void SaveAsButtonReleased(ReleasedEventArgs args)
 			{
-				Level.LevelRep.SaveToGamePackAs(name, description, ThumbnailPath);	
+				if (Level.LevelRep.GamePack.TryGetLevel(name, out LevelRep oldLevel)) {
+					bool confirm = await MenuUIManager.ConfirmationPopUp.RequestConfirmation("Override level",
+																							"Do you want to override existing level with the same name?");
+					if (!confirm) {
+						return;
+					}
+				}
+
+				Level.LevelRep.SaveToGamePackAs(name, description, ThumbnailPath, true);	
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)

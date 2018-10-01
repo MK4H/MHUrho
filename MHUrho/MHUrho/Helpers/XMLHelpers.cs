@@ -215,5 +215,10 @@ namespace MHUrho.Helpers
 		{
 			return bool.Parse(element.Value);
 		}
+
+		public static XElement IntVector2ToXmlElement(XName elementName, IntVector2 value)
+		{
+			return new XElement(elementName, new XAttribute("x", value.X), new XAttribute("y", value.Y));
+		}
 	}
 }
