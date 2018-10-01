@@ -155,8 +155,10 @@ namespace MHUrho.UserInterface
 				if (MatchSelected == null) return;
 
 				DisableInput();
-				MenuUIManager.ConfirmationPopUp.RequestConfirmation("Deleting file",
-																	$"Do you really want to delete the file \"{MatchSelected}\"?").ContinueWith(DeleteFile);
+				MenuUIManager.ConfirmationPopUp
+							.RequestConfirmation("Deleting file",
+												$"Do you really want to delete the file \"{MatchSelected}\"?")
+							.ContinueWith(DeleteFile, TaskScheduler.FromCurrentSynchronizationContext());
 
 
 			}

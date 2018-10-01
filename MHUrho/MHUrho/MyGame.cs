@@ -15,6 +15,7 @@ using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
+using MHUrho.Threading;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("NUnit.Tests")]
 
@@ -108,6 +109,7 @@ namespace MHUrho
 			Graphics.WindowTitle = "MHUrho";
 			
 			mainThreadID = Thread.CurrentThread.ManagedThreadId;
+			SynchronizationContext.SetSynchronizationContext(new MHUrhoSynchronizationContext());
 
 			Log.Open(Files.LogPath);
 			Log.LogLevel = Debugger.IsAttached ? LogLevel.Debug : LogLevel.Info;

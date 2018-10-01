@@ -72,8 +72,10 @@ namespace MHUrho.UserInterface
 
 				if (MyGame.Files.FileExists(newAbsoluteFilePath)) {
 					DisableInput();
-					MenuUIManager.ConfirmationPopUp.RequestConfirmation("Overriding file",
-																		$"Do you really want to override the file \"{MatchSelected}\"?").ContinueWith(OverrideFile);
+					MenuUIManager.ConfirmationPopUp
+								.RequestConfirmation("Overriding file",
+													$"Do you really want to override the file \"{MatchSelected}\"?")
+								.ContinueWith(OverrideFile, TaskScheduler.FromCurrentSynchronizationContext());
 				}
 				else {
 					MenuUIManager.MenuController.SavePausedLevel(LineEdit.Text);

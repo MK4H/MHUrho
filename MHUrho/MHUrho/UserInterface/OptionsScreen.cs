@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MHUrho.Helpers;
 using MHUrho.StartupManagement;
@@ -214,7 +215,7 @@ namespace MHUrho.UserInterface
 								.RequestConfirmation("Save config",
 													"Do you wish to save these settings ?",
 													TimeSpan.FromSeconds(10))
-								.ContinueWith(SaveConfirmation, TaskContinuationOptions.ExecuteSynchronously);
+								.ContinueWith(SaveConfirmation, TaskScheduler.FromCurrentSynchronizationContext());
 				}
 				else {
 					SaveConfirmation(true);
@@ -228,7 +229,7 @@ namespace MHUrho.UserInterface
 					MenuUIManager.ConfirmationPopUp
 								.RequestConfirmation("Exit config",
 													"Do you wish to revert these settings to their previous state?")
-								.ContinueWith(ExitConfirmation, TaskContinuationOptions.ExecuteSynchronously);
+								.ContinueWith(ExitConfirmation, TaskScheduler.FromCurrentSynchronizationContext());
 				}
 				else {
 					ExitConfirmation(true);
