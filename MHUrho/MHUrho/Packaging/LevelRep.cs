@@ -14,12 +14,6 @@ using Urho.Urho2D;
 namespace MHUrho.Packaging
 {
     public class LevelRep : IDisposable {
-		static readonly XName DescriptionElement = PackageManager.XMLNamespace + "description";
-		static readonly XName ThumbnailElement = PackageManager.XMLNamespace + "thumbnail";
-		static readonly XName DataPathElement = PackageManager.XMLNamespace + "dataPath";
-		static readonly XName AssemblyPathElement = PackageManager.XMLNamespace + "assemblyPath";
-		static readonly XName MapSizeElement = PackageManager.XMLNamespace + "mapSize";
-
 		abstract class LevelState {
 
 			protected LevelRep Context;
@@ -63,7 +57,7 @@ namespace MHUrho.Packaging
 			protected string SavePath => Context.savePath;
 			protected string ThumbnailPath => Context.ThumbnailPath;
 
-			volatile protected ILevelManager RunningLevel;
+			protected volatile ILevelManager RunningLevel;
 
 			protected LevelState(LevelRep context)
 			{
@@ -98,15 +92,21 @@ namespace MHUrho.Packaging
 					saveFile?.Dispose();
 				}
 
-				levelsElement.Add(new XElement(GamePackXml.Level,
-												new XAttribute("name", Name),
-												new XElement(DescriptionElement, Description),
-												new XElement(ThumbnailElement, ThumbnailPath),
-												new XElement(AssemblyPathElement, LevelPluginAssemblyPath),
-												new XElement(DataPathElement, SavePath),
-												XmlHelpers.IntVector2ToXmlElement(MapSizeElement, MapSize)));
+				levelsElement.Add(new XElement(LevelsXml.Inst.Level,
+												new XAttribute(LevelXml.Inst.NameAttribute, Name),
+												new XElement(LevelXml.Inst.Description, Description),
+												new XElement(LevelXml.Inst.Thumbnail, ThumbnailPath),
+												new XElement(LevelXml.Inst.AssemblyPath, LevelPluginAssemblyPath),
+												new XElement(LevelXml.Inst.DataPath, SavePath),
+												XmlHelpers.IntVector2ToXmlElement(LevelXml.Inst.MapSize, MapSize)));
 			}
 
+			public abstract LevelState CloneWith(LevelRep newContext);
+
+			public void ClearRunningLevel()
+			{
+				RunningLevel = null;
+			}
 
 			protected void RunningLevelLoaded(Task<ILevelManager> loadingTask)
 			{
@@ -136,6 +136,11 @@ namespace MHUrho.Packaging
 			{
 				throw new InvalidOperationException("Cannot play a default level");
 			}
+
+			public override LevelState CloneWith(LevelRep newContext)
+			{
+				return new CreatedLevel(mapSize, newContext) {RunningLevel = this.RunningLevel};
+			}
 		}
 
 		class LoadedLevel : LevelState {
@@ -163,6 +168,11 @@ namespace MHUrho.Packaging
 				loader.LoadForPlaying(Context, savedLevel, players).ContinueWith(RunningLevelLoaded);
 				return loader;
 			}
+
+			public override LevelState CloneWith(LevelRep newContext)
+			{
+				return new LoadedLevel(newContext) {RunningLevel = this.RunningLevel};
+			}
 		}
 
 		public string Name { get; private set; }
@@ -185,7 +195,7 @@ namespace MHUrho.Packaging
 
 		readonly string savePath;
 
-		LevelState state;
+		readonly LevelState state;
 
 		protected LevelRep(string name,
 						string description,
@@ -231,7 +241,8 @@ namespace MHUrho.Packaging
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
 			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
-			state = other.state;
+
+			state = other.state.CloneWith(this);
 		}
 
 		protected LevelRep(GamePack gamePack, XElement levelXmlElement)
@@ -239,12 +250,12 @@ namespace MHUrho.Packaging
 			this.GamePack = gamePack;
 			//TODO: Check for errors
 			Name = XmlHelpers.GetName(levelXmlElement);
-			Description = levelXmlElement.Element(DescriptionElement).GetString();
-			ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(ThumbnailElement));			
-			LevelPluginAssemblyPath = FileManager.CorrectRelativePath(levelXmlElement.Element(AssemblyPathElement).GetString());
-			savePath = XmlHelpers.GetPath(levelXmlElement.Element(DataPathElement));
+			Description = levelXmlElement.Element(LevelXml.Inst.Description).GetString();
+			ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.Thumbnail));			
+			LevelPluginAssemblyPath = FileManager.CorrectRelativePath(levelXmlElement.Element(LevelXml.Inst.AssemblyPath).GetString());
+			savePath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.DataPath));
 
-			this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(MapSizeElement));
+			this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(LevelXml.Inst.MapSize));
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(ThumbnailPath);
 			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
@@ -274,7 +285,6 @@ namespace MHUrho.Packaging
 			this.LevelPluginAssemblyPath = storedLevel.Plugin.AssemblyPath;
 			LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
-			//TODO: Maybe singletons
 			state = new LoadedLevel(this);
 		}
 
@@ -364,11 +374,17 @@ namespace MHUrho.Packaging
 		{
 			LevelRep clone = new LevelRep(this, newName, newDescription, newThumbnailPath);
 			clone.SaveToGamePack(overrideLevel);
+			clone.state.ClearRunningLevel();
 		}
 
 		public void SaveTo(XElement levelsElement)
 		{
 			state.SaveTo(levelsElement);
+		}
+
+		public void LevelEnded()
+		{
+			state.ClearRunningLevel();
 		}
 
 		public void RemoveDataFile()

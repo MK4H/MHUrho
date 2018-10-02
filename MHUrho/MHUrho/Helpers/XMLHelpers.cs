@@ -13,20 +13,6 @@ namespace MHUrho.Helpers
 {
 	public static class XmlHelpers {
 
-		//XML ELEMENTS AND ATTRIBUTES
-		public static readonly XName IDAttributeName = "ID";
-		public static readonly XName NameAttributeName = "name";
-		public static readonly XName ModelElementName = PackageManager.XMLNamespace + "model";
-		public static readonly XName ModelPathElementName = PackageManager.XMLNamespace + "modelPath";
-		public static readonly XName ModelScaleElementName = PackageManager.XMLNamespace + "scale";
-		public static readonly XName MaterialElementName = PackageManager.XMLNamespace + "material";
-		public static readonly XName MaterialPathElementName = PackageManager.XMLNamespace + "materialPath";
-		public static readonly XName MaterialListElementName = PackageManager.XMLNamespace + "materialListPath";
-		public static readonly XName IconRectangleElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
-		public static readonly XName AssemblyPathElementName = PackageManager.XMLNamespace + "assemblyPath";
-		public static readonly XName ExtensionElementName = PackageManager.XMLNamespace + "extension";
-		public static readonly XName ManuallySpawnableElementName = PackageManager.XMLNamespace + "manuallySpawnable";
-
 		/// <summary>
 		/// Gets ful path from <paramref name="pathToPackageXmlDir"/> and path contained in the child of <paramref name="xmlElement"/> of name <paramref name="childElementName"/>
 		/// 
@@ -53,18 +39,18 @@ namespace MHUrho.Helpers
 		}
 
 		public static int GetID(XElement typeXmlElement) {
-			return GetIntAttribute(typeXmlElement, IDAttributeName);
+			return GetIntAttribute(typeXmlElement, EntityXml.Inst.IDAttribute);
 		}
 
 		public static string GetName(XElement typeXmlElement) {
-			return typeXmlElement.Attribute(NameAttributeName).Value.Trim();
+			return typeXmlElement.Attribute(EntityXml.Inst.NameAttribute).Value.Trim();
 		}
 
 		public static ModelWrapper GetModel(XElement typeXmlElement) {
-			XElement modelElement = typeXmlElement.Element(ModelElementName);
+			XElement modelElement = typeXmlElement.Element(EntityXml.Inst.Model);
 
-			XElement modelPathElement = modelElement.Element(ModelPathElementName);
-			XElement modelScaleElement = modelElement.Element(ModelScaleElementName);
+			XElement modelPathElement = modelElement.Element(ModelXml.Inst.ModelPath);
+			XElement modelScaleElement = modelElement.Element(ModelXml.Inst.Scale);
 
 			if (modelScaleElement != null) {
 				return new ModelWrapper(PackageManager.Instance.GetModel(GetPath(modelPathElement)),
@@ -75,10 +61,10 @@ namespace MHUrho.Helpers
 		}
 
 		public static MaterialWrapper GetMaterial(XElement typeXmlElement) {
-			var materialElement = typeXmlElement.Element(MaterialElementName);
+			var materialElement = typeXmlElement.Element(EntityXml.Inst.Material);
 
-			XElement materialPathElement = materialElement.Element(MaterialPathElementName);
-			XElement materialListPathElement = materialElement.Element(MaterialListElementName);
+			XElement materialPathElement = materialElement.Element(MaterialXml.Inst.MaterialPath);
+			XElement materialListPathElement = materialElement.Element(MaterialXml.Inst.MaterialListPath);
 
 			if (materialPathElement != null) {
 				return new SimpleMaterial(PackageManager.Instance.GetMaterial(GetPath(materialPathElement)));
@@ -96,19 +82,19 @@ namespace MHUrho.Helpers
 		}
 
 		public static IntRect GetIconRectangle(XElement typeXmlElement) {
-				XElement iconElement = typeXmlElement.Element(IconRectangleElementName);
+			XElement iconElement = typeXmlElement.Element(EntityWithIconXml.Inst.IconTextureRectangle);
 
 			return GetIntRect(iconElement);
 
 		}
 
 		public static XElement GetExtensionElement(XElement typeXmlElement) {
-			return typeXmlElement.Element(ExtensionElementName);
+			return typeXmlElement.Element(EntityXml.Inst.Extension);
 		}
 
 		public static bool GetManuallySpawnable(XElement typeXmlElement)
 		{
-			return GetBool(typeXmlElement.Element(ManuallySpawnableElementName));
+			return GetBool(typeXmlElement.Element(UnitTypeXml.Inst.ManuallySpawnable));
 		}
 
 		public static T LoadTypePlugin<T>(XElement typeXml, string pathToPackageXmlDir, string typeName) where T: TypePlugin {
@@ -116,7 +102,7 @@ namespace MHUrho.Helpers
 				pathToPackageXmlDir = System.IO.Path.Combine(MyGame.Files.DynamicDirPath, pathToPackageXmlDir);
 			}
 
-			XElement assemblyPathElement = typeXml.Element(AssemblyPathElementName);
+			XElement assemblyPathElement = typeXml.Element(EntityXml.Inst.AssemblyPath);
 
 			string assemblyPath = GetFullPath(assemblyPathElement, pathToPackageXmlDir);
 

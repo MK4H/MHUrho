@@ -92,6 +92,7 @@ namespace MHUrho.UserInterface
 						}
 						else if (item is LevelPickingNewLevelItem newItem) {
 							SwitchToEditingNewLevel();
+							return;
 						}
 						else {
 							throw new InvalidOperationException("Edit button was pressed when it should not have been possible to press");

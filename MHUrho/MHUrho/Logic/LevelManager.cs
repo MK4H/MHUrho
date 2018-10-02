@@ -203,6 +203,8 @@ namespace MHUrho.Logic
 			scene.Dispose();
 			LevelNode.Dispose();
 
+			LevelRep.LevelEnded();
+
 			base.Dispose();
 
 			CurrentLevel = null;

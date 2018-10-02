@@ -133,8 +133,8 @@ namespace MHUrho.Packaging {
 
 				//Validation in StartLoading should take care of any missing elements
 				levelSavingDirPath = FileManager.CorrectRelativePath(xml.Root
-																		.Element(PackageManager.XMLNamespace + "levels")
-																		.Element(PackageManager.XMLNamespace + "dataDirPath")
+																		.Element(GamePackXml.Inst.Levels)
+																		.Element(LevelsXml.Inst.DataDirPath)
 																		.Value.Trim());
 
 				loadingProgress.TextAndPercentageUpdate("Loading tile types", 5);
@@ -179,7 +179,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(name, GamePackXml.TileTypes, GamePackXml.TileType, tileTypesByName, tileTypesByID);
+				return LoadType(name, GamePackXml.Inst.TileTypes, TileTypesXml.Inst.TileType, tileTypesByName, tileTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown tile type");
@@ -192,7 +192,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(ID, GamePackXml.TileTypes, GamePackXml.TileType, tileTypesByName, tileTypesByID);
+				return LoadType(ID, GamePackXml.Inst.TileTypes, TileTypesXml.Inst.TileType, tileTypesByName, tileTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown tile type");
@@ -208,7 +208,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(name, GamePackXml.UnitTypes, GamePackXml.UnitType, unitTypesByName, unitTypesByID);
+				return LoadType(name, GamePackXml.Inst.UnitTypes, UnitTypesXml.Inst.UnitType, unitTypesByName, unitTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown unit type");
@@ -222,7 +222,7 @@ namespace MHUrho.Packaging {
 			}
 
 			if (IsLoading()) {
-				return LoadType(ID, GamePackXml.UnitTypes, GamePackXml.UnitType, unitTypesByName, unitTypesByID);
+				return LoadType(ID, GamePackXml.Inst.UnitTypes, UnitTypesXml.Inst.UnitType, unitTypesByName, unitTypesByID);
 			}
 
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown unit type");
@@ -240,8 +240,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								GamePackXml.BuildingTypes,
-								GamePackXml.BuildingType,
+								GamePackXml.Inst.BuildingTypes,
+								BuildingTypesXml.Inst.BuildingType,
 								buildingTypesByName,
 								buildingTypesByID);
 			}
@@ -257,8 +257,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(ID,
-								GamePackXml.BuildingTypes,
-								GamePackXml.BuildingType,
+								GamePackXml.Inst.BuildingTypes,
+								BuildingTypesXml.Inst.BuildingType,
 								buildingTypesByName,
 								buildingTypesByID);
 			}
@@ -277,8 +277,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								GamePackXml.ProjectileTypes,
-								GamePackXml.ProjectileType,
+								GamePackXml.Inst.ProjectileTypes,
+								ProjectileTypesXml.Inst.ProjectileType,
 								projectileTypesByName,
 								projectileTypesByID);
 			}
@@ -294,8 +294,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(ID,
-								GamePackXml.ProjectileTypes,
-								GamePackXml.ProjectileType,
+								GamePackXml.Inst.ProjectileTypes,
+								ProjectileTypesXml.Inst.ProjectileType,
 								projectileTypesByName,
 								projectileTypesByID);
 			}
@@ -314,8 +314,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								GamePackXml.ResourceTypes,
-								GamePackXml.ResourceType,
+								GamePackXml.Inst.ResourceTypes,
+								ResourceTypesXml.Inst.ResourceType,
 								resourceTypesByName,
 								resourceTypesByID);
 			}
@@ -331,8 +331,8 @@ namespace MHUrho.Packaging {
 			
 			if (IsLoading()) {
 				return LoadType(ID,
-								GamePackXml.ResourceTypes,
-								GamePackXml.ResourceType,
+								GamePackXml.Inst.ResourceTypes,
+								ResourceTypesXml.Inst.ResourceType,
 								resourceTypesByName,
 								resourceTypesByID);
 			}
@@ -352,8 +352,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(name,
-								GamePackXml.PlayerAITypes,
-								GamePackXml.PlayerAIType,
+								GamePackXml.Inst.PlayerAITypes,
+								PlayerAITypesXml.Inst.PlayerAIType,
 								playerAITypesByName,
 								playerAITypesByID);
 			}
@@ -369,8 +369,8 @@ namespace MHUrho.Packaging {
 
 			if (IsLoading()) {
 				return LoadType(ID, 
-								GamePackXml.PlayerAITypes,
-								GamePackXml.PlayerAIType,
+								GamePackXml.Inst.PlayerAITypes,
+								PlayerAITypesXml.Inst.PlayerAIType,
 								playerAITypesByName,
 								playerAITypesByID);
 			}
@@ -432,7 +432,7 @@ namespace MHUrho.Packaging {
 
 			var xmlData = StartLoading(pathToXml, schemas);
 			//Should not be null, because startLoading validates the xml
-			level.SaveTo(xmlData.Root.Element(GamePackXml.Levels));
+			level.SaveTo(xmlData.Root.Element(GamePackXml.Inst.Levels));
 			WriteData();
 			FinishLoading();
 		}
@@ -453,10 +453,10 @@ namespace MHUrho.Packaging {
 			}
 
 			//This should be correct thanks to xsd validation
-			XElement levels = xmlData.Root.Element("levels");
+			XElement levels = xmlData.Root.Element(GamePackXml.Inst.Levels);
 
-			var levelElement = levels.Elements("level")
-									.FirstOrDefault(levelElem => string.Equals(levelElem.Attribute("name").Value,
+			var levelElement = levels.Elements(LevelsXml.Inst.Level)
+									.FirstOrDefault(levelElem => string.Equals(levelElem.Attribute(LevelXml.Inst.NameAttribute).Value,
 																		level.Name,
 																		StringComparison.InvariantCultureIgnoreCase));
 
@@ -582,10 +582,9 @@ namespace MHUrho.Packaging {
 			CheckIfLoading();
 
 			TileIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"tileIconTexturePath")));
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.TileIconTexturePath)));
 
-			var tileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "tileTypes");
+			var tileTypesElement = data.Root.Element(GamePackXml.Inst.TileTypes);
 
 			// Changed xsd to require playerTypes element
 			//if (tileTypesElement == null) {
@@ -593,12 +592,12 @@ namespace MHUrho.Packaging {
 			//	throw new InvalidOperationException("Default tile type is missing");
 			//}
 
-			var defaultTileTypeElement = tileTypesElement.Element(PackageManager.XMLNamespace + "defaultTileType");
+			var defaultTileTypeElement = tileTypesElement.Element(TileTypesXml.Inst.DefaultTileType);
 
 			DefaultTileType = LoadType<TileType>(defaultTileTypeElement, tileTypesByName, tileTypesByID);
 
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return tileTypesElement.Elements(PackageManager.XMLNamespace + "tileType")
+			return tileTypesElement.Elements(TileTypesXml.Inst.TileType)
 								   .Select(element => LoadType<TileType>(element, tileTypesByName, tileTypesByID))
 								   .ToArray();
 		}
@@ -608,10 +607,9 @@ namespace MHUrho.Packaging {
 			CheckIfLoading();
 
 			UnitIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"unitIconTexturePath")));
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.UnitIconTexturePath)));
 
-			var unitTypesElement = data.Root.Element(PackageManager.XMLNamespace + "unitTypes");
+			var unitTypesElement = data.Root.Element(GamePackXml.Inst.UnitTypes);
 
 			// Changed xsd to require unitTypes element
 			//if (unitTypesElement == null) {
@@ -620,7 +618,7 @@ namespace MHUrho.Packaging {
 			//}
 
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return unitTypesElement.Elements(PackageManager.XMLNamespace + "unitType")
+			return unitTypesElement.Elements(UnitTypesXml.Inst.UnitType)
 								   .Select(unitTypeElement =>
 											   LoadType<UnitType>(unitTypeElement, unitTypesByName, unitTypesByID))
 								   .ToArray();
@@ -631,10 +629,9 @@ namespace MHUrho.Packaging {
 			CheckIfLoading();
 
 			BuildingIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"buildingIconTexturePath")));
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.BuildingIconTexturePath)));
 
-			var buildingTypesElement = data.Root.Element(PackageManager.XMLNamespace + "buildingTypes");
+			var buildingTypesElement = data.Root.Element(GamePackXml.Inst.BuildingTypes);
 
 			// Changed xsd to require buildingTypes element
 			//if (buildingTypesElement == null) {
@@ -643,7 +640,7 @@ namespace MHUrho.Packaging {
 			//}
 
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return buildingTypesElement.Elements(PackageManager.XMLNamespace + "buildingType")
+			return buildingTypesElement.Elements(BuildingTypesXml.Inst.BuildingType)
 									   .Select(buildingTypeElement =>
 												   LoadType<BuildingType>(buildingTypeElement,
 																		  buildingTypesByName,
@@ -655,7 +652,7 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			var projectileTypesElement = data.Root.Element(PackageManager.XMLNamespace + "projectileTypes");
+			var projectileTypesElement = data.Root.Element(GamePackXml.Inst.ProjectileTypes);
 
 			// Changed xsd to require playerTypes element
 			//if (projectileTypesElement == null) {
@@ -665,7 +662,7 @@ namespace MHUrho.Packaging {
 
 
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
-			return projectileTypesElement.Elements(PackageManager.XMLNamespace + "projectileType")
+			return projectileTypesElement.Elements(ProjectileTypesXml.Inst.ProjectileType)
 										 .Select(projectileTypeElement =>
 												   LoadType<ProjectileType>(projectileTypeElement,
 																			projectileTypesByName,
@@ -678,17 +675,16 @@ namespace MHUrho.Packaging {
 			CheckIfLoading();
 
 			ResourceIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"resourceIconTexturePath")));
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ResourceIconTexturePath)));
 
-			var resourceTypesElement = data.Root.Element(PackageManager.XMLNamespace + "resourceTypes");
+			var resourceTypesElement = data.Root.Element(GamePackXml.Inst.ResourceTypes);
 
 			// Changed xsd to require resourceTypes element
 			//if (resourceTypesElement == null) {
 			//	return Enumerable.Empty<ResourceType>();
 			//}
 
-			return resourceTypesElement.Elements(PackageManager.XMLNamespace + "resourceType")
+			return resourceTypesElement.Elements(ResourceTypesXml.Inst.ResourceType)
 									   .Select(resourceTypeElement =>
 												   LoadType<ResourceType>(resourceTypeElement,
 																		  resourceTypesByName,
@@ -701,17 +697,16 @@ namespace MHUrho.Packaging {
 			CheckIfLoading();
 
 			PlayerIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(PackageManager.XMLNamespace +
-																				"playerIconTexturePath")));
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.PlayerIconTexturePath)));
 
-			XElement playerTypes = data.Root.Element(PackageManager.XMLNamespace + "playerAITypes");
+			XElement playerTypes = data.Root.Element(GamePackXml.Inst.PlayerAITypes);
 
 			// Changed xsd to require playerTypes element
 			//if (playerTypes == null) {
 			//	return Enumerable.Empty<PlayerType>();
 			//}
 
-			return playerTypes.Elements(PackageManager.XMLNamespace + "playerAIType")
+			return playerTypes.Elements(PlayerAITypesXml.Inst.PlayerAIType)
 							.Select(playerTypeElement =>
 										LoadType<PlayerType>(playerTypeElement,
 															playerAITypesByName,
@@ -723,14 +718,14 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			XElement levels = data.Root.Element(PackageManager.XMLNamespace + "levels");
+			XElement levels = data.Root.Element(GamePackXml.Inst.Levels);
 
 			// Changed xsd to require levels element
 			//if (levels == null) {
 			//	return Enumerable.Empty<LevelRep>();
 			//}
 
-			return levels.Elements(PackageManager.XMLNamespace + "level")
+			return levels.Elements(LevelsXml.Inst.Level)
 						.Select(LoadLevelRep)
 						.ToArray();
 		}
@@ -776,7 +771,7 @@ namespace MHUrho.Packaging {
 			return deleted;
 		}
 
-		XElement GetXmlTypeDescription(string typeName ,XName groupName, XName itemName) {
+		XElement GetXmlTypeDescription(string typeName, XName groupName, XName itemName) {
 			//Load from file
 			var typeElements = (from element in data.Root
 													.Element(groupName)

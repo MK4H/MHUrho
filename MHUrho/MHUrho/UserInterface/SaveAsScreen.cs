@@ -122,7 +122,8 @@ namespace MHUrho.UserInterface
 					}
 				}
 
-				Level.LevelRep.SaveToGamePackAs(name, description, ThumbnailPath, true);	
+				Level.LevelRep.SaveToGamePackAs(name, description, ThumbnailPath, true);
+				MenuUIManager.SwitchBack();
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)

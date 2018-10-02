@@ -155,6 +155,8 @@ namespace MHUrho.Logic
 
 				public override async Task<ILevelManager> StartLoading()
 				{
+					Urho.IO.Log.Write(LogLevel.Debug,
+									$"Loading default level. MapSize: {mapSize}, LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}");
 					LoadingSanityCheck();
 
 					LoadingWatcher.TextUpdate("Initializing level");
@@ -250,6 +252,9 @@ namespace MHUrho.Logic
 
 				public override async Task<ILevelManager> StartLoading()
 				{
+					Urho.IO.Log.Write(LogLevel.Debug,
+									$"Loading stored level. LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}, EditorMode: {EditorMode}");
+
 					Loaders = new List<ILoader>();
 					LoadingWatcher.TextUpdate("Initializing level");
 					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
