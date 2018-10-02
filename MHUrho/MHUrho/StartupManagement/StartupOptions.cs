@@ -207,9 +207,34 @@ namespace MHUrho.StartupManagement
 
 		public Actions Action { get; private set; }
 
-		public MainMenuAction(Actions action)
+		protected MainMenuAction(Actions action)
 		{
 			this.Action = action;
+		}
+
+		public static MainMenuAction GetStartAction()
+		{
+			return new MainMenuAction(Actions.Start);
+		}
+
+		public static MainMenuAction GetLoadAction()
+		{
+			return new MainMenuAction(Actions.Load);
+		}
+
+		public static MainMenuAction GetOptionsAction()
+		{
+			return new MainMenuAction(Actions.Options);
+		}
+
+		public static MainMenuAction GetAboutAction()
+		{
+			return new MainMenuAction(Actions.About);
+		}
+
+		public static MainMenuAction GetExitAction()
+		{
+			return new MainMenuAction(Actions.Exit);
 		}
 
 		public static MainMenuAction FromXml(XElement element)
@@ -262,7 +287,7 @@ namespace MHUrho.StartupManagement
 
 		readonly string packageName;
 
-		public PackagePickScreenAction(Actions action, string packageName = null)
+		protected PackagePickScreenAction(Actions action, string packageName = null)
 		{
 			this.Action = action;
 
@@ -277,6 +302,20 @@ namespace MHUrho.StartupManagement
 			}
 
 			this.packageName = packageName;
+		}
+
+		public static PackagePickScreenAction GetPickAction(string packageName)
+		{
+			if (packageName == null) {
+				throw new ArgumentNullException(nameof(packageName), "Package name cannot be null");
+			}
+
+			return new PackagePickScreenAction(Actions.Pick, packageName);
+		}
+
+		public static PackagePickScreenAction GetBackAction()
+		{
+			return new PackagePickScreenAction(Actions.Back);
 		}
 
 		public static PackagePickScreenAction FromXml(XElement element)
@@ -330,25 +369,6 @@ namespace MHUrho.StartupManagement
 
 		public Actions Action { get; private set; }
 
-		public static LevelPickScreenAction FromXml(XElement element)
-		{
-			CheckName(Name, element);
-
-			//Element should exist and its value should be correct thanks to schema validation
-			string actionStr = element.Element(XMLNamespace + "action").Value;
-
-			Actions action = StringToAction(actionStr);
-
-			if (action == Actions.Edit || action == Actions.Play) {
-				XElement valuesElement = GetValuesElement(element);
-
-				return BuildActionWithLevelName(action, valuesElement);
-			}
-			else {
-				return new LevelPickScreenAction(action);
-			}
-		}
-
 		public string LevelName {
 			get {
 				if (Action != Actions.Edit && Action != Actions.Play) {
@@ -361,7 +381,7 @@ namespace MHUrho.StartupManagement
 
 		readonly string levelName;
 
-		public LevelPickScreenAction(Actions action, string levelName = null)
+		protected LevelPickScreenAction(Actions action, string levelName = null)
 		{
 			this.Action = action;
 
@@ -375,6 +395,47 @@ namespace MHUrho.StartupManagement
 			}
 
 			this.levelName = levelName;
+		}
+
+		public static LevelPickScreenAction GetEditNewAction()
+		{
+			return new LevelPickScreenAction(Actions.EditNew);
+		}
+
+		public static LevelPickScreenAction GetEditAction(string levelName)
+		{
+			return new LevelPickScreenAction(Actions.Edit, levelName);
+		}
+
+		public static LevelPickScreenAction GetPlayAction(string levelName)
+		{
+			return new LevelPickScreenAction(Actions.Play, levelName);
+		}
+
+		public static LevelPickScreenAction GetBackAction()
+		{
+			return new LevelPickScreenAction(Actions.Back);
+		}
+
+		public static LevelPickScreenAction FromXml(XElement element)
+		{
+			CheckName(Name, element);
+
+			//Element should exist and its value should be correct thanks to schema validation
+			string actionStr = element.Element(XMLNamespace + "action").Value;
+
+			Actions action = StringToAction(actionStr);
+
+			if (action == Actions.Edit || action == Actions.Play)
+			{
+				XElement valuesElement = GetValuesElement(element);
+
+				return BuildActionWithLevelName(action, valuesElement);
+			}
+			else
+			{
+				return new LevelPickScreenAction(action);
+			}
 		}
 
 		static LevelPickScreenAction BuildActionWithLevelName(Actions action, XElement values)
@@ -472,7 +533,7 @@ namespace MHUrho.StartupManagement
 		string pluginPath;
 		IntVector2 mapSize;
 
-		public LevelCreationScreenAction(Actions action,
+		protected LevelCreationScreenAction(Actions action,
 										string levelName = null,
 										string description = null,
 										string thumbnailPath = null,
@@ -508,6 +569,25 @@ namespace MHUrho.StartupManagement
 			this.mapSize = mapSize ?? new IntVector2();
 		}
 
+
+		public static LevelCreationScreenAction GetEditAction(string levelName,
+																string description,
+																string thumbnailPath,
+																string pluginPath,
+																IntVector2 mapSize)
+		{
+			return new LevelCreationScreenAction(Actions.Edit,
+												levelName,
+												description,
+												thumbnailPath,
+												pluginPath,
+												mapSize);
+		}
+
+		public static LevelCreationScreenAction GetBackAction()
+		{
+			return new LevelCreationScreenAction(Actions.Back);
+		}
 
 		public static LevelCreationScreenAction FromXml(XElement element)
 		{
