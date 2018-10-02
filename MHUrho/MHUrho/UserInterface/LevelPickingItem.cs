@@ -53,13 +53,13 @@ namespace MHUrho.UserInterface
 		public virtual void Select()
 		{
 			//If checked changed, automatically calls CheckBoxToggled
-			checkBox.Selected = true;
+			checkBox.Checked = true;
 		}
 
 		public virtual void Deselect()
 		{
 			//If checked changed, automatically calls CheckBoxToggled
-			checkBox.Selected = false;
+			checkBox.Checked = false;
 		}
 
 		protected virtual void OnSelected()

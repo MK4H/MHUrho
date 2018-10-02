@@ -39,35 +39,26 @@ namespace MHUrho.UserInterface
 			protected ListView FileView;
 			protected Button BackButton;
 
-			protected List<NameTextPair> FileNames;
+			protected List<NameTextPair> Filenames;
 
 			protected string MatchSelected;
+			protected string Filename;
+
 
 			protected FilePickScreenBase(FilePickScreen proxy)
 				:base(proxy)
 			{
+				Filenames = new List<NameTextPair>();
+			}
 
-
-				FileNames = new List<NameTextPair>();
-
+			protected void LoadFileNames(string absolutePath)
+			{
 				foreach (var file in MyGame.Files.GetFSEntriesInDirectory(MyGame.Files.SaveGameDirAbsolutePath, true, false))
 				{
-					FileNames.Add(new NameTextPair(Path.GetFileName(file)));
+					Filenames.Add(new NameTextPair(Path.GetFileName(file)));
 				}
 
-				FileNames.Sort();
-				foreach (var nameText in FileNames)
-				{
-					FileView.AddItem(nameText.Text);
-					nameText.Text.Visible = true;
-				}
-
-				MatchSelected = null;
-				TotalMatchDeselected();
-
-				LineEdit.Text = "";
-
-				Window.Visible = true;
+				Filenames.Sort();
 			}
 
 			protected void InitUIElements(Window window,
@@ -81,6 +72,19 @@ namespace MHUrho.UserInterface
 				this.DeleteButton = deleteButton;
 				this.FileView = fileView;
 				this.BackButton = backButton;
+				this.Filename = "";
+
+				foreach (var nameText in Filenames)
+				{
+					FileView.AddItem(nameText.Text);
+					nameText.Text.Visible = true;
+				}
+
+				MatchSelected = null;
+
+				LineEdit.Text = "";
+
+				Window.Visible = true;
 
 				LineEdit.TextChanged += NameEditTextChanged;
 				DeleteButton.Pressed += DeleteButton_Pressed;
@@ -96,14 +100,14 @@ namespace MHUrho.UserInterface
 				BackButton.Pressed -= BackButton_Pressed;
 
 				Window.Visible = false;
-				if (FileNames != null)
+				if (Filenames != null)
 				{
-					foreach (var item in FileNames)
+					foreach (var item in Filenames)
 					{
 						item.Text.Remove();
 						item.Text.Dispose();
 					}
-					FileNames = null;
+					Filenames = null;
 				}
 
 				MatchSelected = null;
@@ -113,12 +117,11 @@ namespace MHUrho.UserInterface
 				Window.RemoveAllChildren();
 				Window.Remove();
 
-				Game?.Dispose();
-				Window?.Dispose();
-				LineEdit?.Dispose();
-				DeleteButton?.Dispose();
-				FileView?.Dispose();
-				BackButton?.Dispose();
+				Window.Dispose();
+				LineEdit.Dispose();
+				DeleteButton.Dispose();
+				FileView.Dispose();
+				BackButton.Dispose();
 			}
 
 
@@ -140,14 +143,62 @@ namespace MHUrho.UserInterface
 
 			protected virtual void TotalMatchSelected(string newMatchSelected)
 			{
-				DeleteButton.SetStyle("DeleteButton");
+				DeleteButton.Enabled = true;
 				MatchSelected = newMatchSelected;
 			}
 
 			protected virtual void TotalMatchDeselected()
 			{
-				DeleteButton.SetStyle("DisabledButton");
+				DeleteButton.Enabled = false;
 				MatchSelected = null;
+			}
+
+			/// <summary>
+			/// Checks the new filename provided by the user and if it is valid, sets it as the new <see cref="Filename"/>
+			///
+			/// Also displays the files that match the current filename and if only one file matches, invokes the <see cref="TotalMatchSelected(string)"/>
+			/// If previously <see cref="MatchSelected"/> was not null, and now there is not just one match, invokes <see cref="TotalMatchDeselected"/>
+			/// </summary>
+			/// <param name="args"></param>
+			protected virtual void NameEditTextChanged(TextChangedEventArgs args)
+			{
+				string newText = args.Text;
+				string newMatchSelected = null;
+
+
+				if (!IsValidFilename(newText)) {
+					//If the new filename is invalid, leave the last valid filename
+					// the displayed files match the last valid filename already, so no need to check them again
+					((LineEdit) args.Element).Text = Filename;
+				}
+				else {
+					Filename = newText;
+					//Display the files matching the new filename
+					foreach (var nameText in Filenames)
+					{
+						bool visible = nameText.Name.StartsWith(Filename, StringComparison.CurrentCultureIgnoreCase);
+						nameText.Text.Visible = visible;
+
+						if (visible && Filename.Equals(nameText.Name, StringComparison.CurrentCultureIgnoreCase))
+						{
+							newMatchSelected = Filename;
+						}
+					}
+				}
+
+				if (MatchSelected == null && newMatchSelected != null)
+				{
+					TotalMatchSelected(newMatchSelected);
+				}
+				else if (MatchSelected != null && newMatchSelected == null)
+				{
+					TotalMatchDeselected();
+				}
+			}
+
+			protected bool IsValidFilename(string filename)
+			{
+				return filename.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
 			}
 
 			void DeleteButton_Pressed(PressedEventArgs args)
@@ -166,14 +217,16 @@ namespace MHUrho.UserInterface
 			void DeleteFile(Task<bool> confirmed)
 			{
 				EnableInput();
-				if (!confirmed.Result) return;
+				if (!confirmed.Result) {
+					return;
+				}
 
 				MyGame.Files.DeleteDynamicFile(Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected));
-				int index = FileNames.FindIndex((pair) => pair.Name.Equals(MatchSelected, StringComparison.CurrentCultureIgnoreCase));
+				int index = Filenames.FindIndex((pair) => pair.Name.Equals(MatchSelected, StringComparison.CurrentCultureIgnoreCase));
 
-				FileView.RemoveItem(FileNames[index].Text);
-				FileNames[index].Text.Dispose();
-				FileNames.RemoveAt(index);
+				FileView.RemoveItem(Filenames[index].Text);
+				Filenames[index].Text.Dispose();
+				Filenames.RemoveAt(index);
 
 				MatchSelected = null;
 				TotalMatchDeselected();
@@ -185,32 +238,7 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchBack();
 			}
 
-			void NameEditTextChanged(TextChangedEventArgs args)
-			{
-				string newText = args.Text;
-				string newMatchSelected = null;
-
-				foreach (var nameText in FileNames)
-				{
-					bool visible = nameText.Name.StartsWith(newText, StringComparison.CurrentCultureIgnoreCase);
-					nameText.Text.Visible = visible;
-
-					if (visible && newText.Equals(nameText.Name, StringComparison.CurrentCultureIgnoreCase))
-					{
-						newMatchSelected = newText;
-					}
-
-				}
-
-				if (MatchSelected == null && newMatchSelected != null)
-				{
-					TotalMatchSelected(newMatchSelected);
-				}
-				else if (MatchSelected != null && newMatchSelected == null)
-				{
-					TotalMatchDeselected();
-				}
-			}
+			
 
 			void OnFileSelected(ItemSelectedEventArgs args)
 			{

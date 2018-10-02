@@ -48,6 +48,9 @@ namespace MHUrho.UserInterface
 				playButton.Released += PlayButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
 
+				playButton.Enabled = false;
+				editButton.Enabled = false;
+
 				GetLevels(listView);
 			}
 
@@ -120,21 +123,25 @@ namespace MHUrho.UserInterface
 
 			void ItemSelected(LevelPickingItem selectedItem)
 			{
+				listView.Selection = listView.FindItem(selectedItem.Element);
+
 				foreach (var item in items) {
 					if (selectedItem != item) {
 						item.Deselect();
 					}
 				}
 
-				listView.Selection = listView.FindItem(selectedItem.Element);
+				playButton.Enabled = selectedItem is LevelPickingLevelItem;
+				editButton.Enabled = true;
+			}
 
-				if (selectedItem is LevelPickingNewLevelItem) {
-					playButton.SetStyle("DisabledButton");
+			void ItemDeselected(LevelPickingItem deselectedItem)
+			{
+				if (listView.SelectedItem == deselectedItem.Element) {
 					playButton.Enabled = false;
-				}
-				else {
-					playButton.SetStyleAuto();
-					playButton.Enabled = true;
+					editButton.Enabled = false;
+
+					listView.ClearSelection();
 				}
 			}
 
@@ -142,6 +149,7 @@ namespace MHUrho.UserInterface
 			{
 				items.Add(newItem);
 				newItem.Selected += ItemSelected;
+				newItem.Deselected += ItemDeselected;
 				listView.AddItem(newItem.Element);
 			}
 

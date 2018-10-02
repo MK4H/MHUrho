@@ -17,6 +17,7 @@ namespace MHUrho.UserInterface
 
 			Window window;
 			ListView listView;
+			Button selectButton;
 
 			List<PackageListItem> items;
 
@@ -32,7 +33,11 @@ namespace MHUrho.UserInterface
 
 				listView = (ListView)window.GetChild("ListView");
 
-				((Button)window.GetChild("SelectButton", true)).Released += SelectButtonReleased;
+				selectButton = (Button) window.GetChild("SelectButton", true);
+				selectButton.Released += SelectButtonReleased;
+				selectButton.Enabled = false;
+
+
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
 
 				foreach (var pack in PackageManager.Instance.AvailablePacks) {
@@ -40,11 +45,13 @@ namespace MHUrho.UserInterface
 					items.Add(newItem);
 					newItem.AddTo(listView);
 					newItem.Selected += ItemSelected;
+					newItem.Deselected += ItemDeselected;
 				}
 
 				window.Visible = true;
 			}
 
+		
 			public override void Dispose()
 			{
 
@@ -77,6 +84,8 @@ namespace MHUrho.UserInterface
 
 			void ItemSelected(PackageListItem args)
 			{
+				listView.Selection = listView.FindItem(args.Element);
+
 				foreach (var item in items) {
 					if (args != item) {
 						item.Deselect();
@@ -84,7 +93,15 @@ namespace MHUrho.UserInterface
 				}
 
 				args.Select();
-				listView.Selection = listView.FindItem(args.Element);
+				selectButton.Enabled = true;
+			}
+
+			void ItemDeselected(PackageListItem item)
+			{
+				if (item.Element == listView.SelectedItem) {
+					selectButton.Enabled = false;
+					listView.ClearSelection();
+				}
 			}
 
 

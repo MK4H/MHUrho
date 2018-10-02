@@ -13,11 +13,13 @@ namespace MHUrho.UserInterface
 	{
 		class Screen : FilePickScreenBase {
 
-			Button loadButton;
+			readonly Button loadButton;
 
 			public Screen(LoadGameScreen proxy) 
 				:base(proxy)
 			{
+				LoadFileNames(MyGame.Files.SaveGameDirAbsolutePath);
+
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadLayout.xml");
 
 				Window window = (Window)MenuUIManager.MenuRoot.GetChild("LoadWindow");
@@ -26,12 +28,12 @@ namespace MHUrho.UserInterface
 
 				loadButton = (Button)window.GetChild("LoadButton", true);
 				loadButton.Pressed += LoadButton_Pressed;
+				loadButton.Enabled = false;
 
 				Button deleteButton = (Button)window.GetChild("DeleteButton", true);
-
+				deleteButton.Enabled = false;
 
 				ListView fileView = (ListView)window.GetChild("FileView", true);
-
 
 				Button backButton = (Button)window.GetChild("BackButton", true);
 
@@ -63,14 +65,14 @@ namespace MHUrho.UserInterface
 			{
 				base.TotalMatchSelected(newMatchSelected);
 
-				loadButton.SetStyle("LoadButton");
+				loadButton.Enabled = true;
 			}
 
 			protected override void TotalMatchDeselected()
 			{
 				base.TotalMatchDeselected();
 
-				loadButton.SetStyle("DisabledButton");
+				loadButton.Enabled = false;
 			}
 
 			void LoadButton_Pressed(PressedEventArgs args)

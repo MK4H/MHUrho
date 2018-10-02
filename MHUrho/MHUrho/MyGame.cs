@@ -144,6 +144,12 @@ namespace MHUrho
 			StartupOptions.UIActions?.RunActions(this);
 		}
 
+		//public void Dispose()
+		//{
+		//	Urho.IO.Log.Write(LogLevel.Debug, "Game disposed.");
+		//	base.Dispose();
+		//}
+
 		void SetConfigOptions()
 		{
 			int monitor = Graphics.CurrentMonitor;

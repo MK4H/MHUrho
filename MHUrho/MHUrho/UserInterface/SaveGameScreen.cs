@@ -12,11 +12,13 @@ namespace MHUrho.UserInterface
 	{
 		class Screen : FilePickScreenBase {
 
-			Button saveButton;
+			readonly Button saveButton;
 
 			public Screen(SaveGameScreen proxy)
 				: base(proxy)
 			{
+				LoadFileNames(MyGame.Files.SaveGameDirAbsolutePath);
+
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/SaveLayout.xml");
 
 				Window window = (Window)MenuUIManager.MenuRoot.GetChild("SaveWindow");
@@ -25,9 +27,10 @@ namespace MHUrho.UserInterface
 
 				saveButton = (Button)window.GetChild("SaveButton", true);
 				saveButton.Pressed += SaveButton_Pressed;
+				saveButton.Enabled = false;
 
 				Button deleteButton = (Button)window.GetChild("DeleteButton", true);
-
+				deleteButton.Enabled = false;
 
 				ListView fileView = (ListView)window.GetChild("FileView", true);
 
@@ -62,6 +65,13 @@ namespace MHUrho.UserInterface
 				saveButton.Enabled = false;
 			}
 
+			protected override void NameEditTextChanged(TextChangedEventArgs args)
+			{
+				base.NameEditTextChanged(args);
+
+				saveButton.Enabled = (Filename != "");
+			}
+
 			void SaveButton_Pressed(PressedEventArgs args)
 			{
 				//TODO: Pop up invalid name
@@ -82,6 +92,8 @@ namespace MHUrho.UserInterface
 					MenuUIManager.SwitchBack();
 				}
 			}
+
+
 
 
 			void OverrideFile(Task<bool> confirmed)
