@@ -41,7 +41,7 @@ namespace MHUrho.Logic
 				this.storedBuilding = storedBuilding;
 				componentLoaders = new List<DefaultComponentLoader>();
 
-				var type = PackageManager.Instance.ActivePackage.GetBuildingType(storedBuilding.TypeID);
+				type = PackageManager.Instance.ActivePackage.GetBuildingType(storedBuilding.TypeID);
 				if (type == null) {
 					throw new ArgumentException("Type of this building was not loaded");
 				}
