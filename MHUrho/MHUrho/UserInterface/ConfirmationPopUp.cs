@@ -79,6 +79,9 @@ namespace MHUrho.UserInterface
 
 			public void Dispose()
 			{
+				confirmButton.Released -= Button_Released;
+				cancelButton.Released -= Button_Released;
+
 				timeoutCancel?.Dispose();
 				confirmButton.Dispose();
 				cancelButton.Dispose();

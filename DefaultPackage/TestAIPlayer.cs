@@ -175,7 +175,8 @@ namespace DefaultPackage
 
 		public override void OnUnitKilled(IUnit unit) {
 			if (unit.UnitType != type.Chicken) {
-				throw new InvalidOperationException("Wrong type of unit signaled");
+				//Do nothing
+				return;
 			}
 
 			chickens.RemoveAll((chicken) => chicken.Chicken == unit.UnitPlugin);

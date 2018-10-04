@@ -12,23 +12,42 @@ namespace MHUrho.UserInterface
 	{
 		class Screen :  ScreenBase {
 
-			class PlayerItem : DropDownList {
+			class PlayerItem : UIElement {
 
-				public PlayerType ChosenType => SelectedItem != null ? elementToTypeMap[SelectedItem] : null; 
+				public PlayerType ChosenType => playerTypeList.SelectedItem != null ? elementToTypeMap[playerTypeList.SelectedItem] : null;
+
+				public int ChosenTeam => teamList.SelectedItem == null ? elementToTeamMap[teamList.SelectedItem] : 0;
 
 				readonly Dictionary<UIElement, PlayerType> elementToTypeMap;
+				readonly Dictionary<UIElement, int> elementToTeamMap;
+
+				readonly DropDownList playerTypeList;
+				readonly DropDownList teamList;
 
 				protected PlayerItem(Screen screen, PlayerTypeCategory playerTypeCategory)
 				{
 					elementToTypeMap = new Dictionary<UIElement, PlayerType>();
+					elementToTeamMap = new Dictionary<UIElement, int>();
+
+					var child =
+						screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerItemLayout.xml"));
+
+					AddChild(child);
+
+					playerTypeList = (DropDownList) child.GetChild("PlayerTypeList", true);
+					teamList = (DropDownList) child.GetChild("TeamList", true);
 
 					foreach (var player in screen.Level.GamePack.GetPlayersWithTypeCategory(playerTypeCategory)) {
-						var item = InitializeItem(player, screen.Game, screen.MenuUIManager);
-						this.AddItem(item);
+						var item = InitTypeItem(player, screen.Game, screen.MenuUIManager);
+						playerTypeList.AddItem(item);
 						elementToTypeMap.Add(item, player);
 					}
 
-					PlaceholderText = "Empty player slot";
+					for (int teamID = 1; teamID <= screen.Level.MaxNumberOfPlayers; teamID++) {
+						UIElement item = InitTeamItem(teamID, screen.Game, screen.MenuUIManager);
+						teamList.AddItem(item);
+						elementToTeamMap.Add(item, teamID);
+					}
 				}
 
 				public static PlayerItem CreateAndAddToList(ListView list,
@@ -41,9 +60,10 @@ namespace MHUrho.UserInterface
 					return newItem;
 				}
 
-				static UIElement InitializeItem(PlayerType player, MyGame game, MenuUIManager menuUIManager)
+
+				static UIElement InitTypeItem(PlayerType player, MyGame game, MenuUIManager menuUIManager)
 				{
-					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerListViewItemLayout.xml"),
+					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerTypeItemLayout.xml"),
 														menuUIManager.MenuRoot.GetDefaultStyle());
 
 					BorderImage playerIcon = (BorderImage)newElement.GetChild("PlayerIcon");
@@ -59,6 +79,17 @@ namespace MHUrho.UserInterface
 
 					return newElement;
 				}
+
+				static UIElement InitTeamItem(int teamID, MyGame game, MenuUIManager menuUIManager)
+				{
+					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/TeamListItemLayout.xml"),
+														menuUIManager.MenuRoot.GetDefaultStyle());
+
+					Text textElement = (Text)newElement.GetChild("TeamIDText");
+					textElement.Value = teamID.ToString();
+
+					return newElement;
+				}
 			}
 
 			readonly LevelSettingsScreen proxy;
@@ -67,7 +98,8 @@ namespace MHUrho.UserInterface
 
 			readonly Window window;
 			readonly Window customSettingsWindow;
-			readonly ScrollView descriptionView;
+			readonly ScrollView descriptionScrollView;
+			readonly Text descriptionText;
 			readonly BorderImage mapImage;
 			readonly ListView playerList;
 
@@ -81,11 +113,19 @@ namespace MHUrho.UserInterface
 
 				window = (Window)MenuUIManager.MenuRoot.GetChild("LevelSettingsWindow");
 
-				customSettingsWindow = (Window)window.GetChild("CustomSettings");
+				customSettingsWindow = (Window)window.GetChild("CustomSettings", true);
 
-				descriptionView = (ScrollView)window.GetChild("DescriptionScrollView");
+				UIElement descriptionTextElement = Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/DescriptionTextLayout.xml"),
+																	MenuUIManager.MenuRoot.GetDefaultStyle());
+				descriptionText = (Text) descriptionTextElement.GetChild("DescriptionText");
+				descriptionText.Value = Level.Description;
+				descriptionScrollView = (ScrollView) window.GetChild("DescriptionScrollView", true);
+
+				descriptionScrollView.ContentElement = descriptionTextElement;
 
 				mapImage = (BorderImage)window.GetChild("MapImage");
+				mapImage.Texture = Level.Thumbnail;
+				mapImage.ImageRect = new Urho.IntRect(0, 0, Level.Thumbnail.Width, Level.Thumbnail.Height);
 
 				playerList = (ListView)window.GetChild("PlayerListView");
 
@@ -104,11 +144,13 @@ namespace MHUrho.UserInterface
 			{
 				//TODO: Sanity checks
 				PlayerSpecification players = new PlayerSpecification();
-				players.SetNeutralPlayer(((PlayerItem) playerList.GetItem(0)).ChosenType);
-				players.SetPlayerWithInput(((PlayerItem)playerList.GetItem(1)).ChosenType);
+				PlayerItem item = ((PlayerItem) playerList.GetItem(0));
+				players.SetNeutralPlayer(item.ChosenType);
+				item = ((PlayerItem) playerList.GetItem(1));
+				players.SetPlayerWithInput(item.ChosenType, item.ChosenTeam);
 				for (uint i = 2; i < playerList.NumItems; i++) {
-					var item = (PlayerItem)playerList.GetItem(i);
-					players.AddAIPlayer(item.ChosenType);
+					item = (PlayerItem)playerList.GetItem(i);
+					players.AddAIPlayer(item.ChosenType, item.ChosenTeam);
 				}
 				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players);
 			}
@@ -130,7 +172,8 @@ namespace MHUrho.UserInterface
 
 				window.Dispose();
 				customSettingsWindow.Dispose();
-				descriptionView.Dispose();
+				descriptionScrollView.Dispose();
+				descriptionText.Dispose();
 				mapImage.Dispose();
 				playerList.Dispose();				
 			}

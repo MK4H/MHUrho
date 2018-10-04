@@ -58,17 +58,17 @@ namespace MHUrho.Storage {
             "cG9uZW50cxgHIAMoCzIiLk1IVXJoby5TdG9yYWdlLlN0RGVmYXVsdENvbXBv",
             "bmVudCJqCglTdFBsYXllcnMSGQoRcGxheWVyV2l0aElucHV0SUQYASABKAUS",
             "FwoPbmV1dHJhbFBsYXllcklEGAIgASgFEikKB3BsYXllcnMYAyADKAsyGC5N",
-            "SFVyaG8uU3RvcmFnZS5TdFBsYXllciKpAQoIU3RQbGF5ZXISCgoCaWQYASAB",
-            "KAUSDgoGdHlwZUlEGAIgASgFEhIKCmluc2lnbmlhSUQYAyABKAUSDwoHdW5p",
-            "dElEcxgEIAMoBRITCgtidWlsZGluZ0lEcxgFIAMoBRIXCg9mcmllbmRQbGF5",
-            "ZXJJRHMYBiADKAUSLgoKdXNlclBsdWdpbhgHIAEoCzIaLk1IVXJoby5TdG9y",
-            "YWdlLlBsdWdpbkRhdGEiwwEKBVN0TWFwEioKBHNpemUYASABKAsyHC5NSFVy",
-            "aG8uU3RvcmFnZS5TdEludFZlY3RvcjISJQoFdGlsZXMYAiADKAsyFi5NSFVy",
-            "aG8uU3RvcmFnZS5TdFRpbGUSMQoLYm9yZGVyVGlsZXMYAyADKAsyHC5NSFVy",
-            "aG8uU3RvcmFnZS5TdEJvcmRlclRpbGUSNAoPbWFwUmFuZ2VUYXJnZXRzGAQg",
-            "AygLMhsuTUhVcmhvLlN0b3JhZ2UuU3RNYXBUYXJnZXQiTwoNU3RMZXZlbFBs",
-            "dWdpbhIUCgxhc3NlbWJseVBhdGgYASABKAkSKAoEZGF0YRgCIAEoCzIaLk1I",
-            "VXJoby5TdG9yYWdlLlBsdWdpbkRhdGFiBnByb3RvMw=="));
+            "SFVyaG8uU3RvcmFnZS5TdFBsYXllciKgAQoIU3RQbGF5ZXISCgoCaWQYASAB",
+            "KAUSDgoGdGVhbUlEGAIgASgFEg4KBnR5cGVJRBgDIAEoBRISCgppbnNpZ25p",
+            "YUlEGAQgASgFEg8KB3VuaXRJRHMYBSADKAUSEwoLYnVpbGRpbmdJRHMYBiAD",
+            "KAUSLgoKdXNlclBsdWdpbhgHIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBsdWdp",
+            "bkRhdGEiwwEKBVN0TWFwEioKBHNpemUYASABKAsyHC5NSFVyaG8uU3RvcmFn",
+            "ZS5TdEludFZlY3RvcjISJQoFdGlsZXMYAiADKAsyFi5NSFVyaG8uU3RvcmFn",
+            "ZS5TdFRpbGUSMQoLYm9yZGVyVGlsZXMYAyADKAsyHC5NSFVyaG8uU3RvcmFn",
+            "ZS5TdEJvcmRlclRpbGUSNAoPbWFwUmFuZ2VUYXJnZXRzGAQgAygLMhsuTUhV",
+            "cmhvLlN0b3JhZ2UuU3RNYXBUYXJnZXQiTwoNU3RMZXZlbFBsdWdpbhIUCgxh",
+            "c3NlbWJseVBhdGgYASABKAkSKAoEZGF0YRgCIAEoCzIaLk1IVXJoby5TdG9y",
+            "YWdlLlBsdWdpbkRhdGFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -80,7 +80,7 @@ namespace MHUrho.Storage {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StProjectile), global::MHUrho.Storage.StProjectile.Parser, new[]{ "Id", "TypeID", "Position", "PlayerID", "UserPlugin", "DefaultComponents" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StBuilding), global::MHUrho.Storage.StBuilding.Parser, new[]{ "Id", "TypeID", "Location", "PlayerID", "UserPlugin", "DefaultComponents" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayers), global::MHUrho.Storage.StPlayers.Parser, new[]{ "PlayerWithInputID", "NeutralPlayerID", "Players" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "Id", "TypeID", "InsigniaID", "UnitIDs", "BuildingIDs", "FriendPlayerIDs", "UserPlugin" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "Id", "TeamID", "TypeID", "InsigniaID", "UnitIDs", "BuildingIDs", "UserPlugin" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles", "MapRangeTargets" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevelPlugin), global::MHUrho.Storage.StLevelPlugin.Parser, new[]{ "AssemblyPath", "Data" }, null, null, null)
           }));
@@ -2080,11 +2080,11 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StPlayer(StPlayer other) : this() {
       id_ = other.id_;
+      teamID_ = other.teamID_;
       typeID_ = other.typeID_;
       insigniaID_ = other.insigniaID_;
       unitIDs_ = other.unitIDs_.Clone();
       buildingIDs_ = other.buildingIDs_.Clone();
-      friendPlayerIDs_ = other.friendPlayerIDs_.Clone();
       UserPlugin = other.userPlugin_ != null ? other.UserPlugin.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -2105,8 +2105,19 @@ namespace MHUrho.Storage {
       }
     }
 
+    /// <summary>Field number for the "teamID" field.</summary>
+    public const int TeamIDFieldNumber = 2;
+    private int teamID_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int TeamID {
+      get { return teamID_; }
+      set {
+        teamID_ = value;
+      }
+    }
+
     /// <summary>Field number for the "typeID" field.</summary>
-    public const int TypeIDFieldNumber = 2;
+    public const int TypeIDFieldNumber = 3;
     private int typeID_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int TypeID {
@@ -2117,7 +2128,7 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "insigniaID" field.</summary>
-    public const int InsigniaIDFieldNumber = 3;
+    public const int InsigniaIDFieldNumber = 4;
     private int insigniaID_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int InsigniaID {
@@ -2128,9 +2139,9 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "unitIDs" field.</summary>
-    public const int UnitIDsFieldNumber = 4;
+    public const int UnitIDsFieldNumber = 5;
     private static readonly pb::FieldCodec<int> _repeated_unitIDs_codec
-        = pb::FieldCodec.ForInt32(34);
+        = pb::FieldCodec.ForInt32(42);
     private readonly pbc::RepeatedField<int> unitIDs_ = new pbc::RepeatedField<int>();
     /// <summary>
     ///TODO: Redundant references both ways, could just store it in building/unit and connect it from there
@@ -2141,23 +2152,13 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "buildingIDs" field.</summary>
-    public const int BuildingIDsFieldNumber = 5;
+    public const int BuildingIDsFieldNumber = 6;
     private static readonly pb::FieldCodec<int> _repeated_buildingIDs_codec
-        = pb::FieldCodec.ForInt32(42);
+        = pb::FieldCodec.ForInt32(50);
     private readonly pbc::RepeatedField<int> buildingIDs_ = new pbc::RepeatedField<int>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<int> BuildingIDs {
       get { return buildingIDs_; }
-    }
-
-    /// <summary>Field number for the "friendPlayerIDs" field.</summary>
-    public const int FriendPlayerIDsFieldNumber = 6;
-    private static readonly pb::FieldCodec<int> _repeated_friendPlayerIDs_codec
-        = pb::FieldCodec.ForInt32(50);
-    private readonly pbc::RepeatedField<int> friendPlayerIDs_ = new pbc::RepeatedField<int>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<int> FriendPlayerIDs {
-      get { return friendPlayerIDs_; }
     }
 
     /// <summary>Field number for the "userPlugin" field.</summary>
@@ -2185,11 +2186,11 @@ namespace MHUrho.Storage {
         return true;
       }
       if (Id != other.Id) return false;
+      if (TeamID != other.TeamID) return false;
       if (TypeID != other.TypeID) return false;
       if (InsigniaID != other.InsigniaID) return false;
       if(!unitIDs_.Equals(other.unitIDs_)) return false;
       if(!buildingIDs_.Equals(other.buildingIDs_)) return false;
-      if(!friendPlayerIDs_.Equals(other.friendPlayerIDs_)) return false;
       if (!object.Equals(UserPlugin, other.UserPlugin)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -2198,11 +2199,11 @@ namespace MHUrho.Storage {
     public override int GetHashCode() {
       int hash = 1;
       if (Id != 0) hash ^= Id.GetHashCode();
+      if (TeamID != 0) hash ^= TeamID.GetHashCode();
       if (TypeID != 0) hash ^= TypeID.GetHashCode();
       if (InsigniaID != 0) hash ^= InsigniaID.GetHashCode();
       hash ^= unitIDs_.GetHashCode();
       hash ^= buildingIDs_.GetHashCode();
-      hash ^= friendPlayerIDs_.GetHashCode();
       if (userPlugin_ != null) hash ^= UserPlugin.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -2221,17 +2222,20 @@ namespace MHUrho.Storage {
         output.WriteRawTag(8);
         output.WriteInt32(Id);
       }
-      if (TypeID != 0) {
+      if (TeamID != 0) {
         output.WriteRawTag(16);
+        output.WriteInt32(TeamID);
+      }
+      if (TypeID != 0) {
+        output.WriteRawTag(24);
         output.WriteInt32(TypeID);
       }
       if (InsigniaID != 0) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(32);
         output.WriteInt32(InsigniaID);
       }
       unitIDs_.WriteTo(output, _repeated_unitIDs_codec);
       buildingIDs_.WriteTo(output, _repeated_buildingIDs_codec);
-      friendPlayerIDs_.WriteTo(output, _repeated_friendPlayerIDs_codec);
       if (userPlugin_ != null) {
         output.WriteRawTag(58);
         output.WriteMessage(UserPlugin);
@@ -2247,6 +2251,9 @@ namespace MHUrho.Storage {
       if (Id != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
       }
+      if (TeamID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TeamID);
+      }
       if (TypeID != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeID);
       }
@@ -2255,7 +2262,6 @@ namespace MHUrho.Storage {
       }
       size += unitIDs_.CalculateSize(_repeated_unitIDs_codec);
       size += buildingIDs_.CalculateSize(_repeated_buildingIDs_codec);
-      size += friendPlayerIDs_.CalculateSize(_repeated_friendPlayerIDs_codec);
       if (userPlugin_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserPlugin);
       }
@@ -2273,6 +2279,9 @@ namespace MHUrho.Storage {
       if (other.Id != 0) {
         Id = other.Id;
       }
+      if (other.TeamID != 0) {
+        TeamID = other.TeamID;
+      }
       if (other.TypeID != 0) {
         TypeID = other.TypeID;
       }
@@ -2281,7 +2290,6 @@ namespace MHUrho.Storage {
       }
       unitIDs_.Add(other.unitIDs_);
       buildingIDs_.Add(other.buildingIDs_);
-      friendPlayerIDs_.Add(other.friendPlayerIDs_);
       if (other.userPlugin_ != null) {
         if (userPlugin_ == null) {
           userPlugin_ = new global::MHUrho.Storage.PluginData();
@@ -2304,26 +2312,25 @@ namespace MHUrho.Storage {
             break;
           }
           case 16: {
-            TypeID = input.ReadInt32();
+            TeamID = input.ReadInt32();
             break;
           }
           case 24: {
-            InsigniaID = input.ReadInt32();
+            TypeID = input.ReadInt32();
             break;
           }
-          case 34:
           case 32: {
-            unitIDs_.AddEntriesFrom(input, _repeated_unitIDs_codec);
+            InsigniaID = input.ReadInt32();
             break;
           }
           case 42:
           case 40: {
-            buildingIDs_.AddEntriesFrom(input, _repeated_buildingIDs_codec);
+            unitIDs_.AddEntriesFrom(input, _repeated_unitIDs_codec);
             break;
           }
           case 50:
           case 48: {
-            friendPlayerIDs_.AddEntriesFrom(input, _repeated_friendPlayerIDs_codec);
+            buildingIDs_.AddEntriesFrom(input, _repeated_buildingIDs_codec);
             break;
           }
           case 58: {

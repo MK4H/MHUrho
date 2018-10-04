@@ -10,6 +10,7 @@ using MHUrho.Storage;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
+using Google.Protobuf;
 
 namespace MHUrho.Logic
 {
@@ -439,7 +440,7 @@ namespace MHUrho.Logic
 						var newPlayerInfo = players.GetEnumerator();
 						for (; storedPlayer.MoveNext() && newPlayerInfo.MoveNext();) {
 							IPlayerLoader newPlayer =
-								Player.GetLoaderFillType(Level, storedPlayer.Current, newPlayerInfo.Current.PlayerType, false);
+								Player.GetLoaderFillType(Level, storedPlayer.Current, newPlayerInfo.Current, false);
 							LoadPlayer(newPlayer);
 
 							if (newPlayerInfo.Current.HasInput && newPlayerInfo.Current.IsNeutral)

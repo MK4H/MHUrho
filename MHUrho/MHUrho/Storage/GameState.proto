@@ -73,12 +73,12 @@ message StPlayers {
 
 message StPlayer {
 	int32 id = 1;
-	int32 typeID = 2;
-	int32 insigniaID = 3;
+	int32 teamID = 2;
+	int32 typeID = 3;
+	int32 insigniaID = 4;
 	//TODO: Redundant references both ways, could just store it in building/unit and connect it from there
-	repeated int32 unitIDs = 4;
-	repeated int32 buildingIDs = 5;
-	repeated int32 friendPlayerIDs = 6;
+	repeated int32 unitIDs = 5;
+	repeated int32 buildingIDs = 6;
 	PluginData userPlugin = 7;
 }
 

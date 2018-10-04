@@ -12,9 +12,12 @@ namespace MHUrho.Logic
 
 		public PlayerType PlayerType { get; private set; }
 
-		public PlayerInfo(PlayerType playerType, bool hasInput, bool isNeutral)
+		public int TeamID { get; private set; }
+
+		public PlayerInfo(PlayerType playerType, int teamID, bool hasInput, bool isNeutral)
 		{
 			this.PlayerType = playerType;
+			this.TeamID = teamID;
 			this.HasInput = hasInput;
 			this.IsNeutral = isNeutral;
 		}
@@ -34,12 +37,12 @@ namespace MHUrho.Logic
 			playerInfos = new List<PlayerInfo>();
 		}
 
-		public void AddAIPlayer(PlayerType type)
+		public void AddAIPlayer(PlayerType type, int teamID)
 		{
 			if (type == null) {
 				throw new ArgumentNullException(nameof(type), "Cannot add AI player without AI");
 			}
-			playerInfos.Add(new PlayerInfo(type, false, false));
+			playerInfos.Add(new PlayerInfo(type, teamID, false, false));
 		}
 
 		public void SetNeutralPlayer(PlayerType type)
@@ -52,11 +55,11 @@ namespace MHUrho.Logic
 				throw new ArgumentNullException(nameof(type), "Cannot add neutral AI player without AI");
 			}
 
-			NeutralPlayer = new PlayerInfo(type, false, true);
+			NeutralPlayer = new PlayerInfo(type, 0, false, true);
 			playerInfos.Add(NeutralPlayer);
 		}
 
-		public void SetPlayerWithInput(PlayerType type)
+		public void SetPlayerWithInput(PlayerType type, int teamID)
 		{
 			if (PlayerWithInput != null) {
 				throw new InvalidOperationException("Level has to have exactly one player with input");
@@ -64,7 +67,7 @@ namespace MHUrho.Logic
 
 			//Can add human player without AI
 
-			PlayerWithInput = new PlayerInfo(type, true, false);
+			PlayerWithInput = new PlayerInfo(type, teamID, true, false);
 			playerInfos.Add(PlayerWithInput);
 		}
 

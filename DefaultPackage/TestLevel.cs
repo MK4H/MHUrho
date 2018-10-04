@@ -14,7 +14,7 @@ namespace DefaultPackage
 	{
 		const string Name = "TestLogic";
 
-		public override int NumberOfPlayers => 5;
+		public override int NumberOfPlayers => 7;
 
 		public override bool IsMyName(string logicName)
 		{

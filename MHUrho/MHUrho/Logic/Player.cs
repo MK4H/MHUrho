@@ -26,8 +26,9 @@ namespace MHUrho.Logic
 			readonly LevelManager level;
 			readonly StPlayer storedPlayer;
 			readonly PlayerType type;
+			readonly int teamID;
 
-			public Loader(LevelManager level, StPlayer storedPlayer, PlayerType newType, bool overrideType)
+			public Loader(LevelManager level, StPlayer storedPlayer, PlayerInfo newInfo, bool overrideType)
 			{
 				this.level = level;
 				this.storedPlayer = storedPlayer;
@@ -37,7 +38,8 @@ namespace MHUrho.Logic
 												nameof(storedPlayer));
 				}
 
-				type = newType;
+				type = newInfo.PlayerType;
+				teamID = newInfo.TeamID;
 				
 				//Clear typespecific data from the safe
 
@@ -55,15 +57,16 @@ namespace MHUrho.Logic
 					}
 
 					type = PackageManager.Instance.ActivePackage.GetPlayerType(storedPlayer.TypeID);
+					teamID = storedPlayer.TeamID;
 				}
 			}
 
 			public static StPlayer Save(Player player)
 			{
-				//TODO: HUMAN PLAYER TYPE
 				var storedPlayer = new StPlayer
 									{
 										Id = player.ID,
+										TeamID = player.TeamID,
 										TypeID = player.type?.ID ?? 0,
 										InsigniaID = player.Insignia.ID
 									};
@@ -78,9 +81,6 @@ namespace MHUrho.Logic
 											from building in buildingType.Value
 											select building.ID);
 
-				storedPlayer.FriendPlayerIDs.Add(from friend in player.friends
-												select friend.ID);
-
 				storedPlayer.UserPlugin = new PluginData();
 				player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.level));
 
@@ -89,15 +89,17 @@ namespace MHUrho.Logic
 
 			public void StartLoading()
 			{
-				loadingPlayer = new Player(storedPlayer.Id, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
-
 				if (type != null) {
-					if (type.ID == storedPlayer.TypeID) {
-						loadingPlayer.Plugin = type.GetInstancePluginForLoading(loadingPlayer, level);
-					}
-					else {
-						loadingPlayer.Plugin = type.GetNewInstancePlugin(loadingPlayer, level);
-					}
+					//If the stored type is the same as the new type, the stored plugin data can be loaded
+					// If it is a different type, it will probably not know the format of the data, so just create new plugin instance
+					bool newPluginInstance = type.ID != storedPlayer.TypeID;
+					loadingPlayer = new Player(storedPlayer.Id, teamID, level, PlayerInsignia.GetInsignia(storedPlayer.InsigniaID), type, newPluginInstance);
+				}
+				else {
+					loadingPlayer =
+						CreatePlaceholderPlayer(storedPlayer.Id,
+												level,
+												PlayerInsignia.GetInsignia(storedPlayer.InsigniaID));
 				}
 			}
 
@@ -108,10 +110,6 @@ namespace MHUrho.Logic
 
 				foreach (var buildingID in storedPlayer.BuildingIDs) {
 					loadingPlayer.AddBuilding(level.GetBuilding(buildingID));
-				}
-
-				foreach (var friendID in storedPlayer.FriendPlayerIDs) {
-					loadingPlayer.friends.Add(level.GetPlayer(friendID));
 				}
 
 				//If the stored data is from the same plugin type as the new type, load the data
@@ -133,7 +131,7 @@ namespace MHUrho.Logic
 
 		public PlayerAIInstancePlugin Plugin { get; private set; }
 
-		readonly HashSet<IPlayer> friends;
+		public int TeamID { get; private set; }
 
 
 		readonly Dictionary<UnitType,List<IUnit>> units;
@@ -146,23 +144,33 @@ namespace MHUrho.Logic
 
 		readonly ILevelManager level;
 
-		protected Player(int id, ILevelManager level, PlayerInsignia insignia) {
+		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia) {
 			ReceiveSceneUpdates = true;
 
 			this.ID = id;
+			this.TeamID = teamID;
 			units = new Dictionary<UnitType, List<IUnit>>();
 			buildings = new Dictionary<BuildingType, List<IBuilding>>();
 			resources = new Dictionary<ResourceType, int>();
-			friends = new HashSet<IPlayer>();
 			this.level = level;
 			this.Insignia = insignia;
 		}
 
-		protected Player(int id, ILevelManager level, PlayerType type, PlayerInsignia insignia)
-			:this(id, level, insignia)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="level"></param>
+		/// <param name="insignia"></param>
+		/// <param name="type"></param>
+		/// <param name="newPluginInstance"></param>
+		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia, PlayerType type, bool newPluginInstance)
+			:this(id, teamID,level, insignia)
 		{
 			this.type = type;
-			this.Plugin = type.GetNewInstancePlugin(this, level);
+			this.Plugin = newPluginInstance
+							? type.GetNewInstancePlugin(this, level)
+							: type.GetInstancePluginForLoading(this, level);
 		}
 
 		/// <summary>
@@ -174,7 +182,7 @@ namespace MHUrho.Logic
 		/// <returns></returns>
 		public static Player CreatePlaceholderPlayer(int id, ILevelManager level, PlayerInsignia insignia)
 		{
-			return new Player(id, level, insignia);
+			return new Player(id, 0, level, insignia);
 		}
 
 		/// <summary>
@@ -212,16 +220,16 @@ namespace MHUrho.Logic
 		/// </summary>
 		/// <param name="level"></param>
 		/// <param name="storedPlayer"></param>
-		/// <param name="fillType"></param>
+		/// <param name="playerInfo"></param>
 		/// <param name="overrideType"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayer"/> contains a playerType and the flag <paramref name="overrideType"/> was not set</exception>
 		public static IPlayerLoader GetLoaderFillType(LevelManager level,
 													StPlayer storedPlayer,
-													PlayerType fillType,
+													PlayerInfo playerInfo,
 													bool overrideType)
 		{
-			return new Loader(level, storedPlayer, fillType, overrideType);
+			return new Loader(level, storedPlayer, playerInfo, overrideType);
 		}
 
 		public StPlayer Save()
@@ -251,6 +259,13 @@ namespace MHUrho.Logic
 			}
 		}
 
+		public void ChangeResourceAmount(ResourceType resourceType, int amount)
+		{
+			//if key does not exist, tryGetValue sets the out variable to default(), which here is zero
+			resources.TryGetValue(resourceType, out int currentValue);
+			resources[resourceType] = currentValue + amount;
+		}
+
 		public bool RemoveUnit(IUnit unit) {
 			bool removed = units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
 			if (removed) {
@@ -277,8 +292,8 @@ namespace MHUrho.Logic
 				   select unit;
 		}
 
-		public IReadOnlyList<IUnit> GetUnitsOfType(UnitType type) {
-			return units.TryGetValue(type, out List<IUnit> unitList) ? new List<IUnit>() : unitList;
+		public IReadOnlyList<IUnit> GetUnitsOfType(UnitType unitType) {
+			return units.TryGetValue(unitType, out List<IUnit> unitList) ? unitList : new List<IUnit>();
 		}
 
 		public IEnumerable<IBuilding> GetAllBuildings() {
@@ -287,12 +302,14 @@ namespace MHUrho.Logic
 				   select building;
 		}
 
-		public IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType type) {
-			return buildings.TryGetValue(type, out var buildingList) ? new List<IBuilding>() : buildingList;
+		public IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType buildingType) {
+			return buildings.TryGetValue(buildingType, out var buildingList) ? buildingList : new List<IBuilding>();
 		}
 
-		public int GetResourcesOfType(ResourceType type) {
-			return resources.TryGetValue(type, out int count) ? 0 : count;
+		public int GetResourceAmount(ResourceType resourceType)
+		{
+			resources.TryGetValue(resourceType, out int count);
+			return count;
 		}
 
 		public IEnumerable<IPlayer> GetEnemyPlayers() {
@@ -305,12 +322,12 @@ namespace MHUrho.Logic
 
 		public bool IsFriend(IPlayer player)
 		{
-			return friends.Contains(player);
+			return player.TeamID == TeamID;
 		}
 
 		public bool IsEnemy(IPlayer player)
 		{
-			return player != this && !IsFriend(player);
+			return !IsFriend(player);
 		}
 
 

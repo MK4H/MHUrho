@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
-  <!--<mainMenu>
+  <mainMenu>
     <action>start</action>
   </mainMenu>
   <packagePicking>
@@ -10,16 +10,9 @@
     </values>
   </packagePicking>
   <levelPicking>
-    <action>editnew</action>
-  </levelPicking>
-  <levelCreation>
-    <action>edit</action>
+    <action>play</action>
     <values>
-      <levelName>New level 2</levelName>
-      <description> The second best level ever</description>
-      <thumbnailPath>xamarin.png</thumbnailPath>
-      <pluginPath>DefaultPackage.dll</pluginPath>
-      <mapSize x="100" y="250"/>
+      <levelName>TestLevelLongDescription</levelName>
     </values>
-  </levelCreation>-->
+  </levelPicking>
 </menuActions>

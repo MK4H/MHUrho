@@ -18,6 +18,7 @@ using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using MHUrho.Plugins;
 using MHUrho.UserInterface;
+using Google.Protobuf;
 
 
 namespace MHUrho.Logic
@@ -170,8 +171,11 @@ namespace MHUrho.Logic
 
 		public void SaveTo(Stream stream, bool leaveOpen = false) {
 			var storedLevel = Save();
-			using (var output = new Google.Protobuf.CodedOutputStream(stream, leaveOpen)) {
-				storedLevel.WriteTo(output);
+
+			storedLevel.WriteTo(stream);
+
+			if (!leaveOpen) {
+				stream.Dispose();
 			}
 		}
 

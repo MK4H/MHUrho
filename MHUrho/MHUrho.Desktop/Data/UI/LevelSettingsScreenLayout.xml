@@ -6,15 +6,6 @@
 	<attribute name="Max Anchor" value="0.5 0.5" />
 	<attribute name="Pivot" value="0.5 0.5" />
 	<attribute name="Layout Border" value="5 5 5 5" />
-	<element type="Window">
-		<attribute name="Name" value="CustomSettings" />
-		<attribute name="Position" value="5 -35" />
-		<attribute name="Size" value="500 370" />
-		<attribute name="Min Anchor" value="0 1" />
-		<attribute name="Max Anchor" value="0 1" />
-		<attribute name="Pivot" value="0 1" />
-		<attribute name="Layout Border" value="5 5 5 5" />
-	</element>
 	<element type="BorderImage">
 		<attribute name="Name" value="MapImage" />
 		<attribute name="Position" value="-5 5" />
@@ -127,67 +118,108 @@
 			</element>
 		</element>
 	</element>
-	<element type="ScrollView">
-		<attribute name="Name" value="DescriptionScrollView" />
+	<element>
+		<attribute name="Name" value="DescriptionElement" />
 		<attribute name="Position" value="-5 -35" />
 		<attribute name="Size" value="500 370" />
 		<attribute name="Min Anchor" value="1 1" />
 		<attribute name="Max Anchor" value="1 1" />
 		<attribute name="Pivot" value="1 1" />
-		<element type="ScrollBar" internal="true" style="none">
-			<attribute name="Size" value="500 16" />
-			<attribute name="Min Anchor" value="0 1" />
-			<attribute name="Max Anchor" value="0 1" />
-			<attribute name="Pivot" value="0 1" />
-			<attribute name="Color" value="0 0 0 0" />
-			<attribute name="Top Left Color" value="0 0 0 0" />
-			<attribute name="Top Right Color" value="0 0 0 0" />
-			<attribute name="Bottom Left Color" value="0 0 0 0" />
-			<attribute name="Bottom Right Color" value="0 0 0 0" />
-			<element type="Button" internal="true" style="none">
-				<attribute name="Pivot" value="0 0" />
-			</element>
-			<element type="Slider" internal="true" style="none">
-				<attribute name="Position" value="16 0" />
-				<attribute name="Size" value="468 16" />
-				<attribute name="Pivot" value="0 0" />
-				<element type="BorderImage" internal="true" style="none">
-					<attribute name="Pivot" value="0 0" />
-				</element>
-			</element>
-			<element type="Button" internal="true" style="none">
-				<attribute name="Position" value="484 0" />
-				<attribute name="Pivot" value="0 0" />
-			</element>
+		<attribute name="Layout Mode" value="Vertical" />
+		<element type="Text">
+			<attribute name="Name" value="DescriptionHeadline" />
+			<attribute name="Pivot" value="0 0" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="20" />
+			<attribute name="Text" value="Description:" />
 		</element>
-		<element type="ScrollBar" internal="true" style="none">
-			<attribute name="Size" value="16 370" />
+		<element type="ScrollView">
+			<attribute name="Name" value="DescriptionScrollView" />
 			<attribute name="Min Anchor" value="1 0" />
 			<attribute name="Max Anchor" value="1 0" />
 			<attribute name="Pivot" value="1 0" />
-			<attribute name="Color" value="0 0 0 0" />
-			<attribute name="Top Left Color" value="0 0 0 0" />
-			<attribute name="Top Right Color" value="0 0 0 0" />
-			<attribute name="Bottom Left Color" value="0 0 0 0" />
-			<attribute name="Bottom Right Color" value="0 0 0 0" />
-			<element type="Button" internal="true" style="none">
-				<attribute name="Pivot" value="0 0" />
-			</element>
-			<element type="Slider" internal="true" style="none">
-				<attribute name="Position" value="0 16" />
-				<attribute name="Size" value="16 338" />
-				<attribute name="Pivot" value="0 0" />
-				<element type="BorderImage" internal="true" style="none">
+			<element type="ScrollBar" internal="true" style="none">
+				<attribute name="Size" value="500 16" />
+				<attribute name="Min Anchor" value="0 1" />
+				<attribute name="Max Anchor" value="0 1" />
+				<attribute name="Pivot" value="0 1" />
+				<attribute name="Color" value="0 0 0 0" />
+				<attribute name="Top Left Color" value="0 0 0 0" />
+				<attribute name="Top Right Color" value="0 0 0 0" />
+				<attribute name="Bottom Left Color" value="0 0 0 0" />
+				<attribute name="Bottom Right Color" value="0 0 0 0" />
+				<element type="Button" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+				</element>
+				<element type="Slider" internal="true" style="none">
+					<attribute name="Position" value="16 0" />
+					<attribute name="Size" value="468 16" />
+					<attribute name="Pivot" value="0 0" />
+					<element type="BorderImage" internal="true" style="none">
+						<attribute name="Pivot" value="0 0" />
+					</element>
+				</element>
+				<element type="Button" internal="true" style="none">
+					<attribute name="Position" value="484 0" />
 					<attribute name="Pivot" value="0 0" />
 				</element>
 			</element>
-			<element type="Button" internal="true" style="none">
-				<attribute name="Position" value="0 354" />
+			<element type="ScrollBar" internal="true" style="none">
+				<attribute name="Size" value="16 343" />
+				<attribute name="Min Anchor" value="1 0" />
+				<attribute name="Max Anchor" value="1 0" />
+				<attribute name="Pivot" value="1 0" />
+				<attribute name="Color" value="0 0 0 0" />
+				<attribute name="Top Left Color" value="0 0 0 0" />
+				<attribute name="Top Right Color" value="0 0 0 0" />
+				<attribute name="Bottom Left Color" value="0 0 0 0" />
+				<attribute name="Bottom Right Color" value="0 0 0 0" />
+				<element type="Button" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+				</element>
+				<element type="Slider" internal="true" style="none">
+					<attribute name="Position" value="0 16" />
+					<attribute name="Size" value="16 311" />
+					<attribute name="Pivot" value="0 0" />
+					<element type="BorderImage" internal="true" style="none">
+						<attribute name="Pivot" value="0 0" />
+					</element>
+				</element>
+				<element type="Button" internal="true" style="none">
+					<attribute name="Position" value="0 327" />
+					<attribute name="Pivot" value="0 0" />
+				</element>
+			</element>
+			<element type="BorderImage" internal="true" style="none">
 				<attribute name="Pivot" value="0 0" />
 			</element>
 		</element>
-		<element type="BorderImage" internal="true" style="none">
+	</element>
+	<element>
+		<attribute name="Name" value="CustomSettingsElement" />
+		<attribute name="Position" value="5 -35" />
+		<attribute name="Size" value="500 370" />
+		<attribute name="Min Anchor" value="0 1" />
+		<attribute name="Max Anchor" value="0 1" />
+		<attribute name="Pivot" value="0 1" />
+		<attribute name="Layout Mode" value="Vertical" />
+		<element type="Text">
+			<attribute name="Name" value="CustomSettingsHeadline" />
 			<attribute name="Pivot" value="0 0" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Font Size" value="20" />
+			<attribute name="Text" value="Settings:" />
+		</element>
+		<element type="Window">
+			<attribute name="Name" value="CustomSettings" />
+			<attribute name="Pivot" value="0 0" />
+			<attribute name="Layout Border" value="5 5 5 5" />
 		</element>
 	</element>
 </element>

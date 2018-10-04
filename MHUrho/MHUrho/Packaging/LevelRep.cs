@@ -10,6 +10,7 @@ using MHUrho.Plugins;
 using MHUrho.Storage;
 using Urho;
 using Urho.Urho2D;
+using Google.Protobuf;
 
 namespace MHUrho.Packaging
 {
@@ -108,7 +109,7 @@ namespace MHUrho.Packaging
 				RunningLevel = null;
 			}
 
-			protected void RunningLevelLoaded(Task<ILevelManager> loadingTask)
+			protected virtual void RunningLevelLoaded(Task<ILevelManager> loadingTask)
 			{
 				//TODO: Check status, react to loading failure
 				RunningLevel = loadingTask.Result;
@@ -143,9 +144,9 @@ namespace MHUrho.Packaging
 			}
 		}
 
-		class LoadedLevel : LevelState {
+		class LoadedLevelPrototype : LevelState {
 
-			public LoadedLevel(LevelRep context)
+			public LoadedLevelPrototype(LevelRep context)
 				:base(context)
 			{
 
@@ -171,7 +172,48 @@ namespace MHUrho.Packaging
 
 			public override LevelState CloneWith(LevelRep newContext)
 			{
-				return new LoadedLevel(newContext) {RunningLevel = this.RunningLevel};
+				return new LoadedLevelPrototype(newContext) {RunningLevel = this.RunningLevel};
+			}
+		}
+
+		class LoadedSavedLevel : LevelState {
+
+			readonly string savedLevelPath;
+			StLevel savedLevel;
+
+			public LoadedSavedLevel(LevelRep context, string savedLevelPath, StLevel savedLevel)
+				: base(context)
+			{
+				this.savedLevelPath = savedLevelPath;
+				this.savedLevel = savedLevel;
+			}
+
+			public override ILevelLoader LoadForEditing()
+			{
+				throw new InvalidOperationException("Level loaded from save cannot be edited");
+			}
+
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players)
+			{
+				if (savedLevel == null) {
+					savedLevel = GetSaveFromDynamicPath(savedLevelPath);
+				}
+				var loader = LevelManager.GetLoader();
+
+				loader.LoadForPlaying(Context, savedLevel, players).ContinueWith(RunningLevelLoaded);
+
+				return loader;
+			}
+
+			public override LevelState CloneWith(LevelRep newContext)
+			{
+				return new LoadedSavedLevel(newContext, savedLevelPath, savedLevel);
+			}
+
+			protected override void RunningLevelLoaded(Task<ILevelManager> loadingTask)
+			{
+				base.RunningLevelLoaded(loadingTask);
+				savedLevel = null;
 			}
 		}
 
@@ -260,7 +302,7 @@ namespace MHUrho.Packaging
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(ThumbnailPath);
 			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
-			state = new LoadedLevel(this);
+			state = new LoadedLevelPrototype(this);
 		}
 
 		/// <summary>
@@ -276,7 +318,7 @@ namespace MHUrho.Packaging
 			this.savePath = storedLevelPath;
 
 			this.Name = storedLevel.LevelName;
-			this.Description = "Temporary level";
+			this.Description = "Temporary level loaded from a saved game";
 			//TODO: Default thumbnail
 			//this.Thumbnail = 
 
@@ -285,7 +327,7 @@ namespace MHUrho.Packaging
 			this.LevelPluginAssemblyPath = storedLevel.Plugin.AssemblyPath;
 			LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
-			state = new LoadedLevel(this);
+			state = new LoadedSavedLevel(this, storedLevelPath, storedLevel);
 		}
 
 		public static LevelRep CreateNewLevel(string name,
@@ -306,16 +348,13 @@ namespace MHUrho.Packaging
 		public static LevelRep GetFromSavedGame(string storedLevelPath)
 		{
 
+
 			StLevel storedLevel = GetSaveFromDynamicPath(storedLevelPath);
 
 			//TODO: Exception if pack is not present
 			var gamePack = PackageManager.Instance.LoadPackage(storedLevel.PackageName);
-			if (gamePack.TryGetLevel(storedLevel.LevelName, out LevelRep value)) {
-				return value;
-			}
-			else {
-				return new LevelRep(gamePack, storedLevelPath, storedLevel);
-			}
+			return new LevelRep(gamePack, storedLevelPath, storedLevel);
+			
 		}
 
 		public static bool IsNameValid(string name)

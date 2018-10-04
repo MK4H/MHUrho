@@ -8,19 +8,21 @@ namespace MHUrho.Logic {
 
 		int ID { get; }
 
+		int TeamID { get; }
+
 		PlayerInsignia Insignia { get; }
 
 		StPlayer Save();
 
 		IEnumerable<IUnit> GetAllUnits();
 
-		IReadOnlyList<IUnit> GetUnitsOfType(UnitType type);
+		IReadOnlyList<IUnit> GetUnitsOfType(UnitType unitType);
 
 		IEnumerable<IBuilding> GetAllBuildings();
 
-		IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType type);
+		IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType buildingType);
 
-		int GetResourcesOfType(ResourceType type);
+		int GetResourceAmount(ResourceType resourceType);
 
 		IEnumerable<IPlayer> GetEnemyPlayers();
 
@@ -33,6 +35,9 @@ namespace MHUrho.Logic {
 		void AddBuilding(IBuilding building);
 
 		bool RemoveUnit(IUnit unit);
+
 		bool RemoveBuilding(IBuilding building);
+
+		void ChangeResourceAmount(ResourceType resourceType, int change);
 	}
 }
