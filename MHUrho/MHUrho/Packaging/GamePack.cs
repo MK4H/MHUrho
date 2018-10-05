@@ -467,6 +467,9 @@ namespace MHUrho.Packaging {
 
 			levelElement.Remove();
 			level.RemoveDataFile();
+
+			WriteData();
+			FinishLoading();
 		}
 
 		/// <summary>

@@ -58,12 +58,15 @@ namespace MHUrho.UserInterface
 
 			public override void Dispose()
 			{
-				nameEdit.TextChanged += NameChanged;
-				descriptionEdit.TextChanged += DescriptionChanged;
-				thumbnailPathButton.Released += ThumbnailPathButtonReleased;
+				nameEdit.TextChanged -= NameChanged;
+				descriptionEdit.TextChanged -= DescriptionChanged;
+				thumbnailPathButton.Released -= ThumbnailPathButtonReleased;
 
 				((Button)window.GetChild("SaveAsButton", true)).Released -= SaveAsButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released -= BackButtonReleased;
+
+				window.RemoveAllChildren();
+				window.Remove();
 
 				window.Dispose();
 				nameEdit.Dispose();

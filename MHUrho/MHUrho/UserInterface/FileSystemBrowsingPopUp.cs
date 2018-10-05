@@ -271,18 +271,24 @@ namespace MHUrho.UserInterface
 			{
 				string oldPath = Path.Combine(currentDirectory, currentFileName);
 				string newDirPath = null;
+
+				if (!IsValidPath(args.Text)) {
+					goto Fail;
+				}
+
 				try {
 					string newPath = args.Text;
 					newDirPath = newPath == "" ? "" : Path.GetDirectoryName(newPath);
+
+					if (newDirPath == null) {
+						goto Fail;
+					}
 				}
 				catch (ArgumentException e) {
-					//TODO: Save previous text
-					pathEdit.Text = oldPath;
-					return;
+					goto Fail;
 				}
 				catch (PathTooLongException e) {
-					pathEdit.Text = oldPath;
-					return;
+					goto Fail;
 				}
 				
 				//If directory changed, show the contents of the new directory
@@ -291,8 +297,7 @@ namespace MHUrho.UserInterface
 					//Load the new directory contents
 					if (!LoadDirectory(newDirPath)) {
 						//The new directory could not be loaded, revert change
-						pathEdit.Text = oldPath;
-						return;
+						goto Fail;
 					}
 				}
 
@@ -348,6 +353,14 @@ namespace MHUrho.UserInterface
 				else {
 					TotalUnmatch();
 				}
+
+				return;
+
+				//I know this is probably not traditional in C#, but this is extremely convenient 
+				// and i think it makes the code much more maintainable
+				Fail:
+					pathEdit.Text = oldPath;
+					return;
 			}
 
 			void OnItemSelected(ItemSelectedEventArgs args)
@@ -484,6 +497,11 @@ namespace MHUrho.UserInterface
 			bool SelectEntry(NameTextPair entry)
 			{
 				return entry.IsDirectory ? SelectDirs(selectOptions) : SelectFiles(selectOptions);
+			}
+
+			bool IsValidPath(string path)
+			{
+				return path.IndexOfAny(Path.GetInvalidPathChars()) == -1;
 			}
 		}
 

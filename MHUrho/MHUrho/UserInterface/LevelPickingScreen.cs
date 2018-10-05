@@ -14,17 +14,27 @@ namespace MHUrho.UserInterface
 
 		class Screen : ScreenBase {
 
-			readonly LevelPickingScreen proxy;
-
-			Window window;
-			ListView listView;
-			Button editButton;
-			Button playButton;
+			const string DeleteButtonName = "DeleteButton";
+			const string EditButtonName = "EditButton";
+			const string PlayButtonName = "PlayButton";
+			const string BackButtonName = "BackButton";
 
 			const string newLevelItemTexturePath = "Textures/NewLevelItem.png";
+
+			readonly LevelPickingScreen proxy;
+
+			readonly Window window;
+			readonly ListView listView;
+			readonly Button deleteButton;
+			readonly Button editButton;
+			readonly Button playButton;
+
+			
 			readonly Texture2D newLevelItemTexture;
 
 			readonly List<LevelPickingItem> items;
+
+			GamePack Package => proxy.Package;
 
 			public Screen(LevelPickingScreen proxy)
 				:base(proxy)
@@ -41,14 +51,17 @@ namespace MHUrho.UserInterface
 
 				listView = (ListView)window.GetChild("ListView");
 
-				editButton = (Button)window.GetChild("EditButton", true);
-				playButton = (Button)window.GetChild("PlayButton", true);
+				deleteButton = (Button) window.GetChild(DeleteButtonName, true);
+				editButton = (Button)window.GetChild(EditButtonName, true);
+				playButton = (Button)window.GetChild(PlayButtonName, true);
 
-				editButton.Released += EditButtonReleased;
-				playButton.Released += PlayButtonReleased;
-				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
+				deleteButton.Released += LevelManipulatingButtonPressed;
+				editButton.Released += LevelManipulatingButtonPressed;
+				playButton.Released += LevelManipulatingButtonPressed;
+				((Button)window.GetChild(BackButtonName, true)).Released += BackButtonReleased;
 
 				playButton.Enabled = false;
+				deleteButton.Enabled = false;
 				editButton.Enabled = false;
 
 				GetLevels(listView);
@@ -56,8 +69,9 @@ namespace MHUrho.UserInterface
 
 			public override void Dispose()
 			{
-				editButton.Released -= EditButtonReleased;
-				playButton.Released -= PlayButtonReleased;
+				deleteButton.Released -= LevelManipulatingButtonPressed;
+				editButton.Released -= LevelManipulatingButtonPressed;
+				playButton.Released -= LevelManipulatingButtonPressed;
 				((Button)window.GetChild("BackButton", true)).Released -= BackButtonReleased;
 
 				foreach (var item in items) {
@@ -69,6 +83,7 @@ namespace MHUrho.UserInterface
 
 				window.Dispose();
 				listView.Dispose();
+				deleteButton.Dispose();
 				editButton.Dispose();
 				playButton.Dispose();
 			}
@@ -82,39 +97,70 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void EditButtonReleased(ReleasedEventArgs obj)
+			void LevelManipulatingButtonPressed(ReleasedEventArgs args)
 			{
-				foreach (var item in items) {
-					if (item.IsSelected) {
-						if (item is LevelPickingLevelItem levelItem) {
-							SwitchToEditingExistingLevel(levelItem.Level);
-							return;
+				foreach (var item in items)
+				{
+					if (item.IsSelected)
+					{
+						switch (args.Element.Name) {
+							case DeleteButtonName:
+								DeleteLevel(item);
+								break;
+							case EditButtonName:
+								EditLevel(item);
+								break;
+							case PlayButtonName:
+								PlayLevel(item);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(args), args.Element.Name, "Unknown button pressed");
 						}
-						else if (item is LevelPickingNewLevelItem newItem) {
-							SwitchToEditingNewLevel();
-							return;
-						}
-						else {
-							throw new InvalidOperationException("Edit button was pressed when it should not have been possible to press");
-						}
+						return;
 					}
 				}
 			}
 
-			void PlayButtonReleased(ReleasedEventArgs args)
+			void DeleteLevel(LevelPickingItem item)
 			{
-				foreach (var item in items) {
-					if (item.IsSelected) {
-						if (item is LevelPickingLevelItem levelItem) {
-							SwitchToPlayingLevel(levelItem.Level);
-							return;
-						}
-						else {
-							throw new InvalidOperationException("Play button was pressed when it should not have been possible to press");
-						}
-					}
+				if (item is LevelPickingLevelItem levelItem) {
+					item.Deselect();
+					Package.RemoveLevel(levelItem.Level);
+					listView.RemoveItem(item.Element);
+					items.Remove(item);
+					listView.UpdateInternalLayout();
 				}
-				
+				else {
+					throw new InvalidOperationException("Delete button was pressed when it should not have been possible to press");
+				}
+			}
+
+			void EditLevel(LevelPickingItem item)
+			{
+				if (item is LevelPickingLevelItem levelItem) {
+					SwitchToEditingExistingLevel(levelItem.Level);
+					return;
+				}
+				else if (item is LevelPickingNewLevelItem newItem) {
+					SwitchToEditingNewLevel();
+					return;
+				}
+				else {
+					throw new InvalidOperationException("Edit button was pressed when it should not have been possible to press");
+				}
+			}
+
+			void PlayLevel(LevelPickingItem item)
+			{
+				if (item is LevelPickingLevelItem levelItem)
+				{
+					SwitchToPlayingLevel(levelItem.Level);
+					return;
+				}
+				else
+				{
+					throw new InvalidOperationException("Play button was pressed when it should not have been possible to press");
+				}
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -133,6 +179,7 @@ namespace MHUrho.UserInterface
 				}
 
 				playButton.Enabled = selectedItem is LevelPickingLevelItem;
+				deleteButton.Enabled = playButton.Enabled;
 				editButton.Enabled = true;
 			}
 
@@ -140,6 +187,7 @@ namespace MHUrho.UserInterface
 			{
 				if (listView.SelectedItem == deselectedItem.Element) {
 					playButton.Enabled = false;
+					deleteButton.Enabled = false;
 					editButton.Enabled = false;
 
 					listView.ClearSelection();
