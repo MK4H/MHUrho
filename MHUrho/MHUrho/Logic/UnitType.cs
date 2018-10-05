@@ -64,10 +64,9 @@ namespace MHUrho.Logic
 			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
-			Plugin =
-				XmlHelpers.LoadTypePlugin<UnitTypePlugin>(xml,
-															 package.DirectoryPath,
-															 Name);
+			XElement pathElement = xml.Element(UnitTypeXml.Inst.AssemblyPath);
+
+			Plugin = TypePlugin.LoadTypePlugin<UnitTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
 
 			//var data = Plugin.TypeData;
 

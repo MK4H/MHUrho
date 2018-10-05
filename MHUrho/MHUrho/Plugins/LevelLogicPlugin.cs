@@ -15,6 +15,8 @@ namespace MHUrho.Plugins
     public abstract class LevelLogicPlugin : IDisposable {
 		public abstract int NumberOfPlayers { get; }
 
+		public abstract string Name { get; }
+
 		public static LevelLogicPlugin Load(string fullAssemblyPath, string name)
 		{
 			if (!System.IO.Path.IsPathRooted(fullAssemblyPath)) {
@@ -30,8 +32,12 @@ namespace MHUrho.Plugins
 								select type;
 
 				foreach (var plugin in levelPlugins) {
+					if (plugin.IsAbstract || !plugin.IsPublic) {
+						continue;
+					}
+
 					LevelLogicPlugin newPluginInstance = (LevelLogicPlugin)Activator.CreateInstance(plugin);
-					if (newPluginInstance.IsMyName(name)) {
+					if (newPluginInstance.Name == name) {
 						pluginInstance = newPluginInstance;
 						break;
 					}
@@ -50,8 +56,6 @@ namespace MHUrho.Plugins
 
 			return pluginInstance;
 		}
-
-		public abstract bool IsMyName(string logicName);
 
 		public abstract void OnUpdate(float timeStep);
 

@@ -55,9 +55,10 @@ namespace MHUrho.Logic
 			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
-			Plugin = XmlHelpers.LoadTypePlugin<BuildingTypePlugin>(xml,
-																 package.DirectoryPath,
-																 Name);
+
+			XElement pathElement = xml.Element(BuildingTypeXml.Inst.AssemblyPath);
+
+			Plugin = TypePlugin.LoadTypePlugin<BuildingTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 										 package);
 		}

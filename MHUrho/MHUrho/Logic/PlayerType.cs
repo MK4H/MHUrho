@@ -34,9 +34,9 @@ namespace MHUrho.Logic
 			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
-			Plugin = XmlHelpers.LoadTypePlugin<PlayerAITypePlugin>(xml, 
-																	package.DirectoryPath, 
-																	Name);
+			XElement pathElement = xml.Element(PlayerAITypeXml.Inst.AssemblyPath);
+
+			Plugin = TypePlugin.LoadTypePlugin<PlayerAITypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
 
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 

@@ -97,44 +97,6 @@ namespace MHUrho.Helpers
 			return GetBool(typeXmlElement.Element(UnitTypeXml.Inst.ManuallySpawnable));
 		}
 
-		public static T LoadTypePlugin<T>(XElement typeXml, string pathToPackageXmlDir, string typeName) where T: TypePlugin {
-			if (!System.IO.Path.IsPathRooted(pathToPackageXmlDir)) {
-				pathToPackageXmlDir = System.IO.Path.Combine(MyGame.Files.DynamicDirPath, pathToPackageXmlDir);
-			}
-
-			XElement assemblyPathElement = typeXml.Element(EntityXml.Inst.AssemblyPath);
-
-			string assemblyPath = GetFullPath(assemblyPathElement, pathToPackageXmlDir);
-
-			var assembly = Assembly.LoadFile(assemblyPath);
-			T pluginInstance = null;
-			try {
-				var unitPlugins = from type in assembly.GetTypes()
-								  where typeof(T).IsAssignableFrom(type)
-								  select type;
-
-				foreach (var plugin in unitPlugins) {
-					var newPluginInstance = (T)Activator.CreateInstance(plugin);
-					if (newPluginInstance.IsMyType(typeName)) {
-						pluginInstance = newPluginInstance;
-						break;
-					}
-				}
-			}
-			catch (ReflectionTypeLoadException e) {
-				Urho.IO.Log.Write(LogLevel.Error, $"Could not get types from the assembly {assembly}");
-				//TODO: Exception
-				throw new Exception("Type plugin loading failed, could not load plugin",e);
-			}
-
-			if (pluginInstance == null) {
-				//TODO: Exception
-				throw new Exception($"Type plugin loading failed, could not load plugin for type {typeName}");
-			}
-
-			return pluginInstance;
-		}
-
 
 		public static XElement GetChild(XElement ofElement, string childName) {
 			return GetChild(ofElement, PackageManager.XMLNamespace + childName);

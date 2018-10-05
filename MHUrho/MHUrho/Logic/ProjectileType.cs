@@ -22,7 +22,7 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		public object Plugin => typePlugin;
+		public ProjectileTypePlugin Plugin {get; private set;}
 
 		public ModelWrapper Model { get; private set; }
 
@@ -31,8 +31,6 @@ namespace MHUrho.Logic
 		readonly Queue<Projectile> projectilePool;
 
 		bool enablePooling = true;
-
-		ProjectileTypePlugin typePlugin;
 
 		public ProjectileType() {
 			projectilePool = new Queue<Projectile>();
@@ -46,10 +44,11 @@ namespace MHUrho.Logic
 			Material = XmlHelpers.GetMaterial(xml);
 			Package = package;
 
-			typePlugin = XmlHelpers.LoadTypePlugin<ProjectileTypePlugin>(xml,
-																		  package.DirectoryPath,
-																		  Name);
-			typePlugin.Initialize(XmlHelpers.GetExtensionElement(xml),
+			XElement pathElement = xml.Element(ProjectileTypeXml.Inst.AssemblyPath);
+
+			Plugin = TypePlugin.LoadTypePlugin<ProjectileTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
+
+			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 								  package);
 		}
 
@@ -93,11 +92,11 @@ namespace MHUrho.Logic
 		}
 
 		internal ProjectileInstancePlugin GetNewInstancePlugin(IProjectile projectile, ILevelManager level) {
-			return typePlugin.CreateNewInstance(level, projectile);
+			return Plugin.CreateNewInstance(level, projectile);
 		}
 
 		internal ProjectileInstancePlugin GetInstancePluginForLoading(IProjectile projectile, ILevelManager level) {
-			return typePlugin.GetInstanceForLoading(level, projectile);
+			return Plugin.GetInstanceForLoading(level, projectile);
 		}
 
 		public bool IsInRange(Vector3 source, IRangeTarget target) {
@@ -105,7 +104,7 @@ namespace MHUrho.Logic
 				return false;
 			}
 
-			return typePlugin.IsInRange(source, target);
+			return Plugin.IsInRange(source, target);
 		}
 
 		public void Dispose() {
