@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
+using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
 
@@ -32,7 +33,7 @@ namespace MHUrho.UserInterface
 			
 			readonly Texture2D newLevelItemTexture;
 
-			readonly List<LevelPickingItem> items;
+
 
 			GamePack Package => proxy.Package;
 
@@ -40,8 +41,6 @@ namespace MHUrho.UserInterface
 				:base(proxy)
 			{
 				this.proxy = proxy;
-
-				items = new List<LevelPickingItem>();
 
 				newLevelItemTexture = PackageManager.Instance.GetTexture2D(newLevelItemTexturePath);
 
@@ -74,7 +73,7 @@ namespace MHUrho.UserInterface
 				playButton.Released -= LevelManipulatingButtonPressed;
 				((Button)window.GetChild("BackButton", true)).Released -= BackButtonReleased;
 
-				foreach (var item in items) {
+				foreach (var item in GetItems()) {
 					item.Dispose();
 				}
 
@@ -99,25 +98,24 @@ namespace MHUrho.UserInterface
 
 			void LevelManipulatingButtonPressed(ReleasedEventArgs args)
 			{
-				foreach (var item in items)
-				{
-					if (item.IsSelected)
-					{
-						switch (args.Element.Name) {
-							case DeleteButtonName:
-								DeleteLevel(item);
-								break;
-							case EditButtonName:
-								EditLevel(item);
-								break;
-							case PlayButtonName:
-								PlayLevel(item);
-								break;
-							default:
-								throw new ArgumentOutOfRangeException(nameof(args), args.Element.Name, "Unknown button pressed");
-						}
-						return;
-					}
+				var selectedItem = (LevelPickingItem)listView.SelectedItem;
+				if (selectedItem == null) {
+					throw new
+						InvalidOperationException("Level manipulation button was enabled and pressed while no level was selected");
+				}
+
+				switch (args.Element.Name) {
+					case DeleteButtonName:
+						DeleteLevel(selectedItem);
+						break;
+					case EditButtonName:
+						EditLevel(selectedItem);
+						break;
+					case PlayButtonName:
+						PlayLevel(selectedItem);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(args), args.Element.Name, "Unknown button pressed");
 				}
 			}
 
@@ -126,8 +124,10 @@ namespace MHUrho.UserInterface
 				if (item is LevelPickingLevelItem levelItem) {
 					item.Deselect();
 					Package.RemoveLevel(levelItem.Level);
-					listView.RemoveItem(item.Element);
-					items.Remove(item);
+					var itemHolder = item.Parent;
+					listView.RemoveItem(item);
+
+					itemHolder.Size = new IntVector2(itemHolder.Size.X, itemHolder.EffectiveMinSize.Y);
 					listView.UpdateInternalLayout();
 				}
 				else {
@@ -170,10 +170,11 @@ namespace MHUrho.UserInterface
 
 			void ItemSelected(LevelPickingItem selectedItem)
 			{
-				listView.Selection = listView.FindItem(selectedItem.Element);
+				listView.Selection = listView.FindItem(selectedItem);
 
-				foreach (var item in items) {
-					if (selectedItem != item) {
+				foreach(var item in GetItems())
+				{
+					if (item != selectedItem) {
 						item.Deselect();
 					}
 				}
@@ -181,25 +182,28 @@ namespace MHUrho.UserInterface
 				playButton.Enabled = selectedItem is LevelPickingLevelItem;
 				deleteButton.Enabled = playButton.Enabled;
 				editButton.Enabled = true;
+
+				listView.UpdateInternalLayout();
 			}
 
 			void ItemDeselected(LevelPickingItem deselectedItem)
 			{
-				if (listView.SelectedItem == deselectedItem.Element) {
+				if (listView.SelectedItem == deselectedItem) {
 					playButton.Enabled = false;
 					deleteButton.Enabled = false;
 					editButton.Enabled = false;
 
 					listView.ClearSelection();
 				}
+
+				listView.UpdateInternalLayout();
 			}
 
 			void AddItem(LevelPickingItem newItem, ListView listView)
 			{
-				items.Add(newItem);
-				newItem.Selected += ItemSelected;
-				newItem.Deselected += ItemDeselected;
-				listView.AddItem(newItem.Element);
+				newItem.ItemSelected += ItemSelected;
+				newItem.ItemDeselected += ItemDeselected;
+				listView.AddItem(newItem);
 			}
 
 			void SwitchToEditingExistingLevel(LevelRep level)
@@ -216,10 +220,17 @@ namespace MHUrho.UserInterface
 			{
 				MenuUIManager.SwitchToLevelSettingsScreen(level);
 			}
+
+			IEnumerable<LevelPickingItem> GetItems()
+			{
+				for (uint i = 0; i < listView.NumItems; i++) {
+					yield return (LevelPickingItem) listView.GetItem(i);
+				}
+			}
 #if DEBUG
 			public void SimulateEditPickingLevel(string levelName)
 			{
-				foreach (var item in items) {
+				foreach (var item in GetItems()) {
 					if (item is LevelPickingLevelItem levelItem && levelItem.Level.Name == levelName)
 					{
 						SwitchToEditingExistingLevel(levelItem.Level);
@@ -239,7 +250,7 @@ namespace MHUrho.UserInterface
 
 			public void SimulatePlayPickingLevel(string levelName)
 			{
-				foreach (var item in items)
+				foreach (var item in GetItems())
 				{
 					if (item is LevelPickingLevelItem levelItem && levelItem.Level.Name == levelName)
 					{

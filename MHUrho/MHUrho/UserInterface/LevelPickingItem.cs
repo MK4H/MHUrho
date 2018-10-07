@@ -8,34 +8,46 @@ using Urho.Urho2D;
 
 namespace MHUrho.UserInterface
 {
-	abstract class LevelPickingItem : IDisposable {
-		public UIElement Element { get; private set; }
+	abstract class LevelPickingItem : UIElement, IDisposable {
+		public bool IsSelected => CheckBox.Checked;
 
-		public bool IsSelected => checkBox.Checked;
+		public event Action<LevelPickingItem> ItemSelected;
+		public event Action<LevelPickingItem> ItemDeselected;
+		public event Action<LevelPickingItem> ItemSelectionChanged;
 
-		public event Action<LevelPickingItem> Selected;
-		public event Action<LevelPickingItem> Deselected;
-		public event Action<LevelPickingItem> SelectionChanged;
+		protected readonly UIElement CollapsingElement;
 
-		readonly CheckBox checkBox;
+		protected readonly UIElement TopElement;
+		protected readonly CheckBox CheckBox;
+
 
 		protected LevelPickingItem(MyGame game, Texture2D thumbnail, string name)
 		{
-			Element = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelItemLayout.xml"),
-										PackageManager.Instance.GetXmlFile("UI/LevelItemStyle.xml"));
+			this.LayoutMode = LayoutMode.Horizontal;
 
-			checkBox = (CheckBox)Element.GetChild("CheckBox");
-			checkBox.Toggled += CheckBoxToggled;
+			TopElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelItemLayout.xml"),
+											PackageManager.Instance.GetXmlFile("UI/LevelItemStyle.xml"));
 
-			var thumbnailElement = (BorderImage)checkBox.GetChild("Thumbnail", true);
+			AddChild(TopElement);
+
+
+
+			CheckBox = (CheckBox)TopElement.GetChild("CheckBox");
+			CheckBox.Toggled += CheckBoxToggled;
+
+			var thumbnailElement = (BorderImage)CheckBox.GetChild("Thumbnail", true);
 			thumbnailElement.Texture = thumbnail;
 			thumbnailElement.ImageRect = new IntRect(0, 0, thumbnail.Width, thumbnail.Height);
 
-			var nameElement = (Text)checkBox.GetChild("NameText", true);
+			var nameElement = (Text)CheckBox.GetChild("NameText", true);
 			nameElement.Value = name;
 
-
-
+			CollapsingElement = CheckBox.GetChild("CollapsingElement", true);
+			CollapsingElement.Visible = false;
+ 
+			//Set the size to effective min size, so all unused space with invisible elements gets hidden
+			TopElement.Size = new IntVector2(TopElement.Size.X, TopElement.EffectiveMinSize.Y);
+			Size = new IntVector2(Size.X, EffectiveMinSize.Y);
 		}
 
 		void CheckBoxToggled(ToggledEventArgs args)
@@ -53,40 +65,37 @@ namespace MHUrho.UserInterface
 		public virtual void Select()
 		{
 			//If checked changed, automatically calls CheckBoxToggled
-			checkBox.Checked = true;
+			CheckBox.Checked = true;
 		}
 
 		public virtual void Deselect()
 		{
 			//If checked changed, automatically calls CheckBoxToggled
-			checkBox.Checked = false;
+			CheckBox.Checked = false;
 		}
 
 		protected virtual void OnSelected()
 		{
-			Selected?.Invoke(this);
+			ItemSelected?.Invoke(this);
 		}
 
 		protected virtual void OnDeselected()
 		{
-			Deselected?.Invoke(this);
+			ItemDeselected?.Invoke(this);
 		}
 
 		protected virtual void OnSelectionChanged()
 		{
-			SelectionChanged?.Invoke(this);
+			ItemSelectionChanged?.Invoke(this);
 		}
 
-		public virtual void Dispose()
+		public new virtual void Dispose()
 		{
-			checkBox.Toggled -= CheckBoxToggled;
+			base.Dispose();
+			CheckBox.Toggled -= CheckBoxToggled;
 
-			Element.RemoveAllChildren();
-			Element.Remove();
-
-			checkBox.Dispose();
-			Element.Dispose();
-			
+			CollapsingElement.Dispose();
+			CheckBox.Dispose();		
 		}
 	}
 
@@ -94,22 +103,13 @@ namespace MHUrho.UserInterface
 
 		public LevelRep Level { get; private set; }
 
-		readonly UIElement descriptionElement;
-
 		public LevelPickingLevelItem(LevelRep level, MyGame game)
 			:base(game, level.Thumbnail, level.Name)
 		{
 			this.Level = level;
-			descriptionElement = Element.GetChild("DescriptionElement", true);
-
-			((Text)Element.GetChild("DescriptionText", true)).Value = level.Description;
+			((Text)GetChild("DescriptionText", true)).Value = level.Description;
 		}
 
-		public override void Dispose()
-		{
-			descriptionElement.Dispose();
-			base.Dispose();
-		}
 
 		protected override void OnSelected()
 		{
@@ -125,12 +125,16 @@ namespace MHUrho.UserInterface
 
 		void Expand()
 		{
-			descriptionElement.Visible = true;
+			CollapsingElement.Visible = true;
 		}
 
 		void Collapse()
 		{
-			descriptionElement.Visible = false;
+			CollapsingElement.Visible = false;
+
+			TopElement.Size = new IntVector2(TopElement.Size.X, TopElement.EffectiveMinSize.Y);
+			Size = new IntVector2(Size.X, EffectiveMinSize.Y);
+			Parent.Size = new IntVector2(Parent.Size.X, Parent.EffectiveMinSize.Y);
 		}
 	}
 
