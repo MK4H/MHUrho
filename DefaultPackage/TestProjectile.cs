@@ -13,11 +13,12 @@ using MHUrho.Helpers;
 namespace DefaultPackage
 {
 	public class TestProjectileType : ProjectileTypePlugin {
-		public float Speed { get;private set; }
 
-		public override bool IsMyType(string typeName) {
-			return typeName == "TestProjectile";
-		}
+		public override int ID => 1;
+
+		public override string Name => "TestProjectile";
+
+		public float Speed { get; private set; }
 
 		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile)
 		{

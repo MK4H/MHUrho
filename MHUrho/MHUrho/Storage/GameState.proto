@@ -90,7 +90,7 @@ message StMap {
 }
 
 message StLevelPlugin {
-	string assemblyPath = 1;
+	int32 typeID = 1;
 	PluginData data = 2;
 }
 

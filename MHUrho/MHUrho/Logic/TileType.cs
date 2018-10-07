@@ -19,7 +19,7 @@ namespace MHUrho.Logic
 		static readonly XName IconTextureElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
 		static readonly XName MinimapColorElement = PackageManager.XMLNamespace + "minimapColor";
 
-		public int ID { get; set; }
+		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 

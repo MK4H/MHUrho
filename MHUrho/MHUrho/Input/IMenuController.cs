@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.StartupManagement;
 using Urho;
 
@@ -30,7 +31,7 @@ namespace MHUrho.Input
 
 		void StartLoadingLevelForEditing(LevelRep level);
 
-		void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players);
+		void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings);
 
 		void ExecuteActionOnCurrentScreen(MenuScreenAction action);
 	}

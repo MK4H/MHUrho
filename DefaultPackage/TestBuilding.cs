@@ -19,15 +19,15 @@ namespace DefaultPackage
 {
 	public class TestBuildingType : BuildingTypePlugin
 	{
+		public override int ID => 1;
+
+		public override string Name => "TestBuilding";
+
 		UnitType workerType;
 		TileType tileType;
 
 		public TestBuildingType() {
 
-		}
-
-		public override bool IsMyType(string typeName) {
-			return typeName == "TestBuilding";
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building) {

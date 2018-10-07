@@ -19,14 +19,12 @@ namespace DefaultPackage
 {
 	public class ChickenType : UnitTypePlugin {
 
-		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
+		public override int ID => 3;
+
+		public override string Name => "Chicken";
 
 		public ProjectileType ProjectileType { get; private set; }
 
-
-		public override bool IsMyType(string unitTypeName) {
-			return unitTypeName == "Chicken";
-		}
 
 		public ChickenType() {
 

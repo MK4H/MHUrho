@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.StartupManagement;
 using Urho.Gui;
 
@@ -83,7 +84,7 @@ namespace MHUrho.UserInterface
 
 				var levelRep = LevelRep.GetFromSavedGame(newRelativePath);
 
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame);
+				MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame);
 			}
 		}
 

@@ -14,7 +14,7 @@ namespace MHUrho.Logic
 		const string IDAttributeName = "ID";
 		const string NameAttribute = "name";
 
-		public int ID { get; set; }
+		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 

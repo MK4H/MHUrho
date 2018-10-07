@@ -66,9 +66,9 @@ namespace MHUrho.Storage {
             "ZS5TdEludFZlY3RvcjISJQoFdGlsZXMYAiADKAsyFi5NSFVyaG8uU3RvcmFn",
             "ZS5TdFRpbGUSMQoLYm9yZGVyVGlsZXMYAyADKAsyHC5NSFVyaG8uU3RvcmFn",
             "ZS5TdEJvcmRlclRpbGUSNAoPbWFwUmFuZ2VUYXJnZXRzGAQgAygLMhsuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RNYXBUYXJnZXQiTwoNU3RMZXZlbFBsdWdpbhIUCgxh",
-            "c3NlbWJseVBhdGgYASABKAkSKAoEZGF0YRgCIAEoCzIaLk1IVXJoby5TdG9y",
-            "YWdlLlBsdWdpbkRhdGFiBnByb3RvMw=="));
+            "cmhvLlN0b3JhZ2UuU3RNYXBUYXJnZXQiSQoNU3RMZXZlbFBsdWdpbhIOCgZ0",
+            "eXBlSUQYASABKAUSKAoEZGF0YRgCIAEoCzIaLk1IVXJoby5TdG9yYWdlLlBs",
+            "dWdpbkRhdGFiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, global::MHUrho.Storage.PluginStorageReflection.Descriptor, global::MHUrho.Storage.MHUrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -82,7 +82,7 @@ namespace MHUrho.Storage {
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayers), global::MHUrho.Storage.StPlayers.Parser, new[]{ "PlayerWithInputID", "NeutralPlayerID", "Players" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPlayer), global::MHUrho.Storage.StPlayer.Parser, new[]{ "Id", "TeamID", "TypeID", "InsigniaID", "UnitIDs", "BuildingIDs", "UserPlugin" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StMap), global::MHUrho.Storage.StMap.Parser, new[]{ "Size", "Tiles", "BorderTiles", "MapRangeTargets" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevelPlugin), global::MHUrho.Storage.StLevelPlugin.Parser, new[]{ "AssemblyPath", "Data" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StLevelPlugin), global::MHUrho.Storage.StLevelPlugin.Parser, new[]{ "TypeID", "Data" }, null, null, null)
           }));
     }
     #endregion
@@ -2566,7 +2566,7 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StLevelPlugin(StLevelPlugin other) : this() {
-      assemblyPath_ = other.assemblyPath_;
+      typeID_ = other.typeID_;
       Data = other.data_ != null ? other.Data.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -2576,14 +2576,14 @@ namespace MHUrho.Storage {
       return new StLevelPlugin(this);
     }
 
-    /// <summary>Field number for the "assemblyPath" field.</summary>
-    public const int AssemblyPathFieldNumber = 1;
-    private string assemblyPath_ = "";
+    /// <summary>Field number for the "typeID" field.</summary>
+    public const int TypeIDFieldNumber = 1;
+    private int typeID_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string AssemblyPath {
-      get { return assemblyPath_; }
+    public int TypeID {
+      get { return typeID_; }
       set {
-        assemblyPath_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        typeID_ = value;
       }
     }
 
@@ -2611,7 +2611,7 @@ namespace MHUrho.Storage {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (AssemblyPath != other.AssemblyPath) return false;
+      if (TypeID != other.TypeID) return false;
       if (!object.Equals(Data, other.Data)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -2619,7 +2619,7 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (AssemblyPath.Length != 0) hash ^= AssemblyPath.GetHashCode();
+      if (TypeID != 0) hash ^= TypeID.GetHashCode();
       if (data_ != null) hash ^= Data.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -2634,9 +2634,9 @@ namespace MHUrho.Storage {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (AssemblyPath.Length != 0) {
-        output.WriteRawTag(10);
-        output.WriteString(AssemblyPath);
+      if (TypeID != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(TypeID);
       }
       if (data_ != null) {
         output.WriteRawTag(18);
@@ -2650,8 +2650,8 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (AssemblyPath.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(AssemblyPath);
+      if (TypeID != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeID);
       }
       if (data_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Data);
@@ -2667,8 +2667,8 @@ namespace MHUrho.Storage {
       if (other == null) {
         return;
       }
-      if (other.AssemblyPath.Length != 0) {
-        AssemblyPath = other.AssemblyPath;
+      if (other.TypeID != 0) {
+        TypeID = other.TypeID;
       }
       if (other.data_ != null) {
         if (data_ == null) {
@@ -2687,8 +2687,8 @@ namespace MHUrho.Storage {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 10: {
-            AssemblyPath = input.ReadString();
+          case 8: {
+            TypeID = input.ReadInt32();
             break;
           }
           case 18: {

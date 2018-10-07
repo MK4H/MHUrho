@@ -6,7 +6,7 @@ namespace MHUrho.Packaging
 {
 	public interface IIDNameAndPackage
 	{
-		int ID { get; set; }
+		int ID { get; }
 		string Name { get; }
 		GamePack Package { get; }
 	}

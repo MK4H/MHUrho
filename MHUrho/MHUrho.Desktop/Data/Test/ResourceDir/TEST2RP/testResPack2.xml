@@ -4,6 +4,14 @@
   <levels>
     <dataDirPath>Levels</dataDirPath>
   </levels>
+  <levelLogicTypes>
+    <levelLogicType name="TestLogic" ID="1">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </levelLogicType>
+    <levelLogicType name="TestLogic2" ID="2">
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+    </levelLogicType>
+  </levelLogicTypes>
 	<playerAITypes>
 		<playerAIType name="TestAI" ID="1" category="ai">
 			<iconTextureRectangle left="0" top="0" right="50" bottom="50"/>

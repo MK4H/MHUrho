@@ -9,12 +9,10 @@ using MHUrho.Storage;
 
 namespace DefaultPackage
 {
-	class TestNeutralPlayer1Type : PlayerAITypePlugin
+	public class TestNeutralPlayer1Type : PlayerAITypePlugin
 	{
-		public override bool IsMyType(string typeName)
-		{
-			return string.Equals(typeName, "testNeutral1", StringComparison.InvariantCultureIgnoreCase);
-		}
+		public override string Name => "testNeutral1";
+		public override int ID => 3;
 
 		public override void Initialize(XElement extensionElement, GamePack package)
 		{
@@ -53,11 +51,9 @@ namespace DefaultPackage
 		}
 	}
 
-	class TestNeutralPlayer2Type : PlayerAITypePlugin {
-		public override bool IsMyType(string typeName)
-		{
-			return string.Equals(typeName, "testNeutral2", StringComparison.InvariantCultureIgnoreCase);
-		}
+	public class TestNeutralPlayer2Type : PlayerAITypePlugin {
+		public override string Name => "testNeutral2";
+		public override int ID => 4;
 
 		public override void Initialize(XElement extensionElement, GamePack package)
 		{

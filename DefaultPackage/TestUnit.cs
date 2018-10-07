@@ -18,12 +18,10 @@ namespace DefaultPackage
 {
 	public class TestUnitType : UnitTypePlugin {
 
-		public UnitTypeInitializationData TypeData => new UnitTypeInitializationData();
 
+		public override int ID => 1;
 
-		public override bool IsMyType(string unitTypeName) {
-			return unitTypeName == "TestUnit";
-		}
+		public override string Name => "TestUnit";
 
 		public TestUnitType() {
 

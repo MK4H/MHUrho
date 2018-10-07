@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.StartupManagement;
 using MHUrho.Storage;
 using Urho;
@@ -41,27 +42,12 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void StartLoadingLevelForEditing(LevelRep level, bool editorMode)
+		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings)
 		{
 			throw new NotImplementedException();
 		}
 
 		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void StartLoadingLevel(string savePath, bool editorMode)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void StartLoadingDefaultLevel(IntVector2 mapSize)
 		{
 			throw new NotImplementedException();
 		}

@@ -10,9 +10,6 @@
     </values>
   </packagePicking>
   <levelPicking>
-    <action>play</action>
-    <values>
-      <levelName>TestLevelLongDescription</levelName>
-    </values>
+    <action>editnew</action>
   </levelPicking>
 </menuActions>

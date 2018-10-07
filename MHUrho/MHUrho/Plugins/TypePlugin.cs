@@ -10,14 +10,15 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
-	public abstract class TypePlugin {
+	public abstract class TypePlugin : IDisposable {
 		public abstract string Name { get; }
+		public abstract int ID { get; }
 
 		/// <summary>
 		/// Called to initialize the instance
 		/// </summary>
 		/// <param name="extensionElement">extension element of the unitType xml description or null if there is none</param>
-		/// <param name="package">TODO: comment</param>
+		/// <param name="package"></param>
 		public abstract void Initialize(XElement extensionElement, GamePack package);
 
 		public static T LoadTypePlugin<T>(string relativeAssemblyPath, GamePack package, string typeName)
@@ -29,17 +30,12 @@ namespace MHUrho.Plugins
 			T pluginInstance = null;
 			try
 			{
-				var unitPlugins = from type in assembly.GetTypes()
-								where typeof(T).IsAssignableFrom(type)
+				var plugins = from type in assembly.GetTypes()
+								where !type.IsAbstract && type.IsPublic && typeof(T).IsAssignableFrom(type)
 								select type;
 
-				foreach (var plugin in unitPlugins)
+				foreach (var plugin in plugins)
 				{
-					if (plugin.IsAbstract || !plugin.IsPublic)
-					{
-						continue;
-					}
-
 					var newPluginInstance = (T)Activator.CreateInstance(plugin);
 					if (newPluginInstance.Name == typeName)
 					{
@@ -62,6 +58,11 @@ namespace MHUrho.Plugins
 			}
 
 			return pluginInstance;
+		}
+
+		public virtual void Dispose()
+		{
+
 		}
 	}
 }

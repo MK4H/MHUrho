@@ -12,9 +12,9 @@ using Urho.Gui;
 
 namespace DefaultPackage
 {
-	public class TestLevelLogicType : LevelLogicTypePlugin {
-		public override string Name => "TestLogic";
-		public override int ID => 1;
+	public class TestLevelLogic2Type : LevelLogicTypePlugin {
+		public override string Name => "TestLogic2";
+		public override int ID => 2;
 
 		public override int MaxNumberOfPlayers => 6;
 		public override int MinNumberOfPlayers => 1;
@@ -25,7 +25,6 @@ namespace DefaultPackage
 		}
 
 
-
 		public override LevelLogicCustomSettings GetCustomSettings(Window customSettingsWindow)
 		{
 			return new LevelLogicCustomSettings();
@@ -33,54 +32,38 @@ namespace DefaultPackage
 
 		public override LevelLogicInstancePlugin CreateInstanceForNewPlaying(LevelLogicCustomSettings levelSettings, ILevelManager level)
 		{
-			return new TestLevel(level);
+			return new TestLevelLogic2(level);
 		}
 
 		public override LevelLogicInstancePlugin CreateInstanceForEditorLoading(ILevelManager level)
 		{
-			return new TestLevel(level);
+			return new TestLevelLogic2(level);
 		}
 
 		public override LevelLogicInstancePlugin CreateInstanceForNewLevel(ILevelManager level)
 		{
-			return new TestLevel(level);
+			return new TestLevelLogic2(level);
 		}
 
 		public override LevelLogicInstancePlugin CreateInstanceForLoadingToPlaying(ILevelManager level)
 		{
-			return new TestLevel(level);
+			return new TestLevelLogic2(level);
 		}
 	}
 
-	public class TestLevel : LevelLogicInstancePlugin
-	{
-		public TestLevel(ILevelManager level)
+	public class TestLevelLogic2 : LevelLogicInstancePlugin {
+		public TestLevelLogic2(ILevelManager level)
 			: base(level)
 		{ }
 
-
-		public override void OnUpdate(float timeStep)
+		public override void SaveState(PluginDataWrapper pluginData)
 		{
-			
+
 		}
 
-		public override void LoadState(PluginDataWrapper fromPluginData)
+		public override void LoadState(PluginDataWrapper pluginData)
 		{
-			//TODO: This
-		}
 
-		public override void SaveState(PluginDataWrapper toPluginData)
-		{
-			//TODO: This
-		}
-
-		public override ToolManager GetToolManager(ILevelManager levelManager, InputType inputType)
-		{
-			if (inputType != InputType.MouseAndKeyboard) {
-				throw new NotImplementedException();
-			}
-
-			return new ToolManagerMandK(levelManager);
 		}
 
 		public override void Dispose()
@@ -88,6 +71,14 @@ namespace DefaultPackage
 
 		}
 
+		public override ToolManager GetToolManager(ILevelManager levelManager, InputType inputType)
+		{
+			if (inputType != InputType.MouseAndKeyboard)
+			{
+				throw new NotImplementedException();
+			}
 
+			return new ToolManagerMandK(levelManager);
+		}
 	}
 }

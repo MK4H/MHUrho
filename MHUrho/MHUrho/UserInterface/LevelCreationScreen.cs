@@ -141,7 +141,21 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			
+			class LogicTypeItem : UIElement {
+
+				public LevelLogicType LogicType { get; private set; }
+
+				public LogicTypeItem(Screen screen, LevelLogicType logicType)
+				{
+					this.LogicType = logicType;
+					this.LayoutMode = LayoutMode.Horizontal;
+					var newItem = screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelLogicTypeItemLayout.xml"),
+															screen.MenuUIManager.MenuRoot.GetDefaultStyle());
+
+					((Text) newItem.GetChild("LogicTypeText")).Value = logicType.Name;
+					AddChild(newItem);
+				}
+			}
 
 			readonly LevelCreationScreen proxy;
 
@@ -156,14 +170,10 @@ namespace MHUrho.UserInterface
 
 			string ThumbnailPath => thumbnailPathText.Value;
 
-			//TODO: Add plugin name to pick the correct plugin from the assembly
-			string PluginPath => pluginPathText.Value;
-
 			readonly Window window;
 			readonly LineEdit nameEdit;
 			readonly SliderDuo mapSize;
-			readonly Button pluginPathButton;
-			readonly PathText pluginPathText;
+			readonly DropDownList logicTypeList;
 			readonly Button thumbnailPathButton;
 			readonly PathText thumbnailPathText;
 			readonly LineEdit descriptionEdit;
@@ -184,24 +194,23 @@ namespace MHUrho.UserInterface
 				var displayText = (Text) window.GetChild("DisplayText", true);
 				mapSize = new SliderDuo(sliderX, sliderY, displayText, Map.MinSize, Map.MaxSize, Map.ChunkSize, Map.MinSize);
 
-				pluginPathButton = (Button) window.GetChild("LevelPluginButton", true);
 				thumbnailPathButton = (Button) window.GetChild("ThumbnailPathButton", true);
 
-				pluginPathText = new PathText((Text)pluginPathButton.GetChild("PluginPathText"));
 				thumbnailPathText = new PathText((Text) thumbnailPathButton.GetChild("ThumbnailPathText"));
 
+				logicTypeList = (DropDownList) window.GetChild("PluginTypeList", true);
 
 				descriptionEdit = (LineEdit) window.GetChild("DescriptionEdit", true);
 
 
 				nameEdit.TextChanged += NameChanged;
 				descriptionEdit.TextChanged += DescriptionChanged;
-				pluginPathButton.Released += PluginPathButtonButtonReleased;
 				thumbnailPathButton.Released += ThumbnailPathButtonReleased;
 
 				((Button)window.GetChild("EditButton", true)).Released += EditButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
 
+				FillLogicTypes();
 
 				//Editing existing level, load the values and lock the unchangable ones (levelSize and plugin)
 				if (Level != null) {
@@ -209,10 +218,9 @@ namespace MHUrho.UserInterface
 					mapSize.Value = Level.MapSize;
 					descriptionEdit.Text = Level.Description;
 					thumbnailPathText.Value = Level.ThumbnailPath;
-					pluginPathText.Value = Level.LevelPluginAssemblyPath;
+					//TODO: Select the current logic type
 
 					//Disable the unchangable ones
-					pluginPathButton.Enabled = false;
 					mapSize.Enabled = false;
 				}
 			}
@@ -221,7 +229,6 @@ namespace MHUrho.UserInterface
 			{
 				nameEdit.TextChanged -= NameChanged;
 				descriptionEdit.TextChanged -= DescriptionChanged;
-				pluginPathButton.Released -= PluginPathButtonButtonReleased;
 				thumbnailPathButton.Released -= ThumbnailPathButtonReleased;
 
 				((Button)window.GetChild("EditButton", true)).Released -= EditButtonReleased;
@@ -229,8 +236,9 @@ namespace MHUrho.UserInterface
 
 				nameEdit.Dispose();
 				mapSize.Dispose();
-				pluginPathButton.Dispose();
+				logicTypeList.Dispose();
 				thumbnailPathButton.Dispose();
+				thumbnailPathText.Dispose();
 				descriptionEdit.Dispose();
 
 				window.RemoveAllChildren();
@@ -240,13 +248,13 @@ namespace MHUrho.UserInterface
 
 			void EditButtonReleased(ReleasedEventArgs args)
 			{
-
+				//TODO: SAVE THE CHANGES TO EXISTING LEVEL
 				//Creating new level
 				if (proxy.Level == null) {
 					proxy.Level = LevelRep.CreateNewLevel(Name,
 														Description,
 														ThumbnailPath,
-														PluginPath,
+														((LogicTypeItem)logicTypeList.SelectedItem).LogicType,
 														mapSize.Value,
 														PackageManager.Instance.ActivePackage);
 				}
@@ -276,14 +284,16 @@ namespace MHUrho.UserInterface
 				Description = descriptionEdit.Text;
 			}
 
-			void PluginPathButtonButtonReleased(ReleasedEventArgs args)
-			{
-				RequestPathToText(pluginPathText);
-			}
-
 			void ThumbnailPathButtonReleased(ReleasedEventArgs args)
 			{
 				RequestPathToText(thumbnailPathText);
+			}
+
+			void FillLogicTypes()
+			{
+				foreach (var logicType in PackageManager.Instance.ActivePackage.LevelLogicTypes) {
+					logicTypeList.AddItem(new LogicTypeItem(this, logicType));
+				}
 			}
 
 			async void RequestPathToText(PathText pathText)
@@ -307,13 +317,13 @@ namespace MHUrho.UserInterface
 			}
 
 #if DEBUG
-			public void SimulateEditNewLevel(string name, string description, string thumbnailPath, string pluginPath, IntVector2 mapSize, GamePack package)
+			public void SimulateEditNewLevel(string name, string description, string thumbnailPath, string logicTypeName, IntVector2 mapSize, GamePack package)
 			{
-			   
+
 				proxy.Level = LevelRep.CreateNewLevel(name,
 													  description,
 													  thumbnailPath,
-													  pluginPath,
+													package.GetLevelLogicType(logicTypeName),
 													  mapSize,
 													  package);
 				
@@ -354,7 +364,7 @@ namespace MHUrho.UserInterface
 							screen.SimulateEditNewLevel(myAction.LevelName,
 														myAction.Description,
 														myAction.ThumbnailPath,
-														myAction.PluginPath,
+														myAction.LogicTypeName,
 														myAction.MapSize,
 														PackageManager.Instance.ActivePackage);
 						}

@@ -18,10 +18,14 @@ namespace MHUrho.Packaging
 
 		public static GamePackXml Inst { get; } = new GamePackXml();
 
+		public XName GamePackElement => PackageManager.XMLNamespace + "gamePack";
+
+
 		public XName NameAttribute => "name";
 		public XName Description => PackageManager.XMLNamespace + "description";
 		public XName PathToThumbnail => PackageManager.XMLNamespace + "pathToThumbnail";
 		public XName Levels => PackageManager.XMLNamespace + "levels";
+		public XName LevelLogicTypes => PackageManager.XMLNamespace + "levelLogicTypes";
 		public XName PlayerAITypes => PackageManager.XMLNamespace + "playerAITypes";
 		public XName ResourceTypes => PackageManager.XMLNamespace + "resourceTypes";
 		public XName TileTypes => PackageManager.XMLNamespace + "tileTypes";
@@ -33,6 +37,11 @@ namespace MHUrho.Packaging
 		public XName UnitIconTexturePath => PackageManager.XMLNamespace + "unitIconTexturePath";
 		public XName BuildingIconTexturePath => PackageManager.XMLNamespace + "buildingIconTexturePath";
 		public XName PlayerIconTexturePath => PackageManager.XMLNamespace + "playerIconTexturePath";
+
+		protected GamePackXml()
+		{
+
+		}
 	}
 
 	class LevelsXml {
@@ -41,6 +50,23 @@ namespace MHUrho.Packaging
 
 		public XName DataDirPath => PackageManager.XMLNamespace + "dataDirPath";
 		public XName Level => PackageManager.XMLNamespace + "level";
+
+		protected LevelsXml()
+		{
+
+		}
+	}
+
+	class LevelLogicTypesXml {
+
+		public static LevelLogicTypesXml Inst { get; } = new LevelLogicTypesXml();
+
+		public XName LevelLogicType => PackageManager.XMLNamespace + "levelLogicType";
+
+		protected LevelLogicTypesXml()
+		{
+
+		}
 	}
 
 	class PlayerAITypesXml {
@@ -48,6 +74,11 @@ namespace MHUrho.Packaging
 		public static PlayerAITypesXml Inst { get; } = new PlayerAITypesXml();
 
 		public XName PlayerAIType => PackageManager.XMLNamespace + "playerAIType";
+
+		protected PlayerAITypesXml()
+		{
+
+		}
 	}
 
 	class ResourceTypesXml {
@@ -55,6 +86,11 @@ namespace MHUrho.Packaging
 		public static ResourceTypesXml Inst { get; } = new ResourceTypesXml();
 
 		public XName ResourceType => PackageManager.XMLNamespace + "resourceType";
+
+		protected ResourceTypesXml()
+		{
+
+		}
 	}
 
 	class TileTypesXml {
@@ -64,6 +100,11 @@ namespace MHUrho.Packaging
 		public XName DefaultTileType => PackageManager.XMLNamespace + "defaultTileType";
 
 		public XName TileType => PackageManager.XMLNamespace + "tileType";
+
+		protected TileTypesXml()
+		{
+
+		}
 	}
 
 	class UnitTypesXml {
@@ -71,6 +112,11 @@ namespace MHUrho.Packaging
 		public static UnitTypesXml Inst { get; } = new UnitTypesXml();
 
 		public XName UnitType => PackageManager.XMLNamespace + "unitType";
+
+		protected UnitTypesXml()
+		{
+
+		}
 	}
 
 	class ProjectileTypesXml {
@@ -78,6 +124,11 @@ namespace MHUrho.Packaging
 		public static ProjectileTypesXml Inst { get; } = new ProjectileTypesXml();
 
 		public XName ProjectileType => PackageManager.XMLNamespace + "projectileType";
+
+		protected ProjectileTypesXml()
+		{
+
+		}
 	}
 
 	class BuildingTypesXml {
@@ -85,6 +136,11 @@ namespace MHUrho.Packaging
 		public static BuildingTypesXml Inst { get; } = new BuildingTypesXml();
 
 		public XName BuildingType => PackageManager.XMLNamespace + "buildingType";
+
+		protected BuildingTypesXml()
+		{
+
+		}
 	}
 
 	class LevelXml {
@@ -97,11 +153,34 @@ namespace MHUrho.Packaging
 
 		public XName Thumbnail => PackageManager.XMLNamespace + "thumbnail";
 
-		public XName AssemblyPath => PackageManager.XMLNamespace + "assemblyPath";
+		public XName LogicTypeName => PackageManager.XMLNamespace + "logicTypeName";
 
 		public XName DataPath => PackageManager.XMLNamespace + "dataPath";
 
 		public XName MapSize => PackageManager.XMLNamespace + "mapSize";
+
+		protected LevelXml()
+		{
+
+		}
+	}
+
+	class LevelLogicTypeXml {
+
+		public static LevelLogicTypeXml Inst { get; } = new LevelLogicTypeXml();
+
+		public XName NameAttribute => "name";
+
+		public XName IDAttribute => "ID";
+
+		public XName AssemblyPath => PackageManager.XMLNamespace + "assemblyPath";
+
+		public XName Extension => PackageManager.XMLNamespace + "extension";
+
+		protected LevelLogicTypeXml()
+		{
+
+		}
 	}
 
 	class PlayerAITypeXml {
@@ -119,6 +198,11 @@ namespace MHUrho.Packaging
 		public XName AssemblyPath => PackageManager.XMLNamespace + "assemblyPath";
 
 		public XName Extension => PackageManager.XMLNamespace + "extension";
+
+		protected PlayerAITypeXml()
+		{
+
+		}
 	}
 
 	class ResourceTypeXml {
@@ -128,6 +212,11 @@ namespace MHUrho.Packaging
 		public XName NameAttribute => "name";
 
 		public XName IconTextureRectangle => PackageManager.XMLNamespace + "iconTextureRectangle";
+
+		protected ResourceTypeXml()
+		{
+
+		}
 	}
 
 	class TileTypeXml {
@@ -145,16 +234,31 @@ namespace MHUrho.Packaging
 		public XName MinimapColor => PackageManager.XMLNamespace + "minimapColor";
 
 		public XName ManuallySpawnable => PackageManager.XMLNamespace + "manuallySpawnable";
+
+		protected TileTypeXml()
+		{
+
+		}
 	}
 
 	class UnitTypeXml : EntityWithIconXml {
 
 		public new static UnitTypeXml Inst { get; } = new UnitTypeXml();
+
+		protected UnitTypeXml()
+		{
+
+		}
 	}
 
 	class ProjectileTypeXml : EntityXml {
 
 		public new static ProjectileTypeXml Inst { get; } = new ProjectileTypeXml();
+
+		protected ProjectileTypeXml()
+		{
+
+		}
 	}
 
 	class BuildingTypeXml : EntityWithIconXml {
@@ -162,6 +266,11 @@ namespace MHUrho.Packaging
 		public new static BuildingTypeXml Inst { get; } = new BuildingTypeXml();
 
 		public XName Size => PackageManager.XMLNamespace + "size";
+
+		protected BuildingTypeXml()
+		{
+
+		}
 	}
 
 	class EntityXml {
@@ -179,6 +288,11 @@ namespace MHUrho.Packaging
 		public XName AssemblyPath => PackageManager.XMLNamespace + "assemblyPath";
 
 		public XName Extension => PackageManager.XMLNamespace + "extension";
+
+		protected EntityXml()
+		{
+
+		}
 	}
 
 	class EntityWithIconXml : EntityXml {
@@ -189,6 +303,11 @@ namespace MHUrho.Packaging
 		public XName IconTextureRectangle => PackageManager.XMLNamespace + "iconTextureRectangle";
 
 		public XName ManuallySpawnable => PackageManager.XMLNamespace + "manuallySpawnable";
+
+		protected EntityWithIconXml()
+		{
+
+		}
 	}
 
 	class ModelXml {
@@ -198,6 +317,11 @@ namespace MHUrho.Packaging
 		public XName ModelPath => PackageManager.XMLNamespace + "modelPath";
 
 		public XName Scale => PackageManager.XMLNamespace + "scale";
+
+		protected ModelXml()
+		{
+
+		}
 	}
 
 	class MaterialXml {
@@ -207,6 +331,11 @@ namespace MHUrho.Packaging
 		public XName MaterialPath => PackageManager.XMLNamespace + "materialPath";
 
 		public XName MaterialListPath => PackageManager.XMLNamespace + "materialListPath";
+
+		protected MaterialXml()
+		{
+
+		}
 	}
 
 	class IntVector2Xml {
@@ -216,10 +345,16 @@ namespace MHUrho.Packaging
 		public XName XAttribute => "x";
 
 		public XName YAttribute => "y";
+
+		protected IntVector2Xml()
+		{
+
+		}
 	}
 
-	class IntRectXml
-	{
+	class IntRectXml {
+		public static IntRectXml Inst { get; } = new IntRectXml();
+
 		public XName LeftAttribute => "left";
 
 		public XName RightAttribute => "right";
@@ -227,26 +362,45 @@ namespace MHUrho.Packaging
 		public XName TopAttribute => "top";
 
 		public XName BottomAttribute => "bottom";
+
+		protected IntRectXml()
+		{
+
+		}
 	}
 
-	class Vector2Xml
-	{
+	class Vector2Xml {
+
+		public static Vector2Xml Inst { get; } = new Vector2Xml();
+
 		public XName XAttribute => "x";
 
 		public XName YAttribute => "y";
+
+		protected Vector2Xml()
+		{
+
+		}
 	}
 
-	class Vector3Xml
-	{
+	class Vector3Xml {
+		public static Vector3Xml Inst { get; } = new Vector3Xml();
+
 		public XName XAttribute => "x";
 
 		public XName YAttribute => "y";
 
 		public XName ZAttribute => "z";
+
+		protected Vector3Xml()
+		{
+
+		}
 	}
 
-	class ColorXml
-	{
+	class ColorXml {
+		public static ColorXml Inst { get; } = new ColorXml();
+
 		public XName RAttribute => "R";
 
 		public XName GAttribute => "G";
@@ -254,5 +408,10 @@ namespace MHUrho.Packaging
 		public XName BAttribute => "B";
 
 		public XName AAttribute => "A";
+
+		protected ColorXml()
+		{
+
+		}
 	}
 }

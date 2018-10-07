@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.StartupManagement;
 using Urho.Gui;
 
@@ -103,7 +104,7 @@ namespace MHUrho.UserInterface
 			readonly BorderImage mapImage;
 			readonly ListView playerList;
 
-
+			readonly LevelLogicCustomSettings pluginCustomSettings;
 
 			public Screen(LevelSettingsScreen proxy)
 				:base(proxy)
@@ -138,6 +139,8 @@ namespace MHUrho.UserInterface
 				for (int i = 0; i < Level.MaxNumberOfPlayers - 1; i++) {
 					PlayerItem.CreateAndAddToList(playerList, this, PlayerTypeCategory.AI);
 				}
+
+				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);
 			}
 
 			void PlayButtonReleased(ReleasedEventArgs args)
@@ -152,7 +155,7 @@ namespace MHUrho.UserInterface
 					item = (PlayerItem)playerList.GetItem(i);
 					players.AddAIPlayer(item.ChosenType, item.ChosenTeam);
 				}
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players);
+				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players, pluginCustomSettings);
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)

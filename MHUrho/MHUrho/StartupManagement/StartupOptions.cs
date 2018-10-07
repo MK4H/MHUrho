@@ -505,14 +505,14 @@ namespace MHUrho.StartupManagement
 			}
 		}
 
-		public string PluginPath {
+		public string LogicTypeName {
 			get {
 				if (Action != Actions.Edit)
 				{
-					throw new InvalidOperationException("PluginPath is only valid with action Actions.Edit");
+					throw new InvalidOperationException("LogicTypeName is only valid with action Actions.Edit");
 				}
 
-				return pluginPath;
+				return logicTypeName;
 			}
 		}
 
@@ -530,21 +530,21 @@ namespace MHUrho.StartupManagement
 		string levelName;
 		string description;
 		string thumbnailPath;
-		string pluginPath;
+		string logicTypeName;
 		IntVector2 mapSize;
 
 		protected LevelCreationScreenAction(Actions action,
 										string levelName = null,
 										string description = null,
 										string thumbnailPath = null,
-										string pluginPath = null,
+										string logicTypeName = null,
 										IntVector2? mapSize = null)
 		{
 			if (action == Actions.Back &&
 				(levelName != null ||
 				description != null ||
 				thumbnailPath != null ||
-				pluginPath != null ||
+				logicTypeName != null ||
 				mapSize != null)) {
 
 				throw new ArgumentException("Arguments cannot have a value with action Back");
@@ -553,7 +553,7 @@ namespace MHUrho.StartupManagement
 					(levelName == null ||
 					description == null ||
 					thumbnailPath == null ||
-					pluginPath == null ||
+					logicTypeName == null ||
 					mapSize == null)) {
 
 				throw new ArgumentNullException("levelName, description, thumbnailPath, pluginPath or mapSize",
@@ -565,7 +565,7 @@ namespace MHUrho.StartupManagement
 			this.levelName = levelName;
 			this.description = description;
 			this.thumbnailPath = thumbnailPath;
-			this.pluginPath = pluginPath;
+			this.logicTypeName = logicTypeName;
 			this.mapSize = mapSize ?? new IntVector2();
 		}
 
@@ -573,14 +573,14 @@ namespace MHUrho.StartupManagement
 		public static LevelCreationScreenAction GetEditAction(string levelName,
 																string description,
 																string thumbnailPath,
-																string pluginPath,
+																string logicTypeName,
 																IntVector2 mapSize)
 		{
 			return new LevelCreationScreenAction(Actions.Edit,
 												levelName,
 												description,
 												thumbnailPath,
-												pluginPath,
+												logicTypeName,
 												mapSize);
 		}
 
@@ -617,9 +617,9 @@ namespace MHUrho.StartupManagement
 			string description = values.Element(XMLNamespace + "description").Value;
 			//TODO: Maybe correct the paths
 			string thumbnailPath = values.Element(XMLNamespace + "thumbnailPath").Value;
-			string pluginPath = values.Element(XMLNamespace + "pluginPath").Value;
+			string typeName = values.Element(XMLNamespace + "logicTypeName").Value;
 			IntVector2 mapSize = XmlHelpers.GetIntVector2(values.Element(XMLNamespace + "mapSize"));
-			return new LevelCreationScreenAction(action, levelName, description, thumbnailPath, pluginPath, mapSize);
+			return new LevelCreationScreenAction(action, levelName, description, thumbnailPath, typeName, mapSize);
 		}
 
 		static Actions StringToAction(string stringRepr)

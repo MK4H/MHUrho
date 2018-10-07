@@ -37,7 +37,14 @@
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>
-			<xs:element name="playerAITypes">
+      <xs:element name="levelLogicTypes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="levelLogicType" type="levelLogicTypeType" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="playerAITypes">
 				<xs:complexType>
 					<xs:sequence>
 						<xs:element name="playerAIType" type="playerAITypeType" minOccurs="0" maxOccurs="unbounded"/>
@@ -89,11 +96,19 @@
 	  <xs:attribute name="name" type="xs:string"/>
   </xs:complexType>
 
+  <xs:complexType name="levelLogicTypeType">
+    <xs:sequence>
+      <xs:element name="assemblyPath" type="xs:string"/>
+      <xs:element name="extension" type="extensionType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="identifiers"/>
+  </xs:complexType>
+
   <xs:complexType name="resourceTypeType">
     <xs:sequence>
       <xs:element name="iconTextureRectangle" type="IntRect"/>
     </xs:sequence>
-    <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attributeGroup ref="identifiers"/>
   </xs:complexType>
 
   <xs:complexType name="tileTypeType">
@@ -197,7 +212,7 @@
 		<xs:sequence>
 			<xs:element name="description" type="xs:string"/>
 			<xs:element name="thumbnail" type="xs:string"/>
-			<xs:element name="assemblyPath" type="xs:string"/>
+			<xs:element name="logicTypeName" type="xs:string"/>
 			<xs:element name="dataPath" type="xs:string"/>
       <xs:element name="mapSize" type="IntVector2"/>
 		</xs:sequence>

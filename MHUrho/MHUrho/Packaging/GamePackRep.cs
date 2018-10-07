@@ -10,10 +10,6 @@ using Urho.Urho2D;
 namespace MHUrho.Packaging
 {
     public class GamePackRep {
-		static readonly XName PackageElement = PackageManager.XMLNamespace + "gamePack";
-		static readonly XName NameAttribute = "name";
-		static readonly XName DescriptionElement = PackageManager.XMLNamespace + "description";
-		static readonly XName ThumbnailElement = PackageManager.XMLNamespace + "thumbnailPath";
 
 		public string Name { get; private set; }
 
@@ -48,12 +44,12 @@ namespace MHUrho.Packaging
 				file?.Dispose();
 			}
 
-			XElement packageElement = data.Element(PackageElement);
+			XElement packageElement = data.Element(GamePackXml.Inst.GamePackElement);
 
-			Name = packageElement.Attribute(NameAttribute).Value;
-			Description = packageElement.Element(DescriptionElement)?.Value ?? "";
+			Name = packageElement.Attribute(GamePackXml.Inst.NameAttribute).Value;
+			Description = packageElement.Element(GamePackXml.Inst.Description)?.Value ?? "";
 
-			string thumbnailPath = packageElement.Element(ThumbnailElement)?.Value;
+			string thumbnailPath = packageElement.Element(GamePackXml.Inst.PathToThumbnail)?.Value;
 			if (thumbnailPath != null) {
 				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.CorrectRelativePath(thumbnailPath));
 				Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);

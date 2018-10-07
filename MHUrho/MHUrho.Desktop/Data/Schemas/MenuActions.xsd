@@ -64,7 +64,7 @@
             <xs:element name="levelName" type="xs:string"/>
             <xs:element name="description" type="xs:string"/>
             <xs:element name="thumbnailPath" type="xs:string"/>
-            <xs:element name="pluginPath" type="xs:string"/>
+            <xs:element name="logicTypeName" type="xs:string"/>
             <xs:element name="mapSize" type="IntVector2"/>
           </xs:sequence>
         </xs:complexType>

@@ -15,7 +15,7 @@ namespace MHUrho.Logic
 
     public class PlayerType : ILoadableType, IDisposable
     {
-		public int ID { get; set; }
+		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 

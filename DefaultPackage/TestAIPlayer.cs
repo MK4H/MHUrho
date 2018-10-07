@@ -17,16 +17,15 @@ namespace DefaultPackage
 {
 	public class TestAIPlayerType : PlayerAITypePlugin {
 
+		public override int ID => 1;
+
+		public override string Name => "TestAI";
+
 		public UnitType Chicken { get; private set; }
 		public UnitType TestUnit { get; private set; }
 		public UnitType TestWorker { get; private set; }
 
 		public BuildingType TestBuilding { get; private set; }
-
-		public override bool IsMyType(string typeName)
-		{
-			return string.Equals(typeName,"TestAI", StringComparison.InvariantCultureIgnoreCase);
-		}
 
 		public override void Initialize(XElement extensionElement, GamePack package)
 		{

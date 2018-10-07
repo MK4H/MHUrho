@@ -19,7 +19,7 @@ namespace MHUrho.Logic
 		private static readonly XName SizeElementName = PackageManager.XMLNamespace + "size";
 
 
-		public int ID { get; set; }
+		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 

@@ -16,7 +16,7 @@ namespace MHUrho.Logic
 	//TODO: Make this an arrow type
 	public class ProjectileType : ILoadableType, IDisposable {
 
-		public int ID { get; set; }
+		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 

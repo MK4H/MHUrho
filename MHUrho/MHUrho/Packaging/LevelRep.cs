@@ -29,28 +29,19 @@ namespace MHUrho.Packaging
 				set => Context.Description = value; 
 			}
 
-
 			protected Texture2D Thumbnail {
 				get => Context.Thumbnail;
 				private set => Context.Thumbnail = value; 
 			}
 
-
-			protected LevelLogicPlugin LevelPlugin {
-				get => Context.LevelPlugin;
-				set => Context.LevelPlugin = value; 
+			protected LevelLogicType LevelLogicType {
+				get => Context.LevelLogicType;
+				set => Context.LevelLogicType = value;
 			}
-
 
 			protected GamePack GamePack {
 				get => Context.GamePack;
 				set => Context.GamePack = value; 
-			}
-
-
-			protected string LevelPluginAssemblyPath {
-				get => Context.LevelPluginAssemblyPath;
-				set => Context.LevelPluginAssemblyPath = value; 
 			}
 
 			protected IntVector2 MapSize => Context.MapSize;
@@ -67,7 +58,7 @@ namespace MHUrho.Packaging
 
 			public abstract ILevelLoader LoadForEditing();
 
-			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players);
+			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings);
 
 			public virtual void SaveTo(XElement levelsElement)
 			{
@@ -97,7 +88,7 @@ namespace MHUrho.Packaging
 												new XAttribute(LevelXml.Inst.NameAttribute, Name),
 												new XElement(LevelXml.Inst.Description, Description),
 												new XElement(LevelXml.Inst.Thumbnail, ThumbnailPath),
-												new XElement(LevelXml.Inst.AssemblyPath, LevelPluginAssemblyPath),
+												new XElement(LevelXml.Inst.LogicTypeName, LevelLogicType.Name),
 												new XElement(LevelXml.Inst.DataPath, SavePath),
 												XmlHelpers.IntVector2ToXmlElement(LevelXml.Inst.MapSize, MapSize)));
 			}
@@ -133,7 +124,7 @@ namespace MHUrho.Packaging
 				return loader;
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players)
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
 			{
 				throw new InvalidOperationException("Cannot play a default level");
 			}
@@ -161,12 +152,12 @@ namespace MHUrho.Packaging
 				return loader;
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players)
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
 			{
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForPlaying(Context, savedLevel, players).ContinueWith(RunningLevelLoaded);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings).ContinueWith(RunningLevelLoaded);
 				return loader;
 			}
 
@@ -193,14 +184,14 @@ namespace MHUrho.Packaging
 				throw new InvalidOperationException("Level loaded from save cannot be edited");
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players)
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
 			{
 				if (savedLevel == null) {
 					savedLevel = GetSaveFromDynamicPath(savedLevelPath);
 				}
 				var loader = LevelManager.GetLoader();
 
-				loader.LoadForPlaying(Context, savedLevel, players).ContinueWith(RunningLevelLoaded);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings).ContinueWith(RunningLevelLoaded);
 
 				return loader;
 			}
@@ -223,17 +214,18 @@ namespace MHUrho.Packaging
 
 		public Texture2D Thumbnail { get; private set; }
 
-		public LevelLogicPlugin LevelPlugin { get; private set; }
+
+		public LevelLogicType LevelLogicType { get; private set; }
 
 		public GamePack GamePack { get; private set; }
-
-		public string LevelPluginAssemblyPath { get; private set; }
 
 		public string ThumbnailPath { get; private set; }
 
 		public IntVector2 MapSize { get; private set; }
 
-		public int MaxNumberOfPlayers => LevelPlugin.NumberOfPlayers;
+		public int MaxNumberOfPlayers => LevelLogicType.MaxNumberOfPlayers;
+
+		public int MinNumberOfPLayers => LevelLogicType.MinNumberOfPlayers;
 
 		readonly string savePath;
 
@@ -242,20 +234,19 @@ namespace MHUrho.Packaging
 		protected LevelRep(string name,
 						string description,
 						string thumbnailPath,
-						string levelPluginAssemblyPath,
+						LevelLogicType levelLogicType,
 						IntVector2 mapSize,
 						GamePack gamePack)
 		{
 			this.Name = name;
 			this.Description = description;
 			this.ThumbnailPath = thumbnailPath;
-			this.LevelPluginAssemblyPath = levelPluginAssemblyPath;
+			this.LevelLogicType = levelLogicType;
 			this.savePath = gamePack.GetLevelProtoSavePath(name);
 			this.MapSize = mapSize;
 			this.GamePack = gamePack;
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
-			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
 			state = new CreatedLevel(mapSize, this);
 		}
@@ -275,13 +266,12 @@ namespace MHUrho.Packaging
 			this.Name = name;
 			this.Description = description;
 			this.ThumbnailPath = thumbnailPath;
-			this.LevelPluginAssemblyPath = other.LevelPluginAssemblyPath;
+			this.LevelLogicType = other.LevelLogicType;
 			this.GamePack = other.GamePack;
 			this.MapSize = other.MapSize;
 			this.savePath = GamePack.GetLevelProtoSavePath(name);
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
-			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
 
 			state = other.state.CloneWith(this);
@@ -293,14 +283,13 @@ namespace MHUrho.Packaging
 			//TODO: Check for errors
 			Name = XmlHelpers.GetName(levelXmlElement);
 			Description = levelXmlElement.Element(LevelXml.Inst.Description).GetString();
-			ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.Thumbnail));			
-			LevelPluginAssemblyPath = FileManager.CorrectRelativePath(levelXmlElement.Element(LevelXml.Inst.AssemblyPath).GetString());
+			ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.Thumbnail));
+			LevelLogicType = gamePack.GetLevelLogicType(levelXmlElement.Element(LevelXml.Inst.LogicTypeName).Value);
 			savePath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.DataPath));
 
 			this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(LevelXml.Inst.MapSize));
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(ThumbnailPath);
-			this.LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
 
 			state = new LoadedLevelPrototype(this);
 		}
@@ -324,20 +313,19 @@ namespace MHUrho.Packaging
 
 			this.MapSize = storedLevel.Map.Size.ToIntVector2();
 
-			this.LevelPluginAssemblyPath = storedLevel.Plugin.AssemblyPath;
-			LevelPlugin = LoadLogicPlugin(LevelPluginAssemblyPath);
+			this.LevelLogicType = gamePack.GetLevelLogicType(storedLevel.Plugin.TypeID);
 
-			state = new LoadedSavedLevel(this, storedLevelPath, storedLevel);
+			this.state = new LoadedSavedLevel(this, storedLevelPath, storedLevel);
 		}
 
 		public static LevelRep CreateNewLevel(string name,
 											string description,
 											string thumbnailPath,
-											string levelPluginAssemblyPath,
+											LevelLogicType levelLogicType,
 											IntVector2 mapSize,
 											GamePack gamePack)
 		{
-			return new LevelRep(name, description, thumbnailPath, levelPluginAssemblyPath, mapSize, gamePack);
+			return new LevelRep(name, description, thumbnailPath, levelLogicType, mapSize, gamePack);
 		}
 
 		public static LevelRep GetFromLevelPrototype(GamePack gamePack, XElement levelXmlElement)
@@ -386,9 +374,9 @@ namespace MHUrho.Packaging
 			return state.LoadForEditing();
 		}
 
-		public ILevelLoader LoadForPlaying(PlayerSpecification players)
+		public ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
 		{
-			return state.LoadForPlaying(players);
+			return state.LoadForPlaying(players, customSettings);
 		}
 
 		/// <summary>
@@ -435,7 +423,7 @@ namespace MHUrho.Packaging
 		public void Dispose()
 		{
 			Thumbnail.Dispose();
-			LevelPlugin.Dispose();
+			LevelLogicType.Dispose();
 		}
 
 		/// <summary>
@@ -477,15 +465,6 @@ namespace MHUrho.Packaging
 
 			return storedLevel;
 		}
-
-		LevelLogicPlugin LoadLogicPlugin(string levelPluginAssemblyPath)
-		{
-			string levelPluginPath = Path.Combine(GamePack.RootedDirectoryPath,
-												levelPluginAssemblyPath);
-
-			return LevelLogicPlugin.Load(levelPluginPath, Name);
-		}
-
 
 	
 	}

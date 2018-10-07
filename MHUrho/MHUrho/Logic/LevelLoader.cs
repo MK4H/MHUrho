@@ -11,6 +11,8 @@ using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
 using Google.Protobuf;
+using MHUrho.Plugins;
+using MHUrho.UserInterface;
 
 namespace MHUrho.Logic
 {
@@ -55,8 +57,12 @@ namespace MHUrho.Logic
 					CurrentLevel = new LevelManager(levelNode, LevelRep, Game, octree, EditorMode);
 					levelNode.AddComponent(CurrentLevel);
 
+					CurrentLevel.Plugin = GetPlugin(CurrentLevel);
+
 					return CurrentLevel;
 				}
+
+				protected abstract LevelLogicInstancePlugin GetPlugin(LevelManager level);
 
 				void LoadSceneParts(Scene scene)
 				{
@@ -115,10 +121,10 @@ namespace MHUrho.Logic
 				}
 
 				/// <summary>
-				/// Registers all players from <see cref="Level.Players"/> to <see cref="Level.UIManager"/>
-				/// by calling <see cref="Level.UIManager.AddPlayer"/>
+				/// Registers all players from <see cref="Level.Players"/> to <see cref="UIManager"/>
+				/// by calling <see cref="UIManager.AddPlayer"/>
 				///
-				/// Selects the player who currently has the input (<see cref="Level.Input.Player"/>)
+				/// Selects the player who currently has the input (<see cref="Player"/>)
 				/// </summary>
 				protected void RegisterPlayersToUI()
 				{
@@ -183,6 +189,11 @@ namespace MHUrho.Logic
 
 					LoadingWatcher.FinishedLoading();
 					return Level;
+				}
+
+				protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
+				{
+					return LevelRep.LevelLogicType.CreateInstancePluginForBrandNewLevel(level);
 				}
 
 				void CreateCamera()
@@ -410,14 +421,36 @@ namespace MHUrho.Logic
 			class SavedLevelPlayingLoader : SavedLevelLoader {
 
 				readonly PlayerSpecification players;
+				readonly LevelLogicCustomSettings customSettings;
 
 				public SavedLevelPlayingLoader(Loader loader,
 												LevelRep levelRep,
 												StLevel storedLevel,
-												PlayerSpecification players)
+												PlayerSpecification players,
+												LevelLogicCustomSettings customSettings)
 					: base(loader, levelRep, storedLevel, false)
 				{
 					this.players = players;
+					this.customSettings = customSettings;
+
+					if ((players == PlayerSpecification.LoadFromSavedGame) !=
+						(customSettings == LevelLogicCustomSettings.LoadFromSavedGame)) {
+						throw new
+							ArgumentException("Argument mismatch, one argument is loaded from save and the other is not");
+					}
+				}
+
+				protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
+				{
+					if (customSettings == LevelLogicCustomSettings.LoadFromSavedGame) {
+						//Loading saved game in play, no new custom settings, just load it
+						return LevelRep.LevelLogicType.CreateInstancePluginForLoadingToPlaying(level);
+					}
+					else {
+						//Loading saved level prototype, so i need to load it with custom settings
+						return LevelRep.LevelLogicType.CreateInstancePluginForNewPlaying(customSettings, level);
+					}
+
 				}
 
 				protected override void LoadPlayers()
@@ -472,12 +505,24 @@ namespace MHUrho.Logic
 					//Player selection is disabled by default in play mode, but it can be enabled again
 					Level.UIManager.DisablePlayerSelection();
 				}
+
+				protected override void FinishLoading()
+				{
+					customSettings.Dispose();
+					base.FinishLoading();
+				}
 			}
 
 			class SavedLevelEditorLoader : SavedLevelLoader {
 				public SavedLevelEditorLoader(Loader loader, LevelRep levelRep, StLevel storedLevel)
 					: base(loader, levelRep, storedLevel, true)
 				{ }
+
+				protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
+				{
+					//Loading saved level prototype, so i need to load it
+					return LevelRep.LevelLogicType.CreateInstancePluginForEditorLoading(level);
+				}
 
 				protected override void LoadPlayers()
 				{				
@@ -544,9 +589,10 @@ namespace MHUrho.Logic
 
 			public Task<ILevelManager> LoadForPlaying(LevelRep levelRep,
 													StLevel storedLevel,
-													PlayerSpecification players)
+													PlayerSpecification players,
+													LevelLogicCustomSettings customSettings)
 			{
-				loaderType = new SavedLevelPlayingLoader(this, levelRep, storedLevel, players);
+				loaderType = new SavedLevelPlayingLoader(this, levelRep, storedLevel, players, customSettings);
 
 				CurrentLoading = loaderType.StartLoading();
 				return CurrentLoading;

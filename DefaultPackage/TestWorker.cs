@@ -14,9 +14,9 @@ namespace DefaultPackage
 {
 	public class TestWorkerType : UnitTypePlugin {
 
-		public override bool IsMyType(string typeName) {
-			return typeName == "TestWorker";
-		}
+		public override int ID => 9;
+
+		public override string Name => "TestWorker";
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
 		{

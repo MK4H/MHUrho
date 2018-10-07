@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.Plugins;
 using Urho;
 using Urho.Resources;
 using Urho.Urho2D;
@@ -64,6 +65,10 @@ namespace MHUrho.Packaging {
 
 		public IEnumerable<LevelRep> Levels => levelsByName.Values;
 
+		public int LevelLogicTypeCount => levelLogicTypesByName.Count;
+
+		public IEnumerable<LevelLogicType> LevelLogicTypes => levelLogicTypesByName.Values;
+
 		public IEnumerable<PlayerType> HumanPlayerTypes => GetPlayersWithTypeCategory(PlayerTypeCategory.Human);
 
 		public IEnumerable<PlayerType> NeutralPlayerTypes => GetPlayersWithTypeCategory(PlayerTypeCategory.Neutral);
@@ -82,6 +87,7 @@ namespace MHUrho.Packaging {
 		readonly Dictionary<string, ProjectileType> projectileTypesByName;
 		readonly Dictionary<string, ResourceType> resourceTypesByName;
 		readonly Dictionary<string, PlayerType> playerAITypesByName;
+		readonly Dictionary<string, LevelLogicType> levelLogicTypesByName;
 		readonly Dictionary<string, LevelRep> levelsByName;
 
 		readonly Dictionary<int, TileType> tileTypesByID;
@@ -90,6 +96,7 @@ namespace MHUrho.Packaging {
 		readonly Dictionary<int, ProjectileType> projectileTypesByID;
 		readonly Dictionary<int, ResourceType> resourceTypesByID;
 		readonly Dictionary<int, PlayerType> playerAITypesByID;
+		readonly Dictionary<int, LevelLogicType> levelLogicTypesByID;
 
 		readonly string pathToXml;
 		readonly XmlSchemaSet schemas;
@@ -113,6 +120,7 @@ namespace MHUrho.Packaging {
 			projectileTypesByName = new Dictionary<string, ProjectileType>();
 			resourceTypesByName = new Dictionary<string, ResourceType>();
 			playerAITypesByName = new Dictionary<string, PlayerType>();
+			levelLogicTypesByName = new Dictionary<string, LevelLogicType>();
 			levelsByName = new Dictionary<string, LevelRep>();
 
 			tileTypesByID = new Dictionary<int, TileType>();
@@ -121,6 +129,7 @@ namespace MHUrho.Packaging {
 			projectileTypesByID = new Dictionary<int, ProjectileType>();
 			resourceTypesByID = new Dictionary<int, ResourceType>();
 			playerAITypesByID = new Dictionary<int, PlayerType>();
+			levelLogicTypesByID = new Dictionary<int, LevelLogicType>();
 
 			this.GamePackRep = gamePackRep;
 			this.schemas = schemas;
@@ -154,6 +163,9 @@ namespace MHUrho.Packaging {
 
 				loadingProgress.TextAndPercentageUpdate("Loading player types", 5);
 				LoadAllPlayerTypes();
+
+				loadingProgress.TextAndPercentageUpdate("Loading level logic types", 5);
+				LoadAllLevelLogicTypes();
 
 				loadingProgress.TextAndPercentageUpdate("Loading levels", 5);
 				LoadAllLevels();
@@ -385,6 +397,49 @@ namespace MHUrho.Packaging {
 					select playerType;
 		}
 
+		public LevelLogicType GetLevelLogicType(string name)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException(nameof(name), "Name of the LevelLogicType cannot be null");
+			}
+
+			if (levelLogicTypesByName.TryGetValue(name, out LevelLogicType value))
+			{
+				return value;
+			}
+
+			if (IsLoading())
+			{
+				return LoadType(Name,
+								GamePackXml.Inst.LevelLogicTypes,
+								LevelLogicTypesXml.Inst.LevelLogicType,
+								levelLogicTypesByName,
+								levelLogicTypesByID);
+			}
+
+			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown level logic type");
+		}
+
+		public LevelLogicType GetLevelLogicType(int ID)
+		{
+			if (levelLogicTypesByID.TryGetValue(ID, out LevelLogicType value))
+			{
+				return value;
+			}
+
+			if (IsLoading())
+			{
+				return LoadType(ID,
+								GamePackXml.Inst.LevelLogicTypes,
+								LevelLogicTypesXml.Inst.LevelLogicType,
+								levelLogicTypesByName,
+								levelLogicTypesByID);
+			}
+
+			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown level logic type");
+		}
+
 		public LevelRep GetLevel(string name)
 		{
 			if (TryGetLevel(name, out LevelRep value)) {
@@ -584,20 +639,17 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
+			//data.Root cannot be null because xsd does not allow it
 			TileIconTexture =
 				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.TileIconTexturePath)));
 
 			var tileTypesElement = data.Root.Element(GamePackXml.Inst.TileTypes);
 
-			// Changed xsd to require playerTypes element
-			//if (tileTypesElement == null) {
-			//	//There are no tile types in this package
-			//	throw new InvalidOperationException("Default tile type is missing");
-			//}
-
+			//tileTypes element cannot be null because xsd does not allow it
 			var defaultTileTypeElement = tileTypesElement.Element(TileTypesXml.Inst.DefaultTileType);
 
 			DefaultTileType = LoadType<TileType>(defaultTileTypeElement, tileTypesByName, tileTypesByID);
+
 
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return tileTypesElement.Elements(TileTypesXml.Inst.TileType)
@@ -609,17 +661,13 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
+			//data.Root cannot be null because xsd does not allow it
 			UnitIconTexture =
 				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.UnitIconTexturePath)));
 
 			var unitTypesElement = data.Root.Element(GamePackXml.Inst.UnitTypes);
 
-			// Changed xsd to require unitTypes element
-			//if (unitTypesElement == null) {
-			//	//There are no unit types in this package
-			//	return Enumerable.Empty<UnitType>();
-			//}
-
+			//unitTypes element cannot be null because xsd does not allow it
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return unitTypesElement.Elements(UnitTypesXml.Inst.UnitType)
 								   .Select(unitTypeElement =>
@@ -631,17 +679,13 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
+			//data.Root cannot be null because xsd does not allow it
 			BuildingIconTexture =
 				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.BuildingIconTexturePath)));
 
 			var buildingTypesElement = data.Root.Element(GamePackXml.Inst.BuildingTypes);
 
-			// Changed xsd to require buildingTypes element
-			//if (buildingTypesElement == null) {
-			//	//There are no building types in this package
-			//	return Enumerable.Empty<BuildingType>();
-			//}
-
+			//buildingTypes element cannot be null because xsd does not allow it
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return buildingTypesElement.Elements(BuildingTypesXml.Inst.BuildingType)
 									   .Select(buildingTypeElement =>
@@ -655,15 +699,10 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
+			//data.Root cannot be null because xsd does not allow it
 			var projectileTypesElement = data.Root.Element(GamePackXml.Inst.ProjectileTypes);
 
-			// Changed xsd to require playerTypes element
-			//if (projectileTypesElement == null) {
-			//	//There are no projectile types in this package
-			//	return Enumerable.Empty<ProjectileType>();
-			//}
-
-
+			//projectileTypes element cannot be null because xsd does not allow it
 			//ended by ToArray because i dont want the Linq expression to be enumerated multiple times
 			return projectileTypesElement.Elements(ProjectileTypesXml.Inst.ProjectileType)
 										 .Select(projectileTypeElement =>
@@ -677,16 +716,13 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
+			//data.Root cannot be null because xsd does not allow it
 			ResourceIconTexture =
 				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ResourceIconTexturePath)));
 
 			var resourceTypesElement = data.Root.Element(GamePackXml.Inst.ResourceTypes);
 
-			// Changed xsd to require resourceTypes element
-			//if (resourceTypesElement == null) {
-			//	return Enumerable.Empty<ResourceType>();
-			//}
-
+			//resourceTypes element cannot be null because xsd does not allow it
 			return resourceTypesElement.Elements(ResourceTypesXml.Inst.ResourceType)
 									   .Select(resourceTypeElement =>
 												   LoadType<ResourceType>(resourceTypeElement,
@@ -699,22 +735,34 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
+			//data.Root cannot be null because xsd does not allow it
 			PlayerIconTexture =
 				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.PlayerIconTexturePath)));
 
 			XElement playerTypes = data.Root.Element(GamePackXml.Inst.PlayerAITypes);
 
-			// Changed xsd to require playerTypes element
-			//if (playerTypes == null) {
-			//	return Enumerable.Empty<PlayerType>();
-			//}
-
+			//playerTypes element cannot be null because xsd does not allow it
 			return playerTypes.Elements(PlayerAITypesXml.Inst.PlayerAIType)
 							.Select(playerTypeElement =>
 										LoadType<PlayerType>(playerTypeElement,
 															playerAITypesByName,
 															playerAITypesByID))
 							.ToArray();
+		}
+
+		IEnumerable<LevelLogicType> LoadAllLevelLogicTypes()
+		{
+			CheckIfLoading();
+
+			//data.Root cannot be null because xsd does not allow it
+			XElement levelLogicTypes = data.Root.Element(GamePackXml.Inst.LevelLogicTypes);
+
+			return levelLogicTypes.Elements(LevelLogicTypesXml.Inst.LevelLogicType)
+								.Select(levelLogicTypeElement =>
+											LoadType<LevelLogicType>(levelLogicTypeElement,
+																	levelLogicTypesByName,
+																	levelLogicTypesByID))
+								.ToArray();
 		}
 
 		IEnumerable<LevelRep> LoadAllLevels()

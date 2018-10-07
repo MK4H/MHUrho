@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.StartupManagement;
 using MHUrho.Storage;
 using MHUrho.UserInterface;
@@ -49,14 +50,14 @@ namespace MHUrho.Input
 			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
 		}
 
-		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players)
+		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings)
 		{
 			if (pausedLevelController != null)
 			{
 				EndPausedLevel();
 			}
 
-			ILevelLoader loader = level.LoadForPlaying(players);
+			ILevelLoader loader = level.LoadForPlaying(players, customSettings);
 
 			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
 		}

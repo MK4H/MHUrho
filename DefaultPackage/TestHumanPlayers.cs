@@ -9,12 +9,11 @@ using MHUrho.Storage;
 
 namespace DefaultPackage
 {
-	class TestHumanPlayer1Type : PlayerAITypePlugin
+	public class TestHumanPlayer1Type : PlayerAITypePlugin
 	{
-		public override bool IsMyType(string typeName)
-		{
-			return string.Equals(typeName, "testHuman1", StringComparison.InvariantCultureIgnoreCase);
-		}
+		public override int ID => 2;
+
+		public override string Name => "testHuman1";
 
 		public override void Initialize(XElement extensionElement, GamePack package)
 		{

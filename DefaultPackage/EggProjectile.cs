@@ -14,11 +14,13 @@ using MHUrho.WorldMap;
 namespace DefaultPackage
 {
 	public class EggProjectileType : ProjectileTypePlugin {
+
+		public override int ID => 2;
+
+		public override string Name => "EggProjectile";
+
 		public float Speed { get; private set; }
 
-		public override bool IsMyType(string typeName) {
-			return typeName == "EggProjectile";
-		}
 
 		public override void Initialize(XElement extensionElement, GamePack package) {
 			var speedElement = XmlHelpers.GetChild(extensionElement, "speed");

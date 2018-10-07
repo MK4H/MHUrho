@@ -84,7 +84,7 @@ namespace MHUrho.Logic
 
 		public IPlayer NeutralPlayer { get; private set; }
 
-		public LevelLogicPlugin Plugin { get; private set; }
+		public LevelLogicInstancePlugin Plugin { get; private set; }
 
 		public event OnUpdateDelegate Update;
 
@@ -110,7 +110,8 @@ namespace MHUrho.Logic
 			this.LevelNode = levelNode;
 			this.LevelRep = levelRep;
 			this.EditorMode = editorMode;
-			this.Plugin = levelRep.LevelPlugin;
+			//Plugin is set in the loader after the creation of LevelManager
+			//this.Plugin = plugin;
 
 			this.units = new Dictionary<int, IUnit>();
 			this.players = new Dictionary<int, IPlayer>();
@@ -141,7 +142,7 @@ namespace MHUrho.Logic
 			};
 
 
-			level.Plugin = new StLevelPlugin {AssemblyPath = LevelRep.LevelPluginAssemblyPath, Data = new PluginData()};
+			level.Plugin = new StLevelPlugin {TypeID = LevelRep.LevelLogicType.ID, Data = new PluginData()};
 
 			Plugin?.SaveState(new PluginDataWrapper(level.Plugin.Data, this));
 
