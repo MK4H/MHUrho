@@ -15,17 +15,16 @@ namespace MHUrho.UserInterface
 
 			readonly PackagePickingScreen proxy;
 
-			Window window;
-			ListView listView;
-			Button selectButton;
+			readonly Window window;
+			readonly ListView listView;
+			readonly Button selectButton;
 
-			List<PackageListItem> items;
 
 			public Screen(PackagePickingScreen proxy)
 				:base(proxy)
 			{
 				this.proxy = proxy;
-				this.items = new List<PackageListItem>();
+
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PackagePickingLayout.xml");
 
 				window = (Window)MenuUIManager.MenuRoot.GetChild("PackagePickingWindow");
@@ -42,10 +41,9 @@ namespace MHUrho.UserInterface
 
 				foreach (var pack in PackageManager.Instance.AvailablePacks) {
 					var newItem = new PackageListItem(pack, Game);
-					items.Add(newItem);
-					newItem.AddTo(listView);
-					newItem.Selected += ItemSelected;
-					newItem.Deselected += ItemDeselected;
+					newItem.ItemSelected += ItemSelected;
+					newItem.ItemDeselected += ItemDeselected;
+					listView.AddItem(newItem);
 				}
 
 				window.Visible = true;
@@ -54,23 +52,26 @@ namespace MHUrho.UserInterface
 		
 			public override void Dispose()
 			{
+				selectButton.Released -= SelectButtonReleased;
 
-				listView.RemoveAllItems();
 
-				foreach (var item in items) {
+				foreach (var item in GetItems()) {
 					item.Dispose();
 				}
+
+				listView.RemoveAllItems();
+				listView.Dispose();
+				selectButton.Dispose();
 
 				window.RemoveAllChildren();
 				window.Remove();
 				window.Dispose();
-				listView.Dispose();
 			}
 
 			void SelectButtonReleased(ReleasedEventArgs args)
 			{
-				foreach (var item in items) {
-					if (item.Element == listView.SelectedItem) {
+				foreach (var item in GetItems()) {
+					if (item == listView.SelectedItem) {
 						ItemSelectionConfirmed(item);
 						return;
 					}
@@ -82,11 +83,11 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchBack();
 			}
 
-			void ItemSelected(PackageListItem args)
+			void ItemSelected(ExpandingListItem args)
 			{
-				listView.Selection = listView.FindItem(args.Element);
+				listView.Selection = listView.FindItem(args);
 
-				foreach (var item in items) {
+				foreach (var item in GetItems()) {
 					if (args != item) {
 						item.Deselect();
 					}
@@ -96,9 +97,9 @@ namespace MHUrho.UserInterface
 				selectButton.Enabled = true;
 			}
 
-			void ItemDeselected(PackageListItem item)
+			void ItemDeselected(ExpandingListItem item)
 			{
-				if (item.Element == listView.SelectedItem) {
+				if (item == listView.SelectedItem) {
 					selectButton.Enabled = false;
 					listView.ClearSelection();
 				}
@@ -110,12 +111,25 @@ namespace MHUrho.UserInterface
 				//TODO: Maybe switch to loading screen when loading package
 				MenuUIManager.SwitchToLevelPickingScreen(PackageManager.Instance.LoadPackage(item.Pack));
 			}
+
+			IEnumerable<PackageListItem> GetItems()
+			{
+				for (uint i = 0; i < listView.NumItems; i++) {
+					yield return (PackageListItem)listView.GetItem(i);
+				}
+			}
+
+			PackageListItem GetSelectedItem()
+			{
+				return (PackageListItem) listView.SelectedItem;
+			}
 #if DEBUG
 			public void SimulatePackagePick(string packageName)
 			{
-				foreach (var item in items) {
+				foreach (var item in GetItems()) {
 					if (item.Pack.Name == packageName) {
 						ItemSelectionConfirmed(item);
+						return;
 					}
 				}
 			}

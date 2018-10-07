@@ -20,7 +20,7 @@ namespace MHUrho.UserInterface
 			const string PlayButtonName = "PlayButton";
 			const string BackButtonName = "BackButton";
 
-			const string newLevelItemTexturePath = "Textures/NewLevelItem.png";
+
 
 			readonly LevelPickingScreen proxy;
 
@@ -31,7 +31,7 @@ namespace MHUrho.UserInterface
 			readonly Button playButton;
 
 			
-			readonly Texture2D newLevelItemTexture;
+
 
 
 
@@ -41,8 +41,6 @@ namespace MHUrho.UserInterface
 				:base(proxy)
 			{
 				this.proxy = proxy;
-
-				newLevelItemTexture = PackageManager.Instance.GetTexture2D(newLevelItemTexturePath);
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LevelPickingLayout.xml");
 
@@ -89,7 +87,7 @@ namespace MHUrho.UserInterface
 
 			void GetLevels(ListView listView)
 			{
-				AddItem(new LevelPickingNewLevelItem(Game, newLevelItemTexture, "Create New Level"), listView);
+				AddItem(new LevelPickingNewLevelItem(Game), listView);
 				
 				foreach (var level in proxy.Package.Levels) {
 					AddItem(new LevelPickingLevelItem(level, Game), listView);
@@ -98,7 +96,7 @@ namespace MHUrho.UserInterface
 
 			void LevelManipulatingButtonPressed(ReleasedEventArgs args)
 			{
-				var selectedItem = (LevelPickingItem)listView.SelectedItem;
+				var selectedItem = GetSelectedItem();
 				if (selectedItem == null) {
 					throw new
 						InvalidOperationException("Level manipulation button was enabled and pressed while no level was selected");
@@ -119,7 +117,7 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void DeleteLevel(LevelPickingItem item)
+			void DeleteLevel(ExpandingListItem item)
 			{
 				if (item is LevelPickingLevelItem levelItem) {
 					item.Deselect();
@@ -135,7 +133,7 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void EditLevel(LevelPickingItem item)
+			void EditLevel(ExpandingListItem item)
 			{
 				if (item is LevelPickingLevelItem levelItem) {
 					SwitchToEditingExistingLevel(levelItem.Level);
@@ -150,7 +148,7 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void PlayLevel(LevelPickingItem item)
+			void PlayLevel(ExpandingListItem item)
 			{
 				if (item is LevelPickingLevelItem levelItem)
 				{
@@ -168,7 +166,7 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchBack();
 			}
 
-			void ItemSelected(LevelPickingItem selectedItem)
+			void ItemSelected(ExpandingListItem selectedItem)
 			{
 				listView.Selection = listView.FindItem(selectedItem);
 
@@ -186,7 +184,7 @@ namespace MHUrho.UserInterface
 				listView.UpdateInternalLayout();
 			}
 
-			void ItemDeselected(LevelPickingItem deselectedItem)
+			void ItemDeselected(ExpandingListItem deselectedItem)
 			{
 				if (listView.SelectedItem == deselectedItem) {
 					playButton.Enabled = false;
@@ -199,7 +197,7 @@ namespace MHUrho.UserInterface
 				listView.UpdateInternalLayout();
 			}
 
-			void AddItem(LevelPickingItem newItem, ListView listView)
+			void AddItem(ExpandingListItem newItem, ListView listView)
 			{
 				newItem.ItemSelected += ItemSelected;
 				newItem.ItemDeselected += ItemDeselected;
@@ -221,11 +219,16 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchToLevelSettingsScreen(level);
 			}
 
-			IEnumerable<LevelPickingItem> GetItems()
+			IEnumerable<ExpandingListItem> GetItems()
 			{
 				for (uint i = 0; i < listView.NumItems; i++) {
-					yield return (LevelPickingItem) listView.GetItem(i);
+					yield return (ExpandingListItem) listView.GetItem(i);
 				}
+			}
+
+			ExpandingListItem GetSelectedItem()
+			{
+				return (ExpandingListItem)listView.SelectedItem;
 			}
 #if DEBUG
 			public void SimulateEditPickingLevel(string levelName)

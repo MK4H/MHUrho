@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<element>
+	<attribute name="Name" value="ExpandingElement" />
+	<attribute name="Size" value="950 0" />
+	<attribute name="Min Size" value="950 0" />
+	<attribute name="Max Size" value="950 2147483647" />
+	<attribute name="Min Anchor" value="0.5 0.5" />
+	<attribute name="Max Anchor" value="0.5 0.5" />
+	<attribute name="Pivot" value="0.5 0.5" />
+	<attribute name="Layout Mode" value="Vertical" />
+</element>
