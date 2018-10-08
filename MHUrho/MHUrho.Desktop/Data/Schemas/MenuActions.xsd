@@ -79,6 +79,13 @@
       <xs:element name="values" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="neutralPlayer">
+              <xs:complexType>
+                <xs:attribute name="typeName" use="required" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="humanPlayer" type="levelSettingsPlayerType"/>
+            <xs:element name="aiPlayer" type="levelSettingsPlayerType" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -120,9 +127,15 @@
 
   <xs:simpleType name="levelSettingsActions">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="play"/>
       <xs:enumeration value="back"/>
     </xs:restriction>
   </xs:simpleType>
+
+  <xs:complexType name="levelSettingsPlayerType">
+    <xs:attribute name="typeName" use="required" type="xs:string"/>
+    <xs:attribute name="teamID" use="required" type="xs:int"/>
+  </xs:complexType>
 
   <xs:complexType name="IntVector2">
     <xs:attribute name="x" use="required" type="xs:int"/>

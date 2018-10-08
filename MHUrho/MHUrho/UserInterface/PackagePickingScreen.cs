@@ -123,7 +123,7 @@ namespace MHUrho.UserInterface
 			{
 				return (PackageListItem) listView.SelectedItem;
 			}
-#if DEBUG
+
 			public void SimulatePackagePick(string packageName)
 			{
 				foreach (var item in GetItems()) {
@@ -138,7 +138,6 @@ namespace MHUrho.UserInterface
 			{
 				MenuUIManager.SwitchBack();
 			}
-#endif
 		}
 
 
@@ -185,9 +184,6 @@ namespace MHUrho.UserInterface
 			}
 
 			screen = new Screen(this);
-#if DEBUG
-			//screen.SimulatePackagePick("testRP2");
-#endif
 
 		}
 

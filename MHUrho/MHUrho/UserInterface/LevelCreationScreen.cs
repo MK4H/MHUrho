@@ -316,7 +316,7 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-#if DEBUG
+
 			public void SimulateEditNewLevel(string name, string description, string thumbnailPath, string logicTypeName, IntVector2 mapSize, GamePack package)
 			{
 
@@ -339,7 +339,6 @@ namespace MHUrho.UserInterface
 			{
 				MenuUIManager.SwitchBack();
 			}
-#endif
 		}
 
 		public LevelRep Level { get; set; }

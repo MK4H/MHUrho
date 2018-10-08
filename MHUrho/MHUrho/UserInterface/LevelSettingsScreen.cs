@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -143,26 +144,6 @@ namespace MHUrho.UserInterface
 				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);
 			}
 
-			void PlayButtonReleased(ReleasedEventArgs args)
-			{
-				//TODO: Sanity checks
-				PlayerSpecification players = new PlayerSpecification();
-				PlayerItem item = ((PlayerItem) playerList.GetItem(0));
-				players.SetNeutralPlayer(item.ChosenType);
-				item = ((PlayerItem) playerList.GetItem(1));
-				players.SetPlayerWithInput(item.ChosenType, item.ChosenTeam);
-				for (uint i = 2; i < playerList.NumItems; i++) {
-					item = (PlayerItem)playerList.GetItem(i);
-					players.AddAIPlayer(item.ChosenType, item.ChosenTeam);
-				}
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players, pluginCustomSettings);
-			}
-
-			void BackButtonReleased(ReleasedEventArgs args)
-			{
-				MenuUIManager.SwitchBack();
-			}
-
 			public override void Dispose()
 			{
 				((Button)window.GetChild("PlayButton", true)).Released -= PlayButtonReleased;
@@ -178,9 +159,68 @@ namespace MHUrho.UserInterface
 				descriptionScrollView.Dispose();
 				descriptionText.Dispose();
 				mapImage.Dispose();
-				playerList.Dispose();				
+				playerList.Dispose();
 			}
 
+			void PlayButtonReleased(ReleasedEventArgs args)
+			{
+				//TODO: Sanity checks
+
+				PlayerItem neutralPlayerItem = ((PlayerItem) playerList.GetItem(0));
+
+
+				PlayerItem humanPlayerItem = ((PlayerItem) playerList.GetItem(1));
+				List<Tuple<PlayerType, int>> aiPlayers = new List<Tuple<PlayerType, int>>();
+				for (uint i = 2; i < playerList.NumItems; i++) {
+					PlayerItem item = (PlayerItem)playerList.GetItem(i);
+					aiPlayers.Add(Tuple.Create(item.ChosenType, item.ChosenTeam));
+				}
+
+				Play(neutralPlayerItem.ChosenType,
+					Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam),
+					aiPlayers);
+			}
+
+			void BackButtonReleased(ReleasedEventArgs args)
+			{
+				MenuUIManager.SwitchBack();
+			}
+
+			void Play(PlayerType neutralPlayerType,
+					Tuple<PlayerType,int> humanPlayer,
+					IEnumerable<Tuple<PlayerType, int>> aiPlayers)
+			{
+				PlayerSpecification players = new PlayerSpecification();
+
+				players.SetNeutralPlayer(neutralPlayerType);
+				players.SetPlayerWithInput(humanPlayer.Item1, humanPlayer.Item2);
+				foreach (var aiPlayer in aiPlayers) {
+					players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2);
+				}
+				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players, pluginCustomSettings);
+			}
+
+			public void SimulateBackButton()
+			{
+				MenuUIManager.SwitchBack();
+			}
+
+			public void SimulatePlayButton(LevelSettingsScreenAction screenAction)
+			{
+				PlayerType neutralPlayerType = Level.GamePack.GetPlayerType(screenAction.NeutralPlayerTypeName);
+
+				Tuple<PlayerType, int> humanPlayer =
+					Tuple.Create(Level.GamePack.GetPlayerType(screenAction.HumanPlayer.Item1),
+								screenAction.HumanPlayer.Item2);
+
+
+
+				Play(neutralPlayerType,
+					humanPlayer,
+					from aiPlayer in screenAction.AIPlayers
+					select Tuple.Create(Level.GamePack.GetPlayerType(aiPlayer.Item1),
+										aiPlayer.Item2));
+			}
 		}
 
 		//TODO: Ensure that Show cannot be called with Level null, that level is not changed after show etc.
@@ -201,7 +241,20 @@ namespace MHUrho.UserInterface
 
 		public override void ExecuteAction(MenuScreenAction action)
 		{
-			throw new NotImplementedException();
+			if (action is LevelSettingsScreenAction myAction) {
+				switch (myAction.Action)
+				{
+					case LevelSettingsScreenAction.Actions.Play:
+						break;
+					case LevelSettingsScreenAction.Actions.Back:
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(action), myAction.Action, "Unknown action type");
+				}
+			}
+			else {
+				throw new ArgumentException("Action does not belong to the current screen", nameof(action));
+			}
 		}
 
 		public override void Show()
@@ -223,6 +276,6 @@ namespace MHUrho.UserInterface
 			base.Hide();
 		}
 
-		
+
 	}
 }

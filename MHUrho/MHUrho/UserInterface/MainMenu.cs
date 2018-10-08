@@ -83,12 +83,11 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-#if DEBUG
+
 			public void SimulateButtonPress(string buttonName)
 			{
 				ExecuteButtonPressAction(buttonName);
 			}
-#endif
 
 		}
 
@@ -142,10 +141,6 @@ namespace MHUrho.UserInterface
 			}
 
 			screen = new Screen(this);
-
-#if DEBUG
-			//screen.SimulateButtonPress("StartButton");
-#endif
 		}
 	}
 }

@@ -11,7 +11,7 @@ using Urho;
 
 namespace MHUrho.StartupManagement
 {
-#if DEBUG
+
 	/// <summary>
 	/// Simple command line parsing for debugging
 	/// </summary>
@@ -638,15 +638,139 @@ namespace MHUrho.StartupManagement
 	}
 
 	public class LevelSettingsScreenAction : MenuScreenAction {
-		public enum Actions { Back };
+		public enum Actions { Play, Back };
 
 		public static string Name = "levelSettings";
 
 		public Actions Action { get; private set; }
 
+		public string NeutralPlayerTypeName {
+			get {
+				if (Action != Actions.Play)
+				{
+					throw new InvalidOperationException("NeutralPlayerTypeName is only valid with action Actions.Play");
+				}
+
+				return neutralPlayerLogicName;
+			}
+		}
+
+		public Tuple<string, int> HumanPlayer {
+			get {
+				if (Action != Actions.Play)
+				{
+					throw new InvalidOperationException("HumanPlayer is only valid with action Actions.Play");
+				}
+
+				return humanPlayer;
+			}
+		}
+
+		public IReadOnlyList<Tuple<string, int>> AIPlayers {
+			get {
+				if (Action != Actions.Play)
+				{
+					throw new InvalidOperationException("AIPlayers is only valid with action Actions.Play");
+				}
+
+				return aiPlayers;
+			}
+		}
+
+		readonly string neutralPlayerLogicName;
+		readonly Tuple<string, int> humanPlayer;
+		readonly List<Tuple<string, int>> aiPlayers;
+
+		protected LevelSettingsScreenAction(Actions action,
+											string neutralPlayerLogicName = null,
+											Tuple<string,int> humanPlayer = null,
+											List<Tuple<string, int>> aiPlayers = null)
+		{
+			if (action == Actions.Back &&
+				(neutralPlayerLogicName != null ||
+				humanPlayer != null ||
+				aiPlayers != null)) {
+				throw new ArgumentException("Argument value was incorrectly provided for action back");
+			}
+			else if (action == Actions.Play &&
+					(neutralPlayerLogicName == null ||
+					humanPlayer == null ||
+					aiPlayers == null)) {
+				throw new ArgumentException("Argument was null for action play");
+			}
+
+			this.neutralPlayerLogicName = neutralPlayerLogicName;
+			this.humanPlayer = humanPlayer;
+			this.aiPlayers = aiPlayers;
+		}
+
 		public static LevelSettingsScreenAction FromXml(XElement element)
 		{
-			throw new NotImplementedException();
+			CheckName(Name, element);
+
+			//Element should exist and its value should be correct thanks to schema validation
+			string actionStr = element.Element(XMLNamespace + "action").Value;
+
+			Actions action = StringToAction(actionStr);
+
+			if (action == Actions.Play)
+			{
+				XElement valuesElement = GetValuesElement(element);
+
+				return BuildActionWithValues(action, valuesElement);
+			}
+			else
+			{
+				return new LevelSettingsScreenAction(Actions.Back);
+			}
+		}
+
+		/// <summary>
+		/// Creates an action for <see cref="UserInterface.LevelSettingsScreen"/> that executes,
+		/// replacing user input
+		/// </summary>
+		/// <param name="neutralPlayerLogicName">Logic name of the neutral player</param>
+		/// <param name="humanPlayer">Logic name and TeamID of the human player</param>
+		/// <param name="aiPlayers">Logic names and TeamIDs of the AI players</param>
+		/// <returns></returns>
+		public static LevelSettingsScreenAction GetPlayAction(string neutralPlayerLogicName,
+															Tuple<string,int> humanPlayer,
+															List<Tuple<string, int>> aiPlayers)
+		{
+			return new LevelSettingsScreenAction(Actions.Play, neutralPlayerLogicName, humanPlayer, aiPlayers);
+		}
+
+		public static LevelSettingsScreenAction GetBackAction()
+		{
+			return new LevelSettingsScreenAction(Actions.Back);
+		}
+
+		static LevelSettingsScreenAction BuildActionWithValues(Actions action, XElement values)
+		{
+			const string logicNameAttribute = "typeName";
+			const string teamIDAttribute = "teamID";
+			const string neutralPlayerElementName = "neutralPlayer";
+			const string humanPlayerElementName = "humanPlayer";
+			const string aiPlayerElementName = "aiPlayer";
+
+			//if valuesElement is not null, schema should guarantee that there are the value elements
+			XElement neutralPlayerElement = values.Element(XMLNamespace + neutralPlayerElementName);
+			string neutralPlayerLogicName = neutralPlayerElement.Attribute(logicNameAttribute).Value;
+			XElement humanPlayerElement = values.Element(XMLNamespace + humanPlayerElementName);
+			string humanPlayerLogicName = humanPlayerElement.Attribute(logicNameAttribute).Value;
+			int humanPlayerTeamID = int.Parse(humanPlayerElement.Attribute(teamIDAttribute).Value);
+			//TODO: Maybe correct the paths
+
+			List<Tuple<string, int>> aiPlayers = new List<Tuple<string, int>>();
+
+			aiPlayers.AddRange(from element in values.Elements(XMLNamespace + aiPlayerElementName)
+								select Tuple.Create(element.Attribute(logicNameAttribute).Value,
+													int.Parse(element.Attribute(teamIDAttribute).Value)));
+
+			return new LevelSettingsScreenAction(action, 
+												neutralPlayerLogicName, 
+												Tuple.Create(humanPlayerLogicName, humanPlayerTeamID), 
+												aiPlayers);
 		}
 
 		static Actions StringToAction(string stringRepr)
@@ -656,10 +780,11 @@ namespace MHUrho.StartupManagement
 			{
 				case "back":
 					return Actions.Back;
+				case "play":
+					return Actions.Play;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(stringRepr), stringRepr, "Unknown action string");
 			}
 		}
 	}
-#endif
 }

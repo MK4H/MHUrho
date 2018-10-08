@@ -10,6 +10,21 @@
     </values>
   </packagePicking>
   <levelPicking>
-    <action>editnew</action>
+    <action>play</action>
+    <values>
+      <levelName>Test level 1</levelName>
+    </values>
   </levelPicking>
+  <levelSettings>
+    <action>play</action>
+    <values>
+      <neutralPlayer typeName="testNeutral1"/>
+      <humanPlayer teamID="1" typeName="testHuman1"/>
+      <aiPlayer teamID="2" typeName="TestAI"/>
+      <aiPlayer teamID="3" typeName="TestAI"/>
+      <aiPlayer teamID="1" typeName="TestAI"/>
+      <aiPlayer teamID="2" typeName="TestAI"/>
+      <aiPlayer teamID="3" typeName="TestAI"/>
+    </values>
+  </levelSettings>
 </menuActions>

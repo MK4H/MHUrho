@@ -230,7 +230,7 @@ namespace MHUrho.UserInterface
 			{
 				return (ExpandingListItem)listView.SelectedItem;
 			}
-#if DEBUG
+
 			public void SimulateEditPickingLevel(string levelName)
 			{
 				foreach (var item in GetItems()) {
@@ -271,7 +271,7 @@ namespace MHUrho.UserInterface
 			{
 				MenuUIManager.SwitchBack();
 			}
-#endif
+
 		}
 
 		//TODO: Check this if it is null, prohibit changing when the screen is visible etc.
