@@ -26,7 +26,8 @@ namespace MHUrho.Plugins
 		{
 			string absoluteAssemblyPath = Path.Combine(package.RootedDirectoryPath, relativeAssemblyPath);
 
-			var assembly = Assembly.LoadFile(absoluteAssemblyPath);
+			var assembly = Assembly.LoadFrom(absoluteAssemblyPath);
+
 			T pluginInstance = null;
 			try
 			{
