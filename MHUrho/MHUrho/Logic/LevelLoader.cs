@@ -109,11 +109,11 @@ namespace MHUrho.Logic
 					level.Camera = cameraMover;
 				}
 
-				protected Player CreatePlaceholderPlayer()
+				protected Player CreatePlaceholderPlayer(PlayerInsignia insignia)
 				{
 					var newPlayer = Player.CreatePlaceholderPlayer(Level.GetNewID(Level.players),
 																	Level,
-																	PlayerInsignia.Insignias[Level.players.Count]);
+																	insignia);
 					Level.LevelNode.AddComponent(newPlayer);
 					Level.players.Add(newPlayer.ID, newPlayer);
 
@@ -203,19 +203,20 @@ namespace MHUrho.Logic
 
 				void CreatePlayers()
 				{
-					Player firstPlayer = CreatePlaceholderPlayer();
-					//First player gets the input and is the first one selected
-					Level.Input =
-						Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.Scene.GetComponent<Octree>(), firstPlayer);
 
-					//TODO: Give him his insignias
+					InsigniaGetter insignias = new InsigniaGetter();
+					Level.HumanPlayer = CreatePlaceholderPlayer(insignias.GetNextUnusedInsignia());
+					//human player gets the input and is the first one selected
+					Level.Input =
+						Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.Scene.GetComponent<Octree>(), Level.HumanPlayer);
+
 					//Neutral player placeholder
-					Level.NeutralPlayer = CreatePlaceholderPlayer();
+					Level.NeutralPlayer = CreatePlaceholderPlayer(insignias.GetUnusedInsignia(insignias.NeutralPlayerIndex));
 
 					//AI player placeholders
 					for (int i = 1; i < LevelRep.MaxNumberOfPlayers; i++)
 					{
-						CreatePlaceholderPlayer();
+						CreatePlaceholderPlayer(insignias.GetNextUnusedInsignia());
 					}
 
 					RegisterPlayersToUI();
@@ -457,48 +458,46 @@ namespace MHUrho.Logic
 				{
 					LoadingWatcher.TextUpdate("Loading players");
 					//If players == null, we are loading a saved level already in play with set AIs
-					IPlayer playerWithInput = null;
+					InsigniaGetter insigniaGetter = new InsigniaGetter();
 					if (players == PlayerSpecification.LoadFromSavedGame) {
 						foreach (var storedPlayer in StoredLevel.Players.Players)
 						{
-							LoadPlayer(Player.GetLoaderStoredType(Level, storedPlayer));
+							LoadPlayer(Player.GetLoaderStoredType(Level, storedPlayer, insigniaGetter));
 						}
 
-						playerWithInput = Level.GetPlayer(StoredLevel.Players.PlayerWithInputID);
+						Level.HumanPlayer = Level.GetPlayer(StoredLevel.Players.HumanPlayerID);
 						Level.NeutralPlayer = Level.GetPlayer(StoredLevel.Players.NeutralPlayerID);
 					}
 					//We are loading new level from a prototype or a level in play with new AIs
 					else {
-						var storedPlayer = StoredLevel.Players.Players.GetEnumerator();
-						var newPlayerInfo = players.GetEnumerator();
-						for (; storedPlayer.MoveNext() && newPlayerInfo.MoveNext();) {
+						
+						foreach (var playerInfo in players) {
 							IPlayerLoader newPlayer =
-								Player.GetLoaderFillType(Level, storedPlayer.Current, newPlayerInfo.Current, false);
+								Player.GetLoaderFromInfo(Level, StoredLevel.Players.Players, playerInfo, insigniaGetter, false);
 							LoadPlayer(newPlayer);
 
-							if (newPlayerInfo.Current.HasInput && newPlayerInfo.Current.IsNeutral)
+							if (playerInfo.IsHuman && playerInfo.IsNeutral)
 							{
 								throw new
 									ArgumentException("Corrupted save file, neutral player cannot have the input");
 							}
-							else if (newPlayerInfo.Current.IsNeutral) {
+							else if (playerInfo.IsNeutral)
+							{
 								Level.NeutralPlayer = newPlayer.Player;
 							}
-							else if (newPlayerInfo.Current.HasInput) {
-								playerWithInput = newPlayer.Player;
+							else if (playerInfo.IsHuman)
+							{
+								Level.HumanPlayer = newPlayer.Player;
 							}
 						}
-
-						storedPlayer.Dispose();
-						newPlayerInfo.Dispose();
 					}
 
-					if (playerWithInput == null) {
+					if (Level.HumanPlayer == null) {
 						throw new
-							ArgumentException("Corrupted save file, no player has input");
+							ArgumentException("Corrupted save file, no human has input");
 					}
 
-					Level.Input = Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.octree, playerWithInput);
+					Level.Input = Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.octree, Level.HumanPlayer);
 					RegisterPlayersToUI();
 
 
@@ -527,10 +526,10 @@ namespace MHUrho.Logic
 				protected override void LoadPlayers()
 				{				
 					int numberOfPlayers = 0;
-
+					InsigniaGetter insigniaGetter = new InsigniaGetter();
 					foreach (var existingPlayer in StoredLevel.Players.Players) {
 						numberOfPlayers++;
-						IPlayerLoader newPlayer = Player.GetLoaderToEditor(Level, existingPlayer);
+						IPlayerLoader newPlayer = Player.GetLoaderToEditor(Level, existingPlayer, insigniaGetter);
 						LoadPlayer(newPlayer);
 
 						//While editing, even the neutral player can have input
@@ -538,7 +537,8 @@ namespace MHUrho.Logic
 						if (newPlayer.Player.ID == StoredLevel.Players.NeutralPlayerID) {
 							Level.NeutralPlayer = newPlayer.Player;
 						}
-						else if (newPlayer.Player.ID == StoredLevel.Players.PlayerWithInputID) {
+						else if (newPlayer.Player.ID == StoredLevel.Players.HumanPlayerID) {
+							Level.HumanPlayer = newPlayer.Player;
 							Level.Input = Game.ControllerFactory.CreateGameController(Level.Camera, Level, Level.octree, newPlayer.Player);
 						}
 					}
@@ -555,7 +555,7 @@ namespace MHUrho.Logic
 					}
 
 					for (; numberOfPlayers < LevelRep.MaxNumberOfPlayers; numberOfPlayers++) {
-						CreatePlaceholderPlayer();
+						CreatePlaceholderPlayer(insigniaGetter.GetNextUnusedInsignia());
 					}
 
 

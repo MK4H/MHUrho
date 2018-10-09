@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.EditorTools;
 using MHUrho.Input;
 using MHUrho.Packaging;
+using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using MHUrho.UserInterface;
@@ -45,6 +46,12 @@ namespace MHUrho.Logic {
 		CameraMover Camera { get; }
 
 		ToolManager ToolManager { get; }
+
+		IPlayer NeutralPlayer { get;  }
+
+		IPlayer HumanPlayer { get; }
+
+		LevelLogicInstancePlugin Plugin { get; }
 
 		event OnUpdateDelegate Update;
 

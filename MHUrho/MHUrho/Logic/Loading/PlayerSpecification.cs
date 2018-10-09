@@ -2,24 +2,55 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.EntityInfo;
 
 namespace MHUrho.Logic
 {
 	public class PlayerInfo {
 		public bool IsNeutral { get; private set; }
 
-		public bool HasInput { get; private set; }
+		public bool IsHuman { get; private set; }
 
 		public PlayerType PlayerType { get; private set; }
 
 		public int TeamID { get; private set; }
 
-		public PlayerInfo(PlayerType playerType, int teamID, bool hasInput, bool isNeutral)
+		public PlayerInsignia Insignia { get; private set; }
+
+		protected PlayerInfo(PlayerType playerType, int teamID, PlayerInsignia insignia, bool isHuman, bool isNeutral)
 		{
 			this.PlayerType = playerType;
 			this.TeamID = teamID;
-			this.HasInput = hasInput;
+			this.Insignia = insignia;
+			this.IsHuman = isHuman;
 			this.IsNeutral = isNeutral;
+		}
+
+		public static PlayerInfo CreateNeutralPlayerInfo(PlayerType playerType)
+		{
+			if (playerType.Category != PlayerTypeCategory.Neutral) {
+				throw new ArgumentException("Player type was of different category than neutral");
+			}
+
+			return new PlayerInfo(playerType, 0, PlayerInsignia.NeutralPlayerInsignia, false, true);
+		}
+
+		public static PlayerInfo CreateHumanPlayer(PlayerType playerType, int teamID, PlayerInsignia insignia)
+		{
+			if (playerType.Category != PlayerTypeCategory.Human) {
+				throw new ArgumentException("Player type was not of type category human");
+			}
+
+			return new PlayerInfo(playerType, teamID, insignia, true, false);
+		}
+
+		public static PlayerInfo CreateAIPlayer(PlayerType playerType, int teamID, PlayerInsignia insignia)
+		{
+			if (playerType.Category != PlayerTypeCategory.AI) {
+				throw new ArgumentException("Player type was not of type category AI");
+			}
+
+			return new PlayerInfo(playerType, teamID, insignia, false, false);
 		}
 	}
 
@@ -37,12 +68,12 @@ namespace MHUrho.Logic
 			playerInfos = new List<PlayerInfo>();
 		}
 
-		public void AddAIPlayer(PlayerType type, int teamID)
+		public void AddAIPlayer(PlayerType type, int teamID, PlayerInsignia insignia)
 		{
 			if (type == null) {
 				throw new ArgumentNullException(nameof(type), "Cannot add AI player without AI");
 			}
-			playerInfos.Add(new PlayerInfo(type, teamID, false, false));
+			playerInfos.Add(PlayerInfo.CreateAIPlayer(type, teamID, insignia));
 		}
 
 		public void SetNeutralPlayer(PlayerType type)
@@ -55,19 +86,19 @@ namespace MHUrho.Logic
 				throw new ArgumentNullException(nameof(type), "Cannot add neutral AI player without AI");
 			}
 
-			NeutralPlayer = new PlayerInfo(type, 0, false, true);
+			NeutralPlayer = PlayerInfo.CreateNeutralPlayerInfo(type);
 			playerInfos.Add(NeutralPlayer);
 		}
 
-		public void SetPlayerWithInput(PlayerType type, int teamID)
+		public void SetHumanPlayer(PlayerType type, int teamID, PlayerInsignia insignia)
 		{
 			if (PlayerWithInput != null) {
-				throw new InvalidOperationException("Level has to have exactly one player with input");
+				throw new InvalidOperationException("Level has to have exactly one human player");
 			}
 
 			//Can add human player without AI
 
-			PlayerWithInput = new PlayerInfo(type, teamID, true, false);
+			PlayerWithInput = PlayerInfo.CreateHumanPlayer(type, teamID, insignia);
 			playerInfos.Add(PlayerWithInput);
 		}
 

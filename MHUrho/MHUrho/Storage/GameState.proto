@@ -66,7 +66,7 @@ message StBuilding {
 }
 
 message StPlayers {
-	int32 playerWithInputID = 1;
+	int32 humanPlayerID = 1;
 	int32 neutralPlayerID = 2;
 	repeated StPlayer players = 3;
 }

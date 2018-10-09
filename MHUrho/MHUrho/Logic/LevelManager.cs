@@ -84,6 +84,8 @@ namespace MHUrho.Logic
 
 		public IPlayer NeutralPlayer { get; private set; }
 
+		public IPlayer HumanPlayer { get; private set; }
+
 		public LevelLogicInstancePlugin Plugin { get; private set; }
 
 		public event OnUpdateDelegate Update;
@@ -160,7 +162,7 @@ namespace MHUrho.Logic
 
 			level.Players = new StPlayers
 							{
-								PlayerWithInputID = Input.Player.ID,
+								HumanPlayerID = HumanPlayer.ID,
 								NeutralPlayerID = NeutralPlayer.ID
 							};
 			foreach (var player in players.Values) {

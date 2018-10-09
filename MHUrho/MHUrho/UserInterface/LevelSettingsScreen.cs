@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MHUrho.EntityInfo;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
@@ -20,14 +21,18 @@ namespace MHUrho.UserInterface
 
 				public int ChosenTeam => teamList.SelectedItem == null ? elementToTeamMap[teamList.SelectedItem] : 0;
 
+				public PlayerInsignia Insignia { get; private set; }
+
 				readonly Dictionary<UIElement, PlayerType> elementToTypeMap;
 				readonly Dictionary<UIElement, int> elementToTeamMap;
 
 				readonly DropDownList playerTypeList;
 				readonly DropDownList teamList;
 
-				protected PlayerItem(Screen screen, PlayerTypeCategory playerTypeCategory)
+				protected PlayerItem(Screen screen, PlayerInsignia insignia, PlayerTypeCategory playerTypeCategory)
 				{
+					this.Insignia = insignia;
+
 					elementToTypeMap = new Dictionary<UIElement, PlayerType>();
 					elementToTeamMap = new Dictionary<UIElement, int>();
 
@@ -36,8 +41,12 @@ namespace MHUrho.UserInterface
 
 					AddChild(child);
 
+					BorderImage playerShield = (BorderImage) child.GetChild("PlayerShield", true);
 					playerTypeList = (DropDownList) child.GetChild("PlayerTypeList", true);
 					teamList = (DropDownList) child.GetChild("TeamList", true);
+
+					playerShield.Texture = insignia.ShieldTexture;
+					playerShield.ImageRect = insignia.ShieldRectangle;
 
 					foreach (var player in screen.Level.GamePack.GetPlayersWithTypeCategory(playerTypeCategory)) {
 						var item = InitTypeItem(player, screen.Game, screen.MenuUIManager);
@@ -45,18 +54,25 @@ namespace MHUrho.UserInterface
 						elementToTypeMap.Add(item, player);
 					}
 
-					for (int teamID = 1; teamID <= screen.Level.MaxNumberOfPlayers; teamID++) {
-						UIElement item = InitTeamItem(teamID, screen.Game, screen.MenuUIManager);
-						teamList.AddItem(item);
-						elementToTeamMap.Add(item, teamID);
+					if (playerTypeCategory != PlayerTypeCategory.Neutral) {
+						for (int teamID = 1; teamID <= screen.Level.MaxNumberOfPlayers; teamID++)
+						{
+							UIElement item = InitTeamItem(teamID, screen.Game, screen.MenuUIManager);
+							teamList.AddItem(item);
+							elementToTeamMap.Add(item, teamID);
+						}
+					}
+					else {
+						teamList.Visible = false;
 					}
 				}
 
 				public static PlayerItem CreateAndAddToList(ListView list,
 															Screen screen,
+															PlayerInsignia insignia,
 															PlayerTypeCategory playerTypeCategory)
 				{
-					var newItem = new PlayerItem(screen, playerTypeCategory);
+					var newItem = new PlayerItem(screen, insignia, playerTypeCategory);
 					list.AddItem(newItem);
 					newItem.SetStyle("PlayerItem");
 					return newItem;
@@ -134,11 +150,20 @@ namespace MHUrho.UserInterface
 				((Button)window.GetChild("PlayButton", true)).Released += PlayButtonReleased;
 				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
 
-				PlayerItem.CreateAndAddToList(playerList, this, PlayerTypeCategory.Neutral);
-				PlayerItem.CreateAndAddToList(playerList, this, PlayerTypeCategory.Human);
+				InsigniaGetter insigniaGetter = new InsigniaGetter();
+
+				PlayerItem.CreateAndAddToList(playerList, 
+											this, 
+											insigniaGetter.MarkUsed(PlayerInsignia.NeutralPlayerInsignia), 
+											PlayerTypeCategory.Neutral);
+
+				PlayerItem.CreateAndAddToList(playerList,
+											this,
+											insigniaGetter.GetNextUnusedInsignia(),
+											PlayerTypeCategory.Human);
 
 				for (int i = 0; i < Level.MaxNumberOfPlayers - 1; i++) {
-					PlayerItem.CreateAndAddToList(playerList, this, PlayerTypeCategory.AI);
+					PlayerItem.CreateAndAddToList(playerList, this, insigniaGetter.GetNextUnusedInsignia(), PlayerTypeCategory.AI);
 				}
 
 				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);
@@ -170,14 +195,14 @@ namespace MHUrho.UserInterface
 
 
 				PlayerItem humanPlayerItem = ((PlayerItem) playerList.GetItem(1));
-				List<Tuple<PlayerType, int>> aiPlayers = new List<Tuple<PlayerType, int>>();
+				List<Tuple<PlayerType, int, PlayerInsignia>> aiPlayers = new List<Tuple<PlayerType, int, PlayerInsignia>>();
 				for (uint i = 2; i < playerList.NumItems; i++) {
 					PlayerItem item = (PlayerItem)playerList.GetItem(i);
-					aiPlayers.Add(Tuple.Create(item.ChosenType, item.ChosenTeam));
+					aiPlayers.Add(Tuple.Create(item.ChosenType, item.ChosenTeam, item.Insignia));
 				}
 
 				Play(neutralPlayerItem.ChosenType,
-					Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam),
+					Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam, humanPlayerItem.Insignia),
 					aiPlayers);
 			}
 
@@ -187,15 +212,15 @@ namespace MHUrho.UserInterface
 			}
 
 			void Play(PlayerType neutralPlayerType,
-					Tuple<PlayerType,int> humanPlayer,
-					IEnumerable<Tuple<PlayerType, int>> aiPlayers)
+					Tuple<PlayerType,int, PlayerInsignia> humanPlayer,
+					IEnumerable<Tuple<PlayerType, int, PlayerInsignia>> aiPlayers)
 			{
 				PlayerSpecification players = new PlayerSpecification();
 
 				players.SetNeutralPlayer(neutralPlayerType);
-				players.SetPlayerWithInput(humanPlayer.Item1, humanPlayer.Item2);
+				players.SetHumanPlayer(humanPlayer.Item1, humanPlayer.Item2, humanPlayer.Item3);
 				foreach (var aiPlayer in aiPlayers) {
-					players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2);
+					players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2, aiPlayer.Item3);
 				}
 				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players, pluginCustomSettings);
 			}
@@ -207,11 +232,14 @@ namespace MHUrho.UserInterface
 
 			public void SimulatePlayButton(LevelSettingsScreenAction screenAction)
 			{
+				InsigniaGetter insigniaGetter = new InsigniaGetter();
+				insigniaGetter.MarkUsed(PlayerInsignia.NeutralPlayerInsignia);
 				PlayerType neutralPlayerType = Level.GamePack.GetPlayerType(screenAction.NeutralPlayerTypeName);
 
-				Tuple<PlayerType, int> humanPlayer =
+				Tuple<PlayerType, int, PlayerInsignia> humanPlayer =
 					Tuple.Create(Level.GamePack.GetPlayerType(screenAction.HumanPlayer.Item1),
-								screenAction.HumanPlayer.Item2);
+								screenAction.HumanPlayer.Item2,
+								 insigniaGetter.GetNextUnusedInsignia());
 
 
 
@@ -219,7 +247,8 @@ namespace MHUrho.UserInterface
 					humanPlayer,
 					from aiPlayer in screenAction.AIPlayers
 					select Tuple.Create(Level.GamePack.GetPlayerType(aiPlayer.Item1),
-										aiPlayer.Item2));
+										aiPlayer.Item2,
+										insigniaGetter.GetNextUnusedInsignia()));
 			}
 		}
 
@@ -245,8 +274,10 @@ namespace MHUrho.UserInterface
 				switch (myAction.Action)
 				{
 					case LevelSettingsScreenAction.Actions.Play:
+						screen.SimulatePlayButton(myAction);
 						break;
 					case LevelSettingsScreenAction.Actions.Back:
+						screen.SimulateBackButton();
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(nameof(action), myAction.Action, "Unknown action type");

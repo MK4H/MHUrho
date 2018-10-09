@@ -15,6 +15,16 @@
       <levelName>Test level 1</levelName>
     </values>
   </levelPicking>
+  <!--<levelCreation>
+    <action>edit</action>
+    <values>
+      <levelName>Test level 1</levelName>
+      <description>The best test level 1</description>
+      <thumbnailPath>xamarin.png</thumbnailPath>
+      <logicTypeName>TestLogic</logicTypeName>
+      <mapSize x="200" y="300"/>
+    </values>
+  </levelCreation>-->
   <levelSettings>
     <action>play</action>
     <values>

@@ -200,7 +200,7 @@ namespace MHUrho.UserInterface
 			checkBox.SetStyle("PlayerCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
 
 
-			checkBox.ImageRect = player.Insignia.ShieldIcon;
+			checkBox.ImageRect = player.Insignia.ShieldRectangle;
 
 			players.Add(checkBox, player);		
 		}

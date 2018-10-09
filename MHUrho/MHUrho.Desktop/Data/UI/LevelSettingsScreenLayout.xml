@@ -57,10 +57,10 @@
 	<element type="ListView">
 		<attribute name="Name" value="PlayerListView" />
 		<attribute name="Position" value="5 5" />
-		<attribute name="Size" value="500 350" />
+		<attribute name="Size" value="600 350" />
 		<attribute name="Pivot" value="0 0" />
 		<element type="ScrollBar" internal="true" style="none">
-			<attribute name="Size" value="500 16" />
+			<attribute name="Size" value="600 16" />
 			<attribute name="Min Anchor" value="0 1" />
 			<attribute name="Max Anchor" value="0 1" />
 			<attribute name="Pivot" value="0 1" />
@@ -74,14 +74,14 @@
 			</element>
 			<element type="Slider" internal="true" style="none">
 				<attribute name="Position" value="16 0" />
-				<attribute name="Size" value="468 16" />
+				<attribute name="Size" value="568 16" />
 				<attribute name="Pivot" value="0 0" />
 				<element type="BorderImage" internal="true" style="none">
 					<attribute name="Pivot" value="0 0" />
 				</element>
 			</element>
 			<element type="Button" internal="true" style="none">
-				<attribute name="Position" value="484 0" />
+				<attribute name="Position" value="584 0" />
 				<attribute name="Pivot" value="0 0" />
 			</element>
 		</element>
