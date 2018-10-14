@@ -33,6 +33,7 @@ namespace MHUrho.UserInterface
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PopUpConfirmationLayout.xml");
 				this.popUpWindow = (Window)MenuUIManager.MenuRoot.GetChild("PopUpConfirmationWindow");
+				popUpWindow.Modal = true;
 				popUpWindow.Visible = true;
 				popUpWindow.BringToFront();
 
@@ -55,7 +56,7 @@ namespace MHUrho.UserInterface
 				if (timeout != null)
 				{
 					timeoutCancel = new CancellationTokenSource();
-					Task.Delay(timeout.Value, timeoutCancel.Token).ContinueWith(TimeOutExpired);
+					Task.Delay(timeout.Value, timeoutCancel.Token).ContinueWith(TimeOutExpired, TaskContinuationOptions.NotOnCanceled);
 				}
 			}
 
