@@ -24,14 +24,73 @@ namespace MHUrho.Logic
 	class Unit : Entity, IUnit {
 		class Loader : IUnitLoader {
 
+			static class ComponentSetup {
+				delegate void ComponentSetupDelegate(Component component, ILevelManager level);
+
+				static readonly Dictionary<StringHash, ComponentSetupDelegate> setupDispatch;
+
+				static ComponentSetup()
+				{
+					setupDispatch = new Dictionary<StringHash, ComponentSetupDelegate>
+									{
+										{ RigidBody.TypeStatic, SetupRigidBody },
+										{ StaticModel.TypeStatic, SetupStaticModel },
+										{ AnimatedModel.TypeStatic, SetupAnimatedModel }
+									};
+				}
+
+
+				public static void SetupComponentsOnNode(Node node, ILevelManager level)
+				{
+					//TODO: Maybe loop through child nodes
+					foreach (var component in node.Components)
+					{
+						if (setupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value)) {
+							value(component, level);
+						}
+					}
+				}
+
+				static void SetupRigidBody(Component rigidBodyComponent, ILevelManager level)
+				{
+					RigidBody rigidBody = rigidBodyComponent as RigidBody;
+
+					rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
+					rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
+					rigidBody.Kinematic = true;
+					rigidBody.Mass = 1;
+					rigidBody.UseGravity = false;
+				}
+
+				static void SetupStaticModel(Component staticModelComponent, ILevelManager level)
+				{
+					StaticModel staticModel = staticModelComponent as StaticModel;
+
+					staticModel.CastShadows = false;
+					staticModel.DrawDistance = level.App.Config.UnitDrawDistance;
+				}
+
+				static void SetupAnimatedModel(Component animatedModelComponent, ILevelManager level)
+				{
+					AnimatedModel animatedModel = animatedModelComponent as AnimatedModel;
+
+					SetupStaticModel(animatedModel, level);
+				}
+
+				static void SetupAnimationController()
+				{
+					//TODO: Maybe add animation controller
+				}
+			}
+			
+
 			public IUnit Unit => loadingUnit;
 
 			Unit loadingUnit;
 
-			List<DefaultComponentLoader> componentLoaders;
+			List<DefaultComponentLoader> defComponentLoaders;
 
 			readonly LevelManager level;
-			readonly Node node;
 			readonly UnitType type;
 			/// <summary>
 			/// Holds the image of this unit between the steps of loading
@@ -40,18 +99,17 @@ namespace MHUrho.Logic
 			/// </summary>
 			readonly StUnit storedUnit;
 
+			const string NodeName = "UnitNode";
+
 			/// <summary>
 			/// Loads unit component from <paramref name="storedUnit"/> and all other needed components
-			///  and adds them to the <paramref name="node"/>
 			/// </summary>
 			/// <param name="level"></param>
-			/// <param name="node">scene node of the unit</param>
 			/// <param name="storedUnit">stored unit</param>
-			public Loader(LevelManager level, Node node, StUnit storedUnit) {
+			public Loader(LevelManager level, StUnit storedUnit) {
 				this.level = level;
-				this.node = node;
 				this.storedUnit = storedUnit;
-				this.componentLoaders = new List<DefaultComponentLoader>();
+				this.defComponentLoaders = new List<DefaultComponentLoader>();
 
 				type = PackageManager.Instance.ActivePackage.GetUnitType(storedUnit.TypeID);
 				if (type == null) {
@@ -64,21 +122,26 @@ namespace MHUrho.Logic
 			/// Also adds the unit as PassingUnit to <paramref name="tile"/>
 			/// </summary>
 			/// <param name="id">The unique identifier of the unit, must be unique among other units</param>
-			/// <param name="unitNode">Scene node of the unit</param>
 			/// <param name="type">type of the unit</param>
 			/// <param name="tile">tile where the unit will spawn</param>
 			/// <param name="player">owner of the unit</param>
 			/// <returns>the unit component, already added to the node</returns>
-			public static Unit CreateNew(int id, Node unitNode, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
+			public static Unit CreateNew(int id, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
 				//TODO: Check if there is already a Unit component on this node, if there is, throw exception
 
-				var centerNode = CreateBasicNodeStructure(unitNode, level, type);
-
-				unitNode.Position = new Vector3(tile.Center.X,
+				Vector3 position = new Vector3(tile.Center.X,
 												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
 												tile.Center.Y);
+
+				//TODO: Rotation
+				Node unitNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				unitNode.Name = NodeName;
+
+
+				ComponentSetup.SetupComponentsOnNode(unitNode, level);
+
 				var unit = new Unit(id, level, type, tile, player, unitNode);
-				centerNode.AddComponent(unit);
+				unitNode.AddComponent(unit);
 
 				unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
 
@@ -119,16 +182,22 @@ namespace MHUrho.Logic
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}
 
-				var centerNode = CreateBasicNodeStructure(node, level, type);
+				Vector3 position = storedUnit.Position.ToVector3();
+				//TODO: Store rotation
+
+				Node centerNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				centerNode.Name = NodeName;
+
+				ComponentSetup.SetupComponentsOnNode(centerNode, level);
 
 				var unitID = storedUnit.Id;
 
-				loadingUnit = new Unit(unitID, level, type, node);
+				loadingUnit = new Unit(unitID, level, type, centerNode);
 				centerNode.AddComponent(loadingUnit);
 
-				//This is the main reason i add Unit to node right here, because i want to isolate the storedUnit reading
-				// to this class, and for that i need to set the Position here
-				node.Position = new Vector3(storedUnit.Position.X, storedUnit.Position.Y, storedUnit.Position.Z);
+				//Unit is automatically registered by the loaders
+				//entityRegistry.Register(loadingUnit);
+
 
 				loadingUnit.UnitPlugin = type.GetInstancePluginForLoading(loadingUnit, level);
 
@@ -138,7 +207,7 @@ namespace MHUrho.Logic
 							.StartLoadingComponent(defaultComponent,
 													level,
 													loadingUnit.UnitPlugin);
-					componentLoaders.Add(componentLoader);
+					defComponentLoaders.Add(componentLoader);
 					loadingUnit.AddComponent(componentLoader.Component);
 				}
 
@@ -151,7 +220,7 @@ namespace MHUrho.Logic
 				loadingUnit.Player = level.GetPlayer(storedUnit.PlayerID);
 				loadingUnit.Tile = level.Map.GetContainingTile(loadingUnit.Position);
 				
-				foreach (var componentLoader in componentLoaders) {
+				foreach (var componentLoader in defComponentLoaders) {
 					componentLoader.ConnectReferences();
 				}
 
@@ -159,47 +228,9 @@ namespace MHUrho.Logic
 			}
 
 			public void FinishLoading() {
-				foreach (var componentLoader in componentLoaders) {
+				foreach (var componentLoader in defComponentLoaders) {
 					componentLoader.FinishLoading();
 				}
-			}
-
-			static Node CreateBasicNodeStructure(Node legNode, ILevelManager level, UnitType type) {
-				var centerNode = legNode.CreateChild("UnitCenter");
-
-				AddRigidBody(centerNode);
-				var model = AddModel(centerNode, level, type);
-				AddAnimationController(centerNode);
-
-				centerNode.Position = new Vector3(0, 0, 0);
-
-				//TODO: Move collisionShape to plugin
-				var collider = centerNode.CreateComponent<CollisionShape>();
-				collider.SetBox(model.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
-
-				return centerNode;
-			}
-
-			static void AddRigidBody(Node node) {
-				var rigidBody = node.CreateComponent<RigidBody>();
-				rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
-				rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
-				rigidBody.Kinematic = true;
-				rigidBody.Mass = 1;
-				rigidBody.UseGravity = false;
-			}
-
-			static StaticModel AddModel(Node node, ILevelManager level, UnitType type) {
-				var animatedModel = type.Model.AddModel(node);
-				type.Material.ApplyMaterial(animatedModel);
-				animatedModel.CastShadows = false;
-
-				animatedModel.DrawDistance = level.App.Config.UnitDrawDistance;
-				return animatedModel;
-			}
-
-			static void AddAnimationController(Node node) {
-				var animationController = node.CreateComponent<AnimationController>();
 			}
 
 		}
@@ -293,19 +324,18 @@ namespace MHUrho.Logic
 
 		#region Public methods
 
-		public static IUnitLoader GetLoader(LevelManager level, Node node, StUnit storedUnit)
+		public static IUnitLoader GetLoader(LevelManager level, StUnit storedUnit)
 		{
-			return new Loader(level, node, storedUnit);
+			return new Loader(level, storedUnit);
 		}
 
 		public static Unit CreateNew(int id,
-										Node unitNode,
 										UnitType type,
 										ILevelManager level,
 										ITile tile,
 										IPlayer player)
 		{
-			return Loader.CreateNew(id, unitNode, type, level, tile, player);
+			return Loader.CreateNew(id, type, level, tile, player);
 		}
 
 		public StUnit Save() {

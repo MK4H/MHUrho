@@ -19,7 +19,7 @@ namespace MHUrho.UserInterface
 
 				public PlayerType ChosenType => playerTypeList.SelectedItem != null ? elementToTypeMap[playerTypeList.SelectedItem] : null;
 
-				public int ChosenTeam => teamList.SelectedItem == null ? elementToTeamMap[teamList.SelectedItem] : 0;
+				public int ChosenTeam => teamList.SelectedItem != null ? elementToTeamMap[teamList.SelectedItem] : 0;
 
 				public PlayerInsignia Insignia { get; private set; }
 
@@ -29,7 +29,7 @@ namespace MHUrho.UserInterface
 				readonly DropDownList playerTypeList;
 				readonly DropDownList teamList;
 
-				protected PlayerItem(Screen screen, PlayerInsignia insignia, PlayerTypeCategory playerTypeCategory)
+				protected PlayerItem(Screen screen, PlayerInsignia insignia, int initialTeamID, PlayerTypeCategory playerTypeCategory)
 				{
 					this.Insignia = insignia;
 
@@ -60,6 +60,10 @@ namespace MHUrho.UserInterface
 							UIElement item = InitTeamItem(teamID, screen.Game, screen.MenuUIManager);
 							teamList.AddItem(item);
 							elementToTeamMap.Add(item, teamID);
+
+							if (teamID == initialTeamID) {
+								teamList.Selection = teamList.NumItems - 1;
+							}
 						}
 					}
 					else {
@@ -70,9 +74,10 @@ namespace MHUrho.UserInterface
 				public static PlayerItem CreateAndAddToList(ListView list,
 															Screen screen,
 															PlayerInsignia insignia,
+															int initialTeamID,
 															PlayerTypeCategory playerTypeCategory)
 				{
-					var newItem = new PlayerItem(screen, insignia, playerTypeCategory);
+					var newItem = new PlayerItem(screen, insignia, initialTeamID, playerTypeCategory);
 					list.AddItem(newItem);
 					newItem.SetStyle("PlayerItem");
 					return newItem;
@@ -155,15 +160,17 @@ namespace MHUrho.UserInterface
 				PlayerItem.CreateAndAddToList(playerList, 
 											this, 
 											insigniaGetter.MarkUsed(PlayerInsignia.NeutralPlayerInsignia), 
+											0,
 											PlayerTypeCategory.Neutral);
 
 				PlayerItem.CreateAndAddToList(playerList,
 											this,
 											insigniaGetter.GetNextUnusedInsignia(),
+											1,
 											PlayerTypeCategory.Human);
 
 				for (int i = 0; i < Level.MaxNumberOfPlayers - 1; i++) {
-					PlayerItem.CreateAndAddToList(playerList, this, insigniaGetter.GetNextUnusedInsignia(), PlayerTypeCategory.AI);
+					PlayerItem.CreateAndAddToList(playerList, this, insigniaGetter.GetNextUnusedInsignia(), i + 2, PlayerTypeCategory.AI);
 				}
 
 				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);

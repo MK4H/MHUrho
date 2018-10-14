@@ -302,9 +302,8 @@ namespace MHUrho.Logic
 				protected virtual void LoadUnits()
 				{
 					LoadingWatcher.TextUpdate("Loading units");
-					foreach (var unit in StoredLevel.Units)
-					{
-						var unitLoader = Unit.GetLoader(Level, Level.LevelNode.CreateChild("UnitNode"), unit);
+					foreach (var unit in StoredLevel.Units) {
+						var unitLoader = Unit.GetLoader(Level, unit);
 						unitLoader.StartLoading();
 						Level.RegisterEntity(unitLoader.Unit);
 						Level.units.Add(unitLoader.Unit.ID, unitLoader.Unit);
@@ -315,28 +314,20 @@ namespace MHUrho.Logic
 				protected virtual void LoadBuildings()
 				{
 					LoadingWatcher.TextUpdate("Loading buildings");
-					foreach (var building in StoredLevel.Buildings)
-					{
-						var buildingLoader =
-							Building.GetLoader(Level,
-												Level.LevelNode.CreateChild("BuildingNode"),
-												building);
+					foreach (var building in StoredLevel.Buildings) {
+						var buildingLoader = Building.GetLoader(Level, building);
 						buildingLoader.StartLoading();
 						Level.RegisterEntity(buildingLoader.Building);
-						Level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building); ;
+						Level.buildings.Add(buildingLoader.Building.ID, buildingLoader.Building); 
 						Loaders.Add(buildingLoader);
-
 					}
 				}
 
 				protected virtual void LoadProjectiles()
 				{
 					LoadingWatcher.TextUpdate("Loading projectiles");
-					foreach (var projectile in StoredLevel.Projectiles)
-					{
-						var projectileLoader = Projectile.GetLoader(Level,
-																	Level.LevelNode.CreateChild("ProjectileNode"),
-																	projectile);
+					foreach (var projectile in StoredLevel.Projectiles) {
+						var projectileLoader = Projectile.GetLoader(Level, projectile);
 						projectileLoader.StartLoading();
 						Level.RegisterEntity(projectileLoader.Projectile);
 						Level.projectiles.Add(projectileLoader.Projectile.ID, projectileLoader.Projectile);
@@ -568,8 +559,6 @@ namespace MHUrho.Logic
 			public Task<ILevelManager> CurrentLoading { get; private set; }
 
 			readonly LoadingWatcher loadingWatcher;
-
-
 
 			CommonLevelLoader loaderType;
 

@@ -24,9 +24,7 @@ namespace MHUrho.Logic
 
 		public ProjectileTypePlugin Plugin {get; private set;}
 
-		public ModelWrapper Model { get; private set; }
-
-		public MaterialWrapper Material { get; private set; }
+		public AssetContainer Assets { get; private set; }
 
 		readonly Queue<Projectile> projectilePool;
 
@@ -40,8 +38,7 @@ namespace MHUrho.Logic
 		public void Load(XElement xml, GamePack package) {
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
-			Model = XmlHelpers.GetModel(xml);
-			Material = XmlHelpers.GetMaterial(xml);
+			Assets = AssetContainer.FromXml(xml.Element(ProjectileTypeXml.Inst.Assets));
 			Package = package;
 
 			XElement pathElement = xml.Element(ProjectileTypeXml.Inst.AssemblyPath);
@@ -107,9 +104,8 @@ namespace MHUrho.Logic
 			return Plugin.IsInRange(source, target);
 		}
 
-		public void Dispose() {
-			Model?.Dispose();
-			Material?.Dispose();
+		public void Dispose(){
+			Assets.Dispose();
 		}
 
 		internal bool ProjectileDespawn(Projectile projectile) {
@@ -131,14 +127,11 @@ namespace MHUrho.Logic
 
 			}
 			else {
-				//Projectile node has to be a child of the scene directly for physics to work correctly
-				var projectileNode = level.LevelNode.CreateChild("Projectile");
 				projectile = Projectile.CreateNew(newID,
 												 level,
 												 player,
 												 position,
-												 this,
-												 projectileNode);
+												 this);
 
 
 			}

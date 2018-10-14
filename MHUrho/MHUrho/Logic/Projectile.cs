@@ -16,6 +16,67 @@ namespace MHUrho.Logic
 	class Projectile : Entity, IProjectile {
 		class Loader : IProjectileLoader {
 
+			static class ComponentSetup
+			{
+				delegate void ComponentSetupDelegate(Component component, ILevelManager level);
+
+				static readonly Dictionary<StringHash, ComponentSetupDelegate> setupDispatch;
+
+				static ComponentSetup()
+				{
+					setupDispatch = new Dictionary<StringHash, ComponentSetupDelegate>
+									{
+										{ RigidBody.TypeStatic, SetupRigidBody },
+										{ StaticModel.TypeStatic, SetupStaticModel },
+										{ AnimatedModel.TypeStatic, SetupAnimatedModel }
+									};
+				}
+
+
+				public static void SetupComponentsOnNode(Node node, ILevelManager level)
+				{
+					//TODO: Maybe loop through child nodes
+					foreach (var component in node.Components)
+					{
+						if (setupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value))
+						{
+							value(component, level);
+						}
+					}
+				}
+
+				static void SetupRigidBody(Component rigidBodyComponent, ILevelManager level)
+				{
+					RigidBody rigidBody = rigidBodyComponent as RigidBody;
+
+					rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
+					rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
+					rigidBody.Kinematic = true;
+					rigidBody.Mass = 1;
+					rigidBody.UseGravity = false;
+				}
+
+				static void SetupStaticModel(Component staticModelComponent, ILevelManager level)
+				{
+					StaticModel staticModel = staticModelComponent as StaticModel;
+
+					staticModel.CastShadows = false;
+					staticModel.DrawDistance = level.App.Config.ProjectileDrawDistance;
+				}
+
+				static void SetupAnimatedModel(Component animatedModelComponent, ILevelManager level)
+				{
+					AnimatedModel animatedModel = animatedModelComponent as AnimatedModel;
+
+					SetupStaticModel(animatedModel, level);
+				}
+
+				static void SetupAnimationController()
+				{
+					//TODO: Maybe add animation controller
+				}
+			}
+
 			public IProjectile Projectile => loadingProjectile;
 
 			Projectile loadingProjectile;
@@ -23,16 +84,15 @@ namespace MHUrho.Logic
 			List<DefaultComponentLoader> componentLoaders;
 
 			readonly LevelManager level;
-			readonly Node node;
 			readonly StProjectile storedProjectile;
 			readonly ProjectileType type;
 
+			const string NodeName = "ProjectileNode";
+
 			public Loader(LevelManager level,
-						Node node,
 						StProjectile storedProjectile)
 			{
 				this.level = level;
-				this.node = node;
 				this.storedProjectile = storedProjectile;
 				this.componentLoaders = new List<DefaultComponentLoader>();
 
@@ -46,16 +106,21 @@ namespace MHUrho.Logic
 												ILevelManager level,
 												IPlayer player,
 												Vector3 position,
-												ProjectileType type,
-												Node node)
+												ProjectileType type)
 			{
-				node.Position = position;
+
+				//TODO: Maybe pass rotation as an argument
+				Node projectileNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				projectileNode.Name = NodeName;
+
+				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
+
 				var projectile = new Projectile(ID, level, type, player);
-				node.AddComponent(projectile);
+				projectileNode.AddComponent(projectile);
 
-				AddBasicComponents(projectile, level);
+				//AddBasicComponents(projectile, level);
 
-				node.NodeCollisionStart += projectile.CollisionHandler;
+				projectileNode.NodeCollisionStart += projectile.CollisionHandler;
 
 				projectile.ProjectilePlugin = type.GetNewInstancePlugin(projectile, level);
 
@@ -92,16 +157,21 @@ namespace MHUrho.Logic
 					throw new ArgumentException("provided type is not the type of the stored projectile");
 				}
 
+				Vector3 position = storedProjectile.Position.ToVector3();
+
 				var instanceID = storedProjectile.Id;
 
-				node.Position = storedProjectile.Position.ToVector3();
+				//TODO: Store rotation
+				Node projectileNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				projectileNode.Name = NodeName;
+
+				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
 
 				loadingProjectile = new Projectile(instanceID, level, type);
-				node.AddComponent(loadingProjectile);
+				projectileNode.AddComponent(loadingProjectile);
 
-				AddBasicComponents(loadingProjectile, level);
 
-				node.NodeCollisionStart += loadingProjectile.CollisionHandler;
+				projectileNode.NodeCollisionStart += loadingProjectile.CollisionHandler;
 
 				loadingProjectile.ProjectilePlugin = loadingProjectile.ProjectileType.GetInstancePluginForLoading(loadingProjectile, level);
 
@@ -134,40 +204,6 @@ namespace MHUrho.Logic
 				foreach (var componentLoader in componentLoaders) {
 					componentLoader.FinishLoading();
 				}
-			}
-
-
-
-			static void AddBasicComponents(Projectile projectile, ILevelManager level)
-			{
-				AddRigidBody(projectile);
-				StaticModel model = AddModel(projectile.Node, projectile.ProjectileType);
-
-				model.DrawDistance = level.App.Config.ProjectileDrawDistance;
-
-				var collider = projectile.Node.CreateComponent<CollisionShape>();
-				collider.SetBox(model.BoundingBox.Size, Vector3.Zero, Quaternion.Identity);
-			}
-
-			static void AddRigidBody(Projectile projectile)
-			{
-
-
-				projectile.rigidBody = projectile.Node.CreateComponent<RigidBody>();
-				projectile.rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
-				projectile.rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
-				projectile.rigidBody.Kinematic = true;
-				projectile.rigidBody.Mass = 1;
-				projectile.rigidBody.UseGravity = false;
-
-				
-			}
-
-			static StaticModel AddModel(Node projectileNode, ProjectileType type)
-			{
-				var staticModel = type.Model.AddModel(projectileNode);
-				type.Material.ApplyMaterial(staticModel);
-				return staticModel;
 			}
 		}
 
@@ -233,19 +269,18 @@ namespace MHUrho.Logic
 		}
 
 
-		public static IProjectileLoader GetLoader(LevelManager level, Node projectileNode, StProjectile storedProjectile)
+		public static IProjectileLoader GetLoader(LevelManager level, StProjectile storedProjectile)
 		{
-			return new Loader(level, projectileNode, storedProjectile);
+			return new Loader(level, storedProjectile);
 		}
 
 		public static Projectile CreateNew(int ID,
 											ILevelManager level,
 											IPlayer player,
 											Vector3 position,
-											ProjectileType type,
-											Node node)
+											ProjectileType type)
 		{
-			return Loader.CreateNew(ID, level, player, position, type, node);
+			return Loader.CreateNew(ID, level, player, position, type);
 		}
 
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {

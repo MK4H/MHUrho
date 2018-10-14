@@ -18,16 +18,13 @@ namespace MHUrho.Logic
 	public class UnitType : ILoadableType, IDisposable
 	{
 
-
 		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 
 		public GamePack Package { get; private set; }
 
-		public ModelWrapper Model { get; private set; }
-
-		public MaterialWrapper Material { get; private set; }
+		public AssetContainer Assets { get; private set; }
 
 		public IntRect IconRectangle { get; private set; }
 
@@ -70,8 +67,7 @@ namespace MHUrho.Logic
 
 			//var data = Plugin.TypeData;
 
-			Model = XmlHelpers.GetModel(xml);
-			Material = XmlHelpers.GetMaterial(xml);
+			Assets = AssetContainer.FromXml(xml.Element(UnitTypeXml.Inst.Assets));
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 
@@ -96,19 +92,17 @@ namespace MHUrho.Logic
 		/// Creates new instance of this unit type positioned at <paramref name="tile"/>
 		/// </summary>
 		/// <param name="unitID">identifier unique between units</param>
-		/// <param name="unitNode">scene node of the new unit</param>
 		/// <param name="level">Level where the unit is being created</param>
 		/// <param name="tile">tile where the unit will spawn</param>
 		/// <param name="player">owner of the unit</param>
 		/// <returns>New unit of this type</returns>
 		internal IUnit CreateNewUnit(int unitID,
-								Node unitNode,
 								ILevelManager level,
 								ITile tile,
 								IPlayer player) {
 
 
-			return Unit.CreateNew(unitID, unitNode, this, level, tile, player);
+			return Unit.CreateNew(unitID, this, level, tile, player);
 		}
 
 
@@ -123,8 +117,7 @@ namespace MHUrho.Logic
 
 		public void Dispose() {
 			//TODO: Release all disposable resources
-			Model.Dispose();
-			Material.Dispose();
+			Assets.Dispose();
 		}
 
 

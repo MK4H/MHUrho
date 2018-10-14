@@ -281,9 +281,7 @@ namespace MHUrho.Packaging
 
 		public XName IDAttribute => "ID";
 
-		public XName Model => PackageManager.XMLNamespace + "model";
-
-		public XName Material => PackageManager.XMLNamespace + "material";
+		public XName Assets => PackageManager.XMLNamespace + "assets";
 
 		public XName AssemblyPath => PackageManager.XMLNamespace + "assemblyPath";
 
@@ -310,13 +308,45 @@ namespace MHUrho.Packaging
 		}
 	}
 
+	class AssetsXml {
+
+		public static AssetsXml Inst { get; } = new AssetsXml();
+
+		public XName TypeAttribute => "type";
+
+		public XName Path => PackageManager.XMLNamespace + "path";
+
+		public XName Scale => PackageManager.XMLNamespace + "scale";
+
+		public XName Model => PackageManager.XMLNamespace + "model";
+
+		public XName CollisionShape => PackageManager.XMLNamespace + "collisionShape";
+
+		public const string XmlPrefabType = "xmlprefab";
+
+		public const string BinaryPrefabType = "binaryprefab";
+
+		public const string ItemsType = "items";
+
+		protected AssetsXml()
+		{
+
+		}
+	}
+
 	class ModelXml {
 
 		public static ModelXml Inst { get; } = new ModelXml();
 
+		public XName TypeAttribute => "type";
+
 		public XName ModelPath => PackageManager.XMLNamespace + "modelPath";
 
-		public XName Scale => PackageManager.XMLNamespace + "scale";
+		public XName Material => PackageManager.XMLNamespace + "material";
+
+		public const string StaticModelType = "static";
+
+		public const string AnimatedModelType = "animated";
 
 		protected ModelXml()
 		{
@@ -328,14 +358,61 @@ namespace MHUrho.Packaging
 
 		public static MaterialXml Inst { get; } = new MaterialXml();
 
-		public XName MaterialPath => PackageManager.XMLNamespace + "materialPath";
-
 		public XName MaterialListPath => PackageManager.XMLNamespace + "materialListPath";
+
+		public XName SimpleMaterialPath => PackageManager.XMLNamespace + "simpleMaterialPath";
+
+		public XName GeometryMaterial => PackageManager.XMLNamespace + "geometryMaterial";
 
 		protected MaterialXml()
 		{
 
 		}
+	}
+
+	class GeometryMaterialXml {
+
+		public static GeometryMaterialXml Inst { get; } = new GeometryMaterialXml();
+
+		public XName IndexAttribute => "index";
+
+		public XName MaterialPath => PackageManager.XMLNamespace + "materialPath";
+
+		protected GeometryMaterialXml()
+		{
+
+		}
+	}
+
+	class CollisionShapeXml {
+
+		public static CollisionShapeXml Inst { get; } = new CollisionShapeXml();
+
+		public XName Box => PackageManager.XMLNamespace + "box";
+
+		public XName Capsule => PackageManager.XMLNamespace + "capsule";
+
+		public XName Cone => PackageManager.XMLNamespace + "cone";
+
+		public XName ConvexHull => PackageManager.XMLNamespace + "convexHull";
+
+		public XName Cylinder => PackageManager.XMLNamespace + "cylinder";
+
+		public XName Sphere => PackageManager.XMLNamespace + "sphere";
+
+		public XName Diameter => PackageManager.XMLNamespace + "diameter";
+
+		public XName Height => PackageManager.XMLNamespace + "height";
+
+		public XName Size => PackageManager.XMLNamespace + "size";
+
+		public XName Scale => PackageManager.XMLNamespace + "scale";
+
+		public XName ModelPath => PackageManager.XMLNamespace + "modelPath";
+
+		public XName Position => PackageManager.XMLNamespace + "position";
+
+		public XName Rotation => PackageManager.XMLNamespace + "rotation";
 	}
 
 	class IntVector2Xml {
@@ -396,6 +473,16 @@ namespace MHUrho.Packaging
 		{
 
 		}
+	}
+
+	class QuaternionXml {
+		public static QuaternionXml Inst { get; } = new QuaternionXml();
+
+		public XName XAngleAttribute => "xAngle";
+
+		public XName YAngleAttribute => "yAngle";
+
+		public XName ZAngleAttribute => "zAngle";
 	}
 
 	class ColorXml {

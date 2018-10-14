@@ -93,7 +93,7 @@
       <xs:element name="buildingIconTexturePath" type="xs:string"/>
       <xs:element name="playerIconTexturePath" type="xs:string"/>
     </xs:sequence>
-	  <xs:attribute name="name" type="xs:string"/>
+	  <xs:attribute name="name" use="required" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="levelLogicTypeType">
@@ -106,16 +106,16 @@
 
   <xs:complexType name="resourceTypeType">
     <xs:sequence>
-      <xs:element name="iconTextureRectangle" type="IntRect"/>
+      <xs:element name="iconTextureRectangle" type="intRect"/>
     </xs:sequence>
     <xs:attributeGroup ref="identifiers"/>
   </xs:complexType>
 
   <xs:complexType name="tileTypeType">
     <xs:sequence>
-	    <xs:element name="iconTextureRectangle" type="IntRect"/>
+	    <xs:element name="iconTextureRectangle" type="intRect"/>
       <xs:element name="texturePath" type="xs:string"/>
-			<xs:element name="minimapColor" type="Color"/>
+			<xs:element name="minimapColor" type="color"/>
 	    <xs:element name="manuallySpawnable" type="xs:boolean"/>
     </xs:sequence>
     <xs:attribute name="name" use="required" type="xs:string"/>
@@ -136,7 +136,7 @@
 		<xs:complexContent>
 			<xs:extension base="entityWithIconType">
 				<xs:sequence>
-					<xs:element name="size" type="IntVector2"/>
+					<xs:element name="size" type="intVector2"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -144,7 +144,7 @@
 
   <xs:complexType name="playerAITypeType">
     <xs:sequence>
-      <xs:element name="iconTextureRectangle" type="IntRect"/>
+      <xs:element name="iconTextureRectangle" type="intRect"/>
       <xs:element name="assemblyPath" type="xs:string"/>
       <xs:element name="extension" type="extensionType" minOccurs="0"/>
     </xs:sequence>
@@ -170,8 +170,7 @@
 
 	<xs:complexType name="entityType">
 		<xs:sequence>
-			<xs:element name="model" type="modelType"/>
-			<xs:element name="material" type="materialType"/>
+      <xs:element name="assets" type="assetsType"/>
 			<xs:element name="assemblyPath" type="xs:string"/>
 			<xs:element name="extension" type="extensionType" minOccurs="0"/>
 		</xs:sequence>
@@ -182,7 +181,7 @@
 		<xs:complexContent>
 			<xs:extension base="entityType">
 				<xs:sequence>
-					<xs:element name="iconTextureRectangle" type="IntRect"/>
+					<xs:element name="iconTextureRectangle" type="intRect"/>
 					<xs:element name="manuallySpawnable" type="xs:boolean"/>
 				</xs:sequence>
 			</xs:extension>
@@ -194,19 +193,113 @@
 		<xs:attribute name="ID" use="required" type="xs:int"/>
 	</xs:attributeGroup>
 
+  <xs:complexType name="assetsType">
+    <xs:choice>
+      <xs:element name="path" type="xs:string"/>
+      <xs:sequence>
+        <xs:element name="scale" type="vector3" minOccurs="0"/>
+        <xs:element name="model" type="modelType" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="collisionShape" type="collisionShapeType" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:choice>
+    <xs:attribute name="type" use="required" type="assetsTypeType"/>
+  </xs:complexType>
+
 	<xs:complexType name="modelType">
 		<xs:sequence>
 			<xs:element name="modelPath" type="xs:string"/>
-			<xs:element name="scale" type="Vector3" minOccurs="0"/>
-		</xs:sequence>
+      <xs:element name="material" type="materialType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="type" use="required" type="modelTypeType"/>
 	</xs:complexType>
 
 	<xs:complexType name="materialType">
 		<xs:choice>
-			<xs:element name="materialPath" type="xs:string"/>
-			<xs:element name="materialListPath" type="xs:string"/>
+		  <xs:element name="materialListPath" type="xs:string"/>
+		  <xs:element name="simpleMaterialPath" type="xs:string"/>
+      <xs:sequence>
+        <xs:element name="geometryMaterial">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="materialPath" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="index" use="required" type="xs:unsignedInt"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
 		</xs:choice>
 	</xs:complexType>
+
+  <xs:complexType name="collisionShapeType">
+    <xs:choice>
+      <xs:element name="box">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="size" type="vector3"/>
+            <xs:element name="position" type="vector3" minOccurs="0"/>
+            <xs:element name="rotation" type="quaternion" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="capsule">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="diameter" type="xs:float"/>
+            <xs:element name="height" type="xs:float"/>
+            <xs:element name="position" type="vector3" minOccurs="0"/>
+            <xs:element name="rotation" type="quaternion" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="cone">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="diameter" type="xs:float"/>
+            <xs:element name="height" type="xs:float"/>
+            <xs:element name="position" type="vector3" minOccurs="0"/>
+            <xs:element name="rotation" type="quaternion" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="convexHull">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="modelPath" type="xs:string"/>
+            <xs:element name="lodLevel" type="xs:unsignedInt"/>
+            <xs:element name="scale" type="vector3"/>
+            <xs:element name="position" type="vector3" minOccurs="0"/>
+            <xs:element name="rotation" type="quaternion" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="cylinder">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="diameter" type="xs:float"/>
+            <xs:element name="height" type="xs:float"/>
+            <xs:element name="position" type="vector3" minOccurs="0"/>
+            <xs:element name="rotation" type="quaternion" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="sphere">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="diameter" type="xs:float"/>
+            <xs:element name="position" type="vector3" minOccurs="0"/>
+            <xs:element name="rotation" type="quaternion" minOccurs="0"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
 
 	<xs:complexType name="levelType">
 		<xs:sequence>
@@ -214,9 +307,9 @@
 			<xs:element name="thumbnail" type="xs:string"/>
 			<xs:element name="logicTypeName" type="xs:string"/>
 			<xs:element name="dataPath" type="xs:string"/>
-      <xs:element name="mapSize" type="IntVector2"/>
+      <xs:element name="mapSize" type="intVector2"/>
 		</xs:sequence>
-		<xs:attribute name="name" use="required"/>
+		<xs:attribute name="name" use="required" type="xs:string"/>
 	</xs:complexType>
 
   <xs:simpleType name="playerTypeCategoryType">
@@ -227,33 +320,54 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:complexType name="IntVector2">
-    <xs:attribute name="x" use="required" type="xs:int"/>
-    <xs:attribute name="y" use="required" type="xs:int"/>
+  <xs:simpleType name="modelTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="animated"/>
+      <xs:enumeration value="static"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="assetsTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="xmlprefab"/>
+      <xs:enumeration value="binaryprefab"/>
+      <xs:enumeration value="items"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="intVector2">
+    <xs:attribute name="x" use="optional" type="xs:int" default="0"/>
+    <xs:attribute name="y" use="optional" type="xs:int" default="0"/>
   </xs:complexType>
 
-	<xs:complexType name="IntRect">
+	<xs:complexType name="intRect">
 		<xs:attribute name="left" use="required" type="xs:int"/>
 		<xs:attribute name="right" use="required" type="xs:int"/>
 		<xs:attribute name="top" use="required" type="xs:int"/>
 		<xs:attribute name="bottom" use="required" type="xs:int"/>
 	</xs:complexType>
 
-  <xs:complexType name="Vector2">
-    <xs:attribute name="x" use="required" type="xs:float"/>
-    <xs:attribute name="y" use="required" type="xs:float"/>
+  <xs:complexType name="vector2">
+    <xs:attribute name="x" use="optional" type="xs:float" default="0"/>
+    <xs:attribute name="y" use="optional" type="xs:float" default="0"/>
   </xs:complexType>
 
-	<xs:complexType name="Vector3">
-		<xs:attribute name="x" use="required" type="xs:float"/>
-		<xs:attribute name="y" use="required" type="xs:float"/>
-		<xs:attribute name="z" use="required" type="xs:float"/>
+	<xs:complexType name="vector3">
+		<xs:attribute name="x" use="optional" type="xs:float" default="0"/>
+		<xs:attribute name="y" use="optional" type="xs:float" default="0"/>
+		<xs:attribute name="z" use="optional" type="xs:float" default="0"/>
 	</xs:complexType>
 
-	<xs:complexType name="Color">
+  <xs:complexType name="quaternion">
+    <xs:attribute name="xAngle" use="optional" type="xs:float" default="0"/>
+    <xs:attribute name="yAngle" use="optional" type="xs:float" default="0"/>
+    <xs:attribute name="zAngle" use="optional" type="xs:float" default="0"/>
+  </xs:complexType>
+
+	<xs:complexType name="color">
 		<xs:attribute name="R" use="required" type="xs:unsignedByte"/>
 		<xs:attribute name="G" use="required" type="xs:unsignedByte"/>
 		<xs:attribute name="B" use="required" type="xs:unsignedByte"/>
-		<xs:attribute name="A" use="optional" type="xs:unsignedByte"/>
+		<xs:attribute name="A" use="optional" type="xs:unsignedByte" default="255"/>
 	</xs:complexType>
 </xs:schema>

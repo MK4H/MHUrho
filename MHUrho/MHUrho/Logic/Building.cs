@@ -17,12 +17,72 @@ namespace MHUrho.Logic
 	class Building : Entity, IBuilding {
 		class Loader : IBuildingLoader {
 
+			static class ComponentSetup
+			{
+				delegate void ComponentSetupDelegate(Component component, ILevelManager level);
+
+				static readonly Dictionary<StringHash, ComponentSetupDelegate> SetupDispatch;
+
+				static ComponentSetup()
+				{
+					SetupDispatch = new Dictionary<StringHash, ComponentSetupDelegate>
+									{
+										{ RigidBody.TypeStatic, SetupRigidBody },
+										{ StaticModel.TypeStatic, SetupStaticModel },
+										{ AnimatedModel.TypeStatic, SetupAnimatedModel }
+									};
+				}
+
+
+				public static void SetupComponentsOnNode(Node node, ILevelManager level)
+				{
+					//TODO: Maybe loop through child nodes
+					foreach (var component in node.Components)
+					{
+						if (SetupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value))
+						{
+							value(component, level);
+						}
+					}
+				}
+
+				static void SetupRigidBody(Component rigidBodyComponent, ILevelManager level)
+				{
+					RigidBody rigidBody = rigidBodyComponent as RigidBody;
+
+					rigidBody.CollisionLayer = (int)CollisionLayer.Building;
+					rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
+					rigidBody.Kinematic = true;
+					rigidBody.Mass = 1;
+					rigidBody.UseGravity = false;
+				}
+
+				static void SetupStaticModel(Component staticModelComponent, ILevelManager level)
+				{
+					StaticModel staticModel = staticModelComponent as StaticModel;
+
+					staticModel.CastShadows = false;
+					staticModel.DrawDistance = level.App.Config.UnitDrawDistance;
+				}
+
+				static void SetupAnimatedModel(Component animatedModelComponent, ILevelManager level)
+				{
+					AnimatedModel animatedModel = animatedModelComponent as AnimatedModel;
+
+					SetupStaticModel(animatedModel, level);
+				}
+
+				static void SetupAnimationController()
+				{
+					//TODO: Maybe add animation controller
+				}
+			}
+
 			public IBuilding Building => loadingBuilding;
 
 			Building loadingBuilding;
 
 			readonly LevelManager level;
-			readonly Node node;
 		
 			/// <summary>
 			/// Used to store the reference to storedBuilding between Load and ConnectReferences calls
@@ -33,11 +93,9 @@ namespace MHUrho.Logic
 			List<DefaultComponentLoader> componentLoaders;
 
 			public Loader(LevelManager level,
-						Node node,
 						StBuilding storedBuilding)
 			{
 				this.level = level;
-				this.node = node;
 				this.storedBuilding = storedBuilding;
 				componentLoaders = new List<DefaultComponentLoader>();
 
@@ -58,36 +116,29 @@ namespace MHUrho.Logic
 			public static Building CreateNew(int id,
 											IntVector2 topLeftCorner,
 											BuildingType type,
-											Node buildingNode,
 											IPlayer player,
 											ILevelManager level) {
 				if (!type.CanBuildIn(type.GetBuildingTilesRectangle(topLeftCorner), level)) {
 					return null;
 				}
 
-				AddRigidBody(buildingNode);
-				StaticModel model = AddModel(buildingNode, type, level);
-
+				//TODO: Redo building building
 				var newBuilding = new Building(id, level, topLeftCorner, type, player);
+
+				Vector2 center = newBuilding.Rectangle.Center();
+
+				Vector3 position = new Vector3(center.X,
+												level.Map.GetTerrainHeightAt(center),
+												center.Y);
+
+				Node buildingNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
 				buildingNode.AddComponent(newBuilding);
 
-				var center = newBuilding.Rectangle.Center();
+				ComponentSetup.SetupComponentsOnNode(buildingNode, level);
 
-				buildingNode.Position = new Vector3(center.X,
-													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * buildingNode.Scale.Y,
-													center.Y);
+
 
 				newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
-
-
-
-				var collider = buildingNode.CreateComponent<CollisionShape>();
-				//TODO: Move collisionShape to plugin
-				collider.SetBox(model.BoundingBox.Size,
-								Vector3.Zero, 
-								Quaternion.Identity);
-
-
 				return newBuilding;
 			}
 
@@ -117,22 +168,16 @@ namespace MHUrho.Logic
 					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
 				}
 
-				AddRigidBody(node);
-				StaticModel model = AddModel(node, type, level);
-
 				loadingBuilding = new Building(level, type, storedBuilding);
-				node.AddComponent(loadingBuilding);
 
 				var center = loadingBuilding.Rectangle.Center();
+				Vector3 position = new Vector3(center.X,
+												level.Map.GetTerrainHeightAt(center),
+												center.Y);
 
-				node.Position = new Vector3(center.X,
-													level.Map.GetTerrainHeightAt(center) + model.BoundingBox.HalfSize.Y * node.Scale.Y,
-													center.Y);
-
-				var collider = node.CreateComponent<CollisionShape>();
-				collider.SetBox(model.BoundingBox.Size,
-								Vector3.Zero,
-								Quaternion.Identity);
+				//TODO: Save rotation
+				Node buildingNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				buildingNode.AddComponent(loadingBuilding);
 
 				loadingBuilding.BuildingPlugin = type.GetInstancePluginForLoading(loadingBuilding, level);
 
@@ -165,26 +210,6 @@ namespace MHUrho.Logic
 				}
 			}
 
-			void Load(LevelManager level, BuildingType type, Node buildingNode) {
-				
-			}
-
-			static void AddRigidBody(Node node) {
-				var rigidBody = node.CreateComponent<RigidBody>();
-				rigidBody.CollisionLayer = (int)CollisionLayer.Building;
-				rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
-				rigidBody.Kinematic = true;
-				rigidBody.Mass = 1;
-				rigidBody.UseGravity = false;
-			}
-
-			static StaticModel AddModel(Node node, BuildingType type, ILevelManager level) {
-				var model = type.Model.AddModel(node);
-				type.Material.ApplyMaterial(model);
-				model.CastShadows = false;
-				model.DrawDistance = level.App.Config.UnitDrawDistance;
-				return model;
-			}
 		}
 
 		public IntRect Rectangle { get; private set; }
@@ -253,19 +278,18 @@ namespace MHUrho.Logic
 		}
 
 
-		public static IBuildingLoader GetLoader(LevelManager level, Node buildingNode, StBuilding storedBuilding)
+		public static IBuildingLoader GetLoader(LevelManager level, StBuilding storedBuilding)
 		{
-			return new Loader(level, buildingNode, storedBuilding);
+			return new Loader(level, storedBuilding);
 		}
 
 		public static Building CreateNew(int id,
 										IntVector2 topLeftCorner,
 										BuildingType type,
-										Node buildingNode,
 										IPlayer player,
 										ILevelManager level)
 		{
-			return Loader.CreateNew(id, topLeftCorner, type, buildingNode, player, level);
+			return Loader.CreateNew(id, topLeftCorner, type, player, level);
 		}
 
 		public StBuilding Save() {

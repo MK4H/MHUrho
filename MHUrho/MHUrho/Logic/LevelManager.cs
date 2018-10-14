@@ -238,9 +238,7 @@ namespace MHUrho.Logic
 				return null;
 			}
 
-			Node unitNode = LevelNode.CreateChild("Unit");
-
-			var newUnit = unitType.CreateNewUnit(GetNewID(entities), unitNode, this, tile, player);
+			var newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, player);
 			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
@@ -261,9 +259,7 @@ namespace MHUrho.Logic
 				return null;
 			}
 
-			Node buildingNode = LevelNode.CreateChild("Building");
-
-			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), buildingNode, this, topLeft, player);
+			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), this, topLeft, player);
 			RegisterEntity(newBuilding);
 			buildings.Add(newBuilding.ID,newBuilding);
 			players[player.ID].AddBuilding(newBuilding);

@@ -47,13 +47,15 @@
   </tileTypes>
   <unitTypes>
     <unitType name="TestUnit" ID="1">
-      <model>
-				<modelPath>Box.mdl</modelPath>
-	      <scale x="1" y="1" z="1"/>
-	    </model>
-      <material>
-				<materialPath>Green.xml</materialPath>
-			</material>
+      <assets type="items">
+        <scale x="1" y="1" z="1"/>
+        <model type="static">
+          <modelPath>Box.mdl</modelPath>
+          <material>
+            <simpleMaterialPath>Green.xml</simpleMaterialPath>
+          </material>
+        </model>
+      </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
         <projectileType>TestProjectile</projectileType>
@@ -62,25 +64,23 @@
 	    <manuallySpawnable>true</manuallySpawnable>
     </unitType>
     <unitType name="TestWorker" ID="9">
-      <model>
-				<modelPath>Box.mdl</modelPath>
-	      <scale x="1" y="0.5" z="1"/>
-      </model>
-      <material>
-				<materialPath>StoneMaterial.xml</materialPath>
-      </material>
+      <assets type="items">
+        <scale x="1" y="0.5" z="1"/>
+        <model type="static">
+          <modelPath>Box.mdl</modelPath>
+          <material>
+            <simpleMaterialPath>StoneMaterial.xml</simpleMaterialPath>
+          </material>
+        </model>
+      </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
 	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
 	    <manuallySpawnable>false</manuallySpawnable>
     </unitType>
     <unitType name="Chicken" ID="3">
-      <model>
-				<modelPath>Chicken/Models/Chicken.mdl</modelPath>
-	      <scale x="0.1" y="0.1" z="0.1"/>
-      </model>
-			<material>
-				<materialListPath>Chicken/Models/Chicken.txt</materialListPath>
-			</material>
+      <assets type="xmlprefab">
+        <path>Chicken/prefab.xml</path>
+      </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
 	    <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
 			<manuallySpawnable>true</manuallySpawnable>
@@ -88,26 +88,35 @@
   </unitTypes>
   <projectileTypes>
     <projectileType name="TestProjectile" ID="1">
-      <model>
-				<modelPath>Box.mdl</modelPath>
-	      <scale x="0.2" y="0.2" z="0.8"/> 
-      </model>
-      <material>
-				<materialPath>StoneMaterial.xml</materialPath>
-			</material>
+      <assets type="items">
+        <scale x="0.2" y="0.2" z="0.8"/>
+        <model type="static">
+          <modelPath>Box.mdl</modelPath>
+          <material>
+            <simpleMaterialPath>StoneMaterial.xml</simpleMaterialPath>
+          </material>
+        </model>
+      </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
 			<extension>
 				<speed>30</speed>
 			</extension>
     </projectileType>
 		<projectileType name="EggProjectile" ID="2">
-			<model>
-				<modelPath>Models/Sphere.mdl</modelPath>
-				<scale x="0.2" y="0.2" z="0.3"/>
-			</model>
-			<material>
-				<materialPath>EggMaterial.xml</materialPath>
-			</material>
+      <assets type="items">
+        <scale x="0.2" y="0.2" z="0.3"/>
+        <model type="static">
+          <modelPath>Models/Sphere.mdl</modelPath>
+          <material>
+            <simpleMaterialPath>EggMaterial.xml</simpleMaterialPath>
+          </material>
+        </model>
+        <collisionShape>
+          <box>
+            <size x="0.2" y="0.2" z="0.3"/>
+          </box>
+        </collisionShape>
+      </assets>
 			<assemblyPath>DefaultPackage.dll</assemblyPath>
 			<extension>
 				<speed>10</speed>
@@ -116,13 +125,20 @@
   </projectileTypes>
   <buildingTypes>
     <buildingType name="TestBuilding" ID="1">
-      <model>
-				<modelPath>Box.mdl</modelPath>
-	      <scale x="3" y="3" z="3"/>
-      </model>
-      <material>
-				<materialPath>StoneMaterial.xml</materialPath>
-	    </material>
+      <assets type="items">
+        <scale x="3" y="3" z="3"/>
+        <model type="static">
+          <modelPath>Box.mdl</modelPath>
+          <material>
+            <simpleMaterialPath>StoneMaterial.xml</simpleMaterialPath>
+          </material>
+        </model>
+        <collisionShape>
+          <box>
+            <size x="3" y="3" z="3"/>
+          </box>
+        </collisionShape>
+      </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
       <extension>
         <workerType>TestWorker</workerType>

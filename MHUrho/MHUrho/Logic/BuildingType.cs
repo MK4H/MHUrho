@@ -15,19 +15,13 @@ namespace MHUrho.Logic
 {
 	public class BuildingType : ILoadableType, IDisposable
 	{
-		//XML ELEMENTS AND ATTRIBUTES
-		private static readonly XName SizeElementName = PackageManager.XMLNamespace + "size";
-
-
 		public int ID { get; private set; }
 
 		public string Name { get; private set; }
 
 		public GamePack Package { get; private set; }
 
-		public ModelWrapper Model { get; private set; }
-
-		public MaterialWrapper Material { get; private set; }
+		public AssetContainer Assets { get; private set; }
 
 		public IntRect IconRectangle { get; private set; }
 
@@ -49,12 +43,12 @@ namespace MHUrho.Logic
 		public void Load(XElement xml, GamePack package) {
 			ID = XmlHelpers.GetID(xml);
 			Name = XmlHelpers.GetName(xml);
-			Model = XmlHelpers.GetModel(xml);
-			Material = XmlHelpers.GetMaterial(xml);
+			Assets = AssetContainer.FromXml(xml.Element(BuildingTypeXml.Inst.Assets));
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 			Package = package;
-			Size = XmlHelpers.GetIntVector2(xml.Element(SizeElementName));
+			//TODO: Maybe remove
+			Size = XmlHelpers.GetIntVector2(xml.Element(BuildingTypeXml.Inst.Size));
 
 			XElement pathElement = xml.Element(BuildingTypeXml.Inst.AssemblyPath);
 
@@ -71,13 +65,12 @@ namespace MHUrho.Logic
 			//If you add any cache dependent on current level, clear it here
 		}
 
-		internal IBuilding BuildNewBuilding(int buildingID, 
-										 Node buildingNode, 
+		internal IBuilding BuildNewBuilding(int buildingID,
 										 ILevelManager level, 
 										 IntVector2 topLeft, 
 										 IPlayer player) {
 
-			return Building.CreateNew(buildingID, topLeft, this, buildingNode, player, level);
+			return Building.CreateNew(buildingID, topLeft, this, player, level);
 		}
 
 		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
@@ -105,7 +98,7 @@ namespace MHUrho.Logic
 
 
 		public void Dispose() {
-			Model?.Dispose();
+			Assets.Dispose();
 		}
 
 
