@@ -30,16 +30,28 @@ namespace MHUrho.Packaging
 
 		public static PackageManager Instance { get; private set; }
 
+		public static string PackageDirectoryPath => MyGame.Files.PackageDirectoryPath;
+
+		public static string PackageDirectoryAbsolutePath => MyGame.Files.PackageDirectoryAbsolutePath;
+
 		public const string GamePackDirFileName = "DirDescription.xml";
 
 		public IEnumerable<GamePackRep> AvailablePacks => availablePacks.Values;
-		
+
+
+
 		/// <summary>
 		/// Path to the schema for Resource Pack Directory xml files
 		/// </summary>
 		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
+		static string GamePackDirFilePath => Path.Combine(PackageDirectoryPath, GamePackDirFileName);
+
+		static string GamePackDirFileAbsolutePath => Path.Combine(PackageDirectoryAbsolutePath, GamePackDirFileName);
+
 		static readonly string defaultIconPath = Path.Combine("Textures","xamarin.png");
+
+
 		public Texture2D DefaultIcon { get; private set; }
 
 		public GamePack ActivePackage { get; private set; }
@@ -47,6 +59,7 @@ namespace MHUrho.Packaging
 		readonly XmlSchemaSet schemas;
 
 		readonly Dictionary<string, GamePackRep> availablePacks = new Dictionary<string, GamePackRep>();
+		readonly Dictionary<GamePackRep, string> dirEntries = new Dictionary<GamePackRep, string>();
 		readonly ResourceCache resourceCache;
 
 
@@ -70,7 +83,6 @@ namespace MHUrho.Packaging
 			}
 
 			try {
-				;
 				Instance.DefaultIcon = resourceCache.GetTexture2D(defaultIconPath);
 			}
 			catch (IOException e) {
@@ -79,7 +91,8 @@ namespace MHUrho.Packaging
 				//TODO: Error loading the default icon, game corrupted
 			}
 
-			Instance.ParseGamePackDir(Path.Combine(MyGame.Files.PackageDirectoryPath, GamePackDirFileName));
+			string[] failedPackagePaths = Instance.ParseGamePackDir();
+			//TODO: Display as error message
 		}
 
 		public GamePack LoadPackage(string packageName, 
@@ -103,6 +116,75 @@ namespace MHUrho.Packaging
 
 			ActivePackage = package.LoadPack(schemas, loadingProgress);
 			return ActivePackage;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="xmlRelativePath">Path of the xml file relative to the <see cref="PackageDirectoryAbsolutePath"/></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"/>
+		public GamePackRep AddGamePack(string xmlRelativePath)
+		{
+			
+			GamePackRep newPack = LoadPack(xmlRelativePath);
+			
+			if (newPack != null) {
+
+				if (availablePacks.ContainsKey(newPack.Name)) {
+					throw new ArgumentException("GamePack of the same name was already loaded",
+												nameof(xmlRelativePath));
+				}
+
+				//Already validated
+				XDocument document = LoadGamePackDirXml(GamePackDirFilePath);
+
+				XElement root = document.Root;
+				root.Add(new XElement(GamePackDirectoryXml.Inst.GamePack, xmlRelativePath));
+
+				WriteGamePackDir(document, GamePackDirFilePath);
+
+				AddToAvailable(newPack, xmlRelativePath);
+			}
+
+			return newPack;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gamePack"></param>
+		public void RemoveGamePack(GamePackRep gamePack)
+		{
+			if (!availablePacks.ContainsValue(gamePack))
+			{
+				throw new ArgumentException("GamePack was not registered as available");
+			}
+
+			string dirEntry = dirEntries[gamePack];
+
+			//TODO: Exception
+			//Already validated
+			XDocument document = LoadGamePackDirXml(GamePackDirFilePath);
+
+			
+
+			XElement packDirElement = (from element in document.Root.Elements()
+									where element.Value == dirEntry
+									select element).FirstOrDefault();
+
+			if (packDirElement == null) {
+				throw new ArgumentException("Did not find entry for the gamePack in gamePack directory xml file",
+											nameof(gamePack));
+			}
+
+			packDirElement.Remove();
+
+			//TODO: Exception
+			WriteGamePackDir(document, GamePackDirFilePath);
+
+			//Only after the change to xml file went through, remove from runtime
+			RemoveFromAvailable(gamePack);
 		}
 
 		public GamePackRep GetGamePack(string name) {
@@ -250,72 +332,146 @@ namespace MHUrho.Packaging
 		/// <summary>
 		/// Pulls data about the resource packs contained in this directory from XML file
 		/// </summary>
-		/// <param name="path">Path to the XML file of Resource pack directory</param>
-		/// <returns>True if successfuly read, False if there was an error while loading</returns>
-		void ParseGamePackDir(string path)
+		/// <returns>Array of package paths that could not be loaded</returns>
+		string[] ParseGamePackDir()
 		{
+			IEnumerable<string> packagePaths = null;
 
-			if (path == null) {
-				//TODO: Exception
-				throw new ArgumentNullException();
-			}
+			try {
 
-			IEnumerable<GamePackRep> presentPacks = null;
+				XDocument doc = LoadGamePackDirXml(GamePackDirFilePath);
 
-			try
-			{
-				XDocument doc = XDocument.Load(MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read));
-				doc.Validate(schemas, null);
-
-				string directoryPath = Path.GetDirectoryName(path);
-
-				presentPacks = from packagePath in doc.Root.Elements(XMLNamespace + "gamePack")
-								select new GamePackRep(Path.Combine(directoryPath, 
-																	FileManager.CorrectRelativePath(packagePath.Value)),
-														this,
-														schemas);
-				//select GamePack.InitialLoad(packages.Attribute("name").Value,
-				//				//PathtoXml is relative to GamePackDir.xml directory path
-				//				Path.Combine(directoryPath,packages.Element(XMLNamespace + "pathToXml").Value), 
-				//				packages.Element(XMLNamespace + "description")?.Value,
-				//				packages.Element(XMLNamespace + "thumbnailPath")?.Value,
-				//				this);
+				packagePaths = from packagePath in doc.Root.Elements(GamePackDirectoryXml.Inst.GamePack)
+							   select packagePath.Value;
 			}
 			catch (IOException e)
 			{
 				//Creation of the FileStream failed, cannot load this directory
-				Log.Write(LogLevel.Warning, $"Opening ResroucePack directory file at {path} failed: {e}");
+				Log.Write(LogLevel.Warning, $"Opening ResourcePack directory file at {GamePackDirFilePath} failed: {e}");
 				if (Debugger.IsAttached) Debugger.Break();
+				throw;
 			}
 			//TODO: Exceptions
 			catch (XmlSchemaValidationException e)
 			{
 				//Invalid resource pack description file, dont load this pack directory
-				Log.Write(LogLevel.Warning, $"ResroucePack directory file at {path} does not conform to the schema: {e}");
+				Log.Write(LogLevel.Warning, $"ResourcePack directory file at {GamePackDirFilePath} does not conform to the schema: {e}");
 				if (Debugger.IsAttached) Debugger.Break();
+				throw;
 			}
 			catch (XmlException e)
 			{
 				//TODO: Alert user for corrupt file
-				Log.Write(LogLevel.Warning, $"ResourcePack directory file at {path} : {e}");
+				Log.Write(LogLevel.Warning, $"ResourcePack directory file at {GamePackDirFilePath} was corrupted : {e}");
 				if (Debugger.IsAttached) Debugger.Break();
+				throw;
 			}
 
-			//If loading failed completely, dont add anything
-			if (presentPacks == null) return;
-
+			List<string> failedPackagePaths = new List<string>();
 			//Adds all the discovered packs into the availablePacks list
-			foreach (var presentPack in presentPacks) {
-				availablePacks.Add(presentPack.Name, presentPack);
+			foreach (var packagePath in packagePaths) {
+				try {
+					GamePackRep newPack = LoadPack(packagePath);
+					AddToAvailable(newPack, packagePath);
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(LogLevel.Warning, $"Loading package at {packagePath} failed with: {e}");
+					failedPackagePaths.Add(packagePath);
+				}
 			}
 
+			return failedPackagePaths.ToArray();
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns>Validated xml file of game pack directory</returns>
+		/// <exception cref="XmlSchemaValidationException"/>
+		/// <exception cref="IOException"/>
+		XDocument LoadGamePackDirXml(string path)
+		{
+			if (path == null)
+			{
+				throw new ArgumentNullException(nameof(path), "Path cannot be null");
+			}
+
+			using (Stream stream = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
+				XDocument doc = XDocument.Load(stream);
+				doc.Validate(schemas, null);
+				return doc;
+			}						
+		}
+
+		/// <summary>
+		/// Validates the <paramref name="document"/> and writes it to the file at <paramref name="path"/>
+		///
+		/// If the <paramref name="document"/> is invalid, throws <see cref="XmlSchemaValidationException"/>
+		/// If the file IO cannot be processed, throws some child of <see cref="IOException"/>
+		/// </summary>
+		/// <param name="document"></param>
+		/// <param name="path"></param>
+		/// <exception cref="XmlSchemaValidationException"/>
+		/// <exception cref="IOException"/>
+		void WriteGamePackDir(XDocument document, string path)
+		{
+			document.Validate(schemas, null);
+			using (Stream stream = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
+				document.Save(stream);
+			}
+		}
 
 		void UnloadPackage(GamePack package) {
 			resourceCache.RemoveResourceDir(package.DirectoryPath);
 			package.UnLoad();
 		}
 
+
+		GamePackRep LoadPack(string pathInDirEntry)
+		{
+			string packXmlPath = Path.Combine(PackageDirectoryPath, FileManager.CorrectRelativePath(pathInDirEntry));
+			GamePackRep newPack = null;
+			try
+			{
+				newPack = new GamePackRep(packXmlPath,
+										this,
+										schemas);
+			}
+			catch (XmlSchemaValidationException e)
+			{
+				//TODO: Exception
+				throw;
+			}
+			catch (IOException e)
+			{
+				throw;
+			}
+
+			return newPack;
+		}
+
+		void AddToAvailable(GamePackRep newPack, string pathInDirEntry)
+		{
+			if (availablePacks.ContainsKey(newPack.Name))
+			{
+				throw new ArgumentException("GamePack of the same name was already loaded",
+											nameof(newPack));
+			}
+
+			availablePacks.Add(newPack.Name, newPack);
+			dirEntries.Add(newPack, pathInDirEntry);
+		}
+
+		void RemoveFromAvailable(GamePackRep gamePack)
+		{
+			if (!availablePacks.ContainsValue(gamePack))
+			{
+				throw new ArgumentException("GamePack was not registered as available");
+			}
+
+			availablePacks.Remove(gamePack.Name);
+			dirEntries.Remove(gamePack);
+		}
 	}
 }

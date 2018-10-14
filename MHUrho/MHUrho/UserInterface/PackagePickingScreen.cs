@@ -17,8 +17,10 @@ namespace MHUrho.UserInterface
 
 			readonly Window window;
 			readonly ListView listView;
+			readonly Button addButton;
+			readonly Button removeButton;
 			readonly Button selectButton;
-
+			readonly Button backButton;
 
 			public Screen(PackagePickingScreen proxy)
 				:base(proxy)
@@ -32,55 +34,98 @@ namespace MHUrho.UserInterface
 
 				listView = (ListView)window.GetChild("ListView");
 
+				addButton = (Button) window.GetChild("AddButton", true);
+				addButton.Released += AddButtonReleased;
+
+				removeButton = (Button) window.GetChild("RemoveButton", true);
+				removeButton.Released += RemoveButtonReleased;
+				removeButton.Enabled = false;
+
 				selectButton = (Button) window.GetChild("SelectButton", true);
 				selectButton.Released += SelectButtonReleased;
 				selectButton.Enabled = false;
 
 
-				((Button)window.GetChild("BackButton", true)).Released += BackButtonReleased;
+				backButton = (Button)window.GetChild("BackButton", true);
+				backButton.Released += BackButtonReleased;
 
 				foreach (var pack in PackageManager.Instance.AvailablePacks) {
-					var newItem = new PackageListItem(pack, Game);
-					newItem.ItemSelected += ItemSelected;
-					newItem.ItemDeselected += ItemDeselected;
-					listView.AddItem(newItem);
+					AddItem(pack);
 				}
 
 				window.Visible = true;
 			}
 
-		
+
+
 			public override void Dispose()
 			{
+				addButton.Released -= AddButtonReleased;
+				removeButton.Released -= RemoveButtonReleased;
 				selectButton.Released -= SelectButtonReleased;
+				backButton.Released -= BackButtonReleased;
 
 
 				foreach (var item in GetItems()) {
 					item.Dispose();
 				}
 
+				
+
 				listView.RemoveAllItems();
 				listView.Dispose();
+
+				addButton.Dispose();
+				removeButton.Dispose();
 				selectButton.Dispose();
+				backButton.Dispose();
 
 				window.RemoveAllChildren();
 				window.Remove();
 				window.Dispose();
 			}
 
+			void RemoveButtonReleased(ReleasedEventArgs obj)
+			{
+				PackageListItem selectedItem = GetSelectedItem();
+				PackageManager.Instance.RemoveGamePack(selectedItem.Pack);
+				RemoveItem(selectedItem);
+			}
+
+			async void AddButtonReleased(ReleasedEventArgs obj)
+			{
+				IPathResult result = await MenuUIManager
+											.FileBrowsingPopUp
+											.Request(MyGame.Files.PackageDirectoryAbsolutePath,
+													SelectOption.File);
+
+				var newPack = PackageManager.Instance.AddGamePack(result.RelativePath);
+				AddItem(newPack);
+
+			}
+
 			void SelectButtonReleased(ReleasedEventArgs args)
 			{
-				foreach (var item in GetItems()) {
-					if (item == listView.SelectedItem) {
-						ItemSelectionConfirmed(item);
-						return;
-					}
-				}
+				ItemSelectionConfirmed(GetSelectedItem());
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
 			{
 				MenuUIManager.SwitchBack();
+			}
+
+			void AddItem(GamePackRep gamePack)
+			{
+				var newItem = new PackageListItem(gamePack, Game);
+				newItem.ItemSelected += ItemSelected;
+				newItem.ItemDeselected += ItemDeselected;
+				listView.AddItem(newItem);
+			}
+
+			void RemoveItem(PackageListItem item)
+			{
+				listView.RemoveItem(item);
+				item.Dispose();
 			}
 
 			void ItemSelected(ExpandingListItem args)
@@ -95,12 +140,14 @@ namespace MHUrho.UserInterface
 
 				args.Select();
 				selectButton.Enabled = true;
+				removeButton.Enabled = true;
 			}
 
 			void ItemDeselected(ExpandingListItem item)
 			{
 				if (item == listView.SelectedItem) {
 					selectButton.Enabled = false;
+					removeButton.Enabled = false;
 					listView.ClearSelection();
 				}
 			}

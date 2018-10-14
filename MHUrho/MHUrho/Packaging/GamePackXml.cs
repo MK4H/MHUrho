@@ -5,9 +5,9 @@ using System.Xml.Linq;
 
 namespace MHUrho.Packaging
 {
-	class GmaePackDirectoryXml {
+	class GamePackDirectoryXml {
 
-		public static GmaePackDirectoryXml Inst { get; } = new GmaePackDirectoryXml();
+		public static GamePackDirectoryXml Inst { get; } = new GamePackDirectoryXml();
 
 
 		public XName GamePack => PackageManager.XMLNamespace + "gamePack";
