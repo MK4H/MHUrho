@@ -33,7 +33,6 @@ namespace MHUrho.UserInterface
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PopUpConfirmationLayout.xml");
 				this.popUpWindow = (Window)MenuUIManager.MenuRoot.GetChild("PopUpConfirmationWindow");
-				popUpWindow.Modal = true;
 				popUpWindow.Visible = true;
 				popUpWindow.BringToFront();
 
