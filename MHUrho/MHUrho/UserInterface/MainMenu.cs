@@ -36,6 +36,21 @@ namespace MHUrho.UserInterface
 				((Button)window.GetChild(ExitButtonName, true)).Released += ButtonPressed;
 			}
 
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
 			public override void Dispose()
 			{
 				((Button)window.GetChild("StartButton", true)).Released -= ButtonPressed;

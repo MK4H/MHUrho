@@ -76,6 +76,38 @@ namespace MHUrho.UserInterface
 				((Button)window.GetChild(ExitButton)).Released += ButtonReleased;
 			}
 
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
+			public override void Dispose()
+			{
+				((Button)window.GetChild(ResumeButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(SaveButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(SaveAsButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(OptionsButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(ExitButton)).Released -= ButtonReleased;
+
+				window.RemoveAllChildren();
+				window.Remove();
+				window.Dispose();
+			}
+
 			void ButtonReleased(ReleasedEventArgs args)
 			{
 				switch (args.Element.Name)
@@ -110,22 +142,7 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchToSaveAsScreen(Level);
 			}
 
-			public override void Dispose()
-			{
-				((Button)window.GetChild(ResumeButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(SaveButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(SaveAsButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(OptionsButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(ExitButton)).Released -= ButtonReleased;
-
-				window.RemoveAllChildren();
-				window.Remove();
-				window.Dispose();
-			}
+		
 		}
 
 		class PlayScreen : Screen {
@@ -155,6 +172,38 @@ namespace MHUrho.UserInterface
 				((Button)window.GetChild(OptionsButton)).Released += ButtonReleased;
 
 				((Button)window.GetChild(ExitButton)).Released += ButtonReleased;
+			}
+
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
+			public override void Dispose()
+			{
+				((Button)window.GetChild(ResumeButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(SaveButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(LoadButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(OptionsButton)).Released -= ButtonReleased;
+
+				((Button)window.GetChild(ExitButton)).Released -= ButtonReleased;
+
+				window.RemoveAllChildren();
+				window.Remove();
+				window.Dispose();
 			}
 
 			void ButtonReleased(ReleasedEventArgs args)
@@ -191,22 +240,7 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchToLoadGame();
 			}
 
-			public override void Dispose()
-			{
-				((Button)window.GetChild(ResumeButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(SaveButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(LoadButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(OptionsButton)).Released -= ButtonReleased;
-
-				((Button)window.GetChild(ExitButton)).Released -= ButtonReleased;
-
-				window.RemoveAllChildren();
-				window.Remove();
-				window.Dispose();
-			}
+			
 		}
 
 		public ILevelManager PausedLevel { get; set; }

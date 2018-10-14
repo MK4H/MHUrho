@@ -55,6 +55,21 @@ namespace MHUrho.UserInterface
 				text.Value = newText;
 			}
 
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
 			public override void Dispose()
 			{
 				LoadingWatcher.OnTextUpdate -= OnTextUpdate;

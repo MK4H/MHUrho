@@ -7,6 +7,7 @@ using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.StartupManagement;
+using MHUrho.UserInterface;
 using Urho;
 
 namespace MHUrho.Input
@@ -20,6 +21,8 @@ namespace MHUrho.Input
 		void Enable();
 
 		void Disable();
+
+		void InitialSwitchToMainMenu(string loadingErrorTitle = null, string loadingErrorDescription = null);
 
 		void SwitchToPauseMenu(IGameController gameController);
 

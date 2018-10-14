@@ -125,22 +125,6 @@ namespace MHUrho.UserInterface
 			}
 
 
-			protected virtual void EnableInput()
-			{
-				LineEdit.Enabled = true;
-				DeleteButton.Enabled = true;
-				FileView.Enabled = true;
-				BackButton.Enabled = true;
-			}
-
-			protected virtual void DisableInput()
-			{
-				LineEdit.Enabled = false;
-				DeleteButton.Enabled = false;
-				FileView.Enabled = false;
-				BackButton.Enabled = false;
-			}
-
 			protected virtual void TotalMatchSelected(string newMatchSelected)
 			{
 				DeleteButton.Enabled = true;

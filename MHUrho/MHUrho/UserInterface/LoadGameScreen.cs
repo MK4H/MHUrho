@@ -41,25 +41,26 @@ namespace MHUrho.UserInterface
 				InitUIElements(window, loadLineEdit, deleteButton, backButton, fileView);
 			}
 
+			public override void EnableInput()
+			{
+				Window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				Window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				Window.ResetDeepEnabled();
+			}
+
 			public override void Dispose()
 			{
 				loadButton.Pressed -= LoadButton_Pressed;
 				loadButton.Dispose();
 				base.Dispose();
-			}
-
-			protected override void EnableInput()
-			{
-				base.EnableInput();
-
-				loadButton.Enabled = true;
-			}
-
-			protected override void DisableInput()
-			{
-				base.DisableInput();
-
-				loadButton.Enabled = false;
 			}
 
 			protected override void TotalMatchSelected(string newMatchSelected)

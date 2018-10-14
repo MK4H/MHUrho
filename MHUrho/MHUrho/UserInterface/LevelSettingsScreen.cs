@@ -176,6 +176,21 @@ namespace MHUrho.UserInterface
 				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);
 			}
 
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
 			public override void Dispose()
 			{
 				((Button)window.GetChild("PlayButton", true)).Released -= PlayButtonReleased;

@@ -17,6 +17,11 @@ namespace MHUrho.Input
 	class MenuTouchController : TouchController, IMenuController
 	{
 		public InputType InputType => InputType.Touch;
+		public void InitialSwitchToMainMenu(string loadingErrorTitle = null, string loadingErrorDescription = null)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void SwitchToPauseMenu(IGameController gameController)
 		{
 			throw new NotImplementedException();

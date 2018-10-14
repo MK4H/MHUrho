@@ -31,13 +31,15 @@ namespace MHUrho.UserInterface
 
 		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
 		public ConfirmationPopUp ConfirmationPopUp { get; private set; }
+		public ErrorPopUp ErrorPopUp { get; private set; }
+
 
 		public UIElement MenuRoot { get; private set; }
 	
 
 		public MenuScreen CurrentScreen { get; protected set; }
 
-		protected Stack<MenuScreen> previousScreens;
+		protected Stack<MenuScreen> PreviousScreens;
 
 		protected MenuUIManager( IMenuController menuController)
 		{
@@ -59,12 +61,9 @@ namespace MHUrho.UserInterface
 			SaveAsScreen = new SaveAsScreen(this);
 			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
 			ConfirmationPopUp = new ConfirmationPopUp(this);
+			ErrorPopUp = new ErrorPopUp(this);
 
-			previousScreens = new Stack<MenuScreen>();
-
-			CurrentScreen = MainMenu;
-
-			MainMenu.Show();
+			PreviousScreens = new Stack<MenuScreen>();
 		}
 
 		public void SwitchToMainMenu()
@@ -132,15 +131,15 @@ namespace MHUrho.UserInterface
 		{
 			CurrentScreen.Hide();
 
-			if (previousScreens.Count != 0) {
-				CurrentScreen = previousScreens.Pop();
+			if (PreviousScreens.Count != 0) {
+				CurrentScreen = PreviousScreens.Pop();
 				CurrentScreen.Show();
 			}
 		}
 
 		public void Clear()
 		{
-			previousScreens = new Stack<MenuScreen>();
+			PreviousScreens = new Stack<MenuScreen>();
 			CurrentScreen.Hide();
 			CurrentScreen = null;
 		}
@@ -150,7 +149,7 @@ namespace MHUrho.UserInterface
 		{
 			if (CurrentScreen != null) {
 				CurrentScreen.Hide();
-				previousScreens.Push(CurrentScreen);
+				PreviousScreens.Push(CurrentScreen);
 			}
 
 			CurrentScreen = newScreen;

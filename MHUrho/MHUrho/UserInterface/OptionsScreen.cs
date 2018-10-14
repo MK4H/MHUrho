@@ -77,6 +77,21 @@ namespace MHUrho.UserInterface
 				changed = false;
 			}
 
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
 			void InitializeOptions()
 			{
 				InitSliders();
@@ -335,16 +350,6 @@ namespace MHUrho.UserInterface
 
 					BorderMovement.Checked = config.MouseBorderCameraMovement;
 				}
-			}
-
-			void ResetInput()
-			{
-				window.ResetDeepEnabled();
-			}
-
-			void DisableInput()
-			{
-				window.SetDeepEnabled(false);
 			}
 		
 			string WindowTypeToString(WindowTypeEnum windowType)

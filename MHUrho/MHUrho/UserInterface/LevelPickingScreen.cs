@@ -30,11 +30,6 @@ namespace MHUrho.UserInterface
 			readonly Button editButton;
 			readonly Button playButton;
 
-			
-
-
-
-
 			GamePack Package => proxy.Package;
 
 			public Screen(LevelPickingScreen proxy)
@@ -64,6 +59,21 @@ namespace MHUrho.UserInterface
 				GetLevels(listView);
 			}
 
+			public override void EnableInput()
+			{
+				window.SetDeepEnabled(true);
+			}
+
+			public override void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+
+			public override void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
 			public override void Dispose()
 			{
 				deleteButton.Released -= LevelManipulatingButtonPressed;
@@ -85,6 +95,7 @@ namespace MHUrho.UserInterface
 				playButton.Dispose();
 			}
 
+	
 			void GetLevels(ListView listView)
 			{
 				AddItem(new LevelPickingNewLevelItem(Game), listView);

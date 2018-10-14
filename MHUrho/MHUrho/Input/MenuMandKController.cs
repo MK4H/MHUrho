@@ -18,8 +18,8 @@ namespace MHUrho.Input
 	class MenuMandKController : MandKController, IMenuController {
 
 		public InputType InputType => InputType.MouseAndKeyboard;
-		
-		MandKMenuUI UIController;
+
+		readonly MandKMenuUI UIController;
 
 		IGameController pausedLevelController;
 
@@ -30,6 +30,17 @@ namespace MHUrho.Input
 
 		public IGameController GetGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, Player player) {
 			return new GameMandKController(levelManager, octree, player, cameraMover);
+		}
+
+		public void InitialSwitchToMainMenu(string loadingErrorTitle = null, string loadingErrorDescription = null)
+		{
+			UIController.SwitchToMainMenu();
+			if (loadingErrorTitle != null && loadingErrorDescription != null) {
+				UIController.CurrentScreen.DisableInput();
+				UIController.ErrorPopUp
+							.DisplayError(loadingErrorTitle, loadingErrorDescription)
+							.ContinueWith((task) => { UIController.CurrentScreen.ResetInput(); });
+			}	
 		}
 
 		public void SwitchToPauseMenu(IGameController gameController)

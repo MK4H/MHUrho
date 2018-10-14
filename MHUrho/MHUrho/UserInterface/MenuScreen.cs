@@ -21,6 +21,21 @@ namespace MHUrho.UserInterface
 			}
 
 			public abstract void Dispose();
+
+			/// <summary>
+			/// Stores the current state of input and then enables it
+			/// </summary>
+			public abstract void EnableInput();
+
+			/// <summary>
+			/// Stores the current state of input and then disables it
+			/// </summary>
+			public abstract void DisableInput();
+
+			/// <summary>
+			/// Sets the input state to the stored state
+			/// </summary>
+			public abstract void ResetInput();
 		}
 
 		public bool Visible {
@@ -57,6 +72,30 @@ namespace MHUrho.UserInterface
 
 			ScreenInstance.Dispose();
 			ScreenInstance = null;
+		}
+
+		/// <summary>
+		/// Stores the current state of input and then enables it
+		/// </summary>
+		public virtual void EnableInput()
+		{
+			ScreenInstance.EnableInput();
+		}
+
+		/// <summary>
+		/// Stores the current state of input and then disables it
+		/// </summary>
+		public virtual void DisableInput()
+		{
+			ScreenInstance.DisableInput();
+		}
+
+		/// <summary>
+		/// Sets the input state to the stored state
+		/// </summary>
+		public virtual void ResetInput()
+		{
+			ScreenInstance.ResetInput();
 		}
 	}
 }

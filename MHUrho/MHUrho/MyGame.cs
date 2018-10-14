@@ -10,6 +10,7 @@ using Urho.Shapes;
 using Urho.IO;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using MHUrho.Input;
 using MHUrho.Logic;
@@ -127,7 +128,7 @@ namespace MHUrho
 				Config = AppConfig.LoadFrom(configFile);
 			}
 				
-			PackageManager.CreateInstance(ResourceCache);
+			string[] failedPackages = PackageManager.CreateInstance(ResourceCache);
 
 			SetConfigOptions();
 
@@ -141,7 +142,19 @@ namespace MHUrho
 
 			MenuController = ControllerFactory.CreateMenuController();
 
-			StartupOptions.UIActions?.RunActions(this);
+			if (failedPackages.Length == 0) {
+				MenuController.InitialSwitchToMainMenu();
+				StartupOptions.UIActions?.RunActions(this);
+			}
+			else {
+				StringBuilder message = new StringBuilder();
+				message.AppendLine("Failed to load packages from these paths:");
+				foreach (string failedPackage in failedPackages) {
+					message.AppendLine(failedPackage);
+				}
+
+				MenuController.InitialSwitchToMainMenu("LOADING ERROR", message.ToString());
+			}
 		}
 
 		//public void Dispose()

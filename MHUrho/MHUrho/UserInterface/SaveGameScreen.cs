@@ -51,18 +51,19 @@ namespace MHUrho.UserInterface
 				base.Dispose();
 			}
 
-			protected override void EnableInput()
+			public override void EnableInput()
 			{
-				base.EnableInput();
-
-				saveButton.Enabled = true;
+				Window.SetDeepEnabled(true);
 			}
 
-			protected override void DisableInput()
+			public override void DisableInput()
 			{
-				base.DisableInput();
+				Window.SetDeepEnabled(false);
+			}
 
-				saveButton.Enabled = false;
+			public override void ResetInput()
+			{
+				Window.ResetDeepEnabled();
 			}
 
 			protected override void NameEditTextChanged(TextChangedEventArgs args)

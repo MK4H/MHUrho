@@ -69,7 +69,12 @@ namespace MHUrho.Packaging
 			schemas = new XmlSchemaSet();
 		}
 
-		public static void CreateInstance(ResourceCache resourceCache) {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resourceCache"></param>
+		/// <returns>Paths of the packages that failed to load</returns>
+		public static string[] CreateInstance(ResourceCache resourceCache) {
 			Instance = new PackageManager(resourceCache);
 			try {
 
@@ -91,8 +96,7 @@ namespace MHUrho.Packaging
 				//TODO: Error loading the default icon, game corrupted
 			}
 
-			string[] failedPackagePaths = Instance.ParseGamePackDir();
-			//TODO: Display as error message
+			return Instance.ParseGamePackDir();
 		}
 
 		public GamePack LoadPackage(string packageName, 
