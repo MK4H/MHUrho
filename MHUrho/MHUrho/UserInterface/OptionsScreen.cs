@@ -74,6 +74,7 @@ namespace MHUrho.UserInterface
 				((Button)window.GetChild("Exit", true)).Released += BackButton_Released;
 
 				InitializeOptions();
+				changed = false;
 			}
 
 			void InitializeOptions()
@@ -211,11 +212,19 @@ namespace MHUrho.UserInterface
 			{
 				if (changed) {
 					Game.Config.SetGraphicsMode(Game.Graphics);
+					DisableInput();
 					MenuUIManager.ConfirmationPopUp
 								.RequestConfirmation("Save config",
 													"Do you wish to save these settings ?",
 													TimeSpan.FromSeconds(10))
-								.ContinueWith(SaveConfirmation, TaskScheduler.FromCurrentSynchronizationContext());
+								.ContinueWith(SaveConfirmation, TaskScheduler.FromCurrentSynchronizationContext())
+								.ContinueWith((confirmed) => {
+												if (!confirmed.Result)
+												{
+													ResetInput();
+												}
+											}, 
+											TaskScheduler.FromCurrentSynchronizationContext());
 				}
 				else {
 					SaveConfirmation(true);
@@ -226,19 +235,28 @@ namespace MHUrho.UserInterface
 			void BackButton_Released(ReleasedEventArgs args)
 			{
 				if (changed) {
+					DisableInput();
 					MenuUIManager.ConfirmationPopUp
 								.RequestConfirmation("Exit config",
 													"Do you wish to revert these settings to their previous state?")
-								.ContinueWith(ExitConfirmation, TaskScheduler.FromCurrentSynchronizationContext());
+								.ContinueWith(ExitConfirmation, TaskScheduler.FromCurrentSynchronizationContext())
+								.ContinueWith((confirmed) => {
+												if (!confirmed.Result) {
+													ResetInput();
+												}
+											}, 
+											TaskScheduler.FromCurrentSynchronizationContext());
 				}
 				else {
 					ExitConfirmation(true);
 				}
 			}
 
-			void ExitConfirmation(Task<bool> confirmed)
+			bool ExitConfirmation(Task<bool> confirmed)
 			{
-				ExitConfirmation(confirmed.Result);
+				bool result = confirmed.Result;
+				ExitConfirmation(result);
+				return result;
 			}
 
 			void ExitConfirmation(bool confirmed)
@@ -253,9 +271,11 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void SaveConfirmation(Task<bool> confirmed)
+			bool SaveConfirmation(Task<bool> confirmed)
 			{
+				bool result = confirmed.Result;
 				SaveConfirmation(confirmed.Result);
+				return result;
 			}
 
 			void SaveConfirmation(bool confirmed)
@@ -317,6 +337,16 @@ namespace MHUrho.UserInterface
 				}
 			}
 
+			void ResetInput()
+			{
+				window.ResetDeepEnabled();
+			}
+
+			void DisableInput()
+			{
+				window.SetDeepEnabled(false);
+			}
+		
 			string WindowTypeToString(WindowTypeEnum windowType)
 			{
 				switch (windowType) {
