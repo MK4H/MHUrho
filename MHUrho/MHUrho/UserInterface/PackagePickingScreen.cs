@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
 using Urho;
@@ -101,8 +102,20 @@ namespace MHUrho.UserInterface
 			void RemoveButtonReleased(ReleasedEventArgs obj)
 			{
 				PackageListItem selectedItem = GetSelectedItem();
-				PackageManager.Instance.RemoveGamePack(selectedItem.Pack);
-				RemoveItem(selectedItem);
+
+				try {
+					PackageManager.Instance.RemoveGamePack(selectedItem.Pack);
+					RemoveItem(selectedItem);
+				}
+				catch (FatalPackagingException e) {
+					Game.ErrorExit(e.Message);
+				}
+				catch (ArgumentException e) {
+					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
+				catch (PackageLoadingException e) {
+					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
 			}
 
 			async void AddButtonReleased(ReleasedEventArgs obj)
@@ -111,10 +124,20 @@ namespace MHUrho.UserInterface
 											.FileBrowsingPopUp
 											.Request(MyGame.Files.PackageDirectoryAbsolutePath,
 													SelectOption.File);
-
-				var newPack = PackageManager.Instance.AddGamePack(result.RelativePath);
-				AddItem(newPack);
-
+				try {
+					var newPack = PackageManager.Instance.AddGamePack(result.RelativePath);
+					AddItem(newPack);
+				}
+				catch (FatalPackagingException e) {
+					Game.ErrorExit(e.Message);
+				}
+				catch (ArgumentException e) {
+					await MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
+				catch (PackageLoadingException e) {
+					await MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
+			
 			}
 
 			void SelectButtonReleased(ReleasedEventArgs args)

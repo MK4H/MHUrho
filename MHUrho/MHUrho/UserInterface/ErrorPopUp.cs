@@ -21,15 +21,21 @@ namespace MHUrho.UserInterface
 			readonly Window window;
 			readonly Button closeButton;
 
+			readonly MenuScreen underlyingMenuScreen;
+
 			/// <summary>
 			/// Task source with dummy type of bool, publicly the tasks are presented as plain Task without a return type
 			/// </summary>
 			TaskCompletionSource<bool> taskSource;
 
-			public Screen(ErrorPopUp proxy, string title, string description)
+
+			public Screen(ErrorPopUp proxy, string title, string description, MenuScreen underlyingMenuScreen)
 			{
 
 				this.proxy = proxy;
+				this.underlyingMenuScreen = underlyingMenuScreen;
+
+				underlyingMenuScreen?.DisableInput();
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PopUpErrorLayout.xml");
 
@@ -57,6 +63,7 @@ namespace MHUrho.UserInterface
 			{
 				//Dummy boolean value, publicly the task present as plain Task without return value
 				taskSource.SetResult(false);
+				underlyingMenuScreen?.ResetInput();
 				proxy.Hide();
 			}
 
@@ -84,9 +91,10 @@ namespace MHUrho.UserInterface
 		}
 
 		public Task DisplayError(string title,
-								string description)
+								string description,
+								MenuScreen underlyingMenuScreen = null)
 		{
-			screen = new Screen(this, title, description);
+			screen = new Screen(this, title, description, underlyingMenuScreen);
 			return screen.CloseTask;
 		}
 

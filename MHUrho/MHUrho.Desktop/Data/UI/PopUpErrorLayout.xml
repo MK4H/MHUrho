@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <element type="Window" style="PoPuPWindow">
-	<attribute name="Name" value="PopUpConfirmationWindow" />
-	<attribute name="Size" value="500 200" />
-	<attribute name="Min Size" value="500 200" />
+	<attribute name="Name" value="PopUpErrorWindow" />
+	<attribute name="Size" value="500 300" />
+	<attribute name="Min Size" value="500 300" />
 	<attribute name="Min Anchor" value="0.5 0.5" />
 	<attribute name="Max Anchor" value="0.5 0.5" />
 	<attribute name="Pivot" value="0.5 0.5" />
 	<attribute name="Priority" value="10" />
 	<attribute name="Focus Mode" value="Focusable" />
 	<element>
-		<attribute name="Size" value="145 30" />
+		<attribute name="Size" value="70 30" />
 		<attribute name="Min Anchor" value="1 1" />
 		<attribute name="Max Anchor" value="1 1" />
 		<attribute name="Pivot" value="1 1" />
 		<attribute name="Layout Mode" value="Horizontal" />
 		<attribute name="Layout Spacing" value="5" />
 		<element type="Button">
-			<attribute name="Name" value="ConfirmButton" />
+			<attribute name="Name" value="CloseButton" />
 			<attribute name="Min Size" value="70 30" />
 			<attribute name="Pivot" value="0 0" />
 			<element type="Text">
@@ -27,22 +27,7 @@
 				<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
 				<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
 				<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
-				<attribute name="Text" value="Confirm" />
-			</element>
-		</element>
-		<element type="Button">
-			<attribute name="Name" value="CancelButton" />
-			<attribute name="Min Size" value="70 30" />
-			<attribute name="Pivot" value="0 0" />
-			<element type="Text">
-				<attribute name="Min Anchor" value="0.5 0.5" />
-				<attribute name="Max Anchor" value="0.5 0.5" />
-				<attribute name="Pivot" value="0.5 0.5" />
-				<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
-				<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
-				<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
-				<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
-				<attribute name="Text" value="Cancel" />
+				<attribute name="Text" value="Close" />
 			</element>
 		</element>
 	</element>
@@ -56,17 +41,85 @@
 		<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
 		<attribute name="Font Size" value="20" />
 	</element>
-	<element type="Text">
-		<attribute name="Name" value="Description" />
+	<element type="ListView">
+		<attribute name="Name" value="DescriptionListView" />
 		<attribute name="Position" value="20 60" />
-		<attribute name="Size" value="460 15" />
-		<attribute name="Min Size" value="460 15" />
-		<attribute name="Max Size" value="460 15" />
+		<attribute name="Size" value="460 200" />
+		<attribute name="Min Size" value="460 200" />
 		<attribute name="Pivot" value="0 0" />
-		<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
-		<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
-		<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
-		<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
-		<attribute name="Word Wrap" value="true" />
+		<element type="ScrollBar" internal="true" style="none">
+			<attribute name="Size" value="460 16" />
+			<attribute name="Min Anchor" value="0 1" />
+			<attribute name="Max Anchor" value="0 1" />
+			<attribute name="Pivot" value="0 1" />
+			<attribute name="Color" value="0 0 0 0" />
+			<attribute name="Top Left Color" value="0 0 0 0" />
+			<attribute name="Top Right Color" value="0 0 0 0" />
+			<attribute name="Bottom Left Color" value="0 0 0 0" />
+			<attribute name="Bottom Right Color" value="0 0 0 0" />
+			<element type="Button" internal="true" style="none">
+				<attribute name="Pivot" value="0 0" />
+			</element>
+			<element type="Slider" internal="true" style="none">
+				<attribute name="Position" value="16 0" />
+				<attribute name="Size" value="428 16" />
+				<attribute name="Pivot" value="0 0" />
+				<element type="BorderImage" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+				</element>
+			</element>
+			<element type="Button" internal="true" style="none">
+				<attribute name="Position" value="444 0" />
+				<attribute name="Pivot" value="0 0" />
+			</element>
+		</element>
+		<element type="ScrollBar" internal="true" style="none">
+			<attribute name="Size" value="16 200" />
+			<attribute name="Min Anchor" value="1 0" />
+			<attribute name="Max Anchor" value="1 0" />
+			<attribute name="Pivot" value="1 0" />
+			<attribute name="Color" value="0 0 0 0" />
+			<attribute name="Top Left Color" value="0 0 0 0" />
+			<attribute name="Top Right Color" value="0 0 0 0" />
+			<attribute name="Bottom Left Color" value="0 0 0 0" />
+			<attribute name="Bottom Right Color" value="0 0 0 0" />
+			<element type="Button" internal="true" style="none">
+				<attribute name="Pivot" value="0 0" />
+			</element>
+			<element type="Slider" internal="true" style="none">
+				<attribute name="Position" value="0 16" />
+				<attribute name="Size" value="16 168" />
+				<attribute name="Pivot" value="0 0" />
+				<element type="BorderImage" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+				</element>
+			</element>
+			<element type="Button" internal="true" style="none">
+				<attribute name="Position" value="0 184" />
+				<attribute name="Pivot" value="0 0" />
+			</element>
+		</element>
+		<element type="BorderImage" internal="true" style="none">
+			<attribute name="Pivot" value="0 0" />
+			<element internal="true" style="none">
+				<attribute name="Pivot" value="0 0" />
+			    <element style="ListRow">
+			      <attribute name="Min Size" value="450 0"/>
+			      <attribute name="Layout Mode" value="Horizontal"/>
+			      <attribute name="Layout Border" value="10 0 10 0"/>
+			      <element type="Text">
+			        <attribute name="Name" value="Description" />
+			        <attribute name="Min Size" value="430 15" />
+			        <attribute name="Max Size" value="430 15" />
+			        <attribute name="Pivot" value="0 0" />
+			        <attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			        <attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			        <attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			        <attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			        <attribute name="Word Wrap" value="true" />
+			      </element>
+			    </element>
+			</element>
+		</element>
 	</element>
 </element>

@@ -127,8 +127,16 @@ namespace MHUrho
 			using (Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
 				Config = AppConfig.LoadFrom(configFile);
 			}
-				
-			string[] failedPackages = PackageManager.CreateInstance(ResourceCache);
+
+			string[] failedPackages;
+			try {
+				failedPackages = PackageManager.CreateInstance(ResourceCache);
+			}
+			catch (FatalPackagingException) {
+				//Exception is already logged at the lowest level where it was detected and then translated into the FatalPackagingException
+				Stop();
+				throw;
+			}
 
 			SetConfigOptions();
 
@@ -150,7 +158,7 @@ namespace MHUrho
 				StringBuilder message = new StringBuilder();
 				message.AppendLine("Failed to load packages from these paths:");
 				foreach (string failedPackage in failedPackages) {
-					message.AppendLine(failedPackage);
+					message.AppendLine(failedPackage);			
 				}
 
 				MenuController.InitialSwitchToMainMenu("LOADING ERROR", message.ToString());

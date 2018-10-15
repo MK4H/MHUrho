@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using Urho;
@@ -23,6 +24,13 @@ namespace MHUrho.Packaging
 
 		readonly string pathToXml;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pathToXml"></param>
+		/// <param name="packageManager"></param>
+		/// <param name="schemas"></param>
+		/// <exception cref="PackageLoadingException">Thrown when the package loading failed for any reason</exception>
 		public GamePackRep(string pathToXml, PackageManager packageManager, XmlSchemaSet schemas)
 		{
 			this.pathToXml = pathToXml;
@@ -36,9 +44,20 @@ namespace MHUrho.Packaging
 				data.Validate(schemas, null);
 			}
 			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
-				//TODO: Exception
-				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+				string errorMessage =
+					$"Package XML was invalid.{Environment.NewLine} Package at: {pathToXml}{Environment.NewLine} Xml validation error: {e.Message}";
+				Urho.IO.Log.Write(LogLevel.Warning, errorMessage);
+				throw new PackageLoadingException(errorMessage, e);
+			}
+			catch (XmlException e) {
+				string errorMessage = $"File at {pathToXml} was not an XML file:{Environment.NewLine}{e.Message}";
+				Urho.IO.Log.Write(LogLevel.Warning, errorMessage);
+				throw new PackageLoadingException(errorMessage, e);
+			}
+			catch (IOException e) {
+				string errorMessage = $"File operation with package XML file at \"{pathToXml}\" failed:{Environment.NewLine}{e.Message}";
+				Urho.IO.Log.Write(LogLevel.Warning, errorMessage);
+				throw new PackageLoadingException(errorMessage, e);
 			}
 			finally {
 				file?.Dispose();
@@ -46,15 +65,26 @@ namespace MHUrho.Packaging
 
 			XElement packageElement = data.Element(GamePackXml.Inst.GamePackElement);
 
+			if (packageElement == null) {
+				string message = $"Package XML did not have root element {GamePackXml.Inst.GamePackElement}.";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message);
+			}
+
+			//Element should not be null because the XML was validated and the schema does not allow it
 			Name = packageElement.Attribute(GamePackXml.Inst.NameAttribute).Value;
+
+			//Description element is optional in the XML schema
 			Description = packageElement.Element(GamePackXml.Inst.Description)?.Value ?? "";
 
+			//Thumbnail path element is optional in the XML schema
 			string thumbnailPath = packageElement.Element(GamePackXml.Inst.PathToThumbnail)?.Value;
 			if (thumbnailPath != null) {
 				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.CorrectRelativePath(thumbnailPath));
 				Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
 			}
 			else {
+				//If no thumbnail provided, show default icon
 				Thumbnail = PackageManager.Instance.DefaultIcon;
 			}
 			

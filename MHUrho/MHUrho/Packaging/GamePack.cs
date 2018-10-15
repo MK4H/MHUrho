@@ -172,8 +172,9 @@ namespace MHUrho.Packaging {
 			}
 			//TODO: Catch only the expected exceptions
 			catch (Exception e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package loading failed with: \"{e}\"");
-				throw new PackageLoadingException($"Package loading failed with: \"{e}\"", e);
+				string message = $"Package loading failed with: \"{e.Message}\"";
+				Urho.IO.Log.Write(LogLevel.Warning,message );
+				throw new PackageLoadingException(message, e);
 			}
 			finally {
 				FinishLoading();
