@@ -77,15 +77,17 @@ namespace MHUrho.UserInterface
 				loadButton.Enabled = false;
 			}
 
-			void LoadButton_Pressed(PressedEventArgs args)
+			async void LoadButton_Pressed(PressedEventArgs args)
 			{
 				if (MatchSelected == null) return;
 
 				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
 
-				var levelRep = LevelRep.GetFromSavedGame(newRelativePath);
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
 
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame);
+				var levelRep = await LevelRep.GetFromSavedGame(newRelativePath, screen.LoadingWatcher.GetWatcherForSubsection(40));
+
+				MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection(60));
 			}
 		}
 

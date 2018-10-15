@@ -12,9 +12,11 @@ namespace MHUrho.UserInterface
 	{
 		class Screen : ScreenBase {
 
+			public LoadingWatcher LoadingWatcher { get; private set; }
+
 			readonly LoadingScreen proxy;
 
-			ILoadingWatcher LoadingWatcher => proxy.LoadingWatcher;
+			
 
 			readonly Window window;
 
@@ -26,6 +28,7 @@ namespace MHUrho.UserInterface
 			{
 
 				this.proxy = proxy;
+				this.LoadingWatcher = new LoadingWatcher();
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadingScreenLayout.xml");
 
@@ -42,7 +45,7 @@ namespace MHUrho.UserInterface
 			{
 				progressBar.SetValue(0);
 				text.Value = "";
-				MenuUIManager.Clear();
+				proxy?.OnLoadingFinished();
 			}
 
 			public void OnPercentageUpdate(float value)
@@ -85,8 +88,9 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		//TODO: Restrict setting only when not visible etc.
-		public ILoadingWatcher LoadingWatcher { get; set; }
+		public LoadingWatcher LoadingWatcher => screen.LoadingWatcher;
+
+		public event Action OnLoadingFinished;
 
 		protected override ScreenBase ScreenInstance {
 			get => screen;
@@ -128,7 +132,7 @@ namespace MHUrho.UserInterface
 			screen.Dispose();
 			screen = null;
 
-			LoadingWatcher = null;
+			OnLoadingFinished = null;
 		}
 	}
 }

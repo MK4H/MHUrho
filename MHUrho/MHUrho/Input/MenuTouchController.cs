@@ -42,12 +42,15 @@ namespace MHUrho.Input
 			throw new NotImplementedException();
 		}
 
-		public void StartLoadingLevelForEditing(LevelRep level)
+		public void StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
 		{
 			throw new NotImplementedException();
 		}
 
-		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings)
+		public void StartLoadingLevelForPlaying(LevelRep level,
+												PlayerSpecification players,
+												LevelLogicCustomSettings customSettings,
+												ILoadingSignaler loadingSignaler)
 		{
 			throw new NotImplementedException();
 		}

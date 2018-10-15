@@ -12,16 +12,14 @@ namespace MHUrho.Logic
 {
     public interface ILevelLoader
     {
-		ILoadingWatcher LoadingWatcher { get; }
-
 		Task<ILevelManager> CurrentLoading { get; }
 	
 
-		Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel);
+		Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel, ILoadingSignaler loadingSignaler);
 
-		Task<ILevelManager> LoadForPlaying(LevelRep levelRep, StLevel storedLevel, PlayerSpecification players, LevelLogicCustomSettings customSettings);
+		Task<ILevelManager> LoadForPlaying(LevelRep levelRep, StLevel storedLevel, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler);
 
-		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize);
+		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize, ILoadingSignaler loadingSignaler);
 
 	}
 }

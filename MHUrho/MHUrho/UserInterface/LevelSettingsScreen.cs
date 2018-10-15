@@ -244,7 +244,11 @@ namespace MHUrho.UserInterface
 				foreach (var aiPlayer in aiPlayers) {
 					players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2, aiPlayer.Item3);
 				}
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(Level, players, pluginCustomSettings);
+
+				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it
+				LevelRep level = Level;
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(() => MenuUIManager.Clear());
+				MenuUIManager.MenuController.StartLoadingLevelForPlaying(level, players, pluginCustomSettings, screen.LoadingWatcher);
 			}
 
 			public void SimulateBackButton()

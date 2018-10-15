@@ -84,8 +84,7 @@ namespace MHUrho.UserInterface
 					item.Dispose();
 				}
 
-				
-
+			
 				listView.RemoveAllItems();
 				listView.Dispose();
 
@@ -189,10 +188,12 @@ namespace MHUrho.UserInterface
 			}
 
 
-			void ItemSelectionConfirmed(PackageListItem item)
+			async void ItemSelectionConfirmed(PackageListItem item)
 			{
-				//TODO: Maybe switch to loading screen when loading package
-				MenuUIManager.SwitchToLevelPickingScreen(PackageManager.Instance.LoadPackage(item.Pack));
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
+				GamePack package = await PackageManager.Instance.LoadPackage(item.Pack, screen.LoadingWatcher);
+
+				MenuUIManager.SwitchToLevelPickingScreen(package);
 			}
 
 			IEnumerable<PackageListItem> GetItems()

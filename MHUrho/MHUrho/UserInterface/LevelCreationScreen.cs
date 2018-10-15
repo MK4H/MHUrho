@@ -274,7 +274,10 @@ namespace MHUrho.UserInterface
 														PackageManager.Instance.ActivePackage);
 				}
 
-				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level);
+				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it
+				LevelRep level = proxy.Level;
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
+				MenuUIManager.MenuController.StartLoadingLevelForEditing(level, screen.LoadingWatcher);
 				
 			}
 
@@ -341,13 +344,14 @@ namespace MHUrho.UserInterface
 													package.GetLevelLogicType(logicTypeName),
 													  mapSize,
 													  package);
-				
-				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level);
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
+				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level, screen.LoadingWatcher);
 			}
 
 			public void SimulateEditExistingLevel()
 			{
-				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level);
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
+				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level, screen.LoadingWatcher);
 			}
 
 			public void SimulateBackButtonPress()

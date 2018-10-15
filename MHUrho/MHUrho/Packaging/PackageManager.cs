@@ -103,13 +103,13 @@ namespace MHUrho.Packaging
 			return Instance.ParseGamePackDir();
 		}
 
-		public GamePack LoadPackage(string packageName, 
+		public Task<GamePack> LoadPackage(string packageName, 
 								ILoadingSignaler loadingProgress = null)
 		{
 			return LoadPackage(availablePacks[packageName], loadingProgress);
 		}
 
-		public GamePack LoadPackage(GamePackRep package, ILoadingSignaler loadingProgress = null)
+		public async Task<GamePack> LoadPackage(GamePackRep package, ILoadingSignaler loadingProgress = null)
 		{
 			if (loadingProgress == null) {
 				loadingProgress = new LoadingWatcher();
@@ -122,7 +122,7 @@ namespace MHUrho.Packaging
 
 			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
-			ActivePackage = package.LoadPack(schemas, loadingProgress);
+			ActivePackage = await package.LoadPack(schemas, loadingProgress);
 			return ActivePackage;
 		}
 

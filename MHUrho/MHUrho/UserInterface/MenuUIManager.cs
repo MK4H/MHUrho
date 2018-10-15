@@ -66,65 +66,76 @@ namespace MHUrho.UserInterface
 			PreviousScreens = new Stack<MenuScreen>();
 		}
 
-		public void SwitchToMainMenu()
+		public MainMenu SwitchToMainMenu()
 		{
 			SwitchToScreen(MainMenu);
+			return MainMenu;
 		}
 
-		public void SwitchToPauseMenu(ILevelManager level)
+		public PauseMenu SwitchToPauseMenu(ILevelManager level)
 		{
 			PauseMenu.PausedLevel = level;
 			SwitchToScreen(PauseMenu);
+			return PauseMenu;
 		}
 
-		public void SwitchToOptions()
+		public OptionsScreen SwitchToOptions()
 		{
 			SwitchToScreen(OptionsScreen);
+			return OptionsScreen;
 		}
 
-		public void SwitchToLoadingScreen(ILoadingWatcher loadingWatcher)
+		public LoadingScreen SwitchToLoadingScreen(Action onLoadingFinished = null)
 		{
-			LoadingScreen.LoadingWatcher = loadingWatcher;
+			LoadingScreen.OnLoadingFinished += onLoadingFinished;
 			SwitchToScreen(LoadingScreen);
+			return LoadingScreen;
 		}
 
-		public void SwitchToSaveGame()
+		public SaveGameScreen SwitchToSaveGame()
 		{
 			SwitchToScreen(SaveGameScreen);
+			return SaveGameScreen;
 		}
 
-		public void SwitchToLoadGame()
+		public LoadGameScreen SwitchToLoadGame()
 		{
 			SwitchToScreen(LoadGameScreen);
+			return LoadGameScreen;
 		}
 
-		public void SwitchToPackagePickingScreen()
+		public PackagePickingScreen SwitchToPackagePickingScreen()
 		{
 			SwitchToScreen(PackagePickingScreen);
+			return PackagePickingScreen;
 		}
 
-		public void SwitchToLevelPickingScreen(GamePack package)
+		public LevelPickingScreen SwitchToLevelPickingScreen(GamePack package)
 		{
 			LevelPickingScreen.Package = package;
 			SwitchToScreen(LevelPickingScreen);
+			return LevelPickingScreen;
 		}
 
-		public void SwitchToLevelSettingsScreen(LevelRep level)
+		public LevelSettingsScreen SwitchToLevelSettingsScreen(LevelRep level)
 		{
 			LevelSettingsScreen.Level = level;
 			SwitchToScreen(LevelSettingsScreen);
+			return LevelSettingsScreen;
 		}
 
-		public void SwitchToLevelCreationScreen(LevelRep level)
+		public LevelCreationScreen SwitchToLevelCreationScreen(LevelRep level)
 		{
 			LevelCreationScreen.Level = level;
 			SwitchToScreen(LevelCreationScreen);
+			return LevelCreationScreen;
 		}
 
-		public void SwitchToSaveAsScreen(ILevelManager level)
+		public SaveAsScreen SwitchToSaveAsScreen(ILevelManager level)
 		{
 			SaveAsScreen.Level = level;
 			SwitchToScreen(SaveAsScreen);
+			return SaveAsScreen;
 		}
 
 		public void SwitchBack()
@@ -144,12 +155,14 @@ namespace MHUrho.UserInterface
 			CurrentScreen = null;
 		}
 
-
 		void SwitchToScreen(MenuScreen newScreen)
 		{
 			if (CurrentScreen != null) {
 				CurrentScreen.Hide();
-				PreviousScreens.Push(CurrentScreen);
+
+				if (CurrentScreen != LoadingScreen) {
+					PreviousScreens.Push(CurrentScreen);
+				}
 			}
 
 			CurrentScreen = newScreen;

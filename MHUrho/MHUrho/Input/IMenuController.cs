@@ -32,9 +32,9 @@ namespace MHUrho.Input
 
 		void SavePausedLevel(string fileName);
 
-		void StartLoadingLevelForEditing(LevelRep level);
+		void StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler);
 
-		void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings);
+		void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler);
 
 		void ExecuteActionOnCurrentScreen(MenuScreenAction action);
 	}

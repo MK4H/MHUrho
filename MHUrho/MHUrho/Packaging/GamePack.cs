@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using MHUrho.Helpers;
@@ -100,6 +101,12 @@ namespace MHUrho.Packaging {
 
 		readonly string pathToXml;
 		readonly XmlSchemaSet schemas;
+
+		/// <summary>
+		/// Used during loading to enable Type plugins requesting yet unloaded types to load them on request
+		/// Circular loading is prevented by spliting it between instance creation, which does not need any types,
+		/// and plugin loading, which may request other types, but the instance is already loaded, so others can request the type
+		/// </summary>
 		XDocument data;
 
 		/// <summary>
@@ -107,12 +114,11 @@ namespace MHUrho.Packaging {
 		///
 		/// Relative to the <see cref="DirectoryPath"/> directory
 		/// </summary>
-		readonly string levelSavingDirPath;
+		string levelSavingDirPath;
 
-		public GamePack(string pathToXml,
-						GamePackRep gamePackRep,
-						XmlSchemaSet schemas,
-						ILoadingSignaler loadingProgress) {
+		GamePack(string pathToXml,
+					GamePackRep gamePackRep,
+					XmlSchemaSet schemas) {
 
 			tileTypesByName = new Dictionary<string, TileType>();
 			unitTypesByName = new Dictionary<string, UnitType>();
@@ -135,51 +141,65 @@ namespace MHUrho.Packaging {
 			this.schemas = schemas;
 			this.pathToXml = pathToXml;
 
+			
+
+		}
+
+		public static async Task<GamePack> Load(string pathToXml,
+												GamePackRep gamePackRep,
+												XmlSchemaSet schemas,
+												ILoadingSignaler loadingProgress)
+		{
+			GamePack newPack = new GamePack(pathToXml, gamePackRep, schemas);
+
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 
-			try {
-				XDocument xml = StartLoading(pathToXml, schemas);
-
+			try
+			{
+				newPack.data = await MyGame.InvokeOnMainSafeAsync(() => StartLoading(pathToXml, schemas));
 				//Validation in StartLoading should take care of any missing elements
-				levelSavingDirPath = FileManager.CorrectRelativePath(xml.Root
-																		.Element(GamePackXml.Inst.Levels)
-																		.Element(LevelsXml.Inst.DataDirPath)
-																		.Value.Trim());
+				newPack.levelSavingDirPath = FileManager.CorrectRelativePath(newPack.data.Root
+																						.Element(GamePackXml.Inst.Levels)
+																						.Element(LevelsXml.Inst.DataDirPath)
+																						.Value.Trim());
 
 				loadingProgress.TextAndPercentageUpdate("Loading tile types", 5);
-				LoadAllTileTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading unit types", 5);
-				LoadAllUnitTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading building types", 5);
-				LoadAllBuildingTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading projectile types", 5);
-				LoadAllProjectileTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading resource types", 5);
-				LoadAllResourceTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading player types", 5);
-				LoadAllPlayerTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading level logic types", 5);
-				LoadAllLevelLogicTypes();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
 
 				loadingProgress.TextAndPercentageUpdate("Loading levels", 5);
-				LoadAllLevels();
+				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
 			}
 			//TODO: Catch only the expected exceptions
-			catch (Exception e) {
+			catch (Exception e)
+			{
 				string message = $"Package loading failed with: \"{e.Message}\"";
-				Urho.IO.Log.Write(LogLevel.Warning,message );
+				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}
-			finally {
-				FinishLoading();
+			finally
+			{
+				newPack.FinishLoading();
 			}
 
+			return newPack;
 		}
 
 		public TileType GetTileType(string name) {
@@ -486,9 +506,9 @@ namespace MHUrho.Packaging {
 				}
 			}
 
-			var xmlData = StartLoading(pathToXml, schemas);
+			data = StartLoading(pathToXml, schemas);
 			//Should not be null, because startLoading validates the xml
-			level.SaveTo(xmlData.Root.Element(GamePackXml.Inst.Levels));
+			level.SaveTo(data.Root.Element(GamePackXml.Inst.Levels));
 			WriteData();
 			FinishLoading();
 		}
@@ -500,7 +520,7 @@ namespace MHUrho.Packaging {
 				throw new ArgumentException("The provided level was not part of this gamePack", nameof(level));
 			}
 
-			var xmlData = StartLoading(pathToXml, schemas);
+			data = StartLoading(pathToXml, schemas);
 
 			if (!levelsByName.Remove(level.Name)) {
 				//This should not happen, but just to be safe
@@ -509,7 +529,7 @@ namespace MHUrho.Packaging {
 			}
 
 			//This should be correct thanks to xsd validation
-			XElement levels = xmlData.Root.Element(GamePackXml.Inst.Levels);
+			XElement levels = data.Root.Element(GamePackXml.Inst.Levels);
 
 			var levelElement = levels.Elements(LevelsXml.Inst.Level)
 									.FirstOrDefault(levelElem => string.Equals(levelElem.Attribute(LevelXml.Inst.NameAttribute).Value,
@@ -614,9 +634,10 @@ namespace MHUrho.Packaging {
 			};
 		}
 
-		XDocument StartLoading(string pathToXml, XmlSchemaSet schemas)
+		static XDocument StartLoading(string pathToXml, XmlSchemaSet schemas)
 		{
 			Stream file = null;
+			XDocument data;
 			//TODO: Handler and signal that resource pack is in invalid state
 			try {
 				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);

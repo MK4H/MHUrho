@@ -56,9 +56,9 @@ namespace MHUrho.Packaging
 				this.Context = context;
 			}
 
-			public abstract ILevelLoader LoadForEditing();
+			public abstract ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler);
 
-			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings);
+			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler);
 
 			public virtual void SaveTo(XElement levelsElement)
 			{
@@ -117,14 +117,14 @@ namespace MHUrho.Packaging
 				this.mapSize = mapSize;
 			}
 
-			public override ILevelLoader LoadForEditing()
+			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 			{
 				var loader = LevelManager.GetLoader();
-				loader.LoadDefaultLevel(Context, mapSize).ContinueWith(RunningLevelLoaded);
+				loader.LoadDefaultLevel(Context, mapSize, loadingSignaler).ContinueWith(RunningLevelLoaded);
 				return loader;
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
 			{
 				throw new InvalidOperationException("Cannot play a default level");
 			}
@@ -143,21 +143,21 @@ namespace MHUrho.Packaging
 
 			}
 
-			public override ILevelLoader LoadForEditing()
+			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 			{
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForEditing(Context, savedLevel).ContinueWith(RunningLevelLoaded);
+				loader.LoadForEditing(Context, savedLevel, loadingSignaler).ContinueWith(RunningLevelLoaded);
 				return loader;
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
 			{
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings).ContinueWith(RunningLevelLoaded);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded);
 				return loader;
 			}
 
@@ -179,19 +179,19 @@ namespace MHUrho.Packaging
 				this.savedLevel = savedLevel;
 			}
 
-			public override ILevelLoader LoadForEditing()
+			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 			{
 				throw new InvalidOperationException("Level loaded from save cannot be edited");
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
 			{
 				if (savedLevel == null) {
 					savedLevel = GetSaveFromDynamicPath(savedLevelPath);
 				}
 				var loader = LevelManager.GetLoader();
 
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings).ContinueWith(RunningLevelLoaded);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded);
 
 				return loader;
 			}
@@ -333,14 +333,16 @@ namespace MHUrho.Packaging
 			return new LevelRep(gamePack, levelXmlElement);
 		}
 
-		public static LevelRep GetFromSavedGame(string storedLevelPath)
+		public static async Task<LevelRep> GetFromSavedGame(string storedLevelPath, ILoadingSignaler loadingSignaler = null)
 		{
 
-
+			loadingSignaler?.TextUpdate("Getting level from save file");
 			StLevel storedLevel = GetSaveFromDynamicPath(storedLevelPath);
+			loadingSignaler?.PercentageUpdate(20);
 
 			//TODO: Exception if pack is not present
-			var gamePack = PackageManager.Instance.LoadPackage(storedLevel.PackageName);
+			loadingSignaler?.TextUpdate("Loading package");
+			var gamePack = await PackageManager.Instance.LoadPackage(storedLevel.PackageName, loadingSignaler?.GetWatcherForSubsection(80));
 			return new LevelRep(gamePack, storedLevelPath, storedLevel);
 			
 		}
@@ -369,14 +371,14 @@ namespace MHUrho.Packaging
 			return true;
 		}
 
-		public ILevelLoader LoadForEditing()
+		public ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 		{
-			return state.LoadForEditing();
+			return state.LoadForEditing(loadingSignaler);
 		}
 
-		public ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings)
+		public ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
 		{
-			return state.LoadForPlaying(players, customSettings);
+			return state.LoadForPlaying(players, customSettings, loadingSignaler);
 		}
 
 		/// <summary>

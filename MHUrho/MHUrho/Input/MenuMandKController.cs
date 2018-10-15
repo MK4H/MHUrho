@@ -49,28 +49,23 @@ namespace MHUrho.Input
 			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
-		public void StartLoadingLevelForEditing(LevelRep level)
+		public void StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
-			//This is correct, dont await, leave UI responsive
-			ILevelLoader loader = level.LoadForEditing();
-			
-			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
+			level.LoadForEditing(loadingSignaler);
 		}
 
-		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings)
+		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
 		{
 			if (pausedLevelController != null)
 			{
 				EndPausedLevel();
 			}
 
-			ILevelLoader loader = level.LoadForPlaying(players, customSettings);
-
-			UIController.SwitchToLoadingScreen(loader.LoadingWatcher);
+			level.LoadForPlaying(players, customSettings, loadingSignaler);
 		}
 
 		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)
@@ -133,7 +128,10 @@ namespace MHUrho.Input
 
 		}
 
-
+		void ClearUI()
+		{
+			UIController.Clear();
+		}
 
 	}
 }

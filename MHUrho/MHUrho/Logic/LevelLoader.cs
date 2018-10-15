@@ -24,7 +24,7 @@ namespace MHUrho.Logic
 				protected readonly Loader Loader;
 
 				protected MyGame Game => MyGame.Instance;
-				protected LoadingWatcher LoadingWatcher => Loader.loadingWatcher;
+				protected ILoadingSignaler LoadingSignaler;
 
 				protected readonly bool EditorMode;
 
@@ -32,18 +32,19 @@ namespace MHUrho.Logic
 
 				protected LevelManager Level;
 
-				protected CommonLevelLoader(Loader loader, LevelRep levelRep, bool editorMode)
+				protected CommonLevelLoader(Loader loader, LevelRep levelRep, bool editorMode, ILoadingSignaler loadingSignaler)
 				{
 					this.Loader = loader;
 					this.LevelRep = levelRep;
 					this.EditorMode = editorMode;
+					this.LoadingSignaler = loadingSignaler;
 				}
 
 				public abstract Task<ILevelManager> StartLoading();
 
 				protected LevelManager InitializeLevel()
 				{
-					LoadingWatcher.TextUpdate("Initializing level");
+					LoadingSignaler.TextUpdate("Initializing level");
 					var scene = new Scene(Game.Context) {UpdateEnabled = false};
 					var octree = scene.CreateComponent<Octree>();
 					var physics = scene.CreateComponent<PhysicsWorld>();
@@ -137,8 +138,8 @@ namespace MHUrho.Logic
 
 			class DefaultLevelLoader : CommonLevelLoader {
 
-				public DefaultLevelLoader(Loader loader, LevelRep levelRep, IntVector2 mapSize)
-					:base(loader, levelRep, true)
+				public DefaultLevelLoader(Loader loader, LevelRep levelRep, IntVector2 mapSize, ILoadingSignaler loadingSignaler)
+					:base(loader, levelRep, true, loadingSignaler)
 				{
 					this.mapSize = mapSize;
 
@@ -166,28 +167,28 @@ namespace MHUrho.Logic
 									$"Loading default level. MapSize: {mapSize}, LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}");
 					LoadingSanityCheck();
 
-					LoadingWatcher.TextUpdate("Initializing level");
+					LoadingSignaler.TextUpdate("Initializing level");
 					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
 					PlayerInsignia.InitInsignias(PackageManager.Instance);
 
-					LoadingWatcher.TextUpdate("Loading map");
+					LoadingSignaler.TextUpdate("Loading map");
 					Level.Map = await MyGame.InvokeOnMainSafe(CreateDefaultMap);
 
 					Level.Minimap = new Minimap(Level, 4);
 
 					MyGame.InvokeOnMainSafe(CreateCamera);
 
-					LoadingWatcher.TextUpdate("Creating players");
+					LoadingSignaler.TextUpdate("Creating players");
 					MyGame.InvokeOnMainSafe(CreatePlayers);
 
-					LoadingWatcher.TextUpdate("Giving player controls");
+					LoadingSignaler.TextUpdate("Giving player controls");
 					MyGame.InvokeOnMainSafe(CreateControl);
 
-					LoadingWatcher.TextUpdate("Starting level");
+					LoadingSignaler.TextUpdate("Starting level");
 					MyGame.InvokeOnMainSafe(StartLevel);
 
-					LoadingWatcher.FinishedLoading();
+					LoadingSignaler.FinishedLoading();
 					return Level;
 				}
 
@@ -241,7 +242,7 @@ namespace MHUrho.Logic
 					Node mapNode = Level.LevelNode.CreateChild("MapNode");
 
 					//This will take a long time, run it in another thread
-					return Task.Run<Map>(() => Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, mapSize, LoadingWatcher.GetWatcherForSubsection(30)));
+					return Task.Run<Map>(() => Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, mapSize, LoadingSignaler.GetWatcherForSubsection(30)));
 				}
 
 				void LoadingSanityCheck()
@@ -252,8 +253,8 @@ namespace MHUrho.Logic
 
 			abstract class SavedLevelLoader : CommonLevelLoader {
 
-				protected SavedLevelLoader(Loader loader, LevelRep levelRep, StLevel storedLevel, bool editorMode)
-					:base(loader, levelRep, editorMode)
+				protected SavedLevelLoader(Loader loader, LevelRep levelRep, StLevel storedLevel, bool editorMode, ILoadingSignaler loadingSignaler)
+					:base(loader, levelRep, editorMode, loadingSignaler)
 				{
 					this.StoredLevel = storedLevel;
 				}
@@ -269,7 +270,7 @@ namespace MHUrho.Logic
 									$"Loading stored level. LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}, EditorMode: {EditorMode}");
 
 					Loaders = new List<ILoader>();
-					LoadingWatcher.TextUpdate("Initializing level");
+					LoadingSignaler.TextUpdate("Initializing level");
 					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
 					PlayerInsignia.InitInsignias(PackageManager.Instance);
@@ -295,13 +296,13 @@ namespace MHUrho.Logic
 					MyGame.InvokeOnMainSafe(FinishLoading);
 					MyGame.InvokeOnMainSafe(StartLevel);
 
-					LoadingWatcher.FinishedLoading();
+					LoadingSignaler.FinishedLoading();
 					return Level;				
 				}
 
 				protected virtual void LoadUnits()
 				{
-					LoadingWatcher.TextUpdate("Loading units");
+					LoadingSignaler.TextUpdate("Loading units");
 					foreach (var unit in StoredLevel.Units) {
 						var unitLoader = Unit.GetLoader(Level, unit);
 						unitLoader.StartLoading();
@@ -313,7 +314,7 @@ namespace MHUrho.Logic
 
 				protected virtual void LoadBuildings()
 				{
-					LoadingWatcher.TextUpdate("Loading buildings");
+					LoadingSignaler.TextUpdate("Loading buildings");
 					foreach (var building in StoredLevel.Buildings) {
 						var buildingLoader = Building.GetLoader(Level, building);
 						buildingLoader.StartLoading();
@@ -325,7 +326,7 @@ namespace MHUrho.Logic
 
 				protected virtual void LoadProjectiles()
 				{
-					LoadingWatcher.TextUpdate("Loading projectiles");
+					LoadingSignaler.TextUpdate("Loading projectiles");
 					foreach (var projectile in StoredLevel.Projectiles) {
 						var projectileLoader = Projectile.GetLoader(Level, projectile);
 						projectileLoader.StartLoading();
@@ -351,7 +352,7 @@ namespace MHUrho.Logic
 
 				protected virtual void ConnectReferences()
 				{
-					LoadingWatcher.TextUpdate("Connecting references");
+					LoadingSignaler.TextUpdate("Connecting references");
 					//Connect references
 					foreach (var loader in Loaders)
 					{
@@ -361,7 +362,7 @@ namespace MHUrho.Logic
 
 				protected virtual void FinishLoading()
 				{
-					LoadingWatcher.TextUpdate("Finishing loading");
+					LoadingSignaler.TextUpdate("Finishing loading");
 					foreach (var loader in Loaders)
 					{
 						loader.FinishLoading();
@@ -370,7 +371,7 @@ namespace MHUrho.Logic
 
 				protected virtual void StartLevel()
 				{
-					LoadingWatcher.TextUpdate("Starting level");
+					LoadingSignaler.TextUpdate("Starting level");
 
 					CurrentLevel = Level;
 					Level.UIManager.ShowUI();
@@ -401,7 +402,7 @@ namespace MHUrho.Logic
 													mapNode,
 													Level.octree,
 													StoredLevel.Map,
-													LoadingWatcher.GetWatcherForSubsection(30));
+													LoadingSignaler.GetWatcherForSubsection(30));
 						loader.StartLoading();
 						return loader;
 									});
@@ -419,8 +420,9 @@ namespace MHUrho.Logic
 												LevelRep levelRep,
 												StLevel storedLevel,
 												PlayerSpecification players,
-												LevelLogicCustomSettings customSettings)
-					: base(loader, levelRep, storedLevel, false)
+												LevelLogicCustomSettings customSettings,
+												ILoadingSignaler loadingSignaler)
+					: base(loader, levelRep, storedLevel, false, loadingSignaler)
 				{
 					this.players = players;
 					this.customSettings = customSettings;
@@ -447,7 +449,7 @@ namespace MHUrho.Logic
 
 				protected override void LoadPlayers()
 				{
-					LoadingWatcher.TextUpdate("Loading players");
+					LoadingSignaler.TextUpdate("Loading players");
 					//If players == null, we are loading a saved level already in play with set AIs
 					InsigniaGetter insigniaGetter = new InsigniaGetter();
 					if (players == PlayerSpecification.LoadFromSavedGame) {
@@ -504,8 +506,8 @@ namespace MHUrho.Logic
 			}
 
 			class SavedLevelEditorLoader : SavedLevelLoader {
-				public SavedLevelEditorLoader(Loader loader, LevelRep levelRep, StLevel storedLevel)
-					: base(loader, levelRep, storedLevel, true)
+				public SavedLevelEditorLoader(Loader loader, LevelRep levelRep, StLevel storedLevel, ILoadingSignaler loadingSignaler)
+					: base(loader, levelRep, storedLevel, true, loadingSignaler)
 				{ }
 
 				protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
@@ -554,23 +556,18 @@ namespace MHUrho.Logic
 				}
 			}
 
-			public ILoadingWatcher LoadingWatcher => loadingWatcher;
-
 			public Task<ILevelManager> CurrentLoading { get; private set; }
-
-			readonly LoadingWatcher loadingWatcher;
 
 			CommonLevelLoader loaderType;
 
 			public Loader()
 			{
 				this.CurrentLoading = null;
-				loadingWatcher = new LoadingWatcher();
 			}
 
-			public Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel)
+			public Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel, ILoadingSignaler loadingSignaler)
 			{
-				loaderType = new SavedLevelEditorLoader(this, levelRep, storedLevel);
+				loaderType = new SavedLevelEditorLoader(this, levelRep, storedLevel, loadingSignaler);
 
 				CurrentLoading = loaderType.StartLoading();
 				return CurrentLoading;
@@ -579,9 +576,10 @@ namespace MHUrho.Logic
 			public Task<ILevelManager> LoadForPlaying(LevelRep levelRep,
 													StLevel storedLevel,
 													PlayerSpecification players,
-													LevelLogicCustomSettings customSettings)
+													LevelLogicCustomSettings customSettings,
+													ILoadingSignaler loadingSignaler)
 			{
-				loaderType = new SavedLevelPlayingLoader(this, levelRep, storedLevel, players, customSettings);
+				loaderType = new SavedLevelPlayingLoader(this, levelRep, storedLevel, players, customSettings, loadingSignaler);
 
 				CurrentLoading = loaderType.StartLoading();
 				return CurrentLoading;
@@ -593,9 +591,9 @@ namespace MHUrho.Logic
 			/// <param name="mapSize">Size of the map to create</param>
 			/// <param name="packages">packages to load</param>
 			/// <returns>Loaded default level</returns>
-			public Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize)
+			public Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize, ILoadingSignaler loadingSignaler)
 			{
-				var newLoaderType = new DefaultLevelLoader(this, levelRep, mapSize);
+				var newLoaderType = new DefaultLevelLoader(this, levelRep, mapSize, loadingSignaler);
 				loaderType = newLoaderType;
 
 				CurrentLoading = newLoaderType.StartLoading();

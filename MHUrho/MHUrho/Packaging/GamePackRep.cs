@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -90,9 +91,9 @@ namespace MHUrho.Packaging
 			
 		}
 
-		public GamePack LoadPack(XmlSchemaSet schemas, ILoadingSignaler loadingProgress)
+		public Task<GamePack> LoadPack(XmlSchemaSet schemas, ILoadingSignaler loadingProgress)
 		{
-			return new GamePack(pathToXml, this, schemas, loadingProgress);
+			return GamePack.Load(pathToXml, this, schemas, loadingProgress);
 		}
 	}
 }
