@@ -91,6 +91,14 @@ namespace MHUrho.Packaging
 			
 		}
 
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="schemas"></param>
+		/// <param name="loadingProgress"></param>
+		/// <returns></returns>
+		/// <exception cref="PackageLoadingException">Thrown when the package loading failed</exception>
 		public Task<GamePack> LoadPack(XmlSchemaSet schemas, ILoadingSignaler loadingProgress)
 		{
 			return GamePack.Load(pathToXml, this, schemas, loadingProgress);

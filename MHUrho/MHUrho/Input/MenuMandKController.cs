@@ -49,23 +49,23 @@ namespace MHUrho.Input
 			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
-		public void StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
+		public ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
-			level.LoadForEditing(loadingSignaler);
+			return level.LoadForEditing(loadingSignaler);
 		}
 
-		public void StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
+		public ILevelLoader StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
 		{
 			if (pausedLevelController != null)
 			{
 				EndPausedLevel();
 			}
 
-			level.LoadForPlaying(players, customSettings, loadingSignaler);
+			return level.LoadForPlaying(players, customSettings, loadingSignaler);
 		}
 
 		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)

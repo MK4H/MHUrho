@@ -145,6 +145,15 @@ namespace MHUrho.Packaging {
 
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pathToXml"></param>
+		/// <param name="gamePackRep"></param>
+		/// <param name="schemas"></param>
+		/// <param name="loadingProgress"></param>
+		/// <returns></returns>
+		/// <exception cref="PackageLoadingException">Thrown when the package loading failed</exception>
 		public static async Task<GamePack> Load(string pathToXml,
 												GamePackRep gamePackRep,
 												XmlSchemaSet schemas,
@@ -163,28 +172,28 @@ namespace MHUrho.Packaging {
 																						.Element(LevelsXml.Inst.DataDirPath)
 																						.Value.Trim());
 
-				loadingProgress.TextAndPercentageUpdate("Loading tile types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading tile types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading unit types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading unit types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading building types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading building types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading projectile types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading projectile types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading resource types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading resource types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading player types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading player types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading level logic types", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading level logic types", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading levels", 5);
+				loadingProgress.TextAndPercentageUpdate("Loading levels", 12.5f);
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
 			}
 			//TODO: Catch only the expected exceptions

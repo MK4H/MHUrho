@@ -191,9 +191,15 @@ namespace MHUrho.UserInterface
 			async void ItemSelectionConfirmed(PackageListItem item)
 			{
 				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
-				GamePack package = await PackageManager.Instance.LoadPackage(item.Pack, screen.LoadingWatcher);
-
-				MenuUIManager.SwitchToLevelPickingScreen(package);
+				try {
+					GamePack package = await PackageManager.Instance.LoadPackage(item.Pack, screen.LoadingWatcher);
+					MenuUIManager.SwitchToLevelPickingScreen(package);
+				}
+				catch (PackageLoadingException e) {
+					//Switch back from loading screen
+					MenuUIManager.SwitchBack();
+					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
 			}
 
 			IEnumerable<PackageListItem> GetItems()

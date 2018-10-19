@@ -120,7 +120,7 @@ namespace MHUrho.Packaging
 			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 			{
 				var loader = LevelManager.GetLoader();
-				loader.LoadDefaultLevel(Context, mapSize, loadingSignaler).ContinueWith(RunningLevelLoaded);
+				loader.LoadDefaultLevel(Context, mapSize, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
 				return loader;
 			}
 
@@ -148,7 +148,7 @@ namespace MHUrho.Packaging
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForEditing(Context, savedLevel, loadingSignaler).ContinueWith(RunningLevelLoaded);
+				loader.LoadForEditing(Context, savedLevel, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
 				return loader;
 			}
 
@@ -157,7 +157,7 @@ namespace MHUrho.Packaging
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
 				return loader;
 			}
 
@@ -191,7 +191,7 @@ namespace MHUrho.Packaging
 				}
 				var loader = LevelManager.GetLoader();
 
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
 
 				return loader;
 			}
@@ -333,18 +333,49 @@ namespace MHUrho.Packaging
 			return new LevelRep(gamePack, levelXmlElement);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="storedLevelPath"></param>
+		/// <param name="loadingSignaler"></param>
+		/// <returns></returns>
+		/// <exception cref="LevelLoadingException">Thrown when the loading of the saved level failed</exception>
 		public static async Task<LevelRep> GetFromSavedGame(string storedLevelPath, ILoadingSignaler loadingSignaler = null)
 		{
 
 			loadingSignaler?.TextUpdate("Getting level from save file");
-			StLevel storedLevel = GetSaveFromDynamicPath(storedLevelPath);
-			loadingSignaler?.PercentageUpdate(20);
+			StLevel storedLevel;
+			try {
+				storedLevel = GetSaveFromDynamicPath(storedLevelPath);
+			}
+			catch (Exception e) {
+				string message = $"Deserialization of the saved level failed with:{Environment.NewLine}{e.Message}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new LevelLoadingException(message, e);
+			}
 
-			//TODO: Exception if pack is not present
-			loadingSignaler?.TextUpdate("Loading package");
-			var gamePack = await PackageManager.Instance.LoadPackage(storedLevel.PackageName, loadingSignaler?.GetWatcherForSubsection(80));
-			return new LevelRep(gamePack, storedLevelPath, storedLevel);
-			
+			loadingSignaler?.TextAndPercentageUpdate("Loading package", 20);
+			try {
+				var gamePack =
+					await PackageManager.Instance.LoadPackage(storedLevel.PackageName,
+															loadingSignaler?.GetWatcherForSubsection(80));
+				return new LevelRep(gamePack, storedLevelPath, storedLevel);
+			}
+			catch (ArgumentOutOfRangeException e) {
+				string message =
+					$"Package the saved level \"{storedLevel.LevelName}\" belonged to is no longer installed, please add the package \"{storedLevel.PackageName}\" before loading this level";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new LevelLoadingException(message, e);
+			}
+			catch (ArgumentNullException e) {
+				string message = $"Saved file at \"{storedLevelPath}\" was corrupted";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new LevelLoadingException(message, e);
+			}
+			catch (PackageLoadingException e) {
+				string message = $"Package loading for the level failed with: {Environment.NewLine}{e.Message}";
+				throw new LevelLoadingException(message, e);
+			}
 		}
 
 		public static bool IsNameValid(string name)

@@ -43,9 +43,10 @@ namespace MHUrho.UserInterface
 
 			public void OnLoadingFinished(ILoadingWatcher finishedLoading)
 			{
-				progressBar.SetValue(0);
-				text.Value = "";
-				proxy?.OnLoadingFinished();
+				progressBar.SetValue(100);
+				text.Value = "Loading finished";
+				Action handlers = proxy.OnLoadingFinished;
+				handlers?.Invoke();
 			}
 
 			public void OnPercentageUpdate(float value)

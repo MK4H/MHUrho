@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
@@ -276,9 +278,18 @@ namespace MHUrho.UserInterface
 
 				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it
 				LevelRep level = proxy.Level;
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
-				MenuUIManager.MenuController.StartLoadingLevelForEditing(level, screen.LoadingWatcher);
-				
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
+
+				ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForEditing(level, screen.LoadingWatcher);
+				loader.CurrentLoading.ContinueWith((newLevel) => MenuUIManager.Clear(), 
+													CancellationToken.None, 
+													TaskContinuationOptions.OnlyOnRanToCompletion,
+													TaskScheduler.FromCurrentSynchronizationContext());
+
+				loader.CurrentLoading.ContinueWith(DisplayError,
+													CancellationToken.None,
+													TaskContinuationOptions.OnlyOnFaulted,
+													TaskScheduler.FromCurrentSynchronizationContext());
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -334,6 +345,11 @@ namespace MHUrho.UserInterface
 				}
 			}
 
+			void DisplayError(Task<ILevelManager> levelLoading)
+			{
+				MenuUIManager.SwitchBack();
+				MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level loading failed with: \"{levelLoading.Exception.InnerException.Message}\"");
+			}
 
 			public void SimulateEditNewLevel(string name, string description, string thumbnailPath, string logicTypeName, IntVector2 mapSize, GamePack package)
 			{
@@ -412,14 +428,15 @@ namespace MHUrho.UserInterface
 			ScreenInstance = new Screen(this);
 		}
 
-		public override void Hide()
-		{
-			if (ScreenInstance == null) {
-				return;
-			}
+		//public override void Hide()
+		//{
+		//	if (ScreenInstance == null) {
+		//		return;
+		//	}
 
-			Level = null;
-			base.Hide();
-		}
+		//	
+		//	Level = null;
+		//	base.Hide();
+		//}
 	}
 }

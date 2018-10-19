@@ -103,26 +103,62 @@ namespace MHUrho.Packaging
 			return Instance.ParseGamePackDir();
 		}
 
+		/// <summary>
+		///	<para>Unloads the <see cref="ActivePackage"/> if there is any
+		/// and then loads the <see cref="GamePack"/> represented by <paramref name="packageName"/></para>
+		///	
+		///
+		/// <para>Optionally can signal loading progress if provided with <paramref name="loadingProgress"/></para>
+		/// </summary>
+		/// <param name="packageName">Name of the package to be loaded</param>
+		/// <param name="loadingProgress">Optional watcher of the loading progress</param>
+		/// <returns>A task that represents the asynchronous loading of the package</returns>
+		/// <exception cref="PackageLoadingException">Thrown when the loading of the package failed</exception>
+		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="packageName"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="packageName"/> is not present in the <see cref="AvailablePacks"/></exception>
 		public Task<GamePack> LoadPackage(string packageName, 
-								ILoadingSignaler loadingProgress = null)
+										ILoadingSignaler loadingProgress = null)
 		{
-			return LoadPackage(availablePacks[packageName], loadingProgress);
+			if (packageName == null) {
+				throw new ArgumentNullException(nameof(packageName), "Package name cannot be null");
+			}
+
+			if (availablePacks.TryGetValue(packageName, out GamePackRep packageRep)) {
+				return LoadPackage(packageRep, loadingProgress);
+			}
+			else {
+				throw new ArgumentOutOfRangeException(nameof(packageName),
+													packageName,
+													"No package of this name is registered");
+			}
+
+			
 		}
 
+		/// <summary>
+		/// <para>Unloads the <see cref="ActivePackage"/> if there is any and then loads
+		/// the package represented by <paramref name="package"/></para>
+		///
+		/// <para>Optionally can signal loading progress if provided with <paramref name="loadingProgress"/></para>
+		/// </summary>
+		/// <param name="package">Representation of the package to be loaded</param>
+		/// <param name="loadingProgress">Optional watcher of the loading progress</param>
+		/// <returns>A task that represents the asynchronous loading of the package</returns>
+		/// <exception cref="PackageLoadingException">Thrown when the loading of the new package failed</exception>
 		public async Task<GamePack> LoadPackage(GamePackRep package, ILoadingSignaler loadingProgress = null)
 		{
 			if (loadingProgress == null) {
 				loadingProgress = new LoadingWatcher();
 			}
 
-			loadingProgress.TextAndPercentageUpdate("Clearing previous games", 5);
+			loadingProgress.TextAndPercentageUpdate("Clearing previous games", 10);
 			if (ActivePackage != null) {
 				UnloadActivePack();
 			}
 
 			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
-			ActivePackage = await package.LoadPack(schemas, loadingProgress);
+			ActivePackage = await package.LoadPack(schemas, loadingProgress.GetWatcherForSubsection(90));
 			return ActivePackage;
 		}
 

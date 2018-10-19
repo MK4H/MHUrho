@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.Packaging
 {
-    class PackagingException : ApplicationException
+    public class PackagingException : ApplicationException
     {
 		public PackagingException()
 		{
@@ -24,7 +24,7 @@ namespace MHUrho.Packaging
 		}
 	}
 
-	class PackageLoadingException : PackagingException {
+	public class PackageLoadingException : PackagingException {
 
 
 		public PackageLoadingException()
@@ -45,7 +45,7 @@ namespace MHUrho.Packaging
 		}
 	}
 
-	class FatalPackagingException : PackagingException {
+	public class FatalPackagingException : PackagingException {
 		public FatalPackagingException()
 		{
 

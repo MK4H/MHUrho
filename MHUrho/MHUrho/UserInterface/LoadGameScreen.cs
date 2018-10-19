@@ -16,9 +16,13 @@ namespace MHUrho.UserInterface
 
 			readonly Button loadButton;
 
+			readonly LoadGameScreen proxy;
+
 			public Screen(LoadGameScreen proxy) 
 				:base(proxy)
 			{
+				this.proxy = proxy;
+
 				LoadFileNames(MyGame.Files.SaveGameDirAbsolutePath);
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadLayout.xml");
@@ -83,11 +87,23 @@ namespace MHUrho.UserInterface
 
 				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
 
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
+				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
 
-				var levelRep = await LevelRep.GetFromSavedGame(newRelativePath, screen.LoadingWatcher.GetWatcherForSubsection(40));
+				try {
+					var levelRep =
+						await LevelRep.GetFromSavedGame(newRelativePath,
+														screen.LoadingWatcher.GetWatcherForSubsection(40));
 
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection(60));
+
+					ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection(60));
+					await loader.CurrentLoading;
+					MenuUIManager.Clear();
+				}
+				catch (LevelLoadingException e) {
+					//Switch back from the loading screen
+					MenuUIManager.SwitchBack();
+					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
 			}
 		}
 
