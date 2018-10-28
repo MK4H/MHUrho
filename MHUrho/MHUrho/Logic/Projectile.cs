@@ -311,7 +311,8 @@ namespace MHUrho.Logic
 			Node.NodeCollisionStart -= CollisionHandler;
 			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {
-				Plugin.Dispose();
+				//If dispose was called before plugin was loaded, we need dispose to work
+				Plugin?.Dispose();
 				Node.Remove();
 				Node.Dispose();
 				Dispose();

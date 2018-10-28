@@ -191,16 +191,17 @@ namespace MHUrho.Logic
 			{
 				thing.Dispose();
 			}
-
+			
+			//Everything that is loaded anywhere else but the constructor may not be loaded at the time of disposing
 			PackageManager.ActivePackage.ClearCaches();
-			ToolManager.Dispose();
-			Input.Dispose();
-			cameraController.Dispose();
-			Camera.Dispose();
+			ToolManager?.Dispose();
+			Input?.Dispose();
+			cameraController?.Dispose();
+			Camera?.Dispose();
 			Input = null;
-			Map.Dispose();
-			Minimap.Dispose();
-			octree.Dispose();
+			Map?.Dispose();
+			Minimap?.Dispose();
+			octree?.Dispose();
 
 			//Have to get the reference before i remove the level from the scene by RemoveAllChildren on the scene
 			Scene scene = Scene;
@@ -208,7 +209,7 @@ namespace MHUrho.Logic
 			scene.RemoveAllComponents();
 			scene.Remove();
 			scene.Dispose();
-			LevelNode.Dispose();
+			LevelNode?.Dispose();
 
 			LevelRep.LevelEnded();
 

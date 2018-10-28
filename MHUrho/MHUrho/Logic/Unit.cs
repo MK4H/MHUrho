@@ -423,11 +423,11 @@ namespace MHUrho.Logic
 			if (RemovedFromLevel) return;
 
 			base.RemoveFromLevel();
-
-			Plugin.Dispose();
+			//We need removeFromLevel to work during any phase of loading, where connect references may not have been called yet
+			Plugin?.Dispose();
 			Level.RemoveUnit(this);
-			Tile.RemoveUnit(this);
-			Player.RemoveUnit(this);
+			Tile?.RemoveUnit(this);
+			Player?.RemoveUnit(this);
 			LegNode.Remove();
 			LegNode.Dispose();
 			

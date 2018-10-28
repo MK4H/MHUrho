@@ -311,13 +311,14 @@ namespace MHUrho.Logic
 
 			base.RemoveFromLevel();
 
-			Plugin.Dispose();
+			//We need removeFromLevel to work even when called during loading
+			Plugin?.Dispose();
 			Level.RemoveBuilding(this);
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);
 			}
 
-			Player.RemoveBuilding(this);
+			Player?.RemoveBuilding(this);
 			Node.Remove();
 			
 			Dispose();

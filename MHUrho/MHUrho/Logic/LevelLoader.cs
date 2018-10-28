@@ -45,13 +45,27 @@ namespace MHUrho.Logic
 				protected LevelManager InitializeLevel()
 				{
 					LoadingSignaler.TextUpdate("Initializing level");
-					var scene = new Scene(Game.Context) {UpdateEnabled = false};
-					var octree = scene.CreateComponent<Octree>();
-					var physics = scene.CreateComponent<PhysicsWorld>();
-					//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
-					physics.Enabled = true;
+					//Before level is asociated with screen, the global try/catch will not dispose of the screen
+					Scene scene = null;
+					Octree octree = null;
+					try {
+						scene = new Scene(Game.Context) {UpdateEnabled = false};
+						octree = scene.CreateComponent<Octree>();
+						var physics = scene.CreateComponent<PhysicsWorld>();
 
-					LoadSceneParts(scene);
+						//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
+						physics.Enabled = true;
+
+						LoadSceneParts(scene);
+					}
+					catch (Exception e) {
+						Urho.IO.Log.Write(LogLevel.Error, $"Screen creation failed with: {e.Message}");
+						octree?.Dispose();
+						scene?.RemoveAllChildren();
+						scene?.Remove();
+						scene?.Dispose();
+						throw;
+					}
 
 					var levelNode = scene.CreateChild("LevelNode");
 					levelNode.Enabled = false;
@@ -167,29 +181,38 @@ namespace MHUrho.Logic
 									$"Loading default level. MapSize: {mapSize}, LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}");
 					LoadingSanityCheck();
 
-					LoadingSignaler.TextUpdate("Initializing level");
-					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
+					try {
+						LoadingSignaler.TextUpdate("Initializing level");
+						Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
-					PlayerInsignia.InitInsignias(PackageManager.Instance);
+						PlayerInsignia.InitInsignias(PackageManager.Instance);
 
-					LoadingSignaler.TextUpdate("Loading map");
-					Level.Map = await MyGame.InvokeOnMainSafe(CreateDefaultMap);
+						LoadingSignaler.TextUpdate("Loading map");
+						Level.Map = await MyGame.InvokeOnMainSafe(CreateDefaultMap);
 
-					Level.Minimap = new Minimap(Level, 4);
+						Level.Minimap = new Minimap(Level, 4);
 
-					MyGame.InvokeOnMainSafe(CreateCamera);
+						MyGame.InvokeOnMainSafe(CreateCamera);
 
-					LoadingSignaler.TextUpdate("Creating players");
-					MyGame.InvokeOnMainSafe(CreatePlayers);
+						LoadingSignaler.TextUpdate("Creating players");
+						MyGame.InvokeOnMainSafe(CreatePlayers);
 
-					LoadingSignaler.TextUpdate("Giving player controls");
-					MyGame.InvokeOnMainSafe(CreateControl);
+						LoadingSignaler.TextUpdate("Giving player controls");
+						MyGame.InvokeOnMainSafe(CreateControl);
 
-					LoadingSignaler.TextUpdate("Starting level");
-					MyGame.InvokeOnMainSafe(StartLevel);
+						LoadingSignaler.TextUpdate("Starting level");
+						MyGame.InvokeOnMainSafe(StartLevel);
 
-					LoadingSignaler.FinishedLoading();
-					return Level;
+						LoadingSignaler.FinishedLoading();
+						return Level;
+					}
+					catch (Exception e) {
+						Urho.IO.Log.Write(LogLevel.Error, $"Level loading failed with: {e.Message}");
+						Level?.Dispose();
+						CurrentLevel = null;
+						throw;
+					}
+					
 				}
 
 				protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
@@ -269,35 +292,43 @@ namespace MHUrho.Logic
 					Urho.IO.Log.Write(LogLevel.Debug,
 									$"Loading stored level. LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}, EditorMode: {EditorMode}");
 
-					Loaders = new List<ILoader>();
-					LoadingSignaler.TextUpdate("Initializing level");
-					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
+					try {
+						Loaders = new List<ILoader>();
+						LoadingSignaler.TextUpdate("Initializing level");
+						Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 
-					PlayerInsignia.InitInsignias(PackageManager.Instance);
-
-
-					var mapLoader = await LoadMap();
-					Loaders.Add(mapLoader);
-					Level.Map = mapLoader.Map;
-					Level.Minimap = new Minimap(Level, 4);
+						PlayerInsignia.InitInsignias(PackageManager.Instance);
 
 
-					MyGame.InvokeOnMainSafe(CreateCamera);
+						var mapLoader = await LoadMap();
+						Loaders.Add(mapLoader);
+						Level.Map = mapLoader.Map;
+						Level.Minimap = new Minimap(Level, 4);
 
-					//TODO: Maybe give each its own subsection watcher
-					//TODO: Add percentage updates
-					MyGame.InvokeOnMainSafe(LoadUnits);
-					MyGame.InvokeOnMainSafe(LoadBuildings);
-					MyGame.InvokeOnMainSafe(LoadProjectiles);
-					MyGame.InvokeOnMainSafe(LoadPlayers);
-					MyGame.InvokeOnMainSafe(LoadToolsAndControllers);
-					MyGame.InvokeOnMainSafe(LoadLevelPlugin);
-					MyGame.InvokeOnMainSafe(ConnectReferences);
-					MyGame.InvokeOnMainSafe(FinishLoading);
-					MyGame.InvokeOnMainSafe(StartLevel);
 
-					LoadingSignaler.FinishedLoading();
-					return Level;				
+						MyGame.InvokeOnMainSafe(CreateCamera);
+
+						//TODO: Maybe give each its own subsection watcher
+						//TODO: Add percentage updates
+						MyGame.InvokeOnMainSafe(LoadUnits);
+						MyGame.InvokeOnMainSafe(LoadBuildings);
+						MyGame.InvokeOnMainSafe(LoadProjectiles);
+						MyGame.InvokeOnMainSafe(LoadPlayers);
+						MyGame.InvokeOnMainSafe(LoadToolsAndControllers);
+						MyGame.InvokeOnMainSafe(LoadLevelPlugin);
+						MyGame.InvokeOnMainSafe(ConnectReferences);
+						MyGame.InvokeOnMainSafe(FinishLoading);
+						MyGame.InvokeOnMainSafe(StartLevel);
+
+						LoadingSignaler.FinishedLoading();
+						return Level;
+					}
+					catch (Exception e) {
+						Urho.IO.Log.Write(LogLevel.Error, $"Level loading failed with: {e.Message}");
+						Level?.Dispose();
+						CurrentLevel = null;
+						throw;
+					}
 				}
 
 				protected virtual void LoadUnits()
