@@ -73,7 +73,7 @@ namespace MHUrho.UserInterface
 										Visible = true
 									};
 
-					Text.SetStyle(isDirectory ? "DirectoryEntry" : "FileEntry", PackageManager.Instance.GetXmlFile("UI/FileBrowserStyle.xml"));
+					Text.SetStyle(isDirectory ? "DirectoryEntry" : "FileEntry", PackageManager.Instance.GetXmlFile("UI/FileBrowserStyle.xml", true));
 
 					IsDirectory = isDirectory;
 				}

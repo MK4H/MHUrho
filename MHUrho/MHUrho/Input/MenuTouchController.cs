@@ -63,7 +63,7 @@ namespace MHUrho.Input
 		public MenuTouchController() {
 			//TODO: TEMPORARY, probably move to UIManager or something
 
-			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml");
+			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml", true);
 
 			var button = UI.Root.CreateButton("StartButton");
 			button.SetStyleAuto(style);

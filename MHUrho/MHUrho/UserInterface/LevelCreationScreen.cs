@@ -151,7 +151,7 @@ namespace MHUrho.UserInterface
 				{
 					this.LogicType = logicType;
 					this.LayoutMode = LayoutMode.Horizontal;
-					var newItem = screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelLogicTypeItemLayout.xml"),
+					var newItem = screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelLogicTypeItemLayout.xml", true),
 															screen.MenuUIManager.MenuRoot.GetDefaultStyle());
 
 					((Text) newItem.GetChild("LogicTypeText")).Value = logicType.Name;

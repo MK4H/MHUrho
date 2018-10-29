@@ -38,8 +38,8 @@ namespace MHUrho.UserInterface
 			this.LayoutMode = LayoutMode.Horizontal;
 			this.ExpandOnSelect = expandOnSelect;
 
-			OuterElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/ExpandingItemLayout.xml"),
-											PackageManager.Instance.GetXmlFile(stylePath));
+			OuterElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/ExpandingItemLayout.xml", true),
+											PackageManager.Instance.GetXmlFile(stylePath, true));
 
 			AddChild(OuterElement);
 

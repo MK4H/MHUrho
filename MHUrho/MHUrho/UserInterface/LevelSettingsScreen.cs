@@ -37,7 +37,7 @@ namespace MHUrho.UserInterface
 					elementToTeamMap = new Dictionary<UIElement, int>();
 
 					var child =
-						screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerItemLayout.xml"));
+						screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerItemLayout.xml", true));
 
 					AddChild(child);
 
@@ -86,7 +86,7 @@ namespace MHUrho.UserInterface
 
 				static UIElement InitTypeItem(PlayerType player, MyGame game, MenuUIManager menuUIManager)
 				{
-					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerTypeItemLayout.xml"),
+					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerTypeItemLayout.xml", true),
 														menuUIManager.MenuRoot.GetDefaultStyle());
 
 					BorderImage playerIcon = (BorderImage)newElement.GetChild("PlayerIcon");
@@ -105,7 +105,7 @@ namespace MHUrho.UserInterface
 
 				static UIElement InitTeamItem(int teamID, MyGame game, MenuUIManager menuUIManager)
 				{
-					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/TeamListItemLayout.xml"),
+					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/TeamListItemLayout.xml", true),
 														menuUIManager.MenuRoot.GetDefaultStyle());
 
 					Text textElement = (Text)newElement.GetChild("TeamIDText");
@@ -138,7 +138,7 @@ namespace MHUrho.UserInterface
 
 				customSettingsWindow = (Window)window.GetChild("CustomSettings", true);
 
-				UIElement descriptionTextElement = Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/DescriptionTextLayout.xml"),
+				UIElement descriptionTextElement = Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/DescriptionTextLayout.xml", true),
 																	MenuUIManager.MenuRoot.GetDefaultStyle());
 				descriptionText = (Text) descriptionTextElement.GetChild("DescriptionText");
 				descriptionText.Value = Level.Description;

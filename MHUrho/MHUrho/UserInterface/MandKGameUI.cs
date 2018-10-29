@@ -60,7 +60,8 @@ namespace MHUrho.UserInterface
 			//TODO: User texture
 			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this);
 
-			gameUI = UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/GameLayout.xml"), PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+			gameUI = UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/GameLayout.xml", true), 
+									PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
 			UI.Root.AddChild(gameUI);
 			gameUI.Visible = false;
 
@@ -149,7 +150,7 @@ namespace MHUrho.UserInterface
 		{
 
 			CheckBox checkBox = toolSelection.CreateCheckBox();
-			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
 
 			checkBox.ImageRect = tool.IconRectangle;
 
@@ -197,7 +198,7 @@ namespace MHUrho.UserInterface
 		{
 
 			CheckBox checkBox = playerSelection.CreateCheckBox();
-			checkBox.SetStyle("PlayerCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml"));
+			checkBox.SetStyle("PlayerCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
 
 
 			checkBox.ImageRect = player.Insignia.ShieldRectangle;

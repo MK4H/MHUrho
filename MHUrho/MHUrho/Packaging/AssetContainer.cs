@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml.Linq;
 using MHUrho.Helpers;
 using MHUrho.Logic;
+using MHUrho.Packaging;
 using Urho;
 using Urho.Physics;
 using Urho.Resources;
@@ -18,6 +19,14 @@ namespace MHUrho.Packaging
 
 		public abstract void Dispose();
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="assetsElement"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="assetsElement"/> is null or there is some internal error</exception>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="assetsElement"/> does not conform to the xml schema or there is some internal error</exception>
+		/// <exception cref="ResourceLoadingException">Thrown when the resource described by the value of <paramref name="assetsElement"/> could not be loaded</exception>
 		public static AssetContainer FromXml(XElement assetsElement)
 		{
 			Check(assetsElement);
@@ -95,12 +104,17 @@ namespace MHUrho.Packaging
 
 		readonly XmlFile file;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="assetsElement"></param>
+		/// <exception cref="ResourceNotFoundException">Thrown when the xml prefab file could not be found</exception>
 		public XmlPrefabAssetContainer(XElement assetsElement)
 		{
 			CheckWithType(assetsElement, AssetsXml.XmlPrefabType);
 
 			string relativePath = GetPath(assetsElement);
-			this.file = PackageManager.Instance.GetXmlFile(relativePath);
+			this.file = PackageManager.Instance.GetXmlFile(relativePath, true);
 		}
 
 		public override Node Instantiate(ILevelManager level, Vector3 position, Quaternion rotation)
@@ -129,12 +143,13 @@ namespace MHUrho.Packaging
 		/// <exception cref="ArgumentException">Thrown when <paramref name="assetsElement"/> xml element is not valid, either is not the <see cref="EntityXml.Inst.Assets"/> element
 		/// or has a wrong type specified</exception>
 		/// <exception cref="IOException">When the file specified by the path in the <see cref="AssetsElementXml.Inst.Path"/> cannot be opened</exception>
+		/// <exception cref="ResourceLoadingException"> Thrown when the file could not be found </exception>
 		public BinaryPrefabAssetContainer(XElement assetsElement)
 		{
 			CheckWithType(assetsElement, AssetsXml.BinaryPrefabType);
 			var relativePath = GetPath(assetsElement);
 
-			this.file = PackageManager.Instance.GetFile(relativePath);
+			this.file = PackageManager.Instance.GetFile(relativePath, true);
 		}
 
 		public override Node Instantiate(ILevelManager level, Vector3 position, Quaternion rotation)
@@ -206,6 +221,14 @@ namespace MHUrho.Packaging
 
 		class AnimatedModelLoader : StaticModelLoader {
 
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="element"></param>
+			/// <returns></returns>
+			/// <exception cref="ArgumentNullException">When the <paramref name="element"/> is null</exception>
+			/// <exception cref="ArgumentException">Thrown when the <paramref name="element"/> does not conform to the xml schema</exception>
+			/// <exception cref="ResourceLoadingException">Thrown when either the model or material resource could not be loaded</exception>
 			public static StaticModelLoader Load(XElement element)
 			{
 				if (element == null)
@@ -222,8 +245,8 @@ namespace MHUrho.Packaging
 
 				string modelPath = element.Element(ModelXml.Inst.ModelPath).Value;
 
-				//TODO: Exception when file not found
-				Model model = PackageManager.Instance.GetModel(modelPath);
+
+				Model model = PackageManager.Instance.GetModel(modelPath, true);
 
 				XElement materialElement  = element.Element(ModelXml.Inst.Material);
 
@@ -255,6 +278,13 @@ namespace MHUrho.Packaging
 		class ScaleLoader : AssetLoader {
 			readonly Vector3 scale;
 
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="element"></param>
+			/// <returns></returns>
+			/// <exception cref="ArgumentNullException">Thrown when the <paramref name="element"/> is null</exception>
+			/// <exception cref="ArgumentException">Thrown when the <paramref name="element"/> does not conform to the xml schema</exception>
 			public static ScaleLoader Load(XElement element)
 			{
 				if (element == null)
@@ -548,6 +578,13 @@ namespace MHUrho.Packaging
 				this.shape = shape;
 			}
 
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="element"></param>
+			/// <returns></returns>
+			/// <exception cref="ArgumentNullException">Thrown when the <paramref name="element"/> is null</exception>
+			/// <exception cref="ArgumentException">Throw when the <paramref name="element"/> does not conform to the xml schema</exception>
 			public static CollisionShapeLoader Load(XElement element)
 			{
 				if (element == null)
@@ -607,6 +644,13 @@ namespace MHUrho.Packaging
 
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="assetsElement"></param>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="assetsElement"/> is null or there is internal error</exception>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="assetsElement"/> does not conform t the xml schema</exception>
+		/// <exception cref="ResourceLoadingException">Thrown when one of the referenced resources could not be loaded</exception>
 		public ItemsAssetContainer(XElement assetsElement)
 		{
 			CheckWithType(assetsElement,  AssetsXml.ItemsType);

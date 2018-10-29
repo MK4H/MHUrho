@@ -44,7 +44,7 @@ namespace MHUrho.UserInterface
 		protected MenuUIManager( IMenuController menuController)
 		{
 			MenuRoot = UI.Root;
-			MenuRoot.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml"));
+			MenuRoot.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml", true));
 
 			this.MenuController = menuController;
 
@@ -157,16 +157,25 @@ namespace MHUrho.UserInterface
 
 		void SwitchToScreen(MenuScreen newScreen)
 		{
-			if (CurrentScreen != null) {
-				CurrentScreen.Hide();
+			try {
+				if (CurrentScreen != null) {
+					CurrentScreen.Hide();
 
-				if (CurrentScreen != LoadingScreen) {
-					PreviousScreens.Push(CurrentScreen);
+					if (CurrentScreen != LoadingScreen) {
+						PreviousScreens.Push(CurrentScreen);
+					}
 				}
-			}
 
-			CurrentScreen = newScreen;
-			newScreen.Show();
+				CurrentScreen = newScreen;
+				newScreen.Show();
+			}
+			catch (Exception e) {
+				string message =
+					$"There was an error while switching menu screens, probably some missing or corrupted files: {e.Message}";
+
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				Game.ErrorExit(message);
+			}
 		}
 
 	}

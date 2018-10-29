@@ -18,8 +18,8 @@ namespace MHUrho.UserInterface
 			:base(game, "UI/AvailablePackItemStyle.xml", true)
 		{
 			this.Pack = pack;
-			UIElement fixedElementContents = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/AvailablePackItemFixedLayout.xml"),
-																PackageManager.Instance.GetXmlFile("UI/AvailablePackItemStyle.xml"));
+			UIElement fixedElementContents = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/AvailablePackItemFixedLayout.xml", true),
+																PackageManager.Instance.GetXmlFile("UI/AvailablePackItemStyle.xml", true));
 
 			FixedElement.AddChild(fixedElementContents);
 
@@ -32,8 +32,8 @@ namespace MHUrho.UserInterface
 
 
 			UIElement expandingElementContents =
-				game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/AvailablePackItemExpandingLayout.xml"),
-									PackageManager.Instance.GetXmlFile("UI/AvailablePackItemStyle.xml"));
+				game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/AvailablePackItemExpandingLayout.xml", true),
+									PackageManager.Instance.GetXmlFile("UI/AvailablePackItemStyle.xml", true));
 
 			ExpandingElement.AddChild(expandingElementContents);
 

@@ -69,6 +69,8 @@ namespace MHUrho.Packaging
 			schemas = new XmlSchemaSet();
 		}
 
+		
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -280,114 +282,158 @@ namespace MHUrho.Packaging
 			return MyGame.InvokeOnMainSafe(() => resourceCache.Exists(name));
 		}
 
-		public Animation GetAnimation(string name)
+		public Animation GetAnimation(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public AnimationSet2D GetAnimationSet2D(string name)
+		public AnimationSet2D GetAnimationSet2D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Urho.IO.File GetFile(string name)
+		public Urho.IO.File GetFile(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetFile(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetFile(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Font GetFont(string name)
+		public Font GetFont(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetFont(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetFont(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Image GetImage(string name)
+		public Image GetImage(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetImage(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetImage(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public JsonFile GetJsonFile(string name)
+		public JsonFile GetJsonFile(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Material GetMaterial(string name)
+		public Material GetMaterial(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Model GetModel(string name)
+		public Model GetModel(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetModel(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetModel(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public ParticleEffect GetParticleEffect(string name)
+		public ParticleEffect GetParticleEffect(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public ParticleEffect2D GetParticleEffect2D(string name)
+		public ParticleEffect2D GetParticleEffect2D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public PListFile GetPListFile(string name)
+		public PListFile GetPListFile(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Shader GetShader(string name)
+		public Shader GetShader(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetShader(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetShader(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Sound GetSound(string name)
+		public Sound GetSound(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetSound(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSound(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Sprite2D GetSprite2D(string name)
+		public Sprite2D GetSprite2D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public SpriteSheet2D GetSpriteSheet2D(string name)
+		public SpriteSheet2D GetSpriteSheet2D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Technique GetTechnique(string name)
+		public Technique GetTechnique(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Texture2D GetTexture2D(string name)
+		public Texture2D GetTexture2D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Texture3D GetTexture3D(string name)
+		public Texture3D GetTexture3D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public Texture GetTextureCube(string name)
+		public Texture GetTextureCube(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public TmxFile2D GetTmxFile2D(string name)
+		public TmxFile2D GetTmxFile2D(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public ValueAnimation GetValueAnimation(string name)
+		public ValueAnimation GetValueAnimation(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
-		public XmlFile GetXmlFile(string name)
+		public XmlFile GetXmlFile(string name, bool throwOnFailure = false)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
+			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
+			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
+
 		}
 
 		public Material GetMaterialFromImage(Image image)

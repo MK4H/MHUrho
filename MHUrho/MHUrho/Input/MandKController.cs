@@ -71,7 +71,7 @@ namespace MHUrho.Input
 
 		void CreateCursor()
 		{
-			XmlFile style = PackageManager.Instance.GetXmlFile("UI/DefaultCursorStyle.xml");
+			XmlFile style = PackageManager.Instance.GetXmlFile("UI/DefaultCursorStyle.xml", true);
 
 			Cursor cursor = UI.Root.CreateCursor("UICursor");
 			UI.Cursor = cursor;
