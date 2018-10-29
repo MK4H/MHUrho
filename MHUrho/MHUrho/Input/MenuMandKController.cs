@@ -34,6 +34,7 @@ namespace MHUrho.Input
 
 		public void InitialSwitchToMainMenu(string loadingErrorTitle = null, string loadingErrorDescription = null)
 		{
+			UIController.Clear();
 			UIController.SwitchToMainMenu();
 			if (loadingErrorTitle != null && loadingErrorDescription != null) {
 				UIController.CurrentScreen.DisableInput();

@@ -44,13 +44,7 @@ namespace MHUrho
 
 		static MyGame()
 		{
-			UnhandledException += 
-				(s, e) => {
-				if (Debugger.IsAttached) {
-						Debugger.Break();
-					}
-					e.Handled = true;
-				};
+			UnhandledException += ErrorRecovery;
 		}
 
 		[Preserve]
@@ -184,5 +178,22 @@ namespace MHUrho
 
 		}
 
+		static void ErrorRecovery(object s, Urho.UnhandledExceptionEventArgs e)
+		{
+			if (Debugger.IsAttached)
+			{
+				Debugger.Break();
+			}
+
+			string message = $"An unhandled exception occured: {e.Exception.Message}";
+			Urho.IO.Log.Write(LogLevel.Error, message);
+
+			LevelManager.CurrentLevel?.End();
+			Instance.MenuController.InitialSwitchToMainMenu("Game error", message);
+
+
+			e.Handled = true;
+		}
+	
 	}
 }

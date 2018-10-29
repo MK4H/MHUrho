@@ -151,7 +151,7 @@ namespace MHUrho.UserInterface
 		public void Clear()
 		{
 			PreviousScreens = new Stack<MenuScreen>();
-			CurrentScreen.Hide();
+			CurrentScreen?.Hide();
 			CurrentScreen = null;
 		}
 
