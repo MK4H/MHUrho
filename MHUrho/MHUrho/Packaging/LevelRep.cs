@@ -354,11 +354,11 @@ namespace MHUrho.Packaging
 				throw new LevelLoadingException(message, e);
 			}
 
-			loadingSignaler?.TextAndPercentageUpdate("Loading package", 20);
+			loadingSignaler?.TextUpdate("Loading package");
 			try {
 				var gamePack =
 					await PackageManager.Instance.LoadPackage(storedLevel.PackageName,
-															loadingSignaler?.GetWatcherForSubsection(80));
+															loadingSignaler?.GetWatcherForSubsection());
 				return new LevelRep(gamePack, storedLevelPath, storedLevel);
 			}
 			catch (ArgumentOutOfRangeException e) {

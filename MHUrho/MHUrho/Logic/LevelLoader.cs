@@ -265,7 +265,7 @@ namespace MHUrho.Logic
 					Node mapNode = Level.LevelNode.CreateChild("MapNode");
 
 					//This will take a long time, run it in another thread
-					return Task.Run<Map>(() => Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, mapSize, LoadingSignaler.GetWatcherForSubsection(30)));
+					return Task.Run<Map>(() => Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, mapSize, LoadingSignaler.GetWatcherForSubsection()));
 				}
 
 				void LoadingSanityCheck()
@@ -433,7 +433,7 @@ namespace MHUrho.Logic
 													mapNode,
 													Level.octree,
 													StoredLevel.Map,
-													LoadingSignaler.GetWatcherForSubsection(30));
+													LoadingSignaler.GetWatcherForSubsection());
 						loader.StartLoading();
 						return loader;
 									});

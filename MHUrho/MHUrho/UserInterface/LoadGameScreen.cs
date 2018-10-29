@@ -92,10 +92,10 @@ namespace MHUrho.UserInterface
 				try {
 					var levelRep =
 						await LevelRep.GetFromSavedGame(newRelativePath,
-														screen.LoadingWatcher.GetWatcherForSubsection(40));
+														screen.LoadingWatcher.GetWatcherForSubsection());
 
 
-					ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection(60));
+					ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection());
 					await loader.CurrentLoading;
 					MenuUIManager.Clear();
 				}

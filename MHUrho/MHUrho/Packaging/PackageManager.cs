@@ -151,14 +151,14 @@ namespace MHUrho.Packaging
 				loadingProgress = new LoadingWatcher();
 			}
 
-			loadingProgress.TextAndPercentageUpdate("Clearing previous games", 10);
+			loadingProgress.TextUpdate("Clearing previous games");
 			if (ActivePackage != null) {
 				UnloadActivePack();
 			}
 
 			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
-			ActivePackage = await package.LoadPack(schemas, loadingProgress.GetWatcherForSubsection(90));
+			ActivePackage = await package.LoadPack(schemas, loadingProgress.GetWatcherForSubsection());
 			return ActivePackage;
 		}
 

@@ -172,28 +172,28 @@ namespace MHUrho.Packaging {
 																						.Element(LevelsXml.Inst.DataDirPath)
 																						.Value.Trim());
 
-				loadingProgress.TextAndPercentageUpdate("Loading tile types", 12.5f);
+				loadingProgress.TextUpdate("Loading tile types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading unit types", 12.5f);
+				loadingProgress.TextUpdate("Loading unit types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading building types", 12.5f);
+				loadingProgress.TextUpdate("Loading building types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading projectile types", 12.5f);
+				loadingProgress.TextUpdate("Loading projectile types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading resource types", 12.5f);
+				loadingProgress.TextUpdate("Loading resource types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading player types", 12.5f);
+				loadingProgress.TextUpdate("Loading player types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading level logic types", 12.5f);
+				loadingProgress.TextUpdate("Loading level logic types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
 
-				loadingProgress.TextAndPercentageUpdate("Loading levels", 12.5f);
+				loadingProgress.TextUpdate("Loading levels");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
 			}
 			//TODO: Catch only the expected exceptions

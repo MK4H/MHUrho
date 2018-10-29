@@ -787,10 +787,9 @@ namespace MHUrho.WorldMap
 
 				loadingProgress.TextUpdate("Creating terrain texture");
 				graphics.CreateMaterial();
-				loadingProgress.PercentageUpdate(5);
 
 				loadingProgress.TextUpdate("Creating map geometry");
-				graphics.CreateModel(loadingProgress);
+				graphics.CreateModel();
 
 				return graphics;
 			}
@@ -1072,15 +1071,13 @@ namespace MHUrho.WorldMap
 				material = PackageManager.Instance.GetMaterialFromImage(mapImage);
 			}
 
-			void CreateModel(LoadingWatcher loadingProgress)
+			void CreateModel()
 			{
 				for (int y = 0; y < numberOfChunks.Y; y++) {
 					for (int x = 0; x < numberOfChunks.X; x++) {
 						IntVector2 chunkTopLeftCorner = new IntVector2(x * chunkSize.X + map.Left, y * chunkSize.Y + map.Top);
 						chunks.Add(new MapChunk(map, this, chunkTopLeftCorner));
 					}
-
-					loadingProgress.PercentageUpdate(25.0f / numberOfChunks.Y);
 				}
 			}
 

@@ -20,7 +20,6 @@ namespace MHUrho.UserInterface
 
 			readonly Window window;
 
-			ProgressBar progressBar;
 			Text text;
 
 			public Screen(LoadingScreen proxy)
@@ -33,25 +32,17 @@ namespace MHUrho.UserInterface
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadingScreenLayout.xml");
 
 				window = (Window)MenuUIManager.MenuRoot.GetChild("LoadingScreen");
-				progressBar = new ProgressBar(window.GetChild("ProgressBar"));
 				text = (Text)window.GetChild("Text");
 
 				LoadingWatcher.OnTextUpdate += OnTextUpdate;
-				LoadingWatcher.OnPercentageUpdate += OnPercentageUpdate;
 				LoadingWatcher.OnFinishedLoading += OnLoadingFinished;
 			}
 
 			public void OnLoadingFinished(ILoadingWatcher finishedLoading)
 			{
-				progressBar.SetValue(100);
 				text.Value = "Loading finished";
 				Action handlers = proxy.OnLoadingFinished;
 				handlers?.Invoke();
-			}
-
-			public void OnPercentageUpdate(float value)
-			{
-				progressBar.SetValue(value);
 			}
 
 			public void OnTextUpdate(string newText)
@@ -77,7 +68,6 @@ namespace MHUrho.UserInterface
 			public override void Dispose()
 			{
 				LoadingWatcher.OnTextUpdate -= OnTextUpdate;
-				LoadingWatcher.OnPercentageUpdate -= OnPercentageUpdate;
 				LoadingWatcher.OnFinishedLoading -= OnLoadingFinished;
 
 				window.RemoveAllChildren();
@@ -85,7 +75,6 @@ namespace MHUrho.UserInterface
 
 				window.Dispose();
 				text.Dispose();
-				progressBar.Dispose();
 			}
 		}
 

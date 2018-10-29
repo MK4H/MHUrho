@@ -90,7 +90,6 @@ namespace MHUrho.WorldMap
 							Map.tiles[Map.GetTileIndex(x, y)] = newTileLoader.Tile;
 						}
 
-						loadingProgress.PercentageUpdate(25.0f / Map.LengthWithBorders);
 					}
 				}
 				catch (IndexOutOfRangeException e) {
@@ -439,14 +438,10 @@ namespace MHUrho.WorldMap
 					newMap.tiles[i] = new Tile(tilePosition.X, tilePosition.Y, defaultTileType, newMap);
 				}
 
-				if (i % newMap.LengthWithBorders == 0) {
-					loadingProgress.PercentageUpdate(25.0f / newMap.LengthWithBorders);
-				}
 			}
 
 			loadingProgress.TextUpdate("Creating pathfinding graph");
 			newMap.PathFinding = new AStar(newMap);
-			loadingProgress.PercentageUpdate(5);
 
 			newMap.BuildGeometry(loadingProgress);
 			return newMap;
