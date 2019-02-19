@@ -626,7 +626,7 @@ namespace MHUrho.Packaging
 
 		public static bool operator ==(LevelRep left, LevelRep right)
 		{
-			return left?.Equals(right) ?? right == null;
+			return left?.Equals(right) ?? null == right;
 		}
 
 		public static bool operator !=(LevelRep left, LevelRep right)
