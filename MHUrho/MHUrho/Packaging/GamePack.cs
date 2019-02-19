@@ -521,7 +521,6 @@ namespace MHUrho.Packaging {
 			XElement element = level.SaveAsPrototype();
 
 			if (removeExisting) {
-				//TODO: Either check the equality by name or check the name before removing
 				RemoveLevelFromLoadedXml(oldLevel, level != oldLevel);
 			}
 

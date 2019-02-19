@@ -21,7 +21,6 @@ namespace MHUrho.Packaging
 
 			public string Name {
 				get => Context.Name;
-				set => Context.Name = value;
 			}
 
 			public string Description {
@@ -432,7 +431,7 @@ namespace MHUrho.Packaging
 			}
 		}
 
-		public string Name { get; private set; }
+		public string Name { get; }
 
 		public string Description { get; private set; }
 
@@ -624,6 +623,32 @@ namespace MHUrho.Packaging
 			}
 			return true;
 		}
+
+		public static bool operator ==(LevelRep left, LevelRep right)
+		{
+			return left?.Equals(right) ?? right == null;
+		}
+
+		public static bool operator !=(LevelRep left, LevelRep right)
+		{
+			return !(left == right);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is LevelRep other) {
+				return Name == other.Name;
+			}
+
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return Name.GetHashCode();
+		}
+
+
 
 		public ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 		{
