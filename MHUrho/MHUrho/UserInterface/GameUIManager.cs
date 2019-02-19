@@ -9,7 +9,6 @@ using Urho.Gui;
 namespace MHUrho.UserInterface
 {
 	public abstract class GameUIManager : UIManager {
-		public CursorTooltips CursorTooltips { get; protected set; }
 
 		public event Action HoverBegin;
 		public event Action HoverEnd;

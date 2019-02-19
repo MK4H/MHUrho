@@ -204,6 +204,10 @@ namespace MHUrho.UserInterface
 					MenuUIManager.SwitchBack();
 					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
 				}
+				catch (Exception e) {
+					MenuUIManager.SwitchBack();
+					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
+				}
 			}
 
 			IEnumerable<PackageListItem> GetItems()

@@ -12,6 +12,7 @@ using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using MHUrho.UserInterface;
+using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
 using Urho;
 
@@ -68,19 +69,11 @@ namespace DefaultPackage
 		}
 
 
-		public override void PopulateUI(MandKGameUI mouseAndKeyboardUI) {
+		public override void PopulateUI(GameUIManager gameUI) {
 			throw new NotImplementedException();
 		}
 
-		public override void ClearUI(MandKGameUI mouseAndKeyboardUI) {
-			throw new NotImplementedException();
-		}
-
-		public override void PopulateUI(TouchUI touchUI) {
-			throw new NotImplementedException();
-		}
-
-		public override void ClearUI(TouchUI touchUI) {
+		public override void ClearUI(GameUIManager gameUI) {
 			throw new NotImplementedException();
 		}
 

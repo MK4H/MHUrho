@@ -137,7 +137,7 @@ namespace MHUrho.Logic
 				ComponentSetup.SetupComponentsOnNode(buildingNode, level);
 
 
-
+				//TODO: Catch if the plugin creation failes, dispose and return null
 				newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 				return newBuilding;
 			}

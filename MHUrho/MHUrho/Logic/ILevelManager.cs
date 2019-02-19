@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MHUrho.CameraMovement;
 using MHUrho.EditorTools;
 using MHUrho.Input;
 using MHUrho.Packaging;

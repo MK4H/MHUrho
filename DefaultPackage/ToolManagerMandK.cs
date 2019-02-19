@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.CameraMovement;
 using MHUrho.EditorTools;
+using MHUrho.EditorTools.MandK;
 using MHUrho.Input;
+using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.UserInterface;
+using MHUrho.UserInterface.MandK;
 
 namespace DefaultPackage
 {
@@ -12,8 +16,8 @@ namespace DefaultPackage
 	{
 		readonly ILevelManager level;
 
-		readonly GameMandKController input;
-		readonly MandKGameUI ui;
+		readonly GameController input;
+		readonly GameUI ui;
 		readonly CameraMover cameraMover;
 
 		public ToolManagerMandK(ILevelManager level)
@@ -24,18 +28,18 @@ namespace DefaultPackage
 				throw new ArgumentException("Wrong input type for this toolManager", nameof(level));
 			}
 
-			input = (GameMandKController) level.Input;
-			ui = (MandKGameUI) level.UIManager;
+			input = (GameController) level.Input;
+			ui = (GameUI) level.UIManager;
 			cameraMover = level.Camera;
 		}
 
 		public override void LoadTools()
 		{
-			LoadTool(new TerrainManipulatorToolMandK(input, ui, cameraMover));
-			LoadTool(new TileTypeToolMandK(input, ui, cameraMover));
-			LoadTool(new UnitSelectorToolMandK(input, ui, cameraMover));
-			LoadTool(new UnitSpawningToolMandK(input, ui, cameraMover));
-			LoadTool(new BuildingBuilderToolMandK(input, ui, cameraMover));
+			LoadTool(new TerrainManipulatorTool(input, ui, cameraMover));
+			LoadTool(new TileTypeTool(input, ui, cameraMover));
+			LoadTool(new UnitSelectorTool(input, ui, cameraMover));
+			LoadTool(new UnitSpawningTool(input, ui, cameraMover));
+			LoadTool(new BuildingBuilderTool(input, ui, cameraMover));
 		}
 	}
 }

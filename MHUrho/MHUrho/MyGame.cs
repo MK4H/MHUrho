@@ -13,6 +13,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using MHUrho.Input;
+using MHUrho.Input.MandK;
+using MHUrho.Input.Touch;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
@@ -83,18 +85,38 @@ namespace MHUrho
 
 		public static async Task InvokeOnMainSafeAsync(Action action)
 		{
-			if (IsMainThread(Thread.CurrentThread)) {
-				action();
-			}
-			else {
-				await InvokeOnMainAsync(action);
+			Exception exc = null;
+
+			await InvokeAsync(() => {
+								try {
+									action();
+								}
+								catch (Exception e) {
+									exc = e;
+								}
+							});
+
+			if (exc != null) {
+				throw new MethodInvocationException("Method invocation ended with an exception.", exc);
 			}
 		}
 
 		public static async Task<T> InvokeOnMainSafeAsync<T>(Func<T> function)
 		{
 			T value = default(T);
-			await InvokeOnMainAsync(() => { value = function(); });
+			Exception exc = null;
+
+			await InvokeOnMainSafeAsync(() => {
+											try {
+												value = function();
+											}
+											catch (Exception e) {
+												exc = e;
+											}								
+										});
+			if (exc != null) {
+				throw new MethodInvocationException("Method invocation ended with an exception.", exc);
+			}
 			return value;
 		}
 
@@ -156,6 +178,18 @@ namespace MHUrho
 				}
 
 				MenuController.InitialSwitchToMainMenu("LOADING ERROR", message.ToString());
+			}
+		}
+
+		static async Task InvokeAsync(Action action)
+		{
+			if (IsMainThread(Thread.CurrentThread))
+			{
+				action();
+			}
+			else
+			{
+				await InvokeOnMainAsync(action);
 			}
 		}
 

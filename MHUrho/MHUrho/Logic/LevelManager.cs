@@ -19,6 +19,7 @@ using MHUrho.Helpers;
 using MHUrho.Plugins;
 using MHUrho.UserInterface;
 using Google.Protobuf;
+using MHUrho.CameraMovement;
 
 
 namespace MHUrho.Logic

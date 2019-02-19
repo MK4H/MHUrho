@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Schema;
+using MHUrho.Threading;
 using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Plugins;
@@ -163,14 +164,14 @@ namespace MHUrho.Packaging {
 
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
 
-			try
-			{
+			try {
 				newPack.data = await MyGame.InvokeOnMainSafeAsync(() => StartLoading(pathToXml, schemas));
+
 				//Validation in StartLoading should take care of any missing elements
 				newPack.levelSavingDirPath = FileManager.CorrectRelativePath(newPack.data.Root
-																						.Element(GamePackXml.Inst.Levels)
-																						.Element(LevelsXml.Inst.DataDirPath)
-																						.Value.Trim());
+																					.Element(GamePackXml.Inst.Levels)
+																					.Element(LevelsXml.Inst.DataDirPath)
+																					.Value.Trim());
 
 				loadingProgress.TextUpdate("Loading tile types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
@@ -196,13 +197,18 @@ namespace MHUrho.Packaging {
 				loadingProgress.TextUpdate("Loading levels");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
 			}
-			//TODO: Catch only the expected exceptions
-			catch (Exception e)
+			catch (MethodInvocationException e)
 			{
-				string message = $"Package loading failed with: \"{e.Message}\"";
+				string message = $"Package loading failed with: \"{e.InnerException?.Message ?? ""}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}
+			//TODO: Catch only the expected exceptions
+			catch (Exception e) {
+				string message = $"Package loading failed with: \"{e.Message}\"";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}			
 			finally
 			{
 				newPack.FinishLoading();

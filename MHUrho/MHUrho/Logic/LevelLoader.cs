@@ -11,6 +11,7 @@ using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
 using Google.Protobuf;
+using MHUrho.CameraMovement;
 using MHUrho.Plugins;
 using MHUrho.UserInterface;
 

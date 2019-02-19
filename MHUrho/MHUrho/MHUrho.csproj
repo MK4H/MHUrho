@@ -15,6 +15,10 @@
     <PackageReference Include="UrhoSharp" Version="1.8.93" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="EditorTools\Touch\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <ProtoIncludes>.;Storage</ProtoIncludes>
   </PropertyGroup>

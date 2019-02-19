@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.CameraMovement;
 using MHUrho.Helpers;
 using MHUrho.Input;
 using MHUrho.Logic;

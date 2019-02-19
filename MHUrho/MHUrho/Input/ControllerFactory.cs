@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.CameraMovement;
 using MHUrho.EditorTools;
 using MHUrho.Logic;
 using Urho;
