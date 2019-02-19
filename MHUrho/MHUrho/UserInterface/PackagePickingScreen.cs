@@ -123,6 +123,10 @@ namespace MHUrho.UserInterface
 											.FileBrowsingPopUp
 											.Request(MyGame.Files.PackageDirectoryAbsolutePath,
 													SelectOption.File);
+				if (result == null) {
+					return;
+				}
+
 				try {
 					var newPack = PackageManager.Instance.AddGamePack(result.RelativePath);
 					AddItem(newPack);

@@ -220,10 +220,17 @@ namespace MHUrho.UserInterface
 					mapSize.Value = Level.MapSize;
 					descriptionEdit.Text = Level.Description;
 					thumbnailPathText.Value = Level.ThumbnailPath;
-					//TODO: Select the current logic type
+					for (uint i = 0; i < logicTypeList.NumItems; i++) {
+						var item = (LogicTypeItem)logicTypeList.GetItem(i);
+						if (item.LogicType == Level.LevelLogicType) {
+							logicTypeList.Selection = i;
+						}
+					}
+
 
 					//Disable the unchangable ones
 					mapSize.Enabled = false;
+					logicTypeList.Enabled = false;
 				}
 			}
 
@@ -274,6 +281,21 @@ namespace MHUrho.UserInterface
 														((LogicTypeItem)logicTypeList.SelectedItem).LogicType,
 														mapSize.Value,
 														PackageManager.Instance.ActivePackage);
+				}
+				else {
+					//Creates clone with the new or old name
+					// if the name was the old one, the old levelRep and the saved level is overwritten
+					// if the name is new, new level is created in the game pack
+					proxy.Level = proxy.Level.CreateClone(Name,
+														Description,
+														ThumbnailPath);
+					try {
+						proxy.Level.GamePack.SaveLevelPrototype(proxy.Level, true);
+					}
+					catch (Exception e) {
+						MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level cloning failed with: \"{e.Message}\"");
+						return;
+					}
 				}
 
 				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it

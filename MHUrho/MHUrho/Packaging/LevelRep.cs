@@ -17,39 +17,37 @@ namespace MHUrho.Packaging
     public class LevelRep : IDisposable {
 		abstract class LevelState {
 
-			protected LevelRep Context;
+			protected readonly LevelRep Context;
 
-			protected string Name {
+			public string Name {
 				get => Context.Name;
 				set => Context.Name = value;
 			}
 
-			protected string Description {
+			public string Description {
 				get => Context.Description;
 				set => Context.Description = value; 
 			}
 
-			protected Texture2D Thumbnail {
+			public Texture2D Thumbnail {
 				get => Context.Thumbnail;
 				private set => Context.Thumbnail = value; 
 			}
 
-			protected LevelLogicType LevelLogicType {
+			public LevelLogicType LevelLogicType {
 				get => Context.LevelLogicType;
 				set => Context.LevelLogicType = value;
 			}
 
-			protected GamePack GamePack {
+			public GamePack GamePack {
 				get => Context.GamePack;
 				set => Context.GamePack = value; 
 			}
 
-			protected IntVector2 MapSize => Context.MapSize;
+			public IntVector2 MapSize => Context.MapSize;
 
-			protected string SavePath => Context.savePath;
-			protected string ThumbnailPath => Context.ThumbnailPath;
-
-			protected volatile ILevelManager RunningLevel;
+			public string SavePath => Context.savePath;
+			public string ThumbnailPath => Context.ThumbnailPath;
 
 			protected LevelState(LevelRep context)
 			{
@@ -60,50 +58,21 @@ namespace MHUrho.Packaging
 
 			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler);
 
-			public virtual void SaveTo(XElement levelsElement)
+			public abstract XElement SaveAsPrototype();
+
+			public abstract LevelState CloneToNewContext(LevelRep newContext);
+
+			public abstract void DetachFromRunningLevel();
+
+			protected XElement ToXml()
 			{
-				if (RunningLevel == null) {
-					throw new InvalidOperationException("Level was not loaded, so there is nothing to save");
-				}
-
-				if (GamePack.TryGetLevel(Name, out LevelRep oldLevel)) {
-					throw new InvalidOperationException("Level with the same name already existed in the package");
-				}
-
-				Stream saveFile = null;
-				try {
-					saveFile = MyGame.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
-					RunningLevel.SaveTo(saveFile);
-				}
-				//TODO: Catch just the expected exceptions
-				catch (Exception e) {
-					//TODO: Display message that saving failed
-					throw;
-				}
-				finally {
-					saveFile?.Dispose();
-				}
-
-				levelsElement.Add(new XElement(LevelsXml.Inst.Level,
-												new XAttribute(LevelXml.Inst.NameAttribute, Name),
-												new XElement(LevelXml.Inst.Description, Description),
-												new XElement(LevelXml.Inst.Thumbnail, ThumbnailPath),
-												new XElement(LevelXml.Inst.LogicTypeName, LevelLogicType.Name),
-												new XElement(LevelXml.Inst.DataPath, SavePath),
-												XmlHelpers.IntVector2ToXmlElement(LevelXml.Inst.MapSize, MapSize)));
-			}
-
-			public abstract LevelState CloneWith(LevelRep newContext);
-
-			public void ClearRunningLevel()
-			{
-				RunningLevel = null;
-			}
-
-			protected virtual void RunningLevelLoaded(Task<ILevelManager> loadingTask)
-			{
-				//TODO: Check status, react to loading failure
-				RunningLevel = loadingTask.Result;
+				return new XElement(LevelsXml.Inst.Level,
+									new XAttribute(LevelXml.Inst.NameAttribute, Name),
+									new XElement(LevelXml.Inst.Description, Description),
+									new XElement(LevelXml.Inst.Thumbnail, ThumbnailPath),
+									new XElement(LevelXml.Inst.LogicTypeName, LevelLogicType.Name),
+									new XElement(LevelXml.Inst.DataPath, SavePath),
+									XmlHelpers.IntVector2ToXmlElement(LevelXml.Inst.MapSize, MapSize));
 			}
 		}
 
@@ -120,7 +89,7 @@ namespace MHUrho.Packaging
 			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
 			{
 				var loader = LevelManager.GetLoader();
-				loader.LoadDefaultLevel(Context, mapSize, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
+				loader.LoadDefaultLevel(Context, mapSize, loadingSignaler).ContinueWith(LevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
 				return loader;
 			}
 
@@ -129,15 +98,35 @@ namespace MHUrho.Packaging
 				throw new InvalidOperationException("Cannot play a default level");
 			}
 
-			public override LevelState CloneWith(LevelRep newContext)
+			public override XElement SaveAsPrototype()
 			{
-				return new CreatedLevel(mapSize, newContext) {RunningLevel = this.RunningLevel};
+				throw new InvalidOperationException("Cannot save a freshly created level");
 			}
+
+			public override LevelState CloneToNewContext(LevelRep newContext)
+			{
+				throw new
+					InvalidOperationException("Cannot clone freshly created level, load it, save it, then clone it");
+			}
+
+			public override void DetachFromRunningLevel()
+			{
+				throw new
+					InvalidOperationException("Cannot detach, there is no running level");
+			}
+
+			void LevelLoaded(Task<ILevelManager> task)
+			{
+				//TODO: Check for exceptions
+				//TODO: Maybe lock state
+				Context.state = new EditingLevel(Context, task.Result);
+			}
+
 		}
 
-		class LoadedLevelPrototype : LevelState {
+		class LevelPrototype : LevelState {
 
-			public LoadedLevelPrototype(LevelRep context)
+			public LevelPrototype(LevelRep context)
 				:base(context)
 			{
 
@@ -148,7 +137,7 @@ namespace MHUrho.Packaging
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForEditing(Context, savedLevel, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
+				loader.LoadForEditing(Context, savedLevel, loadingSignaler).ContinueWith(LoadedForEditing, TaskContinuationOptions.OnlyOnRanToCompletion);
 				return loader;
 			}
 
@@ -157,13 +146,236 @@ namespace MHUrho.Packaging
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
 				var loader = LevelManager.GetLoader();
 				//TODO: Maybe add failure continuation
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(LoadedForPlaying, TaskContinuationOptions.OnlyOnRanToCompletion);
 				return loader;
 			}
 
-			public override LevelState CloneWith(LevelRep newContext)
+			public override XElement SaveAsPrototype()
 			{
-				return new LoadedLevelPrototype(newContext) {RunningLevel = this.RunningLevel};
+				throw new
+					InvalidOperationException("Cannot save level prototype again, try cloning it with a new name and then saving it");
+			}
+
+			public override LevelState CloneToNewContext(LevelRep newContext)
+			{
+				return new ClonedLevelPrototype(newContext, this);
+			}
+
+			public override void DetachFromRunningLevel()
+			{
+				throw new
+					InvalidOperationException("Cannot detach, there is no running level");
+			}
+
+			void LoadedForPlaying(Task<ILevelManager> task)
+			{
+				//Dont have to check for exceptions, this is OnlyOnCompletion continuation
+				//TODO: Maybe lock state
+				Context.state = new PlayingLevel(Context, this, task.Result);
+			}
+
+			void LoadedForEditing(Task<ILevelManager> task)
+			{
+				//Dont have to check for exceptions, this is OnlyOnCompletion continuation
+				//TODO: Maybe lock state
+				Context.state = new EditingLevel(Context, task.Result);
+			}
+		}
+
+		class EditingLevel : LevelState {
+
+			public ILevelManager RunningLevel { get; protected set; }
+
+			public EditingLevel(LevelRep context, ILevelManager runningLevel)
+				:base(context)
+			{
+				this.RunningLevel = runningLevel;
+				runningLevel.Ending += RunningLevelEnding;
+			}
+
+			
+
+			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players,
+														LevelLogicCustomSettings customSettings,
+														ILoadingSignaler loadingSignaler)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override XElement SaveAsPrototype()
+			{
+				if (RunningLevel == null)
+				{
+					throw new InvalidOperationException("Level was not loaded, so there is nothing to save");
+				}
+
+				Stream saveFile = null;
+				try
+				{
+					var storedLevel = RunningLevel.Save();
+					saveFile = MyGame.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
+					storedLevel.WriteTo(saveFile);
+				}
+				//TODO: Catch just the expected exceptions
+				catch (Exception e)
+				{
+					Urho.IO.Log.Write(LogLevel.Error, $"Level saving to {SavePath} failed with: {e.Message}");
+					throw;
+				}
+				finally
+				{
+					saveFile?.Dispose();
+				}
+
+				return ToXml();
+			}
+
+			public override LevelState CloneToNewContext(LevelRep newContext)
+			{
+				return new ClonedEditingLevel(newContext, RunningLevel);
+			}
+
+			public override void DetachFromRunningLevel()
+			{
+				RunningLevel.Ending -= RunningLevelEnding;
+				Context.state = new LevelPrototype(Context);
+			}
+
+			void RunningLevelEnding()
+			{
+				Context.state = new LevelPrototype(Context);
+			}
+		}
+
+		class PlayingLevel : LevelState {
+			public ILevelManager RunningLevel { get; protected set; }
+
+			LevelState sourceState;
+
+			public PlayingLevel(LevelRep context, LevelState sourceState, ILevelManager runningLevel)
+				: base(context)
+			{
+				this.RunningLevel = runningLevel;
+				this.sourceState = sourceState;
+				runningLevel.Ending += RunningLevelEnding;
+			}
+
+			
+
+			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players,
+														LevelLogicCustomSettings customSettings,
+														ILoadingSignaler loadingSignaler)
+			{
+				throw new NotImplementedException();
+			}
+
+			public override XElement SaveAsPrototype()
+			{
+				throw new InvalidOperationException("Cannot save level in play mode as prototype");
+			}
+
+			public override LevelState CloneToNewContext(LevelRep newContext)
+			{
+				throw new InvalidOperationException("Cannot clone level in play mode");
+			}
+
+			public override void DetachFromRunningLevel()
+			{
+				RunningLevel.Ending -= RunningLevelEnding;
+				Context.state = sourceState;
+			}
+
+			void RunningLevelEnding()
+			{
+				Context.state = sourceState;
+			}
+		}
+
+		/// <summary>
+		/// Created when level prototype is loaded for editing
+		/// If the prototype was loaded without changing the name, the old level will be overwritten on the first save
+		/// If the prototype was loaded with new name, new level will be created
+		/// </summary>
+		class ClonedLevelPrototype : LevelState {
+
+			LevelPrototype sourceState;
+
+			public ClonedLevelPrototype(LevelRep context, LevelPrototype sourceState)
+				: base(context)
+			{
+				this.sourceState = sourceState;
+			}
+
+			public override ILevelLoader LoadForEditing(ILoadingSignaler loadingSignaler)
+			{
+				throw new InvalidOperationException("Cloned level cannot be loaded before it is saved");
+			}
+
+			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
+			{
+				throw new InvalidOperationException("Cloned level cannot be loaded before it is saved");
+			}
+
+			public override XElement SaveAsPrototype()
+			{
+				try
+				{
+					if (sourceState.SavePath != SavePath) {
+						MyGame.Files.Copy(Path.Combine(GamePack.RootedDirectoryPath, sourceState.SavePath),
+										Path.Combine(GamePack.RootedDirectoryPath, SavePath),
+										true);
+					}
+				}
+				//TODO: Catch just the expected exceptions
+				catch (Exception e)
+				{
+					Urho.IO.Log.Write(LogLevel.Error, $"Level saving to {SavePath} failed with: {e.Message}");
+					throw;
+				}
+
+				Context.state = new LevelPrototype(Context);
+				return ToXml();
+			}
+
+			public override LevelState CloneToNewContext(LevelRep newContext)
+			{
+				return new ClonedLevelPrototype(newContext, sourceState);
+			}
+
+			public override void DetachFromRunningLevel()
+			{
+				throw new
+					InvalidOperationException("Cannot detach, there is no running level");
+			}
+		}
+
+		/// <summary>
+		/// State of LevelRep after cloning editing level
+		/// Both the original and this copy point to the same running level
+		/// Acts only as a temporary clone, until it is saved or discarded
+		/// After saving, changes to LevelPrototype
+		/// </summary>
+		class ClonedEditingLevel : EditingLevel {
+			public ClonedEditingLevel(LevelRep context, ILevelManager runningLevel)
+				: base(context, runningLevel)
+			{ }
+
+			public override XElement SaveAsPrototype()
+			{
+				XElement xml = base.SaveAsPrototype();
+				RunningLevel = null;
+				Context.state = new LevelPrototype(Context);
+				return xml;
 			}
 		}
 
@@ -191,20 +403,32 @@ namespace MHUrho.Packaging
 				}
 				var loader = LevelManager.GetLoader();
 
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(RunningLevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
+				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingSignaler).ContinueWith(LevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
 
 				return loader;
 			}
 
-			public override LevelState CloneWith(LevelRep newContext)
+			public override XElement SaveAsPrototype()
 			{
-				return new LoadedSavedLevel(newContext, savedLevelPath, savedLevel);
+				throw new InvalidOperationException("Cannot save loaded saved level as a prototype");
 			}
 
-			protected override void RunningLevelLoaded(Task<ILevelManager> loadingTask)
+			public override LevelState CloneToNewContext(LevelRep newContext)
 			{
-				base.RunningLevelLoaded(loadingTask);
+				throw new InvalidOperationException("Cannot clone loaded saved level");
+			}
+
+			public override void DetachFromRunningLevel()
+			{
+				throw new
+					InvalidOperationException("Cannot detach, there is no running level");
+			}
+
+			void LevelLoaded(Task<ILevelManager> loadingTask)
+			{
 				savedLevel = null;
+				//TODO: Maybe lock context to synchronize
+				Context.state = new PlayingLevel(Context, this, loadingTask.Result);
 			}
 		}
 
@@ -213,7 +437,6 @@ namespace MHUrho.Packaging
 		public string Description { get; private set; }
 
 		public Texture2D Thumbnail { get; private set; }
-
 
 		public LevelLogicType LevelLogicType { get; private set; }
 
@@ -229,7 +452,7 @@ namespace MHUrho.Packaging
 
 		readonly string savePath;
 
-		readonly LevelState state;
+		LevelState state;
 
 		protected LevelRep(string name,
 						string description,
@@ -252,7 +475,7 @@ namespace MHUrho.Packaging
 		}
 
 		/// <summary>
-		/// Creates temporary clone with new name, description and thumbnail for the SaveAs call
+		/// Creates clone with new name, description and thumbnail for the SaveAs call
 		/// </summary>
 		/// <param name="other"></param>
 		/// <param name="name"></param>
@@ -274,7 +497,7 @@ namespace MHUrho.Packaging
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
 
 
-			state = other.state.CloneWith(this);
+			state = other.state.CloneToNewContext(this);
 		}
 
 		protected LevelRep(GamePack gamePack, XElement levelXmlElement)
@@ -291,7 +514,7 @@ namespace MHUrho.Packaging
 
 			this.Thumbnail = PackageManager.Instance.GetTexture2D(ThumbnailPath);
 
-			state = new LoadedLevelPrototype(this);
+			state = new LevelPrototype(this);
 		}
 
 		/// <summary>
@@ -419,32 +642,22 @@ namespace MHUrho.Packaging
 		/// <exception cref="InvalidOperationException"/>
 		public void SaveToGamePack(bool overrideLevel)
 		{
-			GamePack.SaveLevel(this, overrideLevel);
+			GamePack.SaveLevelPrototype(this, overrideLevel);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="newName"></param>
-		/// <param name="newDescription"></param>
-		/// <param name="newThumbnailPath"></param>
-		/// <param name="overrideLevel"></param>
-		/// <exception cref="InvalidOperationException"/>
-		public void SaveToGamePackAs(string newName, string newDescription, string newThumbnailPath, bool overrideLevel)
+		public LevelRep CreateClone(string newName, string newDescription, string newThumbnailPath)
 		{
-			LevelRep clone = new LevelRep(this, newName, newDescription, newThumbnailPath);
-			clone.SaveToGamePack(overrideLevel);
-			clone.state.ClearRunningLevel();
+			return new LevelRep(this, newName, newDescription, newThumbnailPath);
 		}
 
-		public void SaveTo(XElement levelsElement)
+		public XElement SaveAsPrototype()
 		{
-			state.SaveTo(levelsElement);
+			return state.SaveAsPrototype();
 		}
 
-		public void LevelEnded()
+		public void DetachFromLevel()
 		{
-			state.ClearRunningLevel();
+			state.DetachFromRunningLevel();
 		}
 
 		public void RemoveDataFile()

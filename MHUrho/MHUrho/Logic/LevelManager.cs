@@ -26,6 +26,8 @@ namespace MHUrho.Logic
 
 	public delegate void OnUpdateDelegate(float timeStep);
 
+	public delegate void OnEndDelegate();
+
 	partial class LevelManager : Component, ILevelManager, IDisposable
 	{
 		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
@@ -89,6 +91,7 @@ namespace MHUrho.Logic
 		public LevelLogicInstancePlugin Plugin { get; private set; }
 
 		public event OnUpdateDelegate Update;
+		public event OnEndDelegate Ending;
 
 		ICameraController cameraController;
 
@@ -184,6 +187,8 @@ namespace MHUrho.Logic
 
 		public new void Dispose()
 		{
+			Ending?.Invoke();
+
 			List<IDisposable> toDispose = new List<IDisposable>();
 			toDispose.AddRange(entities.Values);
 
@@ -210,8 +215,6 @@ namespace MHUrho.Logic
 			scene.Remove();
 			scene.Dispose();
 			LevelNode?.Dispose();
-
-			LevelRep.LevelEnded();
 
 			base.Dispose();
 
@@ -540,6 +543,12 @@ namespace MHUrho.Logic
 		{
 			Scene.UpdateEnabled = true;
 			LevelNode.SetEnabledRecursive(true);
+		}
+
+		public void ChangeRep(LevelRep newLevelRep)
+		{
+			LevelRep.DetachFromLevel();
+			LevelRep = newLevelRep;
 		}
 
 		protected override void OnUpdate(float timeStep) {

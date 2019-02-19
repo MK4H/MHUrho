@@ -501,13 +501,14 @@ namespace MHUrho.Packaging {
 		/// <param name="level"></param>
 		/// <param name="overrideLevel"></param>
 		/// <exception cref="InvalidOperationException">Thrown when a level with the same name as <paramref name="level"/> already exists and the <paramref name="overrideLevel"/> is not set</exception>
-		public void SaveLevel(LevelRep level, bool overrideLevel)
+		public void SaveLevelPrototype(LevelRep level, bool overrideLevel)
 		{
+			bool removeExisting = false;
 			if (TryGetLevel(level.Name, out LevelRep oldLevel))
 			{
 				if (overrideLevel)
 				{
-					RemoveLevel(oldLevel);
+					removeExisting = true;
 				}
 				else
 				{
@@ -516,8 +517,18 @@ namespace MHUrho.Packaging {
 			}
 
 			data = StartLoading(pathToXml, schemas);
-			//Should not be null, because startLoading validates the xml
-			level.SaveTo(data.Root.Element(GamePackXml.Inst.Levels));
+			//Save the level to xml only if the saving went without exception
+			XElement element = level.SaveAsPrototype();
+
+			if (removeExisting) {
+				//TODO: Either check the equality by name or check the name before removing
+				RemoveLevelFromLoadedXml(oldLevel, level != oldLevel);
+			}
+
+			levelsByName.Add(level.Name, level);
+			XElement levels = data.Root.Element(GamePackXml.Inst.Levels);
+			levels.Add(element);
+
 			WriteData();
 			FinishLoading();
 		}
@@ -531,27 +542,7 @@ namespace MHUrho.Packaging {
 
 			data = StartLoading(pathToXml, schemas);
 
-			if (!levelsByName.Remove(level.Name)) {
-				//This should not happen, but just to be safe
-				throw new
-					InvalidOperationException("Bug in the program, the level was not present in the levels dictionary even though it was from this gamePack");
-			}
-
-			//This should be correct thanks to xsd validation
-			XElement levels = data.Root.Element(GamePackXml.Inst.Levels);
-
-			var levelElement = levels.Elements(LevelsXml.Inst.Level)
-									.FirstOrDefault(levelElem => string.Equals(levelElem.Attribute(LevelXml.Inst.NameAttribute).Value,
-																		level.Name,
-																		StringComparison.InvariantCultureIgnoreCase));
-
-			if (levelElement == null) {
-				throw new
-					InvalidOperationException("Xml changed outside the control of the program, you should restart the program to fix this");
-			}
-
-			levelElement.Remove();
-			level.RemoveDataFile();
+			RemoveLevelFromLoadedXml(level, true);
 
 			WriteData();
 			FinishLoading();
@@ -1002,6 +993,33 @@ namespace MHUrho.Packaging {
 
 		}
 
+		void RemoveLevelFromLoadedXml(LevelRep level, bool removeData)
+		{
+			if (!levelsByName.Remove(level.Name))
+			{
+				//This should not happen, but just to be safe
+				throw new
+					InvalidOperationException("Bug in the program, the level was not present in the levels dictionary even though it was from this gamePack");
+			}
 
+			//This should be correct thanks to xsd validation
+			XElement levels = data.Root.Element(GamePackXml.Inst.Levels);
+
+			var levelElement = levels.Elements(LevelsXml.Inst.Level)
+									.FirstOrDefault(levelElem => string.Equals(levelElem.Attribute(LevelXml.Inst.NameAttribute).Value,
+																				level.Name,
+																				StringComparison.InvariantCultureIgnoreCase));
+
+			if (levelElement == null)
+			{
+				throw new
+					InvalidOperationException("Xml changed outside the control of the program, you should restart the program to fix this");
+			}
+
+			levelElement.Remove();
+			if (removeData) {
+				level.RemoveDataFile();
+			}
+		}
 	}
 }

@@ -54,6 +54,7 @@ namespace MHUrho.Logic {
 		LevelLogicInstancePlugin Plugin { get; }
 
 		event OnUpdateDelegate Update;
+		event OnEndDelegate Ending;
 
 		StLevel Save();
 
@@ -123,5 +124,7 @@ namespace MHUrho.Logic {
 		void UnPause();
 
 		void End();
+
+		void ChangeRep(LevelRep newLevelRep);
 	}
 }
