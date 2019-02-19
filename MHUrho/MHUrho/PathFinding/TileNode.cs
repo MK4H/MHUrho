@@ -32,7 +32,6 @@ namespace MHUrho.PathFinding
 
 		public void ConnectNeighbours()
 		{
-			int i = 0;
 			List<TileNode> newTileNeighbours = new List<TileNode>();
 			IntVector2 myLocation = Tile.MapLocation;
 			for (int y = -1; y < 2; y++) {
@@ -93,7 +92,7 @@ namespace MHUrho.PathFinding
 			try {
 				return edgeToNeighbourTile[neighbour];
 			}
-			catch (IndexOutOfRangeException e) {
+			catch (IndexOutOfRangeException) {
 				throw new ArgumentException("Provided tile node is not a neighbour of this tile node", nameof(neighbour));
 			}
 		}

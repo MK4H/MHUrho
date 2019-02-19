@@ -90,12 +90,12 @@ namespace MHUrho.PathFinding
 				outgoingEdges.Add(aStarTarget, movementType);
 				aStarTarget.AddedAsTarget(this);
 			}
-			catch (ArgumentNullException e) {
+			catch (ArgumentNullException) {
 				throw new ArgumentNullException(nameof(target), "TargetNode cannot be null");
 			}
 			catch (ArgumentException e) {
 				throw new ArgumentException("This pathfinding algorithm does not support multiple edges between the same nodes",
-											nameof(target));
+											nameof(target), e);
 			}
 			catch (InvalidCastException e) {
 				throw new ArgumentException("Target node was not from the same pathfinding algorithm", nameof(target), e);

@@ -12,8 +12,6 @@ namespace MHUrho.Input
     {
 		public override CameraMode CameraMode => CameraMode.RTS;
 
-		Node levelNode;
-
 		bool cameraMoved;
 
 		public FixedCamera(IMap map, Node levelNode, Node cameraNode, Vector2 initialPosition, SwitchState switchState)

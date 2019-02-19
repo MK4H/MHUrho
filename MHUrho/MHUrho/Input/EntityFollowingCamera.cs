@@ -13,8 +13,6 @@ namespace MHUrho.Input
 
 		public IEntity Followed { get; private set; }
 
-		Node levelNode;
-
 		/// <summary>
 		/// Direction of the camera so it faces the same directiong
 		/// regardless of the followed entity turning

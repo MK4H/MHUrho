@@ -15,14 +15,14 @@ namespace MHUrho.UserInterface
 	public class TouchUI : GameUIManager,IDisposable {
 
 
-		private readonly GameTouchController touchInputCtl;
+		readonly GameTouchController touchInputCtl;
 
-		private IPlayer player => touchInputCtl.Player;
+		IPlayer Player => touchInputCtl.Player;
 
-		private UIElement selectionBar;
+		UIElement selectionBar;
 
-		private Dictionary<UIElement, TileType> tileTypeButtons;
-		private UIElement selected;
+		Dictionary<UIElement, TileType> tileTypeButtons;
+		UIElement selected;
 
 
 		public TouchUI(GameTouchController gameTouchController)

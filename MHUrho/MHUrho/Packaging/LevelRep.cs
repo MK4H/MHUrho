@@ -255,7 +255,7 @@ namespace MHUrho.Packaging
 		class PlayingLevel : LevelState {
 			public ILevelManager RunningLevel { get; protected set; }
 
-			LevelState sourceState;
+			readonly LevelState sourceState;
 
 			public PlayingLevel(LevelRep context, LevelState sourceState, ILevelManager runningLevel)
 				: base(context)

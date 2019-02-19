@@ -93,11 +93,11 @@ namespace MHUrho.WorldMap
 					}
 				}
 				catch (IndexOutOfRangeException e) {
-					//TODO: Logging
+					Urho.IO.Log.Write(LogLevel.Error, $"Map loading failed with: {e.Message}");
 					throw;
 				}
 				catch (NullReferenceException e) {
-					//TODO: Logging
+					Urho.IO.Log.Write(LogLevel.Error, $"Map loading failed with: {e.Message}");
 					throw;
 				}
 				finally {

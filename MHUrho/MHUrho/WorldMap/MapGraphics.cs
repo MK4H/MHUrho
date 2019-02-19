@@ -590,9 +590,8 @@ namespace MHUrho.WorldMap
 					VertexBuffer InitializeVertexBufferImpl()
 					{
 						//TODO: Context
-						VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false);
+						VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false) {Shadowed = true};
 
-						vb.Shadowed = true;
 						vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
 						return vb;
 					}
@@ -604,9 +603,8 @@ namespace MHUrho.WorldMap
 
 					IndexBuffer InitializeIndexBufferImpl()
 					{
-						IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false);
+						IndexBuffer ib = new IndexBuffer(Application.CurrentContext, false){ Shadowed = true };
 
-						ib.Shadowed = true;
 						ib.SetSize(numIndicies, false, false);
 
 						return ib;
@@ -1104,9 +1102,8 @@ namespace MHUrho.WorldMap
 			/// <param name="color">Color of the highlighted rectangle</param>
 			void HighlightCorner(IntVector2 corner, Color color)
 			{
-				//TODO: Make it look nicer
 				const float tetrahedronEdgeSize = 0.1f;
-				const float tan30 = 0.57735026919f;
+				//const float tan30 = 0.57735026919f;
 				const float tan60 = 1.73205080757f;
 				const float tetrahedronHeight = 0.1f;
 

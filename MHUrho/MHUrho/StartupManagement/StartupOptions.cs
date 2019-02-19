@@ -135,10 +135,13 @@ namespace MHUrho.StartupManagement
 				actions = MenuScreenAction.Parse(xmlFile);
 			}
 			catch (XmlSchemaValidationException e) {
-				//TODO: maybe log
+				Urho.IO.Log.Write(LogLevel.Error, $"MenuAction did not conform to schema: {e.Message}");
 				throw;
 			}
-			
+			catch (IOException e) {
+				Urho.IO.Log.Write(LogLevel.Error, $"Could not open MenuAction file: {e.Message}");
+				throw;
+			}
 		}
 
 		public void RunActions(MyGame game)
@@ -152,7 +155,7 @@ namespace MHUrho.StartupManagement
 	public abstract class MenuScreenAction {
 		public static XNamespace XMLNamespace = "http://www.MobileHold.cz/MenuActions.xsd";
 
-		static Dictionary<string, Func<XElement, MenuScreenAction>> screenActions
+		static readonly Dictionary<string, Func<XElement, MenuScreenAction>> ScreenActions
 			= new Dictionary<string, Func<XElement, MenuScreenAction>>
 			{
 				{MainMenuAction.Name, MainMenuAction.FromXml},
@@ -174,7 +177,7 @@ namespace MHUrho.StartupManagement
 
 			return (from element in root.Elements()
 					let actionName = element.Name.LocalName
-					select screenActions[actionName](element)).ToList();
+					select ScreenActions[actionName](element)).ToList();
 		}
 
 		protected static XElement GetValuesElement(XElement screenActionElement)
@@ -527,11 +530,11 @@ namespace MHUrho.StartupManagement
 			}
 		}
 
-		string levelName;
-		string description;
-		string thumbnailPath;
-		string logicTypeName;
-		IntVector2 mapSize;
+		readonly string levelName;
+		readonly string description;
+		readonly string thumbnailPath;
+		readonly string logicTypeName;
+		readonly IntVector2 mapSize;
 
 		protected LevelCreationScreenAction(Actions action,
 										string levelName = null,

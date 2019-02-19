@@ -10,7 +10,7 @@ using Urho;
 
 namespace MHUrho.WorldMap
 {
-	internal class MapRangeTarget : IRangeTarget {
+	class MapRangeTarget : IRangeTarget {
 		public int InstanceID { get; set; }
 
 		public bool Moving => false;

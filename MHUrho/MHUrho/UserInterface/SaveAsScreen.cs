@@ -124,7 +124,7 @@ namespace MHUrho.UserInterface
 					string newPath = result == null ? oldPath : result.RelativePath;
 					MyGame.InvokeOnMainSafeAsync(() => thumbnailPathText.Value = newPath);
 				}
-				catch (OperationCanceledException e)
+				catch (OperationCanceledException)
 				{
 					//Text should not have changed
 				}

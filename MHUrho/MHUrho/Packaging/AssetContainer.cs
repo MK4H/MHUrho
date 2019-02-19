@@ -665,7 +665,7 @@ namespace MHUrho.Packaging
 					}
 				}
 			}
-			catch (Exception e) {
+			catch (Exception) {
 				foreach (var loader in loaders) {
 					loader.Dispose();
 				}

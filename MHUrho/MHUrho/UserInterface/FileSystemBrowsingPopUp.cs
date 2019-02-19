@@ -174,11 +174,11 @@ namespace MHUrho.UserInterface
 						currentDirectory = Path.GetDirectoryName(startingRelativePath);
 						currentFileName = Path.GetFileName(startingRelativePath);
 					}
-					catch (ArgumentException e) {
+					catch (ArgumentException) {
 						Dispose();
 						throw;
 					}
-					catch (PathTooLongException e) {
+					catch (PathTooLongException) {
 						Dispose();
 						throw;
 					}
@@ -273,7 +273,8 @@ namespace MHUrho.UserInterface
 				string newDirPath = null;
 
 				if (!IsValidPath(args.Text)) {
-					goto Fail;
+					PathChangeFailed(oldPath);
+					return;
 				}
 
 				try {
@@ -281,14 +282,17 @@ namespace MHUrho.UserInterface
 					newDirPath = newPath == "" ? "" : Path.GetDirectoryName(newPath);
 
 					if (newDirPath == null) {
-						goto Fail;
+						PathChangeFailed(oldPath);
+						return;
 					}
 				}
-				catch (ArgumentException e) {
-					goto Fail;
+				catch (ArgumentException) {
+					PathChangeFailed(oldPath);
+					return;
 				}
-				catch (PathTooLongException e) {
-					goto Fail;
+				catch (PathTooLongException) {
+					PathChangeFailed(oldPath);
+					return;
 				}
 				
 				//If directory changed, show the contents of the new directory
@@ -297,7 +301,8 @@ namespace MHUrho.UserInterface
 					//Load the new directory contents
 					if (!LoadDirectory(newDirPath)) {
 						//The new directory could not be loaded, revert change
-						goto Fail;
+						PathChangeFailed(oldPath);
+						return;
 					}
 				}
 
@@ -309,7 +314,7 @@ namespace MHUrho.UserInterface
 				try {
 					fileName = Path.GetFileName(args.Text);
 				}
-				catch (ArgumentException e)
+				catch (ArgumentException)
 				{
 					//Hide all items, no item matches invalid fileName
 					foreach (var entry in cDirEntries) {
@@ -353,14 +358,6 @@ namespace MHUrho.UserInterface
 				else {
 					TotalUnmatch();
 				}
-
-				return;
-
-				//I know this is probably not traditional in C#, but this is extremely convenient 
-				// and i think it makes the code much more maintainable
-				Fail:
-					pathEdit.Text = oldPath;
-					return;
 			}
 
 			void OnItemSelected(ItemSelectedEventArgs args)
@@ -417,7 +414,7 @@ namespace MHUrho.UserInterface
 						newEntries.Add(new NameTextPair(Path.GetFileName(directory), true));
 					}
 				}
-				catch (IOException e) {
+				catch (IOException) {
 					return false;
 				}
 
@@ -502,6 +499,11 @@ namespace MHUrho.UserInterface
 			bool IsValidPath(string path)
 			{
 				return path.IndexOfAny(Path.GetInvalidPathChars()) == -1;
+			}
+
+			void PathChangeFailed(string oldPath)
+			{
+				pathEdit.Text = oldPath;
 			}
 		}
 
