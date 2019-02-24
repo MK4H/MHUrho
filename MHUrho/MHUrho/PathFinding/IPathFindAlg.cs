@@ -10,13 +10,11 @@ namespace MHUrho.PathFinding
 
 		Path FindPath(Vector3 source,
 					INode target,
-					GetTime getTimeBetweenNodes,
-					GetMinimalAproxTime getMinimalAproxTime);
+					INodeDistCalculator nodeDistCalculator);
 
 		List<ITile> GetTileList(Vector3 source,
 								INode target,
-								GetTime getTimeBetweenNodes,
-								GetMinimalAproxTime getMinimalAproxTime);
+								INodeDistCalculator nodeDistCalculator);
 
 		INode GetClosestNode(Vector3 position);
 

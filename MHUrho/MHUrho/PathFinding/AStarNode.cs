@@ -57,7 +57,7 @@ namespace MHUrho.PathFinding
 											FastPriorityQueue<AStarNode> priorityQueue,
 											List<AStarNode> touchedNodes,
 											AStarNode targetNode,
-											GetTime getTimeBetweenNodes,
+											AStarNodeDistCalculator distCalc,
 											Func<Vector3, float> heuristic);
 
 
@@ -141,7 +141,7 @@ namespace MHUrho.PathFinding
 										FastPriorityQueue<AStarNode> priorityQueue,
 										List<AStarNode> touchedNodes,
 										AStarNode targetNode,
-										GetTime getTime,
+										AStarNodeDistCalculator distCalc,
 										Func<Vector3, float> getHeuristic)
 		{
 			//If already opened or closed
@@ -153,7 +153,7 @@ namespace MHUrho.PathFinding
 			else if (neighbour.State == NodeState.Opened) {
 				//if it is closer through the current sourceNode
 
-				if (getTime(this, neighbour, out float timeToTarget)) {
+				if (distCalc.GetTime(this, neighbour, out float timeToTarget)) {
 					float newTime = Time + timeToTarget;
 					if (newTime < neighbour.Time) {
 						neighbour.Time = newTime;
@@ -167,7 +167,7 @@ namespace MHUrho.PathFinding
 				// Compute the heuristic for the new tile
 				float heuristic = getHeuristic(neighbour.Position);
 
-				if (!getTime(this, neighbour, out float timeToTarget)) {
+				if (!distCalc.GetTime(this, neighbour, out float timeToTarget)) {
 					//Unit cannot pass to target node from source node
 					return;
 				}

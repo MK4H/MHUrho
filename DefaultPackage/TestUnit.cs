@@ -54,6 +54,19 @@ namespace DefaultPackage
 									MovingMeeleAttacker.IUser,
 									MovingRangeTarget.IUser
 	{
+		class DistanceCalc : AStarNodeDistCalculator {
+			public override bool GetTime(INode source, INode target, out float time)
+			{
+				time = (target.Position - source.Position).Length;
+				return true;
+			}
+
+			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			{
+				return (target - source).Length;
+			}
+		}
+
 		WorldWalker walker;
 		MovingMeeleAttacker meele;
 
@@ -130,32 +143,9 @@ namespace DefaultPackage
 
 		}
 
-
-
-	
-
-
 		public override void Dispose()
 		{
 
-		}
-
-		
-		
-
-		
-
-	
-
-		bool WorldWalker.IUser.GetTime(INode from, INode to, out float time)
-		{
-			time = (to.Position - from.Position).Length;
-			return true;
-		}
-
-		float WorldWalker.IUser.GetMinimalAproxTime(Vector3 from, Vector3 to)
-		{
-			return (to - from).Length;
 		}
 
 		void OnUnitOrdered(UnitSelector selector, Order order)
@@ -224,6 +214,11 @@ namespace DefaultPackage
 		public IEnumerable<Waypoint> GetFutureWaypoints(MovingRangeTarget target)
 		{
 			return walker.GetRestOfThePath(new Vector3(0,0.25f,0));
+		}
+
+		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
+		{
+			return new DistanceCalc();
 		}
 	}
 }

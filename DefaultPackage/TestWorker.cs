@@ -41,7 +41,8 @@ namespace DefaultPackage
 
 	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.IUser {
 
-		class PathVisitor : NodeVisitor {
+		class PathVisitor : NodeVisitor
+		{
 			TestWorkerInstance worker;
 
 			public PathVisitor(TestWorkerInstance worker)
@@ -63,7 +64,8 @@ namespace DefaultPackage
 
 			public override bool Visit(ITileEdgeNode source, ITileNode target, out float time)
 			{
-				if (target.Tile.Building == null) {
+				if (target.Tile.Building == null)
+				{
 					time = (source.Position - target.Position).Length;
 					return true;
 				}
@@ -87,12 +89,34 @@ namespace DefaultPackage
 					worker.Map
 						.GetTileByMapLocation(new IntVector2(targetTile.Tile.MapLocation.X,
 															source.Tile.MapLocation.Y)) != null
-				) {
+				)
+				{
 					time = -1;
 					return false;
 				}
 
 				return true;
+			}
+
+		}
+
+		class DistanceCalc : AStarNodeDistCalculator {
+
+			readonly PathVisitor pathVisitor;
+
+			public DistanceCalc(PathVisitor pathVisitor)
+			{
+				this.pathVisitor = pathVisitor;
+			}
+
+			public override bool GetTime(INode source, INode target, out float time)
+			{
+				return source.Accept(pathVisitor, target, out time);
+			}
+
+			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			{
+				return (target - source).Length;
 			}
 
 		}
@@ -160,16 +184,10 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
-		bool WorldWalker.IUser.GetTime(INode from, INode to, out float time)
+		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
 		{
-			return from.Accept(pathVisitor, to, out time);
+			return new DistanceCalc(pathVisitor);
 		}
-
-		float WorldWalker.IUser.GetMinimalAproxTime(Vector3 from, Vector3 to)
-		{
-			return (to - from).Length;
-		}
-
 
 		public void OnMovementFinished(WorldWalker walker) {
 			if (homeGoing) {

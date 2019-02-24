@@ -15,40 +15,22 @@ using Priority_Queue;
 
 namespace MHUrho.PathFinding {
 
-	
-	public delegate bool GetTime(INode from, INode to, out float time);
 
-	/// <summary>
-	/// Used as a heuristic for the A* algorithm
-	///
-	/// It has to be admissible, which means it must not overestimate the time
-	/// GetMinimalAproxTime has to always be lower than the optimal path time
-	///
-	/// But the closer you get it to the optimal time, the faster the A* will run
-	///
-	/// If it is not admissible, the returned path may not be optimal and the runtime of A* may be longer
-	///
-	/// If the <paramref name="from"/> and <paramref name="to"/> are in the same Tile, it should return the optimal time
-	/// as that will be used for the movement
-	/// </summary>
-	/// <param name="from"></param>
-	/// <param name="to"></param>
-	/// <returns></returns>
-	public delegate float GetMinimalAproxTime(Vector3 from, Vector3 to);
 
 	public class AStar : IPathFindAlg {
-
-		
 
 		public IMap Map { get; private set; }
 
 		readonly TileNode[] nodeMap;
 
+
+		//Properties of one instance of the algorithm
+		//Because the whole graph holds state, this algorithm cannot be run multiple times in parallel
+		// so the global state here does not hurt anything
 		readonly List<AStarNode> touchedNodes;
 		readonly FastPriorityQueue<AStarNode> priorityQueue;
 		AStarNode targetNode;
-		GetTime getTime;
-		GetMinimalAproxTime getMinimalTime;
+		AStarNodeDistCalculator distCalc;
 
 		public AStar(IMap map) {
 			this.Map = map;
@@ -69,15 +51,11 @@ namespace MHUrho.PathFinding {
 		/// <returns>List of IntVector2s the unit should pass through</returns>
 		public Path FindPath(Vector3 source, 
 							INode target, 
-							GetTime getTimeBetweenNodes, 
-							GetMinimalAproxTime getMinimalTime) 
+							INodeDistCalculator nodeDistCalculator) 
 		{
 			AStarNode realTargetNode = FindPathInNodes(source,
 											target,
-											getTimeBetweenNodes,
-											getMinimalTime);
-
-			Debug.Assert(realTargetNode == null || realTargetNode == targetNode);
+											nodeDistCalculator);
 
 			//If path was not found, return null
 			Path finalPath = realTargetNode == null
@@ -90,13 +68,11 @@ namespace MHUrho.PathFinding {
 
 		public List<ITile> GetTileList(Vector3 source, 
 										INode target,
-										GetTime getTimeBetweenNodes,
-										GetMinimalAproxTime getMinimalTime) {
+										INodeDistCalculator nodeDistCalculator) {
 			
 			AStarNode targetNode = FindPathInNodes(source,
 											target,
-											getTimeBetweenNodes,
-											getMinimalTime);
+											nodeDistCalculator);
 			//If path was not found, return null
 			List<ITile> finalList = targetNode == null ? null : MakeTileList(targetNode);
 			Reset();
@@ -173,9 +149,9 @@ namespace MHUrho.PathFinding {
 
 		//		}
 
-		float Heuristic(Vector3 from)
+		float Heuristic(Vector3 source)
 		{
-			return getMinimalTime(from.XZ(), targetNode.Position.XZ());
+			return distCalc.GetMinimalAproxTime(source.XZ(), targetNode.Position.XZ());
 		}
 
 		void TileHeightChanged(ITile tile)
@@ -185,17 +161,18 @@ namespace MHUrho.PathFinding {
 
 		AStarNode FindPathInNodes(Vector3 source,
 							INode target,
-							GetTime getTimeBetweenNodes,
-							GetMinimalAproxTime getMinimalTime) {
+							INodeDistCalculator nodeDistCalculator) {
 
 			AStarNode startNode = GetTileNode(source).GetClosestNode(source);
+			distCalc = nodeDistCalculator as AStarNodeDistCalculator;
+			if (distCalc == null) {
+				throw new ArgumentException("Cannot calculate node distances with calculator for a different algorithm", nameof(nodeDistCalculator));
+			}
 
 			targetNode = target as AStarNode;
 			if (targetNode == null) {
 				throw new ArgumentException("Target node was not created by this pathfinding algorithm", nameof(target));
 			}
-			this.getTime = getTimeBetweenNodes;
-			this.getMinimalTime = getMinimalTime;
 
 			// Enque the starting node
 			priorityQueue.Enqueue(startNode, 0);
@@ -215,7 +192,7 @@ namespace MHUrho.PathFinding {
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, Heuristic);
+				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc, Heuristic);
 			}
 			//Did not find path
 			return null;
@@ -259,11 +236,11 @@ namespace MHUrho.PathFinding {
 					//Default to linear movement
 					Waypoint sourceWaypoint = waypoints[0];
 					Waypoint firstWaypoint = waypoints[1];
-					if (getTime(sourceWaypoint.Node, firstWaypoint.Node, out float time)) {
+					if (distCalc.GetTime(sourceWaypoint.Node, firstWaypoint.Node, out float time)) {
 						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(time);
 					}
 					else {
-						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(getMinimalTime(source, firstWaypoint.Position));
+						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(distCalc.GetMinimalAproxTime(source, firstWaypoint.Position));
 					}
 					
 					break;
@@ -296,7 +273,7 @@ namespace MHUrho.PathFinding {
 			if (sourceNode.Position == target.Position) {
 				time = 0.0f;
 			}
-			else if (!getTime(sourceNode, target, out time)) {
+			else if (!distCalc.GetTime(sourceNode, target, out time)) {
 				return null;
 			}
 			
@@ -314,8 +291,7 @@ namespace MHUrho.PathFinding {
 			touchedNodes.Clear();
 			priorityQueue.Clear();
 			targetNode = null;
-			getTime = null;
-			getMinimalTime = null;
+			distCalc = null;
 		}
 
 		void VisualizeTouchedNodes()

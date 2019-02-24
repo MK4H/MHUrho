@@ -100,26 +100,7 @@ namespace MHUrho.UnitComponents
 
 		public interface IUser {
 
-			bool GetTime(INode from, INode to, out float time);
-
-
-			/// <summary>
-			/// Used as a heuristic for the A* algorithm
-			///
-			/// It has to be admissible, which means it must not overestimate the time
-			/// GetMinimalAproxTime has to always be lower than the optimal path time
-			///
-			/// But the closer you get it to the optimal time, the faster the A* will run
-			///
-			/// If it is not admissible, the returned path may not be optimal and the runtime of A* may be longer
-			///
-			/// If the <paramref name="from"/> and <paramref name="to"/> are in the same Tile, it should return the optimal time
-			/// as that will be used for the movement
-			/// </summary>
-			/// <param name="from"></param>
-			/// <param name="to"></param>
-			/// <returns></returns>
-			float GetMinimalAproxTime(Vector3 from, Vector3 to);
+			INodeDistCalculator GetNodeDistCalculator();
 		}
 
 		
@@ -195,8 +176,7 @@ namespace MHUrho.UnitComponents
 			var newPath = Path.FromTo(Unit.Position, 
 									targetNode, 
 									Map, 
-									user.GetTime,
-									user.GetMinimalAproxTime);
+									user.GetNodeDistCalculator());
 			if (newPath == null) {
 				Stop();
 				StopMovement(WorldWalkerState.Failed);
@@ -243,7 +223,7 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			if (!Path.WaypointReached(user.GetTime)) {
+			if (!Path.WaypointReached(user.GetNodeDistCalculator())) {
 				StopMovement(WorldWalkerState.Finished);
 			}
 		}
@@ -279,7 +259,7 @@ namespace MHUrho.UnitComponents
 				case MovementType.None:
 					return false;
 				case MovementType.Teleport:
-					if (Path.Update(Unit.Position, timeStep, user.GetTime)) {
+					if (Path.Update(Unit.Position, timeStep, user.GetNodeDistCalculator())) {
 						//Still can teleport
 
 						//Check timeout
@@ -297,7 +277,7 @@ namespace MHUrho.UnitComponents
 					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
 
 
-					if (Path.Update(newPosition, timeStep, user.GetTime)) {
+					if (Path.Update(newPosition, timeStep, user.GetNodeDistCalculator())) {
 						//Can still move towards the waypoint
 						bool reachedWaypoint = false;
 						if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
@@ -318,8 +298,7 @@ namespace MHUrho.UnitComponents
 			var newPath = Path.FromTo(Unit.Position,
 									Path.GetTarget(),
 									Map,
-									user.GetTime,
-									 user.GetMinimalAproxTime);
+									user.GetNodeDistCalculator());
 
 			if (newPath == null) {
 				//Cant get there

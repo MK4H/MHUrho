@@ -122,14 +122,14 @@ namespace DefaultPackage
 				return true;
 			}
 
-			float GetTime(Vector3 from, Vector3 to)
+			float GetTime(Vector3 source, Vector3 to)
 			{
 				//Check for complete equality, which breaks the code below
-				if (from == to) {
+				if (source == to) {
 					return 0;
 				}
 
-				Vector3 diff = to - from;
+				Vector3 diff = to - source;
 
 				//In radians
 				float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
@@ -137,6 +137,28 @@ namespace DefaultPackage
 				//TODO: Maybe cache the Length in the Edge
 				return (diff.Length / 2) + angle;
 			}
+		}
+
+		class DistanceCalc : AStarNodeDistCalculator
+		{
+
+			readonly PathVisitor pathVisitor;
+
+			public DistanceCalc(PathVisitor pathVisitor)
+			{
+				this.pathVisitor = pathVisitor;
+			}
+
+			public override bool GetTime(INode source, INode target, out float time)
+			{
+				return source.Accept(pathVisitor, target, out time);
+			}
+
+			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			{
+				return (source.XZ2() - target.XZ2()).Length / 2;
+			}
+
 		}
 
 		AnimationController animationController;
@@ -266,15 +288,9 @@ namespace DefaultPackage
 			healthbar.Dispose();
 		}
 
-
-		bool WorldWalker.IUser.GetTime(INode from, INode to, out float time)
+		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
 		{
-			return from.Accept(pathVisitor, to, out time);
-		}
-
-		float WorldWalker.IUser.GetMinimalAproxTime(Vector3 from, Vector3 to)
-		{
-			return (from.XZ2() - to.XZ2()).Length / 2;
+			return new DistanceCalc(pathVisitor);
 		}
 
 		void OnMovementStarted(WorldWalker walker) {

@@ -26,16 +26,18 @@ namespace MHUrho.WorldMap
 			readonly LevelManager level;
 			readonly Node mapNode;
 			readonly Octree octree;
+			readonly IPathFindAlgFactory pathFindAlgFactory;
 			readonly StMap storedMap;
 			readonly LoadingWatcher loadingProgress;
 
 			readonly List<ILoader> tileLoaders;
 
-			public Loader(LevelManager level, Node mapNode, Octree octree, StMap storedMap, LoadingWatcher loadingProgress)
+			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, LoadingWatcher loadingProgress)
 			{
 				this.level = level;
 				this.mapNode = mapNode;
 				this.octree = octree;
+				this.pathFindAlgFactory = pathFindAlg;
 				this.storedMap = storedMap;
 				this.loadingProgress = loadingProgress;
 				tileLoaders = new List<ILoader>();
@@ -49,8 +51,6 @@ namespace MHUrho.WorldMap
 			/// 
 			/// Last step is to FinishLoading, after all references are connected
 			/// </summary>
-			/// <param name="mapNode">Scene node of the map</param>
-			/// <param name="storedMap">Protocol Buffers class containing stored map</param>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
 			public void StartLoading() {
 				Map = new Map(mapNode, octree, storedMap) {levelManager = level};
@@ -91,12 +91,10 @@ namespace MHUrho.WorldMap
 						}
 
 					}
+
+					Map.PathFinding = pathFindAlgFactory.GetPathFindAlg(Map);
 				}
-				catch (IndexOutOfRangeException e) {
-					Urho.IO.Log.Write(LogLevel.Error, $"Map loading failed with: {e.Message}");
-					throw;
-				}
-				catch (NullReferenceException e) {
+				catch (Exception e) {
 					Urho.IO.Log.Write(LogLevel.Error, $"Map loading failed with: {e.Message}");
 					throw;
 				}
@@ -106,10 +104,8 @@ namespace MHUrho.WorldMap
 				}
 
 
-				Map.PathFinding = new AStar(Map);
+				
 			}
-
-			
 
 			public void ConnectReferences() {
 				foreach (var loader in tileLoaders) {
@@ -418,7 +414,7 @@ namespace MHUrho.WorldMap
 		/// <param name="mapNode">Node to connect the map to</param>
 		/// <param name="size">Size of the playing field, excluding the borders</param>
 		/// <returns>Fully created map</returns>
-		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IntVector2 size, LoadingWatcher loadingProgress) 
+		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, LoadingWatcher loadingProgress) 
 		{
 			Map newMap = new Map(mapNode, octree, size.X, size.Y) {levelManager = level};
 
@@ -441,15 +437,15 @@ namespace MHUrho.WorldMap
 			}
 
 			loadingProgress.TextUpdate("Creating pathfinding graph");
-			newMap.PathFinding = new AStar(newMap);
+			newMap.PathFinding = pathFindAlg.GetPathFindAlg(newMap);
 
 			newMap.BuildGeometry(loadingProgress);
 			return newMap;
 		}
 
-		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, StMap storedMap, LoadingWatcher loadingProgress)
+		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, LoadingWatcher loadingProgress)
 		{
-			return new Loader(level, mapNode, octree, storedMap, loadingProgress);
+			return new Loader(level, mapNode, octree, pathFindAlg, storedMap, loadingProgress);
 		}
 
 		public StMap Save() 
@@ -477,8 +473,6 @@ namespace MHUrho.WorldMap
 
 			return storedMap;
 		}
-
-	
 
 		protected Map(Node mapNode, Octree octree, StMap storedMap)
 			:this(mapNode, octree, storedMap.Size.X, storedMap.Size.Y) {

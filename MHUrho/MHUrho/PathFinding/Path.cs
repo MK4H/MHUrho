@@ -87,15 +87,14 @@ namespace MHUrho.PathFinding
 		public static Path FromTo(	Vector3 source, 
 									INode target, 
 									Map map, 
-									GetTime getTime,
-									GetMinimalAproxTime getMinimalTime)
+									INodeDistCalculator nodeDistCalculator)
 		{
 
-			return map.PathFinding.FindPath(source, target, getTime, getMinimalTime);
+			return map.PathFinding.FindPath(source, target, nodeDistCalculator);
 		}
 
 
-		public bool Update(Vector3 newPosition, float secondsFromLastUpdate, GetTime getTime)
+		public bool Update(Vector3 newPosition, float secondsFromLastUpdate, INodeDistCalculator nodeDistCalculator)
 		{
 			switch (TargetWaypoint.MovementType) {
 				case MovementType.None:
@@ -111,7 +110,7 @@ namespace MHUrho.PathFinding
 
 			}
 
-			if (getTime(waypoints[previousWaypointIndex].Node, TargetWaypoint.Node, out var newTime)) {
+			if (nodeDistCalculator.GetTime(waypoints[previousWaypointIndex].Node, TargetWaypoint.Node, out var newTime)) {
 				//Still can teleport to TargetWaypoint
 
 				//Scale the remaining time if the time from previous waypoint to targetWaypoint changed
@@ -135,7 +134,7 @@ namespace MHUrho.PathFinding
 		/// 
 		/// </summary>
 		/// <returns>If there was next waypoint to target, or this was the end</returns>
-		public bool WaypointReached(GetTime getTime)
+		public bool WaypointReached(INodeDistCalculator nodeDistCalculator)
 		{
 			currentPosition = TargetWaypoint.Position;
 			TargetWaypoint = TargetWaypoint.WithTimeToWaypointSet(0.0f);
@@ -146,7 +145,7 @@ namespace MHUrho.PathFinding
 				return false;
 			}
 
-			if (!getTime(PreviousWaypoint.Node, TargetWaypoint.Node, out float newTimeToWaypoint))
+			if (!nodeDistCalculator.GetTime(PreviousWaypoint.Node, TargetWaypoint.Node, out float newTimeToWaypoint))
 			{
 				//Cant get to the waypoint, path changed, end of the current path
 				return false;

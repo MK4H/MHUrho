@@ -32,10 +32,10 @@ namespace MHUrho.PathFinding
 												FastPriorityQueue<AStarNode> priorityQueue,
 												List<AStarNode> touchedNodes,
 												AStarNode targetNode,
-												GetTime getTimeBetweenNodes,
+												AStarNodeDistCalculator distCalc,
 												Func<Vector3, float> heuristic)
 		{
-			if (getTimeBetweenNodes(source, this, out float time)) {
+			if (distCalc.GetTime(source, this, out float time)) {
 				float newTime = source.Time + time;
 				if (State != NodeState.Untouched) {
 					if (newTime > Time) {
@@ -50,11 +50,11 @@ namespace MHUrho.PathFinding
 				Time = newTime;
 				PreviousNode = source;
 
-				ProcessNeighbour(Tile1, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, heuristic);
-				ProcessNeighbour(Tile2, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, heuristic);
+				ProcessNeighbour(Tile1, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
+				ProcessNeighbour(Tile2, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
 
 				foreach (var neighbour in outgoingEdges.Keys) {
-					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, getTimeBetweenNodes, heuristic);
+					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
 				}
 			}
 		}

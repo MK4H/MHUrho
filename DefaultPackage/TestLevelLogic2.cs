@@ -6,6 +6,7 @@ using MHUrho.EditorTools;
 using MHUrho.Input;
 using MHUrho.Logic;
 using MHUrho.Packaging;
+using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using Urho.Gui;
@@ -69,6 +70,11 @@ namespace DefaultPackage
 		public override void Dispose()
 		{
 
+		}
+
+		public override IPathFindAlgFactory GetPathFindAlgFactory()
+		{
+			return new AStarFactory();
 		}
 
 		public override ToolManager GetToolManager(ILevelManager levelManager, InputType inputType)
