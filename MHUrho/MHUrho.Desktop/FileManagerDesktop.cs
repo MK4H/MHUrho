@@ -71,46 +71,46 @@ namespace MHUrho.Desktop {
 			Copy(source, target, true);	   
 		}
 
-		public override void Copy(string from, string to, bool overrideFiles)
+		public override void Copy(string source, string target, bool overrideFiles)
 		{
-			if (from == null) {
-				throw new ArgumentNullException(nameof(from), "From path cannot be null");
+			if (source == null) {
+				throw new ArgumentNullException(nameof(source), "Source path cannot be null");
 			}
-			if (!Path.IsPathRooted(from)) {
-				throw new ArgumentException("From path has to be rooted", nameof(from));
-			}
-
-			if (to == null) {
-				throw new ArgumentNullException(nameof(to), "To path cannot be null"); 
-
+			if (!Path.IsPathRooted(source)) {
+				throw new ArgumentException("Source path has to be rooted", nameof(source));
 			}
 
-			if (!Path.IsPathRooted(to)) {
-				throw new ArgumentException("To path has to be rooted", nameof(to));
+			if (target == null) {
+				throw new ArgumentNullException(nameof(target), "Target path cannot be null"); 
+
 			}
 
-			from = Path.GetFullPath(from);
-			to = Path.GetFullPath(to);
+			if (!Path.IsPathRooted(target)) {
+				throw new ArgumentException("Target path has to be rooted", nameof(target));
+			}
 
-			var attr = File.GetAttributes(from);
+			source = Path.GetFullPath(source);
+			target = Path.GetFullPath(target);
+
+			var attr = File.GetAttributes(source);
 
 			if (attr.HasFlag(FileAttributes.Directory))
 			{
-				foreach (string dirPath in Directory.GetDirectories(from, "*", SearchOption.AllDirectories)) {
-					Directory.CreateDirectory(dirPath.Replace(from, to));
+				foreach (string dirPath in Directory.GetDirectories(source, "*", SearchOption.AllDirectories)) {
+					Directory.CreateDirectory(dirPath.Replace(source, target));
 				}
 					
 
 				//Copy all the files and Replaces any files with the same name
-				foreach (string subfilePath in Directory.GetFiles(from, "*.*", SearchOption.AllDirectories)) {
-					File.Copy(subfilePath, subfilePath.Replace(from, to), overrideFiles);
+				foreach (string subfilePath in Directory.GetFiles(source, "*.*", SearchOption.AllDirectories)) {
+					File.Copy(subfilePath, subfilePath.Replace(source, target), overrideFiles);
 				}
 					
 			}
 			else
 			{
-				Directory.CreateDirectory(Path.GetDirectoryName(to));
-				File.Copy(from, to, overrideFiles);
+				Directory.CreateDirectory(Path.GetDirectoryName(target));
+				File.Copy(source, target, overrideFiles);
 			}
 		}
 

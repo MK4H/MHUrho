@@ -102,12 +102,12 @@ namespace MHUrho
 
 		/// <summary>
 		/// Creates a copy of a file or a directory with the whole subtree copied
-		/// If <paramref name="from"/> refers to the same file/directory as <paramref name="to"/>, behavior is undefined
+		/// If <paramref name="source"/> refers to the same file/directory as <paramref name="target"/>, behavior is undefined
 		/// </summary>
-		/// <param name="from">Rooted path from which to copy</param>
-		/// <param name="to">Rooted path to which to copy</param>
+		/// <param name="source">Rooted path from which to copy</param>
+		/// <param name="target">Rooted path to which to copy</param>
 		/// <param name="overrideFiles"></param>
-		public abstract void Copy(string from, string to, bool overrideFiles);
+		public abstract void Copy(string source, string target, bool overrideFiles);
 
 		public abstract bool FileExists(string path);
 
