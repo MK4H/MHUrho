@@ -8,6 +8,7 @@ using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
+using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;
 using MHUrho.Storage;
@@ -54,7 +55,7 @@ namespace DefaultPackage
 									MovingMeeleAttacker.IUser,
 									MovingRangeTarget.IUser
 	{
-		class DistanceCalc : AStarNodeDistCalculator {
+		class DistanceCalc : NodeDistCalculator {
 
 			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
 			{

@@ -10,6 +10,7 @@ using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using MHUrho.PathFinding;
 using MHUrho.UnitComponents;
+using MHUrho.PathFinding.AStar;
 using Urho;
 
 namespace NUnit.Tests {
@@ -869,7 +870,7 @@ namespace NUnit.Tests {
 			}
 		}
 
-		class TestDistCalc : AStarNodeDistCalculator {
+		class TestDistCalc : NodeDistCalculator {
 
 			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
 			{
@@ -945,7 +946,7 @@ namespace NUnit.Tests {
 		[Test]
 
 		public void StraightCornerToCornerAllSpeedsOneGetTileList() {
-			var aStar = new AStar(allOneSpeed);
+			var aStar = new AStarAlg(allOneSpeed);
 
 
 			//Top
@@ -993,7 +994,7 @@ namespace NUnit.Tests {
 		[Test]
 
 		public void StraightCornerToCornerAllSpeedsOneGetPath() {
-			var aStar = new AStar(allOneSpeed);
+			var aStar = new AStarAlg(allOneSpeed);
 
 			//Top
 
@@ -1073,7 +1074,7 @@ namespace NUnit.Tests {
 		[Test]
 
 		public void StartIsFinishPath() {
-			var aStar = new AStar(allOneSpeed);
+			var aStar = new AStarAlg(allOneSpeed);
 
 			Path path = aStar.FindPath(new Vector3(10.5f, 0, 10.5f),
 										aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))),
@@ -1096,7 +1097,7 @@ namespace NUnit.Tests {
 		[Test]
 
 		public void StartIsFinishTileList() {
-			var aStar = new AStar(allOneSpeed);
+			var aStar = new AStarAlg(allOneSpeed);
 
 			var path = aStar.GetTileList(new Vector3(10.5f, 0, 10.5f), 
 										aStar.GetTileNode(allOneSpeed.GetTileByMapLocation(new IntVector2(10, 10))),
@@ -1112,7 +1113,7 @@ namespace NUnit.Tests {
 		[Test]
 		public void MicroBenchmark()
 		{
-			var aStar = new AStar(allOneSpeed);
+			var aStar = new AStarAlg(allOneSpeed);
 
 			Path path = null;
 			Vector3 position = new Vector3();

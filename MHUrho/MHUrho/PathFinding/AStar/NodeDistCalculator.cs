@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 
-namespace MHUrho.PathFinding
+namespace MHUrho.PathFinding.AStar
 {
-	public abstract class AStarNodeDistCalculator : INodeDistCalculator, INodeVisitor {
+	public abstract class NodeDistCalculator : INodeDistCalculator, INodeVisitor {
 
 		bool canPass;
 		float resTime;

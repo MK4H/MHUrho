@@ -7,6 +7,7 @@ using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.PathFinding.AStar;
 using Urho;
 
 

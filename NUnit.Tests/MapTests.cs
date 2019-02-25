@@ -8,9 +8,11 @@ using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
+using MHUrho.PathFinding.AStar;
 using MHUrho.WorldMap;
 using MHUrho.Storage;
 using Urho;
+using Node = Urho.Node;
 
 namespace NUnit.Tests {
 	[TestFixture]

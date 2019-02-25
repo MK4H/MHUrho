@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
+using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -44,7 +45,7 @@ namespace DefaultPackage
 
 
 
-		class DistanceCalc : AStarNodeDistCalculator {
+		class DistanceCalc : NodeDistCalculator {
 
 			IMap map;
 

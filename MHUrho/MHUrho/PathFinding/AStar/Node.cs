@@ -6,17 +6,17 @@ using MHUrho.WorldMap;
 using Priority_Queue;
 using Urho;
 
-namespace MHUrho.PathFinding
+namespace MHUrho.PathFinding.AStar
 {
 	public enum NodeState { Untouched, Opened, Closed };
 
 	
 
-	public abstract class AStarNode : FastPriorityQueueNode, INode {
+	public abstract class Node : FastPriorityQueueNode, INode {
 
 		public abstract NodeType NodeType { get; }
 
-		public AStarNode PreviousNode { get; protected set; }
+		public Node PreviousNode { get; protected set; }
 
 
 		/// <summary>
@@ -32,17 +32,17 @@ namespace MHUrho.PathFinding
 
 		protected float Value => Time + Heuristic;
 	
-		protected readonly AStar AStar;
+		protected readonly AStarAlg AStar;
 
-		protected readonly IDictionary<AStarNode, MovementType> outgoingEdges;
+		protected readonly IDictionary<Node, MovementType> outgoingEdges;
 
 		protected IMap Map => AStar.Map;
 
-		protected AStarNode(AStar aStar)
+		protected Node(AStarAlg aStar)
 		{
 			this.AStar = aStar;
 			State = NodeState.Untouched;
-			outgoingEdges = new Dictionary<AStarNode, MovementType>();
+			outgoingEdges = new Dictionary<Node, MovementType>();
 		}
 
 		public void Reset()
@@ -53,11 +53,11 @@ namespace MHUrho.PathFinding
 			Heuristic = 0;
 		}
 
-		public abstract void ProcessNeighbours(AStarNode source,
-											FastPriorityQueue<AStarNode> priorityQueue,
-											List<AStarNode> touchedNodes,
-											AStarNode targetNode,
-											AStarNodeDistCalculator distCalc,
+		public abstract void ProcessNeighbours(Node source,
+											FastPriorityQueue<Node> priorityQueue,
+											List<Node> touchedNodes,
+											Node targetNode,
+											NodeDistCalculator distCalc,
 											Func<Vector3, float> heuristic);
 
 
@@ -65,7 +65,7 @@ namespace MHUrho.PathFinding
 		/// Returns waypoints to get from <see cref="previousNode"/> to this node
 		/// </summary>
 		/// <returns>Returns waypoints to get from <see cref="previousNode"/> to this node</returns>
-		public abstract IEnumerable<Waypoint> GetWaypoints(AStarNodeDistCalculator nodeDist);
+		public abstract IEnumerable<Waypoint> GetWaypoints(NodeDistCalculator nodeDist);
 
 		public override string ToString()
 		{
@@ -86,7 +86,7 @@ namespace MHUrho.PathFinding
 			}
 
 			try {
-				AStarNode aStarTarget = (AStarNode) target;
+				Node aStarTarget = (Node) target;
 				outgoingEdges.Add(aStarTarget, movementType);
 				aStarTarget.AddedAsTarget(this);
 			}
@@ -112,7 +112,7 @@ namespace MHUrho.PathFinding
 		public INode RemoveEdge(INode target)
 		{
 			try {
-				AStarNode aStarTarget = (AStarNode)target;
+				Node aStarTarget = (Node)target;
 				if (!outgoingEdges.Remove(aStarTarget)) {
 					throw new ArgumentException("There was no edge to the target", nameof(target));
 				}
@@ -125,7 +125,7 @@ namespace MHUrho.PathFinding
 			return this;
 		}
 
-		public abstract MovementType GetMovementTypeToNeighbour(AStarNode neighbour);
+		public abstract MovementType GetMovementTypeToNeighbour(Node neighbour);
 
 		public abstract void Accept(INodeVisitor visitor, INode target);
 
@@ -135,11 +135,11 @@ namespace MHUrho.PathFinding
 
 		public abstract void Accept(INodeVisitor visitor, ITempNode source);
 
-		protected void ProcessNeighbour(AStarNode neighbour,
-										FastPriorityQueue<AStarNode> priorityQueue,
-										List<AStarNode> touchedNodes,
-										AStarNode targetNode,
-										AStarNodeDistCalculator distCalc,
+		protected void ProcessNeighbour(Node neighbour,
+										FastPriorityQueue<Node> priorityQueue,
+										List<Node> touchedNodes,
+										Node targetNode,
+										NodeDistCalculator distCalc,
 										Func<Vector3, float> getHeuristic)
 		{
 			//If already opened or closed
@@ -183,12 +183,12 @@ namespace MHUrho.PathFinding
 			}
 		}
 
-		protected virtual void AddedAsTarget(AStarNode source)
+		protected virtual void AddedAsTarget(Node source)
 		{
 			//NOTHING
 		}
 
-		protected virtual void RemovedAsTarget(AStarNode source)
+		protected virtual void RemovedAsTarget(Node source)
 		{
 			//NOTHING
 		}

@@ -9,6 +9,7 @@ using MHUrho.Helpers;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
+using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -54,7 +55,7 @@ namespace DefaultPackage
 									WorldWalker.IUser, 
 									MovingRangeTarget.IUser{
 
-		class DistanceCalc : AStarNodeDistCalculator
+		class DistanceCalc : NodeDistCalculator
 		{
 			protected override bool GetTime(ITileNode source, ITileNode target, out float time)
 			{

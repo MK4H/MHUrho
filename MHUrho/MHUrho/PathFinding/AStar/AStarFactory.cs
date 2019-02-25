@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.WorldMap;
 
-namespace MHUrho.PathFinding
+namespace MHUrho.PathFinding.AStar
 {
 	public class AStarFactory : IPathFindAlgFactory
 	{
 		public IPathFindAlg GetPathFindAlg(IMap map)
 		{
-			return new AStar(map);
+			return new AStarAlg(map);
 		}
 	}
 }

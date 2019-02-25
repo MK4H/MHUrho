@@ -7,7 +7,7 @@ using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using Urho;
 
-namespace MHUrho.PathFinding
+namespace MHUrho.PathFinding.AStar
 {
     public class TempNode : ITempNode, IHashTileHeightObserver	
     {

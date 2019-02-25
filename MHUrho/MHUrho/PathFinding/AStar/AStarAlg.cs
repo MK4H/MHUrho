@@ -13,11 +13,11 @@ using Priority_Queue;
 
 
 
-namespace MHUrho.PathFinding {
+namespace MHUrho.PathFinding.AStar {
 
 
 
-	public class AStar : IPathFindAlg {
+	public class AStarAlg : IPathFindAlg {
 
 		public IMap Map { get; private set; }
 
@@ -27,16 +27,16 @@ namespace MHUrho.PathFinding {
 		//Properties of one instance of the algorithm
 		//Because the whole graph holds state, this algorithm cannot be run multiple times in parallel
 		// so the global state here does not hurt anything
-		readonly List<AStarNode> touchedNodes;
-		readonly FastPriorityQueue<AStarNode> priorityQueue;
-		AStarNode targetNode;
-		AStarNodeDistCalculator distCalc;
+		readonly List<Node> touchedNodes;
+		readonly FastPriorityQueue<Node> priorityQueue;
+		Node targetNode;
+		NodeDistCalculator distCalc;
 
-		public AStar(IMap map) {
+		public AStarAlg(IMap map) {
 			this.Map = map;
 			nodeMap = new TileNode[map.Width * map.Length];
-			touchedNodes = new List<AStarNode>();
-			priorityQueue = new FastPriorityQueue<AStarNode>(map.Width * map.Length / 4);
+			touchedNodes = new List<Node>();
+			priorityQueue = new FastPriorityQueue<Node>(map.Width * map.Length / 4);
 
 			FillNodeMap();
 			map.TileHeightChangeNotifier.TileHeightsChangedCol += TileHeightsChanged;
@@ -53,7 +53,7 @@ namespace MHUrho.PathFinding {
 							INode target, 
 							INodeDistCalculator nodeDistCalculator) 
 		{
-			AStarNode realTargetNode = FindPathInNodes(source,
+			Node realTargetNode = FindPathInNodes(source,
 											target,
 											nodeDistCalculator);
 
@@ -70,7 +70,7 @@ namespace MHUrho.PathFinding {
 										INode target,
 										INodeDistCalculator nodeDistCalculator) {
 			
-			AStarNode targetNode = FindPathInNodes(source,
+			Node targetNode = FindPathInNodes(source,
 											target,
 											nodeDistCalculator);
 			//If path was not found, return null
@@ -167,17 +167,17 @@ namespace MHUrho.PathFinding {
 			}
 		}
 
-		AStarNode FindPathInNodes(Vector3 source,
+		Node FindPathInNodes(Vector3 source,
 							INode target,
 							INodeDistCalculator nodeDistCalculator) {
 
-			AStarNode startNode = GetTileNode(source).GetClosestNode(source);
-			distCalc = nodeDistCalculator as AStarNodeDistCalculator;
+			Node startNode = GetTileNode(source).GetClosestNode(source);
+			distCalc = nodeDistCalculator as NodeDistCalculator;
 			if (distCalc == null) {
 				throw new ArgumentException("Cannot calculate node distances with calculator for a different algorithm", nameof(nodeDistCalculator));
 			}
 
-			targetNode = target as AStarNode;
+			targetNode = target as Node;
 			if (targetNode == null) {
 				throw new ArgumentException("Target node was not created by this pathfinding algorithm", nameof(target));
 			}
@@ -189,7 +189,7 @@ namespace MHUrho.PathFinding {
 
 			//Main loop
 			while (priorityQueue.Count != 0) {
-				AStarNode currentNode = priorityQueue.Dequeue();
+				Node currentNode = priorityQueue.Dequeue();
 
 				//If we hit the target, finish and return the sourceNode
 				if (currentNode == targetNode) {
@@ -213,9 +213,9 @@ namespace MHUrho.PathFinding {
 		/// </summary>
 		/// <param name="target">Last Node of the path</param>
 		/// <returns>Path in correct order, from first point to the last point</returns>
-		Path MakePath(Vector3 source, AStarNode target)
+		Path MakePath(Vector3 source, Node target)
 		{
-			List<AStarNode> nodes = new List<AStarNode>();
+			List<Node> nodes = new List<Node>();
 			while (target != null) {
 				nodes.Add(target);
 				target = target.PreviousNode;
@@ -258,7 +258,7 @@ namespace MHUrho.PathFinding {
 		}
 
 
-		List<ITile> MakeTileList(AStarNode target) {
+		List<ITile> MakeTileList(Node target) {
 			List<ITile> reversedTileList = new List<ITile>();
 			ITile previousTile = null;
 			for (;target != null; target = target.PreviousNode) {
@@ -273,7 +273,7 @@ namespace MHUrho.PathFinding {
 			return reversedTileList;
 		}
 
-		Path StartIsFinish(AStarNode target, Vector3 source)
+		Path StartIsFinish(Node target, Vector3 source)
 		{
 			TempNode sourceNode = new TempNode(source, Map);
 			float time;
@@ -292,7 +292,7 @@ namespace MHUrho.PathFinding {
 
 		void Reset()
 		{
-			foreach (AStarNode node in touchedNodes) {
+			foreach (Node node in touchedNodes) {
 				node.Reset();
 			}
 

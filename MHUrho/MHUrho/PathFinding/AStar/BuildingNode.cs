@@ -6,9 +6,9 @@ using MHUrho.WorldMap;
 using Priority_Queue;
 using Urho;
 
-namespace MHUrho.PathFinding
+namespace MHUrho.PathFinding.AStar
 {
-    public class BuildingNode : AStarNode, IBuildingNode
+    public class BuildingNode : Node, IBuildingNode
     {
 		public override NodeType NodeType => NodeType.Building;
 
@@ -23,7 +23,7 @@ namespace MHUrho.PathFinding
 		public BuildingNode(IBuilding building, 
 							Vector3 position,
 							object tag,
-							AStar aStar)
+							AStarAlg aStar)
 			: base(aStar)
 		{
 			this.Building = building;
@@ -33,11 +33,11 @@ namespace MHUrho.PathFinding
 			AStar.GetTileNode(position).AddNodeOnThisTile(this);
 		}
 
-		public override void ProcessNeighbours(AStarNode source,
-												FastPriorityQueue<AStarNode> priorityQueue,
-												List<AStarNode> touchedNodes,
-												AStarNode targetNode,
-												AStarNodeDistCalculator distCalc,
+		public override void ProcessNeighbours(Node source,
+												FastPriorityQueue<Node> priorityQueue,
+												List<Node> touchedNodes,
+												Node targetNode,
+												NodeDistCalculator distCalc,
 												Func<Vector3, float> heuristic)
 		{
 			State = NodeState.Closed;
@@ -46,14 +46,14 @@ namespace MHUrho.PathFinding
 			}
 		}
 
-		public override IEnumerable<Waypoint> GetWaypoints(AStarNodeDistCalculator distCalc)
+		public override IEnumerable<Waypoint> GetWaypoints(NodeDistCalculator distCalc)
 		{
 			return new[] { new Waypoint(this,
 										Time - PreviousNode.Time,
 										PreviousNode.GetMovementTypeToNeighbour(this))};
 		}
 
-		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
+		public override MovementType GetMovementTypeToNeighbour(Node neighbour)
 		{
 			return outgoingEdges[neighbour];
 		}
@@ -88,12 +88,12 @@ namespace MHUrho.PathFinding
 			visitor.Visit(source, this);
 		}
 
-		protected override void AddedAsTarget(AStarNode source)
+		protected override void AddedAsTarget(Node source)
 		{
 			incomingEdges.Add(source);
 		}
 
-		protected override void RemovedAsTarget(AStarNode source)
+		protected override void RemovedAsTarget(Node source)
 		{
 			incomingEdges.Remove(source);
 		}

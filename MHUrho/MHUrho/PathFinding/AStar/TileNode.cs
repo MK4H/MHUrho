@@ -7,24 +7,24 @@ using MHUrho.Helpers;
 using Priority_Queue;
 using Urho;
 
-namespace MHUrho.PathFinding
+namespace MHUrho.PathFinding.AStar
 {
-    public class TileNode : AStarNode, ITileNode
+    public class TileNode : Node, ITileNode
     {
 		public override NodeType NodeType => NodeType.Tile;
 
 		public ITile Tile { get; private set; }
 
-		public IEnumerable<AStarNode> NodesOnTile => nodesOnThisTile;
+		public IEnumerable<Node> NodesOnTile => nodesOnThisTile;
 
-		readonly List<AStarNode> nodesOnThisTile;
+		readonly List<Node> nodesOnThisTile;
 
-		public TileNode(ITile tile, AStar aStar) 
+		public TileNode(ITile tile, AStarAlg aStar) 
 			:base(aStar)
 		{
 			this.Tile = tile;
 			this.Position = Tile.Center3;
-			nodesOnThisTile = new List<AStarNode>();
+			nodesOnThisTile = new List<Node>();
 		}
 
 		public void ConnectNeighbours()
@@ -61,11 +61,11 @@ namespace MHUrho.PathFinding
 			return Map.GetBorderBetweenTiles(Tile, other.Tile);
 		}
 
-		public override void ProcessNeighbours(AStarNode source,
-												FastPriorityQueue<AStarNode> priorityQueue,
-												List<AStarNode> touchedNodes,
-												AStarNode targetNode,
-												AStarNodeDistCalculator distCalc,
+		public override void ProcessNeighbours(Node source,
+												FastPriorityQueue<Node> priorityQueue,
+												List<Node> touchedNodes,
+												Node targetNode,
+												NodeDistCalculator distCalc,
 												Func<Vector3, float> heuristic)
 		{
 			State = NodeState.Closed;
@@ -74,7 +74,7 @@ namespace MHUrho.PathFinding
 			}
 		}
 
-		public override IEnumerable<Waypoint> GetWaypoints(AStarNodeDistCalculator nodeDist)
+		public override IEnumerable<Waypoint> GetWaypoints(NodeDistCalculator nodeDist)
 		{
 			if (PreviousNode.NodeType == NodeType.Tile && PreviousNode.GetMovementTypeToNeighbour(this) == MovementType.Linear) {
 				var borderNode = new TempNode(GetEdgePosition((ITileNode) PreviousNode), Map);
@@ -95,15 +95,15 @@ namespace MHUrho.PathFinding
 			}		
 		}
 
-		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
+		public override MovementType GetMovementTypeToNeighbour(Node neighbour)
 		{
 			//Movement type to tile edges is always linear, for other edges, look at what they were added with
 			return outgoingEdges.TryGetValue(neighbour, out MovementType value) ? value : MovementType.Linear;
 		}
 
-		public AStarNode GetClosestNode(Vector3 pointOnThisTile)
+		public Node GetClosestNode(Vector3 pointOnThisTile)
 		{
-			AStarNode closestNode = this;
+			Node closestNode = this;
 			float minDist = Vector3.Distance(Position, pointOnThisTile);
 			foreach (var node in nodesOnThisTile) {
 				float newDist = Vector3.Distance(node.Position, pointOnThisTile);
@@ -117,12 +117,12 @@ namespace MHUrho.PathFinding
 
 		}
 
-		public void AddNodeOnThisTile(AStarNode aStarNode)
+		public void AddNodeOnThisTile(Node aStarNode)
 		{
 			nodesOnThisTile.Add(aStarNode);
 		}
 
-		public bool RemoveNodeOnThisTile(AStarNode aStarNode)
+		public bool RemoveNodeOnThisTile(Node aStarNode)
 		{
 			return nodesOnThisTile.Remove(aStarNode);
 		}
