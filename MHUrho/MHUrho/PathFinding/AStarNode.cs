@@ -65,7 +65,7 @@ namespace MHUrho.PathFinding
 		/// Returns waypoints to get from <see cref="previousNode"/> to this node
 		/// </summary>
 		/// <returns>Returns waypoints to get from <see cref="previousNode"/> to this node</returns>
-		public abstract Waypoint GetWaypoint();
+		public abstract IEnumerable<Waypoint> GetWaypoints(AStarNodeDistCalculator nodeDist);
 
 		public override string ToString()
 		{
@@ -127,15 +127,13 @@ namespace MHUrho.PathFinding
 
 		public abstract MovementType GetMovementTypeToNeighbour(AStarNode neighbour);
 
-		public abstract bool Accept(INodeVisitor visitor, INode target, out float time);
+		public abstract void Accept(INodeVisitor visitor, INode target);
 
-		public abstract bool Accept(INodeVisitor visitor, ITileNode source, out float time);
+		public abstract void Accept(INodeVisitor visitor, ITileNode source);
 
-		public abstract bool Accept(INodeVisitor visitor, IBuildingNode source, out float time);
+		public abstract void Accept(INodeVisitor visitor, IBuildingNode source);
 
-		public abstract bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time);
-
-		public abstract bool Accept(INodeVisitor visitor, ITempNode source, out float time);
+		public abstract void Accept(INodeVisitor visitor, ITempNode source);
 
 		protected void ProcessNeighbour(AStarNode neighbour,
 										FastPriorityQueue<AStarNode> priorityQueue,

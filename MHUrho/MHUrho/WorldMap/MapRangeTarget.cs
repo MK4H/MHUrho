@@ -50,7 +50,7 @@ namespace MHUrho.WorldMap
 		}
 
 		public IEnumerable<Waypoint> GetFutureWaypoints() {
-			yield return new Waypoint(new TempNode(CurrentPosition), 0, MovementType.Linear);
+			yield return new Waypoint(new TempNode(CurrentPosition, level.Map), 0, MovementType.Linear);
 		}
 
 		public void AddShooter(RangeTargetComponent.IShooter shooter) {

@@ -209,7 +209,7 @@ namespace MHUrho.UnitComponents
 		/// <returns>Returns the current position and the part of the path that has not been reached yet</returns>
 		public IEnumerable<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
-			return Path?.GetRestOfThePath(offset) ?? new [] {new Waypoint(new TempNode(Unit.Position), 0, MovementType.Linear).WithOffset(offset)};
+			return Path?.GetRestOfThePath(offset) ?? new [] {new Waypoint(new TempNode(Unit.Position, Map), 0, MovementType.Linear).WithOffset(offset)};
 		}
 
 
@@ -292,7 +292,7 @@ namespace MHUrho.UnitComponents
 					break;
 			}
 
-			//Unit couldnt move to newPosition
+			//Unit couldn't move to newPosition
 
 			//Recalculate path
 			var newPath = Path.FromTo(Unit.Position,

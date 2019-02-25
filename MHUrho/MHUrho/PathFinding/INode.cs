@@ -5,8 +5,7 @@ using Urho;
 
 namespace MHUrho.PathFinding
 {
-	[Flags]
-	public enum NodeType {None = 0, Tile = 1, TileEdge = 2, Building = 4, Temp = 8}
+	public enum NodeType {None = 0, Tile = 1, Building = 2, Temp = 3}
 
 
 	public interface INode
@@ -30,22 +29,12 @@ namespace MHUrho.PathFinding
 		/// <returns>Returns this INode for call chaining</returns>
 		INode RemoveEdge(INode target);
 
-		bool Accept(INodeVisitor visitor, INode target, out float time);
+		void Accept(INodeVisitor visitor, INode target);
 
-		bool Accept(INodeVisitor visitor, ITileNode source, out float time);
+		void Accept(INodeVisitor visitor, ITileNode source);
 
-		bool Accept(INodeVisitor visitor, IBuildingNode source, out float time);
+		void Accept(INodeVisitor visitor, IBuildingNode source);
 
-		bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time);
-
-		bool Accept(INodeVisitor visitor, ITempNode source, out float time);
-	}
-
-
-	public static class NodeTypeExtensions {
-		public static bool IsAnyOfType(this NodeType testedType, NodeType testTypes)
-		{
-			return (testedType & testTypes) != 0;
-		}
+		void Accept(INodeVisitor visitor, ITempNode source);
 	}
 }

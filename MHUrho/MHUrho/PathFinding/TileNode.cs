@@ -19,15 +19,12 @@ namespace MHUrho.PathFinding
 
 		readonly List<AStarNode> nodesOnThisTile;
 
-		readonly Dictionary<ITileNode, TileEdgeNode> edgeToNeighbourTile;
-
 		public TileNode(ITile tile, AStar aStar) 
 			:base(aStar)
 		{
 			this.Tile = tile;
 			this.Position = Tile.Center3;
 			nodesOnThisTile = new List<AStarNode>();
-			edgeToNeighbourTile = new Dictionary<ITileNode, TileEdgeNode>();
 		}
 
 		public void ConnectNeighbours()
@@ -49,20 +46,19 @@ namespace MHUrho.PathFinding
 			}
 
 			foreach (var tileNeighbour in newTileNeighbours) {
-				if (!edgeToNeighbourTile.ContainsKey(tileNeighbour)) {
-					TileEdgeNode tileEdge = new TileEdgeNode(this, tileNeighbour, AStar);
-					edgeToNeighbourTile.Add(tileNeighbour, tileEdge);
-					tileNeighbour.edgeToNeighbourTile.Add(this, tileEdge);
-				}
+				CreateEdge(tileNeighbour, MovementType.Linear);
 			}
 		}
 
 		public void FixHeights()
 		{
 			Position = Tile.Center3;
-			foreach (var tileNeighbour in edgeToNeighbourTile.Keys) {
-				edgeToNeighbourTile[tileNeighbour].FixHeight();
-			}
+		}
+
+		public Vector3 GetEdgePosition(ITileNode other)
+		{
+			//TODO: If this is slow, cache it at construction
+			return Map.GetBorderBetweenTiles(Tile, other.Tile);
 		}
 
 		public override void ProcessNeighbours(AStarNode source,
@@ -73,28 +69,30 @@ namespace MHUrho.PathFinding
 												Func<Vector3, float> heuristic)
 		{
 			State = NodeState.Closed;
-			foreach (var tileEdgeNode in edgeToNeighbourTile.Values) {
-				tileEdgeNode.ProcessNeighbours(this, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
-			}
-
 			foreach (var neighbour in outgoingEdges.Keys) {
 				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
 			}
 		}
 
-		public override Waypoint GetWaypoint()
+		public override IEnumerable<Waypoint> GetWaypoints(AStarNodeDistCalculator nodeDist)
 		{
-			return new Waypoint(this, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this));
-		}
+			if (PreviousNode.NodeType == NodeType.Tile && PreviousNode.GetMovementTypeToNeighbour(this) == MovementType.Linear) {
+				var borderNode = new TempNode(GetEdgePosition((ITileNode) PreviousNode), Map);
+				float totalTime = Time - PreviousNode.Time;
 
-		public ITileEdgeNode GetEdgeNode(ITileNode neighbour)
-		{
-			try {
-				return edgeToNeighbourTile[neighbour];
+				if (!nodeDist.GetTime(PreviousNode, borderNode, out float firstTime)) {
+					//TODO: Exception
+					throw new Exception("Wrong GetTime implementation in package");
+				}
+				return new[]
+						{
+							new Waypoint(borderNode, firstTime, MovementType.Linear),
+							new Waypoint(this, totalTime - firstTime, MovementType.Linear)
+						};
 			}
-			catch (IndexOutOfRangeException) {
-				throw new ArgumentException("Provided tile node is not a neighbour of this tile node", nameof(neighbour));
-			}
+			else {
+				return new[] { new Waypoint(this, Time - PreviousNode.Time, PreviousNode.GetMovementTypeToNeighbour(this)) };
+			}		
 		}
 
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
@@ -129,29 +127,24 @@ namespace MHUrho.PathFinding
 			return nodesOnThisTile.Remove(aStarNode);
 		}
 
-		public override bool Accept(INodeVisitor visitor, INode target, out float time)
+		public override void Accept(INodeVisitor visitor, INode target)
 		{
-			return target.Accept(visitor, this, out time);
+			target.Accept(visitor, this);
 		}
 
-		public override bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		public override void Accept(INodeVisitor visitor, ITileNode source)
 		{
-			return visitor.Visit(source, this, out time);
+			visitor.Visit(source, this);
 		}
 
-		public override bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		public override void Accept(INodeVisitor visitor, IBuildingNode source)
 		{
-			return visitor.Visit(source, this, out time);
+			visitor.Visit(source, this);
 		}
 
-		public override bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		public override void Accept(INodeVisitor visitor, ITempNode source)
 		{
-			return visitor.Visit(source, this, out time);
-		}
-
-		public override bool Accept(INodeVisitor visitor, ITempNode source, out float time)
-		{
-			return visitor.Visit(source, this, out time);
+			visitor.Visit(source, this);
 		}
 
 	}

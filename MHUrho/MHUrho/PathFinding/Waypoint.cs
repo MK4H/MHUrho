@@ -24,9 +24,11 @@ namespace MHUrho.PathFinding
     {
 		public INode Node { get; private set; }
 
-		public Vector3 Position { get; private set; }
+		public Vector3 Position => Node.Position + offset;
 
 		public float TimeToWaypoint { get; set; }
+
+		Vector3 offset;
 
 		/// <summary>
 		/// Type of movement to this waypoint
@@ -36,18 +38,24 @@ namespace MHUrho.PathFinding
 		public MovementType MovementType { get; private set; }
 
 		public Waypoint(INode node, float timeToWaypoint, MovementType movementType)
+			:this(node, timeToWaypoint, movementType, Vector3.Zero)
+		{ }
+
+		public Waypoint(INode node, float timeToWaypoint, MovementType movementType, Vector3 offset)
 		{
 			this.Node = node;
-			this.Position = node.Position;
 			this.TimeToWaypoint = timeToWaypoint;
 			this.MovementType = movementType;
+			this.offset = offset;
 		}
 
 		public Waypoint(StWaypoint storedWaypoint, ILevelManager level)
 		{
-			
-			this.Position = storedWaypoint.Position.ToVector3();
-			this.Node = level.Map.PathFinding.GetClosestNode(Position);
+			Vector3 position = storedWaypoint.Position.ToVector3();
+			this.offset = storedWaypoint.Offset.ToVector3();
+			this.Node = storedWaypoint.Temporary ? 
+							level.Map.PathFinding.CreateTempNode(position) :
+							level.Map.PathFinding.GetClosestNode(position);
 			this.TimeToWaypoint = storedWaypoint.Time;
 			this.MovementType = (MovementType)storedWaypoint.MovementType;
 		}
@@ -65,13 +73,19 @@ namespace MHUrho.PathFinding
 
 		public Waypoint WithOffset(Vector3 offset)
 		{
-			var waypoint = new Waypoint(Node, TimeToWaypoint, MovementType);
-			waypoint.Position += offset;
-			return waypoint;
+			return new Waypoint(Node, TimeToWaypoint, MovementType);
 		}
 
-		public StWaypoint ToStWaypoint() {
-			return new StWaypoint {Position = this.Position.ToStVector3(), Time = TimeToWaypoint, MovementType = (int)this.MovementType};
+		public StWaypoint ToStWaypoint()
+		{
+			return new StWaypoint
+					{
+						Position = this.Position.ToStVector3(),
+						Offset = this.offset.ToStVector3(),
+						Time = TimeToWaypoint,
+						MovementType = (int) this.MovementType,
+						Temporary = Node.NodeType == NodeType.Temp
+					};
 		}
 
 		public override string ToString() {

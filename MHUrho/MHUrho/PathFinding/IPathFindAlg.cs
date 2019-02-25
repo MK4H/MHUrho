@@ -21,5 +21,7 @@ namespace MHUrho.PathFinding
 		ITileNode GetTileNode(ITile tile);
 
 		IBuildingNode CreateBuildingNode(IBuilding building, Vector3 position, object tag);
+
+		ITempNode CreateTempNode(Vector3 position);
 	}
 }

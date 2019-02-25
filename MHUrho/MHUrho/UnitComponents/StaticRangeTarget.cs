@@ -110,7 +110,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		public override IEnumerable<Waypoint> GetFutureWaypoints() {
-			yield return new Waypoint(new TempNode(CurrentPosition), 0, MovementType.Linear);
+			yield return new Waypoint(new TempNode(CurrentPosition, Map), 0, MovementType.Linear);
 		}
 
 

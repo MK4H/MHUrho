@@ -42,20 +42,15 @@ namespace MHUrho.PathFinding
 		{
 			State = NodeState.Closed;
 			foreach (var neighbour in outgoingEdges.Keys) {
-				if (neighbour.NodeType == NodeType.TileEdge) {
-					neighbour.ProcessNeighbours(this, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
-				}
-				else {
-					ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
-				}
+				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
 			}
 		}
 
-		public override Waypoint GetWaypoint()
+		public override IEnumerable<Waypoint> GetWaypoints(AStarNodeDistCalculator distCalc)
 		{
-			return new Waypoint(this,
-								Time - PreviousNode.Time,
-								PreviousNode.GetMovementTypeToNeighbour(this));
+			return new[] { new Waypoint(this,
+										Time - PreviousNode.Time,
+										PreviousNode.GetMovementTypeToNeighbour(this))};
 		}
 
 		public override MovementType GetMovementTypeToNeighbour(AStarNode neighbour)
@@ -73,29 +68,24 @@ namespace MHUrho.PathFinding
 			IsRemoved = true;
 		}
 
-		public override bool Accept(INodeVisitor visitor, INode target, out float time)
+		public override void Accept(INodeVisitor visitor, INode target)
 		{
-			return target.Accept(visitor, this, out time);
+			target.Accept(visitor, this);
 		}
 
-		public override bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		public override void Accept(INodeVisitor visitor, ITileNode source)
 		{
-			return visitor.Visit(source, this, out time);
+			visitor.Visit(source, this);
 		}
 
-		public override bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		public override void Accept(INodeVisitor visitor, IBuildingNode source)
 		{
-			return visitor.Visit(source, this, out time);
+			visitor.Visit(source, this);
 		}
 
-		public override bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		public override void Accept(INodeVisitor visitor, ITempNode source)
 		{
-			return visitor.Visit(source, this, out time);
-		}
-
-		public override bool Accept(INodeVisitor visitor, ITempNode source, out float time)
-		{
-			return visitor.Visit(source, this, out time);
+			visitor.Visit(source, this);
 		}
 
 		protected override void AddedAsTarget(AStarNode source)

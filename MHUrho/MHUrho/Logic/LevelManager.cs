@@ -94,6 +94,8 @@ namespace MHUrho.Logic
 		public event OnUpdateDelegate Update;
 		public event OnEndDelegate Ending;
 
+		public bool IsEnding { get; private set; }
+
 		ICameraController cameraController;
 
 		readonly Octree octree;
@@ -131,6 +133,7 @@ namespace MHUrho.Logic
 			this.App = app;
 			this.octree = octree;
 			this.DefaultComponentFactory = new DefaultComponentFactory();
+			this.IsEnding = false;
 			ReceiveSceneUpdates = true;
 		}
 
@@ -188,6 +191,7 @@ namespace MHUrho.Logic
 
 		public new void Dispose()
 		{
+			IsEnding = true;
 			Ending?.Invoke();
 
 			List<IDisposable> toDispose = new List<IDisposable>();

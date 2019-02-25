@@ -305,6 +305,8 @@ namespace NUnit.Tests {
 
 			#region NOT USED IN TEST
 			public ILevelManager LevelManager => throw new NotImplementedException();
+			public ITileHeightChangeNotifier TileHeightChangeNotifier { get; }
+			public event Action<IReadOnlyCollection<ITile>> TileHeightsChanged;
 
 			public IPathFindAlg PathFinding => throw new NotImplementedException();
 
@@ -868,15 +870,64 @@ namespace NUnit.Tests {
 		}
 
 		class TestDistCalc : AStarNodeDistCalculator {
-			public override bool GetTime(INode source, INode target, out float time)
+
+			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			{
+				return Vector3.Distance(source, target);
+			}
+
+			protected override bool GetTime(ITileNode source, ITileNode target, out float time)
 			{
 				time = Vector3.Distance(source.Position, target.Position);
 				return true;
 			}
 
-			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			protected override bool GetTime(ITileNode source, IBuildingNode target, out float time)
 			{
-				return Vector3.Distance(source, target);
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(ITileNode source, ITempNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(IBuildingNode source, ITileNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(IBuildingNode source, IBuildingNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(IBuildingNode source, ITempNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(ITempNode source, ITileNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(ITempNode source, IBuildingNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
+			}
+
+			protected override bool GetTime(ITempNode source, ITempNode target, out float time)
+			{
+				time = Vector3.Distance(source.Position, target.Position);
+				return true;
 			}
 		}
 

@@ -1,19 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
+using MHUrho.Logic;
+using MHUrho.WorldMap;
+using MHUrho.Helpers;
 using Urho;
 
 namespace MHUrho.PathFinding
 {
-    public class TempNode : ITempNode
+    public class TempNode : ITempNode, IHashTileHeightObserver	
     {
 		public NodeType NodeType => NodeType.Temp;
 
 		public Vector3 Position { get; private set; }
 
-		public TempNode(Vector3 position)
+		readonly ITile containingTile;
+		readonly IMap map;
+
+		public TempNode(Vector3 position, IMap map)
 		{
 			this.Position = position;
+			this.map = map;
+			containingTile = map.GetContainingTile(Position.XZ());
+			map.TileHeightChangeNotifier.WeakRegisterTileHeightObserver(this);							
 		}
 
 
@@ -27,30 +37,31 @@ namespace MHUrho.PathFinding
 			throw new NotImplementedException();
 		}
 
-		public bool Accept(INodeVisitor visitor, INode target, out float time)
+		public void Accept(INodeVisitor visitor, INode target)
 		{
-			return target.Accept(visitor, this, out time);
+			target.Accept(visitor, this);
 		}
 
-		public bool Accept(INodeVisitor visitor, ITileNode source, out float time)
+		public void Accept(INodeVisitor visitor, ITileNode source)
 		{
-			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+			visitor.Visit(source, this);
 		}
 
-		public bool Accept(INodeVisitor visitor, IBuildingNode source, out float time)
+		public void Accept(INodeVisitor visitor, IBuildingNode source)
 		{
-			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+			visitor.Visit(source, this);
 		}
 
-		public bool Accept(INodeVisitor visitor, ITileEdgeNode source, out float time)
+		public void Accept(INodeVisitor visitor, ITempNode source)
 		{
-			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+			visitor.Visit(source, this);
 		}
 
-		public bool Accept(INodeVisitor visitor, ITempNode source, out float time)
+		public void TileHeightsChanged(ImmutableHashSet<ITile> tiles)
 		{
-			throw new InvalidOperationException("TempNode cannot be used as a target, only as a source");
+			if (tiles.Contains(containingTile)) {
+				Position = Position.WithY(map.GetHeightAt(Position.XZ2()));
+			}
 		}
-
 	}
 }

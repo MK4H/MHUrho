@@ -8,6 +8,7 @@ using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
+using MHUrho.WorldMap;
 using Urho;
 
 namespace DefaultPackage
@@ -41,53 +42,34 @@ namespace DefaultPackage
 
 	public class TestWorkerInstance : UnitInstancePlugin, WorldWalker.IUser {
 
-		class PathVisitor : NodeVisitor
-		{
-			TestWorkerInstance worker;
 
-			public PathVisitor(TestWorkerInstance worker)
+
+		class DistanceCalc : AStarNodeDistCalculator {
+
+			IMap map;
+
+			public DistanceCalc(IMap map)
 			{
-				this.worker = worker;
+				this.map = map;
 			}
 
-			public override bool Visit(ITempNode source, ITileEdgeNode target, out float time)
+			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
 			{
-				time = (source.Position - target.Position).Length;
-				return true;
+				return (target - source).Length;
 			}
 
-			public override bool Visit(ITempNode source, ITileNode target, out float time)
+			protected override bool GetTime(ITileNode source, ITileNode target, out float time)
 			{
-				time = (source.Position - target.Position).Length;
-				return true;
-			}
-
-			public override bool Visit(ITileEdgeNode source, ITileNode target, out float time)
-			{
-				if (target.Tile.Building == null)
-				{
-					time = (source.Position - target.Position).Length;
-					return true;
-				}
-
-				time = -1;
-				return false;
-			}
-
-			public override bool Visit(ITileNode source, ITileEdgeNode target, out float time)
-			{
-				time = (source.Position - target.Position).Length;
-				ITileNode targetTile = target.GetOtherSide(source);
+				Vector3 edgePosition = source.GetEdgePosition(target);
+				time = (edgePosition - source.Position).Length + (target.Position - edgePosition).Length;
 
 				//If the edge is diagonal and there are buildings on both sides of the edge, dont go there
-				if (source.Tile.MapLocation.X != targetTile.Tile.MapLocation.X &&
-					source.Tile.MapLocation.Y != targetTile.Tile.MapLocation.Y &&
-					worker.Map
-						.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X,
-															targetTile.Tile.MapLocation.Y))
+				if (source.Tile.MapLocation.X != target.Tile.MapLocation.X &&
+					source.Tile.MapLocation.Y != target.Tile.MapLocation.Y &&
+					map.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X,
+															target.Tile.MapLocation.Y))
 						.Building != null &&
-					worker.Map
-						.GetTileByMapLocation(new IntVector2(targetTile.Tile.MapLocation.X,
+					map.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X,
 															source.Tile.MapLocation.Y)) != null
 				)
 				{
@@ -98,27 +80,17 @@ namespace DefaultPackage
 				return true;
 			}
 
-		}
-
-		class DistanceCalc : AStarNodeDistCalculator {
-
-			readonly PathVisitor pathVisitor;
-
-			public DistanceCalc(PathVisitor pathVisitor)
+			protected override bool GetTime(ITempNode source, ITileNode target, out float time)
 			{
-				this.pathVisitor = pathVisitor;
+				time = (source.Position - target.Position).Length;
+				return true;
 			}
 
-			public override bool GetTime(INode source, INode target, out float time)
+			protected override bool GetTime(ITileNode source, ITempNode target, out float time)
 			{
-				return source.Accept(pathVisitor, target, out time);
+				time = (source.Position - target.Position).Length;
+				return true;
 			}
-
-			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
-			{
-				return (target - source).Length;
-			}
-
 		}
 
 		public TestBuildingInstance WorkedBuilding { get; set; }
@@ -128,7 +100,7 @@ namespace DefaultPackage
 		bool homeGoing = false;
 		bool started = false;
 
-		readonly PathVisitor pathVisitor;
+		readonly DistanceCalc distCalc;
 
 		public static TestWorkerInstance CreateNew(ILevelManager level, IUnit unit)
 		{
@@ -145,9 +117,10 @@ namespace DefaultPackage
 		}
 
 		protected TestWorkerInstance(ILevelManager level, IUnit unit) 
-			: base(level, unit) {
-			
-			this.pathVisitor = new PathVisitor(this);
+			: base(level, unit)
+		{
+
+			this.distCalc = new DistanceCalc(Map);
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -186,7 +159,7 @@ namespace DefaultPackage
 
 		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
 		{
-			return new DistanceCalc(pathVisitor);
+			return distCalc;
 		}
 
 		public void OnMovementFinished(WorldWalker walker) {

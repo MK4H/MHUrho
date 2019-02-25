@@ -41,15 +41,19 @@ namespace MHUrho.PathFinding
 		float originalTime;
 		int previousWaypointIndex = 0;
 
-		protected Path() {
+		IMap map;
+
+		protected Path(IMap map) {
 			this.waypoints = new List<Waypoint>();
+			this.map = map;
 		}
 
-		protected Path(List<Waypoint> waypoints) {
+		protected Path(List<Waypoint> waypoints, IMap map) {
 			this.waypoints = waypoints;
 			targetWaypointIndex = 1;
 			this.currentPosition = waypoints[0].Position;
 			originalTime = TargetWaypoint.TimeToWaypoint;
+			this.map = map;
 		}
 
 
@@ -64,7 +68,7 @@ namespace MHUrho.PathFinding
 		}
 
 		public static Path Load(StPath storedPath, ILevelManager level) {
-			var newPath = new Path();
+			var newPath = new Path(level.Map);
 			foreach (var waypoint in storedPath.Waypoints) {
 				newPath.waypoints.Add(new Waypoint(waypoint, level));
 			}
@@ -76,8 +80,8 @@ namespace MHUrho.PathFinding
 		/// </summary>
 		/// <param name="waypoints">List of waypoints, where waypoints[0] is the current Position with time 0 and MovementType.None and there is at least one more waypoint as a target</param>
 		/// <returns></returns>
-		public static Path CreateFrom(List<Waypoint> waypoints) {
-			return new Path(waypoints);
+		public static Path CreateFrom(List<Waypoint> waypoints, IMap map) {
+			return new Path(waypoints, map);
 		}
 
 
@@ -86,7 +90,7 @@ namespace MHUrho.PathFinding
 
 		public static Path FromTo(	Vector3 source, 
 									INode target, 
-									Map map, 
+									IMap map, 
 									INodeDistCalculator nodeDistCalculator)
 		{
 
@@ -186,10 +190,10 @@ namespace MHUrho.PathFinding
 		/// all positions offseted by <paramref name="offset"/>
 		/// </summary>
 		/// <param name="offset">Offset of every position along the path</param>
-		/// <returns>The remaining part of the path, begining with the curren position, all offseted by <paramref name="offset"/></returns>
+		/// <returns>The remaining part of the path, begining with the current position, all offseted by <paramref name="offset"/></returns>
 		public IEnumerable<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
-			yield return new Waypoint(new TempNode(currentPosition), 0, MovementType.Linear).WithOffset(offset);
+			yield return new Waypoint(new TempNode(currentPosition, map), 0, MovementType.Linear).WithOffset(offset);
 			for (int i = targetWaypointIndex; i < waypoints.Count; i++) {
 				yield return waypoints[i].WithOffset(offset);
 			}

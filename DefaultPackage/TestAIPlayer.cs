@@ -173,7 +173,7 @@ namespace DefaultPackage
 		}
 
 		public override void OnUnitKilled(IUnit unit) {
-			if (unit.UnitType != type.Chicken) {
+			if (Level.IsEnding || unit.UnitType != type.Chicken) {
 				//Do nothing
 				return;
 			}

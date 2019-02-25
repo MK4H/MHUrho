@@ -87,10 +87,10 @@ namespace MHUrho.WorldMap {
 		ILevelManager LevelManager { get; }
 
 		/// <summary>
-		/// Occurs when height of any tile in the map changes
-		/// Gets called with the changed tile as arguments
+		/// An object that provides notifications when tile height changes
 		/// </summary>
-		event Action<ITile> TileHeightChanged;
+		ITileHeightChangeNotifier TileHeightChangeNotifier { get; }
+
 
 		/// <summary>
 		/// Returns whether there exists a tile with <see cref="ITile.MapLocation"/> equal to [<paramref name="x"/>,<paramref name="z"/>]
@@ -544,5 +544,6 @@ namespace MHUrho.WorldMap {
 		/// <param name="position">Position of the new range target</param>
 		/// <returns>Returns a range target at the <paramref name="position"/></returns>
 		IRangeTarget GetRangeTarget(Vector3 position);
+
 	}
 }

@@ -370,7 +370,7 @@ namespace MHUrho.WorldMap
 
 		public ILevelManager LevelManager => levelManager;
 
-		public event Action<ITile> TileHeightChanged;
+		public ITileHeightChangeNotifier TileHeightChangeNotifier => tileHeightChangeNotifier;
 
 		public static IntVector2 ChunkSize => new IntVector2(50, 50);
 		public static IntVector2 MinSize => ChunkSize;
@@ -383,11 +383,15 @@ namespace MHUrho.WorldMap
 
 		readonly Octree octree;
 
+		readonly TileHeightChangeNotifier tileHeightChangeNotifier;
+
 		MapGraphics graphics;
 
 		LevelManager levelManager;
 
 		Dictionary<Vector3, MapRangeTarget> mapRangeTargets;
+
+
 
 		/// <summary>
 		/// Width of the whole map with borders included
@@ -492,7 +496,7 @@ namespace MHUrho.WorldMap
 			this.TopLeft = new IntVector2(1, 1);
 			this.BottomRight = TopLeft + new IntVector2(width - 1, length - 1);
 			this.mapRangeTargets = new Dictionary<Vector3, MapRangeTarget>();
-
+			this.tileHeightChangeNotifier = new TileHeightChangeNotifier();
 			this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
 		}
 
@@ -1009,7 +1013,7 @@ namespace MHUrho.WorldMap
 
 			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
 				for (int x = topLeft.X; x <= bottomRight.X; x++) {
-					ChangeCornerHeight(x, y, heightDelta);
+					ChangeCornerHeight(x, y, heightDelta, false);
 				}
 			}
 
@@ -1018,10 +1022,9 @@ namespace MHUrho.WorldMap
 			//We did not want them before because the their top left corners (by which they are indexed) did not change
 			topLeft -= new IntVector2(1, 1);
 
-			ForEachInRectangle(topLeft, bottomRight, (tile) => {
-														tile.CornerHeightChange();
-														TileHeightChanged?.Invoke(tile);
-													});
+			var changedTiles = GetTilesInRectangle(topLeft, bottomRight).ToList().AsReadOnly();
+			NotifyCornerHeightChanged(changedTiles);
+			NotifyTileHeightsChanged(changedTiles);
 
 
 			//Squish to map again, because we needed to enlarge the rectangle to signal the tiles
@@ -1046,7 +1049,7 @@ namespace MHUrho.WorldMap
 
 			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
 				for (int x = topLeft.X; x <= bottomRight.X; x++) {
-					SetCornerHeight(x, y, newHeightFunction(GetTerrainHeightAt(x, y), x, y));
+					ChangeCornerHeight(x, y, newHeightFunction(GetTerrainHeightAt(x, y), x, y), true);
 				}
 			}
 
@@ -1054,11 +1057,9 @@ namespace MHUrho.WorldMap
 			//They are to the top and to the left of the current rectangle
 			topLeft -= new IntVector2(1, 1);
 
-			ForEachInRectangle(topLeft, bottomRight,
-								(tile) => {
-									tile.CornerHeightChange();
-									TileHeightChanged?.Invoke(tile);
-								});
+			var changedTiles = GetTilesInRectangle(topLeft, bottomRight).ToList().AsReadOnly();
+			NotifyCornerHeightChanged(changedTiles);
+			NotifyTileHeightsChanged(changedTiles);
 
 			SquishToMap(ref topLeft, ref bottomRight);
 			graphics.CorrectTileHeight(topLeft, bottomRight);
@@ -1280,53 +1281,14 @@ namespace MHUrho.WorldMap
 			graphics.DisableHighlight();
 		}
 
-		public void ChangeHeight(IEnumerable<IntVector2> tileCorners, float heightDelta) 
+		public void ChangeHeight(IEnumerable<IntVector2> tileCorners, float heightDelta)
 		{
-
-			foreach (var tileCorner in tileCorners) {
-				ChangeCornerHeight(tileCorner, heightDelta);
-
-				//With border tiles
-				ForEachAroundCorner(tileCorner, 
-									(changedTile) => {
-										changedTile.CornerHeightChange();
-									},
-									 true);
-
-				//Without border tiles, so they dont leak out of the implementation
-				ForEachAroundCorner(tileCorner,
-									(changedTile) => {
-										TileHeightChanged?.Invoke(changedTile);
-									},
-									false);
-				
-			}
-
-			graphics.ChangeCornerHeights(tileCorners);
+			ChangeCornerHeights(tileCorners.ToList(), heightDelta, false);
 		}
 
-		public void ChangeHeightTo(IEnumerable<IntVector2> tileCorners, float newHeight) 
+		public void ChangeHeightTo(IEnumerable<IntVector2> tileCorners, float newHeight)
 		{
-			foreach (var tileCorner in tileCorners) {
-				SetCornerHeight(tileCorner, newHeight);
-
-				//With border tiles
-				ForEachAroundCorner(tileCorner,
-									(changedTile) => {
-										changedTile.CornerHeightChange();
-									},
-									true);
-
-				//Without border tiles, so they dont leak out of the implementation
-				ForEachAroundCorner(tileCorner,
-									(changedTile) => {
-										TileHeightChanged?.Invoke(changedTile);
-									},
-									false);
-
-			}
-
-			graphics.ChangeCornerHeights(tileCorners);
+			ChangeCornerHeights(tileCorners.ToList(), newHeight, true);
 		}
 
 		/// <summary>
@@ -1358,14 +1320,8 @@ namespace MHUrho.WorldMap
 
 		public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) 
 		{
-			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
-				for (int x = topLeft.X; x <= bottomRight.X; x++) {
-					var tile = GetTileByTopLeftCorner(x, y);
-					if (tile != null) {
-						action(tile);
-					}
-					
-				}
+			foreach (var tile in GetTilesInRectangle(topLeft, bottomRight)) {
+				action(tile);
 			}
 		}
 
@@ -1395,6 +1351,9 @@ namespace MHUrho.WorldMap
 			return new Vector3(borderPosition.X, GetTerrainHeightAt(borderPosition), borderPosition.Y);
 		}
 
+
+
+
 		internal void RemoveRangeTarget(MapRangeTarget mapRangeTarget) 
 		{
 			var removed = mapRangeTargets.Remove(mapRangeTarget.CurrentPosition);
@@ -1406,6 +1365,9 @@ namespace MHUrho.WorldMap
 			((IDisposable) graphics).Dispose();
 			node.Dispose();
 		}
+
+
+
 
 		void BuildGeometry(LoadingWatcher loadingProgress)
 		{
@@ -1654,9 +1616,7 @@ namespace MHUrho.WorldMap
 
 		void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action, bool withBorders)
 		{
-			var tilesAroundCorner = GetTilesAroundCorner(cornerCoords, withBorders);
-
-			foreach (var tile in tilesAroundCorner) {
+			foreach (var tile in GetTilesAroundCorner(cornerCoords, withBorders)) {
 				action(tile);
 			}
 		}
@@ -1728,49 +1688,22 @@ namespace MHUrho.WorldMap
 			return null;
 		}
 
-		/// <summary>
-		/// Changes heights in the logic tiles, does not change the height in the map model
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="height"></param>
-		void SetCornerHeight(int x, int y, float height)
+		void ChangeCornerHeights(IReadOnlyCollection<IntVector2> corners, float height, bool absolute)
 		{
-			if (IsBorderCorner(x, y)) {
-				foreach (var tile in GetTilesAroundCorner(new IntVector2(x, y), true)) {
-					if (IsBorderTile(tile)) {
-						bool left = tile.TopLeft.X == x;
-						bool top = tile.TopLeft.Y == y;
-						if (top && left) {
-							((BorderTile)tile).TopLeftHeight = height;
-						}
-						else if (top /* && !left*/) {
-							((BorderTile)tile).TopRightHeight = height;
-						}
-						else if ( /* !top && */ left) {
-							((BorderTile)tile).BottomLeftHeight = height;
-						}
-						else /*!top && !left*/{
-							((BorderTile)tile).BottomRightHeight = height;
-						}
-					}
-					else if (tile.TopLeft == new IntVector2(x, y)) {
-						tile.SetTopLeftHeight(height);
-					}
-				}
-			}
-			else {
-				GetTileByTopLeftCorner(x, y).SetTopLeftHeight(height);
-			}
-		
-		}
+			foreach (var tileCorner in corners)
+			{
+				ChangeCornerHeight(tileCorner, height, absolute);
 
-		void SetCornerHeight(IntVector2 cornerPosition, float height)
-		{
-			SetCornerHeight(cornerPosition.X, cornerPosition.Y, height);
-		}
+				//With border tiles
+				NotifyCornerHeightChanged(GetTilesAroundCorner(tileCorner, true).ToList().AsReadOnly());
 
-		
+				//Without border tiles, so they dont leak out of the implementation
+				NotifyTileHeightsChanged(GetTilesAroundCorner(tileCorner, false).ToList().AsReadOnly());
+
+			}
+
+			graphics.ChangeCornerHeights(corners);
+		}
 
 		/// <summary>
 		/// Changes heights in the logic tiles, does not change the height in the map model
@@ -1778,40 +1711,62 @@ namespace MHUrho.WorldMap
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="height"></param>
-		void ChangeCornerHeight(int x, int y, float heightDelta)
+		void ChangeCornerHeight(int x, int y, float height, bool absolute)
 		{
 			if (IsBorderCorner(x, y)) {
 				foreach (var tile in GetTilesAroundCorner(new IntVector2(x, y), true)) {
 					if (IsBorderTile(tile)) {
 						bool left = tile.TopLeft.X == x;
 						bool top = tile.TopLeft.Y == y;
+						BorderTile btile = ((BorderTile) tile);
 						if (top && left) {
-							((BorderTile)tile).TopLeftHeight += heightDelta;
+							btile.TopLeftHeight = absolute ? height : btile.TopLeftHeight + height;
 						}
 						else if (top /* && !left*/) {
-							((BorderTile)tile).TopRightHeight += heightDelta;
+							btile.TopRightHeight = absolute ? height : btile.TopRightHeight + height;
 						}
 						else if ( /* !top && */ left) {
-							((BorderTile)tile).BottomLeftHeight += heightDelta;
+							btile.BottomLeftHeight = absolute ? height : btile.BottomLeftHeight + height;
 						}
 						else /*!top && !left*/{
-							((BorderTile)tile).BottomRightHeight += heightDelta;
+							btile.BottomRightHeight = absolute ? height : btile.BottomRightHeight + height;
 						}
 					}
 					else if (tile.TopLeft == new IntVector2(x, y)) {
-						tile.ChangeTopLeftHeight(heightDelta);
+						if (absolute)
+							tile.SetTopLeftHeight(height);
+						else
+							tile.ChangeTopLeftHeight(height);
 					}
 				}
 			}
 			else {
-				GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(heightDelta);
+				if (absolute)
+					GetTileByTopLeftCorner(x, y).SetTopLeftHeight(height);
+				else
+					GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(height);
+
 			}
 
 		}
 
-		void ChangeCornerHeight(IntVector2 cornerPosition, float heightDelta)
+		void ChangeCornerHeight(IntVector2 cornerPosition, float height, bool absolute)
 		{
-			ChangeCornerHeight(cornerPosition.X, cornerPosition.Y, heightDelta);
+			ChangeCornerHeight(cornerPosition.X, cornerPosition.Y, height, absolute);
+		}
+
+		void NotifyCornerHeightChanged(IReadOnlyCollection<ITile> changedTiles)
+		{
+			foreach (var tile in changedTiles)
+			{
+				tile.CornerHeightChange();
+			}
+			
+		}
+
+		void NotifyTileHeightsChanged(IReadOnlyCollection<ITile> changedTiles)
+		{
+			tileHeightChangeNotifier.Notify(changedTiles);
 		}
 	}
 }

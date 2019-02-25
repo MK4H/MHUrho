@@ -55,15 +55,29 @@ namespace DefaultPackage
 									MovingRangeTarget.IUser
 	{
 		class DistanceCalc : AStarNodeDistCalculator {
-			public override bool GetTime(INode source, INode target, out float time)
+
+			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			{
+				return (target - source).Length;
+			}
+
+			protected override bool GetTime(ITileNode source, ITileNode target, out float time)
+			{
+				Vector3 edgePosition = source.GetEdgePosition(target);
+				time = (edgePosition - source.Position).Length + (target.Position - edgePosition).Length;
+				return true;
+			}
+
+			protected override bool GetTime(ITileNode source, ITempNode target, out float time)
 			{
 				time = (target.Position - source.Position).Length;
 				return true;
 			}
 
-			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
+			protected override bool GetTime(ITempNode source, ITileNode target, out float time)
 			{
-				return (target - source).Length;
+				time = (target.Position - source.Position).Length;
+				return true;
 			}
 		}
 

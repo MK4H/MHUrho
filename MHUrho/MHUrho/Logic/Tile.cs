@@ -251,9 +251,14 @@ namespace MHUrho.Logic
 		/// <summary>
 		/// Is called every time any of the 4 corners of the tile change height
 		/// </summary>
-		public void CornerHeightChange() {
+		public void CornerHeightChange()
+		{
+			
 			foreach (var unit in Units) {
-				unit.SetHeight(Map.GetTerrainHeightAt(unit.XZPosition));
+				float terrainHeight = Map.GetTerrainHeightAt(unit.XZPosition);
+				if (unit.Position.Y < terrainHeight) {
+					unit.SetHeight(terrainHeight);
+				}		
 			}
 		}
 

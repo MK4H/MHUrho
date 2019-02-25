@@ -25,56 +25,58 @@ namespace MHUrho.Storage {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChFNSFVyaG9UeXBlcy5wcm90bxIOTUhVcmhvLlN0b3JhZ2UaD1VyaG9UeXBl",
-            "cy5wcm90byJdCgpTdFdheXBvaW50EisKCHBvc2l0aW9uGAEgASgLMhkuTUhV",
-            "cmhvLlN0b3JhZ2UuU3RWZWN0b3IzEgwKBHRpbWUYAiABKAISFAoMbW92ZW1l",
-            "bnRUeXBlGAMgASgFIkcKEFN0UGF0aEVudW1lcmF0b3ISJAoEcGF0aBgBIAEo",
-            "CzIWLk1IVXJoby5TdG9yYWdlLlN0UGF0aBINCgVpbmRleBgCIAEoBSI3CgZT",
-            "dFBhdGgSLQoJd2F5cG9pbnRzGAEgAygLMhouTUhVcmhvLlN0b3JhZ2UuU3RX",
-            "YXlwb2ludCLBBAoSU3REZWZhdWx0Q29tcG9uZW50EjQKC3dvcmxkV2Fsa2Vy",
-            "GAEgASgLMh0uTUhVcmhvLlN0b3JhZ2UuU3RXb3JsZFdhbGtlckgAEkQKE2Jh",
-            "bGxpc3RpY1Byb2plY3RpbGUYAiABKAsyJS5NSFVyaG8uU3RvcmFnZS5TdEJh",
-            "bGxpc3RpY1Byb2plY3RpbGVIABJEChNtb3ZpbmdNZWVsZUF0dGFja2VyGAMg",
-            "ASgLMiUuTUhVcmhvLlN0b3JhZ2UuU3RNb3ZpbmdNZWVsZUF0dGFja2VySAAS",
-            "RAoTc3RhdGljTWVlbGVBdHRhY2tlchgEIAEoCzIlLk1IVXJoby5TdG9yYWdl",
-            "LlN0U3RhdGljTWVlbGVBdHRhY2tlckgAEkAKEW1vdmluZ1JhbmdlVGFyZ2V0",
-            "GAUgASgLMiMuTUhVcmhvLlN0b3JhZ2UuU3RNb3ZpbmdSYW5nZVRhcmdldEgA",
-            "EkAKEXN0YXRpY1JhbmdlVGFyZ2V0GAYgASgLMiMuTUhVcmhvLlN0b3JhZ2Uu",
-            "U3RTdGF0aWNSYW5nZVRhcmdldEgAEiwKB3Nob290ZXIYByABKAsyGS5NSFVy",
-            "aG8uU3RvcmFnZS5TdFNob290ZXJIABI2Cgx1bml0U2VsZWN0b3IYCCABKAsy",
-            "Hi5NSFVyaG8uU3RvcmFnZS5TdFVuaXRTZWxlY3RvckgAEiwKB2NsaWNrZXIY",
-            "CSABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdENsaWNrZXJIAEILCgljb21wb25l",
-            "bnQiRgoNU3RXb3JsZFdhbGtlchIPCgdlbmFibGVkGAEgASgIEiQKBHBhdGgY",
-            "AiABKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFBhdGgiVQoVU3RCYWxsaXN0aWNQ",
-            "cm9qZWN0aWxlEg8KB2VuYWJsZWQYASABKAgSKwoIbW92ZW1lbnQYAiABKAsy",
-            "GS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMivwIKFVN0TW92aW5nTWVlbGVB",
-            "dHRhY2tlchIPCgdlbmFibGVkGAEgASgIEhcKD3NlYXJjaEZvclRhcmdldBgC",
-            "IAEoCBI5ChNzZWFyY2hSZWN0YW5nbGVTaXplGAMgASgLMhwuTUhVcmhvLlN0",
-            "b3JhZ2UuU3RJbnRWZWN0b3IyEhsKE3RpbWVCZXR3ZWVuU2VhcmNoZXMYBCAB",
-            "KAISIQoZdGltZUJldHdlZW5Qb3NpdGlvbkNoZWNrcxgFIAEoAhIaChJ0aW1l",
-            "QmV0d2VlbkF0dGFja3MYBiABKAISEAoIdGFyZ2V0SUQYByABKAUSGAoQdGlt",
-            "ZVRvTmV4dFNlYXJjaBgIIAEoAhIfChd0aW1lVG9OZXh0UG9zaXRpb25DaGVj",
-            "axgJIAEoAhIYChB0aW1lVG9OZXh0QXR0YWNrGAogASgCIvsBChVTdFN0YXRp",
-            "Y01lZWxlQXR0YWNrZXISDwoHZW5hYmxlZBgBIAEoCBIXCg9zZWFyY2hGb3JU",
-            "YXJnZXQYAiABKAgSOQoTc2VhcmNoUmVjdGFuZ2xlU2l6ZRgDIAEoCzIcLk1I",
-            "VXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIbChN0aW1lQmV0d2VlblNlYXJj",
-            "aGVzGAQgASgCEhoKEnRpbWVCZXR3ZWVuQXR0YWNrcxgFIAEoAhIQCgh0YXJn",
-            "ZXRJRBgGIAEoBRIYChB0aW1lVG9OZXh0U2VhcmNoGAcgASgCEhgKEHRpbWVU",
-            "b05leHRBdHRhY2sYCCABKAIiZQoTU3RNb3ZpbmdSYW5nZVRhcmdldBIPCgdl",
-            "bmFibGVkGAEgASgIEhIKCmluc3RhbmNlSUQYAiABKAUSKQoGb2Zmc2V0GAMg",
-            "ASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3IzImcKE1N0U3RhdGljUmFu",
-            "Z2VUYXJnZXQSDwoHZW5hYmxlZBgBIAEoCBISCgppbnN0YW5jZUlEGAIgASgF",
-            "EisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0b3Iz",
-            "IukBCglTdFNob290ZXISDwoHZW5hYmxlZBgBIAEoCBIYChBwcm9qZWN0aWxl",
-            "VHlwZUlEGAIgASgFEi8KDHNvdXJjZU9mZnNldBgDIAEoCzIZLk1IVXJoby5T",
-            "dG9yYWdlLlN0VmVjdG9yMxISCgpyYXRlT2ZGaXJlGAQgASgCEhcKD3NlYXJj",
-            "aEZvclRhcmdldBgFIAEoCBIZChF0YXJnZXRTZWFyY2hEZWxheRgGIAEoAhIR",
-            "CglzaG90RGVsYXkYByABKAISEwoLc2VhcmNoRGVsYXkYCCABKAISEAoIdGFy",
-            "Z2V0SUQYCSABKAUiIQoOU3RVbml0U2VsZWN0b3ISDwoHZW5hYmxlZBgBIAEo",
-            "CCIcCglTdENsaWNrZXISDwoHZW5hYmxlZBgBIAEoCGIGcHJvdG8z"));
+            "cy5wcm90byKbAQoKU3RXYXlwb2ludBIrCghwb3NpdGlvbhgBIAEoCzIZLk1I",
+            "VXJoby5TdG9yYWdlLlN0VmVjdG9yMxIpCgZvZmZzZXQYAiABKAsyGS5NSFVy",
+            "aG8uU3RvcmFnZS5TdFZlY3RvcjMSDAoEdGltZRgDIAEoAhIUCgxtb3ZlbWVu",
+            "dFR5cGUYBCABKAUSEQoJdGVtcG9yYXJ5GAUgASgIIkcKEFN0UGF0aEVudW1l",
+            "cmF0b3ISJAoEcGF0aBgBIAEoCzIWLk1IVXJoby5TdG9yYWdlLlN0UGF0aBIN",
+            "CgVpbmRleBgCIAEoBSI3CgZTdFBhdGgSLQoJd2F5cG9pbnRzGAEgAygLMhou",
+            "TUhVcmhvLlN0b3JhZ2UuU3RXYXlwb2ludCLBBAoSU3REZWZhdWx0Q29tcG9u",
+            "ZW50EjQKC3dvcmxkV2Fsa2VyGAEgASgLMh0uTUhVcmhvLlN0b3JhZ2UuU3RX",
+            "b3JsZFdhbGtlckgAEkQKE2JhbGxpc3RpY1Byb2plY3RpbGUYAiABKAsyJS5N",
+            "SFVyaG8uU3RvcmFnZS5TdEJhbGxpc3RpY1Byb2plY3RpbGVIABJEChNtb3Zp",
+            "bmdNZWVsZUF0dGFja2VyGAMgASgLMiUuTUhVcmhvLlN0b3JhZ2UuU3RNb3Zp",
+            "bmdNZWVsZUF0dGFja2VySAASRAoTc3RhdGljTWVlbGVBdHRhY2tlchgEIAEo",
+            "CzIlLk1IVXJoby5TdG9yYWdlLlN0U3RhdGljTWVlbGVBdHRhY2tlckgAEkAK",
+            "EW1vdmluZ1JhbmdlVGFyZ2V0GAUgASgLMiMuTUhVcmhvLlN0b3JhZ2UuU3RN",
+            "b3ZpbmdSYW5nZVRhcmdldEgAEkAKEXN0YXRpY1JhbmdlVGFyZ2V0GAYgASgL",
+            "MiMuTUhVcmhvLlN0b3JhZ2UuU3RTdGF0aWNSYW5nZVRhcmdldEgAEiwKB3No",
+            "b290ZXIYByABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFNob290ZXJIABI2Cgx1",
+            "bml0U2VsZWN0b3IYCCABKAsyHi5NSFVyaG8uU3RvcmFnZS5TdFVuaXRTZWxl",
+            "Y3RvckgAEiwKB2NsaWNrZXIYCSABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdENs",
+            "aWNrZXJIAEILCgljb21wb25lbnQiRgoNU3RXb3JsZFdhbGtlchIPCgdlbmFi",
+            "bGVkGAEgASgIEiQKBHBhdGgYAiABKAsyFi5NSFVyaG8uU3RvcmFnZS5TdFBh",
+            "dGgiVQoVU3RCYWxsaXN0aWNQcm9qZWN0aWxlEg8KB2VuYWJsZWQYASABKAgS",
+            "KwoIbW92ZW1lbnQYAiABKAsyGS5NSFVyaG8uU3RvcmFnZS5TdFZlY3RvcjMi",
+            "vwIKFVN0TW92aW5nTWVlbGVBdHRhY2tlchIPCgdlbmFibGVkGAEgASgIEhcK",
+            "D3NlYXJjaEZvclRhcmdldBgCIAEoCBI5ChNzZWFyY2hSZWN0YW5nbGVTaXpl",
+            "GAMgASgLMhwuTUhVcmhvLlN0b3JhZ2UuU3RJbnRWZWN0b3IyEhsKE3RpbWVC",
+            "ZXR3ZWVuU2VhcmNoZXMYBCABKAISIQoZdGltZUJldHdlZW5Qb3NpdGlvbkNo",
+            "ZWNrcxgFIAEoAhIaChJ0aW1lQmV0d2VlbkF0dGFja3MYBiABKAISEAoIdGFy",
+            "Z2V0SUQYByABKAUSGAoQdGltZVRvTmV4dFNlYXJjaBgIIAEoAhIfChd0aW1l",
+            "VG9OZXh0UG9zaXRpb25DaGVjaxgJIAEoAhIYChB0aW1lVG9OZXh0QXR0YWNr",
+            "GAogASgCIvsBChVTdFN0YXRpY01lZWxlQXR0YWNrZXISDwoHZW5hYmxlZBgB",
+            "IAEoCBIXCg9zZWFyY2hGb3JUYXJnZXQYAiABKAgSOQoTc2VhcmNoUmVjdGFu",
+            "Z2xlU2l6ZRgDIAEoCzIcLk1IVXJoby5TdG9yYWdlLlN0SW50VmVjdG9yMhIb",
+            "ChN0aW1lQmV0d2VlblNlYXJjaGVzGAQgASgCEhoKEnRpbWVCZXR3ZWVuQXR0",
+            "YWNrcxgFIAEoAhIQCgh0YXJnZXRJRBgGIAEoBRIYChB0aW1lVG9OZXh0U2Vh",
+            "cmNoGAcgASgCEhgKEHRpbWVUb05leHRBdHRhY2sYCCABKAIiZQoTU3RNb3Zp",
+            "bmdSYW5nZVRhcmdldBIPCgdlbmFibGVkGAEgASgIEhIKCmluc3RhbmNlSUQY",
+            "AiABKAUSKQoGb2Zmc2V0GAMgASgLMhkuTUhVcmhvLlN0b3JhZ2UuU3RWZWN0",
+            "b3IzImcKE1N0U3RhdGljUmFuZ2VUYXJnZXQSDwoHZW5hYmxlZBgBIAEoCBIS",
+            "CgppbnN0YW5jZUlEGAIgASgFEisKCHBvc2l0aW9uGAMgASgLMhkuTUhVcmhv",
+            "LlN0b3JhZ2UuU3RWZWN0b3IzIukBCglTdFNob290ZXISDwoHZW5hYmxlZBgB",
+            "IAEoCBIYChBwcm9qZWN0aWxlVHlwZUlEGAIgASgFEi8KDHNvdXJjZU9mZnNl",
+            "dBgDIAEoCzIZLk1IVXJoby5TdG9yYWdlLlN0VmVjdG9yMxISCgpyYXRlT2ZG",
+            "aXJlGAQgASgCEhcKD3NlYXJjaEZvclRhcmdldBgFIAEoCBIZChF0YXJnZXRT",
+            "ZWFyY2hEZWxheRgGIAEoAhIRCglzaG90RGVsYXkYByABKAISEwoLc2VhcmNo",
+            "RGVsYXkYCCABKAISEAoIdGFyZ2V0SUQYCSABKAUiIQoOU3RVbml0U2VsZWN0",
+            "b3ISDwoHZW5hYmxlZBgBIAEoCCIcCglTdENsaWNrZXISDwoHZW5hYmxlZBgB",
+            "IAEoCGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::MHUrho.Storage.UrhoTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWaypoint), global::MHUrho.Storage.StWaypoint.Parser, new[]{ "Position", "Time", "MovementType" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StWaypoint), global::MHUrho.Storage.StWaypoint.Parser, new[]{ "Position", "Offset", "Time", "MovementType", "Temporary" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPathEnumerator), global::MHUrho.Storage.StPathEnumerator.Parser, new[]{ "Path", "Index" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StPath), global::MHUrho.Storage.StPath.Parser, new[]{ "Waypoints" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MHUrho.Storage.StDefaultComponent), global::MHUrho.Storage.StDefaultComponent.Parser, new[]{ "WorldWalker", "BallisticProjectile", "MovingMeeleAttacker", "StaticMeeleAttacker", "MovingRangeTarget", "StaticRangeTarget", "Shooter", "UnitSelector", "Clicker" }, new[]{ "Component" }, null, null),
@@ -119,8 +121,10 @@ namespace MHUrho.Storage {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public StWaypoint(StWaypoint other) : this() {
       Position = other.position_ != null ? other.Position.Clone() : null;
+      Offset = other.offset_ != null ? other.Offset.Clone() : null;
       time_ = other.time_;
       movementType_ = other.movementType_;
+      temporary_ = other.temporary_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -140,8 +144,19 @@ namespace MHUrho.Storage {
       }
     }
 
+    /// <summary>Field number for the "offset" field.</summary>
+    public const int OffsetFieldNumber = 2;
+    private global::MHUrho.Storage.StVector3 offset_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::MHUrho.Storage.StVector3 Offset {
+      get { return offset_; }
+      set {
+        offset_ = value;
+      }
+    }
+
     /// <summary>Field number for the "time" field.</summary>
-    public const int TimeFieldNumber = 2;
+    public const int TimeFieldNumber = 3;
     private float time_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public float Time {
@@ -152,13 +167,24 @@ namespace MHUrho.Storage {
     }
 
     /// <summary>Field number for the "movementType" field.</summary>
-    public const int MovementTypeFieldNumber = 3;
+    public const int MovementTypeFieldNumber = 4;
     private int movementType_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int MovementType {
       get { return movementType_; }
       set {
         movementType_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "temporary" field.</summary>
+    public const int TemporaryFieldNumber = 5;
+    private bool temporary_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Temporary {
+      get { return temporary_; }
+      set {
+        temporary_ = value;
       }
     }
 
@@ -176,8 +202,10 @@ namespace MHUrho.Storage {
         return true;
       }
       if (!object.Equals(Position, other.Position)) return false;
+      if (!object.Equals(Offset, other.Offset)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Time, other.Time)) return false;
       if (MovementType != other.MovementType) return false;
+      if (Temporary != other.Temporary) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -185,8 +213,10 @@ namespace MHUrho.Storage {
     public override int GetHashCode() {
       int hash = 1;
       if (position_ != null) hash ^= Position.GetHashCode();
+      if (offset_ != null) hash ^= Offset.GetHashCode();
       if (Time != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Time);
       if (MovementType != 0) hash ^= MovementType.GetHashCode();
+      if (Temporary != false) hash ^= Temporary.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -204,13 +234,21 @@ namespace MHUrho.Storage {
         output.WriteRawTag(10);
         output.WriteMessage(Position);
       }
+      if (offset_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Offset);
+      }
       if (Time != 0F) {
-        output.WriteRawTag(21);
+        output.WriteRawTag(29);
         output.WriteFloat(Time);
       }
       if (MovementType != 0) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(32);
         output.WriteInt32(MovementType);
+      }
+      if (Temporary != false) {
+        output.WriteRawTag(40);
+        output.WriteBool(Temporary);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -223,11 +261,17 @@ namespace MHUrho.Storage {
       if (position_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
       }
+      if (offset_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Offset);
+      }
       if (Time != 0F) {
         size += 1 + 4;
       }
       if (MovementType != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(MovementType);
+      }
+      if (Temporary != false) {
+        size += 1 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -246,11 +290,20 @@ namespace MHUrho.Storage {
         }
         Position.MergeFrom(other.Position);
       }
+      if (other.offset_ != null) {
+        if (offset_ == null) {
+          offset_ = new global::MHUrho.Storage.StVector3();
+        }
+        Offset.MergeFrom(other.Offset);
+      }
       if (other.Time != 0F) {
         Time = other.Time;
       }
       if (other.MovementType != 0) {
         MovementType = other.MovementType;
+      }
+      if (other.Temporary != false) {
+        Temporary = other.Temporary;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -270,12 +323,23 @@ namespace MHUrho.Storage {
             input.ReadMessage(position_);
             break;
           }
-          case 21: {
+          case 18: {
+            if (offset_ == null) {
+              offset_ = new global::MHUrho.Storage.StVector3();
+            }
+            input.ReadMessage(offset_);
+            break;
+          }
+          case 29: {
             Time = input.ReadFloat();
             break;
           }
-          case 24: {
+          case 32: {
             MovementType = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            Temporary = input.ReadBool();
             break;
           }
         }

@@ -39,7 +39,7 @@ namespace MHUrho.PathFinding {
 			priorityQueue = new FastPriorityQueue<AStarNode>(map.Width * map.Length / 4);
 
 			FillNodeMap();
-			map.TileHeightChanged += TileHeightChanged;
+			map.TileHeightChangeNotifier.TileHeightsChangedCol += TileHeightsChanged;
 		}
 
 		
@@ -109,6 +109,12 @@ namespace MHUrho.PathFinding {
 			return new BuildingNode(building, position, tag, this);
 		}
 
+
+		public ITempNode CreateTempNode(Vector3 position)
+		{
+			return new TempNode(position, Map);
+		}
+
 		//		public Path GetPathToIntersection(Vector2 source,
 		//										Path targetPath,
 		//										CanGoToNeighbour canPassFromTo,
@@ -154,9 +160,11 @@ namespace MHUrho.PathFinding {
 			return distCalc.GetMinimalAproxTime(source.XZ(), targetNode.Position.XZ());
 		}
 
-		void TileHeightChanged(ITile tile)
+		void TileHeightsChanged(IReadOnlyCollection<ITile> tiles)
 		{
-			GetTileNode(tile).FixHeights();
+			foreach (var tile in tiles) {
+				GetTileNode(tile).FixHeights();
+			}
 		}
 
 		AStarNode FindPathInNodes(Vector3 source,
@@ -221,9 +229,9 @@ namespace MHUrho.PathFinding {
 			nodes.Reverse();
 
 			List<Waypoint> waypoints = new List<Waypoint>();
-			waypoints.Add(new Waypoint(new TempNode(source), 0, MovementType.None));
+			waypoints.Add(new Waypoint(new TempNode(source, Map), 0, MovementType.None));
 			for (int i = 1; i < nodes.Count; i++) {
-				waypoints.Add(nodes[i].GetWaypoint());
+				waypoints.AddRange(nodes[i].GetWaypoints(distCalc));
 			}
 
 			switch (waypoints[1].MovementType) {
@@ -246,7 +254,7 @@ namespace MHUrho.PathFinding {
 					break;
 			}
 
-			return Path.CreateFrom(waypoints);
+			return Path.CreateFrom(waypoints, Map);
 		}
 
 
@@ -267,7 +275,7 @@ namespace MHUrho.PathFinding {
 
 		Path StartIsFinish(AStarNode target, Vector3 source)
 		{
-			TempNode sourceNode = new TempNode(source);
+			TempNode sourceNode = new TempNode(source, Map);
 			float time;
 			//Check for total equality, which would probably break the user code in getTime
 			if (sourceNode.Position == target.Position) {
@@ -279,7 +287,7 @@ namespace MHUrho.PathFinding {
 			
 			List<Waypoint> waypoints = new List<Waypoint>{new Waypoint(sourceNode, 0.0f, MovementType.None),
 															new Waypoint(target, time, MovementType.Linear)};
-			return Path.CreateFrom(waypoints);
+			return Path.CreateFrom(waypoints, Map);
 		}
 
 		void Reset()

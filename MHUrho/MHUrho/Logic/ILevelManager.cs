@@ -34,6 +34,8 @@ namespace MHUrho.Logic {
 
 		bool EditorMode { get; }
 
+		bool IsEnding { get; }
+
 		IEnumerable<IUnit> Units { get; }
 
 		IEnumerable<IPlayer> Players { get; }

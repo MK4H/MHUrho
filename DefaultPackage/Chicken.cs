@@ -54,69 +54,58 @@ namespace DefaultPackage
 									WorldWalker.IUser, 
 									MovingRangeTarget.IUser{
 
-		class PathVisitor : NodeVisitor {
-			readonly ChickenInstance chicken;
-
-			public PathVisitor(ChickenInstance chicken)
+		class DistanceCalc : AStarNodeDistCalculator
+		{
+			protected override bool GetTime(ITileNode source, ITileNode target, out float time)
 			{
-				this.chicken = chicken;
+				Vector3 edgePosition = source.GetEdgePosition(target);
+				time = GetTime(source.Position, edgePosition) + GetTime(edgePosition, target.Position);
+				return true;
 			}
 
-			public override bool Visit(ITempNode source, IBuildingNode target, out float time)
+			protected override bool GetTime(ITempNode source, IBuildingNode target, out float time)
 			{
 				time = GetTime(source.Position, target.Position);
 				return true;
 			}
 
-			public override bool Visit(ITempNode source, ITileEdgeNode target, out float time)
+			protected override bool GetTime(ITempNode source, ITempNode target, out float time)
 			{
 				time = GetTime(source.Position, target.Position);
 				return true;
 			}
 
-			public override bool Visit(ITempNode source, ITileNode target, out float time)
+			protected override bool GetTime(IBuildingNode source, ITempNode target, out float time)
 			{
 				time = GetTime(source.Position, target.Position);
 				return true;
 			}
 
-			public override bool Visit(ITileEdgeNode source, ITileNode target, out float time)
+			protected override bool GetTime(ITempNode source, ITileNode target, out float time)
 			{
 				time = GetTime(source.Position, target.Position);
 				return true;
 			}
 
-			public override bool Visit(IBuildingNode source, IBuildingNode target, out float time)
+			protected override bool GetTime(IBuildingNode source, IBuildingNode target, out float time)
 			{
 				time = GetTime(source.Position, target.Position);
 				return true;
 			}
 
-			public override bool Visit(ITileNode source, IBuildingNode target, out float time)
+			protected override bool GetTime(ITileNode source, IBuildingNode target, out float time)
 			{
 				time = 1;
 				return true;
 			}
 
-			public override bool Visit(ITileNode source, ITileEdgeNode target, out float time)
+			protected override bool GetTime(ITileNode source, ITempNode target, out float time)
 			{
 				time = GetTime(source.Position, target.Position);
 				return true;
 			}
 
-			public override bool Visit(ITileEdgeNode source, IBuildingNode target, out float time)
-			{
-				time = 1;
-				return true;
-			}
-
-			public override bool Visit(IBuildingNode source, ITileEdgeNode target, out float time)
-			{
-				time = 1;
-				return true;
-			}
-
-			public override bool Visit(IBuildingNode source, ITileNode target, out float time)
+			protected override bool GetTime(IBuildingNode source, ITileNode target, out float time)
 			{
 				time = 1;
 				return true;
@@ -125,7 +114,8 @@ namespace DefaultPackage
 			float GetTime(Vector3 source, Vector3 to)
 			{
 				//Check for complete equality, which breaks the code below
-				if (source == to) {
+				if (source == to)
+				{
 					return 0;
 				}
 
@@ -136,22 +126,6 @@ namespace DefaultPackage
 
 				//TODO: Maybe cache the Length in the Edge
 				return (diff.Length / 2) + angle;
-			}
-		}
-
-		class DistanceCalc : AStarNodeDistCalculator
-		{
-
-			readonly PathVisitor pathVisitor;
-
-			public DistanceCalc(PathVisitor pathVisitor)
-			{
-				this.pathVisitor = pathVisitor;
-			}
-
-			public override bool GetTime(INode source, INode target, out float time)
-			{
-				return source.Accept(pathVisitor, target, out time);
 			}
 
 			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
@@ -167,7 +141,7 @@ namespace DefaultPackage
 
 		bool dying;
 
-		readonly PathVisitor pathVisitor;
+		readonly DistanceCalc distCalc;
 
 		float hp;
 		HealthBar healthbar;
@@ -182,7 +156,7 @@ namespace DefaultPackage
 		public ChickenInstance(ILevelManager level, IUnit unit)
 			:base(level, unit)
 		{
-			pathVisitor = new PathVisitor(this);
+			distCalc = new DistanceCalc();
 		}
 
 		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
@@ -199,7 +173,7 @@ namespace DefaultPackage
 			MovingRangeTarget.CreateNew(this, level, new Vector3(0, 0.5f, 0));
 			
 			unit.AlwaysVertical = true;
-			pathVisitor = new PathVisitor(this);
+			distCalc = new DistanceCalc();
 
 			RegisterEvents(Walker, Shooter, selector);
 
@@ -290,7 +264,7 @@ namespace DefaultPackage
 
 		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
 		{
-			return new DistanceCalc(pathVisitor);
+			return distCalc;
 		}
 
 		void OnMovementStarted(WorldWalker walker) {
