@@ -248,7 +248,14 @@ namespace MHUrho.Logic
 				return null;
 			}
 
-			var newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, initRotation, player);
+			IUnit newUnit = null;
+			try {
+				newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, initRotation, player);
+			}
+			catch (CreationException) {
+				return null;
+			}
+
 			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
@@ -270,7 +277,14 @@ namespace MHUrho.Logic
 				return null;
 			}
 
-			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), this, topLeft, initRotation, player);
+			IBuilding newBuilding;
+			try {
+				newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), this, topLeft, initRotation, player);
+			}
+			catch (CreationException) {
+				return null;
+			}
+
 			RegisterEntity(newBuilding);
 			buildings.Add(newBuilding.ID,newBuilding);
 			players[player.ID].AddBuilding(newBuilding);
@@ -287,15 +301,20 @@ namespace MHUrho.Logic
 		/// <param name="player"></param>
 		/// <param name="target"></param>
 		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
-		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, IRangeTarget target) {
+		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, IRangeTarget target)
+		{
 
-			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, initRotation, target);
-
-			if (newProjectile != null) {
-				RegisterEntity(newProjectile);
-				projectiles.Add(newProjectile.ID, newProjectile);
+			IProjectile newProjectile;
+			try {
+				newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, initRotation, target);
+			}
+			catch (CreationException) {
+				return null;
 			}
 			
+			RegisterEntity(newProjectile);
+			projectiles.Add(newProjectile.ID, newProjectile);
+				
 			return newProjectile;
 		}
 

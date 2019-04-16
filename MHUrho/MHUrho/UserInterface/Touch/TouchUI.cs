@@ -11,7 +11,7 @@ using Urho;
 using Urho.Gui;
 using Urho.Urho2D;
 
-namespace MHUrho.UserInterface
+namespace MHUrho.UserInterface.Touch
 {
 	public class TouchUI : GameUIManager,IDisposable {
 

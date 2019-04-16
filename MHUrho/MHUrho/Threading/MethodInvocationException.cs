@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.Threading
 {
-	class MethodInvocationException : Exception
+	class MethodInvocationException : ApplicationException
 	{
 		public MethodInvocationException(string message, Exception innerException)
 			:base(message, innerException)

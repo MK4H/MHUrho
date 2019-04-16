@@ -110,20 +110,35 @@ namespace MHUrho.Logic
 												Quaternion rotation,
 												ProjectileType type)
 			{
+				Node projectileNode;
+				try {
+					projectileNode = type.Assets.Instantiate(level, position, rotation);
+					projectileNode.Name = NodeName;
+				}
+				catch (Exception e) {
+					string message = $"There was an Exception while creating a projectile: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new CreationException(message, e);
+				}
 
-				Node projectileNode = type.Assets.Instantiate(level, position, rotation);
-				projectileNode.Name = NodeName;
+				try {
+					ComponentSetup.SetupComponentsOnNode(projectileNode, level);
 
-				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
+					var projectile = new Projectile(ID, level, type, player);
+					projectileNode.AddComponent(projectile);
 
-				var projectile = new Projectile(ID, level, type, player);
-				projectileNode.AddComponent(projectile);
+					projectileNode.NodeCollisionStart += projectile.CollisionHandler;
 
-				projectileNode.NodeCollisionStart += projectile.CollisionHandler;
+					projectile.ProjectilePlugin = type.GetNewInstancePlugin(projectile, level);
+					return projectile;
+				}
+				catch (Exception e) {
+					string message = $"There was an Exception while creating a projectile: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new CreationException(message, e);
+				}
 
-				projectile.ProjectilePlugin = type.GetNewInstancePlugin(projectile, level);
-
-				return projectile;
+				
 			}
 
 			public static StProjectile Save(Projectile projectile)
@@ -135,6 +150,8 @@ namespace MHUrho.Logic
 										Rotation = projectile.Node.Rotation.ToStQuaternion(),
 										PlayerID = projectile.Player.ID,
 										TypeID = projectile.ProjectileType.ID,
+										FaceDir = projectile.FaceInTheDirectionOfMovement,
+										Trigger = projectile.TriggerCollisions,
 										UserPlugin = new PluginData()
 									};
 
@@ -168,7 +185,11 @@ namespace MHUrho.Logic
 
 				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
 
-				loadingProjectile = new Projectile(instanceID, level, type);
+				loadingProjectile = new Projectile(instanceID, level, type)
+									{
+										FaceInTheDirectionOfMovement = storedProjectile.FaceDir,
+										TriggerCollisions = storedProjectile.Trigger
+									};
 				projectileNode.AddComponent(loadingProjectile);
 
 
@@ -210,13 +231,6 @@ namespace MHUrho.Logic
 
 		public ProjectileType ProjectileType { get; private set; }
 
-		/// <summary>
-		/// Cast it to your own type, the one returned by <see cref="ProjectileTypePlugin.CreateNewInstance(ILevelManager, Projectile)"/>
-		/// for this type with name <see cref="ProjectileTypePlugin.IsMyType(string)"/>
-		/// </summary>
-		
-
-
 		public override Vector3 Position {
 			get => Node.Position;
 			protected set => Node.Position = value;
@@ -243,12 +257,7 @@ namespace MHUrho.Logic
 		/// </summary>
 		public bool FaceInTheDirectionOfMovement { get; set; }
 
-		public bool TriggerCollisions {
-			get => rigidBody.Enabled;
-			set => rigidBody.Enabled = value;
-		}
-
-		RigidBody rigidBody;
+		public bool TriggerCollisions { get; set; }
 
 		protected Projectile(int ID, ILevelManager level, ProjectileType type, IPlayer player)
 			:base(ID,level)
@@ -257,6 +266,7 @@ namespace MHUrho.Logic
 			this.Player = player;
 			this.ProjectileType = type;
 			this.FaceInTheDirectionOfMovement = true;
+			this.TriggerCollisions = true;
 		}
 
 		protected Projectile(int ID,
@@ -267,6 +277,7 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 			this.ProjectileType = type;
 			this.FaceInTheDirectionOfMovement = true;
+			this.TriggerCollisions = true;
 		}
 
 
@@ -293,7 +304,15 @@ namespace MHUrho.Logic
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
-			ProjectilePlugin.ReInitialize(level);
+
+			try {
+				ProjectilePlugin.ReInitialize(level);
+			}
+			catch (Exception e) {
+				string message = $"There was an Exception while reinitializing a projectile: {e.Message}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new CreationException(message, e);
+			}
 		}
 
 		
@@ -314,10 +333,7 @@ namespace MHUrho.Logic
 			Level.RemoveProjectile(this);
 			if (!ProjectileType.ProjectileDespawn(this)) {
 				//If dispose was called before plugin was loaded, we need dispose to work
-				Plugin?.Dispose();
-				Node.Remove();
-				Node.Dispose();
-				Dispose();
+				HardRemove();
 			}
 			else {
 				Node.Enabled = false;
@@ -332,6 +348,18 @@ namespace MHUrho.Logic
 		public override T Accept<T>(IEntityVisitor<T> visitor)
 		{
 			return visitor.Visit(this);
+		}
+
+		public void HardRemove()
+		{
+			if (!RemovedFromLevel) {
+				RemoveFromLevel();
+			}
+
+			Plugin?.Dispose();
+			Node.Remove();
+			Node.Dispose();
+			Dispose();
 		}
 
 		public bool Move(Vector3 movement)
@@ -379,9 +407,11 @@ namespace MHUrho.Logic
 
 		void CollisionHandler(NodeCollisionStartEventArgs e)
 		{
-			IEntity hitEntity = Level.GetEntity(e.OtherNode);
-			hitEntity.HitBy(this);
-			ProjectilePlugin.OnEntityHit(hitEntity);
+			if (TriggerCollisions) {
+				IEntity hitEntity = Level.GetEntity(e.OtherNode);
+				hitEntity.HitBy(this);
+				ProjectilePlugin.OnEntityHit(hitEntity);
+			}
 		}
 
 	}

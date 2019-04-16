@@ -62,6 +62,8 @@ message StProjectile {
 	int32 playerID = 5;
 	PluginData userPlugin = 6;
 	repeated StDefaultComponent defaultComponents = 7;
+	bool faceDir = 8;
+	bool trigger = 9;
 }
 
 message StBuilding {

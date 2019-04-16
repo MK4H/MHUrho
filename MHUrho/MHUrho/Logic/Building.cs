@@ -124,23 +124,45 @@ namespace MHUrho.Logic
 					return null;
 				}
 
-				var newBuilding = new Building(id, level, topLeftCorner, type, player);
-
-				Vector2 center = newBuilding.Rectangle.Center();
-
+				var rect = new IntRect(topLeftCorner.X,
+										topLeftCorner.Y,
+										topLeftCorner.X + type.Size.X,
+										topLeftCorner.Y + type.Size.Y);
+				Vector2 center = rect.Center();
 				Vector3 position = new Vector3(center.X,
 												level.Map.GetTerrainHeightAt(center),
 												center.Y);
 
-				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
-				buildingNode.AddComponent(newBuilding);
 
-				ComponentSetup.SetupComponentsOnNode(buildingNode, level);
+				Node buildingNode;
+				try {
+					buildingNode = type.Assets.Instantiate(level, position, rotation);
+				}
+				catch (Exception e)
+				{
+					string message = $"There was an Exception while creating a new building: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new CreationException(message, e);
+				}
 
 
-				//TODO: Catch if the plugin creation failes, dispose and return null
-				newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
-				return newBuilding;
+				try {
+					var newBuilding = new Building(id, level, rect, type, player);
+					buildingNode.AddComponent(newBuilding);
+
+					ComponentSetup.SetupComponentsOnNode(buildingNode, level);
+
+					newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
+					return newBuilding;
+				}
+				catch (Exception e) {
+					buildingNode.Remove();
+					buildingNode.Dispose();
+					string message = $"There was an Exception while creating a new building: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new CreationException(message, e);
+				}
+				
 			}
 
 			public static StBuilding Save(Building building) {
@@ -165,25 +187,30 @@ namespace MHUrho.Logic
 			}
 
 			public void StartLoading() {
-				//TODO: Check arguments - node cant have more than one Building component
 				if (type.ID != storedBuilding.TypeID) {
 					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
 				}
 
-				loadingBuilding = new Building(level, type, storedBuilding);
-
-				var center = loadingBuilding.Rectangle.Center();
+				IntVector2 topLeftCorner = storedBuilding.Location.ToIntVector2();
+				var rect = new IntRect(topLeftCorner.X,
+										topLeftCorner.Y,
+										topLeftCorner.X + type.Size.X,
+										topLeftCorner.Y + type.Size.Y);
+				Vector2 center = rect.Center();		
 				Vector3 position = new Vector3(center.X,
 												level.Map.GetTerrainHeightAt(center),
 												center.Y);
 				Quaternion rotation = storedBuilding.Rotation.ToQuaternion();
+
 				
 				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
 				buildingNode.AddComponent(loadingBuilding);
-
+				
+				loadingBuilding = new Building(storedBuilding.Id, level, rect, type);
 				loadingBuilding.BuildingPlugin = type.GetInstancePluginForLoading(loadingBuilding, level);
 
-				foreach (var defaultComponent in storedBuilding.DefaultComponents) {
+				foreach (var defaultComponent in storedBuilding.DefaultComponents)
+				{
 					var componentLoader =
 						level.DefaultComponentFactory
 							.StartLoadingComponent(defaultComponent,
@@ -193,6 +220,8 @@ namespace MHUrho.Logic
 					componentLoaders.Add(componentLoader);
 					loadingBuilding.AddComponent(componentLoader.Component);
 				}
+
+				
 			}
 
 
@@ -254,29 +283,22 @@ namespace MHUrho.Logic
 
 		readonly ITile[] tiles;
 
-		protected Building(int id, ILevelManager level, IntVector2 topLeftCorner, BuildingType type, IPlayer player) 
+		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type, IPlayer player) 
 			:base(id, level)
 		{
 
 			this.BuildingType = type;
 			this.Player = player;
-			this.Rectangle = new IntRect(topLeftCorner.X,
-										 topLeftCorner.Y,
-										 topLeftCorner.X + type.Size.X,
-										 topLeftCorner.Y + type.Size.Y);
-			this.tiles = GetTiles();
+			this.Rectangle = rectangle;
+			this.tiles = AllocTiles();
 		}
 
-		protected Building(ILevelManager level, BuildingType buildingType, StBuilding storedBuilding) 
-			:base(storedBuilding.Id, level)
+		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type) 
+			:base(id, level)
 		{
-			this.BuildingType = buildingType;
-			var topLeft = storedBuilding.Location.ToIntVector2();
-			this.Rectangle = new IntRect(topLeft.X,
-										 topLeft.Y,
-										 topLeft.X + buildingType.Size.X,
-										 topLeft.Y + buildingType.Size.Y);
-			this.tiles = GetTiles();
+			this.BuildingType = type;
+			this.Rectangle = rectangle;
+			this.tiles = AllocTiles();
 		}
 
 
@@ -369,7 +391,7 @@ namespace MHUrho.Logic
 		}
 
 
-		ITile[] GetTiles() {
+		ITile[] AllocTiles() {
 			var newTiles = new ITile[BuildingType.Size.X * BuildingType.Size.Y];
 
 			for (int y = 0; y < BuildingType.Size.Y; y++) {

@@ -129,25 +129,39 @@ namespace MHUrho.Logic
 			/// <param name="rotation">Initial rotation of the unit</param>
 			/// <param name="player">owner of the unit</param>
 			/// <returns>the unit component, already added to the node</returns>
+			/// <exception cref="CreationException">Throws an exception when unit creation fails</exception>
 			public static Unit CreateNew(int id, UnitType type, ILevelManager level, ITile tile, Quaternion rotation, IPlayer player) {
-				//TODO: Check if there is already a Unit component on this node, if there is, throw exception
-
 				Vector3 position = new Vector3(tile.Center.X,
 												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
 												tile.Center.Y);
+				Node unitNode = null;
+				try {
+					unitNode = type.Assets.Instantiate(level, position, rotation);
+					unitNode.Name = NodeName;
+				}
+				catch (Exception e) {
+					string message = $"There was an Exception while creating a new unit: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new CreationException(message, e);
+				}
+				
 
-				Node unitNode = type.Assets.Instantiate(level, position, rotation);
-				unitNode.Name = NodeName;
+				try {
+					ComponentSetup.SetupComponentsOnNode(unitNode, level);
+					var unit = new Unit(id, level, type, tile, player, unitNode);
+					unitNode.AddComponent(unit);
 
+					unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
+					return unit;
+				}
+				catch (Exception e) {
+					unitNode.Remove();
+					unitNode.Dispose();
 
-				ComponentSetup.SetupComponentsOnNode(unitNode, level);
-
-				var unit = new Unit(id, level, type, tile, player, unitNode);
-				unitNode.AddComponent(unit);
-
-				unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
-
-				return unit;
+					string message = $"There was an Exception while creating a new unit: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new CreationException(message, e);
+				}			
 			}
 
 			public static StUnit Save(Unit unit) {

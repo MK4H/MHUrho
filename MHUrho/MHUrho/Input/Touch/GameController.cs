@@ -6,6 +6,7 @@ using MHUrho.Logic;
 using MHUrho.Control;
 using MHUrho.Packaging;
 using MHUrho.UserInterface;
+using MHUrho.UserInterface.Touch;
 using Urho;
 using Urho.Gui;
 using Urho.Urho2D;

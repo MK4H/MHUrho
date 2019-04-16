@@ -124,26 +124,27 @@ namespace MHUrho.Logic
 
 
 		Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, Quaternion initRotation) {
-			Projectile projectile = null;
+
 
 			if (projectilePool.Count != 0) {
 				//NOTE: Add some clever algorithm to manage projectile count
-				projectile = projectilePool.Dequeue();
-				projectile.ReInitialize(newID, level, player, position);
+				var projectile = projectilePool.Dequeue();
 
-			}
-			else {
-				projectile = Projectile.CreateNew(newID,
-												 level,
-												 player,
-												 position,
-												 initRotation,
-												 this);
-
-
+				try {
+					projectile.ReInitialize(newID, level, player, position);
+					return projectile;
+				}
+				catch (CreationException) {
+					projectile.HardRemove();
+				}
 			}
 
-			return projectile;
+			return Projectile.CreateNew(newID,
+										 level,
+										 player,
+										 position,
+										 initRotation,
+										 this);
 		}
 	}
 }
