@@ -9,6 +9,7 @@ using MHUrho.Storage;
 using MHUrho.Control;
 using MHUrho.UnitComponents;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.WorldMap;
 using Urho;
@@ -118,7 +119,7 @@ namespace DefaultPackage
 					var spiralPoint = new Spiral(spawnPoint).GetEnumerator();
 					spiralPoint.MoveNext();
 					for (int i = 0; i < 1; i++, spiralPoint.MoveNext()) {
-						IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(spiralPoint.Current), Player);
+						IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(spiralPoint.Current), Quaternion.Identity, Player);
 						chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.UnitPlugin));
 					}
 
@@ -182,7 +183,7 @@ namespace DefaultPackage
 
 			foreach (var point in new Spiral(spawnPoint)) {
 				if (Map.GetTileByMapLocation(point).Units.Count == 0) {
-					IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(point), Player);
+					IUnit newChicken = Level.SpawnUnit(type.Chicken, Map.GetTileByMapLocation(point), Quaternion.Identity, Player);
 					chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.UnitPlugin));
 					break;
 				}

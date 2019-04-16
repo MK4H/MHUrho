@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using MHUrho.Control;
 using MHUrho.EntityInfo;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
@@ -35,9 +36,11 @@ namespace DefaultPackage
 			IUnit[] workers = new IUnit[2];
 			workers[0] = level.SpawnUnit(workerType,
 										 level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(0, -1)),
+										 Quaternion.Identity,
 										 building.Player);
 			workers[1] = level.SpawnUnit(workerType,
 										 level.Map.GetTileByTopLeftCorner(building.Rectangle.TopLeft() + new IntVector2(-1, 0)),
+										 Quaternion.Identity,
 										 building.Player);
 
 			return new TestBuildingInstance(level, building, workers);

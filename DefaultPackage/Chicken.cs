@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using MHUrho.Control;
 using MHUrho.EntityInfo;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
