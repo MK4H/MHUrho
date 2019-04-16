@@ -58,7 +58,7 @@ namespace MHUrho.EditorTools
 
 			gameUI.RemoveTool(tool);
 
-			//TODO: Maybe leave disposing for the caller
+			//ALT: Maybe leave disposing for the caller
 			tool.Dispose();
 			return true;
 		}

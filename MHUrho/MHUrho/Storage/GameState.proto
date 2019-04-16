@@ -17,10 +17,12 @@ message StLevel {
 }
 
 message StTile {
-	repeated int32 unitIDs = 2;
-	int32 tileTypeID = 3;
-	StIntVector2 topLeftPosition = 4;
-	float height = 5;
+	int32 tileTypeID = 1;
+	StIntVector2 topLeftPosition = 2;
+	float height = 3;
+	int32 buildingID = 4;	
+	repeated int32 unitIDs = 5;
+
 }
 
 message StBorderTile {
@@ -37,12 +39,17 @@ message StMapTarget {
 	StVector3 position = 2;
 }
 
+message StResource {
+	int32 id = 1;
+	double amount = 2;
+}
+
 message StUnit {
 	int32 id = 1;
 	int32 typeID = 2;
 	StVector3 position = 3;
-	int32 playerID = 4;
-	int32 targetUnitID = 5;
+	StQuaternion rotation = 4;
+	int32 playerID = 5;
 	PluginData userPlugin = 6;
 	repeated StDefaultComponent defaultComponents = 7;
 }
@@ -51,16 +58,18 @@ message StProjectile {
 	int32 id = 1;
 	int32 typeID = 2;
 	StVector3 position = 3;
-	int32 playerID = 4;
-	PluginData userPlugin = 5;
-	repeated StDefaultComponent defaultComponents = 6;
+	StQuaternion rotation = 4;
+	int32 playerID = 5;
+	PluginData userPlugin = 6;
+	repeated StDefaultComponent defaultComponents = 7;
 }
 
 message StBuilding {
 	int32 id = 1;
 	int32 typeID = 2;
 	StIntVector2 location = 3;
-	int32 playerID = 4;
+	StQuaternion rotation = 4;
+	int32 playerID = 5;
 	PluginData userPlugin = 6;
 	repeated StDefaultComponent defaultComponents = 7;
 }
@@ -76,10 +85,11 @@ message StPlayer {
 	int32 teamID = 2;
 	int32 typeID = 3;
 	int32 insigniaID = 4;
-	//TODO: Redundant references both ways, could just store it in building/unit and connect it from there
+	//NOTE: Redundant references both ways, could just store it in building/unit and connect it from there
 	repeated int32 unitIDs = 5;
 	repeated int32 buildingIDs = 6;
-	PluginData userPlugin = 7;
+	repeated StResource resources = 7;
+	PluginData userPlugin = 8;
 }
 
 message StMap {

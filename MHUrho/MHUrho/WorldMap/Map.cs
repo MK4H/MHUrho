@@ -9,6 +9,7 @@ using Urho;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.UnitComponents;
 using MHUrho.PathFinding;
@@ -241,11 +242,11 @@ namespace MHUrho.WorldMap
 				throw new InvalidOperationException("Cannot add unit to Border tile");
 			}
 
-			void ITile.RemoveUnit(IUnit unit) {
+			bool ITile.RemoveUnit(IUnit unit) {
 				throw new InvalidOperationException("Cannot remove unit from Border tile");
 			}
 
-			public void AddBuilding(IBuilding building) {
+			public void SetBuilding(IBuilding building) {
 				throw new InvalidOperationException("Cannot add building to Border tile");
 			}
 

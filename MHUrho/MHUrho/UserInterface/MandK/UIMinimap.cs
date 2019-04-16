@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;

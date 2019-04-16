@@ -42,16 +42,18 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 
 		public override void OnMouseDown(MouseButtonDownEventArgs args)
 		{
-			var raycastResult = input.CursorRaycast();
-			var vertex = map.RaycastToVertex(raycastResult);
-			if (vertex.HasValue) {
-				//TODO: this is slow, make it faster
-				if (!verticies.Remove(vertex.Value)) {
-					verticies.Add(vertex.Value);
-				}
-
-				map.HighlightCornerList(SelectedVerticies, Color.Green);
+			List<RayQueryResult> raycastResult = input.CursorRaycast();
+			IntVector2? vertex = map.RaycastToVertex(raycastResult);
+			if (!vertex.HasValue) {
+				return;
 			}
+
+			//NOTE: this is slow, make it faster
+			if (!verticies.Remove(vertex.Value)) {
+				verticies.Add(vertex.Value);
+			}
+
+			map.HighlightCornerList(SelectedVerticies, Color.Green);
 		}
 	}
 }

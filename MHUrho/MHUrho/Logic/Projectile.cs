@@ -7,6 +7,7 @@ using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
@@ -106,19 +107,17 @@ namespace MHUrho.Logic
 												ILevelManager level,
 												IPlayer player,
 												Vector3 position,
+												Quaternion rotation,
 												ProjectileType type)
 			{
 
-				//TODO: Maybe pass rotation as an argument
-				Node projectileNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				Node projectileNode = type.Assets.Instantiate(level, position, rotation);
 				projectileNode.Name = NodeName;
 
 				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
 
 				var projectile = new Projectile(ID, level, type, player);
 				projectileNode.AddComponent(projectile);
-
-				//AddBasicComponents(projectile, level);
 
 				projectileNode.NodeCollisionStart += projectile.CollisionHandler;
 
@@ -133,6 +132,7 @@ namespace MHUrho.Logic
 									{
 										Id = projectile.ID,
 										Position = projectile.Node.Position.ToStVector3(),
+										Rotation = projectile.Node.Rotation.ToStQuaternion(),
 										PlayerID = projectile.Player.ID,
 										TypeID = projectile.ProjectileType.ID,
 										UserPlugin = new PluginData()
@@ -158,11 +158,12 @@ namespace MHUrho.Logic
 				}
 
 				Vector3 position = storedProjectile.Position.ToVector3();
+				Quaternion rotation = storedProjectile.Rotation.ToQuaternion();
 
 				var instanceID = storedProjectile.Id;
 
-				//TODO: Store rotation
-				Node projectileNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+
+				Node projectileNode = type.Assets.Instantiate(level, position, rotation);
 				projectileNode.Name = NodeName;
 
 				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
@@ -278,9 +279,10 @@ namespace MHUrho.Logic
 											ILevelManager level,
 											IPlayer player,
 											Vector3 position,
+											Quaternion rotation,
 											ProjectileType type)
 		{
-			return Loader.CreateNew(ID, level, player, position, type);
+			return Loader.CreateNew(ID, level, player, position, rotation, type);
 		}
 
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {

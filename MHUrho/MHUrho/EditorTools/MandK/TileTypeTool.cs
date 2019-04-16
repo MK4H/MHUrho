@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
@@ -93,7 +94,7 @@ namespace MHUrho.EditorTools.MandK
 		}
 
 		public override void Dispose() {
-			//TODO: Maybe dont disable, or change implementation of disable to not delete currently visible buttons
+			//ALT: Maybe don't disable, or change implementation of disable to not delete currently visible buttons
 			Disable();
 			foreach (var pair in tileTypes) {
 				pair.Key.Toggled -= OnTileTypeToggled;
@@ -124,7 +125,6 @@ namespace MHUrho.EditorTools.MandK
 
 		void Highlight_SquareChanged(Base.StaticSquareChangedArgs args)
 		{
-			//TODO: Dont know if i need this
 			if (ui.UIHovering) return;
 
 			if (checkBoxes.Selected != null && mouseButtonDown) {

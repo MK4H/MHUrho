@@ -71,7 +71,7 @@ namespace MHUrho.CameraMovement
 
 		public override void Zoom(float zoom)
 		{
-			//TODO: maybe move forward/backward
+			//ALT: maybe move forward/backward
 		}
 
 		public override void Reset()

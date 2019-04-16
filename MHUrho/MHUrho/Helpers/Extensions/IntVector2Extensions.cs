@@ -4,9 +4,9 @@ using System.Text;
 using Urho;
 using MHUrho.Storage;
 
-namespace MHUrho.Helpers
+namespace MHUrho.Helpers.Extensions
 {
-	public static class IntVector2Extension
+	public static class IntVector2Extensions
 	{
 		public static StIntVector2 ToStIntVector2(this IntVector2 intVector2) 
 		{

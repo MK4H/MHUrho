@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.WorldMap;
 using Urho;
 

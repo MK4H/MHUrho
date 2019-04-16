@@ -4,7 +4,7 @@ using System.Text;
 using Urho;
 using MHUrho.Storage;
 
-namespace MHUrho.Helpers
+namespace MHUrho.Helpers.Extensions
 {
     public static class ColorExtensions
     {

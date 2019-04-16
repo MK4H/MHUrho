@@ -11,6 +11,7 @@ using MHUrho.Storage;
 using Urho;
 using Urho.Urho2D;
 using Google.Protobuf;
+using MHUrho.Helpers.Extensions;
 
 namespace MHUrho.Packaging
 {

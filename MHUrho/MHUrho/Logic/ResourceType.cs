@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Storage;
 using Urho;

@@ -13,7 +13,7 @@ using Urho.Physics;
 
 namespace MHUrho.Logic
 {
-	//TODO: Make this an arrow type
+
 	public class ProjectileType : ILoadableType, IDisposable {
 
 		public int ID { get; private set; }
@@ -61,8 +61,13 @@ namespace MHUrho.Logic
 		}
 
 
-		internal IProjectile ShootProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, IRangeTarget target) {
-			var projectile = GetProjectile(newID, level, player, position);
+		internal IProjectile ShootProjectile(int newID, 
+											ILevelManager level, 
+											IPlayer player, 
+											Vector3 position, 
+											Quaternion initRotation, 
+											IRangeTarget target) {
+			var projectile = GetProjectile(newID, level, player, position, initRotation);
 
 			if (!projectile.ProjectilePlugin.ShootProjectile(target)) {
 				projectile.RemoveFromLevel();
@@ -76,9 +81,10 @@ namespace MHUrho.Logic
 										ILevelManager level,
 										IPlayer player, 
 										Vector3 position,
+										Quaternion initRotation,
 										Vector3 movement) {
 
-			var projectile = GetProjectile(newID, level, player, position);
+			var projectile = GetProjectile(newID, level, player, position, initRotation);
 
 			if (!projectile.ProjectilePlugin.ShootProjectile(movement)) {
 				projectile.RemoveFromLevel();
@@ -117,11 +123,11 @@ namespace MHUrho.Logic
 
 
 
-		Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position) {
+		Projectile GetProjectile(int newID, ILevelManager level, IPlayer player, Vector3 position, Quaternion initRotation) {
 			Projectile projectile = null;
 
 			if (projectilePool.Count != 0) {
-				//TODO: Some clever algorithm to manage projectile count
+				//NOTE: Add some clever algorithm to manage projectile count
 				projectile = projectilePool.Dequeue();
 				projectile.ReInitialize(newID, level, player, position);
 
@@ -131,6 +137,7 @@ namespace MHUrho.Logic
 												 level,
 												 player,
 												 position,
+												 initRotation,
 												 this);
 
 

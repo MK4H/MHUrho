@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Storage;
 using Urho;
 using Urho.Resources;

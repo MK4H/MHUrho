@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.StartupManagement;
 using Urho;
 using Urho.Gui;

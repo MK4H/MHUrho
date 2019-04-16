@@ -8,6 +8,7 @@ using MHUrho.Storage;
 using MHUrho.Control;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.PathFinding;
 using MHUrho.UnitComponents;
 using MHUrho.PathFinding.AStar;
@@ -60,12 +61,12 @@ namespace NUnit.Tests {
 					throw new NotImplementedException();
 				}
 
-				public void RemoveUnit(IUnit unit)
+				public bool RemoveUnit(IUnit unit)
 				{
 					throw new NotImplementedException();
 				}
 
-				public void AddBuilding(IBuilding building)
+				public void SetBuilding(IBuilding building)
 				{
 					throw new NotImplementedException();
 				}
@@ -197,12 +198,12 @@ namespace NUnit.Tests {
 					throw new NotImplementedException();
 				}
 
-				public void RemoveUnit(IUnit unit)
+				public bool RemoveUnit(IUnit unit)
 				{
 					throw new NotImplementedException();
 				}
 
-				public void AddBuilding(IBuilding building)
+				public void SetBuilding(IBuilding building)
 				{
 					throw new NotImplementedException();
 				}

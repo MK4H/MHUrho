@@ -8,6 +8,7 @@ using Google.Protobuf;
 using MHUrho.Control;
 using MHUrho.EntityInfo;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
@@ -122,19 +123,20 @@ namespace MHUrho.Logic
 			/// Also adds the unit as PassingUnit to <paramref name="tile"/>
 			/// </summary>
 			/// <param name="id">The unique identifier of the unit, must be unique among other units</param>
+			/// <param name="level">LevelManager of the level into which the unit is spawning</param>
 			/// <param name="type">type of the unit</param>
 			/// <param name="tile">tile where the unit will spawn</param>
+			/// <param name="rotation">Initial rotation of the unit</param>
 			/// <param name="player">owner of the unit</param>
 			/// <returns>the unit component, already added to the node</returns>
-			public static Unit CreateNew(int id, UnitType type, ILevelManager level, ITile tile, IPlayer player) {
+			public static Unit CreateNew(int id, UnitType type, ILevelManager level, ITile tile, Quaternion rotation, IPlayer player) {
 				//TODO: Check if there is already a Unit component on this node, if there is, throw exception
 
 				Vector3 position = new Vector3(tile.Center.X,
 												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
 												tile.Center.Y);
 
-				//TODO: Rotation
-				Node unitNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				Node unitNode = type.Assets.Instantiate(level, position, rotation);
 				unitNode.Name = NodeName;
 
 
@@ -153,6 +155,7 @@ namespace MHUrho.Logic
 								{
 									Id = unit.ID,
 									Position = unit.Position.ToStVector3(),
+									Rotation = unit.Node.Rotation.ToStQuaternion(),
 									PlayerID = unit.Player.ID,
 									TypeID = unit.UnitType.ID,
 									UserPlugin = new PluginData()
@@ -183,9 +186,9 @@ namespace MHUrho.Logic
 				}
 
 				Vector3 position = storedUnit.Position.ToVector3();
-				//TODO: Store rotation
+				Quaternion rotation = storedUnit.Rotation.ToQuaternion();
 
-				Node centerNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				Node centerNode = type.Assets.Instantiate(level, position, rotation);
 				centerNode.Name = NodeName;
 
 				ComponentSetup.SetupComponentsOnNode(centerNode, level);
@@ -333,9 +336,10 @@ namespace MHUrho.Logic
 										UnitType type,
 										ILevelManager level,
 										ITile tile,
+										Quaternion rotation,
 										IPlayer player)
 		{
-			return Loader.CreateNew(id, type, level, tile, player);
+			return Loader.CreateNew(id, type, level, tile, rotation, player);
 		}
 
 		public StUnit Save() {

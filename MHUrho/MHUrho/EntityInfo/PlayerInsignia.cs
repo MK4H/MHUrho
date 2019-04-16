@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Urho;
-using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 
 namespace MHUrho.EntityInfo

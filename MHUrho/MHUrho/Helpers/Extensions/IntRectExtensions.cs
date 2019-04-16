@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Urho;
 
-namespace MHUrho.Helpers
+namespace MHUrho.Helpers.Extensions
 {
-	public static class IntRectExtension
+	public static class IntRectExtensions
 	{
 		/// <summary>
 		/// Gets Top Left corner from IntRect, copies the IntRectangle to do this

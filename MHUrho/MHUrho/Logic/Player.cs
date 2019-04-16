@@ -90,6 +90,9 @@ namespace MHUrho.Logic
 											from building in buildingType.Value
 											select building.ID);
 
+				storedPlayer.Resources.Add(from resourceType in player.resources
+											select new StResource{ Id = resourceType.Key.ID, Amount = resourceType.Value});
+
 				storedPlayer.UserPlugin = new PluginData();
 				player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.level));
 
@@ -121,6 +124,12 @@ namespace MHUrho.Logic
 					loadingPlayer.AddBuilding(level.GetBuilding(buildingID));
 				}
 
+				foreach (var resource in storedPlayer.Resources) {
+					//TODO: Try get
+					ResourceType resourceType = level.PackageManager.ActivePackage.GetResourceType(resource.Id);
+					loadingPlayer.ChangeResourceAmount(resourceType, resource.Amount);
+				}
+
 				//If the stored data is from the same plugin type as the new type, load the data
 				// otherwise we created new fresh plugin instance, that most likely does not understand the stored data
 				if (type != null && type.ID == storedPlayer.TypeID) {
@@ -147,7 +156,7 @@ namespace MHUrho.Logic
 
 		readonly Dictionary<BuildingType, List<IBuilding>> buildings;
 
-		readonly Dictionary<ResourceType, int> resources;
+		readonly Dictionary<ResourceType, double> resources;
 
 		readonly PlayerType type;
 
@@ -160,7 +169,7 @@ namespace MHUrho.Logic
 			this.TeamID = teamID;
 			units = new Dictionary<UnitType, List<IUnit>>();
 			buildings = new Dictionary<BuildingType, List<IBuilding>>();
-			resources = new Dictionary<ResourceType, int>();
+			resources = new Dictionary<ResourceType, double>();
 			this.level = level;
 			this.Insignia = insignia;
 		}
@@ -271,10 +280,10 @@ namespace MHUrho.Logic
 			}
 		}
 
-		public void ChangeResourceAmount(ResourceType resourceType, int amount)
+		public void ChangeResourceAmount(ResourceType resourceType, double amount)
 		{
 			//if key does not exist, tryGetValue sets the out variable to default(), which here is zero
-			resources.TryGetValue(resourceType, out int currentValue);
+			resources.TryGetValue(resourceType, out double currentValue);
 			resources[resourceType] = currentValue + amount;
 		}
 
@@ -318,9 +327,9 @@ namespace MHUrho.Logic
 			return buildings.TryGetValue(buildingType, out var buildingList) ? buildingList : new List<IBuilding>();
 		}
 
-		public int GetResourceAmount(ResourceType resourceType)
+		public double GetResourceAmount(ResourceType resourceType)
 		{
-			resources.TryGetValue(resourceType, out int count);
+			resources.TryGetValue(resourceType, out double count);
 			return count;
 		}
 

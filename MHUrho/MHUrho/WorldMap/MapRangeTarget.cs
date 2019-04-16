@@ -5,6 +5,7 @@ using MHUrho.Logic;
 using MHUrho.Storage;
 using MHUrho.UnitComponents;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.PathFinding;
 using MHUrho.PathFinding.AStar;
 using Urho;

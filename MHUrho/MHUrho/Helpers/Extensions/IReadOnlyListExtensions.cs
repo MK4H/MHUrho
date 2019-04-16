@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MHUrho.Helpers
+namespace MHUrho.Helpers.Extensions
 {
     public static class ReadOnlyListExtensions
     {

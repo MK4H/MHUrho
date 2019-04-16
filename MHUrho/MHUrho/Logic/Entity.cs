@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Plugins;
 using MHUrho.UnitComponents;

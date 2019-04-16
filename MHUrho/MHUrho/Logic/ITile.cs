@@ -83,9 +83,10 @@ namespace MHUrho.Logic
 		/// Removes a unit from this tile
 		/// </summary>
 		/// <param name="unit">the unit to remove</param>
-		void RemoveUnit(IUnit unit);
+		/// <returns>True if the unit was successfully removed, false if it was not present on this tile</returns>
+		bool RemoveUnit(IUnit unit);
 
-		void AddBuilding(IBuilding building);
+		void SetBuilding(IBuilding building);
 
 		void RemoveBuilding(IBuilding building);
 

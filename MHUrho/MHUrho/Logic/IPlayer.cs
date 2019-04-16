@@ -22,7 +22,7 @@ namespace MHUrho.Logic {
 
 		IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType buildingType);
 
-		int GetResourceAmount(ResourceType resourceType);
+		double GetResourceAmount(ResourceType resourceType);
 
 		IEnumerable<IPlayer> GetEnemyPlayers();
 
@@ -38,6 +38,6 @@ namespace MHUrho.Logic {
 
 		bool RemoveBuilding(IBuilding building);
 
-		void ChangeResourceAmount(ResourceType resourceType, int change);
+		void ChangeResourceAmount(ResourceType resourceType, double change);
 	}
 }

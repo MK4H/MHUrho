@@ -4,9 +4,9 @@ using System.Text;
 using MHUrho.Storage;
 using Urho;
 
-namespace MHUrho.Helpers
+namespace MHUrho.Helpers.Extensions
 {
-	public static class Vector2Extension
+	public static class Vector2Extensions
 	{
 		public static Vector3 XZ(this Vector3 vector) {
 			return new Vector3(vector.X, 0, vector.Z);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;

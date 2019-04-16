@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using Urho;
 using MHUrho.Logic;
 using MHUrho.PathFinding;

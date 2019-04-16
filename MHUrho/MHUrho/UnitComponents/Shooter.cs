@@ -7,6 +7,7 @@ using MHUrho.Logic;
 using MHUrho.Storage;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Plugins;
 using MHUrho.WorldMap;
 using Urho.Physics;
@@ -257,7 +258,7 @@ namespace MHUrho.UnitComponents
 
 			//Rotate the SourceOffset according to Entity world rotation
 			Vector3 worldOffset = Quaternion.FromRotationTo(Vector3.UnitZ, Entity.Forward) * SourceOffset;
-			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + worldOffset, Player, Target);
+			var projectile = Level.SpawnProjectile(projectileType, Entity.Position + worldOffset, Quaternion.Identity, Player, Target);
 			//Could not fire on the target
 			if (projectile == null) {
 				var previousTarget = Target;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
@@ -44,7 +45,6 @@ namespace MHUrho.EditorTools.MandK
 				}
 
 				var checkBox = ui.SelectionBar.CreateCheckBox();
-				//TODO: Style
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnBuildingTypeToggled;
 				checkBox.Texture = PackageManager.Instance.ActivePackage.BuildingIconTexture;
@@ -126,7 +126,7 @@ namespace MHUrho.EditorTools.MandK
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
 			if (buildingType.CanBuildIn(topLeft, bottomRight, Level)) {
-				LevelManager.CurrentLevel.BuildBuilding(buildingTypes[checkBoxes.Selected], topLeft, input.Player);
+				LevelManager.CurrentLevel.BuildBuilding(buildingTypes[checkBoxes.Selected], topLeft, Quaternion.Identity, input.Player);
 			}
 		}
 

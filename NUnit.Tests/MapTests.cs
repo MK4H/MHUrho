@@ -66,11 +66,11 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public void RemoveUnit(IUnit unit) {
+			public bool RemoveUnit(IUnit unit) {
 				throw new NotImplementedException();
 			}
 
-			public void AddBuilding(IBuilding building) {
+			public void SetBuilding(IBuilding building) {
 				throw new NotImplementedException();
 			}
 

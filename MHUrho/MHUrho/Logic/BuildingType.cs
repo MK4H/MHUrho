@@ -7,6 +7,7 @@ using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using Urho;
 using Urho.Resources;
 using Urho.Urho2D;
@@ -47,7 +48,6 @@ namespace MHUrho.Logic
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 			Package = package;
-			//TODO: Maybe remove
 			Size = XmlHelpers.GetIntVector2(xml.Element(BuildingTypeXml.Inst.Size));
 
 			XElement pathElement = xml.Element(BuildingTypeXml.Inst.AssemblyPath);
@@ -67,10 +67,11 @@ namespace MHUrho.Logic
 
 		internal IBuilding BuildNewBuilding(int buildingID,
 										 ILevelManager level, 
-										 IntVector2 topLeft, 
+										 IntVector2 topLeft,
+										 Quaternion initRotation,
 										 IPlayer player) {
 
-			return Building.CreateNew(buildingID, topLeft, this, player, level);
+			return Building.CreateNew(buildingID, topLeft, initRotation, this, player, level);
 		}
 
 		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {

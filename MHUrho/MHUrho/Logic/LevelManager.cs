@@ -239,15 +239,16 @@ namespace MHUrho.Logic
 		/// </summary>
 		/// <param name="unitType">The unit to be added</param>
 		/// <param name="tile">Tile to spawn the unit at</param>
+		/// <param name="initRotation">Initial rotation of the spawned unit.</param>
 		/// <param name="player">owner of the new unit</param>
 		/// <returns>The new unit if a unit was spawned, or null if no unit was spawned</returns>
-		public IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player) {
+		public IUnit SpawnUnit(UnitType unitType, ITile tile, Quaternion initRotation, IPlayer player) {
 
 			if (!unitType.CanSpawnAt(tile)) {
 				return null;
 			}
 
-			var newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, player);
+			var newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, initRotation, player);
 			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
@@ -257,18 +258,19 @@ namespace MHUrho.Logic
 		}
 
 		/// <summary>
-		/// 
+		/// Creates new building in the world
 		/// </summary>
-		/// <param name="buildingType"></param>
-		/// <param name="topLeft"></param>
-		/// <param name="player"></param>
+		/// <param name="buildingType">Type of the new building</param>
+		/// <param name="topLeft">Coordinates of the top leftmost tile the building will occupy</param>
+		/// <param name="initRotation">Initial rotation of the building when it is created</param>
+		/// <param name="player">Owner of the building</param>
 		/// <returns>The new building if building was built, or null if the building could not be built</returns>
-		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player) {
+		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player) {
 			if (!buildingType.CanBuildIn(buildingType.GetBuildingTilesRectangle(topLeft), this)) {
 				return null;
 			}
 
-			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), this, topLeft, player);
+			var newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), this, topLeft, initRotation, player);
 			RegisterEntity(newBuilding);
 			buildings.Add(newBuilding.ID,newBuilding);
 			players[player.ID].AddBuilding(newBuilding);
@@ -281,12 +283,13 @@ namespace MHUrho.Logic
 		/// </summary>
 		/// <param name="projectileType"></param>
 		/// <param name="position"></param>
+		/// <param name="initRotation"></param>
 		/// <param name="player"></param>
 		/// <param name="target"></param>
 		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
-		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target) {
+		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, IRangeTarget target) {
 
-			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, target);
+			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, initRotation, target);
 
 			if (newProjectile != null) {
 				RegisterEntity(newProjectile);
@@ -301,12 +304,13 @@ namespace MHUrho.Logic
 		/// </summary>
 		/// <param name="projectileType"></param>
 		/// <param name="position"></param>
+		/// <param name="initRotation"></param>
 		/// <param name="player"></param>
 		/// <param name="movement"></param>
 		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
-		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement) {
+		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, Vector3 movement) {
 
-			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, movement);
+			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, initRotation, movement);
 			if (newProjectile != null) {
 				RegisterEntity(newProjectile);
 				projectiles.Add(newProjectile.ID, newProjectile);

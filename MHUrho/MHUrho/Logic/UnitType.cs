@@ -89,20 +89,22 @@ namespace MHUrho.Logic
 		}
 
 		/// <summary>
-		/// Creates new instance of this unit type positioned at <paramref name="tile"/>
+		/// Creates new instance of this unit type positioned at <paramref name="tile"/>.
 		/// </summary>
-		/// <param name="unitID">identifier unique between units</param>
-		/// <param name="level">Level where the unit is being created</param>
-		/// <param name="tile">tile where the unit will spawn</param>
-		/// <param name="player">owner of the unit</param>
-		/// <returns>New unit of this type</returns>
+		/// <param name="unitID">identifier unique between units.</param>
+		/// <param name="level">Level where the unit is being created.</param>
+		/// <param name="tile">Tile where the unit will spawn.</param>
+		/// <param name="initRotation">Initial rotation of the unit after it is created.</param>
+		/// <param name="player">Owner of the unit.</param>
+		/// <returns>New unit of this type.</returns>
 		internal IUnit CreateNewUnit(int unitID,
 								ILevelManager level,
 								ITile tile,
+								Quaternion initRotation,
 								IPlayer player) {
 
 
-			return Unit.CreateNew(unitID, this, level, tile, player);
+			return Unit.CreateNew(unitID, this, level, tile, initRotation, player);
 		}
 
 

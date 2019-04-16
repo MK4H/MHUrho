@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using MHUrho.Packaging;
 using Urho;
 
-namespace MHUrho.Helpers
+namespace MHUrho.Helpers.Extensions
 {
 	public static class XElementExtensions
 	{

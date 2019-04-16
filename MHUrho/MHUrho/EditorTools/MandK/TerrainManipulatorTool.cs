@@ -153,7 +153,6 @@ namespace MHUrho.EditorTools.MandK {
 
 		void OnCameraMove(CameraMovedEventArgs args)
 		{
-			//TODO: Dont know if this is right
 			if (ui.UIHovering) return;
 
 			manipulator?.OnCameraMove(args);

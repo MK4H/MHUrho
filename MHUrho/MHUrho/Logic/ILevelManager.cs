@@ -63,13 +63,13 @@ namespace MHUrho.Logic {
 
 		void SaveTo(Stream stream, bool leaveOpen = false);
 
-		IUnit SpawnUnit(UnitType unitType, ITile tile, IPlayer player);
+		IUnit SpawnUnit(UnitType unitType, ITile tile, Quaternion initRotation, IPlayer player);
 
-		IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, IPlayer player);
+		IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player);
 
-		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, IRangeTarget target);
+		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, IRangeTarget target);
 
-		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, IPlayer player, Vector3 movement);
+		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, Vector3 movement);
 
 		bool RemoveUnit(IUnit unit);
 

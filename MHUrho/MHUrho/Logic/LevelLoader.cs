@@ -309,8 +309,7 @@ namespace MHUrho.Logic
 
 						MyGame.InvokeOnMainSafe(CreateCamera);
 
-						//TODO: Maybe give each its own subsection watcher
-						//TODO: Add percentage updates
+						//ALT: Maybe give each its own subsection watcher
 						MyGame.InvokeOnMainSafe(LoadUnits);
 						MyGame.InvokeOnMainSafe(LoadBuildings);
 						MyGame.InvokeOnMainSafe(LoadProjectiles);
@@ -422,7 +421,7 @@ namespace MHUrho.Logic
 
 				void CreateCamera()
 				{
-					//TODO:Maybe Save camera position
+					//ALT:Maybe Save camera position
 					LoadCamera(Level, new Vector2(10, 10));
 				}
 

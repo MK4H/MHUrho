@@ -15,29 +15,18 @@ namespace MHUrho.UserInterface
 {
 	public class TouchUI : GameUIManager,IDisposable {
 
-
-		readonly GameController touchInputCtl;
-
-		IPlayer Player => touchInputCtl.Player;
-
-		UIElement selectionBar;
-
-		Dictionary<UIElement, TileType> tileTypeButtons;
-		UIElement selected;
-
-
 		public TouchUI(GameController gameTouchController)
 			:base(gameTouchController.Level)
 		{
-			this.touchInputCtl = gameTouchController;
+
 		}
 
 		public void Dispose() {
-			selectionBar.Remove();
+
 		}
 
-		public override bool ToolSelectionEnabled { get; }
-		public override bool PlayerSelectionEnabled { get; }
+		public override bool ToolSelectionEnabled { get; } = false;
+		public override bool PlayerSelectionEnabled { get; } = false;
 
 		public override void AddTool(Tool tool) {
 			throw new NotImplementedException();
@@ -104,31 +93,6 @@ namespace MHUrho.UserInterface
 
 		public override void HideUI() {
 			throw new NotImplementedException();
-		}
-
-
-
-		void SelectionBar_HoverBegin(HoverBeginEventArgs obj)
-		{
-			touchInputCtl.UIPressed = true;
-		}
-
-		void Button_Pressed(PressedEventArgs e)
-		{
-			selected?.SetColor(Color.White);
-			if (selected != e.Element) {
-				selected = e.Element;
-				e.Element.SetColor(Color.Gray);
-			}
-			else {
-				//DESELECT
-				selected = null;
-			}
-		}
-
-		void UI_Pressed(PressedEventArgs e)
-		{
-			touchInputCtl.UIPressed = true;
 		}
 	}
 }

@@ -61,42 +61,6 @@ namespace MHUrho.Input.Touch
 		}
 
 		public MenuController() {
-			//TODO: TEMPORARY, probably move to UIManager or something
-
-			var style = PackageManager.Instance.GetXmlFile("UI/DefaultStyle.xml", true);
-
-			var button = UI.Root.CreateButton("StartButton");
-			button.SetStyleAuto(style);
-			button.Size = new IntVector2(100, 100);
-			button.Position = new IntVector2(0, 0);
-			button.Pressed += Button_Pressed;
-			button.SetColor(Color.Green);
-
-			button = UI.Root.CreateButton("SaveButton");
-			button.SetStyleAuto(style);
-			button.Size = new IntVector2(100, 100);
-			button.Position = new IntVector2(0, 200);
-			button.Pressed += Button_Pressed;
-			button.SetColor(Color.Yellow);
-
-			button = UI.Root.CreateButton("LoadButton");
-			button.SetStyleAuto(style);
-			button.Size = new IntVector2(100, 100);
-			button.Position = new IntVector2(0, 400);
-			button.Pressed += Button_Pressed;
-			button.SetColor(Color.Blue);
-
-			button = UI.Root.CreateButton("EndButton");
-			button.SetStyleAuto(style);
-			button.Size = new IntVector2(100, 100);
-			button.Position = new IntVector2(0, 600);
-			button.Pressed += Button_Pressed;
-			button.SetColor(Color.Red);
-		}
-
-		//TODO: TEMPORARY, probably move to UIManager or something
-		void Button_Pressed(PressedEventArgs obj)
-		{
 			throw new NotImplementedException();
 		}
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.WorldMap;

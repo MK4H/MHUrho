@@ -5,6 +5,7 @@ using System.Text;
 using MHUrho.Control;
 using Urho;
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
@@ -115,6 +116,7 @@ namespace MHUrho.Logic
 			/// <returns>Null if it is not possible to build the building there, new Building if it is possible</returns>
 			public static Building CreateNew(int id,
 											IntVector2 topLeftCorner,
+											Quaternion rotation,
 											BuildingType type,
 											IPlayer player,
 											ILevelManager level) {
@@ -122,7 +124,6 @@ namespace MHUrho.Logic
 					return null;
 				}
 
-				//TODO: Redo building building
 				var newBuilding = new Building(id, level, topLeftCorner, type, player);
 
 				Vector2 center = newBuilding.Rectangle.Center();
@@ -131,7 +132,7 @@ namespace MHUrho.Logic
 												level.Map.GetTerrainHeightAt(center),
 												center.Y);
 
-				Node buildingNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
 				buildingNode.AddComponent(newBuilding);
 
 				ComponentSetup.SetupComponentsOnNode(buildingNode, level);
@@ -148,6 +149,7 @@ namespace MHUrho.Logic
 													TypeID = building.BuildingType.ID,
 													PlayerID = building.Player.ID,
 													Location = building.TopLeft.ToStIntVector2(),
+													Rotation = building.Node.Rotation.ToStQuaternion(),
 													UserPlugin = new PluginData()
 												};
 				building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin, building.Level));
@@ -174,9 +176,9 @@ namespace MHUrho.Logic
 				Vector3 position = new Vector3(center.X,
 												level.Map.GetTerrainHeightAt(center),
 												center.Y);
-
-				//TODO: Save rotation
-				Node buildingNode = type.Assets.Instantiate(level, position, Quaternion.Identity);
+				Quaternion rotation = storedBuilding.Rotation.ToQuaternion();
+				
+				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
 				buildingNode.AddComponent(loadingBuilding);
 
 				loadingBuilding.BuildingPlugin = type.GetInstancePluginForLoading(loadingBuilding, level);
@@ -250,7 +252,7 @@ namespace MHUrho.Logic
 
 		public BuildingInstancePlugin BuildingPlugin { get; private set; }
 
-		ITile[] tiles;
+		readonly ITile[] tiles;
 
 		protected Building(int id, ILevelManager level, IntVector2 topLeftCorner, BuildingType type, IPlayer player) 
 			:base(id, level)
@@ -285,11 +287,12 @@ namespace MHUrho.Logic
 
 		public static Building CreateNew(int id,
 										IntVector2 topLeftCorner,
+										Quaternion rotation,
 										BuildingType type,
 										IPlayer player,
 										ILevelManager level)
 		{
-			return Loader.CreateNew(id, topLeftCorner, type, player, level);
+			return Loader.CreateNew(id, topLeftCorner, rotation, type, player, level);
 		}
 
 		public StBuilding Save() {
@@ -373,7 +376,7 @@ namespace MHUrho.Logic
 				for (int x = 0; x < BuildingType.Size.X; x++) {
 					var tile = Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
 					newTiles[GetTileIndex(x, y)] = tile;
-					tile.AddBuilding(this);
+					tile.SetBuilding(this);
 				}
 			}
 

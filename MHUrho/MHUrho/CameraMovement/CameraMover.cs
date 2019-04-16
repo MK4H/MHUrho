@@ -7,6 +7,7 @@ using Urho;
 using Urho.IO;
 
 using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 
@@ -270,7 +271,7 @@ namespace MHUrho.CameraMovement
 
 		protected override void OnUpdate(float timeStep)
 		{
-			//TODO: Probably isnt needed, had a problem with 0 timeStep ticks
+			//NOTE: Probably isn't needed, had a problem with 0 timeStep ticks
 			if (timeStep <= 0) {
 				return;
 			}

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using MHUrho.Control;
 using MHUrho.Packaging;
-using MHUrho.Helpers;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 using Urho;
@@ -43,12 +43,14 @@ namespace MHUrho.Logic
 								{
 									TopLeftPosition = tile.TopLeft.ToStIntVector2(),
 									Height = tile.TopLeftHeight,
-									TileTypeID = tile.Type.ID
+									TileTypeID = tile.Type.ID,
+									BuildingID = tile.Building?.ID ?? 0
 								};
 
-				foreach (var passingUnit in tile.Units) {
-					storedTile.UnitIDs.Add(passingUnit.ID);
+				foreach (var unit in tile.Units) {
+					storedTile.UnitIDs.Add(unit.ID);
 				}
+
 
 				return storedTile;
 				
@@ -82,10 +84,10 @@ namespace MHUrho.Logic
 					Tile.units.Add(level.GetUnit(unit));
 				}
 
-				//TODO: Connect buildings
-				//foreach (var building in storage.Buil) {
 
-				//}
+				if (storedTile.BuildingID != 0) {
+					Tile.Building = level.GetBuilding(storedTile.BuildingID);
+				} 
 
 			}
 
@@ -101,7 +103,8 @@ namespace MHUrho.Logic
 		/// </summary>
 		public IReadOnlyList<IUnit> Units => units ?? new List<IUnit>();
 
-		public IBuilding Building{ get; private set;}
+		//We enforce one building per tile to make GetHeightAt easier
+		public IBuilding Building { get; private set; }
 
 
 		/// <summary>
@@ -154,8 +157,6 @@ namespace MHUrho.Logic
 		/// List of units present on this tile, is NULL if there are no units on this tile
 		/// </summary>
 		List<IUnit> units;
-
-
 		
 		protected Tile(StTile storedTile, IMap map) {
 			this.MapArea = new IntRect(storedTile.TopLeftPosition.X, 
@@ -198,20 +199,19 @@ namespace MHUrho.Logic
 		/// Removes a unit from this tile, either the owning unit or one of the passing units
 		/// </summary>
 		/// <param name="unit">the unit to remove</param>
-		public void RemoveUnit(IUnit unit)
+		public bool RemoveUnit(IUnit unit)
 		{
-			//TODO: Error, unit not present
-			units.Remove(unit);
+			if (units == null || !units.Remove(unit)) {
+				return false;
+			}
+
 			if (units.Count == 0) {
 				units = null;
 			}
+			return true;
 		}
 
-		public void AddBuilding(IBuilding building) {
-			if (Building != null) {
-				throw new InvalidOperationException("Adding building to a tile that already has a building");
-			}
-
+		public void SetBuilding(IBuilding building) {
 			Building = building;
 		}
 
