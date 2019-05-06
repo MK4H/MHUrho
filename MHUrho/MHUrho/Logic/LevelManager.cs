@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -153,28 +154,35 @@ namespace MHUrho.Logic
 
 			level.Plugin = new StLevelPlugin {TypeID = LevelRep.LevelLogicType.ID, Data = new PluginData()};
 
-			Plugin?.SaveState(new PluginDataWrapper(level.Plugin.Data, this));
-
-			foreach (var unit in units.Values) {
-				level.Units.Add(unit.Save());
+			try {
+				Plugin?.SaveState(new PluginDataWrapper(level.Plugin.Data, this));
+			}
+			catch (Exception e) {
+				//NOTE: Maybe add cap to prevent message flood
+				string message = $"Saving level plugin data failed with Exception: {e.Message}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new SavingException(message, e);
 			}
 
-			foreach (var building in buildings.Values) {
-				level.Buildings.Add(building.Save());
-			}
+			//Saving exception can be thrown during the enumerations
 
-			foreach (var projectile in projectiles.Values) {
-				level.Projectiles.Add(projectile.Save());
-			}
+			level.Units.AddRange(from unit in units.Values
+								select unit.Save());
+
+			level.Buildings.AddRange(from building in buildings.Values
+									select building.Save());
+
+			level.Projectiles.AddRange(from projectile in projectiles.Values
+										select projectile.Save());
 
 			level.Players = new StPlayers
 							{
 								HumanPlayerID = HumanPlayer.ID,
 								NeutralPlayerID = NeutralPlayer.ID
 							};
-			foreach (var player in players.Values) {
-				level.Players.Players.Add(player.Save());
-			}
+
+			level.Players.Players.AddRange(from player in players.Values 
+											select player.Save());
 
 			return level;
 		}

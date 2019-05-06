@@ -23,67 +23,7 @@ namespace MHUrho.Logic
 	/// Class representing unit, every action you want to do with the unit should go through this class
 	/// </summary>
 	class Unit : Entity, IUnit {
-		class Loader : IUnitLoader {
-
-			static class ComponentSetup {
-				delegate void ComponentSetupDelegate(Component component, ILevelManager level);
-
-				static readonly Dictionary<StringHash, ComponentSetupDelegate> setupDispatch;
-
-				static ComponentSetup()
-				{
-					setupDispatch = new Dictionary<StringHash, ComponentSetupDelegate>
-									{
-										{ RigidBody.TypeStatic, SetupRigidBody },
-										{ StaticModel.TypeStatic, SetupStaticModel },
-										{ AnimatedModel.TypeStatic, SetupAnimatedModel }
-									};
-				}
-
-
-				public static void SetupComponentsOnNode(Node node, ILevelManager level)
-				{
-					//TODO: Maybe loop through child nodes
-					foreach (var component in node.Components)
-					{
-						if (setupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value)) {
-							value(component, level);
-						}
-					}
-				}
-
-				static void SetupRigidBody(Component rigidBodyComponent, ILevelManager level)
-				{
-					RigidBody rigidBody = rigidBodyComponent as RigidBody;
-
-					rigidBody.CollisionLayer = (int)CollisionLayer.Unit;
-					rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
-					rigidBody.Kinematic = true;
-					rigidBody.Mass = 1;
-					rigidBody.UseGravity = false;
-				}
-
-				static void SetupStaticModel(Component staticModelComponent, ILevelManager level)
-				{
-					StaticModel staticModel = staticModelComponent as StaticModel;
-
-					staticModel.CastShadows = false;
-					staticModel.DrawDistance = level.App.Config.UnitDrawDistance;
-				}
-
-				static void SetupAnimatedModel(Component animatedModelComponent, ILevelManager level)
-				{
-					AnimatedModel animatedModel = animatedModelComponent as AnimatedModel;
-
-					SetupStaticModel(animatedModel, level);
-				}
-
-				static void SetupAnimationController()
-				{
-					//TODO: Maybe add animation controller
-				}
-			}
-			
+		class Loader : IUnitLoader {			
 
 			public IUnit Unit => loadingUnit;
 
@@ -147,7 +87,7 @@ namespace MHUrho.Logic
 				
 
 				try {
-					ComponentSetup.SetupComponentsOnNode(unitNode, level);
+					new UnitComponentSetup().SetupComponentsOnNode(unitNode, level);
 					var unit = new Unit(id, level, type, tile, player, unitNode);
 					unitNode.AddComponent(unit);
 
@@ -175,8 +115,15 @@ namespace MHUrho.Logic
 									UserPlugin = new PluginData()
 								};
 
-
-				unit.UnitPlugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin, unit.Level));
+				try {
+					unit.UnitPlugin.SaveState(new PluginDataWrapper(storedUnit.UserPlugin, unit.Level));
+				}
+				catch (Exception e)
+				{
+					string message = $"Saving unit plugin failed with Exception: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new SavingException(message, e);
+				}
 
 				foreach (var component in unit.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -205,7 +152,7 @@ namespace MHUrho.Logic
 				Node centerNode = type.Assets.Instantiate(level, position, rotation);
 				centerNode.Name = NodeName;
 
-				ComponentSetup.SetupComponentsOnNode(centerNode, level);
+				new UnitComponentSetup().SetupComponentsOnNode(centerNode, level);
 
 				var unitID = storedUnit.Id;
 
@@ -442,7 +389,14 @@ namespace MHUrho.Logic
 
 			base.RemoveFromLevel();
 			//We need removeFromLevel to work during any phase of loading, where connect references may not have been called yet
-			Plugin?.Dispose();
+			try {
+				Plugin?.Dispose();
+			}
+			catch (Exception e) {
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.Dispose)} failed with Exception: {e.Message}");
+			}
+			
 			Level.RemoveUnit(this);
 			Tile?.RemoveUnit(this);
 			Player?.RemoveUnit(this);
@@ -454,7 +408,13 @@ namespace MHUrho.Logic
 
 		public override void HitBy(IEntity other, object userData)
 		{
-			UnitPlugin.OnHit(other, userData);
+			try {
+				UnitPlugin.OnHit(other, userData);
+			}
+			catch (Exception e) {
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.OnHit)} failed with Exception: {e.Message}");
+			}
 		}
 
 		void IDisposable.Dispose()
@@ -474,7 +434,14 @@ namespace MHUrho.Logic
 				return;
 			}
 
-			UnitPlugin.OnUpdate(timeStep);
+			try {
+				UnitPlugin.OnUpdate(timeStep);
+			}
+			catch (Exception e) {
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.OnUpdate)} failed with Exception: {e.Message}");
+			}
+			
 		}
 
 		#endregion

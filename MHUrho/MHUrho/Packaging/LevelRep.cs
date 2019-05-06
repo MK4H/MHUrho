@@ -217,7 +217,7 @@ namespace MHUrho.Packaging
 				Stream saveFile = null;
 				try
 				{
-					var storedLevel = RunningLevel.Save();
+					StLevel storedLevel = RunningLevel.Save();
 					saveFile = MyGame.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
 					storedLevel.WriteTo(saveFile);
 				}

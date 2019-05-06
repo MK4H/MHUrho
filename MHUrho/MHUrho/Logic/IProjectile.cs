@@ -1,5 +1,6 @@
 ﻿using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.UnitComponents;
 using Urho;
 
 namespace MHUrho.Logic {
@@ -13,6 +14,10 @@ namespace MHUrho.Logic {
 		ProjectileType ProjectileType { get; }
 
 		bool TriggerCollisions { get; set; }
+
+		bool Shoot(IRangeTarget target);
+
+		bool Shoot(Vector3 movement);
 
 		bool Move(Vector3 movement);
 

@@ -18,67 +18,6 @@ namespace MHUrho.Logic
 	class Building : Entity, IBuilding {
 		class Loader : IBuildingLoader {
 
-			static class ComponentSetup
-			{
-				delegate void ComponentSetupDelegate(Component component, ILevelManager level);
-
-				static readonly Dictionary<StringHash, ComponentSetupDelegate> SetupDispatch;
-
-				static ComponentSetup()
-				{
-					SetupDispatch = new Dictionary<StringHash, ComponentSetupDelegate>
-									{
-										{ RigidBody.TypeStatic, SetupRigidBody },
-										{ StaticModel.TypeStatic, SetupStaticModel },
-										{ AnimatedModel.TypeStatic, SetupAnimatedModel }
-									};
-				}
-
-
-				public static void SetupComponentsOnNode(Node node, ILevelManager level)
-				{
-					//TODO: Maybe loop through child nodes
-					foreach (var component in node.Components)
-					{
-						if (SetupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value))
-						{
-							value(component, level);
-						}
-					}
-				}
-
-				static void SetupRigidBody(Component rigidBodyComponent, ILevelManager level)
-				{
-					RigidBody rigidBody = rigidBodyComponent as RigidBody;
-
-					rigidBody.CollisionLayer = (int)CollisionLayer.Building;
-					rigidBody.CollisionMask = (int)CollisionLayer.Projectile;
-					rigidBody.Kinematic = true;
-					rigidBody.Mass = 1;
-					rigidBody.UseGravity = false;
-				}
-
-				static void SetupStaticModel(Component staticModelComponent, ILevelManager level)
-				{
-					StaticModel staticModel = staticModelComponent as StaticModel;
-
-					staticModel.CastShadows = false;
-					staticModel.DrawDistance = level.App.Config.UnitDrawDistance;
-				}
-
-				static void SetupAnimatedModel(Component animatedModelComponent, ILevelManager level)
-				{
-					AnimatedModel animatedModel = animatedModelComponent as AnimatedModel;
-
-					SetupStaticModel(animatedModel, level);
-				}
-
-				static void SetupAnimationController()
-				{
-					//TODO: Maybe add animation controller
-				}
-			}
-
 			public IBuilding Building => loadingBuilding;
 
 			Building loadingBuilding;
@@ -147,10 +86,10 @@ namespace MHUrho.Logic
 
 
 				try {
+					new BuildingComponentSetup().SetupComponentsOnNode(buildingNode, level);
+
 					var newBuilding = new Building(id, level, rect, type, player);
 					buildingNode.AddComponent(newBuilding);
-
-					ComponentSetup.SetupComponentsOnNode(buildingNode, level);
 
 					newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 					return newBuilding;
@@ -174,7 +113,15 @@ namespace MHUrho.Logic
 													Rotation = building.Node.Rotation.ToStQuaternion(),
 													UserPlugin = new PluginData()
 												};
-				building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin, building.Level));
+				try {
+					building.BuildingPlugin.SaveState(new PluginDataWrapper(stBuilding.UserPlugin, building.Level));
+				}
+				catch (Exception e)
+				{
+					string message = $"Saving building plugin failed with Exception: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new SavingException(message, e);
+				}
 
 				foreach (var component in building.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -204,6 +151,8 @@ namespace MHUrho.Logic
 
 				
 				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
+				new BuildingComponentSetup().SetupComponentsOnNode(buildingNode, level);
+
 				buildingNode.AddComponent(loadingBuilding);
 				
 				loadingBuilding = new Building(storedBuilding.Id, level, rect, type);
@@ -337,7 +286,14 @@ namespace MHUrho.Logic
 			base.RemoveFromLevel();
 
 			//We need removeFromLevel to work even when called during loading
-			Plugin?.Dispose();
+			try {
+				BuildingPlugin?.Dispose();
+			}
+			catch (Exception e) {
+				//Log and ignore
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.Dispose)} failed with Exception: {e.Message}");
+			}
+			
 			Level.RemoveBuilding(this);
 			foreach (var tile in tiles) {
 				tile.RemoveBuilding(this);
@@ -352,17 +308,40 @@ namespace MHUrho.Logic
 
 		public override void HitBy(IEntity other, object userData)
 		{
-			BuildingPlugin.OnHit(other, userData);
+			try {
+				BuildingPlugin.OnHit(other, userData);
+			}
+			catch (Exception e) {
+				//Log and ignore
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.OnHit)} failed with Exception: {e.Message}");
+			}
 		}
 
 		public float? GetHeightAt(float x, float y)
 		{
-			return BuildingPlugin.GetHeightAt(x, y);
+			try {
+				return BuildingPlugin.GetHeightAt(x, y);
+			}
+			catch (Exception e) {
+				//Log and ignore
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.GetHeightAt)} failed with Exception: {e.Message}");
+				return null;
+			}
+
 		}
 
 		public IFormationController GetFormationController(Vector3 centerPosition)
 		{
-			return BuildingPlugin.GetFormationController(centerPosition);
+			try {
+				return BuildingPlugin.GetFormationController(centerPosition);
+			}
+			catch (Exception e) {
+				//Log and ignore
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.GetFormationController)} failed with Exception: {e.Message}");
+				return null;
+			}
 		}
 
 		
@@ -379,7 +358,15 @@ namespace MHUrho.Logic
 				return;
 			}
 
-			BuildingPlugin.OnUpdate(timeStep);
+			try {
+				BuildingPlugin.OnUpdate(timeStep);
+			}
+			catch (Exception e)
+			{
+				//Log and ignore
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.OnUpdate)} failed with Exception: {e.Message}");
+			}
 		}
 
 		int GetTileIndex(int x, int y) {

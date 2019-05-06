@@ -17,67 +17,6 @@ namespace MHUrho.Logic
 	class Projectile : Entity, IProjectile {
 		class Loader : IProjectileLoader {
 
-			static class ComponentSetup
-			{
-				delegate void ComponentSetupDelegate(Component component, ILevelManager level);
-
-				static readonly Dictionary<StringHash, ComponentSetupDelegate> setupDispatch;
-
-				static ComponentSetup()
-				{
-					setupDispatch = new Dictionary<StringHash, ComponentSetupDelegate>
-									{
-										{ RigidBody.TypeStatic, SetupRigidBody },
-										{ StaticModel.TypeStatic, SetupStaticModel },
-										{ AnimatedModel.TypeStatic, SetupAnimatedModel }
-									};
-				}
-
-
-				public static void SetupComponentsOnNode(Node node, ILevelManager level)
-				{
-					//TODO: Maybe loop through child nodes
-					foreach (var component in node.Components)
-					{
-						if (setupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value))
-						{
-							value(component, level);
-						}
-					}
-				}
-
-				static void SetupRigidBody(Component rigidBodyComponent, ILevelManager level)
-				{
-					RigidBody rigidBody = rigidBodyComponent as RigidBody;
-
-					rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
-					rigidBody.CollisionMask = (int)(CollisionLayer.Unit | CollisionLayer.Building);
-					rigidBody.Kinematic = true;
-					rigidBody.Mass = 1;
-					rigidBody.UseGravity = false;
-				}
-
-				static void SetupStaticModel(Component staticModelComponent, ILevelManager level)
-				{
-					StaticModel staticModel = staticModelComponent as StaticModel;
-
-					staticModel.CastShadows = false;
-					staticModel.DrawDistance = level.App.Config.ProjectileDrawDistance;
-				}
-
-				static void SetupAnimatedModel(Component animatedModelComponent, ILevelManager level)
-				{
-					AnimatedModel animatedModel = animatedModelComponent as AnimatedModel;
-
-					SetupStaticModel(animatedModel, level);
-				}
-
-				static void SetupAnimationController()
-				{
-					//TODO: Maybe add animation controller
-				}
-			}
-
 			public IProjectile Projectile => loadingProjectile;
 
 			Projectile loadingProjectile;
@@ -122,7 +61,7 @@ namespace MHUrho.Logic
 				}
 
 				try {
-					ComponentSetup.SetupComponentsOnNode(projectileNode, level);
+					new ProjectileComponentSetup().SetupComponentsOnNode(projectileNode, level);
 
 					var projectile = new Projectile(ID, level, type, player);
 					projectileNode.AddComponent(projectile);
@@ -133,6 +72,9 @@ namespace MHUrho.Logic
 					return projectile;
 				}
 				catch (Exception e) {
+					projectileNode.Remove();
+					projectileNode.Dispose();
+
 					string message = $"There was an Exception while creating a projectile: {e.Message}";
 					Urho.IO.Log.Write(LogLevel.Error, message);
 					throw new CreationException(message, e);
@@ -155,7 +97,16 @@ namespace MHUrho.Logic
 										UserPlugin = new PluginData()
 									};
 
-				projectile.ProjectilePlugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin, projectile.Level));
+				try {
+					projectile.ProjectilePlugin.SaveState(new PluginDataWrapper(stProjectile.UserPlugin,
+																				projectile.Level));
+				}
+				catch (Exception e) {
+					string message = $"Saving projectile plugin failed with Exception: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new SavingException(message, e);
+				}
+
 
 				foreach (var component in projectile.Node.Components) {
 					var defaultComponent = component as DefaultComponent;
@@ -183,7 +134,7 @@ namespace MHUrho.Logic
 				Node projectileNode = type.Assets.Instantiate(level, position, rotation);
 				projectileNode.Name = NodeName;
 
-				ComponentSetup.SetupComponentsOnNode(projectileNode, level);
+				new ProjectileComponentSetup().SetupComponentsOnNode(projectileNode, level);
 
 				loadingProjectile = new Projectile(instanceID, level, type)
 									{
@@ -364,11 +315,7 @@ namespace MHUrho.Logic
 
 		public bool Move(Vector3 movement)
 		{
-			if (!Map.IsInside(Position)) {
-				ProjectilePlugin.OnTerrainHit();
-				return false;
-			}
-
+			
 			Position += movement;
 			SignalPositionChanged();
 
@@ -378,11 +325,46 @@ namespace MHUrho.Logic
 			}
 
 			if (!Map.IsInside(Position)) {
-				ProjectilePlugin.OnTerrainHit();
+				try
+				{
+					ProjectilePlugin.OnTerrainHit();
+				}
+				catch (Exception e)
+				{
+					//NOTE: Maybe add cap to prevent message flood
+					Urho.IO.Log.Write(LogLevel.Error, $"Projectile plugin call {nameof(ProjectilePlugin.OnTerrainHit)} failed with Exception: {e.Message}");
+				}
 				return false;
 			}
 
 			return true;	
+		}
+
+		public bool Shoot(IRangeTarget target)
+		{
+			try {
+				return ProjectilePlugin.ShootProjectile(target);
+			}
+			catch (Exception e) {
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Projectile plugin call {nameof(ProjectilePlugin.ShootProjectile)} failed with Exception: {e.Message}");
+				return false;
+			}
+		}
+
+		public bool Shoot(Vector3 movement)
+		{
+			try
+			{
+				return ProjectilePlugin.ShootProjectile(movement);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Projectile plugin call {nameof(ProjectilePlugin.ShootProjectile)} failed with Exception: {e.Message}");
+				return false;
+			}
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -402,15 +384,31 @@ namespace MHUrho.Logic
 				return;
 			}
 
-			ProjectilePlugin.OnUpdate(timeStep);
+			try
+			{
+				ProjectilePlugin.OnUpdate(timeStep);
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Projectile plugin call {nameof(ProjectilePlugin.OnUpdate)} failed with Exception: {e.Message}");
+			}
+			
 		}
 
-		void CollisionHandler(NodeCollisionStartEventArgs e)
+		void CollisionHandler(NodeCollisionStartEventArgs args)
 		{
 			if (TriggerCollisions) {
-				IEntity hitEntity = Level.GetEntity(e.OtherNode);
+				IEntity hitEntity = Level.GetEntity(args.OtherNode);
 				hitEntity.HitBy(this);
-				ProjectilePlugin.OnEntityHit(hitEntity);
+				try {
+					ProjectilePlugin.OnEntityHit(hitEntity);
+				}
+				catch (Exception e) {
+					//NOTE: Maybe add cap to prevent message flood
+					Urho.IO.Log.Write(LogLevel.Error, $"Projectile plugin call {nameof(ProjectilePlugin.OnEntityHit)} failed with Exception: {e.Message}");
+				}
+				
 			}
 		}
 

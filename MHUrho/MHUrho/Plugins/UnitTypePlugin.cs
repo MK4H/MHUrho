@@ -11,12 +11,6 @@ namespace MHUrho.Plugins
 {
 	public abstract class UnitTypePlugin : TypePlugin
 	{
-
-		/// <summary>
-		/// Data overriding or superseding the XML data describing the type
-		/// </summary>
-		public virtual UnitTypeInitializationData TypeData { get; } = null;
-
 		/// <summary>
 		/// Create new instance of the unit in with default contents
 		/// 

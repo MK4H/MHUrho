@@ -82,19 +82,27 @@ namespace MHUrho.Logic
 
 
 
-				storedPlayer.UnitIDs.Add(from unitType in player.units
+				storedPlayer.UnitIDs.AddRange(from unitType in player.units
 										from unit in unitType.Value
 										select unit.ID);
 
-				storedPlayer.BuildingIDs.Add(from buildingType in player.buildings
+				storedPlayer.BuildingIDs.AddRange(from buildingType in player.buildings
 											from building in buildingType.Value
 											select building.ID);
 
-				storedPlayer.Resources.Add(from resourceType in player.resources
+				storedPlayer.Resources.AddRange(from resourceType in player.resources
 											select new StResource{ Id = resourceType.Key.ID, Amount = resourceType.Value});
 
 				storedPlayer.UserPlugin = new PluginData();
-				player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.level));
+				try {
+					player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.level));
+				}
+				catch (Exception e)
+				{
+					string message = $"Saving player plugin failed with Exception: {e.Message}";
+					Urho.IO.Log.Write(LogLevel.Error, message);
+					throw new SavingException(message, e);
+				}
 
 				return storedPlayer;
 			}
@@ -269,6 +277,16 @@ namespace MHUrho.Logic
 			else {
 				units.Add(unit.UnitType, new List<IUnit> {unit});
 			}
+
+			try {
+				Plugin.UnitAdded(unit);
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.UnitAdded)} failed with Exception: {e.Message}");
+			}
+			
 		}
 
 		public void AddBuilding(IBuilding building) {
@@ -278,19 +296,44 @@ namespace MHUrho.Logic
 			else {
 				buildings.Add(building.BuildingType, new List<IBuilding> {building});
 			}
+
+			try {
+				Plugin.BuildingAdded(building); 
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.BuildingAdded)} failed with Exception: {e.Message}");
+			}
+			
 		}
 
-		public void ChangeResourceAmount(ResourceType resourceType, double amount)
+		public void ChangeResourceAmount(ResourceType resourceType, double change)
 		{
 			//if key does not exist, tryGetValue sets the out variable to default(), which here is zero
 			resources.TryGetValue(resourceType, out double currentValue);
-			resources[resourceType] = currentValue + amount;
+
+			try {
+				resources[resourceType] = Plugin.ResourceAmountChanged(resourceType, currentValue, currentValue + change);
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.ResourceAmountChanged)} failed with Exception: {e.Message}");
+			}
+			
 		}
 
 		public bool RemoveUnit(IUnit unit) {
 			bool removed = units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
 			if (removed) {
-				Plugin?.OnUnitKilled(unit);
+				try {
+					Plugin.OnUnitKilled(unit);
+				}
+				catch (Exception e) {
+					//NOTE: Maybe add cap to prevent message flood
+					Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnUnitKilled)} failed with Exception: {e.Message}");
+				}
 			}
 
 			return removed;
@@ -300,8 +343,14 @@ namespace MHUrho.Logic
 			bool removed = buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
 
 			if (removed) {
-				//TODO: Make sure every player has a plugin
-				Plugin?.OnBuildingDestroyed(building);
+				try {
+					Plugin.OnBuildingDestroyed(building);
+				}
+				catch (Exception e)
+				{
+					//NOTE: Maybe add cap to prevent message flood
+					Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnBuildingDestroyed)} failed with Exception: {e.Message}");
+				}
 			}
 
 			return removed;
@@ -367,7 +416,14 @@ namespace MHUrho.Logic
 		{
 			if (!EnabledEffective || !level.LevelNode.Enabled) return;
 
-			Plugin?.OnUpdate(timeStep);
+			try {
+				Plugin.OnUpdate(timeStep);
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnUpdate)} failed with Exception: {e.Message}");
+			}
 		}
 	}
 }

@@ -59,6 +59,11 @@ namespace MHUrho.Logic {
 		event OnUpdateDelegate Update;
 		event OnEndDelegate Ending;
 
+		/// <summary>
+		/// Stores the current level into a StLevel object.
+		/// </summary>
+		/// <returns>Stored level</returns>
+		/// <exception cref="SavingException">Thrown when the saving of the level fails</exception>
 		StLevel Save();
 
 		void SaveTo(Stream stream, bool leaveOpen = false);

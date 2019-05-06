@@ -43,10 +43,6 @@ namespace MHUrho.EditorTools.MandK
 
 			foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
 
-				if (!tileType.IsManuallySpawnable) {
-					continue;
-				}
-
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnTileTypeToggled;

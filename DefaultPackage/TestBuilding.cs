@@ -71,23 +71,6 @@ namespace DefaultPackage
 			return empty && rightTileTypeCount > 5;
 		}
 
-
-		public override void PopulateUI(GameUIManager gameUI) {
-			throw new NotImplementedException();
-		}
-
-		public override void ClearUI(GameUIManager gameUI) {
-			throw new NotImplementedException();
-		}
-
-		public override void AddSelected(BuildingInstancePlugin buildingInstance) {
-			throw new NotImplementedException();
-		}
-
-		public override void RemoveSelected(BuildingInstancePlugin buildingInstance) {
-			throw new NotImplementedException();
-		}
-
 		public override void Initialize(XElement extensionElement, GamePack package) {
 			workerType = package.GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")));
 			tileType = package.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")));

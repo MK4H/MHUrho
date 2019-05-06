@@ -39,11 +39,6 @@ namespace MHUrho.Helpers
 			return typeXmlElement.Element(EntityXml.Inst.Extension);
 		}
 
-		public static bool GetManuallySpawnable(XElement typeXmlElement)
-		{
-			return GetBool(typeXmlElement.Element(UnitTypeXml.Inst.ManuallySpawnable));
-		}
-
 
 		public static XElement GetChild(XElement ofElement, string childName) {
 			return GetChild(ofElement, PackageManager.XMLNamespace + childName);

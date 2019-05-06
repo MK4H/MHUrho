@@ -40,10 +40,6 @@ namespace MHUrho.EditorTools.MandK
 
 			foreach (var buildingType in PackageManager.Instance.ActivePackage.BuildingTypes) {
 
-				if (!buildingType.IsManuallySpawnable) {
-					continue;
-				}
-
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnBuildingTypeToggled;

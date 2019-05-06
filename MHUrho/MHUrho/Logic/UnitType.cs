@@ -30,10 +30,6 @@ namespace MHUrho.Logic
 
 		public UnitTypePlugin Plugin { get; private set; }
 
-		public bool IsManuallySpawnable { get; private set; }
-
-		//TODO: More loaded properties
-
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
 		/// It is done this way to allow cyclic references during the Load method, so anything 
@@ -65,11 +61,8 @@ namespace MHUrho.Logic
 
 			Plugin = TypePlugin.LoadTypePlugin<UnitTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
 
-			//var data = Plugin.TypeData;
-
 			Assets = AssetContainer.FromXml(xml.Element(UnitTypeXml.Inst.Assets));
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
-			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 
 			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
 									 package);
@@ -85,7 +78,14 @@ namespace MHUrho.Logic
 
 
 		public bool CanSpawnAt(ITile tile) {
-			return Plugin.CanSpawnAt(tile);
+			try {
+				return Plugin.CanSpawnAt(tile);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Unit type plugin call {nameof(Plugin.CanSpawnAt)} failed with Exception: {e.Message}");
+				return false;
+			}
 		}
 
 		/// <summary>
@@ -110,15 +110,31 @@ namespace MHUrho.Logic
 
 
 		internal UnitInstancePlugin GetNewInstancePlugin(IUnit unit, ILevelManager level) {
-			return Plugin.CreateNewInstance(level, unit);
+			try {
+				return Plugin.CreateNewInstance(level, unit);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Unit type plugin call {nameof(Plugin.CreateNewInstance)} failed with Exception: {e.Message}");
+				throw;
+			}
+			
 		}
 
 		internal UnitInstancePlugin GetInstancePluginForLoading(IUnit unit, ILevelManager level) {
-			return Plugin.GetInstanceForLoading(level, unit);
+			try {
+				return Plugin.GetInstanceForLoading(level, unit);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Unit type plugin call {nameof(Plugin.GetInstanceForLoading)} failed with Exception: {e.Message}");
+				throw;
+			}
 		}
 
 		public void Dispose() {
-			//TODO: Release all disposable resources
+			//NOTE: Release all disposable resources
 			Assets.Dispose();
 		}
 

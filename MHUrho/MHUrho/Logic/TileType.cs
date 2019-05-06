@@ -33,13 +33,7 @@ namespace MHUrho.Logic
 
 		public IntRect IconRectangle { get; private set; }
 
-		public bool IsManuallySpawnable { get; private set; }
-
 		string imagePath;
-
-		public static string GetNameFromXml(XElement tileTypeElement) {
-			return tileTypeElement.Attribute("name").Value;
-		}
 
 		public void Load(XElement xml, GamePack package) {
 			//TODO: Check for errors
@@ -48,7 +42,6 @@ namespace MHUrho.Logic
 			imagePath = XmlHelpers.GetPath(xml.Element(TexturePathElementName));
 			IconRectangle = XmlHelpers.GetIntRect(xml.Element(IconTextureElementName));
 			MinimapColor = XmlHelpers.GetColor(xml.Element(MinimapColorElement));
-			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 			Package = package;
 		}
 

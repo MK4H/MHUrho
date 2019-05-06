@@ -27,13 +27,5 @@ namespace MHUrho.Plugins
 		public abstract BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding projectile);
 
 		public abstract bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
-
-		public abstract void PopulateUI(GameUIManager gameUI);
-
-		public abstract void ClearUI(GameUIManager gameUI);
-
-		public abstract void AddSelected(BuildingInstancePlugin buildingInstance);
-
-		public abstract void RemoveSelected(BuildingInstancePlugin buildingInstance);
 	}
 }

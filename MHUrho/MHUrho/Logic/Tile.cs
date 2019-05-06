@@ -235,8 +235,6 @@ namespace MHUrho.Logic
 		/// <param name="heightDelta"></param>
 		public void ChangeTopLeftHeight(float heightDelta) {
 			TopLeftHeight += heightDelta;
-
-			
 		}
 
 		/// <summary>

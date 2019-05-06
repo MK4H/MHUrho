@@ -39,10 +39,6 @@ namespace MHUrho.EditorTools.MandK
 
 			foreach (var unitType in PackageManager.Instance.ActivePackage.UnitTypes) {
 
-				if (!unitType.IsManuallySpawnable) {
-					continue;
-				}
-
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnUnitTypeToggled;

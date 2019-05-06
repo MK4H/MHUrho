@@ -442,7 +442,7 @@ namespace MHUrho.WorldMap
 
 				int GetBufferOffset(ITile tile)
 				{
-					//TODO: maybe - Map.Left and - Map.Top
+					//NOTE: maybe - Map.Left and - Map.Top
 					return GetBufferOffset(tile.TopLeft.X, tile.TopLeft.Y);
 				}
 
@@ -672,7 +672,7 @@ namespace MHUrho.WorldMap
 
 				public RectangleOperation(IntVector2 topLeft, IntVector2 bottomRight, MapGraphics graphics)
 				{
-					//TODO: Maybe unnecessary, because chunk itself does bound checks
+					//NOTE: Maybe unnecessary, because chunk itself does bound checks
 					if (!graphics.map.IsInside(topLeft)) {
 						throw new ArgumentOutOfRangeException(nameof(topLeft),
 															"topLeft corner was outside the displayed area of the map");

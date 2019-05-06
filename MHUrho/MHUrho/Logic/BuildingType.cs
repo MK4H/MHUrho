@@ -29,8 +29,6 @@ namespace MHUrho.Logic
 		public IntVector2 Size { get; private set; }
 
 		public BuildingTypePlugin Plugin { get; private set; }
-
-		public bool IsManuallySpawnable { get; private set; }
 		
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
@@ -46,7 +44,6 @@ namespace MHUrho.Logic
 			Name = XmlHelpers.GetName(xml);
 			Assets = AssetContainer.FromXml(xml.Element(BuildingTypeXml.Inst.Assets));
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
-			IsManuallySpawnable = XmlHelpers.GetManuallySpawnable(xml);
 			Package = package;
 			Size = XmlHelpers.GetIntVector2(xml.Element(BuildingTypeXml.Inst.Size));
 
@@ -75,7 +72,15 @@ namespace MHUrho.Logic
 		}
 
 		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
-			return Plugin.CanBuildIn(topLeft, bottomRight, level);
+			try {
+				return Plugin.CanBuildIn(topLeft, bottomRight, level);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Building type plugin call {nameof(Plugin.CanBuildIn)} failed with Exception: {e.Message}");
+				return false;
+			}
+			
 		}
 
 		public bool CanBuildIn(IntRect buildingTilesRectangle, ILevelManager level) {
@@ -83,11 +88,28 @@ namespace MHUrho.Logic
 		}
  
 		internal BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {
-			return Plugin.CreateNewInstance(level, building);
+			try {
+				return Plugin.CreateNewInstance(level, building);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Building type plugin call {nameof(Plugin.CreateNewInstance)} failed with Exception: {e.Message}");
+				throw;
+			}
+			
 		}
 
 		internal BuildingInstancePlugin GetInstancePluginForLoading(IBuilding building, ILevelManager level) {
-			return Plugin.GetInstanceForLoading(level, building);
+			try {
+				return Plugin.GetInstanceForLoading(level, building);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Building type plugin call {nameof(Plugin.GetInstanceForLoading)} failed with Exception: {e.Message}");
+				throw;
+			}
+			
 		}
 
 		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft) {
@@ -101,8 +123,5 @@ namespace MHUrho.Logic
 		public void Dispose() {
 			Assets.Dispose();
 		}
-
-
-
 	}
 }

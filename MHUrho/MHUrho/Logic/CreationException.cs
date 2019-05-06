@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
-	class CreationException : ApplicationException
+	public class CreationException : ApplicationException
 	{
 		public CreationException()
 		{

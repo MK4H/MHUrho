@@ -29,6 +29,7 @@ namespace MHUrho.Logic
 
 		public void Load(XElement xml, GamePack package)
 		{
+			//TODO: Check for errors
 			ID = XmlHelpers.GetID(xml);
 			Category = StringToCategory(xml.Attribute("category").Value);
 			Name = XmlHelpers.GetName(xml);
@@ -53,12 +54,28 @@ namespace MHUrho.Logic
 		}
 
 		public PlayerAIInstancePlugin GetNewInstancePlugin(IPlayer player, ILevelManager level)
-		{
-			return Plugin.CreateNewInstance(level, player);
+		{			
+			try
+			{
+				return Plugin.CreateNewInstance(level, player);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Player type plugin call {nameof(Plugin.CreateNewInstance)} failed with Exception: {e.Message}");
+				throw;
+			}
 		}
 
 		public PlayerAIInstancePlugin GetInstancePluginForLoading(IPlayer player, ILevelManager level) {
-			return Plugin.GetInstanceForLoading(level, player);
+			try {
+				return Plugin.GetInstanceForLoading(level, player);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"Player type plugin call {nameof(Plugin.GetInstanceForLoading)} failed with Exception: {e.Message}");
+				throw;
+			}
+			
 		}
 
 		public void Dispose() {
