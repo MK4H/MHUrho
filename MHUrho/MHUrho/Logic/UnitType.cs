@@ -15,7 +15,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
-	public class UnitType : ILoadableType, IDisposable
+	public class UnitType : IEntityType, IDisposable
 	{
 
 		public int ID { get; private set; }
@@ -29,6 +29,8 @@ namespace MHUrho.Logic
 		public IntRect IconRectangle { get; private set; }
 
 		public UnitTypePlugin Plugin { get; private set; }
+
+		TypePlugin IEntityType.Plugin => Plugin;
 
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>

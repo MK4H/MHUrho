@@ -20,7 +20,7 @@ namespace MHUrho.Logic {
 
 		MyGame App { get; }
 
-		Map Map { get; }
+		IMap Map { get; }
 
 		Minimap Minimap { get; }
 

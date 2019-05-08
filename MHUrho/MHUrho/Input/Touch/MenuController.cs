@@ -42,7 +42,7 @@ namespace MHUrho.Input.Touch
 			throw new NotImplementedException();
 		}
 
-		public ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
+		public ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingProgress loadingProgress)
 		{
 			throw new NotImplementedException();
 		}
@@ -50,7 +50,7 @@ namespace MHUrho.Input.Touch
 		public ILevelLoader StartLoadingLevelForPlaying(LevelRep level,
 												PlayerSpecification players,
 												LevelLogicCustomSettings customSettings,
-												ILoadingSignaler loadingSignaler)
+												ILoadingProgress loadingProgress)
 		{
 			throw new NotImplementedException();
 		}

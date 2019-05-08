@@ -104,8 +104,8 @@ namespace MHUrho.EditorTools.MandK
 		public override void Enable() {
 			if (enabled) return;
 
-			dynamicHighlight.SelectionHandler += HandleAreaSelection;
-			dynamicHighlight.SingleClickHandler += HandleSingleClick;
+			dynamicHighlight.Selected += HandleAreaSelection;
+			dynamicHighlight.SingleClick += HandleSingleClick;
 
 			dynamicHighlight.Enable();
 
@@ -122,8 +122,8 @@ namespace MHUrho.EditorTools.MandK
 		public override void Disable() {
 			if (!enabled) return;
 
-			dynamicHighlight.SelectionHandler -= HandleAreaSelection;
-			dynamicHighlight.SingleClickHandler -= HandleSingleClick;
+			dynamicHighlight.Selected -= HandleAreaSelection;
+			dynamicHighlight.SingleClick -= HandleSingleClick;
 			dynamicHighlight.Disable();
 
 			foreach (var type in selected.Values) {

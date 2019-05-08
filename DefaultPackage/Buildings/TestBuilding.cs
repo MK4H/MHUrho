@@ -160,7 +160,7 @@ namespace DefaultPackage
 
 		public override IFormationController GetFormationController(Vector3 centerPosition)
 		{
-			return new TestBuildingFormationController(pathfindingNodes, Map.GetContainingTile(centerPosition), entryTile, Map);
+			return new TestBuildingFormationController(pathfindingNodes, Level.Map.GetContainingTile(centerPosition), entryTile, Level.Map);
 		}
 
 		public override float? GetHeightAt(float x, float y)
@@ -171,7 +171,7 @@ namespace DefaultPackage
 		public ITile GetInterfaceTile(TestWorkerInstance testWorker) {
 			for (int i = 0; i < workers.Length; i++) {
 				if (testWorker == workers[i]) {
-					return Map.GetTileByBottomRightCorner(Building.Rectangle.TopLeft() +
+					return Level.Map.GetTileByBottomRightCorner(Building.Rectangle.TopLeft() +
 														new IntVector2(0, i % 4));
 				}
 			}
@@ -189,10 +189,10 @@ namespace DefaultPackage
 
 			for (int y = Building.Rectangle.Top; y < Building.Rectangle.Bottom; y++) {
 				for (int x = Building.Rectangle.Left; x < Building.Rectangle.Right; x++) {
-					ITile tile = Map.GetTileByTopLeftCorner(x, y);
-					Vector3 position = new Vector3(tile.Center.X, Map.GetTerrainHeightAt(tile.Center) + GetHeightAt(tile.Center.X, tile.Center.Y).Value, tile.Center.Y);
+					ITile tile = Level.Map.GetTileByTopLeftCorner(x, y);
+					Vector3 position = new Vector3(tile.Center.X, Level.Map.GetTerrainHeightAt(tile.Center) + GetHeightAt(tile.Center.X, tile.Center.Y).Value, tile.Center.Y);
 					pathfindingNodes.Add(tile,
-										Map.PathFinding.CreateBuildingNode(Building, position, null));
+										Level.Map.PathFinding.CreateBuildingNode(Building, position, null));
 				}
 			}
 
@@ -204,9 +204,9 @@ namespace DefaultPackage
 				}
 			}
 
-			entryTile = Map.GetContainingTile(Building.Center + Building.Forward * 2);
-			var tileNode = Map.PathFinding.GetTileNode(entryTile);
-			var buildingEntryNode = pathfindingNodes[Map.GetContainingTile(Building.Center + Building.Forward)];
+			entryTile = Level.Map.GetContainingTile(Building.Center + Building.Forward * 2);
+			var tileNode = Level.Map.PathFinding.GetTileNode(entryTile);
+			var buildingEntryNode = pathfindingNodes[Level.Map.GetContainingTile(Building.Center + Building.Forward)];
 			buildingEntryNode.CreateEdge(tileNode, MovementType.Teleport);
 			tileNode.CreateEdge(buildingEntryNode, MovementType.Teleport);
 		}

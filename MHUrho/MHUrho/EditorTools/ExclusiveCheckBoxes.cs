@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Urho;
 using Urho.Gui;
 
 namespace MHUrho.EditorTools
@@ -91,7 +92,7 @@ namespace MHUrho.EditorTools
 			else {
 				Selected = null;				
 			}
-			SelectedChanged?.Invoke(Selected, oldSelected);
+			InvokeSelectedChanged(Selected, oldSelected);
 		}
 
 		public void Dispose()
@@ -104,6 +105,17 @@ namespace MHUrho.EditorTools
 			}
 
 			checkBoxes.Clear();
+		}
+
+		void InvokeSelectedChanged(CheckBox newSelected, CheckBox oldSelected)
+		{
+			try {
+				SelectedChanged?.Invoke(newSelected, oldSelected);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(SelectedChanged)}: {e.Message}");
+			}
 		}
 	}
 }

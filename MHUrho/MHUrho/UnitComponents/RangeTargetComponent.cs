@@ -11,14 +11,14 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents {
 
-	public delegate void TargetMoved(IRangeTarget target);
+	public delegate void TargetMovedDelegate(IRangeTarget target);
 
 	public interface IRangeTarget {
 		int InstanceID { get; set; }
 
 		bool Moving { get; }
 
-		event TargetMoved OnTargetMoved;
+		event TargetMovedDelegate TargetMoved;
 
 		Vector3 CurrentPosition { get; }
 
@@ -44,7 +44,11 @@ namespace MHUrho.UnitComponents {
 		public int InstanceID { get; set; }
 
 		public abstract bool Moving { get; }
-		public event TargetMoved OnTargetMoved;
+
+		/// <summary>
+		/// Invoked every time target moves.
+		/// </summary>
+		public event TargetMovedDelegate TargetMoved;
 
 		public abstract Vector3 CurrentPosition { get; }
 
@@ -65,9 +69,15 @@ namespace MHUrho.UnitComponents {
 
 		public abstract IEnumerable<Waypoint> GetFutureWaypoints();
 
-		public void TargetMoved(IEntity entity)
+		public void SignalTargetMoved(IEntity entity)
 		{
-			OnTargetMoved?.Invoke(this);
+			try {
+				TargetMoved?.Invoke(this);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(TargetMoved)}: {e.Message}");
+			}
 		}
 
 		/// <summary>
@@ -86,12 +96,19 @@ namespace MHUrho.UnitComponents {
 		}
 
 
-
+		/// <summary>
+		/// Called on destruction of component, basically a destructor
+		/// </summary>
 		protected override void OnDeleted() {
 			base.OnDeleted();
 
 			foreach (var shooter in shooters) {
-				shooter.OnTargetDestroy(this);
+				try {
+					shooter.OnTargetDestroy(this);
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(LogLevel.Error, $"There was an unexpected exception in {nameof(shooter.OnTargetDestroy)}: {e.Message}");
+				}
 			}
 
 			Level.UnRegisterRangeTarget(InstanceID);
@@ -111,11 +128,4 @@ namespace MHUrho.UnitComponents {
 		}
 
 	}
-
-	
-
-	
-
-
-
 }

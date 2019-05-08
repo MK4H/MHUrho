@@ -53,7 +53,8 @@ namespace DefaultPackage
 	public class TestUnitInstance : UnitInstancePlugin, 
 									WorldWalker.IUser, 
 									MovingMeeleAttacker.IUser,
-									MovingRangeTarget.IUser
+									MovingRangeTarget.IUser,
+									UnitSelector.IUser
 	{
 		class DistanceCalc : NodeDistCalculator {
 
@@ -163,15 +164,18 @@ namespace DefaultPackage
 
 		}
 
-		void OnUnitOrdered(UnitSelector selector, Order order)
+		bool UnitSelector.IUser.ExecuteOrder(Order order)
 		{
-			if (order.PlatformOrder) {
-				switch (order) {
+			if (order.PlatformOrder)
+			{
+				switch (order)
+				{
 					case MoveOrder moveOrder:
 						order.Executed = walker.GoTo(moveOrder.Target);
 						break;
 					case AttackOrder attackOrder:
-						if (attackOrder.Target.Player != Unit.Player) {
+						if (attackOrder.Target.Player != Unit.Player)
+						{
 							meele.Attack(attackOrder.Target);
 							order.Executed = true;
 						}
@@ -183,9 +187,10 @@ namespace DefaultPackage
 				}
 			}
 
+			return order.Executed;
 		}
 
-		void Attacked(MeeleAttacker attacker, IEntity target)
+		void OnAttacked(MeeleAttacker attacker, IEntity target)
 		{
 			target.HitBy(Unit);
 		}
@@ -195,20 +200,19 @@ namespace DefaultPackage
 		void Init(UnitSelector selector, MovingMeeleAttacker meeleAttacker)
 		{
 			healthbar = new HealthBar(Level, Unit, new Vector3(0, 1, 0), new Vector2(0.5f, 0.1f), health);
-			selector.Ordered += OnUnitOrdered;
-			meele.Attacked += Attacked;
-			meele.TargetInRange += TargetInRange;
+			meele.Attacked += OnAttacked;
+			meele.TargetInRange += OnTargetInRange;
 
 		}
 
-		void TargetInRange(MeeleAttacker attacker, IEntity target)
+		void OnTargetInRange(MeeleAttacker attacker, IEntity target)
 		{
 			walker.Stop();
 		}
 
 		void MovingMeeleAttacker.IUser.MoveTo(Vector3 position)
 		{
-			walker.GoTo(Map.PathFinding.GetClosestNode(position));
+			walker.GoTo(Level.Map.PathFinding.GetClosestNode(position));
 		}
 
 		bool MeeleAttacker.IBaseUser.IsInRange(MeeleAttacker attacker, IEntity target)
@@ -216,7 +220,7 @@ namespace DefaultPackage
 			return Vector3.Distance(Unit.Position, target.Position) < 1;
 		}
 
-		IUnit MeeleAttacker.IBaseUser.PickTarget(List<IUnit> possibleTargets)
+		IUnit MeeleAttacker.IBaseUser.PickTarget(ICollection<IUnit> possibleTargets)
 		{
 			return possibleTargets.Count == 0
 						? null

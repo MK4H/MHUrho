@@ -108,7 +108,7 @@ namespace DefaultPackage
 			var instance = new TestWorkerInstance(level, unit);
 			instance.walker = WorldWalker.CreateNew(instance, level);
 
-			instance.walker.OnMovementEnded += instance.OnMovementFinished;
+			instance.walker.MovementFinished += instance.OnMovementFinished;
 			return instance;
 		}
 
@@ -121,7 +121,7 @@ namespace DefaultPackage
 			: base(level, unit)
 		{
 
-			this.distCalc = new DistanceCalc(Map);
+			this.distCalc = new DistanceCalc(Level.Map);
 		}
 
 		public override void OnUpdate(float timeStep) {
@@ -166,12 +166,12 @@ namespace DefaultPackage
 		public void OnMovementFinished(WorldWalker walker) {
 			if (homeGoing) {
 				homeGoing = !homeGoing;
-				walker.GoTo(Map.PathFinding.GetTileNode(Map.GetTileByMapLocation(new IntVector2(20, 20))));
+				walker.GoTo(Level.Map.PathFinding.GetTileNode(Level.Map.GetTileByMapLocation(new IntVector2(20, 20))));
 				
 			}
 			else if (!homeGoing) {
 				homeGoing = !homeGoing;
-				walker.GoTo(Map.PathFinding.GetTileNode(WorkedBuilding.GetInterfaceTile(this)));
+				walker.GoTo(Level.Map.PathFinding.GetTileNode(WorkedBuilding.GetInterfaceTile(this)));
 				
 			}
 		}

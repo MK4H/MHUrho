@@ -99,30 +99,75 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
+		/// <summary>
+		/// Interface that must be implemented by the plugin of the entity using this component.
+		/// </summary>
 		public interface IUser {
-
+			/// <summary>
+			/// Gets node distance calculator.
+			/// This method may be called many times.
+			/// Every received instance will not be used after unit is moved by WorldWalker.
+			/// </summary>
+			/// <returns>Node distance calculator.</returns>
 			INodeDistCalculator GetNodeDistCalculator();
 		}
 
 		
-
+		/// <summary>
+		/// State of the last request executed by this WorldWalker.
+		/// </summary>
 		public WorldWalkerState State { get; private set; }
 
+		/// <summary>
+		/// Current path the WorldWalker is following, or null if WorldWalker is not moving
+		/// </summary>
 		public Path Path { get; private set; }
 
-		public event MovementStartedDelegate OnMovementStarted;
-		public event MovementEndedDelegate OnMovementEnded;
-		public event MovementFailedDelegate OnMovementFailed;
-		public event MovementCanceledDelegate OnMovementCanceled;
-		public event PathRecalculatedDelegate OnPathRecalculated;
+		/// <summary>
+		/// Invoked on start of a new movement.
+		/// </summary>
+		public event MovementStartedDelegate MovementStarted;
 
+		/// <summary>
+		/// Invoked on successful completition of a movement request
+		/// </summary>
+		public event MovementEndedDelegate MovementFinished;
 
+		/// <summary>
+		/// Invoked on a failure of movement, either there is currently no path
+		/// to the provided target or path calculation failed.
+		/// </summary>
+		public event MovementFailedDelegate MovementFailed;
+
+		/// <summary>
+		/// Invoked on user cancellation of current movement.
+		/// </summary>
+		public event MovementCanceledDelegate MovementCanceled;
+
+		/// <summary>
+		/// Invoked on every path recalculation. Recalculation happens on failure to move along
+		/// previously calculated path.
+		/// </summary>
+		public event PathRecalculatedDelegate PathRecalculated;
+
+		/// <summary>
+		/// The unit this WorldWalker moves around the world.
+		/// </summary>
 		public IUnit Unit => (IUnit) Entity;
 
+		/// <summary>
+		/// The plugin providing an implementation of the required methods.
+		/// </summary>
 		readonly IUser user;
 
 		
-
+		/// <summary>
+		/// Creates new WorldWalker and attaches it to the Unit and its node.
+		/// </summary>
+		/// <typeparam name="T">Unit plugin that implements the <see cref="IUser"/> interface required for this component.</typeparam>
+		/// <param name="plugin">Unit plugin of the unit this WorldWalker should be attached to.</param>
+		/// <param name="level">Current level.</param>
+		/// <returns>The newly created WorldWalker instance.</returns>
 		public static WorldWalker CreateNew<T>(T plugin, ILevelManager level)
 			where T : UnitInstancePlugin, IUser {
 
@@ -155,76 +200,88 @@ namespace MHUrho.UnitComponents
 			this.user = user;
 		}
 
-
-
-
 		public override StDefaultComponent SaveState()
 		{
 			return Loader.SaveState(this);
 		}
 
-		public void GoAlong(Path newPath) {
-			if (Path != null) {
-				StopMovement(WorldWalkerState.Canceled);
-				
-			}
-			
-			StartMovement(newPath);
-		}
-
+		/// <summary>
+		/// Tries to start movement towards the <paramref name="targetNode"/>. Returns true if path was found, false if no path was found.
+		/// </summary>
+		/// <param name="targetNode">Target of the movement.</param>
+		/// <returns>Returns true if path was found, false if no path was found.</returns>
 		public bool GoTo(INode targetNode)
 		{
+			if (!TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc)) {
+				StopMovement(WorldWalkerState.Failed);
+				return false;
+			}
+
 			var newPath = Path.FromTo(Unit.Position, 
 									targetNode, 
-									Map, 
-									user.GetNodeDistCalculator());
+									Level.Map,
+									nodeDistCalc);
+
+
 			if (newPath == null) {
-				Stop();
 				StopMovement(WorldWalkerState.Failed);
 				return false;
 			}
 			else {
-				GoAlong(newPath);
+				StopMovement(WorldWalkerState.Canceled);
+				StartMovement(newPath);
 				return true;
 			}
 		}
 
+		/// <summary>
+		/// Stops the current movement if there is any
+		/// </summary>
 		public void Stop()
-		{
-			if (State == WorldWalkerState.Started) {
-				StopMovement(WorldWalkerState.Canceled);
-			}
-
-			State = WorldWalkerState.Canceled;
+		{		
+			StopMovement(WorldWalkerState.Canceled);		
 		}
 
+		/// <summary>
+		/// Returns the current position and the part of the path that has not been reached yet.
+		/// </summary>
+		/// <returns>Remaining part of the path to be walked in the form of waypoints.</returns>
 		public IEnumerable<Waypoint> GetRestOfThePath()
 		{
 			return GetRestOfThePath(new Vector3(0, 0, 0));
 		}
 
 		/// <summary>
-		/// Returns the current position and the part of the path that has not been reached yet
+		/// Returns the current position and the part of the path that has not been reached yet, each waypoint offset by <paramref name="offset"/>.
 		/// </summary>
-		/// <param name="offset">Offset from the unit feet position that every Waypoint position will be transfered by</param>
-		/// <returns>Returns the current position and the part of the path that has not been reached yet</returns>
+		/// <param name="offset">Offset from the unit feet position that every Waypoint position will be translated by</param>
+		/// <returns>Returns the current position and the part of the path that has not been reached yet, each waypoint offset by <paramref name="offset"/>.</returns>
 		public IEnumerable<Waypoint> GetRestOfThePath(Vector3 offset)
 		{
-			return Path?.GetRestOfThePath(offset) ?? new [] {new Waypoint(new TempNode(Unit.Position, Map), 0, MovementType.Linear).WithOffset(offset)};
+			return Path?.GetRestOfThePath(offset) ?? new [] {new Waypoint(new TempNode(Unit.Position, Level.Map), 0, MovementType.Linear).WithOffset(offset)};
 		}
 
-
-
+		/// <summary>
+		/// Scene update, checked that the level is started and the updates of this unit are enabled.
+		/// </summary>
+		/// <param name="timeStep">Time from the previous update.</param>
 		protected override void OnUpdateChecked(float timeStep)
 		{
 			Debug.Assert(Path != null, "Target was null with scene updates enabled");
 
-
+			//Move towards the next waypoint
 			if (!MoveTowards(Path.TargetWaypoint, timeStep)) {
 				return;
 			}
 
-			if (!Path.WaypointReached(user.GetNodeDistCalculator())) {
+			if (TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc)) {
+				StopMovement(WorldWalkerState.Failed);
+				return;
+			}
+
+			//Signal to the path that waypoint was reached (MoveTowards returned true), check if it was the last
+			if (!Path.WaypointReached(nodeDistCalc)) {
+				//Last waypoint was reached
 				StopMovement(WorldWalkerState.Finished);
 			}
 		}
@@ -251,16 +308,22 @@ namespace MHUrho.UnitComponents
 		/// <summary>
 		/// Moves unit towards the <paramref name="point"/>
 		/// </summary>
-		/// <param name="waypoint">waypoint to move towards</param>
-		/// <param name="timeStep">timeStep of the game</param>
+		/// <param name="waypoint">Waypoint to move towards</param>
+		/// <param name="timeStep">TimeStep of the game, time from previous update.</param>
 		/// <returns>If unit reached the waypoint</returns>
 		bool MoveTowards(Waypoint waypoint, float timeStep) {
+
+			if (TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc))
+			{
+				StopMovement(WorldWalkerState.Failed);
+				return false;
+			}
 
 			switch (waypoint.MovementType) {
 				case MovementType.None:
 					return false;
 				case MovementType.Teleport:
-					if (Path.Update(Unit.Position, timeStep, user.GetNodeDistCalculator())) {
+					if (Path.Update(Unit.Position, timeStep, nodeDistCalc)) {
 						//Still can teleport
 
 						//Check timeout
@@ -277,8 +340,7 @@ namespace MHUrho.UnitComponents
 					//Default to linear movement
 					Vector3 newPosition = Unit.Position + GetMoveVector(waypoint, timeStep);
 
-
-					if (Path.Update(newPosition, timeStep, user.GetNodeDistCalculator())) {
+					if (Path.Update(newPosition, timeStep, nodeDistCalc)) {
 						//Can still move towards the waypoint
 						bool reachedWaypoint = false;
 						if (ReachedPoint(Unit.Position, newPosition, waypoint.Position)) {
@@ -295,18 +357,23 @@ namespace MHUrho.UnitComponents
 
 			//Unit couldn't move to newPosition
 
+			if (TryGetNodeDistCalculator(out nodeDistCalc)) {
+				StopMovement(WorldWalkerState.Failed);
+				return false;
+			}
+
 			//Recalculate path
 			var newPath = Path.FromTo(Unit.Position,
 									Path.GetTarget(),
-									Map,
-									user.GetNodeDistCalculator());
+									Level.Map,
+									nodeDistCalc);
 
 			if (newPath == null) {
 				//Cant get there
 				StopMovement(WorldWalkerState.Failed);
 			}
 			else {
-				OnPathRecalculated?.Invoke(this, Path, newPath);
+				InvokeOnPathRecalculated(Path, newPath);
 				Path = newPath;
 			}
 			return false;
@@ -347,7 +414,7 @@ namespace MHUrho.UnitComponents
 			Path = newPath;
 			Enabled = true;
 			State = WorldWalkerState.Started;
-			OnMovementStarted?.Invoke(this);
+			InvokeOnMovementStarted();
 		}
 
 		void StopMovement(WorldWalkerState endState)
@@ -355,19 +422,97 @@ namespace MHUrho.UnitComponents
 			State = endState;
 			switch (endState) {
 				case WorldWalkerState.Finished:
-					OnMovementEnded?.Invoke(this);
+					InvokeOnMovementFinished();
 					break;
 				case WorldWalkerState.Failed:
-					OnMovementFailed?.Invoke(this);
+					InvokeOnMovementFailed();
 					break;
 				case WorldWalkerState.Canceled:
-					OnMovementCanceled?.Invoke(this);
+					if (Path != null) {
+						InvokeOnMovementCanceled();
+					}			
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(endState), endState, null);
 			}
 			Path = null;
 			Enabled = false;
+		}
+
+		bool TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalculator)
+		{
+			try {
+				nodeDistCalculator = user.GetNodeDistCalculator();
+				return nodeDistCalculator != null;
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"There was an unexpected exception in {nameof(user.GetNodeDistCalculator)}: {e.Message}");
+				nodeDistCalculator = null;
+				return false;
+			}
+		}
+
+		void InvokeOnMovementStarted()
+		{
+			try {
+				MovementStarted?.Invoke(this);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(MovementStarted)}: {e.Message}");
+			}
+		}
+
+		void InvokeOnMovementFinished(){
+			try
+			{
+				MovementFinished?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(MovementFinished)}: {e.Message}");
+			}
+		}
+
+		void InvokeOnMovementFailed()
+		{
+			try
+			{
+				MovementFailed?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(MovementFailed)}: {e.Message}");
+			}
+		}
+
+		void InvokeOnMovementCanceled()
+		{
+			try
+			{
+				MovementCanceled?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(MovementCanceled)}: {e.Message}");
+			}
+		}
+
+		void InvokeOnPathRecalculated(Path oldPath, Path newPath)
+		{
+			try
+			{
+				PathRecalculated?.Invoke(this, oldPath, newPath);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(PathRecalculated)}: {e.Message}");
+			}
 		}
 	}
 }

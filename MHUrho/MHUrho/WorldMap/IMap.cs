@@ -19,7 +19,7 @@ namespace MHUrho.WorldMap {
 	/// <param name="x">X coord of the tile corner</param>
 	/// <param name="y">Y coord of the tile corner</param>
 	/// <returns>New height of the [x,y] corner</returns>
-	public delegate float ChangeCornerHeightDelegate(float previousHeight, int x, int y);
+	public delegate float GetCornerHeightDelegate(float previousHeight, int x, int y);
 
 	/// <summary>
 	/// Represents a level map, with XZ plane horizontal and Y plane vertical. <para/>
@@ -445,7 +445,7 @@ namespace MHUrho.WorldMap {
 
 		void ChangeTileHeight(ITile centerTile,
 							IntVector2 rectangleSize,
-							ChangeCornerHeightDelegate newHeightFunction);
+							GetCornerHeightDelegate newHeightFunction);
 
 		float GetTerrainHeightAt(int x, int y);
 

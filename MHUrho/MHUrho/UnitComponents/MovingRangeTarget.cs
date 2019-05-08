@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
@@ -139,7 +140,14 @@ namespace MHUrho.UnitComponents
 		}
 
 		public override IEnumerable<Waypoint> GetFutureWaypoints() {
-			return user.GetFutureWaypoints(this);
+			try {
+				return user.GetFutureWaypoints(this);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning, $"There was an unexpected exception in {nameof(user.GetFutureWaypoints)}: {e.Message}");
+				//Recover
+				return Enumerable.Empty<Waypoint>();
+			}
 		}
 
 		public override StDefaultComponent SaveState() {
@@ -150,17 +158,16 @@ namespace MHUrho.UnitComponents
 			base.AddedToEntity(entityDefaultComponents);
 			AddedToEntity(typeof(MovingRangeTarget), entityDefaultComponents);
 
-			Entity.PositionChanged += TargetMoved;
+			Entity.PositionChanged += SignalTargetMoved;
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {
-			Entity.PositionChanged -= TargetMoved;
+			Entity.PositionChanged -= SignalTargetMoved;
 
 			bool removedBase = base.RemovedFromEntity(entityDefaultComponents);
 			bool removed = RemovedFromEntity(typeof(MovingRangeTarget), entityDefaultComponents);
 			Debug.Assert(removedBase == removed, "DefaultComponent was not correctly registered in the entity");
 			return removed;
 		}
-
 	}
 }

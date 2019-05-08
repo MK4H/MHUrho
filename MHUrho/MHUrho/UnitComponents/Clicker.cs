@@ -99,7 +99,13 @@ namespace MHUrho.UnitComponents
 
 		public void Click(int button, int buttons, int qualifiers)
 		{
-			Clicked?.Invoke(button, buttons, qualifiers);
+			try {
+				Clicked?.Invoke(button, buttons, qualifiers);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(Urho.LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(Clicked)}: {e.Message}");
+			}
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {

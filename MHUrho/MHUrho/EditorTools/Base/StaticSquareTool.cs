@@ -41,7 +41,13 @@ namespace MHUrho.EditorTools.Base
 
 		protected virtual void OnSquareChanged(ITile centerTile, int size)
 		{
-			SquareChanged?.Invoke(new StaticSquareChangedArgs(centerTile, size));
+			try {
+				SquareChanged?.Invoke(new StaticSquareChangedArgs(centerTile, size));
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(SquareChanged)}: {e.Message}");
+			}
 		}
 	}
 }

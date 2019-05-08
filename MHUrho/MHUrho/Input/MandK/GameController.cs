@@ -20,20 +20,22 @@ using Urho.Resources;
 
 namespace MHUrho.Input.MandK
 {
-	
+
+	public delegate void OnMouseMoveDelegate(MHUrhoMouseMovedEventArgs e);
+
+	public delegate void OnMouseDownDelegate(MouseButtonDownEventArgs e);
+
+	public delegate void OnMouseUpDelegate(MouseButtonUpEventArgs e);
+
+	public delegate void OnMouseWheelDelegate(MouseWheelEventArgs e);
+
+	public delegate void ScreenBorderEventDelegate(ScreenBorder border);
+
 	public enum ScreenBorder { Top, Bottom, Left, Right}
 
 	public class GameController : Controller, IGameController
 	{
-		public delegate void OnMouseMove(MHUrhoMouseMovedEventArgs e);
 
-		public delegate void OnMouseDown(MouseButtonDownEventArgs e);
-
-		public delegate void OnMouseUp(MouseButtonUpEventArgs e);
-
-		public delegate void OnMouseWheel(MouseWheelEventArgs e);
-
-		public delegate void ScreenBorderEvent(ScreenBorder border);
 
 		public IPlayer Player { get; private set; }
 
@@ -50,13 +52,13 @@ namespace MHUrho.Input.MandK
 
 		public IntVector2 CursorPosition => UI.CursorPosition;
 
-		public event OnMouseMove MouseMove;
-		public event OnMouseDown MouseDown;
-		public event OnMouseUp MouseUp;
-		public event OnMouseWheel MouseWheelMoved;
+		public event OnMouseMoveDelegate MouseMove;
+		public event OnMouseDownDelegate MouseDown;
+		public event OnMouseUpDelegate MouseUp;
+		public event OnMouseWheelDelegate MouseWheelMoved;
 
-		public event ScreenBorderEvent EnteredScreenBorder;
-		public event ScreenBorderEvent LeftScreenBorder;
+		public event ScreenBorderEventDelegate EnteredScreenBorder;
+		public event ScreenBorderEventDelegate LeftScreenBorder;
 
 	
 		readonly Octree octree;
@@ -173,7 +175,7 @@ namespace MHUrho.Input.MandK
 			if (IsBorder(prevCursorPosition)) {
 				List<ScreenBorder> prevBorders = GetBorders(prevCursorPosition);
 				foreach (var prevBorder in prevBorders) {
-					LeftScreenBorder?.Invoke(prevBorder);
+					InvokeLeftScreenBorder(prevBorder);
 				}
 			}
 		}
@@ -191,7 +193,7 @@ namespace MHUrho.Input.MandK
 			if (IsBorder(UI.Cursor.Position)) {
 				List<ScreenBorder> borders = GetBorders(UI.Cursor.Position);
 				foreach (var border in borders) {
-					EnteredScreenBorder?.Invoke(border);
+					InvokeEnteredScreenBorder(border);
 				}
 			}
 
@@ -303,17 +305,17 @@ namespace MHUrho.Input.MandK
 		protected override void KeyDown(KeyDownEventArgs e) {
 			if (e.Repeat) {
 				if (keyRepeatActions.TryGetValue(e.Key, out var repeatAction)) {
-					repeatAction?.Invoke(e);
+					InvokeKeyAction(repeatAction,e);
 				}
 			}
 			else if (keyDownActions.TryGetValue(e.Key, out var downAction)) {
-				downAction?.Invoke(e);
+				InvokeKeyAction(downAction,e);
 			}
 		}
 
 		protected override void KeyUp(KeyUpEventArgs e) {
 			if (keyUpActions.TryGetValue(e.Key, out var upAction)) {
-				upAction?.Invoke(e);
+				InvokeKeyAction(upAction, e);
 			}
 		}
 
@@ -321,7 +323,7 @@ namespace MHUrho.Input.MandK
 
 			//Log.Write(LogLevel.Debug, $"Mouse button down at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
 
-			MouseDown?.Invoke(e);
+			InvokeMouseDown(e);
 			cachedTileUnderCursor = null;
 		}
 
@@ -329,7 +331,7 @@ namespace MHUrho.Input.MandK
 			//Log.Write(LogLevel.Debug, $"Mouse button up at: X={UI.Cursor.Position.X}, Y={UI.Cursor.Position.Y}");
 
 			
-			MouseUp?.Invoke(e);
+			InvokeMouseUp(e);
 			cachedTileUnderCursor = null;
 		}
 
@@ -342,7 +344,7 @@ namespace MHUrho.Input.MandK
 			var args = new MHUrhoMouseMovedEventArgs(UI.CursorPosition + new IntVector2(e.DX,e.DY), e.DX, e.DY,(MouseButton) e.Buttons, e.Qualifiers);
 			
 
-			MouseMove?.Invoke(args);
+			InvokeMouseMove(args);
 
 			//Invisible cursor cannot be on the border
 			if (!cursorVisible) {
@@ -359,14 +361,14 @@ namespace MHUrho.Input.MandK
 
 				foreach (var prevBorder in prevBorders) {
 					if (!borders.Contains(prevBorder)) {
-						LeftScreenBorder?.Invoke(prevBorder);
+						InvokeLeftScreenBorder(prevBorder);
 					}
 				}
 
 
 				foreach (var border in borders) {
 					if (!prevBorders.Contains(border)) {
-						EnteredScreenBorder?.Invoke(border);
+						InvokeEnteredScreenBorder(border);
 					}
 				}
 			}
@@ -378,7 +380,7 @@ namespace MHUrho.Input.MandK
 
 		protected override void MouseWheel(MouseWheelEventArgs e)
 		{
-			MouseWheelMoved?.Invoke(e);
+			InvokeMouseWheelMoved(e);
 		}
 
 		void SwitchToPause(KeyDownEventArgs e)
@@ -422,6 +424,98 @@ namespace MHUrho.Input.MandK
 			}
 
 			return borders;
+		}
+
+
+		void InvokeMouseMove(MHUrhoMouseMovedEventArgs args)
+		{
+			try
+			{
+				MouseMove?.Invoke(args);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(MouseMove)}: {e.Message}");
+			}
+		}
+
+		void InvokeMouseDown(MouseButtonDownEventArgs args)
+		{
+			try
+			{
+				MouseDown?.Invoke(args);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(MouseDown)}: {e.Message}");
+			}
+		}
+
+		void InvokeMouseUp(MouseButtonUpEventArgs args)
+		{
+			try
+			{
+				MouseUp?.Invoke(args);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(MouseUp)}: {e.Message}");
+			}
+		}
+
+		void InvokeMouseWheelMoved(MouseWheelEventArgs args)
+		{
+			try
+			{
+				MouseWheelMoved?.Invoke(args);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(MouseWheelMoved)}: {e.Message}");
+			}
+		}
+
+		void InvokeEnteredScreenBorder(ScreenBorder border)
+		{
+			try
+			{
+				EnteredScreenBorder?.Invoke(border);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(EnteredScreenBorder)}: {e.Message}");
+			}
+		}
+
+		void InvokeLeftScreenBorder(ScreenBorder border)
+		{
+			try
+			{
+				LeftScreenBorder?.Invoke(border);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(LeftScreenBorder)}: {e.Message}");
+			}
+		}
+
+		void InvokeKeyAction<T>(Action<T> keyAction, T args)
+		{
+			try
+			{
+				keyAction?.Invoke(args);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(keyAction)}: {e.Message}");
+			}
 		}
 	}
 }

@@ -83,6 +83,10 @@ namespace MHUrho.UserInterface
 
 			async void LoadButton_Pressed(PressedEventArgs args)
 			{
+				//100% in total
+				const double repLoadingPartSize = 10;
+				const double managerLoadingPartSize = 90;
+
 				if (MatchSelected == null) return;
 
 				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
@@ -92,10 +96,10 @@ namespace MHUrho.UserInterface
 				try {
 					var levelRep =
 						await LevelRep.GetFromSavedGame(newRelativePath,
-														screen.LoadingWatcher.GetWatcherForSubsection());
+														screen.LoadingWatcher.GetWatcherForSubsection(repLoadingPartSize));
 
 
-					ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection());
+					ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection(managerLoadingPartSize));
 					await loader.CurrentLoading;
 					MenuUIManager.Clear();
 				}

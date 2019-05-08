@@ -17,31 +17,33 @@ namespace MHUrho.WorldMap
 
 		public bool Moving => false;
 		//Map targets never move
-		public event TargetMoved OnTargetMoved;
+		public event TargetMovedDelegate TargetMoved;
 
 		public Vector3 CurrentPosition { get; }
 
 		protected List<RangeTargetComponent.IShooter> shooters;
 
-		LevelManager level;
+		readonly LevelManager level;
+		readonly Map map;
 
-		protected MapRangeTarget(LevelManager level, Vector3 position) {
+		protected MapRangeTarget(LevelManager level, Map map, Vector3 position) {
 			this.level = level;
+			this.map = map;
 			this.CurrentPosition = position;
 			shooters = new List<RangeTargetComponent.IShooter>();
 		}
 
-		internal static MapRangeTarget CreateNew(LevelManager level, Vector3 position) {
+		internal static MapRangeTarget CreateNew(LevelManager level, Map map, Vector3 position) {
 
-			var mapTarget = new MapRangeTarget(level, position);
+			var mapTarget = new MapRangeTarget(level, map, position);
 			level.RegisterRangeTarget(mapTarget);
 			return mapTarget;
 		}
 
-		internal static MapRangeTarget Load(LevelManager level, StMapTarget storedMapTarget)
+		internal static MapRangeTarget Load(LevelManager level, Map map, StMapTarget storedMapTarget)
 		{
 			var newTarget =
-				new MapRangeTarget(level, storedMapTarget.Position.ToVector3()) {InstanceID = storedMapTarget.InstanceID};
+				new MapRangeTarget(level, map, storedMapTarget.Position.ToVector3()) {InstanceID = storedMapTarget.InstanceID};
 			level.LoadRangeTarget(newTarget);
 			return newTarget;
 		}
@@ -64,7 +66,7 @@ namespace MHUrho.WorldMap
 
 			if (shooters.Count == 0) {
 				level.UnRegisterRangeTarget(InstanceID);
-				level.Map.RemoveRangeTarget(this);
+				map.RemoveRangeTarget(this);
 			}
 		}
 

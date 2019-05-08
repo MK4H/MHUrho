@@ -77,7 +77,6 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-
 		public Vector3 Movement { get; private set; }
 
 		public IProjectile Projectile => (IProjectile)Entity;
@@ -128,7 +127,7 @@ namespace MHUrho.UnitComponents
 			//Source https://blog.forrestthewoods.com/solving-ballistic-trajectories-b0165523348c
 			// https://en.wikipedia.org/wiki/Projectile_motion
 
-			//TODO: Try this https://gamedev.stackexchange.com/questions/114522/how-can-i-launch-a-gameobject-at-a-target-if-i-am-given-everything-except-for-it
+			//NOTE: Try this https://gamedev.stackexchange.com/questions/114522/how-can-i-launch-a-gameobject-at-a-target-if-i-am-given-everything-except-for-it
 
 			var diff = targetPosition - sourcePosition;
 			Vector3 directionXZ = diff.XZ();

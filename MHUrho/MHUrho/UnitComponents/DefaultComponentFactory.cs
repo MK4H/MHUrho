@@ -30,7 +30,7 @@ namespace MHUrho.UnitComponents
 		}
 
 		void AddLoaders(IDictionary<StDefaultComponent.ComponentOneofCase, DefaultComponentLoader> loaders) {
-			//TODO: Maybe reflection
+			//NOTE: Maybe use reflection
 			loaders.Add(StDefaultComponent.ComponentOneofCase.UnitSelector, new UnitSelector.Loader());
 			loaders.Add(StDefaultComponent.ComponentOneofCase.WorldWalker, new WorldWalker.Loader());
 			loaders.Add(StDefaultComponent.ComponentOneofCase.Shooter, new Shooter.Loader());
@@ -40,7 +40,7 @@ namespace MHUrho.UnitComponents
 			loaders.Add(StDefaultComponent.ComponentOneofCase.MovingMeeleAttacker, new MovingMeeleAttacker.Loader());
 			loaders.Add(StDefaultComponent.ComponentOneofCase.StaticMeeleAttacker, new StaticMeeleAttacker.Loader());
 			loaders.Add(StDefaultComponent.ComponentOneofCase.Clicker, new Clicker.Loader());
-			//TODO: Add other components
+			//NOTE: Add other components
 		}
 
 

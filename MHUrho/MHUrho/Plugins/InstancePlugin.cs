@@ -12,8 +12,6 @@ namespace MHUrho.Plugins
 	{
 		public ILevelManager Level { get; protected set; }
 
-		public Map Map => Level.Map;
-
 		protected InstancePlugin(ILevelManager level) {
 			this.Level = level;
 		}

@@ -15,13 +15,13 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.EditorTools.MandK
 {
+	public delegate void HandleSelectedRectangle(IntVector2 topLeft, IntVector2 bottomRight, MouseButtonUpEventArgs e);
+	public delegate void HandleSingleClick(MouseButtonUpEventArgs e);
+
 	public class DynamicRectangleTool : MHUrho.EditorTools.Base.DynamicRectangleTool, IMandKTool {
-		public delegate void HandleSelectedRectangle(IntVector2 topLeft, IntVector2 bottomRight, MouseButtonUpEventArgs e);
-
-		public delegate void HandleSingleClick(MouseButtonUpEventArgs e);
-
-		public event HandleSelectedRectangle SelectionHandler;
-		public event HandleSingleClick SingleClickHandler;
+		
+		public event HandleSelectedRectangle Selected;
+		public event HandleSingleClick SingleClick;
 
 		readonly GameController input;
 		readonly GameUI ui;
@@ -45,11 +45,6 @@ namespace MHUrho.EditorTools.MandK
 
 		public override void Enable() {
 			if (enabled) return;
-
-			if (SelectionHandler == null) {
-				throw new
-					InvalidOperationException($"{nameof(SelectionHandler)} and {nameof(SingleClickHandler)} were not set, cannot enable without handler");
-			}
 
 			input.MouseDown += MouseDown;
 			input.MouseUp += MouseUp;
@@ -101,7 +96,7 @@ namespace MHUrho.EditorTools.MandK
 			var tile = input.GetTileUnderCursor();
 
 			if (!rectangle && tile != null) {
-				SingleClickHandler?.Invoke(e);
+				InvokeSingleClick(e);
 			}
 			else {
 				IntVector2 topLeft, bottomRight;
@@ -119,7 +114,7 @@ namespace MHUrho.EditorTools.MandK
 													 Math.Max(mouseDownPos.Y, lastMousePos.Y));
 				}
 
-				SelectionHandler?.Invoke(topLeft, bottomRight, e);
+				InvokeSelected(topLeft, bottomRight, e);
 				Map.DisableHighlight();
 			}
 		  
@@ -162,6 +157,30 @@ namespace MHUrho.EditorTools.MandK
 			}
 		}
 
+		void InvokeSelected(IntVector2 topLeft, IntVector2 bottomRight, MouseButtonUpEventArgs args)
+		{
+			try {
+				Selected?.Invoke(topLeft, bottomRight, args);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(Selected)}: {e.Message}");
+	
+			}
+		}
 
+		void InvokeSingleClick(MouseButtonUpEventArgs args)
+		{
+			try
+			{
+				SingleClick?.Invoke(args);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(SingleClick)}: {e.Message}");
+
+			}
+		}
 	}
 }

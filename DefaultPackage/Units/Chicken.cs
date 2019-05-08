@@ -54,7 +54,9 @@ namespace DefaultPackage
 
 	public class ChickenInstance : UnitInstancePlugin, 
 									WorldWalker.IUser, 
-									MovingRangeTarget.IUser{
+									MovingRangeTarget.IUser,
+									UnitSelector.IUser
+	{
 
 		class DistanceCalc : NodeDistCalculator
 		{
@@ -245,7 +247,7 @@ namespace DefaultPackage
 					}
 					else if (explicitTarget.Moving && targetMoved) {
 						targetMoved = false;
-						Walker.GoTo(Map.PathFinding.GetClosestNode(explicitTarget.CurrentPosition));
+						Walker.GoTo(Level.Map.PathFinding.GetClosestNode(explicitTarget.CurrentPosition));
 					}
 				}
 			}
@@ -267,6 +269,38 @@ namespace DefaultPackage
 		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
 		{
 			return distCalc;
+		}
+
+		bool UnitSelector.IUser.ExecuteOrder(Order order)
+		{
+			order.Executed = false;
+			if (order.PlatformOrder)
+			{
+				switch (order)
+				{
+					case MoveOrder moveOrder:
+						Shooter.StopShooting();
+						Shooter.SearchForTarget = false;
+						explicitTarget = null;
+						order.Executed = Walker.GoTo(moveOrder.Target);
+						break;
+					case AttackOrder attackOrder:
+						Shooter.StopShooting();
+
+						if (Unit.Player.IsEnemy(attackOrder.Target.Player) && (SetExplicitTarget(attackOrder.Target) != null))
+						{
+							order.Executed = Shooter.ShootAt(explicitTarget) || Walker.GoTo(Level.Map.PathFinding.GetClosestNode(explicitTarget.CurrentPosition));
+						}
+
+						if (order.Executed)
+						{
+							Shooter.SearchForTarget = false;
+						}
+						break;
+				}
+			}
+
+			return order.Executed;
 		}
 
 		void OnMovementStarted(WorldWalker walker) {
@@ -302,32 +336,7 @@ namespace DefaultPackage
 			}
 		}
 
-		void OnUnitOrdered(UnitSelector selector, Order order) {
-			order.Executed = false;
-			if (order.PlatformOrder) {
-				switch (order) {
-					case MoveOrder moveOrder:
-						Shooter.StopShooting();
-						Shooter.SearchForTarget = false;
-						explicitTarget = null;
-						order.Executed = Walker.GoTo(moveOrder.Target);
-						break;
-					case AttackOrder attackOrder:
-						Shooter.StopShooting();
-
-						if (Unit.Player.IsEnemy(attackOrder.Target.Player) && (SetExplicitTarget(attackOrder.Target) != null)) {
-							order.Executed = Shooter.ShootAt(explicitTarget) || Walker.GoTo(Map.PathFinding.GetClosestNode(explicitTarget.CurrentPosition));
-						}
-
-						if (order.Executed) {
-							Shooter.SearchForTarget = false;
-						}
-						break;
-				}
-			}
-		}
-
-		void OnTargetAcquired(Shooter shooter) {
+		void OnTargetAutoAcquired(Shooter shooter) {
 			var targetPos = shooter.Target.CurrentPosition;
 
 			var diff = Unit.Position - targetPos;
@@ -371,7 +380,7 @@ namespace DefaultPackage
 			if (target == null) return null;
 
 			explicitTarget = target;
-			target.OnTargetMoved += ExplicitTargetMoved;
+			target.TargetMoved += ExplicitTargetMoved;
 
 			return target;
 		}
@@ -383,19 +392,20 @@ namespace DefaultPackage
 
 		void RegisterEvents(WorldWalker walker, Shooter shooter, UnitSelector selector)
 		{
-			walker.OnMovementStarted += OnMovementStarted;
-			walker.OnMovementEnded += OnMovementFinished;
-			walker.OnMovementFailed += OnMovementFailed;
-			walker.OnMovementCanceled += OnMovementCanceled;
+			walker.MovementStarted += OnMovementStarted;
+			walker.MovementFinished += OnMovementFinished;
+			walker.MovementFailed += OnMovementFailed;
+			walker.MovementCanceled += OnMovementCanceled;
 
 			
 
-			shooter.OnBeforeShotFired += BeforeShotFired;
-			shooter.OnTargetAcquired += OnTargetAcquired;
-			shooter.OnTargetDestroyed += OnTargetDestroyed;
+			shooter.BeforeShotFired += BeforeShotFired;
+			shooter.TargetAutoAcquired += OnTargetAutoAcquired;
+			shooter.TargetDestroyed += OnTargetDestroyed;
 
-			selector.Ordered += OnUnitOrdered;
 			selector.UnitSelected += OnUnitSelected;
 		}
+
+
 	}
 }

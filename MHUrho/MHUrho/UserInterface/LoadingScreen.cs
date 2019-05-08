@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
+using Urho;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
@@ -34,21 +35,11 @@ namespace MHUrho.UserInterface
 				window = (Window)MenuUIManager.MenuRoot.GetChild("LoadingScreen");
 				text = (Text)window.GetChild("Text");
 
-				LoadingWatcher.OnTextUpdate += OnTextUpdate;
-				LoadingWatcher.OnFinishedLoading += OnLoadingFinished;
+				LoadingWatcher.TextUpdate += OnTextUpdate;
+				LoadingWatcher.FinishedLoading += OnLoadingFinished;
 			}
 
-			public void OnLoadingFinished(ILoadingWatcher finishedLoading)
-			{
-				text.Value = "Loading finished";
-				Action handlers = proxy.OnLoadingFinished;
-				handlers?.Invoke();
-			}
-
-			public void OnTextUpdate(string newText)
-			{
-				text.Value = newText;
-			}
+			
 
 			public override void EnableInput()
 			{
@@ -67,14 +58,37 @@ namespace MHUrho.UserInterface
 
 			public override void Dispose()
 			{
-				LoadingWatcher.OnTextUpdate -= OnTextUpdate;
-				LoadingWatcher.OnFinishedLoading -= OnLoadingFinished;
+				LoadingWatcher.TextUpdate -= OnTextUpdate;
+				LoadingWatcher.FinishedLoading -= OnLoadingFinished;
 
 				window.RemoveAllChildren();
 				window.Remove();
 
 				window.Dispose();
 				text.Dispose();
+			}
+
+			void OnLoadingFinished(ILoadingWatcher finishedLoading)
+			{
+				//Update UI text, must be called from main thread
+				MyGame.InvokeOnMainSafe(() => { text.Value = "Loading finished"; });
+				
+				//Copy to local variable if any of them call Hide()
+				Action handlers = proxy.OnLoadingFinished;
+				//Possible user methods
+				try {
+					handlers?.Invoke();
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(LogLevel.Debug,
+									$"There was an unexpected exception during the invocation of {nameof(proxy.OnLoadingFinished)}: {e.Message}");
+				}
+			}
+
+			void OnTextUpdate(string newText)
+			{
+				//Update UI text, must be called from main thread
+				MyGame.InvokeOnMainSafe(() => { text.Value = newText; ; });	
 			}
 		}
 

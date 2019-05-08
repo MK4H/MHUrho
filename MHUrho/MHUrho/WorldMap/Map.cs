@@ -29,11 +29,11 @@ namespace MHUrho.WorldMap
 			readonly Octree octree;
 			readonly IPathFindAlgFactory pathFindAlgFactory;
 			readonly StMap storedMap;
-			readonly LoadingWatcher loadingProgress;
+			readonly ILoadingProgress loadingProgress;
 
 			readonly List<ILoader> tileLoaders;
 
-			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, LoadingWatcher loadingProgress)
+			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, ILoadingProgress loadingProgress)
 			{
 				this.level = level;
 				this.mapNode = mapNode;
@@ -53,11 +53,14 @@ namespace MHUrho.WorldMap
 			/// Last step is to FinishLoading, after all references are connected
 			/// </summary>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
-			public void StartLoading() {
+			public void StartLoading()
+			{
+				loadingProgress?.SendTextUpdate("Loading map");
+
 				Map = new Map(mapNode, octree, storedMap) {levelManager = level};
 
 				foreach (var storedMapTarget in storedMap.MapRangeTargets) {
-					var newTarget = MapRangeTarget.Load(level, storedMapTarget);
+					var newTarget = MapRangeTarget.Load(level, Map, storedMapTarget);
 					Map.mapRangeTargets.Add(newTarget.CurrentPosition, newTarget);
 				}
 
@@ -70,8 +73,7 @@ namespace MHUrho.WorldMap
 							ITileLoader newTileLoader;
 							if (Map.IsBorderTileMapLocation(x, y)) {
 								if (!borderTiles.MoveNext()) {
-									//TODO: Exception
-									throw new Exception("Corrupted save file");
+									throw new LevelLoadingException("Corrupted save file, invalid number of border tiles compared to the stored map size");
 								}
 
 								newTileLoader = BorderTile.GetLoader(Map, borderTiles.Current);
@@ -79,8 +81,7 @@ namespace MHUrho.WorldMap
 							}
 							else {
 								if (!tiles.MoveNext()) {
-									//TODO: Exception
-									throw new Exception("Corrupted save file");
+									throw new LevelLoadingException("Corrupted save file, invalid number of tiles compared to the stored map size");
 								}
 
 								newTileLoader = Tile.GetLoader(level, Map, tiles.Current);
@@ -104,8 +105,8 @@ namespace MHUrho.WorldMap
 					borderTiles?.Dispose();
 				}
 
-
-				
+				loadingProgress?.SendUpdate(100, "Loaded map");
+				loadingProgress?.SendFinishedLoading();
 			}
 
 			public void ConnectReferences() {
@@ -122,7 +123,7 @@ namespace MHUrho.WorldMap
 					loader.FinishLoading();
 				}
 
-				Map.BuildGeometry(loadingProgress);
+				Map.BuildGeometry(null);
 			}
 
 		}
@@ -419,8 +420,14 @@ namespace MHUrho.WorldMap
 		/// <param name="mapNode">Node to connect the map to</param>
 		/// <param name="size">Size of the playing field, excluding the borders</param>
 		/// <returns>Fully created map</returns>
-		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, LoadingWatcher loadingProgress) 
+		/// <exception cref="Exception">Exception might be thrown by <paramref name="pathFindAlg"/> factory</exception>
+		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, ILoadingProgress loadingProgress = null)
 		{
+			const double mapPartSize = 50;
+			const double pathfindPartSize = 40;
+			const double geometryPartSize = 10;
+
+			loadingProgress?.SendTextUpdate("Creating map");
 			Map newMap = new Map(mapNode, octree, size.X, size.Y) {levelManager = level};
 
 			TileType defaultTileType = PackageManager.Instance.ActivePackage.DefaultTileType;
@@ -440,11 +447,18 @@ namespace MHUrho.WorldMap
 				}
 
 			}
+			loadingProgress?.SendUpdate(mapPartSize, "Created map");
 
-			loadingProgress.TextUpdate("Creating pathfinding graph");
+			loadingProgress?.SendTextUpdate("Creating pathfinding graph");
 			newMap.PathFinding = pathFindAlg.GetPathFindAlg(newMap);
+			loadingProgress?.SendUpdate(pathfindPartSize, "Created pathfinding graph");
 
-			newMap.BuildGeometry(loadingProgress);
+			loadingProgress?.SendTextUpdate("Creating geometry");
+			newMap.BuildGeometry(loadingProgress.GetWatcherForSubsection(geometryPartSize));
+
+			loadingProgress?.SendTextUpdate("Created map");
+			loadingProgress?.SendFinishedLoading();
+
 			return newMap;
 		}
 
@@ -899,7 +913,7 @@ namespace MHUrho.WorldMap
 		{
 			var results = octree.Raycast(ray: ray, maxDistance: maxDistance);
 
-			//TODO: Check it intersects from the correct side
+			//NOTE: Maybe check it intersects from the correct side
 			return from result in results
 					where IsRaycastToMap(result)
 					select result;
@@ -1037,7 +1051,7 @@ namespace MHUrho.WorldMap
 
 		public void ChangeTileHeight(ITile centerTile, 
 									 IntVector2 rectangleSize,
-									 ChangeCornerHeightDelegate newHeightFunction) 
+									 GetCornerHeightDelegate newHeightFunction) 
 		{
 
 			//COPYING IS FREQUENT SOURCE OF ERRORS
@@ -1050,7 +1064,15 @@ namespace MHUrho.WorldMap
 
 			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
 				for (int x = topLeft.X; x <= bottomRight.X; x++) {
-					ChangeCornerHeight(x, y, newHeightFunction(GetTerrainHeightAt(x, y), x, y), true);
+					float height = GetTerrainHeightAt(x, y);
+					try {
+						height = newHeightFunction(height, x, y);
+					}
+					catch (Exception e) {
+						Urho.IO.Log.Write(LogLevel.Warning,
+										$"There was an unexpected exception during the calculation of new height: {e.Message}");
+					} 
+					ChangeCornerHeight(x, y, height, true);
 				}
 			}
 
@@ -1339,7 +1361,7 @@ namespace MHUrho.WorldMap
 		public IRangeTarget GetRangeTarget(Vector3 position) 
 		{
 			if (!mapRangeTargets.TryGetValue(position, out MapRangeTarget mapTarget)) {
-				mapTarget = MapRangeTarget.CreateNew(levelManager, position);
+				mapTarget = MapRangeTarget.CreateNew(levelManager, this, position);
 				mapRangeTargets.Add(position, mapTarget);
 			}
 
@@ -1370,7 +1392,7 @@ namespace MHUrho.WorldMap
 
 
 
-		void BuildGeometry(LoadingWatcher loadingProgress)
+		void BuildGeometry(ILoadingProgress loadingProgress)
 		{
 			graphics = MapGraphics.Build(this, 
 										 ChunkSize,

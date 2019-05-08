@@ -14,16 +14,6 @@ namespace MHUrho.UnitComponents
 	public delegate void UnitSelectedDelegate(UnitSelector unitSelector);
 	public delegate void UnitDeselectedDelegate(UnitSelector unitSelector);
 
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="selector"></param>
-	/// <param name="order">Contains an Executed flag, which is true if some method before consumed the command, and false if it did not
-	/// Should be set to true if you were able to execute the command, and leave the previous value if not</param>
-	public delegate void UnitOrderedDelegate(UnitSelector unitSelector, Order order);
-
-
-
 	public class UnitSelector : Selector {
 
 		internal class Loader : DefaultComponentLoader {
@@ -58,13 +48,20 @@ namespace MHUrho.UnitComponents
 
 			public override void StartLoading() {
 
+				var user = plugin as IUser;
+				if (user == null)
+				{
+					throw new
+						ArgumentException($"provided plugin does not implement the {nameof(IUser)} interface", nameof(plugin));
+				}
+
 				if (storedData.ComponentCase != StDefaultComponent.ComponentOneofCase.UnitSelector) {
 					throw new ArgumentException("Invalid component type data passed to loader", nameof(storedData));
 				}
 
 				var storedUnitSelector = storedData.UnitSelector;
 
-				UnitSelector = new UnitSelector(level)
+				UnitSelector = new UnitSelector(user, level)
 								{
 									Enabled = storedUnitSelector.Enabled
 								};
@@ -85,51 +82,87 @@ namespace MHUrho.UnitComponents
 			}
 		}
 
-		public IUnit Unit => (IUnit)Entity;
-
-		public event UnitSelectedDelegate UnitSelected;
-		public event UnitDeselectedDelegate UnitDeselected;
-		
-		
-		public event UnitOrderedDelegate Ordered;
-
-
-		protected UnitSelector(ILevelManager level) 
-			:base(level)
-		{
-
+		public interface IUser {
+			/// <summary>
+			/// Executes given <paramref name="order"/>, returns true if executed successfully, false otherwise.
+			/// </summary>
+			/// <param name="order">Order to execute.</param>
+			/// <returns>True if executed successfully, false otherwise</returns>
+			bool ExecuteOrder(Order order);
 		}
 
-		public static UnitSelector CreateNew(UnitInstancePlugin plugin, ILevelManager level)
+		public IUnit Unit => (IUnit)Entity;
+
+		/// <summary>
+		/// Invoked on unit selection
+		/// </summary>
+		public event UnitSelectedDelegate UnitSelected;
+
+		/// <summary>
+		/// Invoked on unit deselection
+		/// </summary>
+		public event UnitDeselectedDelegate UnitDeselected;
+
+		IUser user;
+
+		protected UnitSelector(IUser user, ILevelManager level) 
+			:base(level)
 		{
-			var newInstance = new UnitSelector(level);
+			this.user = user;
+		}
+
+		public static UnitSelector CreateNew<T>(T plugin, ILevelManager level)
+			where T: UnitInstancePlugin, IUser
+		{
+			if (plugin == null) {
+				throw new ArgumentNullException(nameof(plugin));
+			}
+
+			var newInstance = new UnitSelector(plugin, level);
 			plugin.Entity.AddComponent(newInstance);
 			return newInstance;
 		}
 
 		/// <summary>
-		/// Orders this selected unit with target <paramref name="targetTile"/>
-		/// 
-		/// if the unit can do anything, returns true,the order is given and the unit will procede
-		/// if the unit cant do anything, returns false
+		/// Issues an <paramref name="order"/> to the unit.
+		/// If the order was executed, returns true, otherwise false.
 		/// </summary>
-		/// <param name="targetTile">target tile</param>
-		/// <returns>True if unit was given order, False if there is nothing the unit can do</returns>
+		/// <param name="order">Order to execute.</param>
+		/// <returns>True if unit executed given order, False if there is nothing the unit can do</returns>
 		public override bool Order(Order order) {
-			//TODO: EventArgs to get if the event was handled
-			Ordered?.Invoke(this, order);
-			return order.Executed;
+			try {
+				return user.ExecuteOrder(order);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error,
+								$"There was an unexpected exception in {nameof(user.ExecuteOrder)}: {e.Message}");
+				return false;
+			}
 		}
 
 
 		public override void Select() {
 			Selected = true;
-			UnitSelected?.Invoke(this);
+			try {
+				UnitSelected?.Invoke(this);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(UnitSelected)}: {e.Message}");
+			}
 		}
 
 		public override void Deselect() {
 			Selected = false;
-			UnitDeselected?.Invoke(this);
+			try
+			{
+				UnitDeselected?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(UnitDeselected)}: {e.Message}");
+			}
 		}
 
 

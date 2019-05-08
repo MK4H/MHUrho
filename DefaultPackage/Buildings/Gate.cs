@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
@@ -36,28 +37,54 @@ namespace DefaultPackage
 	}
 
 	public class GateInstance : BuildingInstancePlugin {
+
+		bool isOpen;
+
+
 		public GateInstance(ILevelManager level, IBuilding building)
 			: base(level, building)
 		{ }
 
+		public void Open()
+		{
+
+		}
+
+		public void Close()
+		{
+
+		}
+
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
-			throw new NotImplementedException();
+			var writer = pluginData.GetWriterForWrappedSequentialData();
+			writer.StoreNext(isOpen);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
-			throw new NotImplementedException();
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			isOpen = reader.GetNext<bool>();
 		}
 
 		public override void Dispose()
 		{
-			throw new NotImplementedException();
+			
 		}
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
-			throw new NotImplementedException();
+			
+		}
+
+		public override float? GetHeightAt(float x, float y)
+		{
+			return null;
+		}
+
+		public override IFormationController GetFormationController(Vector3 centerPosition)
+		{
+			return null;
 		}
 	}
 }

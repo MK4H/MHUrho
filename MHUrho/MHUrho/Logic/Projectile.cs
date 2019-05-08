@@ -182,6 +182,8 @@ namespace MHUrho.Logic
 
 		public ProjectileType ProjectileType { get; private set; }
 
+		public override IEntityType Type => ProjectileType;
+
 		public override Vector3 Position {
 			get => Node.Position;
 			protected set => Node.Position = value;
@@ -251,7 +253,7 @@ namespace MHUrho.Logic
 			ID = newID;
 			Enabled = true;
 			Node.NodeCollisionStart += CollisionHandler;
-			RemovedFromLevel = false;
+			IsRemovedFromLevel = false;
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
@@ -277,7 +279,7 @@ namespace MHUrho.Logic
 		public override void RemoveFromLevel() 
 		{
 			Enabled = false;
-			if (RemovedFromLevel) return;
+			if (IsRemovedFromLevel) return;
 			base.RemoveFromLevel();
 
 			Node.NodeCollisionStart -= CollisionHandler;
@@ -303,7 +305,7 @@ namespace MHUrho.Logic
 
 		public void HardRemove()
 		{
-			if (!RemovedFromLevel) {
+			if (!IsRemovedFromLevel) {
 				RemoveFromLevel();
 			}
 
@@ -324,7 +326,7 @@ namespace MHUrho.Logic
 				SignalRotationChanged();
 			}
 
-			if (!Map.IsInside(Position)) {
+			if (!Level.Map.IsInside(Position)) {
 				try
 				{
 					ProjectilePlugin.OnTerrainHit();

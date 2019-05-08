@@ -14,7 +14,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
-	public class BuildingType : ILoadableType, IDisposable
+	public class BuildingType : IEntityType, IDisposable
 	{
 		public int ID { get; private set; }
 
@@ -29,7 +29,9 @@ namespace MHUrho.Logic
 		public IntVector2 Size { get; private set; }
 
 		public BuildingTypePlugin Plugin { get; private set; }
-		
+
+		TypePlugin IEntityType.Plugin => Plugin;
+
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
 		/// It is done this way to allow cyclic references during the Load method, so anything 

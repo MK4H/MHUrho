@@ -30,14 +30,14 @@ namespace MHUrho.Logic
 
 		public ILevelManager Level { get; protected set; }
 
-		public Map Map => Level.Map;
-
 		public abstract Vector3 Position { get; protected set; }
 
 		public Vector2 XZPosition {
 			get => Position.XZ2();
 			set => Position = new Vector3(value.X, Position.Y, value.Y);
 		}
+
+		public new abstract IEntityType Type { get; }
 
 		public abstract Vector3 Forward { get; }
 
@@ -54,7 +54,7 @@ namespace MHUrho.Logic
 		public abstract InstancePlugin Plugin { get; }
 	
 
-		public bool RemovedFromLevel { get; protected set; }
+		public bool IsRemovedFromLevel { get; protected set; }
 
 		public event Action<IEntity> PositionChanged;
 
@@ -120,20 +120,41 @@ namespace MHUrho.Logic
 
 		public virtual void RemoveFromLevel()
 		{
-			RemovedFromLevel = true;
-			OnRemoval?.Invoke();
+			IsRemovedFromLevel = true;
+			try {
+				OnRemoval?.Invoke();
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(OnRemoval)}: {e.Message}");
+			}
 		}
 
 		public abstract void HitBy(IEntity other, object additionalData);
 
 		protected void SignalPositionChanged()
 		{
-			PositionChanged?.Invoke(this);
+			try {
+				PositionChanged?.Invoke(this);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(PositionChanged)}: {e.Message}");
+			}
+			
 		}
 
 		protected void SignalRotationChanged()
 		{
-			RotationChanged?.Invoke(this);
+			try {
+				RotationChanged?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(RotationChanged)}: {e.Message}");
+			}
 		}
 	}
 }

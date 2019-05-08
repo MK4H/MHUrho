@@ -116,8 +116,14 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		public float RateOfFire { get; set; }
 
+		/// <summary>
+		/// If shooter should search for a target automatically.
+		/// </summary>
 		public bool SearchForTarget { get; set; }
 
+		/// <summary>
+		/// Delay between search sweeps.
+		/// </summary>
 		public float TargetSearchDelay { get; set; }
 
 		/// <summary>
@@ -126,21 +132,57 @@ namespace MHUrho.UnitComponents
 		/// </summary>
 		public Vector3 SourceOffset { get; set; }
 
+		/// <summary>
+		/// Current target the shooter is shooting at.
+		/// </summary>
 		public IRangeTarget Target { get; private set; }
 
-		public event TargetAquiredDelegate OnTargetAcquired;
-		public event ShotReloadedDelegate OnShotReloaded;
-		public event BeforeShotFiredDelegate OnBeforeShotFired;
-		public event TargetLostDelegate OnTargetLost;
-		public event TargetDestroyedDelegate OnTargetDestroyed;
-		public event ShotFiredDelegate OnShotFired;
+		/// <summary>
+		/// Invoked when shooter acquires a target automatically.
+		/// </summary>
+		public event TargetAquiredDelegate TargetAutoAcquired;
+
+		/// <summary>
+		/// Invoked when timeout between shots expires.
+		/// </summary>
+		public event ShotReloadedDelegate ShotReloaded;
+
+		/// <summary>
+		/// Invoked just before projectile is fired.
+		/// </summary>
+		public event BeforeShotFiredDelegate BeforeShotFired;
+
+		/// <summary>
+		/// Invoked when shooter looses current target. (Target gets out of range, etc.)
+		/// </summary>
+		public event TargetLostDelegate TargetLost;
+
+		/// <summary>
+		/// Invoked when target dies.
+		/// </summary>
+		public event TargetDestroyedDelegate TargetDestroyed;
+
+		/// <summary>
+		/// Invoked just after the projectile is fired.
+		/// </summary>
+		public event ShotFiredDelegate ShotFired;
 
 		float shotDelay;
 		float searchDelay;
 
+		/// <summary>
+		/// Type of the projectile to shoot.
+		/// </summary>
 		readonly ProjectileType projectileType;
 
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="level">Current level.</param>
+		/// <param name="projectileType">Type of the projectile to shoot.</param>
+		/// <param name="sourceOffset">Offset of the source of projectiles from the Entity Node.</param>
+		/// <param name="rateOfFire">Number of projectiles to shoot per minute.</param>
 		protected Shooter(ILevelManager level,
 						ProjectileType projectileType,
 						Vector3 sourceOffset,
@@ -156,6 +198,15 @@ namespace MHUrho.UnitComponents
 			ReceiveSceneUpdates = true;
 		}
 
+		/// <summary>
+		/// Creates new instance of a shooter and attaches it to the Entity and it's node.
+		/// </summary>
+		/// <param name="plugin">Plugin of the entity</param>
+		/// <param name="level">Current level.</param>
+		/// <param name="projectileType">Type of the projectile to shoot.</param>
+		/// <param name="sourceOffset">Offset of the source of projectiles from the Entity Node.</param>
+		/// <param name="rateOfFire">Rate of fire in number of projectiles per minute.</param>
+		/// <returns>The newly created instance of Shooter.</returns>
 		public static Shooter CreateNew(EntityInstancePlugin plugin,
 										ILevelManager level,
 										ProjectileType projectileType,
@@ -177,43 +228,70 @@ namespace MHUrho.UnitComponents
 			return Loader.SaveState(this);
 		}
 
-
+		/// <summary>
+		/// Stops shooting at any current target and sets <paramref name="newTarget"/> as the target of this Shooter if the <paramref name="newTarget"/> is in range of this shooter.
+		/// </summary>
+		/// <param name="newTarget">New target to try shooting at.</param>
+		/// <returns>True if <paramref name="newTarget"/> is in range, false otherwise.</returns>
 		public bool ShootAt(IRangeTarget newTarget) {
 			StopShooting();
 
-			if (!projectileType.IsInRange(Entity.Position, newTarget)) return false;
+			if (!CanShootAt(newTarget)) return false;
 
 			Target = newTarget;
 			newTarget.AddShooter(this);
 			return true;
 		}
 
+		/// <summary>
+		/// Checks if <paramref name="target"/> can be shot at, mainly if the target is in range.
+		/// </summary>
+		/// <param name="target">The target to check.</param>
+		/// <returns>True of target can be shot at, false otherwise.</returns>
 		public bool CanShootAt(IRangeTarget target)
 		{
 			return projectileType.IsInRange(Entity.Position, target);
 		}
 
+		/// <summary>
+		/// Stops shooting at any current target.
+		/// </summary>
 		public void StopShooting() {
 			Target?.RemoveShooter(this);
 			Target = null;
 		}
 
+		/// <summary>
+		/// Manually resets shot delay, meaning if shooter has a target, it will shoot at it immediately.
+		/// </summary>
 		public void ResetShotDelay()
 		{
 			shotDelay = 60 / RateOfFire;
 		}
 
-		public void OnTargetDestroy(IRangeTarget target) {
+		/// <summary>
+		/// Informs the shooter that the target was destroyed.
+		/// </summary>
+		/// <param name="target">The destroyed target.</param>
+		void RangeTargetComponent.IShooter.OnTargetDestroy(IRangeTarget target)
+		{
 			Debug.Assert(this.Target == target);
 			this.Target = null;
-			OnTargetDestroyed?.Invoke(this, target);
+			InvokeOnTargetDestroyed(target);
 		}
 
+		/// <summary>
+		/// Invoked when this component is deleted, basically a destructor.
+		/// </summary>
 		protected override void OnDeleted() {
 			Target?.RemoveShooter(this);
 			base.OnDeleted();
 		}
 
+		/// <summary>
+		/// Game tick update, invoked only when both Level and Entity are enabled.
+		/// </summary>
+		/// <param name="timeStep">Elapsed time since the previous update.</param>
 		protected override void OnUpdateChecked(float timeStep)
 		{
 			SearchTarget(timeStep);
@@ -243,13 +321,13 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			OnShotReloaded?.Invoke(this);
+			InvokeOnShotReloaded();
 
 			if (Target == null) {
 				return;
 			}
 
-			OnBeforeShotFired?.Invoke(this);
+			InvokeOnBeforeShotFired();
 
 			//Check if shotDelay was not reset in the OnBeforeShotFired or OnShotReloaded handlers
 			if (shotDelay > 0) {
@@ -265,10 +343,10 @@ namespace MHUrho.UnitComponents
 				Target.RemoveShooter(this);
 				Target = null;
 
-				OnTargetLost?.Invoke(this, previousTarget);
+				InvokeOnTargetLost(previousTarget);
 			}
 			else {
-				OnShotFired?.Invoke(this, projectile);
+				InvokeOnShotFired(projectile);
 			}
 
 			ResetShotDelay();
@@ -302,11 +380,90 @@ namespace MHUrho.UnitComponents
 
 					Target = newTarget;
 					Target.AddShooter(this);
-					OnTargetAcquired?.Invoke(this);
+					InvokeOnTargetAcquired();
 					break;
 				}
 
 			}
 		}
+
+		void InvokeOnTargetAcquired()
+		{
+			try
+			{
+				TargetAutoAcquired?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(TargetAutoAcquired)}: {e.Message}");
+			}
+		}
+
+		void InvokeOnShotReloaded(){
+			try
+			{
+				ShotReloaded?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(ShotReloaded)}: {e.Message}");
+			}
+		}
+
+
+		void InvokeOnBeforeShotFired(){
+			try
+			{
+				BeforeShotFired?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(BeforeShotFired)}: {e.Message}");
+			}
+		}
+
+
+		void InvokeOnTargetLost(IRangeTarget target){
+			try
+			{
+				TargetLost?.Invoke(this, target);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(TargetLost)}: {e.Message}");
+			}
+
+		}
+
+
+		void InvokeOnTargetDestroyed(IRangeTarget target){
+			try
+			{
+				TargetDestroyed?.Invoke(this, target);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(TargetDestroyed)}: {e.Message}");
+			}
+		}
+
+
+		void InvokeOnShotFired(IProjectile projectile){
+			try
+			{
+				ShotFired?.Invoke(this, projectile);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(ShotFired)}: {e.Message}");
+			}
+		}
+
 	}
 }

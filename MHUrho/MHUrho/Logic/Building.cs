@@ -214,6 +214,8 @@ namespace MHUrho.Logic
 
 		public BuildingType BuildingType { get; private set; }
 
+		public override IEntityType Type => BuildingType;
+
 		public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
 		public override Vector3 Forward => Node.WorldDirection;
@@ -281,7 +283,7 @@ namespace MHUrho.Logic
 
 		public override void RemoveFromLevel() {
 
-			if (RemovedFromLevel) return;
+			if (IsRemovedFromLevel) return;
 
 			base.RemoveFromLevel();
 
@@ -383,7 +385,7 @@ namespace MHUrho.Logic
 
 			for (int y = 0; y < BuildingType.Size.Y; y++) {
 				for (int x = 0; x < BuildingType.Size.X; x++) {
-					var tile = Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
+					var tile = Level.Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
 					newTiles[GetTileIndex(x, y)] = tile;
 					tile.SetBuilding(this);
 				}

@@ -17,8 +17,6 @@ using Urho.Urho2D;
 namespace MHUrho.Packaging {
 
 	public class GamePack : IDisposable {
-		const string DefaultThumbnailPath = "Textures/xamarin.png";
-
 		public GamePackRep GamePackRep { get; private set; }
 
 		public string Name => GamePackRep.Name;
@@ -147,19 +145,30 @@ namespace MHUrho.Packaging {
 		}
 
 		/// <summary>
-		/// 
+		/// Starts a task loading new game pack from XML file at <paramref name="pathToXml"/>,
+		/// represented by <paramref name="gamePackRep"/>.
+		/// You can watch the progress of loading by providing <paramref name="loadingProgress"/>, which will be updated from 0 to 100%.
 		/// </summary>
-		/// <param name="pathToXml"></param>
-		/// <param name="gamePackRep"></param>
-		/// <param name="schemas"></param>
-		/// <param name="loadingProgress"></param>
-		/// <returns></returns>
+		/// <param name="pathToXml">Path to the XML file describing the Game pack</param>
+		/// <param name="gamePackRep">Representant of the GamePack</param>
+		/// <param name="schemas">Schemas to validate the loaded XML file with.</param>
+		/// <param name="loadingProgress">Optional loading progress watcher, which will be updated from 0 to 100%.</param>
+		/// <returns>A task representing the loading of the gamePack</returns>
 		/// <exception cref="PackageLoadingException">Thrown when the package loading failed</exception>
 		public static async Task<GamePack> Load(string pathToXml,
 												GamePackRep gamePackRep,
 												XmlSchemaSet schemas,
-												ILoadingSignaler loadingProgress)
+												ILoadingProgress loadingProgress = null)
 		{
+			const double tileTypesPartSize = 12.5;
+			const double unitTypesPartSize = 12.5;
+			const double buildingTypesPartSize = 12.5;
+			const double projectileTypesPartSize = 12.5;
+			const double resourceTypesPartSize = 12.5;
+			const double playerTypesPartSize = 12.5;
+			const double levelLogicTypesPartSize = 12.5;
+			const double levelsPartSize = 12.5;
+
 			GamePack newPack = new GamePack(pathToXml, gamePackRep, schemas);
 
 			pathToXml = FileManager.CorrectRelativePath(pathToXml);
@@ -173,29 +182,37 @@ namespace MHUrho.Packaging {
 																					.Element(LevelsXml.Inst.DataDirPath)
 																					.Value.Trim());
 
-				loadingProgress.TextUpdate("Loading tile types");
+				loadingProgress?.SendTextUpdate("Loading tile types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
+				loadingProgress?.SendUpdate(tileTypesPartSize,"Loaded tile types");
 
-				loadingProgress.TextUpdate("Loading unit types");
+				loadingProgress?.SendTextUpdate("Loading unit types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
+				loadingProgress?.SendUpdate(unitTypesPartSize, "Loaded unit types");
 
-				loadingProgress.TextUpdate("Loading building types");
+				loadingProgress?.SendTextUpdate("Loading building types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
+				loadingProgress?.SendUpdate(buildingTypesPartSize, "Loaded building types");
 
-				loadingProgress.TextUpdate("Loading projectile types");
+				loadingProgress?.SendTextUpdate("Loading projectile types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
+				loadingProgress?.SendUpdate(projectileTypesPartSize, "Loaded projectile types");
 
-				loadingProgress.TextUpdate("Loading resource types");
+				loadingProgress?.SendTextUpdate("Loading resource types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
+				loadingProgress?.SendUpdate(resourceTypesPartSize, "Loaded resource types");
 
-				loadingProgress.TextUpdate("Loading player types");
+				loadingProgress?.SendTextUpdate("Loading player types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
+				loadingProgress?.SendUpdate(playerTypesPartSize, "Loaded player types");
 
-				loadingProgress.TextUpdate("Loading level logic types");
+				loadingProgress?.SendTextUpdate("Loading level logic types");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
+				loadingProgress?.SendUpdate(levelLogicTypesPartSize, "Loaded level logic types");
 
-				loadingProgress.TextUpdate("Loading levels");
+				loadingProgress?.SendTextUpdate("Loading levels");
 				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
+				loadingProgress?.SendUpdate(levelsPartSize, "Loaded levels");
 			}
 			catch (MethodInvocationException e)
 			{
@@ -203,7 +220,6 @@ namespace MHUrho.Packaging {
 				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}
-			//TODO: Catch only the expected exceptions
 			catch (Exception e) {
 				string message = $"Package loading failed with: \"{e.Message}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
@@ -214,6 +230,7 @@ namespace MHUrho.Packaging {
 				newPack.FinishLoading();
 			}
 
+			loadingProgress?.SendFinishedLoading();
 			return newPack;
 		}
 
@@ -832,7 +849,7 @@ namespace MHUrho.Packaging {
 		/// <param name="dictionary">removes items with Value.ID 0 from this dictionary</param>
 		/// <returns>true if deleted something, false if didnt delete anything</returns>
 		bool RemoveUnused<T>(IDictionary<string,T> dictionary)
-			where T : IIDNameAndPackage {
+			where T : IIdentifiable {
 
 			bool deleted = false;
 			var toRemove = new List<string>();

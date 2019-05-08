@@ -506,7 +506,7 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, ChangeCornerHeightDelegate newHeightFunction)
+			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, GetCornerHeightDelegate newHeightFunction)
 			{
 				throw new NotImplementedException();
 			}

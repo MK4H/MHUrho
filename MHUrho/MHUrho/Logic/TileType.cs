@@ -14,11 +14,6 @@ using Urho.Urho2D;
 namespace MHUrho.Logic
 {
 	public class TileType : ILoadableType {
-		static readonly string IDAttributeName = "ID";
-		static readonly string NameAttributeName = "name";
-		static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";
-		static readonly XName IconTextureElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
-		static readonly XName MinimapColorElement = PackageManager.XMLNamespace + "minimapColor";
 
 		public int ID { get; private set; }
 
@@ -37,11 +32,11 @@ namespace MHUrho.Logic
 
 		public void Load(XElement xml, GamePack package) {
 			//TODO: Check for errors
-			ID = xml.GetIntFromAttribute(IDAttributeName);
-			Name = xml.Attribute(NameAttributeName).Value;
-			imagePath = XmlHelpers.GetPath(xml.Element(TexturePathElementName));
-			IconRectangle = XmlHelpers.GetIntRect(xml.Element(IconTextureElementName));
-			MinimapColor = XmlHelpers.GetColor(xml.Element(MinimapColorElement));
+			ID = XmlHelpers.GetID(xml);
+			Name = XmlHelpers.GetName(xml);
+			imagePath = XmlHelpers.GetPath(xml.Element(TileTypeXml.Inst.TexturePath));
+			IconRectangle = XmlHelpers.GetIntRect(xml.Element(TileTypeXml.Inst.IconTextureRectangle));
+			MinimapColor = XmlHelpers.GetColor(xml.Element(TileTypeXml.Inst.MinimapColor));
 			Package = package;
 		}
 

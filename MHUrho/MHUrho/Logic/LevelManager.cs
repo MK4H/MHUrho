@@ -61,7 +61,7 @@ namespace MHUrho.Logic
 
 		public Node LevelNode { get; private set; }
 
-		public Map Map { get; private set; }
+		public IMap Map => map;
 
 		public Minimap Minimap { get; private set; }
 
@@ -113,6 +113,7 @@ namespace MHUrho.Logic
 		readonly Dictionary<Node, IEntity> nodeToEntity;
 
 		readonly Random rng;
+		Map map;
 
 		protected LevelManager(Node levelNode, LevelRep levelRep, MyGame app, Octree octree, bool editorMode)
 		{
@@ -200,7 +201,13 @@ namespace MHUrho.Logic
 		public new void Dispose()
 		{
 			IsEnding = true;
-			Ending?.Invoke();
+			try {
+				Ending?.Invoke();
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(Ending)}: {e.Message}");
+			}
 
 			List<IDisposable> toDispose = new List<IDisposable>();
 			toDispose.AddRange(entities.Values);
@@ -217,7 +224,7 @@ namespace MHUrho.Logic
 			cameraController?.Dispose();
 			Camera?.Dispose();
 			Input = null;
-			Map?.Dispose();
+			map?.Dispose();
 			Minimap?.Dispose();
 			octree?.Dispose();
 
@@ -352,7 +359,7 @@ namespace MHUrho.Logic
 		{
 			bool removed = units.Remove(unit.ID) && RemoveEntity(unit);
 
-			if (!unit.RemovedFromLevel) {
+			if (!unit.IsRemovedFromLevel) {
 				unit.RemoveFromLevel();
 			}
 
@@ -363,7 +370,7 @@ namespace MHUrho.Logic
 		{
 			bool removed = buildings.Remove(building.ID) && RemoveEntity(building);
 
-			if (!building.RemovedFromLevel) {
+			if (!building.IsRemovedFromLevel) {
 				building.RemoveFromLevel();
 			}
 			return removed;
@@ -373,7 +380,7 @@ namespace MHUrho.Logic
 		{
 			bool removed = projectiles.Remove(projectile.ID) && RemoveEntity(projectile);
 
-			if (!projectile.RemovedFromLevel) {
+			if (!projectile.IsRemovedFromLevel) {
 				projectile.RemoveFromLevel();
 			}
 			return removed;
@@ -595,8 +602,15 @@ namespace MHUrho.Logic
 			Plugin.OnUpdate(timeStep);
 
 			Minimap.OnUpdate(timeStep);
+			try { 
+				Update?.Invoke(timeStep);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(Update)}: {e.Message}");
+			}
 
-			Update?.Invoke(timeStep);
 		}
 
 	

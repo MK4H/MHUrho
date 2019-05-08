@@ -15,11 +15,11 @@ namespace MHUrho.Logic
 		Task<ILevelManager> CurrentLoading { get; }
 	
 
-		Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel, ILoadingSignaler loadingSignaler);
+		Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel, ILoadingProgress loadingProgress);
 
-		Task<ILevelManager> LoadForPlaying(LevelRep levelRep, StLevel storedLevel, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler);
+		Task<ILevelManager> LoadForPlaying(LevelRep levelRep, StLevel storedLevel, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress);
 
-		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize, ILoadingSignaler loadingSignaler);
+		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize, ILoadingProgress loadingProgress);
 
 	}
 }

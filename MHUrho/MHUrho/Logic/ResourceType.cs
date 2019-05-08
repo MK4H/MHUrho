@@ -12,8 +12,6 @@ using Urho.Resources;
 namespace MHUrho.Logic
 {
 	public class ResourceType : ILoadableType, IDisposable {
-		const string IDAttributeName = "ID";
-		const string NameAttribute = "name";
 
 		public int ID { get; private set; }
 
@@ -24,9 +22,10 @@ namespace MHUrho.Logic
 	
 		public IntRect IconRectangle { get; private set; }
 
-		public void Load(XElement xml, GamePack package) {
-			ID = xml.GetIntFromAttribute(IDAttributeName);
-			Name = xml.Attribute(NameAttribute).Value;
+		public void Load(XElement xml, GamePack package)
+		{
+			ID = XmlHelpers.GetID(xml);
+			Name = XmlHelpers.GetName(xml);
 			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			Package = package;
 		}

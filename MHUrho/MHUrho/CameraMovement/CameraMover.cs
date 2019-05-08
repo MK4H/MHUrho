@@ -13,7 +13,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.CameraMovement
 {
-	public delegate void OnCameraMove(CameraMovedEventArgs args);
+	public delegate void OnCameraMoveDelegate(CameraMovedEventArgs args);
 
 	public class CameraMover : Component {
 
@@ -47,7 +47,7 @@ namespace MHUrho.CameraMovement
 
 		public IEntity Followed => entityFollowingCameraState.Followed;
 
-		public event OnCameraMove CameraMoved;
+		public event OnCameraMoveDelegate CameraMoved;
 
 		float decayingZoom;
 		float staticZoom;
@@ -342,7 +342,13 @@ namespace MHUrho.CameraMovement
 
 		void OnCameraMoved(CameraMovedEventArgs args)
 		{
-			CameraMoved?.Invoke(args);
+			try {
+				CameraMoved?.Invoke(args);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(CameraMoved)}: {e.Message}");
+			}
 		}
 	}
 }

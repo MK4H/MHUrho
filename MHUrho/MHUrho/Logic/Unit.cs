@@ -202,6 +202,8 @@ namespace MHUrho.Logic
 		#region Public members
 		public UnitType UnitType { get; private set;}
 
+		public override IEntityType Type => UnitType;
+
 		public override Vector3 Position {
 			get => LegNode.Position;
 			protected set => LegNode.Position = value;
@@ -338,7 +340,7 @@ namespace MHUrho.Logic
 			Position = newPosition;
 			ITile newTile;
 
-			if ((newTile = Map.GetContainingTile(Position)) != Tile) {
+			if ((newTile = Level.Map.GetContainingTile(Position)) != Tile) {
 				Tile.RemoveUnit(this);
 				Tile = newTile;
 				Tile.AddUnit(this);
@@ -348,7 +350,7 @@ namespace MHUrho.Logic
 		}
 
 		public void MoveTo(Vector2 newLocation) {
-			MoveTo(new Vector3(newLocation.X, Map.GetTerrainHeightAt(newLocation), newLocation.Y));
+			MoveTo(new Vector3(newLocation.X, Level.Map.GetTerrainHeightAt(newLocation), newLocation.Y));
 		}
 
 		/// <summary>
@@ -385,7 +387,7 @@ namespace MHUrho.Logic
 
 		public override void RemoveFromLevel()
 		{
-			if (RemovedFromLevel) return;
+			if (IsRemovedFromLevel) return;
 
 			base.RemoveFromLevel();
 			//We need removeFromLevel to work during any phase of loading, where connect references may not have been called yet

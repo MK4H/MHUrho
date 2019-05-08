@@ -118,12 +118,8 @@ namespace MHUrho.UnitComponents
 
 		Vector3 previousTargetPosition;
 
-
-
 		float timeBetweenPositionChecks;
 		float timeToNextPositionCheck;
-
-
 
 		protected MovingMeeleAttacker(ILevelManager level,
 									bool searchForTarget,
@@ -227,10 +223,7 @@ namespace MHUrho.UnitComponents
 			if (Target != null && !TryAttack(timeStep)) {
 
 				CheckTargetPosition(timeStep);
-
 			}
-
-			
 		}
 
 		protected override void AddedToEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents)
@@ -255,10 +248,21 @@ namespace MHUrho.UnitComponents
 
 			timeToNextPositionCheck = timeBetweenPositionChecks;
 
-			//TODO: Intersect
+			//NOTE: Maybe intersect intersect
 			if (Target.Position != previousTargetPosition) {
-				user.MoveTo(Target.Position);
+				MoveTo(Target.Position);
 				previousTargetPosition = Target.Position;
+			}
+		}
+
+		void MoveTo(Vector3 position)
+		{
+			try {
+				user.MoveTo(position);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception in {nameof(user.MoveTo)}: {e.Message}");
 			}
 		}
 	}

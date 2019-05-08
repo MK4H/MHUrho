@@ -14,7 +14,7 @@ using Urho.Physics;
 namespace MHUrho.Logic
 {
 
-	public class ProjectileType : ILoadableType, IDisposable {
+	public class ProjectileType : IEntityType, IDisposable {
 
 		public int ID { get; private set; }
 
@@ -22,9 +22,11 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		public ProjectileTypePlugin Plugin {get; private set;}
-
 		public AssetContainer Assets { get; private set; }
+
+		public ProjectileTypePlugin Plugin { get; private set; }
+
+		TypePlugin IEntityType.Plugin => Plugin;
 
 		readonly Queue<Projectile> projectilePool;
 

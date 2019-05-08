@@ -22,11 +22,11 @@ namespace MHUrho.CameraMovement
 		FreeFloat
 	}
 
-	delegate void SwitchState(CameraStates newState);
+	delegate void StateSwitchedDelegate(CameraStates newState);
 
     abstract class CameraState {
 
-		public event OnCameraMove CameraMoved;
+		public event OnCameraMoveDelegate CameraMoved;
 
 		public abstract Vector3 CameraWorldPosition { get; }
 		public abstract Quaternion CameraWorldRotation { get; }
@@ -34,12 +34,12 @@ namespace MHUrho.CameraMovement
 		public abstract CameraMode CameraMode{ get; }
 
 		protected IMap Map;
-		protected SwitchState SwitchState;
+		protected StateSwitchedDelegate StateSwitched;
 
-		protected CameraState(IMap map, SwitchState switchState)
+		protected CameraState(IMap map, StateSwitchedDelegate stateSwitched)
 		{
 			this.Map = map;
-			this.SwitchState = switchState;
+			this.StateSwitched = stateSwitched;
 		}
 
 		public abstract void MoveTo(Vector2 xzPosition);

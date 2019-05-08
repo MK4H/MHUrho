@@ -10,21 +10,7 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.UnitComponents
 {
-	public enum DefaultComponents {
-		Shooter,
-		UnitSelector,
-		WorldWalker,
-		UnpoweredFlier,
-		StaticRangeTarget,
-		MovingRangeTarget,
-		Clicker,
-		MovingMeele,
-		StaticMeele
-
-	}
-
-	//TODO: Rename this
-	internal interface IByTypeQueryable {
+	interface IByTypeQueryable {
 		void AddedToEntity(IEntity entity, IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
 
 		bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents);
@@ -39,11 +25,6 @@ namespace MHUrho.UnitComponents
 		public IPlayer Player => Entity.Player;
 
 		public ILevelManager Level { get; private set; }
-
-
-		public Map Map => Level.Map;
-
-
 
 		protected DefaultComponent(ILevelManager level)
 		{
@@ -94,6 +75,8 @@ namespace MHUrho.UnitComponents
 		protected override void OnUpdate(float timeStep)
 		{
 			base.OnUpdate(timeStep);
+			//I had problems where OnUpdate was called when logically it should not have been
+			//This is somewhat hacky solution to that problem
 			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}

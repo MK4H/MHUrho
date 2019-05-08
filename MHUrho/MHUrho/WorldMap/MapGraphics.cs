@@ -772,8 +772,13 @@ namespace MHUrho.WorldMap
 			/// <returns></returns>
 			public static MapGraphics Build(Map map,
 											IntVector2 chunkSize,
-											LoadingWatcher loadingProgress)
+											ILoadingProgress loadingProgress = null)
 			{
+				const double initializingPartSize = 10;
+				const double materialPartSize = 50;
+				const double modelPartSize = 40;
+
+				loadingProgress?.SendTextUpdate("Initializing map graphics");
 				IntVector2 mapSize = new IntVector2(map.Width, map.Length);
 
 				if (mapSize.X % chunkSize.X != 0 ||
@@ -782,13 +787,17 @@ namespace MHUrho.WorldMap
 				}
 
 				MapGraphics graphics = new MapGraphics(map, chunkSize, mapSize);
+				loadingProgress?.SendUpdate(initializingPartSize, "Initialized map graphics");
 
-				loadingProgress.TextUpdate("Creating terrain texture");
+				loadingProgress?.SendTextUpdate("Creating terrain texture");
 				graphics.CreateMaterial();
+				loadingProgress?.SendUpdate(materialPartSize, "Created terrain texture");
 
-				loadingProgress.TextUpdate("Creating map geometry");
+				loadingProgress?.SendTextUpdate("Creating map geometry");
 				graphics.CreateModel();
+				loadingProgress?.SendUpdate(modelPartSize, "Created map geometry");
 
+				loadingProgress?.SendFinishedLoading();
 				return graphics;
 			}
 
