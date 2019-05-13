@@ -15,6 +15,7 @@
           <xs:element name="levelPicking" type="levelPickingType"/>
           <xs:element name="levelCreation" type="levelCreationType"/>
           <xs:element name="levelSettings" type="levelSettingsType"/>
+          <xs:element name="loading" type="loadingType"/>
         </xs:choice>
       </xs:sequence>
     </xs:complexType>
@@ -69,6 +70,12 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="loadingType">
+    <xs:sequence>
+      <xs:element name="action" type="loadingActions"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -129,6 +136,12 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="play"/>
       <xs:enumeration value="back"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="loadingActions">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
     </xs:restriction>
   </xs:simpleType>
 

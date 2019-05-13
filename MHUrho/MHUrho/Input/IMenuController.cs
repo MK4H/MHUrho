@@ -12,11 +12,15 @@ using Urho;
 
 namespace MHUrho.Input
 {
+	public delegate void OnScreenChangeDelegate();
+
 	public interface IMenuController
 	{
 		InputType InputType { get; }
 
 		bool Enabled { get; }
+
+		event OnScreenChangeDelegate ScreenChanged;
 
 		void Enable();
 
@@ -32,9 +36,9 @@ namespace MHUrho.Input
 
 		void SavePausedLevel(string fileName);
 
-		ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingProgress loadingProgress);
+		ILevelLoader GetLevelLoaderForEditing(LevelRep level, IProgressEventWatcher parentProgress = null, double subsectionSize = 100);
 
-		ILevelLoader StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress);
+		ILevelLoader GetLevelLoaderForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100);
 
 		void ExecuteActionOnCurrentScreen(MenuScreenAction action);
 	}

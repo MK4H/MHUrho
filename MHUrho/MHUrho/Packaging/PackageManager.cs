@@ -119,7 +119,7 @@ namespace MHUrho.Packaging
 		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="packageName"/> is null</exception>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="packageName"/> is not present in the <see cref="AvailablePacks"/></exception>
 		public Task<GamePack> LoadPackage(string packageName, 
-										ILoadingProgress loadingProgress = null)
+										IProgressEventWatcher loadingProgress = null)
 		{
 			if (packageName == null) {
 				throw new ArgumentNullException(nameof(packageName), "Package name cannot be null");
@@ -147,13 +147,13 @@ namespace MHUrho.Packaging
 		/// <param name="loadingProgress">Optional watcher of the loading progress</param>
 		/// <returns>A task that represents the asynchronous loading of the package</returns>
 		/// <exception cref="PackageLoadingException">Thrown when the loading of the new package failed</exception>
-		public async Task<GamePack> LoadPackage(GamePackRep package, ILoadingProgress loadingProgress = null)
+		public async Task<GamePack> LoadPackage(GamePackRep package, IProgressEventWatcher loadingProgress = null)
 		{
 			const double clearPartSize = 10;
 			const double loadPartSize = 90;
 
 			if (loadingProgress == null) {
-				loadingProgress = new LoadingWatcher();
+				loadingProgress = new ProgressWatcher();
 			}
 
 			loadingProgress.SendTextUpdate("Clearing previous games");
@@ -165,9 +165,9 @@ namespace MHUrho.Packaging
 			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
 			loadingProgress.SendTextUpdate("Loading new package");
-			ActivePackage = await package.LoadPack(schemas, loadingProgress.GetWatcherForSubsection(loadPartSize));
+			ActivePackage = await package.LoadPack(schemas, new ProgressWatcher(loadingProgress, loadPartSize));
 
-			loadingProgress.SendFinishedLoading();
+			loadingProgress.SendFinished();
 			return ActivePackage;
 		}
 
@@ -282,6 +282,11 @@ namespace MHUrho.Packaging
 			var activePackage = ActivePackage;
 			ActivePackage = null;
 			UnloadPackage(activePackage);
+		}
+
+		public XName GetQualifiedXName(string elementName)
+		{
+			return XMLNamespace + elementName;
 		}
 
 		public bool Exists(string name)

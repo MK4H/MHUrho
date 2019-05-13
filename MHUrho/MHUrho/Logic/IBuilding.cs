@@ -9,8 +9,6 @@ namespace MHUrho.Logic {
 	public interface IBuilding : IEntity {
 		BuildingType BuildingType { get; }
 
-
-
 		BuildingInstancePlugin BuildingPlugin { get; }
 
 		IntRect Rectangle { get; }

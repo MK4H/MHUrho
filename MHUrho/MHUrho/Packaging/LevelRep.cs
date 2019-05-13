@@ -15,7 +15,17 @@ using MHUrho.Helpers.Extensions;
 
 namespace MHUrho.Packaging
 {
+	/// <summary>
+	/// This class represents a level that is available in a package.
+	/// This level may be loaded for playing or for editing.
+	/// </summary>
     public class LevelRep : IDisposable {
+
+		/// <summary>
+		/// Represents possible states the level can be in.
+		/// Every state represents a source of the data, either generated, loaded from prototype or loaded from saved game
+		/// and the current state the level is in.
+		/// </summary>
 		abstract class LevelState {
 
 			protected readonly LevelRep Context;
@@ -54,9 +64,9 @@ namespace MHUrho.Packaging
 				this.Context = context;
 			}
 
-			public abstract ILevelLoader LoadForEditing(ILoadingProgress loadingProgress);
+			public abstract ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100);
 
-			public abstract ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress);
+			public abstract ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100);
 
 			public abstract XElement SaveAsPrototype();
 
@@ -76,6 +86,9 @@ namespace MHUrho.Packaging
 			}
 		}
 
+		/// <summary>
+		/// Represents level that was created but not yet loaded and generated for editing.
+		/// </summary>
 		class CreatedLevel : LevelState {
 
 			readonly IntVector2 mapSize;
@@ -86,14 +99,18 @@ namespace MHUrho.Packaging
 				this.mapSize = mapSize;
 			}
 
-			public override ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
-				var loader = LevelManager.GetLoader();
-				loader.LoadDefaultLevel(Context, mapSize, loadingProgress).ContinueWith(LevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
+				var loader = LevelManager.GetLoaderForDefaultLevel(Context, mapSize, parentProgress, subsectionSize);
+
+				loader.Finished += (notifier) => {
+					Context.state = new EditingLevel(Context, loader.Level);
+				};
+
 				return loader;
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cannot play a default level");
 			}
@@ -115,15 +132,18 @@ namespace MHUrho.Packaging
 					InvalidOperationException("Cannot detach, there is no running level");
 			}
 
-			void LevelLoaded(Task<ILevelManager> task)
+			void LevelLoaded(IProgressNotifier task)
 			{
 				//TODO: Check for exceptions
 				//TODO: Maybe lock state
-				Context.state = new EditingLevel(Context, task.Result);
+				
 			}
 
 		}
 
+		/// <summary>
+		/// Level that was stored from editor and can be played from scratch.
+		/// </summary>
 		class LevelPrototype : LevelState {
 
 			public LevelPrototype(LevelRep context)
@@ -132,21 +152,27 @@ namespace MHUrho.Packaging
 
 			}
 
-			public override ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
-				var loader = LevelManager.GetLoader();
-				//NOTE: Maybe add failure continuation
-				loader.LoadForEditing(Context, savedLevel, loadingProgress).ContinueWith(LoadedForEditing, TaskContinuationOptions.OnlyOnRanToCompletion);
+				var loader = LevelManager.GetLoaderForEditing(Context, savedLevel, parentProgress, subsectionSize);
+
+				loader.Finished += (notifier) => {
+										Context.state = new PlayingLevel(Context, this, loader.Level);
+				};
+
 				return loader;
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				var savedLevel = GetSaveFromPackagePath(SavePath, GamePack);
-				var loader = LevelManager.GetLoader();
-				//NOTE: Maybe add failure continuation
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingProgress).ContinueWith(LoadedForPlaying, TaskContinuationOptions.OnlyOnRanToCompletion);
+				var loader = LevelManager.GetLoaderForPlaying(Context, savedLevel, players, customSettings, parentProgress, subsectionSize);
+
+				loader.Finished += (notifier) => {
+										Context.state = new EditingLevel(Context, loader.Level);
+									};
+
 				return loader;
 			}
 
@@ -166,22 +192,11 @@ namespace MHUrho.Packaging
 				throw new
 					InvalidOperationException("Cannot detach, there is no running level");
 			}
-
-			void LoadedForPlaying(Task<ILevelManager> task)
-			{
-				//Dont have to check for exceptions, this is OnlyOnCompletion continuation
-				//TODO: Maybe lock state
-				Context.state = new PlayingLevel(Context, this, task.Result);
-			}
-
-			void LoadedForEditing(Task<ILevelManager> task)
-			{
-				//Dont have to check for exceptions, this is OnlyOnCompletion continuation
-				//TODO: Maybe lock state
-				Context.state = new EditingLevel(Context, task.Result);
-			}
 		}
 
+		/// <summary>
+		/// Level that is currently loaded for editing.
+		/// </summary>
 		class EditingLevel : LevelState {
 
 			public ILevelManager RunningLevel { get; protected set; }
@@ -195,14 +210,15 @@ namespace MHUrho.Packaging
 
 			
 
-			public override ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cannot load level in edit mode");
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players,
-														LevelLogicCustomSettings customSettings,
-														ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players,
+															LevelLogicCustomSettings customSettings,
+															IProgressEventWatcher parentProgress = null, 
+															double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cannot load level in edit mode");
 			}
@@ -251,6 +267,9 @@ namespace MHUrho.Packaging
 			}
 		}
 
+		/// <summary>
+		/// Level that is currently being played.
+		/// </summary>
 		class PlayingLevel : LevelState {
 			public ILevelManager RunningLevel { get; protected set; }
 
@@ -266,14 +285,15 @@ namespace MHUrho.Packaging
 
 			
 
-			public override ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cannot load level in play mode");
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players,
-														LevelLogicCustomSettings customSettings,
-														ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players,
+															LevelLogicCustomSettings customSettings,
+															IProgressEventWatcher parentProgress = null, 
+															double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cannot load level in play mode");
 			}
@@ -315,12 +335,12 @@ namespace MHUrho.Packaging
 				this.sourceState = sourceState;
 			}
 
-			public override ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cloned level cannot be loaded before it is saved");
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Cloned level cannot be loaded before it is saved");
 			}
@@ -377,6 +397,9 @@ namespace MHUrho.Packaging
 			}
 		}
 
+		/// <summary>
+		/// Level that was loaded from a saved game in the middle of playing the level.
+		/// </summary>
 		class LoadedSavedLevel : LevelState {
 
 			readonly string savedLevelPath;
@@ -389,19 +412,22 @@ namespace MHUrho.Packaging
 				this.savedLevel = savedLevel;
 			}
 
-			public override ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				throw new InvalidOperationException("Level loaded from save cannot be edited");
 			}
 
-			public override ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress)
+			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				if (savedLevel == null) {
 					savedLevel = GetSaveFromDynamicPath(savedLevelPath);
 				}
-				var loader = LevelManager.GetLoader();
+				var loader = LevelManager.GetLoaderForPlaying(Context, savedLevel, players, customSettings, parentProgress, subsectionSize);
 
-				loader.LoadForPlaying(Context, savedLevel, players, customSettings, loadingProgress).ContinueWith(LevelLoaded, TaskContinuationOptions.OnlyOnRanToCompletion);
+				loader.Finished += (notifier) => {
+										savedLevel = null;
+										Context.state = new PlayingLevel(Context, this, loader.Level);
+				};
 
 				return loader;
 			}
@@ -424,9 +450,7 @@ namespace MHUrho.Packaging
 
 			void LevelLoaded(Task<ILevelManager> loadingTask)
 			{
-				savedLevel = null;
-				//NOTE: Maybe lock context to synchronize
-				Context.state = new PlayingLevel(Context, this, loadingTask.Result);
+				
 			}
 		}
 
@@ -558,16 +582,16 @@ namespace MHUrho.Packaging
 		/// 
 		/// </summary>
 		/// <param name="storedLevelPath"></param>
-		/// <param name="loadingProgress"></param>
+		/// <param name="progressWatcher">Watcher that will be watching progress of this method, from 0 to 100%</param>
 		/// <returns></returns>
 		/// <exception cref="LevelLoadingException">Thrown when the loading of the saved level failed</exception>
-		public static async Task<LevelRep> GetFromSavedGame(string storedLevelPath, ILoadingProgress loadingProgress = null)
+		public static async Task<LevelRep> GetFromSavedGame(string storedLevelPath, IProgressEventWatcher progressWatcher)
 		{
 			//Should sum up to 100%
 			const double stlevelLoadingPartSize = 50;
 			const double packageLoadingPartSize = 50;
 
-			loadingProgress?.SendTextUpdate("Getting level from save file");
+			progressWatcher?.SendTextUpdate("Getting level from save file");
 			StLevel storedLevel;
 			try {
 				storedLevel = GetSaveFromDynamicPath(storedLevelPath);
@@ -578,16 +602,16 @@ namespace MHUrho.Packaging
 				throw new LevelLoadingException(message, e);
 			}
 
-			loadingProgress?.SendUpdate(stlevelLoadingPartSize, "Got level from save file");
+			progressWatcher?.SendUpdate(stlevelLoadingPartSize, "Got level from save file");
 
 
 			try {
-				loadingProgress?.SendTextUpdate("Loading package");
+				progressWatcher?.SendTextUpdate("Loading package");
 				var gamePack =
 					await PackageManager.Instance.LoadPackage(storedLevel.PackageName,
-															loadingProgress?.GetWatcherForSubsection(packageLoadingPartSize));
-				loadingProgress?.SendTextUpdate("Loaded package");
-				loadingProgress?.SendFinishedLoading();
+															new ProgressWatcher(progressWatcher, packageLoadingPartSize));
+				progressWatcher?.SendTextUpdate("Loaded package");
+				progressWatcher?.SendFinished();
 
 				return new LevelRep(gamePack, storedLevelPath, storedLevel);
 			}
@@ -595,15 +619,19 @@ namespace MHUrho.Packaging
 				string message =
 					$"Package the saved level \"{storedLevel.LevelName}\" belonged to is no longer installed, please add the package \"{storedLevel.PackageName}\" before loading this level";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
+				progressWatcher?.SendFailed(message);
 				throw new LevelLoadingException(message, e);
 			}
 			catch (ArgumentNullException e) {
 				string message = $"Saved file at \"{storedLevelPath}\" was corrupted";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
+				progressWatcher?.SendFailed(message);
 				throw new LevelLoadingException(message, e);
 			}
 			catch (PackageLoadingException e) {
 				string message = $"Package loading for the level failed with: {Environment.NewLine}{e.Message}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				progressWatcher?.SendFailed(message);
 				throw new LevelLoadingException(message, e);
 			}
 		}
@@ -656,16 +684,14 @@ namespace MHUrho.Packaging
 			return Name.GetHashCode();
 		}
 
-
-
-		public ILevelLoader LoadForEditing(ILoadingProgress loadingProgress)
+		public ILevelLoader GetLoaderForEditing(IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 		{
-			return state.LoadForEditing(loadingProgress);
+			return state.GetLoaderForEditing(parentProgress, subsectionSize);
 		}
 
-		public ILevelLoader LoadForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress)
+		public ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 		{
-			return state.LoadForPlaying(players, customSettings, loadingProgress);
+			return state.GetLoaderForPlaying(players, customSettings, parentProgress, subsectionSize);
 		}
 
 		/// <summary>

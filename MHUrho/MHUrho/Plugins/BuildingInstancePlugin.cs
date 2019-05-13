@@ -27,6 +27,9 @@ namespace MHUrho.Plugins
 			return null;
 		}
 
-		public abstract void OnHit(IEntity byEntity, object userData);
+		public virtual void OnHit(IEntity byEntity, object userData)
+		{
+
+		}
 	}
 }

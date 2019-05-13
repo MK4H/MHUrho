@@ -12,7 +12,7 @@ using Urho;
 
 namespace MHUrho.UnitComponents
 {
-
+	
 
 	/// <summary>
 	/// A component that can check for targets in a rectangle of size <see cref="MeeleAttacker.SearchRectangleSize"/>,

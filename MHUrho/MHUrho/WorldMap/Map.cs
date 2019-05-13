@@ -29,11 +29,11 @@ namespace MHUrho.WorldMap
 			readonly Octree octree;
 			readonly IPathFindAlgFactory pathFindAlgFactory;
 			readonly StMap storedMap;
-			readonly ILoadingProgress loadingProgress;
+			readonly IProgressEventWatcher loadingProgress;
 
 			readonly List<ILoader> tileLoaders;
 
-			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, ILoadingProgress loadingProgress)
+			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, IProgressEventWatcher loadingProgress)
 			{
 				this.level = level;
 				this.mapNode = mapNode;
@@ -106,7 +106,7 @@ namespace MHUrho.WorldMap
 				}
 
 				loadingProgress?.SendUpdate(100, "Loaded map");
-				loadingProgress?.SendFinishedLoading();
+				loadingProgress?.SendFinished();
 			}
 
 			public void ConnectReferences() {
@@ -421,13 +421,13 @@ namespace MHUrho.WorldMap
 		/// <param name="size">Size of the playing field, excluding the borders</param>
 		/// <returns>Fully created map</returns>
 		/// <exception cref="Exception">Exception might be thrown by <paramref name="pathFindAlg"/> factory</exception>
-		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, ILoadingProgress loadingProgress = null)
+		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, IProgressEventWatcher progress = null)
 		{
 			const double mapPartSize = 50;
 			const double pathfindPartSize = 40;
 			const double geometryPartSize = 10;
 
-			loadingProgress?.SendTextUpdate("Creating map");
+			progress?.SendTextUpdate("Creating map");
 			Map newMap = new Map(mapNode, octree, size.X, size.Y) {levelManager = level};
 
 			TileType defaultTileType = PackageManager.Instance.ActivePackage.DefaultTileType;
@@ -447,24 +447,24 @@ namespace MHUrho.WorldMap
 				}
 
 			}
-			loadingProgress?.SendUpdate(mapPartSize, "Created map");
+			progress?.SendUpdate(mapPartSize, "Created map");
 
-			loadingProgress?.SendTextUpdate("Creating pathfinding graph");
+			progress?.SendTextUpdate("Creating pathfinding graph");
 			newMap.PathFinding = pathFindAlg.GetPathFindAlg(newMap);
-			loadingProgress?.SendUpdate(pathfindPartSize, "Created pathfinding graph");
+			progress?.SendUpdate(pathfindPartSize, "Created pathfinding graph");
 
-			loadingProgress?.SendTextUpdate("Creating geometry");
-			newMap.BuildGeometry(loadingProgress.GetWatcherForSubsection(geometryPartSize));
+			progress?.SendTextUpdate("Creating geometry");
+			newMap.BuildGeometry(new ProgressWatcher(progress, geometryPartSize));
 
-			loadingProgress?.SendTextUpdate("Created map");
-			loadingProgress?.SendFinishedLoading();
+			progress?.SendTextUpdate("Created map");
+			progress?.SendFinished();
 
 			return newMap;
 		}
 
-		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, LoadingWatcher loadingProgress)
+		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, ProgressWatcher progress)
 		{
-			return new Loader(level, mapNode, octree, pathFindAlg, storedMap, loadingProgress);
+			return new Loader(level, mapNode, octree, pathFindAlg, storedMap, progress);
 		}
 
 		public StMap Save() 
@@ -1392,7 +1392,7 @@ namespace MHUrho.WorldMap
 
 
 
-		void BuildGeometry(ILoadingProgress loadingProgress)
+		void BuildGeometry(IProgressEventWatcher loadingProgress)
 		{
 			graphics = MapGraphics.Build(this, 
 										 ChunkSize,

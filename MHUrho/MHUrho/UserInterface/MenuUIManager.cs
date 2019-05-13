@@ -12,6 +12,8 @@ using Urho.Resources;
 
 namespace MHUrho.UserInterface
 {
+
+
 	abstract class MenuUIManager : UIManager
 	{
 		public IMenuController MenuController { get; private set; }
@@ -38,6 +40,8 @@ namespace MHUrho.UserInterface
 	
 
 		public MenuScreen CurrentScreen { get; protected set; }
+
+		public OnScreenChangeDelegate ScreenChanged;
 
 		protected Stack<MenuScreen> PreviousScreens;
 
@@ -85,9 +89,9 @@ namespace MHUrho.UserInterface
 			return OptionsScreen;
 		}
 
-		public LoadingScreen SwitchToLoadingScreen(Action onLoadingFinished = null)
+		public LoadingScreen SwitchToLoadingScreen(IProgressNotifier progressNotifier)
 		{
-			LoadingScreen.OnLoadingFinished += onLoadingFinished;
+			LoadingScreen.ProgressNotifier = progressNotifier;
 			SwitchToScreen(LoadingScreen);
 			return LoadingScreen;
 		}
@@ -168,10 +172,17 @@ namespace MHUrho.UserInterface
 
 				CurrentScreen = newScreen;
 				newScreen.Show();
+				try {
+					ScreenChanged?.Invoke();
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(LogLevel.Warning,
+									$"Invocation of {nameof(ScreenChanged)} threw an exception: {e.Message}");
+				}
 			}
 			catch (Exception e) {
 				string message =
-					$"There was an error while switching menu screens, probably some missing or corrupted files: {e.Message}";
+					$"There was an error while switching menu screens: {e.Message}";
 
 				Urho.IO.Log.Write(LogLevel.Error, message);
 				Game.ErrorExit(message);

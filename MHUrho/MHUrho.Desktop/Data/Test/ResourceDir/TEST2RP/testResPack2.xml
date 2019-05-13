@@ -36,13 +36,16 @@
 	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
       <texturePath>xamarin.png</texturePath>
 			<minimapColor R="102" G="194" B="255"/>
-	    <manuallySpawnable>true</manuallySpawnable>
     </defaultTileType>
     <tileType name="Sand" ID="2">
 	    <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
       <texturePath>sand.jpg</texturePath>
 	    <minimapColor R="255" G="210" B="77"/>
-	    <manuallySpawnable>true</manuallySpawnable>
+    </tileType>
+    <tileType name="Grass" ID="3">
+      <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
+      <texturePath>grass.png</texturePath>
+      <minimapColor R="51" G="204" B="51"/>
     </tileType>
   </tileTypes>
   <unitTypes>
@@ -61,9 +64,8 @@
         <projectileType>TestProjectile</projectileType>
       </extension>
 	    <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
-	    <manuallySpawnable>true</manuallySpawnable>
     </unitType>
-    <unitType name="TestWorker" ID="9">
+    <unitType name="TestWorker" ID="2">
       <assets type="items">
         <scale x="1" y="0.5" z="1"/>
         <model type="static">
@@ -75,7 +77,6 @@
       </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
 	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
-	    <manuallySpawnable>false</manuallySpawnable>
     </unitType>
     <unitType name="Chicken" ID="3">
       <assets type="xmlprefab">
@@ -83,7 +84,13 @@
       </assets>
       <assemblyPath>DefaultPackage.dll</assemblyPath>
 	    <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
-			<manuallySpawnable>true</manuallySpawnable>
+    </unitType>
+    <unitType name="Dog" ID="4">
+      <assets type="xmlprefab">
+        <path>Units/Dog/prefab.xml</path>
+      </assets>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+      <iconTextureRectangle left="0" top="400" right="100" bottom="500"/>
     </unitType>
   </unitTypes>
   <projectileTypes>
@@ -145,8 +152,18 @@
         <tileType>Sand</tileType>
       </extension>
 	    <iconTextureRectangle left="0" top="300" right="100" bottom="400"/>
-	    <manuallySpawnable>true</manuallySpawnable>
 	    <size x="3" y="3"/>
+    </buildingType>
+    <buildingType name="Tree1" ID="2">
+      <assets type="xmlprefab">
+        <path>Buildings/Tree1/prefab.xml</path>
+      </assets>
+      <assemblyPath>DefaultPackage.dll</assemblyPath>
+      <extension>
+        <growsIn type="Grass" speed="1"/>
+      </extension>
+      <iconTextureRectangle left="0" top="400" right="100" bottom="500"/>
+      <size x="1" y="1"/>
     </buildingType>
   </buildingTypes>
 	<resourceIconTexturePath>Textures/tileIcons.png</resourceIconTexturePath>

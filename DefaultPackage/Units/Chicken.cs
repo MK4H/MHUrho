@@ -17,7 +17,7 @@ using MHUrho.UnitComponents;
 using MHUrho.WorldMap;
 using Urho;
 
-namespace DefaultPackage
+namespace DefaultPackage.Units
 {
 	public class ChickenType : UnitTypePlugin {
 
@@ -58,86 +58,6 @@ namespace DefaultPackage
 									UnitSelector.IUser
 	{
 
-		class DistanceCalc : NodeDistCalculator
-		{
-			protected override bool GetTime(ITileNode source, ITileNode target, out float time)
-			{
-				Vector3 edgePosition = source.GetEdgePosition(target);
-				time = GetTime(source.Position, edgePosition) + GetTime(edgePosition, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(ITempNode source, IBuildingNode target, out float time)
-			{
-				time = GetTime(source.Position, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(ITempNode source, ITempNode target, out float time)
-			{
-				time = GetTime(source.Position, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(IBuildingNode source, ITempNode target, out float time)
-			{
-				time = GetTime(source.Position, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(ITempNode source, ITileNode target, out float time)
-			{
-				time = GetTime(source.Position, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(IBuildingNode source, IBuildingNode target, out float time)
-			{
-				time = GetTime(source.Position, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(ITileNode source, IBuildingNode target, out float time)
-			{
-				time = 1;
-				return true;
-			}
-
-			protected override bool GetTime(ITileNode source, ITempNode target, out float time)
-			{
-				time = GetTime(source.Position, target.Position);
-				return true;
-			}
-
-			protected override bool GetTime(IBuildingNode source, ITileNode target, out float time)
-			{
-				time = 1;
-				return true;
-			}
-
-			float GetTime(Vector3 source, Vector3 to)
-			{
-				//Check for complete equality, which breaks the code below
-				if (source == to)
-				{
-					return 0;
-				}
-
-				Vector3 diff = to - source;
-
-				//In radians
-				float angle = (float)Math.Max(Math.Asin(Math.Abs(diff.Y) / diff.Length), 0);
-
-				//TODO: Maybe cache the Length in the Edge
-				return (diff.Length / 2) + angle;
-			}
-
-			public override float GetMinimalAproxTime(Vector3 source, Vector3 target)
-			{
-				return (source.XZ2() - target.XZ2()).Length / 2;
-			}
-
-		}
 
 		AnimationController animationController;
 		public WorldWalker Walker { get; private set; }
@@ -145,7 +65,7 @@ namespace DefaultPackage
 
 		bool dying;
 
-		readonly DistanceCalc distCalc;
+		readonly ClimbingDistCalc distCalc;
 
 		float hp;
 		HealthBar healthbar;
@@ -160,7 +80,7 @@ namespace DefaultPackage
 		public ChickenInstance(ILevelManager level, IUnit unit)
 			:base(level, unit)
 		{
-			distCalc = new DistanceCalc();
+			distCalc = new ClimbingDistCalc(1,1);
 		}
 
 		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
@@ -177,7 +97,7 @@ namespace DefaultPackage
 			MovingRangeTarget.CreateNew(this, level, new Vector3(0, 0.5f, 0));
 			
 			unit.AlwaysVertical = true;
-			distCalc = new DistanceCalc();
+			distCalc = new ClimbingDistCalc(1, 1);
 
 			RegisterEvents(Walker, Shooter, selector);
 

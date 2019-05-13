@@ -2,111 +2,83 @@
 using System.Collections.Generic;
 using System.Text;
 
+
+/*
+ * Main idea behind these interfaces and a class is to watch the progress of an ongoing task.
+ *
+ * Classes that execute the ongoing task should implement the IProgressNotifier and notify observers of events and
+ * accept optional ProgressWatcher to enable structuring the task into separate subtasks, which the class may be one of
+ *
+ * Methods that provide updates should accept IProgressEventWatcher and update this watcher from 0 to 100.
+ * This watcher should be created on the call to the method and optionally parented to any overarching task progress watcher.
+ *
+ * Base implementation of Watcher and Notifier is provided in the form of ProgressWatcher class, which accepts updates and
+ * distributes them to all registered observers.
+ *
+ */
+
 namespace MHUrho.Packaging
 {
-
-	public interface ILoadingWatcher {
+	public interface IProgressNotifier {
 		event Action<string> TextUpdate;
 		event Action<double> PercentageUpdate;
-		event Action<ILoadingWatcher> FinishedLoading;
-		event Action<ILoadingWatcher> SubsectionFinishedLoading;
+		event Action<IProgressNotifier> Finished;
+		event Action<IProgressNotifier, string> Failed;
 
 		string Text { get; }
 		double Percentage { get; }
 	}
 
-	public interface ILoadingProgress {
+	public interface IProgressEventWatcher {
 		
-		/// <summary>
-		/// Creates a loading watcher for a subsection of the current loading section.
-		/// Subsection has a certain <paramref name="subsectionSize"/>, when the subsection is 100% finished,
-		/// the parent section will be advanced by 100*<paramref name="subsectionSize"/>%.
-		/// </summary>
-		/// <param name="subsectionSize">Size of the subsection in relation to the parent section of loading, 0 to 100% of the parent</param>
-		/// <returns>LoadingWatcher that should be passed to the subsection</returns>
-		LoadingWatcher GetWatcherForSubsection(double subsectionSize);
-
 		void SendTextUpdate(string newText);
 
 		void SendPercentageUpdate(double change);
 
 		void SendUpdate(double percentageChange, string newText);
 
-		void SendFinishedLoading();
+		void SendFinished();
+
+		void SendSubsectionFinished(IProgressEventWatcher subsection);
+
+		void SendFailed(string message);
 	}
 
-	public class LoadingWatcher : ILoadingWatcher, ILoadingProgress {
+	public class ProgressWatcher : IProgressNotifier, IProgressEventWatcher
+	{
 
-		protected class SubsectionLoadingWatcher : LoadingWatcher {
-
-			readonly LoadingWatcher parent;
-			readonly double subsectionSize;
-
-			/// <summary>
-			/// Creates a loading watcher for a subsection, so the subsection can
-			/// count it's own progress from 0 to 100% independently.
-			/// </summary>
-			/// <param name="parent">Parent loading watcher, even a subsection</param>
-			/// <param name="subsectionSize">Size of the subsection in relation to the total loading process, range 0-100</param>
-			public SubsectionLoadingWatcher(LoadingWatcher parent, double subsectionSize)
-			{
-				if (subsectionSize < 0 || 100 < subsectionSize) {
-					throw new ArgumentOutOfRangeException(nameof(subsectionSize),
-														subsectionSize,
-														"Subsection size should be between 0 and 100");
-				}
-
-				this.parent = parent;
-				this.subsectionSize = subsectionSize / 100;
-			}
-
-
-			public override void SendPercentageUpdate(double change)
-			{
-				base.SendPercentageUpdate(change);
-				parent.SendPercentageUpdate(change * subsectionSize);
-			}
-
-			public override void SendTextUpdate(string newText)
-			{
-				base.SendTextUpdate(newText);
-				parent.SendTextUpdate(newText);
-			}
-
-			public override void SendFinishedLoading()
-			{
-				base.SendFinishedLoading();
-				parent.SendSubsectionFinishedLoading(this);
-			}
-		}
+		readonly IProgressEventWatcher parent;
+		readonly double subsectionSize;
 
 		public event Action<string> TextUpdate;
 		public event Action<double> PercentageUpdate;
-		public event Action<ILoadingWatcher> FinishedLoading;
-		public event Action<ILoadingWatcher> SubsectionFinishedLoading;
+		public event Action<IProgressNotifier> Finished;
+		public event Action<IProgressNotifier, string> Failed;
 
 		public string Text { get; private set; }
 		public double Percentage { get; private set; }
 
-		public LoadingWatcher()
-		{
-
-		}
-
-
 		/// <summary>
-		/// Creates a loading watcher for a subsection of the current loading section.
-		/// Subsection has a certain <paramref name="subsectionSize"/>, when the subsection is 100% finished,
-		/// the parent section will be advanced by 100*<paramref name="subsectionSize"/>%.
+		/// Creates a progress watcher.
+		/// Can be used to watch a subsection from 0 to 100%, in which case it will send updates to a <paramref name="parent"/> scaled by <paramref name="size"/>
 		/// </summary>
-		/// <param name="subsectionSize">Size of the subsection in relation to the parent section of loading, 0 to 100% of the parent</param>
-		/// <returns>LoadingWatcher that should be passed to the subsection</returns>
-		public LoadingWatcher GetWatcherForSubsection(double subsectionSize)
+		/// <param name="parent">Parent loading event watcher</param>
+		/// <param name="subsectionSize">Size of the subsection in relation to the total progress, range 0-100</param>
+		public ProgressWatcher(IProgressEventWatcher parent = null, double subsectionSize = 100)
 		{
-			return new SubsectionLoadingWatcher(this, subsectionSize);
+			if (subsectionSize < 0 || 100 < subsectionSize)
+			{
+				throw new ArgumentOutOfRangeException(nameof(subsectionSize),
+													subsectionSize,
+													"Subsection size should be between 0 and 100");
+			}
+
+			this.parent = parent;
+			this.subsectionSize = subsectionSize / 100;
 		}
 
-		public virtual void SendPercentageUpdate(double change)
+
+		public void SendPercentageUpdate(double change)
 		{
 			Percentage += change;
 			try {
@@ -117,9 +89,11 @@ namespace MHUrho.Packaging
 				Urho.IO.Log.Write(Urho.LogLevel.Warning,
 								$"There was an unexpected exception during the invocation of {nameof(PercentageUpdate)}: {e.Message}");
 			}
+
+			parent?.SendPercentageUpdate(change * subsectionSize);
 		}
 
-		public virtual void SendTextUpdate(string newText)
+		public void SendTextUpdate(string newText)
 		{
 			Text = newText;
 			//Possible user methods
@@ -130,6 +104,8 @@ namespace MHUrho.Packaging
 				Urho.IO.Log.Write(Urho.LogLevel.Warning,
 								$"There was an unexpected exception during the invocation of {nameof(TextUpdate)}: {e.Message}");
 			}
+
+			parent?.SendTextUpdate(newText);
 		}
 
 		public void SendUpdate(double percentageChange, string newText)
@@ -138,29 +114,37 @@ namespace MHUrho.Packaging
 			SendTextUpdate(newText);
 		}
 
-		public virtual void SendFinishedLoading()
+		public void SendFinished()
 		{
 			try {
-				FinishedLoading?.Invoke(this);
+				Finished?.Invoke(this);
 			}
 			catch (Exception e)
 			{
 				Urho.IO.Log.Write(Urho.LogLevel.Warning,
-								$"There was an unexpected exception during the invocation of {nameof(FinishedLoading)}: {e.Message}");
+								$"There was an unexpected exception during the invocation of {nameof(Finished)}: {e.Message}");
 			}
 
+			parent?.SendSubsectionFinished(this);
 		}
 
-		protected virtual void SendSubsectionFinishedLoading(SubsectionLoadingWatcher subsection)
+		public void SendFailed(string message)
 		{
 			try {
-				SubsectionFinishedLoading?.Invoke(subsection);
+				Failed?.Invoke(this, message);
 			}
 			catch (Exception e)
 			{
 				Urho.IO.Log.Write(Urho.LogLevel.Warning,
-								$"There was an unexpected exception during the invocation of {nameof(SubsectionFinishedLoading)}: {e.Message}");
+								$"There was an unexpected exception during the invocation of {nameof(Failed)}: {e.Message}");
 			}
+
+			parent?.SendFailed(message);
+		}
+
+		public void SendSubsectionFinished(IProgressEventWatcher subsection)
+		{
+
 		}
 	}
 }

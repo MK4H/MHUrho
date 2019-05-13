@@ -81,33 +81,15 @@ namespace MHUrho.UserInterface
 				loadButton.Enabled = false;
 			}
 
-			async void LoadButton_Pressed(PressedEventArgs args)
+			void LoadButton_Pressed(PressedEventArgs args)
 			{
-				//100% in total
-				const double repLoadingPartSize = 10;
-				const double managerLoadingPartSize = 90;
-
+			
 				if (MatchSelected == null) return;
 
 				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
 
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
-
-				try {
-					var levelRep =
-						await LevelRep.GetFromSavedGame(newRelativePath,
-														screen.LoadingWatcher.GetWatcherForSubsection(repLoadingPartSize));
-
-
-					ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForPlaying(levelRep, PlayerSpecification.LoadFromSavedGame, LevelLogicCustomSettings.LoadFromSavedGame, screen.LoadingWatcher.GetWatcherForSubsection(managerLoadingPartSize));
-					await loader.CurrentLoading;
-					MenuUIManager.Clear();
-				}
-				catch (LevelLoadingException e) {
-					//Switch back from the loading screen
-					MenuUIManager.SwitchBack();
-					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
-				}
+				//Has to be last statement in the method, this instance will be released during execution.
+				proxy.Load(newRelativePath);
 			}
 		}
 
@@ -138,6 +120,46 @@ namespace MHUrho.UserInterface
 			}
 
 			screen = new Screen(this);
+		}
+
+		/// <summary>
+		/// Starts loading of the saved level from <paramref name="newRelativePath"/>.
+		/// Cannot be implemented in screen, because we switch to loading screen, which releases our <see cref="screen"/>.
+		/// </summary>
+		/// <param name="newRelativePath">Relative path to the save game</param>
+		async void Load(string newRelativePath)
+		{
+			//100% in total
+			const double repLoadingPartSize = 10;
+			const double managerLoadingPartSize = 90;
+
+			ProgressWatcher progress = new ProgressWatcher();
+			try
+			{
+				MenuUIManager.SwitchToLoadingScreen(progress);
+				var levelRep =
+					await LevelRep.GetFromSavedGame(newRelativePath,
+													new ProgressWatcher(progress, repLoadingPartSize));
+
+
+				ILevelLoader loader = MenuUIManager.MenuController
+													.GetLevelLoaderForPlaying(levelRep,
+																			PlayerSpecification.LoadFromSavedGame,
+																			LevelLogicCustomSettings.LoadFromSavedGame,
+																			new ProgressWatcher(progress, managerLoadingPartSize));
+				loader.Finished += (finishedProgress) => { MenuUIManager.Clear(); };
+				loader.Failed += (failedProgress, message) => {
+									//Switch back from the loading screen
+									MenuUIManager.SwitchBack();
+									MenuUIManager.ErrorPopUp.DisplayError("Error", message, this);
+								};
+				await loader.StartLoading();
+			}
+			catch (LevelLoadingException e)
+			{
+				MenuUIManager.SwitchBack();
+				await MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, this);
+			}
 		}
 	}
 }

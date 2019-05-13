@@ -64,7 +64,9 @@ namespace MHUrho.Logic
 
 		protected Dictionary<Type, IList<DefaultComponent>> defaultComponents;
 
-		protected Entity(int ID, ILevelManager level) {
+		protected Entity(int ID, ILevelManager level)
+		{
+			this.ReceiveSceneUpdates = true;
 			this.ID = ID;
 			this.Level = level;
 			this.defaultComponents = new Dictionary<Type, IList<DefaultComponent>>();

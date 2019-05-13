@@ -41,6 +41,9 @@
   <PropertyGroup>
     <ApplicationIcon>shield_grey.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.Protobuf, Version=3.5.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Google.Protobuf.3.5.1\lib\net45\Google.Protobuf.dll</HintPath>
@@ -68,9 +71,24 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Buildings\Tree1\Materials\Bark.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Buildings\Tree1\Materials\Tree.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Buildings\Tree1\Models\Default.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Buildings\Tree1\prefab.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\prefab.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\grass.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Test\ResourceDir\TEST2RP\Levels\LevelsFolder.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -79,6 +97,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Test\ResourceDir\TEST2RP\Textures\tileIcons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Units\Dog\Cube.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Units\Dog\dogUV.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Units\Dog\Material.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Test\ResourceDir\TEST2RP\Units\Dog\prefab.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Test\UIActions.xml">
@@ -351,6 +381,15 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Buildings\Tree1\Models\Default.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Units\Dog\Walk.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Test\ResourceDir\TEST2RP\Units\Dog\Cube.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -368,4 +407,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\UrhoSharp.1.8.93\build\net45\UrhoSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\UrhoSharp.1.8.93\build\net45\UrhoSharp.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>rd /s /q "$(TargetDir)DynData\PackageDirectory"
+md "$(TargetDir)DynData\PackageDirectory"
+xcopy /s /e "$(TargetDir)Data\Test\ResourceDir" "$(TargetDir)DynData\PackageDirectory\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -29,7 +29,7 @@ namespace MHUrho.Logic
 			readonly PlayerType type;
 			readonly int teamID;
 
-			public Loader(LevelManager level, IList<StPlayer> storedPlayers, PlayerInfo newInfo, InsigniaGetter insigniaGetter, bool overrideType)
+			public Loader(LevelManager level, IList<StPlayer> storedPlayers, InsigniaGetter insigniaGetter, PlayerInfo newInfo)
 			{
 				this.level = level;
 				this.storedPlayer = (from stPlayer in storedPlayers
@@ -41,33 +41,35 @@ namespace MHUrho.Logic
 						ArgumentException("StoredPlayers did not contain player entry for player with provided playerInfo", nameof(storedPlayers));
 				}
 
-				if (storedPlayer.TypeID != 0 && !overrideType) {
-					throw new ArgumentException("storedPlayer had a type and the override flag was not set",
-												nameof(storedPlayer));
-				}
-
 				this.type = newInfo.PlayerType;
 				this.teamID = newInfo.TeamID;
 				this.insignia = insigniaGetter.MarkUsed(newInfo.Insignia);
-				//Clear typespecific data from the safe
 
+				//Clear the stored player plugin data
 				storedPlayer.UserPlugin = new PluginData();
 			}
 
-			public Loader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter, bool loadType)
+			public Loader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter, bool loadPlaceholder)
 			{
 				this.level = level;
 				this.storedPlayer = storedPlayer;
 				this.insignia = insigniaGetter.GetUnusedInsignia(storedPlayer.InsigniaID);
+				if (loadPlaceholder) {
+					this.type = PlayerType.Placeholder;
+					teamID = 0;
 
-				if (loadType) {
-					if (storedPlayer.TypeID == 0) {
+				}
+				else {
+					if (storedPlayer.TypeID == 0)
+					{
 						throw new ArgumentException("StoredPlayer had no type", nameof(storedPlayer));
 					}
 
 					type = PackageManager.Instance.ActivePackage.GetPlayerType(storedPlayer.TypeID);
 					teamID = storedPlayer.TeamID;
 				}
+				
+
 			}
 
 			public static StPlayer Save(Player player)
@@ -109,18 +111,11 @@ namespace MHUrho.Logic
 
 			public void StartLoading()
 			{
-				if (type != null) {
-					//If the stored type is the same as the new type, the stored plugin data can be loaded
-					// If it is a different type, it will probably not know the format of the data, so just create new plugin instance
-					bool newPluginInstance = type.ID != storedPlayer.TypeID;
-					loadingPlayer = new Player(storedPlayer.Id, teamID, level, insignia, type, newPluginInstance);
-				}
-				else {
-					loadingPlayer =
-						CreatePlaceholderPlayer(storedPlayer.Id,
-												level,
-												insignia);
-				}
+
+				//If the stored type is the same as the new type, the stored plugin data can be loaded
+				// If it is a different type, it will probably not know the format of the data, so just create new plugin instance
+				bool newPluginInstance = type.ID != storedPlayer.TypeID;
+				loadingPlayer = new Player(storedPlayer.Id, teamID, level, insignia, type, newPluginInstance);
 			}
 
 			public void ConnectReferences() {
@@ -133,14 +128,13 @@ namespace MHUrho.Logic
 				}
 
 				foreach (var resource in storedPlayer.Resources) {
-					//TODO: Try get
 					ResourceType resourceType = level.PackageManager.ActivePackage.GetResourceType(resource.Id);
 					loadingPlayer.ChangeResourceAmount(resourceType, resource.Amount);
 				}
 
 				//If the stored data is from the same plugin type as the new type, load the data
 				// otherwise we created new fresh plugin instance, that most likely does not understand the stored data
-				if (type != null && type.ID == storedPlayer.TypeID) {
+				if (type.ID == storedPlayer.TypeID) {
 					loadingPlayer.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
 				}
 				
@@ -170,18 +164,6 @@ namespace MHUrho.Logic
 
 		readonly ILevelManager level;
 
-		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia) {
-			ReceiveSceneUpdates = true;
-
-			this.ID = id;
-			this.TeamID = teamID;
-			units = new Dictionary<UnitType, List<IUnit>>();
-			buildings = new Dictionary<BuildingType, List<IBuilding>>();
-			resources = new Dictionary<ResourceType, double>();
-			this.level = level;
-			this.Insignia = insignia;
-		}
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -191,8 +173,15 @@ namespace MHUrho.Logic
 		/// <param name="type"></param>
 		/// <param name="newPluginInstance"></param>
 		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia, PlayerType type, bool newPluginInstance)
-			:this(id, teamID,level, insignia)
 		{
+			ReceiveSceneUpdates = true;
+			this.ID = id;
+			this.TeamID = teamID;
+			units = new Dictionary<UnitType, List<IUnit>>();
+			buildings = new Dictionary<BuildingType, List<IBuilding>>();
+			resources = new Dictionary<ResourceType, double>();
+			this.level = level;
+			this.Insignia = insignia;
 			this.type = type;
 			this.Plugin = newPluginInstance
 							? type.GetNewInstancePlugin(this, level)
@@ -208,57 +197,49 @@ namespace MHUrho.Logic
 		/// <returns></returns>
 		public static Player CreatePlaceholderPlayer(int id, ILevelManager level, PlayerInsignia insignia)
 		{
-			return new Player(id, 0, level, insignia);
+			return new Player(id, 0, level, insignia, PlayerType.Placeholder, true);
 		}
 
 		/// <summary>
-		/// Loads player without the plugin and with cleared playerType
-		///
-		/// Loaded player serve only as a container of units, buildings and resources
+		/// Loads player as is stored in the <paramref name="storedPlayer"/>.
 		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="storedPlayer"></param>
-		/// <returns></returns>
-		public static IPlayerLoader GetLoaderToEditor(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
+		/// <param name="level">Level into which the player is being loaded.</param>
+		/// <param name="storedPlayer">Stored data of the player.</param>
+		/// <param name="insigniaGetter"></param>
+		/// <returns>Loader that loads the player as is stored in the <paramref name="storedPlayer"/>.</returns>
+		public static IPlayerLoader GetLoader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
 		{
 			return new Loader(level, storedPlayer, insigniaGetter, false);
 		}
 
 		/// <summary>
-		/// Loads player with the type it is stored with
-		///
-		/// Throws if there is no playerType stored for the player
+		/// Loads placeholder player with ownership of units and buildings.
 		/// </summary>
 		/// <param name="level"></param>
 		/// <param name="storedPlayer"></param>
+		/// <param name="insigniaGetter"></param>
 		/// <returns></returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayer"/> does not contain a player type</exception>
-		public static IPlayerLoader GetLoaderStoredType(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
+		public static IPlayerLoader GetLoaderToPlaceholder(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
 		{
 			return new Loader(level, storedPlayer, insigniaGetter, true);
 		}
 
 		/// <summary>
-		/// Loads player with the <paramref name="fillType"/> as its new type
-		///
-		/// If <paramref name="overrideType"/> is true, overrides any existing player type stored with this player,
-		/// if it is false, throws exception if there is a playerType stored with the player
+		/// Loads player with given <paramref name="playerInfo"/>, overriding any player type info the player may have been stored with.
 		/// </summary>
 		/// <param name="level"></param>
 		/// <param name="storedPlayers"></param>
 		/// <param name="playerInfo"></param>
-		/// <param name="overrideType"></param>
+		/// <param name="insigniaGetter"></param>
 		/// <returns></returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayers"/> contains a playerType and the flag <paramref name="overrideType"/> was not set</exception>
 		public static IPlayerLoader GetLoaderFromInfo(LevelManager level,
 													IList<StPlayer> storedPlayers,
 													PlayerInfo playerInfo,
-													InsigniaGetter insigniaGetter,
-													bool overrideType)
+													InsigniaGetter insigniaGetter)
 		{
 
 
-			return new Loader(level, storedPlayers, playerInfo, insigniaGetter, overrideType);
+			return new Loader(level, storedPlayers, insigniaGetter, playerInfo);
 		}
 
 		public StPlayer Save()

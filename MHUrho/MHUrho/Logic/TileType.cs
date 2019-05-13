@@ -62,7 +62,7 @@ namespace MHUrho.Logic
 		}
 
 		public Image GetImage() {
-			return PackageManager.Instance.GetImage(imagePath);
+			return PackageManager.Instance.GetImage(imagePath, true);
 		}
 
 

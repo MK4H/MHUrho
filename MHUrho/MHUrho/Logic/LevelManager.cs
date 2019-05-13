@@ -139,9 +139,30 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
-		public static ILevelLoader GetLoader()
+		public static ILevelLoader GetLoaderForPlaying(LevelRep levelRep,
+														StLevel storedLevel,
+														PlayerSpecification players,
+														LevelLogicCustomSettings customSettings,
+														IProgressEventWatcher parentProgress = null,
+														double loadingSubsectionSize = 100)
 		{
-			return new Loader();
+			return new SavedLevelPlayingLoader(levelRep, storedLevel, players, customSettings, parentProgress, loadingSubsectionSize);
+		}
+
+		public static ILevelLoader GetLoaderForEditing(LevelRep levelRep,
+														StLevel storedLevel,
+														IProgressEventWatcher parentProgress = null,
+														double loadingSubsectionSize = 100)
+		{
+			return new SavedLevelEditorLoader(levelRep, storedLevel, parentProgress, loadingSubsectionSize);
+		}
+
+		public static ILevelLoader GetLoaderForDefaultLevel(LevelRep levelRep,
+															IntVector2 mapSize,
+															IProgressEventWatcher parentProgress = null,
+															double loadingSubsectionSize = 100)
+		{
+			return new DefaultLevelLoader(levelRep, mapSize, parentProgress, loadingSubsectionSize);
 		}
 
 		public StLevel Save() {
@@ -267,7 +288,7 @@ namespace MHUrho.Logic
 			try {
 				newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, initRotation, player);
 			}
-			catch (CreationException) {
+			catch (CreationException e) {
 				return null;
 			}
 

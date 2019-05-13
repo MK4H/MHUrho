@@ -28,8 +28,6 @@ namespace MHUrho.Logic {
 
 		Node LevelNode { get; }
 
-		DefaultComponentFactory DefaultComponentFactory { get; }
-
 		PackageManager PackageManager { get; }
 
 		bool EditorMode { get; }
@@ -56,7 +54,14 @@ namespace MHUrho.Logic {
 
 		LevelLogicInstancePlugin Plugin { get; }
 
+		/// <summary>
+		/// Invoked on each scene update.
+		/// </summary>
 		event OnUpdateDelegate Update;
+
+		/// <summary>
+		/// Invoked when level is ending.
+		/// </summary>
 		event OnEndDelegate Ending;
 
 		/// <summary>
@@ -68,8 +73,24 @@ namespace MHUrho.Logic {
 
 		void SaveTo(Stream stream, bool leaveOpen = false);
 
+		/// <summary>
+		/// Spawns new unit of given <paramref name="unitType"/> into the world map at <paramref name="tile"/>.
+		/// </summary>
+		/// <param name="unitType">The unit to be added.</param>
+		/// <param name="tile">Tile to spawn the unit at.</param>
+		/// <param name="initRotation">Initial rotation of the spawned unit.</param>
+		/// <param name="player">owner of the new unit.</param>
+		/// <returns>The new unit if a unit was spawned, or null if no unit was spawned.</returns>
 		IUnit SpawnUnit(UnitType unitType, ITile tile, Quaternion initRotation, IPlayer player);
 
+		/// <summary>
+		/// Creates new building in the world.
+		/// </summary>
+		/// <param name="buildingType">Type of the new building.</param>
+		/// <param name="topLeft">Coordinates of the top leftmost tile the building will occupy.</param>
+		/// <param name="initRotation">Initial rotation of the building when it is create.d</param>
+		/// <param name="player">Owner of the building.</param>
+		/// <returns>The new building if it was built, or null if the building could not be built.</returns>
 		IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player);
 
 		IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, IRangeTarget target);

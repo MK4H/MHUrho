@@ -158,7 +158,7 @@ namespace MHUrho.Packaging {
 		public static async Task<GamePack> Load(string pathToXml,
 												GamePackRep gamePackRep,
 												XmlSchemaSet schemas,
-												ILoadingProgress loadingProgress = null)
+												IProgressEventWatcher loadingProgress = null)
 		{
 			const double tileTypesPartSize = 12.5;
 			const double unitTypesPartSize = 12.5;
@@ -230,10 +230,17 @@ namespace MHUrho.Packaging {
 				newPack.FinishLoading();
 			}
 
-			loadingProgress?.SendFinishedLoading();
+			loadingProgress?.SendFinished();
 			return newPack;
 		}
 
+		/// <summary>
+		/// Returns the <see cref="TileType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="TileType"/></param>
+		/// <returns>Returns the <see cref="TileType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when argument is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public TileType GetTileType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name),"Name of the tileType cannot be null");
@@ -250,6 +257,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown tile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="TileType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="TileType"/></param>
+		/// <returns>Returns the <see cref="TileType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public TileType GetTileType(int ID) {
 
 			if (tileTypesByID.TryGetValue(ID, out TileType value)) {
@@ -263,6 +276,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown tile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="UnitType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="UnitType"/></param>
+		/// <returns>Returns the <see cref="UnitType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public UnitType GetUnitType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the unitType cannot be null");
@@ -280,6 +300,12 @@ namespace MHUrho.Packaging {
 
 		}
 
+		/// <summary>
+		/// Returns the <see cref="UnitType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="UnitType"/></param>
+		/// <returns>Returns the <see cref="UnitType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public UnitType GetUnitType(int ID) {
 
 			if (unitTypesByID.TryGetValue(ID, out  UnitType value)) {
@@ -294,6 +320,13 @@ namespace MHUrho.Packaging {
 
 		}
 
+		/// <summary>
+		/// Returns the <see cref="BuildingType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="BuildingType"/></param>
+		/// <returns>Returns the <see cref="BuildingType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public BuildingType GetBuildingType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the buildingType cannot be null");
@@ -314,6 +347,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown building type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="BuildingType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="BuildingType"/></param>
+		/// <returns>Returns the <see cref="BuildingType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public BuildingType GetBuildingType(int ID) {
 
 			if (buildingTypesByID.TryGetValue(ID, out BuildingType value)) {
@@ -331,6 +370,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown building type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ProjectileType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="ProjectileType"/></param>
+		/// <returns>Returns the <see cref="ProjectileType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public ProjectileType GetProjectileType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the projectileType cannot be null");
@@ -351,6 +397,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown projectile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ProjectileType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="ProjectileType"/></param>
+		/// <returns>Returns the <see cref="ProjectileType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public ProjectileType GetProjectileType(int ID) {
 
 			if (projectileTypesByID.TryGetValue(ID, out ProjectileType value)) {
@@ -368,6 +420,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown projectile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ResourceType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="ResourceType"/></param>
+		/// <returns>Returns the <see cref="ResourceType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public ResourceType GetResourceType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the ResourceType cannot be null");
@@ -388,6 +447,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown resource type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ResourceType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="ResourceType"/></param>
+		/// <returns>Returns the <see cref="ResourceType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public ResourceType GetResourceType(int ID) {
 			if (resourceTypesByID.TryGetValue(ID, out ResourceType value)) {
 				return value;
@@ -405,6 +470,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown resource type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="PlayerType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="PlayerType"/></param>
+		/// <returns>Returns the <see cref="PlayerType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public PlayerType GetPlayerType(string name)
 		{
 			if (name == null) {
@@ -426,6 +498,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown player type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="PlayerType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="PlayerType"/></param>
+		/// <returns>Returns the <see cref="PlayerType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public PlayerType GetPlayerType(int ID) {
 
 			if (playerAITypesByID.TryGetValue(ID, out PlayerType value)) {
@@ -450,6 +528,13 @@ namespace MHUrho.Packaging {
 					select playerType;
 		}
 
+		/// <summary>
+		/// Returns the <see cref="LevelLogicType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="LevelLogicType"/></param>
+		/// <returns>Returns the <see cref="LevelLogicType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public LevelLogicType GetLevelLogicType(string name)
 		{
 			if (name == null)
@@ -474,6 +559,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown level logic type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="LevelLogicType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="LevelLogicType"/></param>
+		/// <returns>Returns the <see cref="LevelLogicType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public LevelLogicType GetLevelLogicType(int ID)
 		{
 			if (levelLogicTypesByID.TryGetValue(ID, out LevelLogicType value))

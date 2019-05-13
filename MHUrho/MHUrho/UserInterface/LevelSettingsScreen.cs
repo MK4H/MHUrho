@@ -223,9 +223,11 @@ namespace MHUrho.UserInterface
 					aiPlayers.Add(Tuple.Create(item.ChosenType, item.ChosenTeam, item.Insignia));
 				}
 
-				Play(neutralPlayerItem.ChosenType,
-					Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam, humanPlayerItem.Insignia),
-					aiPlayers);
+				//Has to be last statement in the method, this instance will be released during execution.
+				proxy.Play(neutralPlayerItem.ChosenType,
+							Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam, humanPlayerItem.Insignia),
+							aiPlayers,
+							 pluginCustomSettings);
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -233,23 +235,7 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchBack();
 			}
 
-			void Play(PlayerType neutralPlayerType,
-					Tuple<PlayerType,int, PlayerInsignia> humanPlayer,
-					IEnumerable<Tuple<PlayerType, int, PlayerInsignia>> aiPlayers)
-			{
-				PlayerSpecification players = new PlayerSpecification();
-
-				players.SetNeutralPlayer(neutralPlayerType);
-				players.SetHumanPlayer(humanPlayer.Item1, humanPlayer.Item2, humanPlayer.Item3);
-				foreach (var aiPlayer in aiPlayers) {
-					players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2, aiPlayer.Item3);
-				}
-
-				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it
-				LevelRep level = Level;
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(() => MenuUIManager.Clear());
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(level, players, pluginCustomSettings, screen.LoadingWatcher);
-			}
+			
 
 			public void SimulateBackButton()
 			{
@@ -268,17 +254,17 @@ namespace MHUrho.UserInterface
 								 insigniaGetter.GetNextUnusedInsignia());
 
 
-
-				Play(neutralPlayerType,
-					humanPlayer,
-					from aiPlayer in screenAction.AIPlayers
-					select Tuple.Create(Level.GamePack.GetPlayerType(aiPlayer.Item1),
-										aiPlayer.Item2,
-										insigniaGetter.GetNextUnusedInsignia()));
+				//Has to be last statement in the method, this instance will be released during the execution
+				proxy.Play(neutralPlayerType,
+							humanPlayer,
+							from aiPlayer in screenAction.AIPlayers
+							select Tuple.Create(Level.GamePack.GetPlayerType(aiPlayer.Item1),
+												aiPlayer.Item2,
+												insigniaGetter.GetNextUnusedInsignia()),
+							 pluginCustomSettings);
 			}
 		}
 
-		//TODO: Ensure that Show cannot be called with Level null, that level is not changed after show etc.
 		public LevelRep Level { get; set; }
 
 		protected override ScreenBase ScreenInstance {
@@ -320,6 +306,10 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
+			if (Level == null) {
+				throw new InvalidOperationException($"{nameof(Level)} has to be set before Showing this screen");
+			}
+
 			screen = new Screen(this);
 		}
 
@@ -333,6 +323,45 @@ namespace MHUrho.UserInterface
 			base.Hide();
 		}
 
+		/// <summary>
+		/// Starts the loading of the <see cref="Level"/> for playing.
+		/// Loads the level with neutral player of type <paramref name="neutralPlayerType"/>,
+		/// human player of type <paramref name="humanPlayer"/>,
+		/// ai players of types <paramref name="aiPlayers"/> and
+		/// gives the level plugin the <paramref name="pluginCustomSettings"/> it defined in the provided window.
+		/// </summary>
+		/// <param name="neutralPlayerType">The type of the neutral player in the loaded level.</param>
+		/// <param name="humanPlayer">The type of the human player in the loaded level.</param>
+		/// <param name="aiPlayers">The types of ai players in the loaded level.</param>
+		/// <param name="pluginCustomSettings">Data the plugin requested from the user.</param>
+		void Play(PlayerType neutralPlayerType,
+				Tuple<PlayerType, int, PlayerInsignia> humanPlayer,
+				IEnumerable<Tuple<PlayerType, int, PlayerInsignia>> aiPlayers,
+				LevelLogicCustomSettings pluginCustomSettings)
+		{
+			PlayerSpecification players = new PlayerSpecification();
 
+			players.SetNeutralPlayer(neutralPlayerType);
+			players.SetHumanPlayer(humanPlayer.Item1, humanPlayer.Item2, humanPlayer.Item3);
+			foreach (var aiPlayer in aiPlayers)
+			{
+				players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2, aiPlayer.Item3);
+			}
+
+
+			ILevelLoader loader = MenuUIManager.MenuController.GetLevelLoaderForPlaying(Level, players, pluginCustomSettings);
+			MenuUIManager.SwitchToLoadingScreen(loader);
+
+			loader.Finished += (progress) => {
+									MenuUIManager.Clear();
+								};
+			loader.Failed += (progress, message) => {
+								//Switch back from the loading screen
+								MenuUIManager.SwitchBack();
+								MenuUIManager.ErrorPopUp.DisplayError("Error", message, this);
+							};
+
+			loader.StartLoading();
+		}
 	}
 }

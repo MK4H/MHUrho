@@ -13,8 +13,17 @@ namespace MHUrho.Logic
 {
 	public enum PlayerTypeCategory { Human, Neutral, AI };
 
-    public class PlayerType : ILoadableType, IDisposable
-    {
+    public class PlayerType : ILoadableType, IDisposable {
+		public static PlayerType Placeholder { get; private set; } = new PlayerType()
+																	{
+																		ID = 0,
+																		Name = "MHUrhoPlaceholder",
+																		Package = null,
+																		IconRectangle = new IntRect(0,0,0,0),
+																		Category = PlayerTypeCategory.Neutral,
+																		Plugin = new PlaceholderPlayerPluginType()
+																	};
+
 		public int ID { get; private set; }
 
 		public string Name { get; private set; }

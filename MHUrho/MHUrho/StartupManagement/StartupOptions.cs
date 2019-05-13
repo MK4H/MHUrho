@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using MHUrho.Helpers;
+using MHUrho.UserInterface;
 using Urho;
 
 namespace MHUrho.StartupManagement
@@ -92,7 +93,7 @@ namespace MHUrho.StartupManagement
 				}
 				catch (IOException e)
 				{
-					//TODO: This means could not open xml schema
+					//NOTE: This may mean we could not open xml schema
 					throw new ArgumentException("-ui xmlFilePath, could not read actions from the file xmlFilePath", e);
 				}
 				catch (XmlSchemaValidationException e)
@@ -110,6 +111,27 @@ namespace MHUrho.StartupManagement
 	}
 
 	public class ActionManager {
+
+		class Execution {
+			readonly MyGame game;
+			readonly IEnumerator<MenuScreenAction> actions;
+
+			public Execution(MyGame game, IEnumerator<MenuScreenAction> actions)
+			{
+				this.game = game;
+				this.actions = actions;
+			}
+
+			public void TriggerNext()
+			{
+				if (actions.MoveNext()) {
+					game.MenuController.ExecuteActionOnCurrentScreen(actions.Current);
+				}
+				else {
+					game.MenuController.ScreenChanged -= TriggerNext;
+				}
+			}
+		}
 
 		static readonly string SchemaPath = Path.Combine("Data", "Schemas", "MenuActions.xsd");
 
@@ -146,9 +168,9 @@ namespace MHUrho.StartupManagement
 
 		public void RunActions(MyGame game)
 		{
-			foreach (var action in actions) {
-				game.MenuController.ExecuteActionOnCurrentScreen(action);
-			}
+			var exec = new Execution(game, actions.GetEnumerator());
+			game.MenuController.ScreenChanged += exec.TriggerNext;
+			exec.TriggerNext();
 		}
 	}
 
@@ -162,7 +184,8 @@ namespace MHUrho.StartupManagement
 				{PackagePickScreenAction.Name, PackagePickScreenAction.FromXml },
 				{LevelPickScreenAction.Name, LevelPickScreenAction.FromXml },
 				{LevelCreationScreenAction.Name, LevelCreationScreenAction.FromXml },
-				{LevelSettingsScreenAction.Name, LevelSettingsScreenAction.FromXml }
+				{LevelSettingsScreenAction.Name, LevelSettingsScreenAction.FromXml },
+				{LoadingScreenAction.Name, LoadingScreenAction.FromXml }
 			};
 																					
 
@@ -785,6 +808,46 @@ namespace MHUrho.StartupManagement
 					return Actions.Back;
 				case "play":
 					return Actions.Play;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(stringRepr), stringRepr, "Unknown action string");
+			}
+		}
+	}
+
+	public class LoadingScreenAction : MenuScreenAction {
+		public enum Actions { None };
+
+		public static string Name = "loading";
+
+		public Actions Action { get; private set; }
+
+		protected LoadingScreenAction(Actions action)
+		{
+			this.Action = action;
+		}
+
+		public static LoadingScreenAction GetNoneAction()
+		{
+			return new LoadingScreenAction(Actions.None);
+		}
+
+		public static LoadingScreenAction FromXml(XElement element)
+		{
+			CheckName(Name, element);
+
+			//Element should exist and its value should be correct thanks to schema validation
+			string actionStr = element.Element(XMLNamespace + "action").Value;
+
+			return new LoadingScreenAction(StringToAction(actionStr));
+		}
+
+		static Actions StringToAction(string stringRepr)
+		{
+			// STRINGS HAVE TO MATCH THOSE IN THE SCHEMA
+			switch (stringRepr)
+			{
+				case "none":
+					return Actions.None;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(stringRepr), stringRepr, "Unknown action string");
 			}

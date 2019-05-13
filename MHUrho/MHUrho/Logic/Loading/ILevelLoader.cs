@@ -10,16 +10,10 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-    public interface ILevelLoader
+    public interface ILevelLoader : IProgressNotifier
     {
-		Task<ILevelManager> CurrentLoading { get; }
-	
+		ILevelManager Level { get; }
 
-		Task<ILevelManager> LoadForEditing(LevelRep levelRep, StLevel storedLevel, ILoadingProgress loadingProgress);
-
-		Task<ILevelManager> LoadForPlaying(LevelRep levelRep, StLevel storedLevel, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress);
-
-		Task<ILevelManager> LoadDefaultLevel(LevelRep levelRep, IntVector2 mapSize, ILoadingProgress loadingProgress);
-
+		Task<ILevelManager> StartLoading();
 	}
 }

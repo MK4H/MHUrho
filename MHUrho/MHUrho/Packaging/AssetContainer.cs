@@ -120,8 +120,16 @@ namespace MHUrho.Packaging
 
 		public override Node Instantiate(ILevelManager level, Vector3 position, Quaternion rotation)
 		{
-			//TODO: Checks that it instantiated correctly
-			var newNode = level.Scene.InstantiateXml(file.GetRoot(), position, rotation);
+			Node newNode = null;
+			try {
+				newNode = level.Scene.InstantiateXml(file.GetRoot(), position, rotation);
+			}
+			catch (Exception e) {
+				string message = $"Prefab instantiation failed with an exception: {e.Message}";
+				Urho.IO.Log.Write(LogLevel.Warning,
+								message);
+				throw new LevelLoadingException($"Prefab instantiation failed with an exception: {e.Message}");
+			}
 			newNode.ChangeParent(level.LevelNode);
 
 			return newNode;

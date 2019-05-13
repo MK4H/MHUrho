@@ -58,7 +58,7 @@ namespace MHUrho
 
 		public static bool IsMainThread(Thread thread)
 		{
-			//TODO: Better
+			//NOTE: When UrhoSharp implements the Urho3D method of checking main thread, delegate to it
 			return thread.ManagedThreadId == mainThreadID;
 		}
 
@@ -68,11 +68,28 @@ namespace MHUrho
 		/// <param name="action"></param>
 		public static void InvokeOnMainSafe(Action action)
 		{
+			Exception exc = null;
 			if (IsMainThread(Thread.CurrentThread)) {
-				action();
+				try {
+					action();
+				}
+				catch (Exception e) {
+					exc = e;
+				}
 			}
 			else {
-				InvokeOnMainAsync(action).Wait();
+				InvokeOnMainAsync(() => {
+									try {
+										action();
+									}
+									catch (Exception e) {
+										exc = e;
+									}
+								}).Wait();
+			}
+
+			if (exc != null) {
+				throw new MethodInvocationException($"Method invocation ended with an exception: {exc.Message}", exc);
 			}
 		}
 
@@ -87,17 +104,17 @@ namespace MHUrho
 		{
 			Exception exc = null;
 
-			await InvokeAsync(() => {
-								try {
-									action();
-								}
-								catch (Exception e) {
-									exc = e;
-								}
-							});
+			await InvokeOnMainAsync(() => {
+										try {
+											action();
+										}
+										catch (Exception e) {
+											exc = e;
+										}
+									});
 
 			if (exc != null) {
-				throw new MethodInvocationException("Method invocation ended with an exception.", exc);
+				throw new MethodInvocationException($"Method invocation ended with an exception: {exc.Message}", exc);
 			}
 		}
 
@@ -216,17 +233,18 @@ namespace MHUrho
 		{
 			if (Debugger.IsAttached)
 			{
-				Debugger.Break();
+				//Debugger.Break();
 			}
 
-			string message = $"An unhandled exception occured: {e.Exception.Message}";
+			string message = $"Native exception occured: {e.Exception.Message}";
 			Urho.IO.Log.Write(LogLevel.Error, message);
-
+			//e.Handled = true;
+			/*
 			LevelManager.CurrentLevel?.End();
 			Instance.MenuController.InitialSwitchToMainMenu("Game error", message);
+			*/
 
 
-			e.Handled = true;
 		}
 	
 	}

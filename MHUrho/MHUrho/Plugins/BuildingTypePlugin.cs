@@ -24,7 +24,7 @@ namespace MHUrho.Plugins
 		/// Creates instance of <see cref="BuildingInstancePlugin"/> that will be loaded by <see cref="BuildingInstancePlugin.LoadState(LevelManager, PluginDataWrapper)"/>
 		/// </summary>
 		/// <returns>New instance, that will be loaded in the next step</returns>
-		public abstract BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding projectile);
+		public abstract BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building);
 
 		public abstract bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level);
 	}

@@ -25,7 +25,7 @@ namespace DefaultPackage
 			throw new NotImplementedException();
 		}
 
-		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding projectile)
+		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building)
 		{
 			throw new NotImplementedException();
 		}

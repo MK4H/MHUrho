@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using DefaultPackage.Units;
 using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.Storage;
@@ -14,7 +15,7 @@ using MHUrho.Packaging;
 using MHUrho.WorldMap;
 using Urho;
 
-namespace DefaultPackage
+namespace DefaultPackage.Players
 {
 	public class TestAIPlayerType : PlayerAITypePlugin {
 

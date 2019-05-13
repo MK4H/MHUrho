@@ -18,6 +18,8 @@ namespace MHUrho.UnitComponents
 
 	public delegate void TargetFoundDelegate(MeeleAttacker attacker, IEntity target);
 
+	public delegate void TargetLost(MeeleAttacker attacker);
+
 	/// <summary>
 	/// Component that attacks a target in selectable intervals.
 	/// Can automatically search for target unit and automatically attack it.
@@ -115,6 +117,8 @@ namespace MHUrho.UnitComponents
 		/// Invoked when target is acquired automatically
 		/// </summary>
 		public event TargetFoundDelegate TargetFound;
+
+		public event TargetLost TargetLost;
 
 
 		protected float TimeToNextSearch;
@@ -260,6 +264,7 @@ namespace MHUrho.UnitComponents
 		void OnTargetDeath()
 		{
 			Target = null;
+			InvokeTargetLost();
 		}
 
 		bool IsInRange(IEntity target)
@@ -323,6 +328,19 @@ namespace MHUrho.UnitComponents
 			{
 				Urho.IO.Log.Write(LogLevel.Debug,
 								$"There was an unexpected exception during the invocation of {nameof(TargetFound)}: {e.Message}");
+			}
+		}
+
+		void InvokeTargetLost()
+		{
+			try
+			{
+				TargetLost?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Debug,
+								$"There was an unexpected exception during the invocation of {nameof(TargetLost)}: {e.Message}");
 			}
 		}
 	}

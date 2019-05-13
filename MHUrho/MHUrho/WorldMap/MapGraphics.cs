@@ -772,7 +772,7 @@ namespace MHUrho.WorldMap
 			/// <returns></returns>
 			public static MapGraphics Build(Map map,
 											IntVector2 chunkSize,
-											ILoadingProgress loadingProgress = null)
+											IProgressEventWatcher loadingProgress = null)
 			{
 				const double initializingPartSize = 10;
 				const double materialPartSize = 50;
@@ -797,7 +797,7 @@ namespace MHUrho.WorldMap
 				graphics.CreateModel();
 				loadingProgress?.SendUpdate(modelPartSize, "Created map geometry");
 
-				loadingProgress?.SendFinishedLoading();
+				loadingProgress?.SendFinished();
 				return graphics;
 			}
 

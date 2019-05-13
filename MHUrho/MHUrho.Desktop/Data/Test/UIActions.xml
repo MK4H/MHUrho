@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
-  <!--<mainMenu>
+  <mainMenu>
     <action>start</action>
   </mainMenu>
   <packagePicking>
@@ -9,6 +9,9 @@
       <packageName>testRP2</packageName>
     </values>
   </packagePicking>
+  <loading>
+    <action>none</action>
+  </loading>
   <levelPicking>
     <action>editnew</action>
   </levelPicking>
@@ -21,7 +24,10 @@
       <logicTypeName>TestLogic</logicTypeName>
       <mapSize x="200" y="300"/>
     </values>
-  </levelCreation>-->
+  </levelCreation>
+  <loading>
+    <action>none</action>
+  </loading>
   <!--<levelPicking>
     <action>play</action>
     <values>

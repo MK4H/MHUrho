@@ -21,6 +21,15 @@ namespace MHUrho.Input.MandK
 
 		public InputType InputType => InputType.MouseAndKeyboard;
 
+		public event OnScreenChangeDelegate ScreenChanged {
+			add {
+				UIController.ScreenChanged += value;
+			}
+			remove {
+				UIController.ScreenChanged -= value;
+			}
+		}
+
 		readonly MenuUI UIController;
 
 		IGameController pausedLevelController;
@@ -52,23 +61,27 @@ namespace MHUrho.Input.MandK
 			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
-		public ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingProgress loadingProgress)
+		public ILevelLoader GetLevelLoaderForEditing(LevelRep level, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
-			return level.LoadForEditing(loadingProgress);
+			return level.GetLoaderForEditing(parentProgress, subsectionSize);
 		}
 
-		public ILevelLoader StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingProgress loadingProgress)
+		public ILevelLoader GetLevelLoaderForPlaying(LevelRep level, 
+														PlayerSpecification players, 
+														LevelLogicCustomSettings customSettings, 
+														IProgressEventWatcher parentProgress = null, 
+														double subsectionSize = 100)
 		{
 			if (pausedLevelController != null)
 			{
 				EndPausedLevel();
 			}
 
-			return level.LoadForPlaying(players, customSettings, loadingProgress);
+			return level.GetLoaderForPlaying(players, customSettings, parentProgress, subsectionSize);
 		}
 
 		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)
