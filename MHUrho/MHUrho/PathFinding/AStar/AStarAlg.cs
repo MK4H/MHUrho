@@ -16,7 +16,7 @@ using Priority_Queue;
 
 namespace MHUrho.PathFinding.AStar {
 
-
+	public enum Visualization { None, TouchedNodes, FinalPath }
 
 	public class AStarAlg : IPathFindAlg {
 
@@ -33,11 +33,14 @@ namespace MHUrho.PathFinding.AStar {
 		Node targetNode;
 		NodeDistCalculator distCalc;
 
-		public AStarAlg(IMap map) {
+		readonly Visualization visualization;
+
+		public AStarAlg(IMap map, Visualization visualization = Visualization.None) {
 			this.Map = map;
 			nodeMap = new TileNode[map.Width * map.Length];
 			touchedNodes = new List<Node>();
 			priorityQueue = new FastPriorityQueue<Node>(map.Width * map.Length / 4);
+			this.visualization = visualization;
 
 			FillNodeMap();
 			map.TileHeightChangeNotifier.TileHeightsChangedCol += TileHeightsChanged;
@@ -154,9 +157,11 @@ namespace MHUrho.PathFinding.AStar {
 
 				//If we hit the target, finish and return the sourceNode
 				if (currentNode == targetNode) {
-#if DEBUG
-					//VisualizeTouchedNodes();
-#endif
+
+					if (visualization == Visualization.TouchedNodes) {
+						VisualizeTouchedNodes(targetNode.Time);
+					}
+					
 					return currentNode;
 				}
 
@@ -182,12 +187,16 @@ namespace MHUrho.PathFinding.AStar {
 				target = target.PreviousNode;
 			}
 
+			//Reverse so that source is first and target is last
+			nodes.Reverse();
+
+			if (visualization == Visualization.FinalPath) {
+				VisualizePath(nodes);
+			}
+
 			if (nodes.Count == 1) {
 				return StartIsFinish(nodes[0], source);
 			}
-
-			//Reverse so that source is first and target is last
-			nodes.Reverse();
 
 			List<Waypoint> waypoints = new List<Waypoint>();
 			waypoints.Add(new Waypoint(new TempNode(source, Map), 0, MovementType.None));
@@ -263,9 +272,25 @@ namespace MHUrho.PathFinding.AStar {
 			distCalc = null;
 		}
 
-		void VisualizeTouchedNodes()
+		void VisualizeTouchedNodes(float finalTime)
 		{
-			Map.HighlightTileList(from node in touchedNodes select GetTileNode(node).Tile, Color.Green);
+			Map.HighlightTileList(from node in touchedNodes select GetTileNode(node).Tile,
+								(tile) => {
+									TileNode node = GetTileNode(tile);
+									float time = node.Time;
+									return new Color(time / finalTime, 1 - time / finalTime, 0, 1);
+								});
+		}
+
+		void VisualizePath(IReadOnlyList<Node> pathNodes)
+		{
+			float finalTime = pathNodes[pathNodes.Count].Time;
+			Map.HighlightTileList(from node in pathNodes select GetTileNode(node).Tile,
+								(tile) => {
+									TileNode node = GetTileNode(tile);
+									float time = node.Time;
+									return new Color(time / finalTime, 1 - time / finalTime, 0, 1);
+								});
 		}
 
 		void FillNodeMap()
