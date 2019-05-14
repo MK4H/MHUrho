@@ -74,10 +74,6 @@ namespace MHUrho.UserInterface
 				switch (buttonName)
 				{
 					case StartButtonName:
-
-						//DO NOT WAIT, let the ui thread respond to user
-						//LevelManager.LoadDefaultLevel(Game, new IntVector2(100, 100), "testRP2", MenuUIManager.LoadingScreen.GetLoadingWatcher());
-						//MenuUIManager.SwitchToLoadingScreen();
 						MenuUIManager.SwitchToPackagePickingScreen();
 						break;
 					case LoadButtonName:

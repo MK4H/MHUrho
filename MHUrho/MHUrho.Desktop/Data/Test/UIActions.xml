@@ -6,7 +6,7 @@
   <packagePicking>
     <action>pick</action>
     <values>
-      <packageName>testRP2</packageName>
+      <packageName>Showcase Package</packageName>
     </values>
   </packagePicking>
   <loading>

@@ -274,7 +274,7 @@ namespace MHUrho.UnitComponents
 				return;
 			}
 
-			if (TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc)) {
+			if (!TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc)) {
 				StopMovement(WorldWalkerState.Failed);
 				return;
 			}
@@ -313,7 +313,7 @@ namespace MHUrho.UnitComponents
 		/// <returns>If unit reached the waypoint</returns>
 		bool MoveTowards(Waypoint waypoint, float timeStep) {
 
-			if (TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc))
+			if (!TryGetNodeDistCalculator(out INodeDistCalculator nodeDistCalc))
 			{
 				StopMovement(WorldWalkerState.Failed);
 				return false;
@@ -357,7 +357,7 @@ namespace MHUrho.UnitComponents
 
 			//Unit couldn't move to newPosition
 
-			if (TryGetNodeDistCalculator(out nodeDistCalc)) {
+			if (!TryGetNodeDistCalculator(out nodeDistCalc)) {
 				StopMovement(WorldWalkerState.Failed);
 				return false;
 			}

@@ -198,18 +198,6 @@ namespace MHUrho
 			}
 		}
 
-		static async Task InvokeAsync(Action action)
-		{
-			if (IsMainThread(Thread.CurrentThread))
-			{
-				action();
-			}
-			else
-			{
-				await InvokeOnMainAsync(action);
-			}
-		}
-
 		//public void Dispose()
 		//{
 		//	Urho.IO.Log.Write(LogLevel.Debug, "Game disposed.");
@@ -243,8 +231,6 @@ namespace MHUrho
 			LevelManager.CurrentLevel?.End();
 			Instance.MenuController.InitialSwitchToMainMenu("Game error", message);
 			*/
-
-
 		}
 	
 	}
