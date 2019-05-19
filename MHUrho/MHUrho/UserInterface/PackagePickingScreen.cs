@@ -121,7 +121,7 @@ namespace MHUrho.UserInterface
 			{
 				IPathResult result = await MenuUIManager
 											.FileBrowsingPopUp
-											.Request(MyGame.Files.PackageDirectoryAbsolutePath,
+											.Request(MHUrhoApp.Files.PackageDirectoryPath,
 													SelectOption.File);
 				if (result == null) {
 					return;

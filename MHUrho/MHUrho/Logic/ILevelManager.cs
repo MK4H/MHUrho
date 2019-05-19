@@ -18,7 +18,7 @@ namespace MHUrho.Logic {
 
 		LevelRep LevelRep { get; }
 
-		MyGame App { get; }
+		MHUrhoApp App { get; }
 
 		IMap Map { get; }
 

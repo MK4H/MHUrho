@@ -68,9 +68,13 @@ namespace MHUrho.Logic
 			/// <param name="tile">tile where the unit will spawn</param>
 			/// <param name="rotation">Initial rotation of the unit</param>
 			/// <param name="player">owner of the unit</param>
-			/// <returns>the unit component, already added to the node</returns>
+			/// <returns>the unit component, already added to the node, or null if the unit cannot be spawned on the <paramref name="tile"/></returns>
 			/// <exception cref="CreationException">Throws an exception when unit creation fails</exception>
 			public static Unit CreateNew(int id, UnitType type, ILevelManager level, ITile tile, Quaternion rotation, IPlayer player) {
+				if (!type.CanSpawnAt(tile)) {
+					return null;
+				}
+
 				Vector3 position = new Vector3(tile.Center.X,
 												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
 												tile.Center.Y);

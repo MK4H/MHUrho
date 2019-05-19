@@ -97,7 +97,7 @@ namespace MHUrho.Packaging
 		protected string GetPath(XElement assetsElement)
 		{
 			var pathElement = assetsElement.Element(AssetsXml.Inst.Path);
-			return FileManager.CorrectRelativePath(pathElement.Value);
+			return FileManager.ReplaceDirectorySeparators(pathElement.Value);
 		}
 	}
 

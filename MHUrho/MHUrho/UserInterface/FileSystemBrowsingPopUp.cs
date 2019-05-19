@@ -95,7 +95,7 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			MyGame Game => MyGame.Instance;
+			MHUrhoApp Game => MHUrhoApp.Instance;
 
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
@@ -406,11 +406,11 @@ namespace MHUrho.UserInterface
 				string absoluteDirPath = Path.Combine(baseDir, relativeDirPath);
 				var newEntries = new List<NameTextPair>();
 				try {
-					foreach (var file in MyGame.Files.GetFSEntriesInDirectory(absoluteDirPath, true, false)) {
+					foreach (var file in MHUrhoApp.Files.GetFSEntriesInDirectory(absoluteDirPath, true, false)) {
 						newEntries.Add(new NameTextPair(Path.GetFileName(file), false));
 					}
 
-					foreach (var directory in MyGame.Files.GetFSEntriesInDirectory(absoluteDirPath, false, true)) {
+					foreach (var directory in MHUrhoApp.Files.GetFSEntriesInDirectory(absoluteDirPath, false, true)) {
 						newEntries.Add(new NameTextPair(Path.GetFileName(directory), true));
 					}
 				}

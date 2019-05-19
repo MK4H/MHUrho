@@ -1,8 +1,8 @@
 <material>
 	<technique name="Techniques/Diff.xml"/>
-	<texture name="Chicken/Textures/UV-Texture.png" unit="diffuse"/>
+	<texture name="Assets/Chicken/Textures/UV-Texture.png" unit="diffuse"/>
 	<parameter name="MatDiffColor" value="0.64 0.64 0.64 1"/>
-	<parameter name="MatSpecColor" value="0.642857 0.642857 0.642857 137"/>
+	<parameter name="MatSpecColor" value="0 0 0 50"/>
 	<cull value="none"/>
 	<shadowcull value="none"/>
 </material>

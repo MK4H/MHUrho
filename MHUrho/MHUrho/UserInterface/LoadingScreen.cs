@@ -70,19 +70,19 @@ namespace MHUrho.UserInterface
 			void OnLoadingFinished(IProgressNotifier finished)
 			{
 				//Update UI text, must be called from main thread
-				MyGame.InvokeOnMainSafe(() => { text.Value = "Loading finished"; });
+				MHUrhoApp.InvokeOnMainSafe(() => { text.Value = "Loading finished"; });
 			}
 
 			void OnLoadingFailed(IProgressNotifier failed, string message)
 			{
 				//Update UI text, must be called from main thread
-				MyGame.InvokeOnMainSafe(() => { text.Value = "Loading failed"; });
+				MHUrhoApp.InvokeOnMainSafe(() => { text.Value = "Loading failed"; });
 			}
 
 			void OnTextUpdate(string newText)
 			{
 				//Update UI text, must be called from main thread
-				MyGame.InvokeOnMainSafe(() => { text.Value = newText; ; });	
+				MHUrhoApp.InvokeOnMainSafe(() => { text.Value = newText; ; });	
 			}
 		}
 

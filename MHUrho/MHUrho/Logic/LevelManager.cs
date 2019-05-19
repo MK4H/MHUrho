@@ -57,7 +57,7 @@ namespace MHUrho.Logic
 
 		public LevelRep LevelRep { get; private set; }
 
-		public MyGame App { get; private set; }
+		public MHUrhoApp App { get; private set; }
 
 		public Node LevelNode { get; private set; }
 
@@ -115,7 +115,7 @@ namespace MHUrho.Logic
 		readonly Random rng;
 		Map map;
 
-		protected LevelManager(Node levelNode, LevelRep levelRep, MyGame app, Octree octree, bool editorMode)
+		protected LevelManager(Node levelNode, LevelRep levelRep, MHUrhoApp app, Octree octree, bool editorMode)
 		{
 			this.LevelNode = levelNode;
 			this.LevelRep = levelRep;
@@ -292,6 +292,11 @@ namespace MHUrho.Logic
 				return null;
 			}
 
+			//Could not spawn unit, user restrictions
+			if (newUnit == null) {
+				return null;
+			}
+
 			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
@@ -321,6 +326,11 @@ namespace MHUrho.Logic
 				return null;
 			}
 
+			//Could not build building because of user restrictions
+			if (newBuilding == null) {
+				return null;
+			}
+
 			RegisterEntity(newBuilding);
 			buildings.Add(newBuilding.ID,newBuilding);
 			players[player.ID].AddBuilding(newBuilding);
@@ -347,7 +357,12 @@ namespace MHUrho.Logic
 			catch (CreationException) {
 				return null;
 			}
-			
+			//Could not spawn projectile, maybe out of range
+			if (newProjectile == null) {
+				return null;
+			}
+
+
 			RegisterEntity(newProjectile);
 			projectiles.Add(newProjectile.ID, newProjectile);
 				

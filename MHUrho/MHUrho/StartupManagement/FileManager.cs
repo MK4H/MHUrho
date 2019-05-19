@@ -10,31 +10,47 @@ namespace MHUrho
 	public abstract class FileManager
 	{
 		/// <summary>
-		/// Relative path inside the DynamicDir to the directory where the packages are stored and
-		/// the resource package directory xml file is
-		/// </summary>
-		public string PackageDirectoryPath { get; protected set; }
-
-		/// <summary>
 		/// Absolute path of the PackageDirectory <see cref="PackageDirectoryPath"/>
 		/// </summary>
-		public string PackageDirectoryAbsolutePath => Path.Combine(DynamicDirPath, PackageDirectoryPath);
+		public string PackageDirectoryPath { get; private set; } 
 
+		/// <summary>
+		/// Absolute path of the log file.
+		/// </summary>
 		public string LogPath { get; private set; }
+		
+		/// <summary>
+		/// Absolute path of the directory containing static app data.
+		/// </summary>
 		public string StaticDirPath { get; protected set; }
+
+		/// <summary>
+		/// Absolute path of the directory containing dynamic app data, created at runtime.
+		/// </summary>
 		public string DynamicDirPath { get; protected set; }
 
+		/// <summary>
+		/// Relative file path of the config file, which has the default instance inside the <see cref="StaticDirPath"/> and the user specific in <see cref="DynamicDirPath"/>
+		/// </summary>
 		public string ConfigFilePath { get; protected set; }
 
 		/// <summary>
-		/// Path to the directory containing saved games
+		/// Relative path to the directory containing saved games.
 		/// Relative to <see cref="DynamicDirPath"/>
 		/// </summary>
 		public string SaveGameDirPath { get; protected set; }
 
+		/// <summary>
+		/// Absolute path of the directory containing saved games.
+		/// </summary>
 		public string SaveGameDirAbsolutePath => Path.Combine(DynamicDirPath, SaveGameDirPath);
 
-		public static string CorrectRelativePath(string relativePath) {
+		/// <summary>
+		/// Replaces directory separators in the provided <paramref name="relativePath"/> from / as a directory separator to the platform specific <see cref="Path.DirectorySeparatorChar"/>
+		/// </summary>
+		/// <param name="relativePath">The path to correct</param>
+		/// <returns>Relative path separated by the correct <see cref="Path.DirectorySeparatorChar"/></returns>
+		public static string ReplaceDirectorySeparators(string relativePath) {
 			if (relativePath == null) {
 				return null;
 			}
@@ -134,20 +150,32 @@ namespace MHUrho
 
 		public abstract void DeleteDynamicFile(string relativePath);
 
+		/// <summary>
+		/// Creates new instance of file manager
+		/// </summary>
+		/// <param name="staticDataDirAbs">Absolute path of the directory containing static data, distributed with the app and read only.</param>
+		/// <param name="dynamicDataDirAbs">Absolute path of the directory containing dynamic data, created during runtime.</param>
+		/// <param name="packageDirAbs">Absolute path of the directory containing packages.</param>
+		/// <param name="logFileAbs">Absolute path of where to create the log file.</param>
+		/// <param name="configFileRel">Relative path of the config file in static and dynamic directories. (Static for default, dynamic for user specific)</param>
+		/// <param name="savedGamesRel">Relative path inside the dynamic directory where to save the saved games, should be separate directory containing only the saved games.</param>
 		protected FileManager(
-			string packageDirectoryPath,
-			string configFilePath,
-			string staticDirPath,
-			string dynamicDirPath,
-			string logPath,
-			string saveDirPath) {
+			string staticDataDirAbs,
+			string dynamicDataDirAbs,
+			string packageDirAbs,
+			string logFileAbs,
+			string configFileRel,
+			string savedGamesRel) {
 
-			this.PackageDirectoryPath = packageDirectoryPath;
-			this.ConfigFilePath = configFilePath;
-			this.StaticDirPath = staticDirPath;
-			this.DynamicDirPath = dynamicDirPath;
-			this.LogPath = logPath;
-			this.SaveGameDirPath = saveDirPath;
+			
+			
+			this.StaticDirPath = staticDataDirAbs;
+			this.DynamicDirPath = dynamicDataDirAbs;
+			this.PackageDirectoryPath = packageDirAbs;
+			this.LogPath = logFileAbs;
+			this.ConfigFilePath = configFileRel;
+			this.SaveGameDirPath = savedGamesRel;
+			
 		}
 
 	}

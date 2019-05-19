@@ -122,7 +122,7 @@ namespace MHUrho.UserInterface
 
 
 					string newPath = result == null ? oldPath : result.RelativePath;
-					MyGame.InvokeOnMainSafeAsync(() => thumbnailPathText.Value = newPath);
+					await MHUrhoApp.InvokeOnMainSafeAsync(() => thumbnailPathText.Value = newPath);
 				}
 				catch (OperationCanceledException)
 				{
@@ -134,16 +134,27 @@ namespace MHUrho.UserInterface
 			{
 				if (Level.LevelRep.GamePack.TryGetLevel(name, out LevelRep oldLevel)) {
 					bool confirm = await MenuUIManager.ConfirmationPopUp.RequestConfirmation("Override level",
-																							"Do you want to override existing level with the same name?");
+																							"Do you want to override existing level with the same name?",
+																							 null,
+																							 proxy);
 					if (!confirm) {
 						return;
 					}
 				}
 
-				LevelRep newLevelRep = Level.LevelRep.CreateClone(name, description, ThumbnailPath);
-				newLevelRep.SaveToGamePack(true);
-				Level.ChangeRep(newLevelRep);
-				MenuUIManager.SwitchBack();
+				LevelRep newLevelRep = null;
+				try {
+					newLevelRep = Level.LevelRep.CreateClone(name, description, ThumbnailPath);
+					newLevelRep.SaveToGamePack(true);
+					Level.ChangeRep(newLevelRep);
+					MenuUIManager.SwitchBack();
+				}
+				catch (Exception e) {
+					newLevelRep?.Dispose();
+					await MenuUIManager.ErrorPopUp.DisplayError("Package Error",
+																"There was an error while saving the level to package, see log for details.",
+																proxy);
+				}
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)

@@ -30,11 +30,11 @@ namespace MHUrho.Packaging
 
 		public static PackageManager Instance { get; private set; }
 
-		public static string PackageDirectoryPath => MyGame.Files.PackageDirectoryPath;
+		public static string PackageDirectoryPath => MHUrhoApp.Files.PackageDirectoryPath;
 
-		public static string PackageDirectoryAbsolutePath => MyGame.Files.PackageDirectoryAbsolutePath;
+		public static string PackageDirectoryAbsolutePath => MHUrhoApp.Files.PackageDirectoryPath;
 
-		public const string GamePackDirFileName = "DirDescription.xml";
+		public const string GamePackDirFileName = "Packages.xml";
 
 		public IEnumerable<GamePackRep> AvailablePacks => availablePacks.Values;
 
@@ -80,14 +80,15 @@ namespace MHUrho.Packaging
 			Instance = new PackageManager(resourceCache);
 			try {
 
-				Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Files.OpenStaticFileRO(GamePackageSchemaPath)));
+				Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MHUrhoApp.Files.OpenStaticFileRO(GamePackageSchemaPath)));
 			}
 			catch (IOException e) {
 				string message = $"Error loading GamePack schema: {e.Message}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
+				if (Debugger.IsAttached) {
+					Debugger.Break();
+				}
 				//Reading of static file of this app failed, something is horribly wrong, die
-				//TODO: Error reading static data of app, game data corrupted
 				throw new FatalPackagingException(message, e);
 			}
 
@@ -97,8 +98,10 @@ namespace MHUrho.Packaging
 			catch (IOException e) {
 				string message = $"Error loading the default icon at {defaultIconPath}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
-				//TODO: Error loading the default icon, game corrupted
+				if (Debugger.IsAttached) {
+					Debugger.Break();
+				}
+				//Reading of static file of this app failed, something is horribly wrong, die
 				throw new FatalPackagingException(message, e);
 			}
 
@@ -162,7 +165,7 @@ namespace MHUrho.Packaging
 			}
 			loadingProgress.SendUpdate(clearPartSize ,"Cleared previous games");
 
-			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
+			resourceCache.AddResourceDir(Path.Combine(MHUrhoApp.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
 			loadingProgress.SendTextUpdate("Loading new package");
 			ActivePackage = await package.LoadPack(schemas, new ProgressWatcher(loadingProgress, loadPartSize));
@@ -291,176 +294,176 @@ namespace MHUrho.Packaging
 
 		public bool Exists(string name)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.Exists(name));
+			return MHUrhoApp.InvokeOnMainSafe(() => resourceCache.Exists(name));
 		}
 
 		public Animation GetAnimation(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public AnimationSet2D GetAnimationSet2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Urho.IO.File GetFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Font GetFont(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetFont(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetFont(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Image GetImage(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetImage(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetImage(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public JsonFile GetJsonFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Material GetMaterial(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Model GetModel(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetModel(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetModel(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public ParticleEffect GetParticleEffect(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public ParticleEffect2D GetParticleEffect2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public PListFile GetPListFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Shader GetShader(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetShader(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetShader(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Sound GetSound(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSound(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetSound(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Sprite2D GetSprite2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public SpriteSheet2D GetSpriteSheet2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Technique GetTechnique(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Texture2D GetTexture2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Texture3D GetTexture3D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Texture GetTextureCube(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public TmxFile2D GetTmxFile2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public ValueAnimation GetValueAnimation(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public XmlFile GetXmlFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Material GetMaterialFromImage(Image image)
 		{
-			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image));
+			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image));
 		}
 
 		public Material GetMaterialFromImage(string image)
 		{
-			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image));
+			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image));
 		}
 
 		public Material GetMaterialFromImage(string image, string normals)
 		{
-			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image, normals));
+			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image, normals));
 		}
 
 		/// <summary>
@@ -484,22 +487,27 @@ namespace MHUrho.Packaging
 				//Creation of the FileStream failed, cannot load this directory
 				string message = $"Opening ResourcePack directory file at {GamePackDirFilePath} failed: {e}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
+				if (Debugger.IsAttached) {
+					Debugger.Break();
+				}
 				throw new FatalPackagingException(message, e);
 			}
-			//TODO: Exceptions
 			catch (XmlSchemaValidationException e) {
 				string message =
 					$"ResourcePack directory file at {GamePackDirFilePath} does not conform to the schema: {e.Message}";
 				//Invalid resource pack description file, dont load this pack directory
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
+				if (Debugger.IsAttached) {
+					Debugger.Break();
+				}
 				throw new FatalPackagingException(message, e);
 			}
 			catch (XmlException e) {
 				string message = $"ResourcePack directory file at {GamePackDirFilePath} was corrupted : {e.Message}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
+				if (Debugger.IsAttached) {
+					Debugger.Break();
+				}
 				throw new FatalPackagingException(message, e);
 			}
 
@@ -534,7 +542,7 @@ namespace MHUrho.Packaging
 				throw new ArgumentNullException(nameof(path), "Path cannot be null");
 			}
 
-			using (Stream stream = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
+			using (Stream stream = MHUrhoApp.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
 				XDocument doc = XDocument.Load(stream);
 				doc.Validate(schemas, null);
 				return doc;
@@ -554,7 +562,7 @@ namespace MHUrho.Packaging
 		void WriteGamePackDir(XDocument document, string path)
 		{
 			document.Validate(schemas, null);
-			using (Stream stream = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
+			using (Stream stream = MHUrhoApp.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
 				document.Save(stream);
 			}
 		}
@@ -567,7 +575,7 @@ namespace MHUrho.Packaging
 
 		GamePackRep LoadPack(string pathInDirEntry)
 		{
-			string packXmlPath = Path.Combine(PackageDirectoryPath, FileManager.CorrectRelativePath(pathInDirEntry));
+			string packXmlPath = Path.Combine(PackageDirectoryPath, FileManager.ReplaceDirectorySeparators(pathInDirEntry));
 			GamePackRep newPack = null;
 	
 			newPack = new GamePackRep(packXmlPath,

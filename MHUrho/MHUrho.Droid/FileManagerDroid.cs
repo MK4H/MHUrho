@@ -119,7 +119,6 @@ namespace MHUrho.Droid {
 					System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),
 					System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal),"Log"),
 					"SavedGames"){
-			PackageDirectoryPath = packageDirectoryPath;
 			this.assetManager = assetManager;
 		}
 

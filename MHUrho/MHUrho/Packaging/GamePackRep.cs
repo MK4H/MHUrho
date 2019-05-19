@@ -40,7 +40,7 @@ namespace MHUrho.Packaging
 			Stream file = null;
 			XDocument data = null;
 			try {
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				file = MHUrhoApp.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				data = XDocument.Load(file);
 				data.Validate(schemas, null);
 			}
@@ -81,7 +81,7 @@ namespace MHUrho.Packaging
 			//Thumbnail path element is optional in the XML schema
 			string thumbnailPath = packageElement.Element(GamePackXml.Inst.PathToThumbnail)?.Value;
 			if (thumbnailPath != null) {
-				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.CorrectRelativePath(thumbnailPath));
+				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.ReplaceDirectorySeparators(thumbnailPath));
 				Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
 			}
 			else {

@@ -24,9 +24,9 @@ using MHUrho.Threading;
 
 namespace MHUrho
 {
-	public class MyGame : Application
+	public class MHUrhoApp : Application
 	{
-		public static MyGame Instance { get; private set; }
+		public static MHUrhoApp Instance { get; private set; }
 
 		public static FileManager Files { get; set; }
 
@@ -44,13 +44,13 @@ namespace MHUrho
 
 		MonoDebugHud monoDebugHud;
 
-		static MyGame()
+		static MHUrhoApp()
 		{
 			UnhandledException += ErrorRecovery;
 		}
 
 		[Preserve]
-		public MyGame(ApplicationOptions opts)
+		public MHUrhoApp(ApplicationOptions opts)
 			: base(opts)
 		{
 

@@ -16,7 +16,7 @@ namespace MHUrho.Helpers
 
 
 		public static string GetPath(XElement xmlElement) {
-			return FileManager.CorrectRelativePath(xmlElement.Value.Trim());
+			return FileManager.ReplaceDirectorySeparators(xmlElement.Value.Trim());
 		}
 
 		public static int GetID(XElement typeXmlElement) {

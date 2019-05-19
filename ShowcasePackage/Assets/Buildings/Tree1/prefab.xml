@@ -17,7 +17,7 @@
 		<attribute name="Offset Position" value="-3 10 0" />
 	</component>
 	<component type="StaticModel" id="16777231">
-		<attribute name="Model" value="Model;Buildings/Tree1/Models/Default.mdl" />
-		<attribute name="Material" value="Material;Buildings/Tree1/Materials/Bark.xml;Buildings/Tree1/Materials/Tree.xml" />
+		<attribute name="Model" value="Model;Assets/Buildings/Tree1/Models/Default.mdl" />
+		<attribute name="Material" value="Material;Assets/Buildings/Tree1/Materials/Bark.xml;Assets/Buildings/Tree1/Materials/Tree.xml" />
 	</component>
 </node>

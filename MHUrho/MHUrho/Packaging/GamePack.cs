@@ -33,7 +33,7 @@ namespace MHUrho.Packaging {
 		/// <summary>
 		/// See <see cref="DirectoryPath"/>
 		/// </summary>
-		public string RootedDirectoryPath => Path.Combine(MyGame.Files.DynamicDirPath, DirectoryPath);
+		public string RootedDirectoryPath => Path.Combine(MHUrhoApp.Files.DynamicDirPath, DirectoryPath);
 
 		public TileType DefaultTileType { get; private set; }
 
@@ -171,47 +171,47 @@ namespace MHUrho.Packaging {
 
 			GamePack newPack = new GamePack(pathToXml, gamePackRep, schemas);
 
-			pathToXml = FileManager.CorrectRelativePath(pathToXml);
+			pathToXml = FileManager.ReplaceDirectorySeparators(pathToXml);
 
 			try {
-				newPack.data = await MyGame.InvokeOnMainSafeAsync(() => StartLoading(pathToXml, schemas));
+				newPack.data = await MHUrhoApp.InvokeOnMainSafeAsync(() => StartLoading(pathToXml, schemas));
 
 				//Validation in StartLoading should take care of any missing elements
-				newPack.levelSavingDirPath = FileManager.CorrectRelativePath(newPack.data.Root
+				newPack.levelSavingDirPath = FileManager.ReplaceDirectorySeparators(newPack.data.Root
 																					.Element(GamePackXml.Inst.Levels)
 																					.Element(LevelsXml.Inst.DataDirPath)
 																					.Value.Trim());
 
 				loadingProgress?.SendTextUpdate("Loading tile types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
 				loadingProgress?.SendUpdate(tileTypesPartSize,"Loaded tile types");
 
 				loadingProgress?.SendTextUpdate("Loading unit types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
 				loadingProgress?.SendUpdate(unitTypesPartSize, "Loaded unit types");
 
 				loadingProgress?.SendTextUpdate("Loading building types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
 				loadingProgress?.SendUpdate(buildingTypesPartSize, "Loaded building types");
 
 				loadingProgress?.SendTextUpdate("Loading projectile types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
 				loadingProgress?.SendUpdate(projectileTypesPartSize, "Loaded projectile types");
 
 				loadingProgress?.SendTextUpdate("Loading resource types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
 				loadingProgress?.SendUpdate(resourceTypesPartSize, "Loaded resource types");
 
 				loadingProgress?.SendTextUpdate("Loading player types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
 				loadingProgress?.SendUpdate(playerTypesPartSize, "Loaded player types");
 
 				loadingProgress?.SendTextUpdate("Loading level logic types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
 				loadingProgress?.SendUpdate(levelLogicTypesPartSize, "Loaded level logic types");
 
 				loadingProgress?.SendTextUpdate("Loading levels");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
 				loadingProgress?.SendUpdate(levelsPartSize, "Loaded levels");
 			}
 			catch (MethodInvocationException e)
@@ -615,6 +615,7 @@ namespace MHUrho.Packaging {
 		/// <param name="level"></param>
 		/// <param name="overrideLevel"></param>
 		/// <exception cref="InvalidOperationException">Thrown when a level with the same name as <paramref name="level"/> already exists and the <paramref name="overrideLevel"/> is not set</exception>
+		/// <exception cref="PackageLoadingException">Thrown when we could not open or write to the package file.</exception>
 		public void SaveLevelPrototype(LevelRep level, bool overrideLevel)
 		{
 			bool removeExisting = false;
@@ -647,6 +648,12 @@ namespace MHUrho.Packaging {
 		}
 
 
+		/// <summary>
+		/// Removes the <paramref name="level"/> from this package.
+		/// </summary>
+		/// <param name="level">Representant of the level to remove.</param>
+		/// <exception cref="ArgumentException">Thrown when the <paramref name="level"/> is not part of this package.</exception>
+		/// <exception cref="PackageLoadingException">Thrown when the package file could not be opened, read or written.</exception>
 		public void RemoveLevel(LevelRep level)
 		{
 			if (level.GamePack != this) {
@@ -677,9 +684,9 @@ namespace MHUrho.Packaging {
 				newPath.Append(ch);
 			}
 
-			//TODO: Better generation of random filename
+			//NOTE: Maybe do better generation of random filename
 			var random = new Random();
-			while (MyGame.Files.FileExists(newPath.ToString())) {
+			while (MHUrhoApp.Files.FileExists(newPath.ToString())) {
 				int randomDigit = random.Next(10);
 				newPath.Append(randomDigit);
 			}
@@ -751,18 +758,27 @@ namespace MHUrho.Packaging {
 		{
 			Stream file = null;
 			XDocument data;
-			//TODO: Handler and signal that resource pack is in invalid state
 			try {
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				file = MHUrhoApp.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				data = XDocument.Load(file);
 				data.Validate(schemas, null);
 			}
 			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
-				//TODO: Exception
-				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+				string message = $"Package XML was invalid. Package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
 			}
-			//TODO: Catch file opening failed
+			catch (IOException e) {
+				string message = $"Failed to open or read the package file at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
+			catch (Exception e)
+			{
+				string message = $"There was an unexpected exception while reading the package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
 			finally {
 				file?.Dispose();
 			}
@@ -979,14 +995,13 @@ namespace MHUrho.Packaging {
 
 		XElement GetXmlTypeDescription(IEnumerator<XElement> typeElements) {
 			if (!typeElements.MoveNext()) {
-				throw new ArgumentException("type of that name does not exist in this package");
+				throw new ArgumentException("Type of that name does not exist in this package");
 			}
 
 			var typeElement = typeElements.Current;
 
 			if (typeElements.MoveNext()) {
-				//TODO: Exception
-				throw new Exception("Duplicate type names");
+				throw new ArgumentException("Duplicate type names in a package");
 			}
 
 			typeElements.Dispose();
@@ -1086,20 +1101,27 @@ namespace MHUrho.Packaging {
 		void WriteData()
 		{
 			Stream file = null;
-			//TODO: Handler and signal that resource pack is in invalid state
 			try {
 				//Validate before truncating the file
 				data.Validate(schemas, null);
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
+				file = MHUrhoApp.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
 				data.Save(file);
 			}
-			//TODO: Other exceptions
 			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
-				//TODO: Exception
-				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+				string message = $"Package XML was invalid. Package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
 			}
-			//TODO: Catch file opening failed
+			catch (IOException e) {
+				string message = $"Could not open or write to the package file at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
+			catch (Exception e) {
+				string message = $"There was an unexpected exception while saving the package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
 			finally {
 				file?.Dispose();
 			}

@@ -10,7 +10,7 @@ namespace MHUrho.Input.Touch
 	{
 		public bool Enabled { get; private set; }
 
-		protected MyGame Game => MyGame.Instance;
+		protected MHUrhoApp Game => MHUrhoApp.Instance;
 		protected Urho.Input Input => Game.Input;
 
 		protected UI UI => Game.UI;

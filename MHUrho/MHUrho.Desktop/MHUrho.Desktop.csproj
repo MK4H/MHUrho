@@ -9,14 +9,14 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MHUrho.Desktop</RootNamespace>
     <AssemblyName>MHUrho.Desktop</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -71,70 +72,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\ShowcasePackage\bin\Debug\MoreLinq.dll">
-      <Link>Data\Test\ResourceDir\ShowcasePackage\MoreLinq.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\ShowcasePackage\bin\Debug\MoreLinq.pdb">
-      <Link>Data\Test\ResourceDir\ShowcasePackage\MoreLinq.pdb</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\ShowcasePackage\bin\Debug\MoreLinq.xml">
-      <Link>Data\Test\ResourceDir\ShowcasePackage\MoreLinq.xml</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\ShowcasePackage\bin\Debug\ShowcasePackage.dll">
-      <Link>Data\Test\ResourceDir\ShowcasePackage\ShowcasePackage.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\ShowcasePackage\bin\Debug\ShowcasePackage.pdb">
-      <Link>Data\Test\ResourceDir\ShowcasePackage\ShowcasePackage.pdb</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\ShowcasePackage\bin\Debug\System.ValueTuple.dll">
-      <Link>Data\Test\ResourceDir\ShowcasePackage\System.ValueTuple.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Buildings\Tree1\Materials\Bark.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Buildings\Tree1\Materials\Tree.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Buildings\Tree1\Models\Default.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Buildings\Tree1\prefab.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\prefab.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\grass.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Levels\LevelsFolder.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Textures\entityIcons.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Textures\tileIcons.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Units\Dog\Cube.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Units\Dog\dogUV.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Units\Dog\Material.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Units\Dog\prefab.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Data\Test\UIActions.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -291,52 +228,7 @@
     <Content Include="Data\Materials\BoxMaterial.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\Test\ResourceDir\DirDescription.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\ChickenIcon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Materials\Chicken.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Materials\Comb.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Materials\Material.001.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Chicken.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Textures\ChickenNorm.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Textures\UV-Texture.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\EggMaterial.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\xamarin.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Green.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\sand.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\StoneDiffuse.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\StoneNormal.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\PackageDef.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\StoneMaterial.xml">
+    <Content Include="Data\Test\ResourceDir\Packages.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Textures\HealthBars.png">
@@ -352,64 +244,10 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Box.mdl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\BeginPecking.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Chicken.mdl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Dying.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Eating.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\EndPecking.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Idle.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Idle1.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Idle2.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Pecking1.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Pecking2.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Pecking3.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Stand.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\StopPecking.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\ShowcasePackage\Chicken\Models\Walk.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Data\Schemas\MenuActions.xsd">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Data\Test\ResourceDir\ShowcasePackage\Buildings\Tree1\Models\Default.mdl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Test\ResourceDir\ShowcasePackage\Units\Dog\Walk.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Test\ResourceDir\ShowcasePackage\Units\Dog\Cube.mdl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -421,9 +259,10 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>rd /s /q "$(TargetDir)DynData\PackageDirectory"
-md "$(TargetDir)DynData\PackageDirectory"
-xcopy /s /e "$(TargetDir)Data\Test\ResourceDir" "$(TargetDir)DynData\PackageDirectory\"</PostBuildEvent>
+    <PostBuildEvent>rd /s /q "$(TargetDir)DynData\Packages"
+md "$(TargetDir)DynData\Packages\ShowcasePackage"
+copy "$(TargetDir)Data\Test\ResourceDir\Packages.xml" "$(TargetDir)DynData\Packages\Packages.xml"
+xcopy /s /e "$(SolutionDir)ShowcasePackage\bin\$(ConfigurationName)" "$(TargetDir)DynData\Packages\ShowcasePackage"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets" Condition="Exists('..\..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

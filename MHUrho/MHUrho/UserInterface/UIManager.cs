@@ -10,7 +10,7 @@ namespace MHUrho.UserInterface
     public abstract class UIManager
     {
 
-		protected MyGame Game => MyGame.Instance;
+		protected MHUrhoApp Game => MHUrhoApp.Instance;
 
 		protected UI UI => Game.UI;
 		protected Urho.Input Input => Game.Input;

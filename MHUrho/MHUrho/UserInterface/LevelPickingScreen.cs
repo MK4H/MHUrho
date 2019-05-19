@@ -132,12 +132,20 @@ namespace MHUrho.UserInterface
 			{
 				if (item is LevelPickingLevelItem levelItem) {
 					item.Deselect();
-					Package.RemoveLevel(levelItem.Level);
-					var itemHolder = item.Parent;
-					listView.RemoveItem(item);
+					try {
+						Package.RemoveLevel(levelItem.Level);
 
-					itemHolder.Size = new IntVector2(itemHolder.Size.X, itemHolder.EffectiveMinSize.Y);
-					listView.UpdateInternalLayout();
+						var itemHolder = item.Parent;
+						listView.RemoveItem(item);
+
+						itemHolder.Size = new IntVector2(itemHolder.Size.X, itemHolder.EffectiveMinSize.Y);
+						listView.UpdateInternalLayout();
+					}
+					catch (Exception e) {
+						MenuUIManager.ErrorPopUp.DisplayError("Package Error",
+															"There was an error removing the level from file, see log for details.",
+															proxy);
+					}
 				}
 				else {
 					throw new InvalidOperationException("Delete button was pressed when it should not have been possible to press");

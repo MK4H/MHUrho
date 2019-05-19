@@ -46,7 +46,7 @@ namespace MHUrho.Logic
 
 			ILevelManager ILevelLoader.Level => Level;
 
-			protected MyGame Game => MyGame.Instance;
+			protected MHUrhoApp Game => MHUrhoApp.Instance;
 
 			protected readonly bool EditorMode;
 
@@ -250,13 +250,13 @@ namespace MHUrho.Logic
 				try
 				{
 					Progress.SendTextUpdate("Initializing level");
-					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
+					Level = await MHUrhoApp.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 					Progress.SendUpdate(initLPartSize, "Initialized level");
 
 					PlayerInsignia.InitInsignias(PackageManager.Instance);
 
 					Progress.SendTextUpdate("Loading map");
-					Node mapNode = await MyGame.InvokeOnMainSafeAsync(() => Level.LevelNode.CreateChild("MapNode"));
+					Node mapNode = await MHUrhoApp.InvokeOnMainSafeAsync(() => Level.LevelNode.CreateChild("MapNode"));
 
 
 					//This will take a long time, run it in another thread			
@@ -266,19 +266,19 @@ namespace MHUrho.Logic
 
 					Level.Minimap = new Minimap(Level, 4);
 
-					MyGame.InvokeOnMainSafe(CreateCamera);
+					MHUrhoApp.InvokeOnMainSafe(CreateCamera);
 
 
 					Progress.SendTextUpdate("Creating players");
-					MyGame.InvokeOnMainSafe(CreatePlayers);
+					MHUrhoApp.InvokeOnMainSafe(CreatePlayers);
 					Progress.SendUpdate(playersLPartSize, "Created players");
 
 					Progress.SendTextUpdate("Giving player controls");
-					MyGame.InvokeOnMainSafe(CreateControl);
+					MHUrhoApp.InvokeOnMainSafe(CreateControl);
 					Progress.SendUpdate(controlLPartSize, "Player controls created");
 
 					Progress.SendTextUpdate("Starting level");
-					MyGame.InvokeOnMainSafe(StartLevel);
+					MHUrhoApp.InvokeOnMainSafe(StartLevel);
 
 					Progress.SendFinished();
 					return Level;
@@ -378,7 +378,7 @@ namespace MHUrho.Logic
 				{
 					Loaders = new List<ILoader>();
 					Progress.SendTextUpdate("Initializing level");
-					Level = await MyGame.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
+					Level = await MHUrhoApp.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 					Progress.SendUpdate(initLPartSize, "Initialized level");
 
 					PlayerInsignia.InitInsignias(PackageManager.Instance);
@@ -390,18 +390,18 @@ namespace MHUrho.Logic
 					Level.Minimap = new Minimap(Level, 4);
 
 
-					MyGame.InvokeOnMainSafe(CreateCamera);
+					MHUrhoApp.InvokeOnMainSafe(CreateCamera);
 
 					//ALT: Maybe give each its own subsection watcher
-					MyGame.InvokeOnMainSafe(LoadUnits);
-					MyGame.InvokeOnMainSafe(LoadBuildings);
-					MyGame.InvokeOnMainSafe(LoadProjectiles);
-					MyGame.InvokeOnMainSafe(LoadPlayers);
-					MyGame.InvokeOnMainSafe(LoadToolsAndControllers);
-					MyGame.InvokeOnMainSafe(LoadLevelPlugin);
-					MyGame.InvokeOnMainSafe(ConnectReferences);
-					MyGame.InvokeOnMainSafe(FinishLoading);
-					MyGame.InvokeOnMainSafe(StartLevel);
+					MHUrhoApp.InvokeOnMainSafe(LoadUnits);
+					MHUrhoApp.InvokeOnMainSafe(LoadBuildings);
+					MHUrhoApp.InvokeOnMainSafe(LoadProjectiles);
+					MHUrhoApp.InvokeOnMainSafe(LoadPlayers);
+					MHUrhoApp.InvokeOnMainSafe(LoadToolsAndControllers);
+					MHUrhoApp.InvokeOnMainSafe(LoadLevelPlugin);
+					MHUrhoApp.InvokeOnMainSafe(ConnectReferences);
+					MHUrhoApp.InvokeOnMainSafe(FinishLoading);
+					MHUrhoApp.InvokeOnMainSafe(StartLevel);
 
 					Progress.SendFinished();
 					return Level;

@@ -8,14 +8,18 @@ using System.Threading.Tasks;
 namespace MHUrho.Desktop {
 	class FileManagerDesktop : FileManager {
 
-		public static FileManagerDesktop LoadFileManager() {
-			var fileManager = new FileManagerDesktop(
-				"PackageDirectory",
-				"config.xml",
-				Directory.GetCurrentDirectory(),
-				Path.Combine(Directory.GetCurrentDirectory(),"DynData"),
-				Path.Combine(Directory.GetCurrentDirectory(), "DynData","Log"),
-				"SavedGames");
+		public static FileManagerDesktop LoadFileManager(string staticDataDirAbs,
+														string dynamicDataDirAbs,
+														string packageDirAbs,
+														string logFileAbs, 
+														string configFileRel, 
+														string savedGamesRel) {
+			var fileManager = new FileManagerDesktop(staticDataDirAbs, 
+													 dynamicDataDirAbs,
+													 packageDirAbs,
+													 logFileAbs,
+													 configFileRel,
+													 savedGamesRel);
 
 			if (!Directory.Exists(fileManager.DynamicDirPath)) {
 				Directory.CreateDirectory(fileManager.DynamicDirPath);
@@ -26,8 +30,8 @@ namespace MHUrho.Desktop {
 				Directory.CreateDirectory(fileManager.SaveGameDirAbsolutePath);
 			}
 
-			if (!Directory.Exists(fileManager.PackageDirectoryAbsolutePath)) {
-				Directory.CreateDirectory(fileManager.PackageDirectoryAbsolutePath);
+			if (!Directory.Exists(fileManager.PackageDirectoryPath)) {
+				Directory.CreateDirectory(fileManager.PackageDirectoryPath);
 			}
 
 			File.Create(fileManager.LogPath).Dispose();
@@ -35,13 +39,13 @@ namespace MHUrho.Desktop {
 			return fileManager;
 		}
 
-		protected FileManagerDesktop(string packageDirectoryPath, 
-									string configFilePath, 
-									string staticDirPath,
-									string dynamicDirPath,
-									string logFilePath,
-									string saveDirPath)
-			: base(packageDirectoryPath, configFilePath, staticDirPath, dynamicDirPath, logFilePath, saveDirPath) {
+		protected FileManagerDesktop(string staticDataDirAbs,
+									string dynamicDataDirAbs,
+									string packageDirAbs,
+									string logFileAbs,
+									string configFileRel,
+									string savedGamesRel)
+			: base(staticDataDirAbs, dynamicDataDirAbs, packageDirAbs, logFileAbs, configFileRel, savedGamesRel) {
 
 		}
 

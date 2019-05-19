@@ -24,8 +24,8 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="16777231">
-			<attribute name="Model" value="Model;Units/Dog/Cube.mdl" />
-			<attribute name="Material" value="Material;Units/Dog/Material.xml" />
+			<attribute name="Model" value="Model;Assets/Units/Dog/Cube.mdl" />
+			<attribute name="Material" value="Material;Assets/Units/Dog/Material.xml" />
 			<attribute name="Bone Animation Enabled">
 				<variant type="Bool" value="true" />
 				<variant type="Bool" value="true" />

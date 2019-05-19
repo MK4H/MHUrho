@@ -14,7 +14,7 @@ namespace MHUrho.UserInterface
 
 		public LevelRep Level { get; private set; }
 
-		public LevelPickingLevelItem(LevelRep level, MyGame game)
+		public LevelPickingLevelItem(LevelRep level, MHUrhoApp game)
 			:base(game, "UI/LevelItemStyle.xml", true)
 		{
 			this.Level = level;
@@ -45,7 +45,7 @@ namespace MHUrho.UserInterface
 
 	class LevelPickingNewLevelItem : ExpandingListItem
 	{
-		public LevelPickingNewLevelItem(MyGame game)
+		public LevelPickingNewLevelItem(MHUrhoApp game)
 			:base(game, "UI/LevelItemStyle.xml", false)
 		{
 			UIElement fixedElementContets =

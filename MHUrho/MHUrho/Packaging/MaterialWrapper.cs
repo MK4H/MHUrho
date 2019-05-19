@@ -105,7 +105,7 @@ namespace MHUrho.Packaging
 								throw new ArgumentException("GeometryMaterials element is not valid according to GamePack.xsd, invalid index value type");
 				Material material;
 				try {
-					string path = FileManager.CorrectRelativePath(pathElement.Value);
+					string path = FileManager.ReplaceDirectorySeparators(pathElement.Value);
 
 					material = PackageManager.Instance.GetMaterial(path);
 				}

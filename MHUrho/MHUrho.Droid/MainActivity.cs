@@ -21,7 +21,7 @@ namespace MHUrho.Droid
 		ScreenOrientation = ScreenOrientation.Landscape)]
 	public class MainActivity : Activity
 	{
-		MyGame myGame;
+		MHUrhoApp myGame;
 
 		protected override async void OnCreate(Bundle bundle)
 		{
@@ -44,11 +44,11 @@ namespace MHUrho.Droid
 			SetContentView(layout);
 
 
-			MyGame.Files = FileManagerDroid.LoadConfig(Assets);
-			MyGame.Files.CopyStaticToDynamic(Path.Combine("Data", "Test"));
+			MHUrhoApp.Files = FileManagerDroid.LoadConfig(Assets);
+			MHUrhoApp.Files.CopyStaticToDynamic(Path.Combine("Data", "Test"));
 
 			try {
-				myGame = await surface.Show<MyGame>(new ApplicationOptions("Data"));
+				myGame = await surface.Show<MHUrhoApp>(new ApplicationOptions("Data"));
 			}
 			catch (Exception e) {
 				Urho.IO.Log.Write(LogLevel.Debug, e.ToString());

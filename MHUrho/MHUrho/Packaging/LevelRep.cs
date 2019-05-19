@@ -234,7 +234,7 @@ namespace MHUrho.Packaging
 				try
 				{
 					StLevel storedLevel = RunningLevel.Save();
-					saveFile = MyGame.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
+					saveFile = MHUrhoApp.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
 					storedLevel.WriteTo(saveFile);
 				}
 				catch (Exception e)
@@ -350,7 +350,7 @@ namespace MHUrho.Packaging
 				try
 				{
 					if (sourceState.SavePath != SavePath) {
-						MyGame.Files.Copy(Path.Combine(GamePack.RootedDirectoryPath, sourceState.SavePath),
+						MHUrhoApp.Files.Copy(Path.Combine(GamePack.RootedDirectoryPath, sourceState.SavePath),
 										Path.Combine(GamePack.RootedDirectoryPath, SavePath),
 										true);
 					}
@@ -695,10 +695,10 @@ namespace MHUrho.Packaging
 		}
 
 		/// <summary>
-		/// 
+		/// Saves the current level to the <see cref="GamePack"/>
 		/// </summary>
-		/// <param name="overrideLevel"></param>
-		/// <exception cref="InvalidOperationException"/>
+		/// <param name="overrideLevel">Override existing level with the same name.</param>
+		/// <exception cref="PackageLoadingException">Thrown when the level could not be saved to the package</exception>
 		public void SaveToGamePack(bool overrideLevel)
 		{
 			GamePack.SaveLevelPrototype(this, overrideLevel);
@@ -722,7 +722,7 @@ namespace MHUrho.Packaging
 		public void RemoveDataFile()
 		{
 			//NOTE: Maybe move this to state, maybe the file may not exist yet
-			MyGame.Files.DeleteDynamicFile(Path.Combine(GamePack.DirectoryPath, savePath));
+			MHUrhoApp.Files.DeleteDynamicFile(Path.Combine(GamePack.DirectoryPath, savePath));
 		}
 
 		public void Dispose()
@@ -743,7 +743,7 @@ namespace MHUrho.Packaging
 			StLevel storedLevel = null;
 			Stream saveFile = null;
 			try {
-				saveFile = MyGame.Files.OpenDynamicFileInPackage(path,
+				saveFile = MHUrhoApp.Files.OpenDynamicFileInPackage(path,
 																System.IO.FileMode.Open,
 																System.IO.FileAccess.Read,
 																package);
@@ -768,7 +768,7 @@ namespace MHUrho.Packaging
 			Stream saveFile = null;
 			try
 			{
-				saveFile = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				saveFile = MHUrhoApp.Files.OpenDynamicFile(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				storedLevel = StLevel.Parser.ParseFrom(saveFile);
 			}
 			finally

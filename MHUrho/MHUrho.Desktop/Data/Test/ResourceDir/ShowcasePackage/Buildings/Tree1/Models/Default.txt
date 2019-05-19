@@ -1,2 +1,0 @@
-Buildings/Tree1/Materials/Bark.xml
-Buildings/Tree1/Materials/Tree.xml

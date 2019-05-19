@@ -348,7 +348,7 @@ namespace MHUrho.UserInterface
 					
 
 					string newText = result == null ? oldText : result.RelativePath;
-					await MyGame.InvokeOnMainSafeAsync(() => pathText.Value = newText);
+					await MHUrhoApp.InvokeOnMainSafeAsync(() => pathText.Value = newText);
 				}
 				catch (OperationCanceledException) {
 					//Text should not have changed

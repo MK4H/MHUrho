@@ -84,7 +84,7 @@ namespace MHUrho.UserInterface
 				}
 
 
-				static UIElement InitTypeItem(PlayerType player, MyGame game, MenuUIManager menuUIManager)
+				static UIElement InitTypeItem(PlayerType player, MHUrhoApp game, MenuUIManager menuUIManager)
 				{
 					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerTypeItemLayout.xml", true),
 														menuUIManager.MenuRoot.GetDefaultStyle());
@@ -103,7 +103,7 @@ namespace MHUrho.UserInterface
 					return newElement;
 				}
 
-				static UIElement InitTeamItem(int teamID, MyGame game, MenuUIManager menuUIManager)
+				static UIElement InitTeamItem(int teamID, MHUrhoApp game, MenuUIManager menuUIManager)
 				{
 					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/TeamListItemLayout.xml", true),
 														menuUIManager.MenuRoot.GetDefaultStyle());

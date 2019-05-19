@@ -10,7 +10,7 @@ namespace MHUrho.UserInterface.MandK
     public class CursorTooltips : IDisposable
     {
 		GameUI uiCtl;
-		MyGame Game => MyGame.Instance;
+		MHUrhoApp Game => MHUrhoApp.Instance;
 
 		protected UI UI => Game.UI;
 		protected Urho.Input Input => Game.Input;

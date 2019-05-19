@@ -14,7 +14,7 @@ namespace MHUrho.UserInterface
 
 		readonly Text descriptionText;
 
-		public PackageListItem(GamePackRep pack, MyGame game)
+		public PackageListItem(GamePackRep pack, MHUrhoApp game)
 			:base(game, "UI/AvailablePackItemStyle.xml", true)
 		{
 			this.Pack = pack;

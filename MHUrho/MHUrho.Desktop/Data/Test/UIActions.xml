@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
-  <mainMenu>
+  <!--<mainMenu>
     <action>start</action>
   </mainMenu>
   <packagePicking>
@@ -27,7 +27,8 @@
   </levelCreation>
   <loading>
     <action>none</action>
-  </loading>
+  </loading>-->
+
   <!--<levelPicking>
     <action>play</action>
     <values>

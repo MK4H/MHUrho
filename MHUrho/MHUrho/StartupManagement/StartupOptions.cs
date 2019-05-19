@@ -81,10 +81,10 @@ namespace MHUrho.StartupManagement
 			Stream file = null;
 			try {
 				file = fromDynamic
-							? MyGame.Files.OpenDynamicFile(argsEnumerator.Current,
+							? MHUrhoApp.Files.OpenDynamicFile(argsEnumerator.Current,
 															System.IO.FileMode.Open,
 															System.IO.FileAccess.Read)
-							: MyGame.Files.OpenStaticFileRO(argsEnumerator.Current);
+							: MHUrhoApp.Files.OpenStaticFileRO(argsEnumerator.Current);
 				XDocument xmlFile = XDocument.Load(file);
 
 				try
@@ -113,10 +113,10 @@ namespace MHUrho.StartupManagement
 	public class ActionManager {
 
 		class Execution {
-			readonly MyGame game;
+			readonly MHUrhoApp game;
 			readonly IEnumerator<MenuScreenAction> actions;
 
-			public Execution(MyGame game, IEnumerator<MenuScreenAction> actions)
+			public Execution(MHUrhoApp game, IEnumerator<MenuScreenAction> actions)
 			{
 				this.game = game;
 				this.actions = actions;
@@ -150,7 +150,7 @@ namespace MHUrho.StartupManagement
 
 				var schema = new XmlSchemaSet();
 				schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
-							XmlReader.Create(MyGame.Files.OpenStaticFileRO(SchemaPath)));
+							XmlReader.Create(MHUrhoApp.Files.OpenStaticFileRO(SchemaPath)));
 
 				xmlFile.Validate(schema, null);
 
@@ -166,7 +166,7 @@ namespace MHUrho.StartupManagement
 			}
 		}
 
-		public void RunActions(MyGame game)
+		public void RunActions(MHUrhoApp game)
 		{
 			var exec = new Execution(game, actions.GetEnumerator());
 			game.MenuController.ScreenChanged += exec.TriggerNext;

@@ -12,7 +12,7 @@ namespace MHUrho.UserInterface
 
 			MenuScreen proxyBase;
 
-			protected MyGame Game => proxyBase.Game;
+			protected MHUrhoApp Game => proxyBase.Game;
 			protected MenuUIManager MenuUIManager => proxyBase.MenuUIManager;
 
 			protected ScreenBase(MenuScreen proxy)
@@ -52,7 +52,7 @@ namespace MHUrho.UserInterface
 
 		protected abstract ScreenBase ScreenInstance { get; set; }
 
-		protected MyGame Game => MyGame.Instance;
+		protected MHUrhoApp Game => MHUrhoApp.Instance;
 		protected readonly MenuUIManager MenuUIManager;
 
 		protected MenuScreen(MenuUIManager menuUIManager)

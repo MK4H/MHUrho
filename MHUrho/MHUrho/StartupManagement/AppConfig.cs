@@ -103,7 +103,7 @@ namespace MHUrho.StartupManagement
 		public void Reload()
 		{
 			using (Stream configFile =
-				MyGame.Files.OpenDynamicFile(MyGame.Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
+				MHUrhoApp.Files.OpenDynamicFile(MHUrhoApp.Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
 				AppConfig reloadedConfig = LoadFrom(configFile);
 				Copy(reloadedConfig);
 			}
@@ -112,7 +112,7 @@ namespace MHUrho.StartupManagement
 		public void Save()
 		{
 			using (Stream configFile =
-				MyGame.Files.OpenDynamicFile(MyGame.Files.ConfigFilePath, System.IO.FileMode.Truncate, FileAccess.Write)) {
+				MHUrhoApp.Files.OpenDynamicFile(MHUrhoApp.Files.ConfigFilePath, System.IO.FileMode.Truncate, FileAccess.Write)) {
 				SaveTo(configFile);
 			}		
 		}

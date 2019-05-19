@@ -48,10 +48,10 @@ namespace MHUrho.Input.MandK
 			UIController.Clear();
 			UIController.SwitchToMainMenu();
 			if (loadingErrorTitle != null && loadingErrorDescription != null) {
-				UIController.CurrentScreen.DisableInput();
 				UIController.ErrorPopUp
-							.DisplayError(loadingErrorTitle, loadingErrorDescription)
-							.ContinueWith((task) => { UIController.CurrentScreen.ResetInput(); });
+							.DisplayError(loadingErrorTitle,
+										loadingErrorDescription,
+										UIController.MainMenu);
 			}	
 		}
 
@@ -103,19 +103,18 @@ namespace MHUrho.Input.MandK
 
 		public void SavePausedLevel(string fileName)
 		{
-			//TODO: More checks for the fileName
+			//NOTE:Maybe add more checks for the fileName
 			if (string.IsNullOrEmpty(fileName) || Path.GetFileName(fileName) != fileName) {
 				throw new ArgumentException("Invalid fileName for the save file", nameof(fileName));
 			}
 
-			string dynamicPath = Path.Combine(MyGame.Files.SaveGameDirPath, fileName);
+			string dynamicPath = Path.Combine(MHUrhoApp.Files.SaveGameDirPath, fileName);
 			try {
-				Stream file = MyGame.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
+				Stream file = MHUrhoApp.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
 				pausedLevelController.Level.SaveTo(file);
 			}
 			catch (IOException e) {
 				Urho.IO.Log.Write(LogLevel.Error, $"Saving a level failed with exception: {e}");
-				//TODO: Inform user
 				throw;
 			}
 		}

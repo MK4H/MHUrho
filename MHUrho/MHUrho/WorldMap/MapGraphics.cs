@@ -358,7 +358,7 @@ namespace MHUrho.WorldMap
 					this.topLeftCorner = topLeftCorner;
 					//Because size is in tiles, this is correct position of the top left corner of the bottom right tile
 					this.bottomRightTileTLCorner = topLeftCorner + Size - new IntVector2(1,1);
-					MyGame.InvokeOnMainSafe(() => {
+					MHUrhoApp.InvokeOnMainSafe(() => {
 												this.chunkNode = map.node.CreateChild("chunkNode");
 												chunkNode.Position = new Vector3(topLeftCorner.X + Size.X / 2.0f, 0, topLeftCorner.Y + Size.Y / 2.0f);
 					});
@@ -585,7 +585,7 @@ namespace MHUrho.WorldMap
 
 				static VertexBuffer InitializeVertexBuffer(uint numVerticies)
 				{
-					return MyGame.InvokeOnMainSafe(InitializeVertexBufferImpl);
+					return MHUrhoApp.InvokeOnMainSafe(InitializeVertexBufferImpl);
 
 					VertexBuffer InitializeVertexBufferImpl()
 					{
@@ -599,7 +599,7 @@ namespace MHUrho.WorldMap
 
 				static IndexBuffer InitializeIndexBuffer(uint numIndicies)
 				{
-					return MyGame.InvokeOnMainSafe(InitializeIndexBufferImpl);
+					return MHUrhoApp.InvokeOnMainSafe(InitializeIndexBufferImpl);
 
 					IndexBuffer InitializeIndexBufferImpl()
 					{
@@ -613,17 +613,17 @@ namespace MHUrho.WorldMap
 
 				static IntPtr LockVertexBufferSafe(VertexBuffer vb, uint numVerticies)
 				{
-					return MyGame.InvokeOnMainSafe(() => vb.Lock(0, numVerticies));
+					return MHUrhoApp.InvokeOnMainSafe(() => vb.Lock(0, numVerticies));
 				}
 
 				static IntPtr LockIndexBufferSafe(IndexBuffer ib, uint numIndicies)
 				{
-					return MyGame.InvokeOnMainSafe(() => ib.Lock(0, numIndicies));
+					return MHUrhoApp.InvokeOnMainSafe(() => ib.Lock(0, numIndicies));
 				}
 
 				void FinalizeModelCreation(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
 				{
-					MyGame.InvokeOnMainSafe(FinalizeModelCreationImpl);
+					MHUrhoApp.InvokeOnMainSafe(FinalizeModelCreationImpl);
 
 					void FinalizeModelCreationImpl()
 					{
@@ -647,14 +647,13 @@ namespace MHUrho.WorldMap
 
 				void SetModel(ILevelManager level)
 				{
-					MyGame.InvokeOnMainSafe(SetModelImpl);
+					MHUrhoApp.InvokeOnMainSafe(SetModelImpl);
 
 					void SetModelImpl()
 					{
 						StaticModel staticModel = chunkNode.CreateComponent<StaticModel>();
 						staticModel.Model = model;
 						staticModel.SetMaterial(graphics.material);
-						//TODO: Draw distance
 						staticModel.DrawDistance = level.App.Config.TerrainDrawDistance;
 					}
 				}

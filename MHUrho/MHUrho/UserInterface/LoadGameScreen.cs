@@ -23,7 +23,7 @@ namespace MHUrho.UserInterface
 			{
 				this.proxy = proxy;
 
-				LoadFileNames(MyGame.Files.SaveGameDirAbsolutePath);
+				LoadFileNames(MHUrhoApp.Files.SaveGameDirAbsolutePath);
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadLayout.xml");
 
@@ -86,7 +86,7 @@ namespace MHUrho.UserInterface
 			
 				if (MatchSelected == null) return;
 
-				string newRelativePath = Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected);
+				string newRelativePath = Path.Combine(MHUrhoApp.Files.SaveGameDirPath, MatchSelected);
 
 				//Has to be last statement in the method, this instance will be released during execution.
 				proxy.Load(newRelativePath);
