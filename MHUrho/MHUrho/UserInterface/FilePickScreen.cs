@@ -215,7 +215,7 @@ namespace MHUrho.UserInterface
 					TotalMatchDeselected();
 					LineEdit.Text = "";
 				}
-				catch (Exception e) {
+				catch (Exception) {
 					MenuUIManager.ErrorPopUp.DisplayError("File Error",
 														"There was an error while deleting a file, see log for details",
 														proxy);

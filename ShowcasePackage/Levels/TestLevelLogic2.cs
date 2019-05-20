@@ -21,12 +21,7 @@ namespace ShowcasePackage.Levels
 		public override int MaxNumberOfPlayers => 6;
 		public override int MinNumberOfPlayers => 1;
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-
-		}
-
-
+		
 		public override LevelLogicCustomSettings GetCustomSettings(Window customSettingsWindow)
 		{
 			return new LevelLogicCustomSettings();
@@ -50,6 +45,11 @@ namespace ShowcasePackage.Levels
 		public override LevelLogicInstancePlugin CreateInstanceForLoadingToPlaying(ILevelManager level)
 		{
 			return new TestLevelLogic2(level);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+
 		}
 	}
 

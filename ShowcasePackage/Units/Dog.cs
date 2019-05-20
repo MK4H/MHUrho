@@ -19,10 +19,7 @@ namespace ShowcasePackage.Units
 	public class DogType : UnitTypePlugin {
 		public override string Name => "Dog";
 		public override int ID => 4;
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-			
-		}
+		
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
 		{
@@ -37,6 +34,11 @@ namespace ShowcasePackage.Units
 		public override bool CanSpawnAt(ITile centerTile)
 		{
 			return centerTile.Building == null && centerTile.Units.Count == 0;
+
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
 
 		}
 	}

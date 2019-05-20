@@ -1,0 +1,3 @@
+Assets/Units/Chicken/Materials/Chicken.xml
+Assets/Units/Chicken/Materials/Comb.xml
+Assets/Units/Chicken/Materials/Material.001.xml

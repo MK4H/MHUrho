@@ -17,7 +17,7 @@ namespace ShowcasePackage.Units
 {
 	public class TestWorkerType : UnitTypePlugin {
 
-		public override int ID => 9;
+		public override int ID => 2;
 
 		public override string Name => "TestWorker";
 
@@ -37,7 +37,7 @@ namespace ShowcasePackage.Units
 				   centerTile.Building == null;
 		}
 
-		public override void Initialize(XElement extensionElement, GamePack package) {
+		protected override void Initialize(XElement extensionElement, GamePack package) {
 			
 		}
 	}

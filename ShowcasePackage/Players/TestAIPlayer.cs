@@ -29,14 +29,6 @@ namespace ShowcasePackage.Players
 
 		public BuildingType TestBuilding { get; private set; }
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-			Chicken = package.GetUnitType("Chicken");
-			TestUnit = package.GetUnitType("TestUnit");
-			TestWorker = package.GetUnitType("TestWorker");
-			TestBuilding = package.GetBuildingType("TestBuilding");
-		}
-
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
 			return TestAIPlayer.CreateNew(level, player,this);
@@ -45,6 +37,14 @@ namespace ShowcasePackage.Players
 		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
 			return TestAIPlayer.GetInstanceForLoading(level, player, this);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+			Chicken = package.GetUnitType("Chicken");
+			TestUnit = package.GetUnitType("TestUnit");
+			TestWorker = package.GetUnitType("TestWorker");
+			TestBuilding = package.GetBuildingType("TestBuilding");
 		}
 	}
 

@@ -288,7 +288,7 @@ namespace MHUrho.Logic
 			try {
 				newUnit = unitType.CreateNewUnit(GetNewID(entities), this, tile, initRotation, player);
 			}
-			catch (CreationException e) {
+			catch (CreationException) {
 				return null;
 			}
 

@@ -15,10 +15,6 @@ namespace ShowcasePackage.Players
 
 		public override string Name => "testHuman1";
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-
-		}
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
@@ -28,6 +24,11 @@ namespace ShowcasePackage.Players
 		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
 			return new TestHumanPlayer1Instance(level, player);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+
 		}
 	}
 

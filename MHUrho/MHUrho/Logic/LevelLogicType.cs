@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
+using Urho;
 using Urho.Gui;
 
 namespace MHUrho.Logic {
@@ -28,16 +29,30 @@ namespace MHUrho.Logic {
 
 		public void Load(XElement xml, GamePack package)
 		{
-			ID = XmlHelpers.GetID(xml);
-			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
-			XElement assemblyPathElement = xml.Element(LevelLogicTypeXml.Inst.AssemblyPath);
-			Plugin = TypePlugin.LoadTypePlugin<LevelLogicTypePlugin>(XmlHelpers.GetPath(assemblyPathElement),
-																	package,
-																	Name);
+			string assemblyPath = null;
+			XElement extensionElem = null;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				assemblyPath = XmlHelpers.GetPath(xml.Element(LevelLogicTypeXml.Inst.AssemblyPath));
+				extensionElem = xml.Element(LevelLogicTypeXml.Inst.Extension);
+			}
+			catch (Exception e) {
+				LoadError($"Level logic type loading failed: Invalid XML of the package {package.Name}", e);
+			}
 
-			Plugin.Initialize(xml.Element(LevelLogicTypeXml.Inst.Extension), package);
+			try {
+				Plugin = TypePlugin.LoadTypePlugin<LevelLogicTypePlugin>(assemblyPath,
+																		package,
+																		Name,
+																		 ID,
+																		 extensionElem);
+			}
+			catch (Exception e) {
+				LoadError($"Level logic type \"{Name}\"[{ID}] loading failed: Plugin loading failed with exception: {e.Message}", e);
+			}	
 		}
 
 		public void ClearCache()
@@ -73,6 +88,17 @@ namespace MHUrho.Logic {
 		public void Dispose()
 		{
 			Plugin.Dispose();
+		}
+
+		/// <summary>
+		/// Logs message and throws a <see cref="PackageLoadingException"/>
+		/// </summary>
+		/// <param name="message">Message to log and propagate via exception</param>
+		/// <exception cref="PackageLoadingException">Always throws this exception</exception>
+		void LoadError(string message, Exception e)
+		{
+			Urho.IO.Log.Write(LogLevel.Error, message);
+			throw new PackageLoadingException(message, e);
 		}
 	}
 }

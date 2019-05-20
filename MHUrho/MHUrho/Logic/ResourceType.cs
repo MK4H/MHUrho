@@ -24,10 +24,18 @@ namespace MHUrho.Logic
 
 		public void Load(XElement xml, GamePack package)
 		{
-			ID = XmlHelpers.GetID(xml);
-			Name = XmlHelpers.GetName(xml);
-			IconRectangle = XmlHelpers.GetIconRectangle(xml);
 			Package = package;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				IconRectangle = XmlHelpers.GetIconRectangle(xml);
+			}
+			catch (Exception e)
+			{
+				string message = $"Resource type loading failed: Invalid XML of the package {package.Name}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new PackageLoadingException(message, e);
+			}
 		}
 
 		/// <summary>

@@ -80,7 +80,7 @@
     </unitType>
     <unitType name="Chicken" ID="3">
       <assets type="xmlprefab">
-        <path>Assets/Chicken/prefab.xml</path>
+        <path>Assets/Units/Chicken/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	    <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
@@ -160,7 +160,9 @@
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
       <extension>
-        <growsIn type="Grass" speed="1"/>
+        <growsIn type="Grass" time="10"/>
+        <growsIn type="Sand" time="1000"/>
+        <baseScale x="0.1" y="0.1" z="0.1"/>
       </extension>
       <iconTextureRectangle left="0" top="400" right="100" bottom="500"/>
       <size x="1" y="1"/>

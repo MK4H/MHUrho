@@ -16,10 +16,6 @@ namespace ShowcasePackage.Buildings
 	public class GateType : BuildingTypePlugin {
 		public override string Name => "Gate";
 		public override int ID => 3;
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-			
-		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
 		{
@@ -36,6 +32,11 @@ namespace ShowcasePackage.Buildings
 			return level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
 						.All((tile) => tile.Building == null && tile.Units.Count == 0);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+
 		}
 	}
 

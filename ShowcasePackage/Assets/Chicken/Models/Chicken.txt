@@ -1,3 +1,0 @@
-Assets/Chicken/Materials/Chicken.xml
-Assets/Chicken/Materials/Comb.xml
-Assets/Chicken/Materials/Material.001.xml

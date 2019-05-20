@@ -72,7 +72,7 @@ namespace ShowcasePackage.Buildings
 			return empty && rightTileTypeCount > 5;
 		}
 
-		public override void Initialize(XElement extensionElement, GamePack package) {
+		protected override void Initialize(XElement extensionElement, GamePack package) {
 			workerType = package.GetUnitType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement,"workerType")));
 			tileType = package.GetTileType(XmlHelpers.GetString(XmlHelpers.GetChild(extensionElement, "tileType")));
 		}

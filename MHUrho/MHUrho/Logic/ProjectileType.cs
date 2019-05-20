@@ -38,18 +38,42 @@ namespace MHUrho.Logic
 
 
 		public void Load(XElement xml, GamePack package) {
-			//TODO: Check for errors
-			ID = XmlHelpers.GetID(xml);
-			Name = XmlHelpers.GetName(xml);
-			Assets = AssetContainer.FromXml(xml.Element(ProjectileTypeXml.Inst.Assets));
+
 			Package = package;
 
-			XElement pathElement = xml.Element(ProjectileTypeXml.Inst.AssemblyPath);
+			string assemblyPath = null;
+			XElement assetsElement = null;
+			XElement extensionElem = null;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				assemblyPath = XmlHelpers.GetPath(xml.Element(ProjectileTypeXml.Inst.AssemblyPath));
+				assetsElement = xml.Element(ProjectileTypeXml.Inst.Assets);
+				extensionElem = XmlHelpers.GetExtensionElement(xml);
+			}
+			catch (Exception e) {
+				LoadError($"Projectile type loading failed: Invalid XML of the package {package.Name}", e);
+			}
 
-			Plugin = TypePlugin.LoadTypePlugin<ProjectileTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
+			try
+			{
+				Assets = AssetContainer.FromXml(assetsElement);
+			}
+			catch (Exception e)
+			{
+				LoadError($"Projectile type \"{Name}\"[{ID}] loading failed: Asset instantiation failed with exception: {e.Message}", e);
+			}
 
-			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-								  package);
+			try {
+				Plugin = TypePlugin.LoadTypePlugin<ProjectileTypePlugin>(assemblyPath,
+																		package,
+																		Name,
+																		 ID,
+																		 extensionElem);
+			}
+			catch (Exception e) {
+				LoadError($"Projectile type \"{Name}\"[{ID}] loading failed: Plugin loading failed with exception: {e.Message}", e);
+			}
 		}
 
 		public void ClearCache()
@@ -171,6 +195,17 @@ namespace MHUrho.Logic
 										 position,
 										 initRotation,
 										 this);
+		}
+
+		/// <summary>
+		/// Logs message and throws a <see cref="PackageLoadingException"/>
+		/// </summary>
+		/// <param name="message">Message to log and propagate via exception</param>
+		/// <exception cref="PackageLoadingException">Always throws this exception</exception>
+		void LoadError(string message, Exception e)
+		{
+			Urho.IO.Log.Write(LogLevel.Error, message);
+			throw new PackageLoadingException(message, e);
 		}
 	}
 }

@@ -8,8 +8,8 @@
 	<attribute name="Scale" value="0.1 0.1 0.1" />
 	<attribute name="Variables" />
 	<component type="AnimatedModel" id="3">
-		<attribute name="Model" value="Model;Assets/Chicken/Models/Chicken.mdl" />
-		<attribute name="Material" value="Material;Assets/Chicken/Materials/Chicken.xml;Assets/Chicken/Materials/Comb.xml;Assets/Chicken/Materials/Material.001.xml" />
+		<attribute name="Model" value="Model;Assets/Units/Chicken/Models/Chicken.mdl" />
+		<attribute name="Material" value="Material;Assets/Units/Chicken/Materials/Chicken.xml;Assets/Units/Chicken/Materials/Comb.xml;Assets/Units/Chicken/Materials/Material.001.xml" />
 		<attribute name="Bone Animation Enabled">
 			<variant type="Bool" value="true" />
 			<variant type="Bool" value="true" />

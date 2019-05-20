@@ -45,7 +45,7 @@ namespace ShowcasePackage.Units
 			return true;
 		}
 
-		public override void Initialize(XElement extensionElement, GamePack package) {
+		protected override void Initialize(XElement extensionElement, GamePack package) {
 
 		}
 	}

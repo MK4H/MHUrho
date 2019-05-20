@@ -47,7 +47,7 @@ namespace ShowcasePackage.Units
 			return true;
 		}
 
-		public override void Initialize(XElement extensionElement, GamePack package) {
+		protected override void Initialize(XElement extensionElement, GamePack package) {
 			ProjectileType = package.GetProjectileType("EggProjectile");
 		}
 	}
@@ -224,35 +224,35 @@ namespace ShowcasePackage.Units
 		}
 
 		void OnMovementStarted(WorldWalker walker) {
-			animationController.PlayExclusive("Chicken/Models/Walk.ani", 0, true);
-			animationController.SetSpeed("Chicken/Models/Walk.ani", 2);
+			animationController.PlayExclusive("Assets/Units/Chicken/Models/Walk.ani", 0, true);
+			animationController.SetSpeed("Assets/Units/Chicken/Models/Walk.ani", 2);
 
 			Shooter.StopShooting();
 			Shooter.SearchForTarget = false;
 		}
 
 		void OnMovementFinished(WorldWalker walker) {
-			animationController.Stop("Chicken/Models/Walk.ani");
+			animationController.Stop("Assets/Units/Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
 			Shooter.ResetShotDelay();
 		}
 
 		void OnMovementFailed(WorldWalker walker) {
-			animationController.Stop("Chicken/Models/Walk.ani");
+			animationController.Stop("Assets/Units/Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
 			Shooter.ResetShotDelay();
 		}
 
 		void OnMovementCanceled(WorldWalker walker)
 		{
-			animationController.Stop("Chicken/Models/Walk.ani");
+			animationController.Stop("Assets/Units/Chicken/Models/Walk.ani");
 			Shooter.SearchForTarget = true;
 			Shooter.ResetShotDelay();
 		}
 
 		void OnUnitSelected(UnitSelector selector) {
 			if (Walker.State != WorldWalkerState.Started) {
-				animationController.Play("Chicken/Models/Idle.ani", 0, true);
+				animationController.Play("Assets/Units/Chicken/Models/Idle.ani", 0, true);
 			}
 		}
 

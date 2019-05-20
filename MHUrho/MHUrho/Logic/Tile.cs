@@ -212,6 +212,10 @@ namespace MHUrho.Logic
 		}
 
 		public void SetBuilding(IBuilding building) {
+			if (Building != null) {
+				throw new InvalidOperationException("There is a building already on this tile");
+			}
+
 			Building = building;
 		}
 

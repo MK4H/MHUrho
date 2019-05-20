@@ -14,11 +14,6 @@ namespace ShowcasePackage.Players
 		public override string Name => "testNeutral1";
 		public override int ID => 3;
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-
-		}
-
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
 			return new TestNeutralPlayer1Instance(level, player);
@@ -27,6 +22,11 @@ namespace ShowcasePackage.Players
 		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
 			return new TestNeutralPlayer1Instance(level, player);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+
 		}
 	}
 
@@ -55,10 +55,6 @@ namespace ShowcasePackage.Players
 		public override string Name => "testNeutral2";
 		public override int ID => 4;
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-
-		}
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
@@ -68,6 +64,11 @@ namespace ShowcasePackage.Players
 		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
 			return new TestNeutralPlayer2Instance(level, player);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+
 		}
 	}
 

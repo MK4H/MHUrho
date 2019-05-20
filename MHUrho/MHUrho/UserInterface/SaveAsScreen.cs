@@ -149,7 +149,7 @@ namespace MHUrho.UserInterface
 					Level.ChangeRep(newLevelRep);
 					MenuUIManager.SwitchBack();
 				}
-				catch (Exception e) {
+				catch (Exception) {
 					newLevelRep?.Dispose();
 					await MenuUIManager.ErrorPopUp.DisplayError("Package Error",
 																"There was an error while saving the level to package, see log for details.",

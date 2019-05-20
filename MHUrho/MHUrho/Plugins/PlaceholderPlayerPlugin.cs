@@ -17,11 +17,6 @@ namespace MHUrho.Plugins
 		public override string Name => "";
 		public override int ID => 0;
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-			//Nothing
-		}
-
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
 			return new PlaceholderPlayerPluginInstance(level, player);
@@ -30,6 +25,11 @@ namespace MHUrho.Plugins
 		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
 			return new PlaceholderPlayerPluginInstance(level, player);
+		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+			//Nothing
 		}
 	}
 

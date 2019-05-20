@@ -21,12 +21,6 @@ namespace ShowcasePackage.Levels
 		public override int MaxNumberOfPlayers => 6;
 		public override int MinNumberOfPlayers => 1;
 
-		public override void Initialize(XElement extensionElement, GamePack package)
-		{
-
-		}
-
-
 
 		public override LevelLogicCustomSettings GetCustomSettings(Window customSettingsWindow)
 		{
@@ -52,6 +46,11 @@ namespace ShowcasePackage.Levels
 		{
 			return new TestLevel(level);
 		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+
+		}
 	}
 
 	public class TestLevel : LevelLogicInstancePlugin
@@ -68,12 +67,12 @@ namespace ShowcasePackage.Levels
 
 		public override void LoadState(PluginDataWrapper fromPluginData)
 		{
-			//TODO: This
+
 		}
 
 		public override void SaveState(PluginDataWrapper toPluginData)
 		{
-			//TODO: This
+
 		}
 
 		public override IPathFindAlgFactory GetPathFindAlgFactory()

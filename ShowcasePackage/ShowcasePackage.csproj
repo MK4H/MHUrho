@@ -103,17 +103,17 @@
     <Content Include="Assets\Buildings\Gate\Models\Door.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Chicken.txt">
+    <Content Include="Assets\Units\Chicken\Models\Chicken.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\prefab.xml">
+    <Content Include="Assets\Units\Chicken\prefab.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Textures\ChickenNorm.png">
+    <Content Include="Assets\Units\Chicken\Textures\ChickenNorm.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Textures\UV-Texture.png">
+    <Content Include="Assets\Units\Chicken\Textures\UV-Texture.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\EggMaterial.xml">
@@ -177,46 +177,46 @@
     <None Include="Assets\Buildings\Tree1\Models\Default.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Assets\Chicken\Models\BeginPecking.ani">
+    <Content Include="Assets\Units\Chicken\Models\BeginPecking.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Chicken.mdl">
+    <Content Include="Assets\Units\Chicken\Models\Chicken.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Dying.ani">
+    <Content Include="Assets\Units\Chicken\Models\Dying.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Eating.ani">
+    <Content Include="Assets\Units\Chicken\Models\Eating.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\EndPecking.ani">
+    <Content Include="Assets\Units\Chicken\Models\EndPecking.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Idle.ani">
+    <Content Include="Assets\Units\Chicken\Models\Idle.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Idle1.ani">
+    <Content Include="Assets\Units\Chicken\Models\Idle1.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Idle2.ani">
+    <Content Include="Assets\Units\Chicken\Models\Idle2.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Pecking1.ani">
+    <Content Include="Assets\Units\Chicken\Models\Pecking1.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Pecking2.ani">
+    <Content Include="Assets\Units\Chicken\Models\Pecking2.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Pecking3.ani">
+    <Content Include="Assets\Units\Chicken\Models\Pecking3.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Stand.ani">
+    <Content Include="Assets\Units\Chicken\Models\Stand.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\StopPecking.ani">
+    <Content Include="Assets\Units\Chicken\Models\StopPecking.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Models\Walk.ani">
+    <Content Include="Assets\Units\Chicken\Models\Walk.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Assets\Units\Dog\Cube.mdl">
@@ -240,16 +240,16 @@
     <Content Include="Assets\Buildings\Tree1\prefab.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\ChickenIcon.png">
+    <Content Include="Assets\Units\Chicken\ChickenIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Materials\Chicken.xml">
+    <Content Include="Assets\Units\Chicken\Materials\Chicken.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Materials\Comb.xml">
+    <Content Include="Assets\Units\Chicken\Materials\Comb.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Chicken\Materials\Material.001.xml">
+    <Content Include="Assets\Units\Chicken\Materials\Material.001.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

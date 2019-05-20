@@ -21,7 +21,6 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		//TODO: Check that texture is null
 		public Rect TextureCoords { get; private set; }
 
 		public Color MinimapColor { get; private set; }
@@ -31,13 +30,19 @@ namespace MHUrho.Logic
 		string imagePath;
 
 		public void Load(XElement xml, GamePack package) {
-			//TODO: Check for errors
-			ID = XmlHelpers.GetID(xml);
-			Name = XmlHelpers.GetName(xml);
-			imagePath = XmlHelpers.GetPath(xml.Element(TileTypeXml.Inst.TexturePath));
-			IconRectangle = XmlHelpers.GetIntRect(xml.Element(TileTypeXml.Inst.IconTextureRectangle));
-			MinimapColor = XmlHelpers.GetColor(xml.Element(TileTypeXml.Inst.MinimapColor));
 			Package = package;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				imagePath = XmlHelpers.GetPath(xml.Element(TileTypeXml.Inst.TexturePath));
+				IconRectangle = XmlHelpers.GetIntRect(xml.Element(TileTypeXml.Inst.IconTextureRectangle));
+				MinimapColor = XmlHelpers.GetColor(xml.Element(TileTypeXml.Inst.MinimapColor));
+			}
+			catch (Exception e) {
+				string message = $"Tile type loading failed: Invalid XML of the package {package.Name}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new PackageLoadingException(message, e);
+			}
 		}
 
 		/// <summary>

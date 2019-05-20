@@ -141,7 +141,7 @@ namespace MHUrho.UserInterface
 						itemHolder.Size = new IntVector2(itemHolder.Size.X, itemHolder.EffectiveMinSize.Y);
 						listView.UpdateInternalLayout();
 					}
-					catch (Exception e) {
+					catch (Exception) {
 						MenuUIManager.ErrorPopUp.DisplayError("Package Error",
 															"There was an error removing the level from file, see log for details.",
 															proxy);

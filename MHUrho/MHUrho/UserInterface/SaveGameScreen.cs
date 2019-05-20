@@ -97,7 +97,7 @@ namespace MHUrho.UserInterface
 					MenuUIManager.MenuController.SavePausedLevel(LineEdit.Text);
 					MenuUIManager.SwitchBack();
 				}
-				catch (Exception e) {
+				catch (Exception) {
 					await MenuUIManager.ErrorPopUp.DisplayError("Saving Error",
 																"There was an error while saving the level, see log for details.",
 																proxy);

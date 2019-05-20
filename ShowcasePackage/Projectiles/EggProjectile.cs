@@ -21,12 +21,6 @@ namespace ShowcasePackage.Projectiles
 
 		public float Speed { get; private set; }
 
-
-		public override void Initialize(XElement extensionElement, GamePack package) {
-			var speedElement = XmlHelpers.GetChild(extensionElement, "speed");
-			Speed = XmlHelpers.GetFloat(speedElement);
-		}
-
 		public override ProjectileInstancePlugin CreateNewInstance(ILevelManager level, IProjectile projectile)
 		{
 			return EggProjectileInstance.CreateNew(level, projectile, this);
@@ -46,6 +40,13 @@ namespace ShowcasePackage.Projectiles
 																		out var highTime,
 																		out var highVector);
 		}
+
+		protected override void Initialize(XElement extensionElement, GamePack package)
+		{
+			var speedElement = XmlHelpers.GetChild(extensionElement, "speed");
+			Speed = XmlHelpers.GetFloat(speedElement);
+		}
+
 	}
 
 	public class EggProjectileInstance : ProjectileInstancePlugin{
