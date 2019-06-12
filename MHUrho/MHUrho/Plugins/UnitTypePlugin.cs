@@ -14,7 +14,7 @@ namespace MHUrho.Plugins
 		/// <summary>
 		/// Create new instance of the unit in with default contents
 		/// 
-		/// Add components from <see cref="MHUrho.UnitComponents"/> to <see name="unit.Node"/> and/or
+		/// Add components from <see cref="MHUrho.DefaultComponents"/> to <see name="unit.Node"/> and/or
 		/// create your own Plugin in <see cref="UnitInstancePlugin.OnUpdate(float)"/>
 		/// </summary>
 		/// <param name="level"></param>

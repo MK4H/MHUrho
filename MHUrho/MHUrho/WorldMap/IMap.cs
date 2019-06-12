@@ -4,7 +4,7 @@ using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 using Urho.Gui;
 

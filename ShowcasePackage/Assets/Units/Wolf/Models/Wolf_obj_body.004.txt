@@ -1,0 +1,5 @@
+Materials/Wolf_Body.xml
+Materials/Wolf_Eyes.xml
+Materials/Wolf_Claws.xml
+Materials/Wolf_Teeth.xml
+Materials/Wolf_Fur.xml

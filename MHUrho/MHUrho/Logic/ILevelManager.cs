@@ -8,7 +8,7 @@ using MHUrho.Input;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.UserInterface;
 using MHUrho.WorldMap;
 using Urho;
@@ -29,6 +29,8 @@ namespace MHUrho.Logic {
 		Node LevelNode { get; }
 
 		PackageManager PackageManager { get; }
+
+		GamePack Package { get; }
 
 		bool EditorMode { get; }
 

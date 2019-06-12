@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.PathFinding;

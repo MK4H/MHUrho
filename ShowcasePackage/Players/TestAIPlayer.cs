@@ -8,7 +8,7 @@ using MHUrho.Logic;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.Control;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;

@@ -8,7 +8,7 @@ using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.WorldMap;
 
 namespace ShowcasePackage.Projectiles

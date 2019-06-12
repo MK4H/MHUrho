@@ -9,7 +9,7 @@ using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.WorldMap;
 using Urho.Physics;
 
@@ -59,7 +59,7 @@ namespace MHUrho.Logic
 											BuildingType type,
 											IPlayer player,
 											ILevelManager level) {
-				if (!type.CanBuildIn(type.GetBuildingTilesRectangle(topLeftCorner), level)) {
+				if (!type.CanBuild(type.GetBuildingTilesRectangle(topLeftCorner), player, level)) {
 					return null;
 				}
 

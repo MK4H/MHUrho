@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 
 namespace MHUrho.Plugins

@@ -119,11 +119,6 @@ namespace MHUrho.PathFinding.AStar {
 			return new TempNode(position, Map);
 		}
 
-		float Heuristic(Vector3 source)
-		{
-			return distCalc.GetMinimalAproxTime(source.XZ(), targetNode.Position.XZ());
-		}
-
 		void TileHeightsChanged(IReadOnlyCollection<ITile> tiles)
 		{
 			foreach (var tile in tiles) {
@@ -166,7 +161,7 @@ namespace MHUrho.PathFinding.AStar {
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc, Heuristic);
+				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc);
 			}
 			//Did not find path
 			return null;

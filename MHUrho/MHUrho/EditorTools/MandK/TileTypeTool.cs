@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
+using MHUrho.EditorTools.MandK.MapHighlighting;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
@@ -24,22 +25,26 @@ namespace MHUrho.EditorTools.MandK
 		readonly GameController input;
 		readonly GameUI ui;
 
-		readonly StaticSquareTool highlight;
+		readonly StaticSizeHighlighter highlight;
 
 		readonly ExclusiveCheckBoxes checkBoxes;
+
+		readonly UIElement uiElem;
+		readonly Slider sizeSlider;
 
 		bool mouseButtonDown;
 		bool enabled;
 
-		public TileTypeTool(GameController input, GameUI ui, CameraMover camera)
-			: base(input)
+		public TileTypeTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 
 			this.input = input;
 			this.ui = ui;
 			this.tileTypes = new Dictionary<CheckBox, TileType>();
-			this.highlight = new StaticSquareTool(input, ui, camera, 3);
+			this.highlight = new StaticSizeHighlighter(input, ui, camera, 3, Color.Green);
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			InitUI(ui, out uiElem, out sizeSlider);
 
 			foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
 
@@ -60,10 +65,12 @@ namespace MHUrho.EditorTools.MandK
 			if (enabled) return;
 
 			checkBoxes.Show();
+			uiElem.Visible = true;
 
 			highlight.Enable();
 			input.MouseDown += OnMouseDown;
 			input.MouseUp += OnMouseUp;
+			sizeSlider.SliderChanged += OnSliderChanged;
 			highlight.SquareChanged += Highlight_SquareChanged;
 			enabled = true;
 		}
@@ -75,14 +82,15 @@ namespace MHUrho.EditorTools.MandK
 
 			checkBoxes.Hide();
 			checkBoxes.Deselect();
+			uiElem.Visible = false;
 
 			highlight.Disable();
 			input.MouseDown -= OnMouseDown;
 			input.MouseUp -= OnMouseUp;
+			sizeSlider.SliderChanged -= OnSliderChanged;
 			highlight.SquareChanged -= Highlight_SquareChanged;
 			
-			enabled = false;
-			
+			enabled = false;		
 		}
 
 		public override void ClearPlayerSpecificState() {
@@ -100,6 +108,8 @@ namespace MHUrho.EditorTools.MandK
 
 			highlight.Dispose();
 			checkBoxes.Dispose();
+			sizeSlider.Dispose();
+			uiElem.Dispose();
 		}
 
 		void OnTileTypeToggled(ToggledEventArgs e) {
@@ -119,7 +129,7 @@ namespace MHUrho.EditorTools.MandK
 			}
 		}
 
-		void Highlight_SquareChanged(Base.StaticSquareChangedArgs args)
+		void Highlight_SquareChanged(Base.MapHighlighting.StaticSquareChangedArgs args)
 		{
 			if (ui.UIHovering) return;
 
@@ -132,6 +142,23 @@ namespace MHUrho.EditorTools.MandK
 
 		void OnMouseUp(MouseButtonUpEventArgs e) {
 			mouseButtonDown = false;
+		}
+
+		static void InitUI(GameUI ui, out UIElement uiElem, out Slider sizeSlider)
+		{
+			if ((uiElem = ui.CustomWindow.GetChild("TileTypeToolUI")) == null) {
+				ui.CustomWindow.LoadLayout("UI/TileTypeToolUI.xml");
+				uiElem = ui.CustomWindow.GetChild("TileTypeToolUI");
+			}
+
+			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+		}
+
+		void OnSliderChanged(SliderChangedEventArgs obj)
+		{
+			int sliderValue = (int)Math.Round(obj.Value);
+			highlight.EdgeSize = 1 + sliderValue;
+			((Slider)obj.Element).Value = sliderValue;
 		}
 	}
 }

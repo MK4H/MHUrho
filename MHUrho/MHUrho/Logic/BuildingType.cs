@@ -92,20 +92,20 @@ namespace MHUrho.Logic
 			return Building.CreateNew(buildingID, topLeft, initRotation, this, player, level);
 		}
 
-		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
+		public bool CanBuild(IntVector2 topLeft, IntVector2 bottomRight, IPlayer owner, ILevelManager level) {
 			try {
-				return Plugin.CanBuildIn(topLeft, bottomRight, level);
+				return Plugin.CanBuild(topLeft, bottomRight, owner, level);
 			}
 			catch (Exception e) {
 				Urho.IO.Log.Write(LogLevel.Error,
-								$"Building type plugin call {nameof(Plugin.CanBuildIn)} failed with Exception: {e.Message}");
+								$"Building type plugin call {nameof(Plugin.CanBuild)} failed with Exception: {e.Message}");
 				return false;
 			}
 			
 		}
 
-		public bool CanBuildIn(IntRect buildingTilesRectangle, ILevelManager level) {
-			return CanBuildIn(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), level);
+		public bool CanBuild(IntRect buildingTilesRectangle, IPlayer owner, ILevelManager level) {
+			return CanBuild(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), owner, level);
 		}
  
 		internal BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {

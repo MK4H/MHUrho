@@ -9,8 +9,8 @@ namespace MHUrho.EditorTools.Base
 {
 	public abstract class TileTypeTool : Tool
 	{
-		protected TileTypeTool(IGameController input)
-			: base(input, new IntRect(0, 150, 50, 200))
+		protected TileTypeTool(IGameController input, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 
 		}

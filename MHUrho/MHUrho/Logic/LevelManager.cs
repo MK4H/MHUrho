@@ -13,7 +13,7 @@ using MHUrho.Packaging;
 using Urho;
 using Urho.Physics;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho.Actions;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
@@ -69,6 +69,7 @@ namespace MHUrho.Logic
 
 		public PackageManager PackageManager => PackageManager.Instance;
 
+		public GamePack Package => PackageManager.ActivePackage;
 
 		public bool EditorMode { get; private set; }
 
@@ -314,7 +315,7 @@ namespace MHUrho.Logic
 		/// <param name="player">Owner of the building</param>
 		/// <returns>The new building if building was built, or null if the building could not be built</returns>
 		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player) {
-			if (!buildingType.CanBuildIn(buildingType.GetBuildingTilesRectangle(topLeft), this)) {
+			if (!buildingType.CanBuild(buildingType.GetBuildingTilesRectangle(topLeft), player, this)) {
 				return null;
 			}
 

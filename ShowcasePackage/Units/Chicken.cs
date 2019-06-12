@@ -13,7 +13,7 @@ using MHUrho.PathFinding;
 using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.WorldMap;
 using Urho;
 

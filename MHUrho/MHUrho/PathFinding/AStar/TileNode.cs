@@ -57,7 +57,7 @@ namespace MHUrho.PathFinding.AStar
 
 		public Vector3 GetEdgePosition(ITileNode other)
 		{
-			//TODO: If this is slow, cache it at construction
+			//NOTE: If this is slow, cache it at construction
 			return Map.GetBorderBetweenTiles(Tile, other.Tile);
 		}
 
@@ -65,12 +65,11 @@ namespace MHUrho.PathFinding.AStar
 												FastPriorityQueue<Node> priorityQueue,
 												List<Node> touchedNodes,
 												Node targetNode,
-												NodeDistCalculator distCalc,
-												Func<Vector3, float> heuristic)
+												NodeDistCalculator distCalc)
 		{
 			State = NodeState.Closed;
 			foreach (var neighbour in outgoingEdges.Keys) {
-				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
+				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc);
 			}
 		}
 
@@ -81,8 +80,7 @@ namespace MHUrho.PathFinding.AStar
 				float totalTime = Time - PreviousNode.Time;
 
 				if (!nodeDist.GetTime(PreviousNode, borderNode, out float firstTime)) {
-					//TODO: Exception
-					throw new Exception("Wrong GetTime implementation in package");
+					throw new ArgumentException($"Wrong {nameof(nodeDist)} implementation, does not give the same result on path building.");
 				}
 				return new[]
 						{

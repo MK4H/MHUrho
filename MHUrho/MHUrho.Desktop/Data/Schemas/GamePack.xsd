@@ -92,6 +92,7 @@
 			<xs:element name="unitIconTexturePath" type="xs:string"/>
       <xs:element name="buildingIconTexturePath" type="xs:string"/>
       <xs:element name="playerIconTexturePath" type="xs:string"/>
+      <xs:element name="toolIconTexturePath" type="xs:string"/>
     </xs:sequence>
 	  <xs:attribute name="name" use="required" type="xs:string"/>
   </xs:complexType>

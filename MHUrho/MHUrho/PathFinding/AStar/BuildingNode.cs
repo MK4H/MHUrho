@@ -37,12 +37,11 @@ namespace MHUrho.PathFinding.AStar
 												FastPriorityQueue<Node> priorityQueue,
 												List<Node> touchedNodes,
 												Node targetNode,
-												NodeDistCalculator distCalc,
-												Func<Vector3, float> heuristic)
+												NodeDistCalculator distCalc)
 		{
 			State = NodeState.Closed;
 			foreach (var neighbour in outgoingEdges.Keys) {
-				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
+				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc);
 			}
 		}
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
@@ -15,6 +16,7 @@ namespace MHUrho.PathFinding.AStar
 		public NodeType NodeType => NodeType.Temp;
 
 		public Vector3 Position { get; private set; }
+		public IEnumerable<INode> Neighbours => Enumerable.Empty<INode>();
 
 		readonly ITile containingTile;
 		readonly IMap map;

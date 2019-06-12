@@ -56,8 +56,6 @@
 		<attribute name="Image Rect" value="0 132 16 148"/>
 	</element>
 	<element type="ToolCheckBox" style="ExpansionWindowCheckBox">
-		<attribute name="Texture" value="Texture2D;Textures/ToolIcons.png"/>
-		<attribute name="Image Rect" value="0 0 50 50"/>
 	</element>
 	<element type="PlayerCheckBox" style="ExpansionWindowCheckBox">
 		<attribute name="Texture" value="Texture2D;Textures/PlayerIconShields.png"/>

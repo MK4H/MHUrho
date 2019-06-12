@@ -4,7 +4,7 @@ using System.Text;
 using Urho;
 using MHUrho.Logic;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 
 namespace MHUrho.Plugins
 {

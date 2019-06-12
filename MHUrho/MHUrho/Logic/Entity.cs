@@ -6,7 +6,7 @@ using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Plugins;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 using MHUrho.WorldMap;
 

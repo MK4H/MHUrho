@@ -15,8 +15,11 @@ using Urho.Gui;
 namespace ShowcasePackage.Levels
 {
 	public class TestLevelLogicType : LevelLogicTypePlugin {
-		public override string Name => "TestLogic";
-		public override int ID => 1;
+		public static string TypeName =  "TestLogic";
+		public static int TypeID =  1;
+
+		public override string Name => TypeName;
+		public override int ID => TypeID;
 
 		public override int MaxNumberOfPlayers => 6;
 		public override int MinNumberOfPlayers => 1;

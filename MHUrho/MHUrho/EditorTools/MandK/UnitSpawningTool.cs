@@ -28,8 +28,8 @@ namespace MHUrho.EditorTools.MandK
 
 		bool enabled;
 
-		public UnitSpawningTool(GameController input, GameUI ui, CameraMover camera)
-			:base(input)
+		public UnitSpawningTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			:base(input, iconRectangle)
 		{
 
 			this.input = input;

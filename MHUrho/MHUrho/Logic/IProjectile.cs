@@ -1,6 +1,6 @@
 ﻿using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 
 namespace MHUrho.Logic {

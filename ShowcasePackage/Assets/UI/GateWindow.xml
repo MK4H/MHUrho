@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<element type="Window">
+	<attribute name="Name" value="GateWindow" />
+	<attribute name="Position" value="500 200" />
+	<attribute name="Size" value="200 300" />
+	<attribute name="Pivot" value="0 0" />
+	<attribute name="Is Movable" value="true" />
+	<element type="Text">
+		<attribute name="Name" value="GateText" />
+		<attribute name="Position" value="0 15" />
+		<attribute name="Min Anchor" value="0.5 0" />
+		<attribute name="Max Anchor" value="0.5 0" />
+		<attribute name="Pivot" value="0.5 0" />
+		<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Font Size" value="20" />
+		<attribute name="Text" value="Gate" />
+	</element>
+	<element type="Button" style="CloseButton">
+		<attribute name="Name" value="CloseButton" />
+		<attribute name="Size" value="16 16" />
+		<attribute name="Min Anchor" value="1 0" />
+		<attribute name="Max Anchor" value="1 0" />
+		<attribute name="Pivot" value="1 0" />
+	</element>
+	<element type="Button">
+		<attribute name="Name" value="SwitchButton" />
+		<attribute name="Position" value="0 -20" />
+		<attribute name="Size" value="100 100" />
+		<attribute name="Min Anchor" value="0.5 1" />
+		<attribute name="Max Anchor" value="0.5 1" />
+		<attribute name="Pivot" value="0.5 1" />
+		<element type="Text">
+			<attribute name="Name" value="OpenText" />
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Text" value="Open" />
+		</element>
+		<element type="Text">
+			<attribute name="Name" value="CloseText" />
+			<attribute name="Min Anchor" value="0.5 0.5" />
+			<attribute name="Max Anchor" value="0.5 0.5" />
+			<attribute name="Pivot" value="0.5 0.5" />
+			<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+			<attribute name="Text" value="Close" />
+		</element>
+	</element>
+	<element type="Text">
+		<attribute name="Name" value="StateText" />
+		<attribute name="Min Anchor" value="0.5 0.5" />
+		<attribute name="Max Anchor" value="0.5 0.5" />
+		<attribute name="Pivot" value="0.5 0.5" />
+		<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+		<attribute name="Text" value="State:" />
+	</element>
+</element>

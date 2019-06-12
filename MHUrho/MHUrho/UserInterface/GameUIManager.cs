@@ -59,6 +59,11 @@ namespace MHUrho.UserInterface
 
 		public abstract void HideUI();
 
+		public void LoadLayoutToUI(string path)
+		{
+			UI.LoadLayoutToElement(UI.Root, Game.ResourceCache, path);
+		}
+
 		protected void OnHoverBegin()
 		{
 			HoverBegin?.Invoke();

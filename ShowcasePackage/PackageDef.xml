@@ -175,10 +175,43 @@
       <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
       <size x="5" y="5"/>
     </buildingType>
+    <buildingType name="Wall" ID="4">
+      <assets type="xmlprefab">
+        <path>Assets/Buildings/Wall/prefab.xml</path>
+      </assets>
+      <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <size x="1" y="1"/>
+    </buildingType>
+    <buildingType name="Tower" ID="5">
+      <assets type="xmlprefab">
+        <path>Assets/Buildings/Tower/prefab.xml</path>
+      </assets>
+      <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <size x="3" y="3"/>
+    </buildingType>
+    <buildingType name="TreeCutter" ID="6">
+      <assets type="xmlprefab">
+        <path>Assets/Buildings/TreeCutter/prefab.xml</path>
+      </assets>
+      <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <size x="3" y="3"/>
+    </buildingType>
+    <buildingType name="Keep" ID="7">
+      <assets type="xmlprefab">
+        <path>Assets/Buildings/Keep/prefab.xml</path>
+      </assets>
+      <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <size x="5" y="5"/>
+    </buildingType>
   </buildingTypes>
 	<resourceIconTexturePath>Assets/Textures/tileIcons.png</resourceIconTexturePath>
 	<tileIconTexturePath>Assets/Textures/tileIcons.png</tileIconTexturePath>
 	<unitIconTexturePath>Assets/Textures/entityIcons.png</unitIconTexturePath>
 	<buildingIconTexturePath>Assets/Textures/entityIcons.png</buildingIconTexturePath>
 	<playerIconTexturePath>Assets/Textures/tileIcons.png</playerIconTexturePath>
+  <toolIconTexturePath>Assets/Textures/toolIcons.png</toolIconTexturePath>
 </gamePack>

@@ -11,7 +11,7 @@ using MHUrho.Storage;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.PathFinding;
 using Urho.IO;
 

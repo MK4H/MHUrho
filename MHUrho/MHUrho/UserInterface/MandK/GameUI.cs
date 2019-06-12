@@ -69,7 +69,7 @@ namespace MHUrho.UserInterface.MandK
 			UI.Root.AddChild(gameUI);
 			gameUI.Visible = false;
 
-			CustomWindow = new CustomElementsWindow((Window)gameUI.GetChild("CustomWindow"));
+			CustomWindow = new CustomElementsWindow((Window)gameUI.GetChild("CustomWindow"), UI, Game.ResourceCache);
 			CustomWindow.HoverBegin += UIHoverBegin;
 			CustomWindow.HoverEnd += UIHoverEnd;
 
@@ -155,7 +155,7 @@ namespace MHUrho.UserInterface.MandK
 
 			CheckBox checkBox = toolSelection.CreateCheckBox();
 			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
-
+			checkBox.Texture = InputCtl.Level.Package.ToolIconTexture;
 			checkBox.ImageRect = tool.IconRectangle;
 
 			tools.Add(checkBox, tool);

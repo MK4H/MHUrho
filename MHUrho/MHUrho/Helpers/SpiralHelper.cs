@@ -33,6 +33,22 @@ namespace MHUrho.Helpers
 				this.spiral = spiral;
 			}
 
+			/// <summary>
+			/// NOT TESTED
+			/// </summary>
+			/// <param name="spiral"></param>
+			/// <param name="emptyInnerSize"></param>
+			public SpiralEnumerator(Spiral spiral, int emptyInnerSize)
+				:this(spiral)
+			{
+				if (emptyInnerSize % 2 == 1) {
+					emptyInnerSize -= 1;
+				}
+
+				spiralCoords = new IntVector2(emptyInnerSize / 2, (emptyInnerSize / 2) - 1);
+				d = new IntVector2(0, -1);
+			}
+
 			public bool MoveNext() {
 
 				Current = spiral.center + spiralCoords;
@@ -84,6 +100,12 @@ namespace MHUrho.Helpers
 		public SpiralEnumerator GetSpiralEnumerator()
 		{
 			return new SpiralEnumerator(this);
+		}
+
+		//TODO: TEST
+		public SpiralEnumerator GetSpiralEnumerator(int emptyInnerSize)
+		{
+			return new SpiralEnumerator(this, emptyInnerSize);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()

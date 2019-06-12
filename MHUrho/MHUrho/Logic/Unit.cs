@@ -12,7 +12,7 @@ using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 using Urho.Physics;
 
@@ -145,7 +145,6 @@ namespace MHUrho.Logic
 			/// </summary>
 			/// <returns>Loaded unit component, already added to the node</returns>
 			public void StartLoading() {
-				//TODO: Check arguments - node cant have more than one Unit component
 				if (type.ID != storedUnit.TypeID) {
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}

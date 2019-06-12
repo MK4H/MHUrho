@@ -11,7 +11,7 @@ using MHUrho.Packaging;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.UserInterface;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
@@ -22,9 +22,13 @@ namespace ShowcasePackage.Buildings
 {
 	public class TestBuildingType : BuildingTypePlugin
 	{
-		public override int ID => 1;
+		public static string TypeName = "TestBuilding";
 
-		public override string Name => "TestBuilding";
+		public static int TypeID = 1;
+
+		public override int ID => TypeID;
+
+		public override string Name => TypeName;
 
 		UnitType workerType;
 		TileType tileType;
@@ -51,7 +55,7 @@ namespace ShowcasePackage.Buildings
 			return new TestBuildingInstance(level, building);
 		}
 
-		public override bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level) {
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level) {
 			bool empty = true;
 			int rightTileTypeCount = 0;
 			level.Map.ForEachInRectangle(topLeftTileIndex, 

@@ -30,8 +30,8 @@ namespace MHUrho.EditorTools.MandK
 
 		bool enabled;
 
-		public BuildingBuilderTool(GameController input, GameUI ui, CameraMover camera)
-			: base(input)
+		public BuildingBuilderTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 			this.input = input;
 			this.ui = ui;
@@ -98,16 +98,7 @@ namespace MHUrho.EditorTools.MandK
 
 		void OnBuildingTypeToggled(ToggledEventArgs e)
 		{
-			if (e.State) {
-				//TODO: THINGS
-				//var text = input.UIManager.CursorTooltips.AddText();
-				//text.SetStyleAuto();
-				//text.Value = "Hello world";
-				//text.Position = new IntVector2(10, 0);
-
-				//input.UIManager.CursorTooltips.AddImage(new IntRect(0, 0, 200, 200));
-			}
-
+			//NOTE: Can display stuff on toggle
 		}
 
 
@@ -121,7 +112,7 @@ namespace MHUrho.EditorTools.MandK
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
-			if (buildingType.CanBuildIn(topLeft, bottomRight, Level)) {
+			if (buildingType.CanBuild(topLeft, bottomRight, input.Player, Level)) {
 				LevelManager.CurrentLevel.BuildBuilding(buildingTypes[checkBoxes.Selected], topLeft, Quaternion.Identity, input.Player);
 			}
 		}
@@ -154,7 +145,7 @@ namespace MHUrho.EditorTools.MandK
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
-			Color color = buildingType.CanBuildIn(topLeft, bottomRight, Level) ? Color.Green : Color.Red;
+			Color color = buildingType.CanBuild(topLeft, bottomRight, input.Player, Level) ? Color.Green : Color.Red;
 			Map.HighlightRectangle(topLeft, bottomRight, color);
 		}
 

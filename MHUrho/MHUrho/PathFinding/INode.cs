@@ -14,6 +14,8 @@ namespace MHUrho.PathFinding
 
 		Vector3 Position { get; }
 
+		IEnumerable<INode> Neighbours { get; }
+
 		/// <summary>
 		/// 
 		/// </summary>

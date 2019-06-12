@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
+using MHUrho.EditorTools.MandK.MapHighlighting;
 using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
@@ -9,6 +10,7 @@ using MHUrho.UserInterface;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
 using Urho;
+using Urho.Gui;
 
 namespace MHUrho.EditorTools.MandK.TerrainManipulation
 {
@@ -21,7 +23,10 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 
 		readonly GameController input;
 		readonly GameUI ui;
-		readonly StaticSquareTool highlight;
+
+		readonly UIElement uiElem;
+		readonly Slider sizeSlider;
+		readonly StaticSizeHighlighter highlight;
 		readonly IMap map;
 
 		bool mouseButtonDown;
@@ -32,17 +37,24 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 			this.input = input;
 			this.ui = ui;
 			this.map = map;
-			highlight = new StaticSquareTool(input, ui, camera, 3);
+			InitUI(ui, out uiElem, out sizeSlider);
+			highlight = new StaticSizeHighlighter(input, ui, camera, 3, Color.Green);
 		}
 
 		public override void OnEnabled()
 		{
 			highlight.Enable();
+			sizeSlider.SliderChanged += OnSliderChanged;
+			uiElem.Visible = true;
 		}
+
+		
 
 		public override void OnDisabled()
 		{
 			highlight.Disable();
+			sizeSlider.SliderChanged -= OnSliderChanged;
+			uiElem.Visible = false;
 		}
 
 		public override void OnMouseDown(MouseButtonDownEventArgs args)
@@ -72,6 +84,8 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 		public override void Dispose()
 		{
 			highlight.Dispose();
+			sizeSlider.Dispose();
+			uiElem.Dispose();
 		}
 
 		float CalculateTileHeight(float previousHeight, int x, int y)
@@ -107,6 +121,24 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 				}
 
 			}
+		}
+
+		static void InitUI(GameUI ui, out UIElement uiElem, out Slider sizeSlider)
+		{
+			if ((uiElem = ui.CustomWindow.GetChild("SmoothingManipulatorUI")) == null)
+			{
+				ui.CustomWindow.LoadLayout("UI/SmoothingManipulatorUI.xml");
+				uiElem = ui.CustomWindow.GetChild("SmoothingManipulatorUI");
+			}
+
+			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+		}
+
+		void OnSliderChanged(SliderChangedEventArgs obj)
+		{
+			int sliderValue = (int)Math.Round(obj.Value);
+			highlight.EdgeSize = 1 + sliderValue;
+			((Slider)obj.Element).Value = sliderValue;
 		}
 	}
 }

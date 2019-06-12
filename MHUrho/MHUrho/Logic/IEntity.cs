@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using MHUrho.Input;
 using MHUrho.Plugins;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.WorldMap;
 using Urho;
 
@@ -104,7 +104,7 @@ namespace MHUrho.Logic {
 		event Action<IEntity> RotationChanged;
 
 		/// <summary>
-		/// Adds one of the classes derived from <see cref="DefaultComponent"/>. See <see cref="MHUrho.UnitComponents"/>
+		/// Adds one of the classes derived from <see cref="DefaultComponent"/>. See <see cref="MHUrho.DefaultComponents"/>
 		/// </summary>
 		/// <param name="defaultComponent">the component to be added, should not be null</param>
 		void AddComponent(DefaultComponent defaultComponent);
@@ -142,15 +142,15 @@ namespace MHUrho.Logic {
 		/// O(1) time complexity compared to <see cref="Node.GetComponent{T}(bool)"/> and <see cref="Component.GetComponent{T}"/>
 		/// which are O(n) time complexity where n is the number of components.
 		/// </summary>
-		/// <typeparam name="T">One of the components defined in namespace <see cref="MHUrho.UnitComponents"/>.</typeparam>
-		/// <returns>First component of type <typeparamref name="T"/> or derived from it present on this entity.</returns>
+		/// <typeparam name="T">One of the components defined in namespace <see cref="MHUrho.DefaultComponents"/>.</typeparam>
+		/// <returns>First component of type <typeparamref name="T"/> or derived from it present on this entity, or null if not present.</returns>
 		T GetDefaultComponent<T>() where T : DefaultComponent;
 
 		/// <summary>
 		/// Get an enumerable of all components of type <typeparamref name="T"/> or derived from it present on this entity.
 		/// O(1) time complexity compared to <see cref="Node.GetComponent{T}(bool)"/> and <see cref="Component.GetComponent{T}"/> which are O(n) in the total number of components.
 		/// </summary>
-		/// <typeparam name="T">One of the components defined in namespace <see cref="MHUrho.UnitComponents"/>.</typeparam>
+		/// <typeparam name="T">One of the components defined in namespace <see cref="MHUrho.DefaultComponents"/>.</typeparam>
 		/// <returns>Enumerable with all components of type <typeparamref name="T"/> or derived from it.</returns>
 		IEnumerable<T> GetDefaultComponents<T>() where T : DefaultComponent;
 
@@ -158,7 +158,7 @@ namespace MHUrho.Logic {
 		/// Checks if there is a components of type <typeparamref name="T"/> or derived from it present on this entity.
 		/// O(1) time complexity.
 		/// </summary>
-		/// <typeparam name="T">One of the components defined in namespace <see cref="MHUrho.UnitComponents"/>.</typeparam>
+		/// <typeparam name="T">One of the components defined in namespace <see cref="MHUrho.DefaultComponents"/>.</typeparam>
 		/// <returns>True if there is a component of type <typeparamref name="T"/> or derived from it, false otherwise.</returns>
 		bool HasDefaultComponent<T>() where T : DefaultComponent;
 

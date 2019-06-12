@@ -2,19 +2,88 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.CameraMovement;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.Helpers.Extensions;
+using MHUrho.Input.MandK;
+using MHUrho.UserInterface.MandK;
 using Urho;
+using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
-	public class TreeType : BuildingTypePlugin {
+	public class TreeType : BaseBuildingTypePlugin {
 
-		public override string Name => "Tree1";
-		public override int ID => 2;
+		class TreeBuilder : DirectionlessBuilder
+		{
+
+			readonly TreeType type;
+
+			UIElement options;
+			Slider sizeSlider;
+
+
+			public TreeBuilder(GameController input, GameUI ui, CameraMover camera, TreeType type)
+				: base(input, ui, camera, type.myType)
+			{
+				this.type = type;
+
+			}
+
+			public override void OnMouseDown(MouseButtonDownEventArgs e)
+			{
+				if (e.Button != (int)MouseButton.Left)
+				{
+					return;
+				}
+
+				ITile tile = Input.GetTileUnderCursor();
+				if (tile == null)
+				{
+					return;
+				}
+
+				IntRect rect = GetBuildingRectangle(tile, BuildingType);
+				if (BuildingType.CanBuild(rect, Input.Player, Level))
+				{
+					IBuilding building = Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.Identity, Input.Player);
+					Tree tree = (Tree)building.BuildingPlugin;
+					tree.SetSize((sizeSlider.Value / sizeSlider.Range) + startSize);
+				}
+			}
+
+			public override void Enable()
+			{
+				base.Enable();
+
+				if ((options = Ui.CustomWindow.GetChild("TreeOptions")) == null)
+				{
+					Ui.CustomWindow.LoadLayout("Assets/Buildings/Tree1/CWLayout.xml");
+					options = Ui.CustomWindow.GetChild("TreeOptions");
+				}
+
+				sizeSlider = (Slider)options.GetChild("sizeSlider");
+				options.Visible = true;
+			}
+
+			public override void Disable()
+			{
+				base.Disable();
+
+				options.Visible = false;
+			}
+
+		}
+
+
+		public static string TypeName =  "Tree1";
+		public static int TypeID =  2;
+
+		public override string Name => TypeName;
+		public override int ID => TypeID;
 
 		/// <summary>
 		/// Contains tiles the tree grows in and the time it takes to grow to full
@@ -31,6 +100,8 @@ namespace ShowcasePackage.Buildings
 		const string timeAttr = "time";
 
 		const float startSize = 0.05f;
+
+		BuildingType myType;
 
 		readonly Dictionary<TileType, double> tileGrowth;
 
@@ -54,7 +125,7 @@ namespace ShowcasePackage.Buildings
 			return new Tree(level, building, this);
 		}
 
-		public override bool CanBuildIn(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
 		{
 			//Tree is just 1 tile big
 			if (topLeftTileIndex != bottomRightTileIndex) {
@@ -66,8 +137,15 @@ namespace ShowcasePackage.Buildings
 			return tile.Building == null && tileGrowth.ContainsKey(tile.Type);
 		}
 
+		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
+		{
+			return new TreeBuilder(input, ui, camera, this);
+		}
+
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			myType = package.GetBuildingType(ID);
+
 			IEnumerable<XElement> growsIn = extensionElement.Elements(PackageManager.Instance.GetQualifiedXName(growsInElem));
 			foreach (var element in growsIn)
 			{
@@ -271,4 +349,6 @@ namespace ShowcasePackage.Buildings
 			SetSize(currentSize);
 		} 
 	}
+
+	
 }

@@ -10,7 +10,7 @@ using MHUrho.Packaging;
 using MHUrho.PathFinding;
 using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.Storage;
 using MHUrho.WorldMap;
 using Urho;

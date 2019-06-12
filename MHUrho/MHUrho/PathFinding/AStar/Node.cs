@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using Priority_Queue;
@@ -25,6 +26,8 @@ namespace MHUrho.PathFinding.AStar
 		public float Time { get; set; }
 
 		public Vector3 Position { get; protected set; }
+
+		public IEnumerable<INode> Neighbours => outgoingEdges.Keys;
 
 		protected NodeState State;
 
@@ -57,8 +60,7 @@ namespace MHUrho.PathFinding.AStar
 											FastPriorityQueue<Node> priorityQueue,
 											List<Node> touchedNodes,
 											Node targetNode,
-											NodeDistCalculator distCalc,
-											Func<Vector3, float> heuristic);
+											NodeDistCalculator distCalc);
 
 
 		/// <summary>
@@ -139,47 +141,37 @@ namespace MHUrho.PathFinding.AStar
 										FastPriorityQueue<Node> priorityQueue,
 										List<Node> touchedNodes,
 										Node targetNode,
-										NodeDistCalculator distCalc,
-										Func<Vector3, float> getHeuristic)
+										NodeDistCalculator distCalc)
 		{
-			//If already opened or closed
 			if (neighbour.State == NodeState.Closed) {
 				//Already closed, either not passable or the best path there can be found
 				return;
-
 			}
-			else if (neighbour.State == NodeState.Opened) {
-				//if it is closer through the current sourceNode
-
-				if (distCalc.GetTime(this, neighbour, out float timeToTarget)) {
-					float newTime = Time + timeToTarget;
-					if (newTime < neighbour.Time) {
-						neighbour.Time = newTime;
-						neighbour.PreviousNode = this;
-						priorityQueue.UpdatePriority(neighbour, neighbour.Value);
-					}
-				}
-
-			}
-			else /*NodeState.Untouched*/{
-				// Compute the heuristic for the new tile
-				float heuristic = getHeuristic(neighbour.Position);
-
-				if (!distCalc.GetTime(this, neighbour, out float timeToTarget)) {
-					//Unit cannot pass to target node from source node
-					return;
-				}
-				else {
+			
+			//If Unit can pass to target node from source node
+			if (distCalc.GetTime(this, neighbour, out float timeToTarget)) {
+				if (neighbour.State == NodeState.Untouched) {
+					// Compute the heuristic for the new node
+					float heuristic = distCalc.GetMinimalAproxTime(neighbour.Position.XZ(), targetNode.Position.XZ());
 					neighbour.State = NodeState.Opened;
 					neighbour.Heuristic = heuristic;
 					neighbour.PreviousNode = this;
 					neighbour.Time = Time + timeToTarget;
 
-					//Unit can pass through this tile, enqueue it
+					//Unit can pass through this node, enqueue it
 					priorityQueue.Enqueue(neighbour, neighbour.Value);
 					touchedNodes.Add(neighbour);
 				}
-
+				else if (neighbour.State == NodeState.Opened) {
+					float newTime = Time + timeToTarget;
+					//if it is closer through the current sourceNode
+					if (newTime < neighbour.Time)
+					{
+						neighbour.Time = newTime;
+						neighbour.PreviousNode = this;
+						priorityQueue.UpdatePriority(neighbour, neighbour.Value);
+					}
+				}
 			}
 		}
 

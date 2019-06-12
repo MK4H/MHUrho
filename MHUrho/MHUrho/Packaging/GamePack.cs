@@ -80,6 +80,7 @@ namespace MHUrho.Packaging {
 		public Texture2D UnitIconTexture { get; private set; }
 		public Texture2D BuildingIconTexture { get; private set; }
 		public Texture2D PlayerIconTexture { get; private set; }
+		public Texture2D ToolIconTexture { get; private set; }
 	   
 		readonly Dictionary<string, TileType> tileTypesByName;
 		readonly Dictionary<string, UnitType> unitTypesByName;
@@ -209,6 +210,10 @@ namespace MHUrho.Packaging {
 				loadingProgress?.SendTextUpdate("Loading level logic types");
 				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
 				loadingProgress?.SendUpdate(levelLogicTypesPartSize, "Loaded level logic types");
+
+				loadingProgress?.SendTextUpdate("Loading icon textures");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadIconTextures);
+				loadingProgress?.SendUpdate(playerTypesPartSize, "Loaded icon textures");
 
 				loadingProgress?.SendTextUpdate("Loading levels");
 				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
@@ -707,6 +712,7 @@ namespace MHUrho.Packaging {
 			UnitIconTexture.Dispose();
 			BuildingIconTexture.Dispose();
 			PlayerIconTexture.Dispose();
+			ToolIconTexture.Dispose();
 
 			foreach (var unitType in unitTypesByName.Values) {
 				unitType.Dispose();
@@ -790,9 +796,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			TileIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.TileIconTexturePath)));
 
 			var tileTypesElement = data.Root.Element(GamePackXml.Inst.TileTypes);
 
@@ -812,10 +815,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			UnitIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.UnitIconTexturePath)));
-
 			var unitTypesElement = data.Root.Element(GamePackXml.Inst.UnitTypes);
 
 			//unitTypes element cannot be null because xsd does not allow it
@@ -830,9 +829,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			BuildingIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.BuildingIconTexturePath)));
 
 			var buildingTypesElement = data.Root.Element(GamePackXml.Inst.BuildingTypes);
 
@@ -867,10 +863,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			ResourceIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ResourceIconTexturePath)));
-
 			var resourceTypesElement = data.Root.Element(GamePackXml.Inst.ResourceTypes);
 
 			//resourceTypes element cannot be null because xsd does not allow it
@@ -885,10 +877,6 @@ namespace MHUrho.Packaging {
 		IEnumerable<PlayerType> LoadAllPlayerTypes()
 		{
 			CheckIfLoading();
-
-			//data.Root cannot be null because xsd does not allow it
-			PlayerIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.PlayerIconTexturePath)));
 
 			XElement playerTypes = data.Root.Element(GamePackXml.Inst.PlayerAITypes);
 
@@ -914,6 +902,24 @@ namespace MHUrho.Packaging {
 																	levelLogicTypesByName,
 																	levelLogicTypesByID))
 								.ToArray();
+		}
+
+		void LoadIconTextures()
+		{
+			CheckIfLoading();
+			//data.Root cannot be null because xsd does not allow it
+			TileIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.TileIconTexturePath)));
+			UnitIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.UnitIconTexturePath)));
+			BuildingIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.BuildingIconTexturePath)));
+			ResourceIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ResourceIconTexturePath)));
+			PlayerIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.PlayerIconTexturePath)));
+			ToolIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ToolIconTexturePath)));
 		}
 
 		IEnumerable<LevelRep> LoadAllLevels()

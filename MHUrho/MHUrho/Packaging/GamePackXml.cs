@@ -37,6 +37,7 @@ namespace MHUrho.Packaging
 		public XName UnitIconTexturePath => PackageManager.XMLNamespace + "unitIconTexturePath";
 		public XName BuildingIconTexturePath => PackageManager.XMLNamespace + "buildingIconTexturePath";
 		public XName PlayerIconTexturePath => PackageManager.XMLNamespace + "playerIconTexturePath";
+		public XName ToolIconTexturePath => PackageManager.XMLNamespace + "toolIconTexturePath";
 
 		protected GamePackXml()
 		{

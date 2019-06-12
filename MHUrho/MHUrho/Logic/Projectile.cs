@@ -10,7 +10,7 @@ using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 
 namespace MHUrho.Logic
 {

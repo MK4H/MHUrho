@@ -4,7 +4,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Helpers;
 using MHUrho.Logic;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 
 namespace MHUrho.WorldMap

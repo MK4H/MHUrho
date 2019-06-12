@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using MHUrho.CameraMovement;
 using MHUrho.Control;
+using MHUrho.EditorTools.MandK.MapHighlighting;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.Packaging;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.UserInterface;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
@@ -82,7 +83,7 @@ namespace MHUrho.EditorTools.MandK
 		readonly GameController input;
 		readonly GameUI ui;
 
-		readonly DynamicRectangleTool dynamicHighlight;
+		readonly DynamicSizeHighlighter dynamicHighlight;
 
 		readonly Dictionary<UnitType, SelectedInfo> selected;
 
@@ -90,15 +91,15 @@ namespace MHUrho.EditorTools.MandK
 
 		bool enabled;
 
-		public UnitSelectorTool(GameController input, GameUI ui, CameraMover camera)
-			:base(input)
+		public UnitSelectorTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			:base(input, iconRectangle)
 		{
 			this.input = input;
 			this.ui = ui;
 			this.selected = new Dictionary<UnitType, SelectedInfo>();
 			this.unitTypes = new Dictionary<UIElement, UnitType>();
 
-			this.dynamicHighlight = new DynamicRectangleTool(input, ui, camera);
+			this.dynamicHighlight = new DynamicSizeHighlighter(input, ui, camera);
 		}
 
 		public override void Enable() {

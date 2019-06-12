@@ -6,7 +6,7 @@ using MHUrho.Helpers;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.WorldMap;
 using Urho;
 using Urho.Physics;
