@@ -60,7 +60,7 @@ namespace MHUrho.Logic
 			}
 
 			try {
-				Assets = AssetContainer.FromXml(xml.Element(BuildingTypeXml.Inst.Assets));
+				Assets = AssetContainer.FromXml(xml.Element(BuildingTypeXml.Inst.Assets), package);
 			}
 			catch (Exception e) {
 				LoadError($"Building type \"{Name}\"[{ID}] loading failed: Asset instantiation failed with exception: {e.Message}", e);

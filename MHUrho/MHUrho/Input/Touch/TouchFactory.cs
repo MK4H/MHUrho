@@ -25,7 +25,7 @@ namespace MHUrho.Input.Touch
 			return new GameController(levelManager, octree, player, cameraMover);
 		}
 
-		public override IMenuController CreateMenuController()
+		public override IMenuController CreateMenuController(MHUrhoApp app)
 		{
 			return new MenuController();
 		}

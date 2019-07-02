@@ -174,6 +174,11 @@ namespace ShowcasePackage.Players
 
 		}
 
+		public override void Init(ILevelManager level)
+		{
+			
+		}
+
 		public override void OnUnitKilled(IUnit unit) {
 			if (Level.IsEnding || unit.UnitType != type.Chicken) {
 				//Do nothing

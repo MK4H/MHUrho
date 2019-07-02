@@ -55,7 +55,7 @@ namespace MHUrho.UserInterface
 
 			protected void LoadFileNames(string absolutePath)
 			{
-				foreach (var file in MHUrhoApp.Files.GetFSEntriesInDirectory(MHUrhoApp.Files.SaveGameDirAbsolutePath, true, false))
+				foreach (var file in Game.Files.GetFSEntriesInDirectory(Game.Files.SaveGameDirAbsolutePath, true, false))
 				{
 					Filenames.Add(new NameTextPair(Path.GetFileName(file)));
 				}
@@ -204,7 +204,7 @@ namespace MHUrho.UserInterface
 			void DeleteFile()
 			{
 				try {
-					MHUrhoApp.Files.DeleteDynamicFile(Path.Combine(MHUrhoApp.Files.SaveGameDirPath, MatchSelected));
+					Game.Files.DeleteDynamicFile(Path.Combine(Game.Files.SaveGameDirPath, MatchSelected));
 					int index = Filenames.FindIndex((pair) => pair.Name.Equals(MatchSelected, StringComparison.CurrentCultureIgnoreCase));
 
 					FileView.RemoveItem(Filenames[index].Text);

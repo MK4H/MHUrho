@@ -63,7 +63,7 @@ namespace ShowcasePackage.Buildings
 			IEnumerable<string> activeBuilders = Level.EditorMode ? EditBuilders : PlayBuilders;
 			foreach (var builder in activeBuilders) {
 				BaseBuildingTypePlugin typePlugin = (BaseBuildingTypePlugin)Level.Package.GetBuildingType(builder).Plugin;
-				InitCheckbox(typePlugin.GetBuilder(input, ui, camera));
+				InitCheckbox(typePlugin.GetBuilder(input, ui, camera), input.Level.Package);
 			}
 		}
 
@@ -119,11 +119,11 @@ namespace ShowcasePackage.Buildings
 
 		}
 
-		void InitCheckbox(Builder builder)
+		void InitCheckbox(Builder builder, GamePack package)
 		{
 			var checkBox = ui.SelectionBar.CreateCheckBox();
 			checkBox.SetStyle("SelectionBarCheckBox");
-			checkBox.Texture = PackageManager.Instance.ActivePackage.BuildingIconTexture;
+			checkBox.Texture = package.BuildingIconTexture;
 			checkBox.ImageRect = builder.BuildingType.IconRectangle;
 			checkBox.HoverOffset = new IntVector2(builder.BuildingType.IconRectangle.Width(), 0);
 			checkBox.CheckedOffset = new IntVector2(2 * builder.BuildingType.IconRectangle.Width(), 0);

@@ -60,7 +60,7 @@ namespace MHUrho.Logic
 
 		public event Action<IEntity> RotationChanged;
 
-		public event Action OnRemoval;
+		public event Action<IEntity> OnRemoval;
 
 		protected Dictionary<Type, IList<DefaultComponent>> defaultComponents;
 
@@ -124,7 +124,7 @@ namespace MHUrho.Logic
 		{
 			IsRemovedFromLevel = true;
 			try {
-				OnRemoval?.Invoke();
+				OnRemoval?.Invoke(this);
 			}
 			catch (Exception e)
 			{

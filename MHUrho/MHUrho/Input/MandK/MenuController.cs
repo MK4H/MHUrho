@@ -31,11 +31,13 @@ namespace MHUrho.Input.MandK
 		}
 
 		readonly MenuUI UIController;
+		readonly MHUrhoApp app;
 
 		IGameController pausedLevelController;
 
-		public MenuController()
+		public MenuController(MHUrhoApp app)
 		{
+			this.app = app;
 			UIController = new MenuUI(this);
 		}
 
@@ -108,9 +110,9 @@ namespace MHUrho.Input.MandK
 				throw new ArgumentException("Invalid fileName for the save file", nameof(fileName));
 			}
 
-			string dynamicPath = Path.Combine(MHUrhoApp.Files.SaveGameDirPath, fileName);
+			string dynamicPath = Path.Combine(app.Files.SaveGameDirPath, fileName);
 			try {
-				Stream file = MHUrhoApp.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
+				Stream file = app.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
 				pausedLevelController.Level.SaveTo(file);
 			}
 			catch (IOException e) {

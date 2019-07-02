@@ -270,7 +270,7 @@ namespace MHUrho.EditorTools.MandK
 		Button CreateButton(UnitType unitType) {
 			var button = ui.SelectionBar.CreateButton();
 			button.SetStyle("SelectedUnitButton");
-			button.Texture = PackageManager.Instance.ActivePackage.UnitIconTexture;
+			button.Texture = input.Level.Package.UnitIconTexture;
 			button.ImageRect = unitType.IconRectangle;
 			button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
 			button.PressedOffset = new IntVector2(unitType.IconRectangle.Width() * 2, 0);

@@ -26,7 +26,7 @@ namespace MHUrho.StartupManagement
 			UIActions = uiActions;
 		}
 
-		public static StartupOptions FromCommandLineParams(string[] args)
+		public static StartupOptions FromCommandLineParams(string[] args, FileManager files)
 		{
 			ActionManager uiActions = null;
 
@@ -35,7 +35,7 @@ namespace MHUrho.StartupManagement
 			while (argsEnumerator.MoveNext()) {
 				switch (argsEnumerator.Current) {
 					case "-ui":
-						uiActions = GetUIActions(argsEnumerator);
+						uiActions = GetUIActions(argsEnumerator, files);
 						break;
 				}
 			}
@@ -45,7 +45,7 @@ namespace MHUrho.StartupManagement
 			return new StartupOptions(uiActions);
 		}
 
-		static ActionManager GetUIActions(IEnumerator<string> argsEnumerator)
+		static ActionManager GetUIActions(IEnumerator<string> argsEnumerator, FileManager files)
 		{
 			bool fromDynamic = true;
 			if (argsEnumerator.MoveNext()) {
@@ -81,15 +81,15 @@ namespace MHUrho.StartupManagement
 			Stream file = null;
 			try {
 				file = fromDynamic
-							? MHUrhoApp.Files.OpenDynamicFile(argsEnumerator.Current,
+							? files.OpenDynamicFile(argsEnumerator.Current,
 															System.IO.FileMode.Open,
 															System.IO.FileAccess.Read)
-							: MHUrhoApp.Files.OpenStaticFileRO(argsEnumerator.Current);
+							: files.OpenStaticFileRO(argsEnumerator.Current);
 				XDocument xmlFile = XDocument.Load(file);
 
 				try
 				{
-					return new ActionManager(xmlFile);
+					return new ActionManager(xmlFile, files);
 				}
 				catch (IOException e)
 				{
@@ -138,19 +138,20 @@ namespace MHUrho.StartupManagement
 		readonly List<MenuScreenAction> actions;
 
 		/// <summary>
-		/// 
+		/// Creates new action manager from the given <paramref name="xmlFile"/>.
 		/// </summary>
-		/// <param name="xmlFilePath"></param>
+		/// <param name="xmlFIle">XML file to parse the actions from.</param>
+		/// <param name="files">File management system.</param>
 		/// <exception cref="IOException">Occurs when the <paramref name="xmlFilePath"/> is not valid path or the file could not be opened</exception>
 		/// <exception cref="XmlSchemaValidationException">Occurs when <paramref name="xmlFilePath"/> does not conform to the schema at Schemas/MenuActions.xsd</exception>
-		public ActionManager(XDocument xmlFile)
+		public ActionManager(XDocument xmlFile, FileManager files)
 		{
 			try {
 
 
 				var schema = new XmlSchemaSet();
 				schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
-							XmlReader.Create(MHUrhoApp.Files.OpenStaticFileRO(SchemaPath)));
+							XmlReader.Create(files.OpenStaticFileRO(SchemaPath)));
 
 				xmlFile.Validate(schema, null);
 

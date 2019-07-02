@@ -11,6 +11,11 @@ using Urho.Urho2D;
 
 namespace MHUrho.Packaging
 {
+	/// <summary>
+	/// Represents a game package that can be loaded into the currently running instance of the platform.
+	/// Can start the loading of the package.
+	/// This class is used to enable quick validation of the package integrity and partial load, to preserve memory.
+	/// </summary>
     public class GamePackRep {
 
 		public string Name { get; private set; }
@@ -40,7 +45,7 @@ namespace MHUrho.Packaging
 			Stream file = null;
 			XDocument data = null;
 			try {
-				file = MHUrhoApp.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				file = packageManager.App.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				data = XDocument.Load(file);
 				data.Validate(schemas, null);
 			}
@@ -82,11 +87,11 @@ namespace MHUrho.Packaging
 			string thumbnailPath = packageElement.Element(GamePackXml.Inst.PathToThumbnail)?.Value;
 			if (thumbnailPath != null) {
 				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.ReplaceDirectorySeparators(thumbnailPath));
-				Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
+				Thumbnail = packageManager.GetTexture2D(thumbnailPath);
 			}
 			else {
 				//If no thumbnail provided, show default icon
-				Thumbnail = PackageManager.Instance.DefaultIcon;
+				Thumbnail = packageManager.DefaultIcon;
 			}
 			
 		}

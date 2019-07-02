@@ -116,7 +116,7 @@ namespace MHUrho.UserInterface
 
 					var result = await MenuUIManager.
 										FileBrowsingPopUp.
-										Request(PackageManager.Instance.ActivePackage.RootedDirectoryPath,
+										Request(Game.PackageManager.ActivePackage.RootedDirectoryPath,
 												SelectOption.File,
 												thumbnailPathText.HasDefaultValue ? null : thumbnailPathText.Value);
 

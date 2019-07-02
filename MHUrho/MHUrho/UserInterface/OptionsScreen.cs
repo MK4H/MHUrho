@@ -261,7 +261,7 @@ namespace MHUrho.UserInterface
 			{
 				if (confirmed) {
 					if (changed) {
-						Game.Config.Reload();
+						Game.Config.Reload(Game.Files);
 						SetValues(Game.Config);
 					}
 					changed = false;
@@ -273,14 +273,14 @@ namespace MHUrho.UserInterface
 			{
 				if (confirmed) {
 					if (changed) {
-						Game.Config.Save();
+						Game.Config.Save(Game.Files);
 						changed = false;
 					}
 					MenuUIManager.SwitchBack();
 				}
 				else {
 					if (changed) {
-						Game.Config.Reload();
+						Game.Config.Reload(Game.Files);
 						SetValues(Game.Config);
 						Game.Config.SetGraphicsMode(Game.Graphics);
 						changed = false;

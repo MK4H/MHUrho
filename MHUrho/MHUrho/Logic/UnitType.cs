@@ -74,7 +74,7 @@ namespace MHUrho.Logic
 
 			try
 			{
-				Assets = AssetContainer.FromXml(assetsElement);
+				Assets = AssetContainer.FromXml(assetsElement, package);
 			}
 			catch (Exception e)
 			{

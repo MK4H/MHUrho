@@ -65,7 +65,7 @@ namespace MHUrho.UserInterface
 
 				public readonly bool IsDirectory;
 
-				public NameTextPair(string name, bool isDirectory)
+				public NameTextPair(MHUrhoApp game, string name, bool isDirectory)
 				{
 					Name = name;
 					Text = new Text {
@@ -73,7 +73,7 @@ namespace MHUrho.UserInterface
 										Visible = true
 									};
 
-					Text.SetStyle(isDirectory ? "DirectoryEntry" : "FileEntry", PackageManager.Instance.GetXmlFile("UI/FileBrowserStyle.xml", true));
+					Text.SetStyle(isDirectory ? "DirectoryEntry" : "FileEntry", game.PackageManager.GetXmlFile("UI/FileBrowserStyle.xml", true));
 
 					IsDirectory = isDirectory;
 				}
@@ -406,12 +406,12 @@ namespace MHUrho.UserInterface
 				string absoluteDirPath = Path.Combine(baseDir, relativeDirPath);
 				var newEntries = new List<NameTextPair>();
 				try {
-					foreach (var file in MHUrhoApp.Files.GetFSEntriesInDirectory(absoluteDirPath, true, false)) {
-						newEntries.Add(new NameTextPair(Path.GetFileName(file), false));
+					foreach (var file in Game.Files.GetFSEntriesInDirectory(absoluteDirPath, true, false)) {
+						newEntries.Add(new NameTextPair(Game, Path.GetFileName(file), false));
 					}
 
-					foreach (var directory in MHUrhoApp.Files.GetFSEntriesInDirectory(absoluteDirPath, false, true)) {
-						newEntries.Add(new NameTextPair(Path.GetFileName(directory), true));
+					foreach (var directory in Game.Files.GetFSEntriesInDirectory(absoluteDirPath, false, true)) {
+						newEntries.Add(new NameTextPair(Game, Path.GetFileName(directory), true));
 					}
 				}
 				catch (IOException) {
@@ -425,7 +425,7 @@ namespace MHUrho.UserInterface
 				cDirEntries.Sort();
 
 				if (absoluteDirPath != baseDir) {
-					cDirEntries.Insert(0, new NameTextPair("..", true));
+					cDirEntries.Insert(0, new NameTextPair(Game, "..", true));
 				}
 
 				foreach (var entry in cDirEntries) {

@@ -15,6 +15,13 @@ using MHUrho.Helpers.Extensions;
 
 namespace MHUrho.Packaging
 {
+	/*
+	 * LevelRep class uses State design pattern to represent changes of state, such as
+	 * when the level gets newly created, saved, loaded for editing, loaded for playing, etc.
+	 *
+	 */
+
+
 	/// <summary>
 	/// This class represents a level that is available in a package.
 	/// This level may be loaded for playing or for editing.
@@ -234,7 +241,7 @@ namespace MHUrho.Packaging
 				try
 				{
 					StLevel storedLevel = RunningLevel.Save();
-					saveFile = MHUrhoApp.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
+					saveFile = GamePack.App.Files.OpenDynamicFileInPackage(SavePath, FileMode.Create, FileAccess.Write, GamePack);
 					storedLevel.WriteTo(saveFile);
 				}
 				catch (Exception e)
@@ -350,7 +357,7 @@ namespace MHUrho.Packaging
 				try
 				{
 					if (sourceState.SavePath != SavePath) {
-						MHUrhoApp.Files.Copy(Path.Combine(GamePack.RootedDirectoryPath, sourceState.SavePath),
+						GamePack.App.Files.Copy(Path.Combine(GamePack.RootedDirectoryPath, sourceState.SavePath),
 										Path.Combine(GamePack.RootedDirectoryPath, SavePath),
 										true);
 					}
@@ -420,7 +427,7 @@ namespace MHUrho.Packaging
 			public override ILevelLoader GetLoaderForPlaying(PlayerSpecification players, LevelLogicCustomSettings customSettings, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 			{
 				if (savedLevel == null) {
-					savedLevel = GetSaveFromDynamicPath(savedLevelPath);
+					savedLevel = GetSaveFromDynamicPath(savedLevelPath, GamePack.App.Files);
 				}
 				var loader = LevelManager.GetLoaderForPlaying(Context, savedLevel, players, customSettings, parentProgress, subsectionSize);
 
@@ -468,6 +475,8 @@ namespace MHUrho.Packaging
 
 		public IntVector2 MapSize { get; private set; }
 
+		public MHUrhoApp App => GamePack.App;
+
 		public int MaxNumberOfPlayers => LevelLogicType.MaxNumberOfPlayers;
 
 		public int MinNumberOfPLayers => LevelLogicType.MinNumberOfPlayers;
@@ -491,7 +500,7 @@ namespace MHUrho.Packaging
 			this.MapSize = mapSize;
 			this.GamePack = gamePack;
 
-			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
+			this.Thumbnail = GamePack.PackageManager.GetTexture2D(thumbnailPath);
 
 			state = new CreatedLevel(mapSize, this);
 		}
@@ -516,7 +525,7 @@ namespace MHUrho.Packaging
 			this.MapSize = other.MapSize;
 			this.savePath = GamePack.GetLevelProtoSavePath(name);
 
-			this.Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
+			this.Thumbnail = other.GamePack.PackageManager.GetTexture2D(thumbnailPath);
 
 
 			state = other.state.CloneToNewContext(this);
@@ -534,7 +543,7 @@ namespace MHUrho.Packaging
 
 			this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(LevelXml.Inst.MapSize));
 
-			this.Thumbnail = PackageManager.Instance.GetTexture2D(ThumbnailPath);
+			this.Thumbnail = GamePack.PackageManager.GetTexture2D(ThumbnailPath);
 
 			state = new LevelPrototype(this);
 		}
@@ -585,7 +594,7 @@ namespace MHUrho.Packaging
 		/// <param name="progressWatcher">Watcher that will be watching progress of this method, from 0 to 100%</param>
 		/// <returns></returns>
 		/// <exception cref="LevelLoadingException">Thrown when the loading of the saved level failed</exception>
-		public static async Task<LevelRep> GetFromSavedGame(string storedLevelPath, IProgressEventWatcher progressWatcher)
+		public static async Task<LevelRep> GetFromSavedGame(PackageManager packageManager, string storedLevelPath, IProgressEventWatcher progressWatcher)
 		{
 			//Should sum up to 100%
 			const double stlevelLoadingPartSize = 50;
@@ -594,7 +603,7 @@ namespace MHUrho.Packaging
 			progressWatcher?.SendTextUpdate("Getting level from save file");
 			StLevel storedLevel;
 			try {
-				storedLevel = GetSaveFromDynamicPath(storedLevelPath);
+				storedLevel = GetSaveFromDynamicPath(storedLevelPath, packageManager.App.Files);
 			}
 			catch (Exception e) {
 				string message = $"Deserialization of the saved level failed with:{Environment.NewLine}{e.Message}";
@@ -608,7 +617,7 @@ namespace MHUrho.Packaging
 			try {
 				progressWatcher?.SendTextUpdate("Loading package");
 				var gamePack =
-					await PackageManager.Instance.LoadPackage(storedLevel.PackageName,
+					await packageManager.LoadPackage(storedLevel.PackageName,
 															new ProgressWatcher(progressWatcher, packageLoadingPartSize));
 				progressWatcher?.SendTextUpdate("Loaded package");
 				progressWatcher?.SendFinished();
@@ -722,7 +731,7 @@ namespace MHUrho.Packaging
 		public void RemoveDataFile()
 		{
 			//NOTE: Maybe move this to state, maybe the file may not exist yet
-			MHUrhoApp.Files.DeleteDynamicFile(Path.Combine(GamePack.DirectoryPath, savePath));
+			GamePack.App.Files.DeleteDynamicFile(Path.Combine(GamePack.DirectoryPath, savePath));
 		}
 
 		public void Dispose()
@@ -732,7 +741,7 @@ namespace MHUrho.Packaging
 		}
 
 		/// <summary>
-		/// 
+		/// Loads serialized level in the form of <see cref="StLevel"/> from <paramref name="path"/>
 		/// </summary>
 		/// <param name="path">Relative path based in <see cref="GamePack.DirectoryPath"/> of the owning gamePack</param>
 		/// <param name="package">Package from which the path is based</param>
@@ -743,7 +752,7 @@ namespace MHUrho.Packaging
 			StLevel storedLevel = null;
 			Stream saveFile = null;
 			try {
-				saveFile = MHUrhoApp.Files.OpenDynamicFileInPackage(path,
+				saveFile = package.App.Files.OpenDynamicFileInPackage(path,
 																System.IO.FileMode.Open,
 																System.IO.FileAccess.Read,
 																package);
@@ -757,18 +766,20 @@ namespace MHUrho.Packaging
 		}
 
 		/// <summary>
-		/// 
+		/// Loads serialized level in the form of <see cref="StLevel"/> from <paramref name="path"/>
+		/// as a relative path inside the dynamic directory.
 		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
+		/// <param name="path">Path to load the level from.</param>
+		/// <param name="files">File management system.</param>
+		/// <returns>Stored level.</returns>
 		/// <exception cref="Exception">May throw exceptions on failure, will be caught higher</exception>
-		static StLevel GetSaveFromDynamicPath(string path)
+		static StLevel GetSaveFromDynamicPath(string path, FileManager files)
 		{
 			StLevel storedLevel = null;
 			Stream saveFile = null;
 			try
 			{
-				saveFile = MHUrhoApp.Files.OpenDynamicFile(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				saveFile = files.OpenDynamicFile(path, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				storedLevel = StLevel.Parser.ParseFrom(saveFile);
 			}
 			finally

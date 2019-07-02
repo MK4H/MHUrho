@@ -1,4 +1,5 @@
-﻿using MHUrho.Control;
+﻿using System.Collections.Generic;
+using MHUrho.Control;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using Urho;
@@ -24,6 +25,8 @@ namespace MHUrho.Logic {
 		Vector3 Center { get; }
 
 		IntVector2 Size { get; }
+
+		IReadOnlyList<ITile> Tiles { get; }
 
 		StBuilding Save();
 

@@ -28,13 +28,25 @@ namespace MHUrho
 	{
 		public static MHUrhoApp Instance { get; private set; }
 
-		public static FileManager Files { get; set; }
+		/// <summary>
+		/// File manager set by system specific startup code.
+		/// Has to be static for Android startup.
+		/// </summary>
+		public static FileManager FileManager { get; set; }
 
-		public static StartupOptions StartupOptions { get; set; }
+		/// <summary>
+		/// Startup options (command line options) set by system specific startup code.
+		/// Has to be static for Android startup.
+		/// </summary>
+		public static StartupOptions StartupArgs { get; set; }
+
+		public FileManager Files => FileManager;
+
+		public StartupOptions StartupOptions => StartupArgs;
 
 		public AppConfig Config { get; private set; }
 
-
+		public PackageManager PackageManager { get; private set; }
 
 		public IMenuController MenuController { get; private set; }
 
@@ -53,7 +65,6 @@ namespace MHUrho
 		public MHUrhoApp(ApplicationOptions opts)
 			: base(opts)
 		{
-
 		}
 
 		public static bool IsMainThread(Thread thread)
@@ -161,17 +172,18 @@ namespace MHUrho
 				Config = AppConfig.LoadFrom(configFile);
 			}
 
+			SetConfigOptions();
+
 			string[] failedPackages;
 			try {
-				failedPackages = PackageManager.CreateInstance(ResourceCache);
+				PackageManager = new PackageManager(this);
+				failedPackages = PackageManager.ParseGamePackDir();
 			}
 			catch (FatalPackagingException) {
 				//Exception is already logged at the lowest level where it was detected and then translated into the FatalPackagingException
 				Stop();
 				throw;
 			}
-
-			SetConfigOptions();
 
 			if (Platform == Platforms.Android ||
 				Platform == Platforms.iOS) {
@@ -181,7 +193,7 @@ namespace MHUrho
 				ControllerFactory = new MandKFactory();
 			}
 
-			MenuController = ControllerFactory.CreateMenuController();
+			MenuController = ControllerFactory.CreateMenuController(this);
 
 			if (failedPackages.Length == 0) {
 				MenuController.InitialSwitchToMainMenu();

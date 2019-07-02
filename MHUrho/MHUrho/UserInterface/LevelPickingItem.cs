@@ -20,14 +20,14 @@ namespace MHUrho.UserInterface
 			this.Level = level;
 
 
-			XmlFile styleFile = PackageManager.Instance.GetXmlFile("UI/LevelItemStyle.xml", true);
+			XmlFile styleFile = game.PackageManager.GetXmlFile("UI/LevelItemStyle.xml", true);
 
-			UIElement fixedElementContents = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelItemFixedLayout.xml", true),
+			UIElement fixedElementContents = game.UI.LoadLayout(game.PackageManager.GetXmlFile("UI/LevelItemFixedLayout.xml", true),
 																styleFile);
 			FixedElement.AddChild(fixedElementContents);
 
 
-			UIElement expandingElementContents = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelItemExpandingLayout.xml", true),
+			UIElement expandingElementContents = game.UI.LoadLayout(game.PackageManager.GetXmlFile("UI/LevelItemExpandingLayout.xml", true),
 																	 styleFile);
 
 			ExpandingElement.AddChild(expandingElementContents);
@@ -49,8 +49,8 @@ namespace MHUrho.UserInterface
 			:base(game, "UI/LevelItemStyle.xml", false)
 		{
 			UIElement fixedElementContets =
-				game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/NewLevelItemLayout.xml", true),
-									PackageManager.Instance.GetXmlFile("UI/LevelItemStyle.xml", true));
+				game.UI.LoadLayout(game.PackageManager.GetXmlFile("UI/NewLevelItemLayout.xml", true),
+									game.PackageManager.GetXmlFile("UI/LevelItemStyle.xml", true));
 
 			FixedElement.AddChild(fixedElementContets);
 		}

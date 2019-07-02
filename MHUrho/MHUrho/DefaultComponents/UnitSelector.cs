@@ -183,7 +183,7 @@ namespace MHUrho.DefaultComponents
 
 
 			AddedToEntity(typeof(UnitSelector), entityDefaultComponents);
-			Entity.OnRemoval += Deselect;
+			Entity.OnRemoval += (_) => Deselect();
 		}
 
 		protected override bool RemovedFromEntity(IDictionary<Type, IList<DefaultComponent>> entityDefaultComponents) {

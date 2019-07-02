@@ -33,7 +33,7 @@ namespace ShowcasePackage.Units
 
 
 		public override bool CanSpawnAt(ITile centerTile) {
-			return centerTile.Type != PackageManager.Instance.ActivePackage.DefaultTileType &&
+			return centerTile.Type != centerTile.Map.LevelManager.Package.DefaultTileType &&
 				   centerTile.Building == null;
 		}
 

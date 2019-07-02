@@ -52,7 +52,7 @@ namespace MHUrho.Logic
 				this.storedUnit = storedUnit;
 				this.defComponentLoaders = new List<DefaultComponentLoader>();
 
-				type = PackageManager.Instance.ActivePackage.GetUnitType(storedUnit.TypeID);
+				type = level.Package.GetUnitType(storedUnit.TypeID);
 				if (type == null) {
 					throw new ArgumentException("Type of this unit was not loaded");
 				}
@@ -202,7 +202,6 @@ namespace MHUrho.Logic
 
 		}
 
-		#region Public members
 		public UnitType UnitType { get; private set;}
 
 		public override IEntityType Type => UnitType;
@@ -246,16 +245,6 @@ namespace MHUrho.Logic
 
 		public override Vector3 Down => -Up;
 
-		#endregion
-
-		#region Private members
-
-
-
-		#endregion
-
-		#region Constructors
-
 		/// <summary>
 		/// Initializes everything apart from the things referenced by their ID or position
 		/// </summary>
@@ -288,10 +277,6 @@ namespace MHUrho.Logic
 
 			ReceiveSceneUpdates = true;
 		}
-
-		#endregion
-
-		#region Public methods
 
 		public static IUnitLoader GetLoader(LevelManager level, StUnit storedUnit)
 		{
@@ -426,9 +411,6 @@ namespace MHUrho.Logic
 		{
 			RemoveFromLevel();
 		}
-		#endregion
-
-		#region Protected Methods
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
@@ -448,15 +430,6 @@ namespace MHUrho.Logic
 			}
 			
 		}
-
-		#endregion
-
-		#region Private Methods
-
-
-
-		#endregion
-
 	 
 	}
 }

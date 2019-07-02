@@ -146,7 +146,7 @@ namespace ShowcasePackage.Buildings
 		{
 			myType = package.GetBuildingType(ID);
 
-			IEnumerable<XElement> growsIn = extensionElement.Elements(PackageManager.Instance.GetQualifiedXName(growsInElem));
+			IEnumerable<XElement> growsIn = extensionElement.Elements(package.PackageManager.GetQualifiedXName(growsInElem));
 			foreach (var element in growsIn)
 			{
 				TileType tileType = GetTileType(element, package);
@@ -159,7 +159,7 @@ namespace ShowcasePackage.Buildings
 				tileGrowth.Add(tileType, growthRate.Value);
 			}
 
-			BaseScale = extensionElement.Element(PackageManager.Instance.GetQualifiedXName(baseScaleElem)).GetVector3();
+			BaseScale = extensionElement.Element(package.PackageManager.GetQualifiedXName(baseScaleElem)).GetVector3();
 		}
 
 		TileType GetTileType(XElement growsIn, GamePack package)
@@ -301,6 +301,14 @@ namespace ShowcasePackage.Buildings
 			}
 
 			Building.Node.Scale = type.BaseScale * newSize;
+		}
+
+		public void Chomp()
+		{
+			currentSize -= 0.1f;
+			if (currentSize < 0.1f) {
+				Building.RemoveFromLevel();
+			}
 		}
 
 		void Spread(float timeStep)

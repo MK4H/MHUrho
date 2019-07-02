@@ -73,7 +73,7 @@ namespace MHUrho
 												GamePack package = null)
 		{
 			if (package == null) {
-				package = PackageManager.Instance.ActivePackage;
+				package = MHUrhoApp.Instance.PackageManager.ActivePackage;
 			}
 
 			string basePath = package.DirectoryPath;

@@ -51,5 +51,10 @@ namespace ShowcasePackage.Players
 		{
 
 		}
+
+		public override void Init(ILevelManager level)
+		{
+			
+		}
 	}
 }

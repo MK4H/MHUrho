@@ -22,7 +22,7 @@ namespace MHUrho.UserInterface.MandK
 		static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
 		static Texture2D DefaultButtonTexture =
-			PackageManager.Instance.GetTexture2D("Textures/xamarin.png");
+			MHUrhoApp.Instance.PackageManager.GetTexture2D("Textures/xamarin.png");
 
 		public GameController InputCtl { get; protected set; }
 
@@ -62,10 +62,10 @@ namespace MHUrho.UserInterface.MandK
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
 			//TODO: User texture
-			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this);
+			this.CursorTooltips = new CursorTooltips(Level.PackageManager.GetTexture2D("Textures/xamarin.png"),this);
 
-			gameUI = UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/GameLayout.xml", true), 
-									PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
+			gameUI = UI.LoadLayout(Level.PackageManager.GetXmlFile("UI/GameLayout.xml", true),
+									Level.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
 			UI.Root.AddChild(gameUI);
 			gameUI.Visible = false;
 
@@ -154,7 +154,7 @@ namespace MHUrho.UserInterface.MandK
 		{
 
 			CheckBox checkBox = toolSelection.CreateCheckBox();
-			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
+			checkBox.SetStyle("ToolCheckBox", Game.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
 			checkBox.Texture = InputCtl.Level.Package.ToolIconTexture;
 			checkBox.ImageRect = tool.IconRectangle;
 
@@ -202,7 +202,7 @@ namespace MHUrho.UserInterface.MandK
 		{
 
 			CheckBox checkBox = playerSelection.CreateCheckBox();
-			checkBox.SetStyle("PlayerCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
+			checkBox.SetStyle("PlayerCheckBox", Game.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
 
 
 			checkBox.ImageRect = player.Insignia.ShieldRectangle;

@@ -30,6 +30,9 @@ namespace MHUrho.Logic
 
 	public delegate void OnEndDelegate();
 
+	/// <summary>
+	/// Main class representing the current level
+	/// </summary>
 	partial class LevelManager : Component, ILevelManager, IDisposable
 	{
 		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
@@ -67,7 +70,7 @@ namespace MHUrho.Logic
 
 		public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
-		public PackageManager PackageManager => PackageManager.Instance;
+		public PackageManager PackageManager => App.PackageManager;
 
 		public GamePack Package => PackageManager.ActivePackage;
 
@@ -170,7 +173,7 @@ namespace MHUrho.Logic
 			StLevel level = new StLevel() {
 				LevelName = LevelRep.Name,
 				Map = this.Map.Save(),
-				PackageName = PackageManager.Instance.ActivePackage.Name,
+				PackageName = PackageManager.ActivePackage.Name,
 				Plugin = new StLevelPlugin()
 			};
 

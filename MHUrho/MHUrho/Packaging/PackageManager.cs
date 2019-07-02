@@ -28,13 +28,15 @@ namespace MHUrho.Packaging
 	public class PackageManager  {
 		public static XNamespace XMLNamespace = "http://www.MobileHold.cz/GamePack.xsd";
 
-		public static PackageManager Instance { get; private set; }
-
-		public static string PackageDirectoryPath => MHUrhoApp.Files.PackageDirectoryPath;
-
-		public static string PackageDirectoryAbsolutePath => MHUrhoApp.Files.PackageDirectoryPath;
-
 		public const string GamePackDirFileName = "Packages.xml";
+
+		public MHUrhoApp App { get; private set; }
+
+		public string PackageDirectoryPath => App.Files.PackageDirectoryPath;
+
+		public string PackageDirectoryAbsolutePath => App.Files.PackageDirectoryPath;
+
+		
 
 		public IEnumerable<GamePackRep> AvailablePacks => availablePacks.Values;
 
@@ -45,11 +47,13 @@ namespace MHUrho.Packaging
 		/// </summary>
 		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
-		static string GamePackDirFilePath => Path.Combine(PackageDirectoryPath, GamePackDirFileName);
+		static readonly string defaultIconPath = Path.Combine("Textures", "xamarin.png");
 
-		static string GamePackDirFileAbsolutePath => Path.Combine(PackageDirectoryAbsolutePath, GamePackDirFileName);
+		string GamePackDirFilePath => Path.Combine(PackageDirectoryPath, GamePackDirFileName);
 
-		static readonly string defaultIconPath = Path.Combine("Textures","xamarin.png");
+		string GamePackDirFileAbsolutePath => Path.Combine(PackageDirectoryAbsolutePath, GamePackDirFileName);
+
+		
 
 
 		public Texture2D DefaultIcon { get; private set; }
@@ -63,50 +67,117 @@ namespace MHUrho.Packaging
 		readonly ResourceCache resourceCache;
 
 
-		protected PackageManager(ResourceCache resourceCache) {
-			this.resourceCache = resourceCache;
+		public PackageManager(MHUrhoApp app) {
+			this.App = app;
+			this.resourceCache = app.ResourceCache;
 
 			schemas = new XmlSchemaSet();
-		}
 
-		
+			try
+			{
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="resourceCache"></param>
-		/// <returns>Paths of the packages that failed to load</returns>
-		public static string[] CreateInstance(ResourceCache resourceCache) {
-			Instance = new PackageManager(resourceCache);
-			try {
-
-				Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MHUrhoApp.Files.OpenStaticFileRO(GamePackageSchemaPath)));
+				schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(App.Files.OpenStaticFileRO(GamePackageSchemaPath)));
 			}
-			catch (IOException e) {
+			catch (IOException e)
+			{
 				string message = $"Error loading GamePack schema: {e.Message}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) {
+				if (Debugger.IsAttached)
+				{
 					Debugger.Break();
 				}
 				//Reading of static file of this app failed, something is horribly wrong, die
 				throw new FatalPackagingException(message, e);
 			}
 
-			try {
-				Instance.DefaultIcon = resourceCache.GetTexture2D(defaultIconPath);
+			try
+			{
+				DefaultIcon = resourceCache.GetTexture2D(defaultIconPath);
 			}
-			catch (IOException e) {
+			catch (IOException e)
+			{
 				string message = $"Error loading the default icon at {defaultIconPath}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) {
+				if (Debugger.IsAttached)
+				{
 					Debugger.Break();
 				}
 				//Reading of static file of this app failed, something is horribly wrong, die
 				throw new FatalPackagingException(message, e);
 			}
-
-			return Instance.ParseGamePackDir();
 		}
+
+		/// <summary>
+		/// Pulls data about the resource packs contained in this directory from XML file
+		/// </summary>
+		/// <returns>Array of package paths that could not be loaded</returns>
+		/// <exception cref="FatalPackagingException">Thrown when package directory loading completely failed, and the game can terminate</exception>
+		public string[] ParseGamePackDir()
+		{
+			IEnumerable<string> packagePaths = null;
+
+			try
+			{
+
+				XDocument doc = LoadGamePackDirXml(GamePackDirFilePath);
+
+				packagePaths = from packagePath in doc.Root.Elements(GamePackDirectoryXml.Inst.GamePack)
+							   select packagePath.Value;
+			}
+			catch (IOException e)
+			{
+				//Creation of the FileStream failed, cannot load this directory
+				string message = $"Opening ResourcePack directory file at {GamePackDirFilePath} failed: {e}";
+				Log.Write(LogLevel.Error, message);
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
+				throw new FatalPackagingException(message, e);
+			}
+			catch (XmlSchemaValidationException e)
+			{
+				string message =
+					$"ResourcePack directory file at {GamePackDirFilePath} does not conform to the schema: {e.Message}";
+				//Invalid resource pack description file, dont load this pack directory
+				Log.Write(LogLevel.Error, message);
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
+				throw new FatalPackagingException(message, e);
+			}
+			catch (XmlException e)
+			{
+				string message = $"ResourcePack directory file at {GamePackDirFilePath} was corrupted : {e.Message}";
+				Log.Write(LogLevel.Error, message);
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
+				throw new FatalPackagingException(message, e);
+			}
+
+			List<string> failedPackagePaths = new List<string>();
+			//Adds all the discovered packs into the availablePacks list
+			foreach (var packagePath in packagePaths)
+			{
+				try
+				{
+					GamePackRep newPack = LoadPack(packagePath);
+					AddToAvailable(newPack, packagePath);
+				}
+				catch (Exception)
+				{
+					//The package writes the error to the log by itself
+					//Urho.IO.Log.Write(LogLevel.Warning, $"Loading package at {packagePath} failed with: {e}");
+					failedPackagePaths.Add(packagePath);
+				}
+			}
+
+			return failedPackagePaths.ToArray();
+		}
+
 
 		/// <summary>
 		///	<para>Unloads the <see cref="ActivePackage"/> if there is any
@@ -165,7 +236,7 @@ namespace MHUrho.Packaging
 			}
 			loadingProgress.SendUpdate(clearPartSize ,"Cleared previous games");
 
-			resourceCache.AddResourceDir(Path.Combine(MHUrhoApp.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
+			resourceCache.AddResourceDir(Path.Combine(App.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
 			loadingProgress.SendTextUpdate("Loading new package");
 			ActivePackage = await package.LoadPack(schemas, new ProgressWatcher(loadingProgress, loadPartSize));
@@ -466,67 +537,7 @@ namespace MHUrho.Packaging
 			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image, normals));
 		}
 
-		/// <summary>
-		/// Pulls data about the resource packs contained in this directory from XML file
-		/// </summary>
-		/// <returns>Array of package paths that could not be loaded</returns>
-		/// <exception cref="FatalPackagingException">Thrown when package directory loading completely failed, and the game can terminate</exception>
-		string[] ParseGamePackDir()
-		{
-			IEnumerable<string> packagePaths = null;
-
-			try {
-
-				XDocument doc = LoadGamePackDirXml(GamePackDirFilePath);
-
-				packagePaths = from packagePath in doc.Root.Elements(GamePackDirectoryXml.Inst.GamePack)
-							   select packagePath.Value;
-			}
-			catch (IOException e)
-			{
-				//Creation of the FileStream failed, cannot load this directory
-				string message = $"Opening ResourcePack directory file at {GamePackDirFilePath} failed: {e}";
-				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) {
-					Debugger.Break();
-				}
-				throw new FatalPackagingException(message, e);
-			}
-			catch (XmlSchemaValidationException e) {
-				string message =
-					$"ResourcePack directory file at {GamePackDirFilePath} does not conform to the schema: {e.Message}";
-				//Invalid resource pack description file, dont load this pack directory
-				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) {
-					Debugger.Break();
-				}
-				throw new FatalPackagingException(message, e);
-			}
-			catch (XmlException e) {
-				string message = $"ResourcePack directory file at {GamePackDirFilePath} was corrupted : {e.Message}";
-				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) {
-					Debugger.Break();
-				}
-				throw new FatalPackagingException(message, e);
-			}
-
-			List<string> failedPackagePaths = new List<string>();
-			//Adds all the discovered packs into the availablePacks list
-			foreach (var packagePath in packagePaths) {
-				try {
-					GamePackRep newPack = LoadPack(packagePath);
-					AddToAvailable(newPack, packagePath);
-				}
-				catch (Exception) {
-					//The package writes the error to the log by itself
-					//Urho.IO.Log.Write(LogLevel.Warning, $"Loading package at {packagePath} failed with: {e}");
-					failedPackagePaths.Add(packagePath);
-				}
-			}
-
-			return failedPackagePaths.ToArray();
-		}
+		
 
 		/// <summary>
 		/// 
@@ -542,7 +553,7 @@ namespace MHUrho.Packaging
 				throw new ArgumentNullException(nameof(path), "Path cannot be null");
 			}
 
-			using (Stream stream = MHUrhoApp.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
+			using (Stream stream = App.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
 				XDocument doc = XDocument.Load(stream);
 				doc.Validate(schemas, null);
 				return doc;
@@ -562,7 +573,7 @@ namespace MHUrho.Packaging
 		void WriteGamePackDir(XDocument document, string path)
 		{
 			document.Validate(schemas, null);
-			using (Stream stream = MHUrhoApp.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
+			using (Stream stream = App.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
 				document.Save(stream);
 			}
 		}

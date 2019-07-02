@@ -4,6 +4,9 @@ using System.Text;
 
 namespace MHUrho.Packaging
 {
+	/// <summary>
+	/// Exception representing a failure during loading.
+	/// </summary>
 	public class LevelLoadingException : ApplicationException
 	{
 		public LevelLoadingException()

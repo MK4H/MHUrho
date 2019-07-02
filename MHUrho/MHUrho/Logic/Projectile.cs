@@ -36,7 +36,7 @@ namespace MHUrho.Logic
 				this.storedProjectile = storedProjectile;
 				this.componentLoaders = new List<DefaultComponentLoader>();
 
-				type = PackageManager.Instance.ActivePackage.GetProjectileType(storedProjectile.TypeID);
+				type = level.Package.GetProjectileType(storedProjectile.TypeID);
 				if (type == null) {
 					throw new ArgumentException($"Projectile type {storedProjectile.TypeID} was not loaded");
 				}

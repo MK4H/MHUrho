@@ -49,6 +49,11 @@ namespace ShowcasePackage.Players
 		{
 
 		}
+
+		public override void Init(ILevelManager level)
+		{
+			
+		}
 	}
 
 	public class TestNeutralPlayer2Type : PlayerAITypePlugin {
@@ -90,6 +95,11 @@ namespace ShowcasePackage.Players
 		public override void Dispose()
 		{
 
+		}
+
+		public override void Init(ILevelManager level)
+		{
+			
 		}
 	}
 }

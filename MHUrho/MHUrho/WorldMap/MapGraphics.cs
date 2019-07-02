@@ -789,7 +789,9 @@ namespace MHUrho.WorldMap
 				loadingProgress?.SendUpdate(initializingPartSize, "Initialized map graphics");
 
 				loadingProgress?.SendTextUpdate("Creating terrain texture");
-				graphics.CreateMaterial();
+				graphics.CreateMaterial(map.levelManager.App, 
+										map.LevelManager.Package.TileTypeCount,
+										map.LevelManager.Package.TileTypes);
 				loadingProgress?.SendUpdate(materialPartSize, "Created terrain texture");
 
 				loadingProgress?.SendTextUpdate("Creating map geometry");
@@ -1030,9 +1032,7 @@ namespace MHUrho.WorldMap
 				material.Dispose();
 			}
 
-			void CreateMaterial() {
-				//Count for output image size
-				int tileTypeCount = PackageManager.Instance.ActivePackage.TileTypeCount;
+			void CreateMaterial(MHUrhoApp game, int tileTypeCount, IEnumerable<TileType> tileTypes) {
 
 				//TODO: Context
 				Image mapImage = new Image();
@@ -1046,7 +1046,7 @@ namespace MHUrho.WorldMap
 				int mapImageHeight = Tile.ImageHeight;
 
 				IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
-				foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
+				foreach (var tileType in tileTypes) {
 					var tileTypeImage = tileType.GetImage();
 
 					if (tileTypeImage.Compressed) {
@@ -1074,7 +1074,7 @@ namespace MHUrho.WorldMap
 					subimageRect.Right += Tile.ImageWidth;
 				}
 
-				material = PackageManager.Instance.GetMaterialFromImage(mapImage);
+				material = game.PackageManager.GetMaterialFromImage(mapImage);
 			}
 
 			void CreateModel()

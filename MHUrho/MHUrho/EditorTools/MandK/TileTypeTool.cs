@@ -46,12 +46,12 @@ namespace MHUrho.EditorTools.MandK
 			this.checkBoxes = new ExclusiveCheckBoxes();
 			InitUI(ui, out uiElem, out sizeSlider);
 
-			foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
+			foreach (var tileType in input.Level.Package.TileTypes) {
 
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnTileTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActivePackage.TileIconTexture;
+				checkBox.Texture = input.Level.Package.TileIconTexture;
 				checkBox.ImageRect = tileType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(tileType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * tileType.IconRectangle.Width(), 0);

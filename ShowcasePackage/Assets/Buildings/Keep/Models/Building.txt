@@ -1,0 +1,3 @@
+Assets/Buildings/Keep/Materials/Material.xml
+Assets/Buildings/Keep/Materials/DoorMat.xml
+Assets/Buildings/Keep/Materials/TopMat.xml

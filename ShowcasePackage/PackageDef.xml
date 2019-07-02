@@ -30,7 +30,14 @@
 	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	  </playerAIType>
 	</playerAITypes>
-  <resourceTypes></resourceTypes>
+  <resourceTypes>
+    <resourceType name="Wood" ID="1">
+      <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
+    </resourceType>
+    <resourceType name="Gold" ID="2">
+      <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
+    </resourceType>
+  </resourceTypes>
   <tileTypes>
     <defaultTileType name="Default" ID="1">
 	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
@@ -196,6 +203,10 @@
         <path>Assets/Buildings/TreeCutter/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <extension>
+        <workerType>Dog</workerType>
+        <resourceType>Wood</resourceType>
+      </extension>
       <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
       <size x="3" y="3"/>
     </buildingType>

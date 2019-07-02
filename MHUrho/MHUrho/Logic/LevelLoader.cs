@@ -105,6 +105,10 @@ namespace MHUrho.Logic
 
 			protected abstract LevelLogicInstancePlugin GetPlugin(LevelManager level);
 
+			/// <summary>
+			/// Loads parts common to scene of every level
+			/// </summary>
+			/// <param name="scene">The scene of the level</param>
 			void LoadSceneParts(Scene scene)
 			{
 
@@ -141,6 +145,11 @@ namespace MHUrho.Logic
 
 			}
 
+			/// <summary>
+			/// Creates a camera and an associated viewport to display the camera output into.
+			/// </summary>
+			/// <param name="level">Level into which the camera is loaded.</param>
+			/// <param name="cameraPosition">Initial position of the camera</param>
 			protected void LoadCamera(LevelManager level, Vector2 cameraPosition)
 			{
 				// Camera
@@ -154,6 +163,14 @@ namespace MHUrho.Logic
 				level.Camera = cameraMover;
 			}
 
+			/// <summary>
+			/// Creates a player to serve as a placeholder for future player with AI.
+			/// Placeholder serves only as a container of units, buildings and projectiles, with no behavior.
+			///
+			/// Player is added to the level.
+			/// </summary>
+			/// <param name="insignia">Icons and healthbars for the players units.</param>
+			/// <returns>The new placeholder player, initialized and placed into the level.</returns>
 			protected Player CreatePlaceholderPlayer(PlayerInsignia insignia)
 			{
 				var newPlayer = Player.CreatePlaceholderPlayer(Level.GetNewID(Level.players),
@@ -180,6 +197,10 @@ namespace MHUrho.Logic
 				Level.UIManager.SelectPlayer(Level.Input.Player);
 			}
 
+			/// <summary>
+			/// Method for forwarding <see cref="Progress"/> <see cref="ProgressWatcher.Finished"/> events to our <see cref="Finished"/> event.
+			/// </summary>
+			/// <param name="progress">Should always be our <see cref="Progress"/>.</param>
 			void LoadingFinished(IProgressNotifier progress)
 			{
 				try
@@ -193,6 +214,10 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <summary>
+			/// Method for forwarding <see cref="Progress"/> <see cref="ProgressWatcher.Failed"/> events to our <see cref="Failed"/> event.
+			/// </summary>
+			/// <param name="progress">Should always be our <see cref="Progress"/>.</param>
 			void LoadingFailed(IProgressNotifier progress, string message)
 			{
 				try
@@ -208,14 +233,23 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <summary>
+		/// Loads level in a default state for player to edit.
+		/// </summary>
 		class DefaultLevelLoader : BaseLoader {
+
+			//Estimates on relative durations of different parts of loading
 			const double initLPartSize = 2;
 			const double mapLPartSize = 70;
 			const double playersLPartSize = 20;
 			const double controlLPartSize = 7;
 			//1 for finishloading
 
-			public DefaultLevelLoader(LevelRep levelRep, IntVector2 mapSize, IProgressEventWatcher parentProgress = null, double loadingSubsectionSize = 100)
+
+			public DefaultLevelLoader(LevelRep levelRep, 
+									IntVector2 mapSize, 
+									IProgressEventWatcher parentProgress = null, 
+									double loadingSubsectionSize = 100)
 				: base(levelRep, true, parentProgress, loadingSubsectionSize)
 			{
 				this.mapSize = mapSize;
@@ -253,7 +287,7 @@ namespace MHUrho.Logic
 					Level = await MHUrhoApp.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 					Progress.SendUpdate(initLPartSize, "Initialized level");
 
-					PlayerInsignia.InitInsignias(PackageManager.Instance);
+					PlayerInsignia.InitInsignias(Game.PackageManager);
 
 					Progress.SendTextUpdate("Loading map");
 					Node mapNode = await MHUrhoApp.InvokeOnMainSafeAsync(() => Level.LevelNode.CreateChild("MapNode"));
@@ -381,7 +415,7 @@ namespace MHUrho.Logic
 					Level = await MHUrhoApp.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
 					Progress.SendUpdate(initLPartSize, "Initialized level");
 
-					PlayerInsignia.InitInsignias(PackageManager.Instance);
+					PlayerInsignia.InitInsignias(Game.PackageManager);
 
 
 					var mapLoader = await LoadMap();

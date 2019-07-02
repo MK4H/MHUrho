@@ -21,14 +21,15 @@ namespace MHUrho.Packaging
 		public abstract void Dispose();
 
 		/// <summary>
-		/// 
+		/// Creates a container for assets based on the description in he <paramref name="assetsElement"/>.
 		/// </summary>
-		/// <param name="assetsElement"></param>
+		/// <param name="assetsElement">XML element describing the assets to load.</param>
+		/// <param name="package">Package to load the assets from.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="assetsElement"/> is null or there is some internal error</exception>
 		/// <exception cref="ArgumentException">Thrown when <paramref name="assetsElement"/> does not conform to the xml schema or there is some internal error</exception>
 		/// <exception cref="ResourceLoadingException">Thrown when the resource described by the value of <paramref name="assetsElement"/> could not be loaded</exception>
-		public static AssetContainer FromXml(XElement assetsElement)
+		public static AssetContainer FromXml(XElement assetsElement, GamePack package)
 		{
 			Check(assetsElement);
 
@@ -36,11 +37,11 @@ namespace MHUrho.Packaging
 
 			switch (type) {
 				case AssetsXml.XmlPrefabType:
-					return new XmlPrefabAssetContainer(assetsElement);
+					return new XmlPrefabAssetContainer(assetsElement, package);
 				case AssetsXml.BinaryPrefabType:
-					return new BinaryPrefabAssetContainer(assetsElement);
+					return new BinaryPrefabAssetContainer(assetsElement, package);
 				case AssetsXml.ItemsType:
-					return new ItemsAssetContainer(assetsElement);
+					return new ItemsAssetContainer(assetsElement, package);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown asset type");
 			}
@@ -110,12 +111,12 @@ namespace MHUrho.Packaging
 		/// </summary>
 		/// <param name="assetsElement"></param>
 		/// <exception cref="ResourceNotFoundException">Thrown when the xml prefab file could not be found</exception>
-		public XmlPrefabAssetContainer(XElement assetsElement)
+		public XmlPrefabAssetContainer(XElement assetsElement, GamePack package)
 		{
 			CheckWithType(assetsElement, AssetsXml.XmlPrefabType);
 
 			string relativePath = GetPath(assetsElement);
-			this.file = PackageManager.Instance.GetXmlFile(relativePath, true);
+			this.file = package.PackageManager.GetXmlFile(relativePath, true);
 		}
 
 		public override Node Instantiate(ILevelManager level, Vector3 position, Quaternion rotation)
@@ -145,20 +146,21 @@ namespace MHUrho.Packaging
 		readonly Urho.IO.File file;
 
 		/// <summary>
-		/// 
+		/// Loads a binary prefab based on the <paramref name="assetsElement"/>.
 		/// </summary>
-		/// <param name="assetsElement"></param>
+		/// <param name="assetsElement">XML containing the path to the binary prefab.</param>
+		/// <param name="package">GamePack of the level.</param>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="assetsElement"/> is null</exception>
 		/// <exception cref="ArgumentException">Thrown when <paramref name="assetsElement"/> xml element is not valid, either is not the <see cref="EntityXml.Inst.Assets"/> element
 		/// or has a wrong type specified</exception>
 		/// <exception cref="IOException">When the file specified by the path in the <see cref="AssetsElementXml.Inst.Path"/> cannot be opened</exception>
 		/// <exception cref="ResourceLoadingException"> Thrown when the file could not be found </exception>
-		public BinaryPrefabAssetContainer(XElement assetsElement)
+		public BinaryPrefabAssetContainer(XElement assetsElement, GamePack package)
 		{
 			CheckWithType(assetsElement, AssetsXml.BinaryPrefabType);
 			var relativePath = GetPath(assetsElement);
 
-			this.file = PackageManager.Instance.GetFile(relativePath, true);
+			this.file = package.PackageManager.GetFile(relativePath, true);
 		}
 
 		public override Node Instantiate(ILevelManager level, Vector3 position, Quaternion rotation)
@@ -177,7 +179,7 @@ namespace MHUrho.Packaging
 
 	public class ItemsAssetContainer : AssetContainer {
 
-		delegate AssetLoader ParseAssetLoaderDelegate(XElement element);
+		delegate AssetLoader ParseAssetLoaderDelegate(XElement element, GamePack package);
 
 		abstract class AssetLoader : IDisposable {
 			public abstract void ApplyOn(Node node);
@@ -231,14 +233,15 @@ namespace MHUrho.Packaging
 		class AnimatedModelLoader : StaticModelLoader {
 
 			/// <summary>
-			/// 
+			/// Loads animated model based on the descriptio in the XML <paramref name="element"/>.
 			/// </summary>
-			/// <param name="element"></param>
-			/// <returns></returns>
+			/// <param name="element">XML describing the animated model.</param>
+			/// <param name="package">GamePackage of the level.</param>
+			/// <returns>Loader with the loaded model.</returns>
 			/// <exception cref="ArgumentNullException">When the <paramref name="element"/> is null</exception>
 			/// <exception cref="ArgumentException">Thrown when the <paramref name="element"/> does not conform to the xml schema</exception>
 			/// <exception cref="ResourceLoadingException">Thrown when either the model or material resource could not be loaded</exception>
-			public static StaticModelLoader Load(XElement element)
+			public static StaticModelLoader Load(XElement element, GamePack package)
 			{
 				if (element == null)
 				{
@@ -255,11 +258,11 @@ namespace MHUrho.Packaging
 				string modelPath = element.Element(ModelXml.Inst.ModelPath).Value;
 
 
-				Model model = PackageManager.Instance.GetModel(modelPath, true);
+				Model model = package.PackageManager.GetModel(modelPath, true);
 
 				XElement materialElement  = element.Element(ModelXml.Inst.Material);
 
-				MaterialWrapper material = MaterialWrapper.FromXml(materialElement);
+				MaterialWrapper material = MaterialWrapper.FromXml(materialElement, package);
 
 				if (type == ModelXml.StaticModelType) {
 					return StaticModelLoader.CreateStaticModel(model, material);
@@ -288,13 +291,14 @@ namespace MHUrho.Packaging
 			readonly Vector3 scale;
 
 			/// <summary>
-			/// 
+			/// Loads a scale from given XML.
 			/// </summary>
-			/// <param name="element"></param>
-			/// <returns></returns>
+			/// <param name="element">XML describing the scale.</param>
+			/// <param name="package">Source package of the XML.</param>
+			/// <returns>Loaded scale.</returns>
 			/// <exception cref="ArgumentNullException">Thrown when the <paramref name="element"/> is null</exception>
 			/// <exception cref="ArgumentException">Thrown when the <paramref name="element"/> does not conform to the xml schema</exception>
-			public static ScaleLoader Load(XElement element)
+			public static ScaleLoader Load(XElement element, GamePack package)
 			{
 				if (element == null)
 				{
@@ -323,7 +327,7 @@ namespace MHUrho.Packaging
 		}
 
 		class CollisionShapeLoader : AssetLoader {
-			delegate ConcreteShape LoadShapeDelegate(XElement element);
+			delegate ConcreteShape LoadShapeDelegate(XElement element, GamePack package);
 
 			abstract class ConcreteShape {
 				public abstract void SetTo(CollisionShape shapeComponent);
@@ -354,7 +358,7 @@ namespace MHUrho.Packaging
 					this.rotation = rotation;
 				}
 
-				public static Box FromXml(XElement boxElement)
+				public static Box FromXml(XElement boxElement, GamePack package)
 				{
 					if (boxElement.Name != ElementName)
 					{
@@ -391,7 +395,7 @@ namespace MHUrho.Packaging
 					this.rotation = rotation;
 				}
 
-				public static Capsule FromXml(XElement capsuleElement)
+				public static Capsule FromXml(XElement capsuleElement, GamePack package)
 				{
 					if (capsuleElement.Name != ElementName)
 					{
@@ -429,7 +433,7 @@ namespace MHUrho.Packaging
 					this.rotation = rotation;
 				}
 
-				public static Cone FromXml(XElement coneElement)
+				public static Cone FromXml(XElement coneElement, GamePack package)
 				{
 					if (coneElement.Name != ElementName)
 					{
@@ -469,7 +473,7 @@ namespace MHUrho.Packaging
 					this.rotation = rotation;
 				}
 
-				public static ConvexHull FromXml(XElement hullElement)
+				public static ConvexHull FromXml(XElement hullElement, GamePack package)
 				{
 					if (hullElement.Name != ElementName)
 					{
@@ -478,7 +482,7 @@ namespace MHUrho.Packaging
 
 					string modelPath = hullElement.Element(CollisionShapeXml.Inst.ModelPath).GetPath();
 
-					Model model = PackageManager.Instance.GetModel(modelPath);
+					Model model = package.PackageManager.GetModel(modelPath);
 					uint lodLevel = hullElement.Element(CollisionShapeXml.Inst.Height).GetUInt();
 					Vector3 scale = hullElement.Element(CollisionShapeXml.Inst.Scale).GetVector3();
 					Vector3 position = GetPosition(hullElement);
@@ -510,7 +514,7 @@ namespace MHUrho.Packaging
 					this.rotation = rotation;
 				}
 
-				public static Cylinder FromXml(XElement cylinderElement)
+				public static Cylinder FromXml(XElement cylinderElement, GamePack package)
 				{
 					if (cylinderElement.Name != ElementName)
 					{
@@ -546,7 +550,7 @@ namespace MHUrho.Packaging
 					this.rotation = rotation;
 				}
 
-				public static Sphere FromXml(XElement sphereElement)
+				public static Sphere FromXml(XElement sphereElement, GamePack package)
 				{
 					if (sphereElement.Name != ElementName) {
 						throw new ArgumentException($"Expected element {ElementName}, got {sphereElement.Name}", nameof(sphereElement));
@@ -588,13 +592,14 @@ namespace MHUrho.Packaging
 			}
 
 			/// <summary>
-			/// 
+			/// Loads collision shape described by the XML <paramref name="element"/>.
 			/// </summary>
-			/// <param name="element"></param>
+			/// <param name="element">XML describing the collision shape.</param>
+			/// <param name="package">Source of the XML.</param>
 			/// <returns></returns>
 			/// <exception cref="ArgumentNullException">Thrown when the <paramref name="element"/> is null</exception>
 			/// <exception cref="ArgumentException">Throw when the <paramref name="element"/> does not conform to the xml schema</exception>
-			public static CollisionShapeLoader Load(XElement element)
+			public static CollisionShapeLoader Load(XElement element, GamePack package)
 			{
 				if (element == null)
 				{
@@ -611,7 +616,7 @@ namespace MHUrho.Packaging
 
 				ConcreteShape newShape;
 				if (dispatch.TryGetValue(child.Name, out var loadShape)) {
-					newShape = loadShape(child);
+					newShape = loadShape(child, package);
 				}
 				else {
 					throw new
@@ -649,18 +654,18 @@ namespace MHUrho.Packaging
 						{AssetsXml.Inst.Scale, ScaleLoader.Load},
 						{AssetsXml.Inst.CollisionShape, CollisionShapeLoader.Load }
 					};
-			
-
+		
 		}
 
 		/// <summary>
-		/// 
+		/// Creates container for assets described item by item in the package XML.
 		/// </summary>
-		/// <param name="assetsElement"></param>
+		/// <param name="assetsElement">The description of the assets.</param>
+		/// <param name="package">Source GamePack</param>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="assetsElement"/> is null or there is internal error</exception>
 		/// <exception cref="ArgumentException">Thrown when <paramref name="assetsElement"/> does not conform t the xml schema</exception>
 		/// <exception cref="ResourceLoadingException">Thrown when one of the referenced resources could not be loaded</exception>
-		public ItemsAssetContainer(XElement assetsElement)
+		public ItemsAssetContainer(XElement assetsElement, GamePack package)
 		{
 			CheckWithType(assetsElement,  AssetsXml.ItemsType);
 
@@ -670,7 +675,7 @@ namespace MHUrho.Packaging
 				foreach (var element in assetsElement.Elements()) {
 					if (Parsers.TryGetValue(element.Name, out ParseAssetLoaderDelegate parse)) {
 						//TODO: Possible exceptions
-						loaders.Add(parse(element));
+						loaders.Add(parse(element, package));
 					}
 				}
 			}

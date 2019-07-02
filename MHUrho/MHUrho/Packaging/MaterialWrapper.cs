@@ -9,7 +9,7 @@ namespace MHUrho.Packaging
 {
     public abstract class MaterialWrapper : IDisposable {
 
-		public static MaterialWrapper FromXml(XElement materialElement)
+		public static MaterialWrapper FromXml(XElement materialElement, GamePack package)
 		{
 			if (materialElement.Name != ModelXml.Inst.Material) {
 				throw new
@@ -31,10 +31,10 @@ namespace MHUrho.Packaging
 				return new MaterialList(element.Value);
 			}
 			else if (element.Name == MaterialXml.Inst.SimpleMaterialPath) {
-				return new SimpleMaterial(element.Value);
+				return new SimpleMaterial(element.Value, package);
 			}
 			else if (element.Name == MaterialXml.Inst.GeometryMaterial) {
-				return new GeometryMaterials(element);
+				return new GeometryMaterials(element, package);
 			}
 			else {
 				throw new ArgumentException("Material element is not valid according to GamePack.xsd", nameof(materialElement));
@@ -66,12 +66,13 @@ namespace MHUrho.Packaging
 		readonly Material material;
 
 		/// <summary>
-		/// 
+		/// Loads simple material from the given path.
 		/// </summary>
-		/// <param name="materialPath"></param>
+		/// <param name="materialPath">Path to the simple material.</param>
+		/// <param name="package">Source package.</param>
 		/// <exception cref="IOException"/>
-		public SimpleMaterial(string materialPath) {
-			this.material = PackageManager.Instance.GetMaterial(materialPath);
+		public SimpleMaterial(string materialPath, GamePack package) {
+			this.material = package.PackageManager.GetMaterial(materialPath);
 		}
 
 		public override void ApplyMaterial(StaticModel model) {
@@ -87,7 +88,7 @@ namespace MHUrho.Packaging
 
 		readonly List<Tuple<uint, Material>> materials;
 
-		public GeometryMaterials(XElement element)
+		public GeometryMaterials(XElement element, GamePack package)
 		{
 			if (element.Name != MaterialXml.Inst.GeometryMaterial) {
 				throw new
@@ -107,7 +108,7 @@ namespace MHUrho.Packaging
 				try {
 					string path = FileManager.ReplaceDirectorySeparators(pathElement.Value);
 
-					material = PackageManager.Instance.GetMaterial(path);
+					material = package.PackageManager.GetMaterial(path);
 				}
 				catch (Exception e) {
 					throw new ArgumentException("Loading material failed, probably wrong path in the MaterialPath element", e);

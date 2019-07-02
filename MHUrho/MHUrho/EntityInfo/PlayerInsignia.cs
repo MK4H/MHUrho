@@ -137,7 +137,7 @@ namespace MHUrho.EntityInfo
 
 		public InsigniaGetter()
 		{
-			PlayerInsignia.InitInsignias(PackageManager.Instance);
+			PlayerInsignia.InitInsignias(MHUrhoApp.Instance.PackageManager);
 			freeIndicies = new List<int>();
 			for (int i = 0; i < PlayerInsignia.InsigniaCount; i++) {
 				freeIndicies.Add(i);

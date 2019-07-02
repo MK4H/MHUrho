@@ -75,6 +75,9 @@
     <Compile Include="Levels\LevelPluginBase.cs" />
     <Compile Include="Levels\TestLevel.cs" />
     <Compile Include="Levels\TestLevelLogic2.cs" />
+    <Compile Include="Misc\Timeout.cs" />
+    <Compile Include="Players\AgressivePlayer.cs" />
+    <Compile Include="Players\DefensivePlayer.cs" />
     <Compile Include="Players\TestAIPlayer.cs" />
     <Compile Include="Players\TestHumanPlayers.cs" />
     <Compile Include="Players\TestNeutralPlayers.cs" />
@@ -82,13 +85,13 @@
     <Compile Include="Projectiles\TestProjectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolManagerMandK.cs" />
-    <Compile Include="Units\Ant.cs" />
     <Compile Include="Units\BaseDistCalc.cs" />
     <Compile Include="Units\Chicken.cs" />
     <Compile Include="Units\ClimbingDistCalc.cs" />
     <Compile Include="Units\Dog.cs" />
     <Compile Include="Units\TestUnit.cs" />
     <Compile Include="Units\TestWorker.cs" />
+    <Compile Include="Units\Wolf.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MHUrho\MHUrho\MHUrho.csproj">
@@ -111,6 +114,51 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Buildings\Gate\Models\Door.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Keep\Materials\DoorMat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Keep\Materials\Material.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Keep\Materials\TopMat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Keep\Models\Building.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Keep\prefab.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Tower\Materials\Material.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Tower\Materials\TopMaterial.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Tower\Models\Building.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Tower\prefab.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\TreeCutter\Materials\TreeChopperMat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\TreeCutter\Models\Cylinder.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\TreeCutter\prefab.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Wall\Materials\Material.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Wall\Models\Building.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Buildings\Wall\prefab.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Textures\toolIcons.png">
@@ -187,6 +235,12 @@
     <None Include="Assets\Buildings\Gate\Models\Door.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Assets\Buildings\Keep\Models\Building.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Buildings\Tower\Models\Building.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Assets\Buildings\Tree1\Models\Default.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -232,6 +286,12 @@
     <Content Include="Assets\Units\Chicken\Models\Walk.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Assets\Buildings\TreeCutter\Models\Cylinder.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Buildings\Wall\Models\Building.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Assets\Units\Dog\Cube.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

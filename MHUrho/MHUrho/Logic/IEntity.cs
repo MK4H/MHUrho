@@ -91,7 +91,7 @@ namespace MHUrho.Logic {
 		/// <summary>
 		/// Cleanup actions, called on entity removal.
 		/// </summary>
-		event Action OnRemoval;
+		event Action<IEntity> OnRemoval;
 
 		/// <summary>
 		/// Triggered on every change in <see cref="Position"/>.

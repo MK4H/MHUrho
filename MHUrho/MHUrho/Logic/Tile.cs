@@ -74,7 +74,7 @@ namespace MHUrho.Logic
 			/// </summary>
 			public void ConnectReferences()
 			{
-				Tile.Type = PackageManager.Instance.ActivePackage.GetTileType(storedTile.TileTypeID);
+				Tile.Type = level.Package.GetTileType(storedTile.TileTypeID);
 
 				if (storedTile.UnitIDs.Count != 0) {
 					Tile.units = new List<IUnit>();
@@ -274,25 +274,28 @@ namespace MHUrho.Logic
 			return GetHeightAt(position.X, position.Y);
 		}
 
+		static readonly IntVector2[] NeighborDiff =
+		{
+			new IntVector2(-1, -1),
+			new IntVector2(0, -1),
+			new IntVector2(1, -1),
+			new IntVector2(-1, 0),
+			new IntVector2(-1, 1),
+			new IntVector2(0, 1),
+			new IntVector2(1, 1),
+			new IntVector2(1, 0)
+		};
+
+
+		/// <inheritdoc />
 		public IEnumerable<ITile> GetNeighbours()
 		{
-			//Top left neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, -1));
-			//Top neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(0, -1));
-			//Top right neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, -1));
-			//Right neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, 0));
-			//Bottom right neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, 1));
-			//Bottom neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(0, 1));
-			//Bottom left neighbour 
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, 1));
-			//Left neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, 0));
-
+			foreach (var diff in NeighborDiff) {
+				ITile tile = Map.GetTileByMapLocation(MapLocation + diff);
+				if (tile != null) {
+					yield return tile;
+				}
+			}
 		}
 	} 
 }

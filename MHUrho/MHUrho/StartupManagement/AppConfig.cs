@@ -100,19 +100,19 @@ namespace MHUrho.StartupManagement
 			return newConfig;
 		}
 
-		public void Reload()
+		public void Reload(FileManager files)
 		{
 			using (Stream configFile =
-				MHUrhoApp.Files.OpenDynamicFile(MHUrhoApp.Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
+				files.OpenDynamicFile(files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
 				AppConfig reloadedConfig = LoadFrom(configFile);
 				Copy(reloadedConfig);
 			}
 		}
 
-		public void Save()
+		public void Save(FileManager files)
 		{
 			using (Stream configFile =
-				MHUrhoApp.Files.OpenDynamicFile(MHUrhoApp.Files.ConfigFilePath, System.IO.FileMode.Truncate, FileAccess.Write)) {
+				files.OpenDynamicFile(files.ConfigFilePath, System.IO.FileMode.Truncate, FileAccess.Write)) {
 				SaveTo(configFile);
 			}		
 		}

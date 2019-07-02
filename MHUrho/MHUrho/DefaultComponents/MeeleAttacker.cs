@@ -261,7 +261,7 @@ namespace MHUrho.DefaultComponents
 		/// <summary>
 		/// Removes the target on its death.
 		/// </summary>
-		void OnTargetDeath()
+		void OnTargetDeath(IEntity target)
 		{
 			Target = null;
 			InvokeTargetLost();

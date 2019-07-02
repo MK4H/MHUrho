@@ -430,7 +430,7 @@ namespace MHUrho.WorldMap
 			progress?.SendTextUpdate("Creating map");
 			Map newMap = new Map(mapNode, octree, size.X, size.Y) {levelManager = level};
 
-			TileType defaultTileType = PackageManager.Instance.ActivePackage.DefaultTileType;
+			TileType defaultTileType = level.Package.DefaultTileType;
 
 			for (int i = 0; i < newMap.tiles.Length; i++) {
 				IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.WidthWithBorders);

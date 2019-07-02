@@ -16,10 +16,18 @@ using Urho.Urho2D;
 
 namespace MHUrho.Packaging {
 
+	/// <summary>
+	/// Class representing loaded game package.
+	/// Contains all loaded types, textures etc.
+	/// Implements the loading of package into the running game.
+	/// Provides API to get references to types, either by ID or by name.
+	/// </summary>
 	public class GamePack : IDisposable {
 		public GamePackRep GamePackRep { get; private set; }
 
 		public string Name => GamePackRep.Name;
+
+		public MHUrhoApp App => PackageManager.App;
 
 		public PackageManager PackageManager => GamePackRep.PackageManager;
 
@@ -33,7 +41,7 @@ namespace MHUrho.Packaging {
 		/// <summary>
 		/// See <see cref="DirectoryPath"/>
 		/// </summary>
-		public string RootedDirectoryPath => Path.Combine(MHUrhoApp.Files.DynamicDirPath, DirectoryPath);
+		public string RootedDirectoryPath => Path.Combine(App.Files.DynamicDirPath, DirectoryPath);
 
 		public TileType DefaultTileType { get; private set; }
 
@@ -161,6 +169,7 @@ namespace MHUrho.Packaging {
 												XmlSchemaSet schemas,
 												IProgressEventWatcher loadingProgress = null)
 		{
+			//Relative loading time of the parts, should add up to 100. Used to send accurate percentage update.
 			const double tileTypesPartSize = 12.5;
 			const double unitTypesPartSize = 12.5;
 			const double buildingTypesPartSize = 12.5;
@@ -175,7 +184,7 @@ namespace MHUrho.Packaging {
 			pathToXml = FileManager.ReplaceDirectorySeparators(pathToXml);
 
 			try {
-				newPack.data = await MHUrhoApp.InvokeOnMainSafeAsync(() => StartLoading(pathToXml, schemas));
+				newPack.data = await MHUrhoApp.InvokeOnMainSafeAsync(() => newPack.LoadXml(pathToXml, schemas));
 
 				//Validation in StartLoading should take care of any missing elements
 				newPack.levelSavingDirPath = FileManager.ReplaceDirectorySeparators(newPack.data.Root
@@ -221,18 +230,20 @@ namespace MHUrho.Packaging {
 			}
 			catch (MethodInvocationException e)
 			{
+				//TODO: Dispose on error
 				string message = $"Package loading failed with: \"{e.InnerException?.Message ?? ""}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}
 			catch (Exception e) {
+				//TODO: Dispose on error
 				string message = $"Package loading failed with: \"{e.Message}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}			
 			finally
 			{
-				newPack.FinishLoading();
+				newPack.ReleaseXml();
 			}
 
 			loadingProgress?.SendFinished();
@@ -526,6 +537,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown player type");
 		}
 
+		/// <summary>
+		/// Returns every <see cref="PlayerType"/> with the <paramref name="category"/>.
+		///
+		/// Mainly used to get all the AI player types, Human player types or Neutral player types.
+		/// </summary>
+		/// <param name="category">Category of the wanted playerTypes</param>
+		/// <returns>Returns every <see cref="PlayerType"/> with the <paramref name="category"/>.</returns>
 		public IEnumerable<PlayerType> GetPlayersWithTypeCategory(PlayerTypeCategory category)
 		{
 			return from playerType in PlayerTypes
@@ -589,6 +607,17 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown level logic type");
 		}
 
+		/// <summary>
+		/// Returns an instance of <see cref="LevelRep"/> representing the level with the given <paramref name="name"/>.
+		///
+		/// This instance can be used to manipulate the level.
+		/// Throws an exception if a level with the given <paramref name="name"/> cannot be found.
+		/// Alternatively you can use <see cref="TryGetLevel(string, out LevelRep)"/> to check the existence of the level.
+		/// </summary>
+		/// <param name="name">Name of the wanted level.</param>
+		/// <returns>Returns an instance of <see cref="LevelRep"/> representing the level with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when a level with the given <paramref name="name"/> cannot be found.</exception>
+		/// <exception cref="ArgumentNullException">Thrown when the given <paramref name="name"/> is null.</exception>
 		public LevelRep GetLevel(string name)
 		{
 			if (TryGetLevel(name, out LevelRep value)) {
@@ -599,6 +628,18 @@ namespace MHUrho.Packaging {
 			}
 		}
 
+		/// <summary>
+		/// Gets an instance of <see cref="LevelRep"/> representing the level with the given <paramref name="name"/> if
+		/// such level exists.
+		///
+		/// Alternatively, you can use <see cref="GetLevel(string)"/> to be informed by exception if the level is not present.
+		/// </summary>
+		/// <param name="name">Name of the wanted level.</param>
+		/// <param name="value">If return value is true, contains the <see cref="LevelRep"/> representing the level with the given <paramref name="name"/></param>
+		/// <returns>True if level with the given <paramref name="name"/> was found,
+		/// and sets the <paramref name="value"/> to the <see cref="LevelRep"/> representing the level,
+		/// or returns false if no level with this <paramref name="name"/> exists.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="name"/> is null.</exception>
 		public bool TryGetLevel(string name, out LevelRep value)
 		{
 			//To enable loading saved games even if their source level was deleted
@@ -636,7 +677,7 @@ namespace MHUrho.Packaging {
 				}
 			}
 
-			data = StartLoading(pathToXml, schemas);
+			data = LoadXml(pathToXml, schemas);
 			//Save the level to xml only if the saving went without exception
 			XElement element = level.SaveAsPrototype();
 
@@ -649,12 +690,14 @@ namespace MHUrho.Packaging {
 			levels.Add(element);
 
 			WriteData();
-			FinishLoading();
+			ReleaseXml();
 		}
 
 
 		/// <summary>
 		/// Removes the <paramref name="level"/> from this package.
+		///
+		/// Also removes the data of the level.
 		/// </summary>
 		/// <param name="level">Representant of the level to remove.</param>
 		/// <exception cref="ArgumentException">Thrown when the <paramref name="level"/> is not part of this package.</exception>
@@ -665,21 +708,23 @@ namespace MHUrho.Packaging {
 				throw new ArgumentException("The provided level was not part of this gamePack", nameof(level));
 			}
 
-			data = StartLoading(pathToXml, schemas);
+			data = LoadXml(pathToXml, schemas);
 
 			RemoveLevelFromLoadedXml(level, true);
 
 			WriteData();
-			FinishLoading();
+			ReleaseXml();
 		}
 
 		/// <summary>
-		/// Returns the path to the file to which the level should be saved
+		/// Generates a path to the file to which the level should be saved.
+		/// This path is derived from the given <paramref name="levelName"/>,
+		///  but is made unique if any levels with the same or similar name already exist.
 		///
 		/// The path is relative to the <see cref="DirectoryPath"/>
 		/// </summary>
-		/// <param name="levelName"></param>
-		/// <returns></returns>
+		/// <param name="levelName">Name of the level the path is for.</param>
+		/// <returns>Returns the path to the file to which the level should be saved.</returns>
 		public string GetLevelProtoSavePath(string levelName)
 		{
 			//Just strip it to bare minimum
@@ -691,7 +736,7 @@ namespace MHUrho.Packaging {
 
 			//NOTE: Maybe do better generation of random filename
 			var random = new Random();
-			while (MHUrhoApp.Files.FileExists(newPath.ToString())) {
+			while (App.Files.FileExists(newPath.ToString())) {
 				int randomDigit = random.Next(10);
 				newPath.Append(randomDigit);
 			}
@@ -727,11 +772,19 @@ namespace MHUrho.Packaging {
 			}
 		}
 
+		/// <summary>
+		/// Alias of <see cref="Dispose"/>
+		/// </summary>
 		public void UnLoad()
 		{
 			Dispose();
 		}
 
+		/// <summary>
+		/// Clears caches of all type in this package.
+		/// Caches are used in types to enable reuse of instances of the type.
+		/// Should be called on level end.
+		/// </summary>
 		public void ClearCaches()
 		{
 
@@ -760,12 +813,19 @@ namespace MHUrho.Packaging {
 			};
 		}
 
-		static XDocument StartLoading(string pathToXml, XmlSchemaSet schemas)
+		/// <summary>
+		/// Loads XML data from file at <paramref name="pathToXml"/> and
+		/// validates this data against  <paramref name="schemas"/>.
+		/// </summary>
+		/// <param name="pathToXml">Path to the XML to load.</param>
+		/// <param name="schemas">XSD schema to validate against.</param>
+		/// <returns>Loaded XML document.</returns>
+		XDocument LoadXml(string pathToXml, XmlSchemaSet schemas)
 		{
 			Stream file = null;
 			XDocument data;
 			try {
-				file = MHUrhoApp.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				file = App.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				data = XDocument.Load(file);
 				data.Validate(schemas, null);
 			}
@@ -938,7 +998,7 @@ namespace MHUrho.Packaging {
 						.ToArray();
 		}
 
-		void FinishLoading()
+		void ReleaseXml()
 		{
 			data = null;
 		}
@@ -1110,7 +1170,7 @@ namespace MHUrho.Packaging {
 			try {
 				//Validate before truncating the file
 				data.Validate(schemas, null);
-				file = MHUrhoApp.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
+				file = App.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
 				data.Save(file);
 			}
 			catch (XmlSchemaValidationException e) {

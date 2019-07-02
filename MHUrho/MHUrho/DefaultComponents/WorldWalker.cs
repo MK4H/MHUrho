@@ -26,6 +26,7 @@ namespace MHUrho.DefaultComponents
 
 
 	public enum WorldWalkerState {
+		Initial,
 		Started,
 		Finished,
 		Failed,
@@ -112,11 +113,11 @@ namespace MHUrho.DefaultComponents
 			INodeDistCalculator GetNodeDistCalculator();
 		}
 
-		
+
 		/// <summary>
 		/// State of the last request executed by this WorldWalker.
 		/// </summary>
-		public WorldWalkerState State { get; private set; }
+		public WorldWalkerState State { get; private set; } = WorldWalkerState.Initial;
 
 		/// <summary>
 		/// Current path the WorldWalker is following, or null if WorldWalker is not moving

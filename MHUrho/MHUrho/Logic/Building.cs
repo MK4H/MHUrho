@@ -39,7 +39,7 @@ namespace MHUrho.Logic
 				this.storedBuilding = storedBuilding;
 				componentLoaders = new List<DefaultComponentLoader>();
 
-				type = PackageManager.Instance.ActivePackage.GetBuildingType(storedBuilding.TypeID);
+				type = level.Package.GetBuildingType(storedBuilding.TypeID);
 				if (type == null) {
 					throw new ArgumentException("Type of this building was not loaded");
 				}
@@ -231,6 +231,8 @@ namespace MHUrho.Logic
 		public override Vector3 Down => -Up;
 
 		public BuildingInstancePlugin BuildingPlugin { get; private set; }
+
+		public IReadOnlyList<ITile> Tiles => tiles;
 
 		readonly ITile[] tiles;
 

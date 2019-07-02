@@ -37,12 +37,12 @@ namespace MHUrho.EditorTools.MandK
 			this.unitTypes = new Dictionary<CheckBox, UnitType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
 
-			foreach (var unitType in PackageManager.Instance.ActivePackage.UnitTypes) {
+			foreach (var unitType in input.Level.Package.UnitTypes) {
 
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnUnitTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActivePackage.UnitIconTexture;
+				checkBox.Texture = input.Level.Package.UnitIconTexture;
 				checkBox.ImageRect = unitType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * unitType.IconRectangle.Width(), 0);

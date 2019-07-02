@@ -57,5 +57,10 @@ namespace MHUrho.Plugins
 		{
 
 		}
+
+		public override void Init(ILevelManager level)
+		{
+			
+		}
 	}
 }

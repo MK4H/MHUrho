@@ -151,7 +151,7 @@ namespace MHUrho.UserInterface
 				{
 					this.LogicType = logicType;
 					this.LayoutMode = LayoutMode.Horizontal;
-					var newItem = screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelLogicTypeItemLayout.xml", true),
+					var newItem = screen.Game.UI.LoadLayout(screen.Game.PackageManager.GetXmlFile("UI/LevelLogicTypeItemLayout.xml", true),
 															screen.MenuUIManager.MenuRoot.GetDefaultStyle());
 
 					((Text) newItem.GetChild("LogicTypeText")).Value = logicType.Name;
@@ -280,7 +280,7 @@ namespace MHUrho.UserInterface
 														ThumbnailPath,
 														((LogicTypeItem)logicTypeList.SelectedItem).LogicType,
 														mapSize.Value,
-														PackageManager.Instance.ActivePackage);
+														Game.PackageManager.ActivePackage);
 				}
 				else {
 					//Creates clone with the new or old name
@@ -330,7 +330,7 @@ namespace MHUrho.UserInterface
 
 			void FillLogicTypes()
 			{
-				foreach (var logicType in PackageManager.Instance.ActivePackage.LevelLogicTypes) {
+				foreach (var logicType in Game.PackageManager.ActivePackage.LevelLogicTypes) {
 					logicTypeList.AddItem(new LogicTypeItem(this, logicType));
 				}
 			}
@@ -342,7 +342,7 @@ namespace MHUrho.UserInterface
 
 					var result = await MenuUIManager.
 										FileBrowsingPopUp.
-										Request(PackageManager.Instance.ActivePackage.RootedDirectoryPath,
+										Request(Game.PackageManager.ActivePackage.RootedDirectoryPath,
 												SelectOption.File,
 												 pathText.HasDefaultValue ? null : pathText.Value);
 					
@@ -385,9 +385,9 @@ namespace MHUrho.UserInterface
 							Level = LevelRep.CreateNewLevel(myAction.LevelName,
 															myAction.Description,
 															myAction.ThumbnailPath,
-															PackageManager.Instance.ActivePackage.GetLevelLogicType(myAction.LogicTypeName),
+															Game.PackageManager.ActivePackage.GetLevelLogicType(myAction.LogicTypeName),
 															myAction.MapSize,
-															PackageManager.Instance.ActivePackage);
+															Game.PackageManager.ActivePackage);
 	
 						}
 						else {

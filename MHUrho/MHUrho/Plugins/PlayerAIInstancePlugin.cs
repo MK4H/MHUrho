@@ -20,6 +20,17 @@ namespace MHUrho.Plugins
 			this.Player = player;
 		}
 
+		/// <summary>
+		/// Initializes the player AI plugin on it's first loading into the level.
+		/// During this call, all units, buildings and projectiles of this player should already be loaded and connected to this player.
+		/// State of other players cannot is undefined.
+		///
+		/// If there is a saved state of the player with the same plugin type, <see cref="InstancePlugin.LoadState(PluginDataWrapper)"/>
+		/// will be called instead.
+		/// </summary>
+		/// <param name="level">Current level into which this player is being loaded.</param>
+		public abstract void Init(ILevelManager level);
+
 
 		public virtual void OnBuildingDestroyed(IBuilding building)
 		{

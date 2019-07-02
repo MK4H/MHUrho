@@ -48,7 +48,7 @@ namespace MHUrho.UserInterface
 		protected MenuUIManager( IMenuController menuController)
 		{
 			MenuRoot = UI.Root;
-			MenuRoot.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml", true));
+			MenuRoot.SetDefaultStyle(Game.PackageManager.GetXmlFile("UI/MainMenuStyle.xml", true));
 
 			this.MenuController = menuController;
 

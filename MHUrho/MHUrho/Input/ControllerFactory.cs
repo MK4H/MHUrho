@@ -14,6 +14,6 @@ namespace MHUrho.Input
 
 		public abstract IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player);
 
-		public abstract IMenuController CreateMenuController();
+		public abstract IMenuController CreateMenuController(MHUrhoApp app);
 	}
 }

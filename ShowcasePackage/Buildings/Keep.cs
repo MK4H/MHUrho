@@ -20,7 +20,7 @@ namespace ShowcasePackage.Buildings
 	public class KeepType : BaseBuildingTypePlugin
 	{
 		public static string TypeName = "Keep";
-		public static int TypeID = 5;
+		public static int TypeID = 7;
 
 		public override string Name => TypeName;
 		public override int ID => TypeID;

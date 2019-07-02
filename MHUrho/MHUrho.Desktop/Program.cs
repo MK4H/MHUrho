@@ -25,14 +25,14 @@ namespace MHUrho.Desktop
 #endif
 
 
-			MHUrhoApp.Files = FileManagerDesktop.LoadFileManager(Directory.GetCurrentDirectory(),
+			MHUrhoApp.FileManager = FileManagerDesktop.LoadFileManager(Directory.GetCurrentDirectory(),
 															  appDataAppPath,
 															  Path.Combine(appDataAppPath, "Packages"),
 															  Path.Combine(appDataAppPath, "Log.txt"),
 															  "config.xml",
 															  "SavedGames");
 
-			MHUrhoApp.StartupOptions = StartupOptions.FromCommandLineParams(args);
+			MHUrhoApp.StartupArgs = StartupOptions.FromCommandLineParams(args, MHUrhoApp.FileManager);
 
 			try {
 				new MHUrhoApp(new ApplicationOptions("Data")).Run();

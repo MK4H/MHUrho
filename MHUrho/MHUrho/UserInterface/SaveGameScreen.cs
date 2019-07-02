@@ -20,7 +20,7 @@ namespace MHUrho.UserInterface
 				: base(proxy)
 			{
 				this.proxy = proxy;
-				LoadFileNames(MHUrhoApp.Files.SaveGameDirAbsolutePath);
+				LoadFileNames(Game.Files.SaveGameDirAbsolutePath);
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/SaveLayout.xml");
 
@@ -81,9 +81,9 @@ namespace MHUrho.UserInterface
 				await MenuUIManager.ErrorPopUp.DisplayError("Invalid name", "Name of the saved game cannot be empty");
 				if (LineEdit.Text == "") return;
 
-				string newAbsoluteFilePath = Path.Combine(MHUrhoApp.Files.SaveGameDirAbsolutePath, LineEdit.Text);
+				string newAbsoluteFilePath = Path.Combine(Game.Files.SaveGameDirAbsolutePath, LineEdit.Text);
 
-				if (MHUrhoApp.Files.FileExists(newAbsoluteFilePath)) {
+				if (Game.Files.FileExists(newAbsoluteFilePath)) {
 
 					bool confirmed = await MenuUIManager.ConfirmationPopUp
 														.RequestConfirmation("Overriding file",

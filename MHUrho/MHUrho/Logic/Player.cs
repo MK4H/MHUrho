@@ -65,7 +65,7 @@ namespace MHUrho.Logic
 						throw new ArgumentException("StoredPlayer had no type", nameof(storedPlayer));
 					}
 
-					type = PackageManager.Instance.ActivePackage.GetPlayerType(storedPlayer.TypeID);
+					type = level.Package.GetPlayerType(storedPlayer.TypeID);
 					teamID = storedPlayer.TeamID;
 				}
 				
@@ -137,7 +137,9 @@ namespace MHUrho.Logic
 				if (type.ID == storedPlayer.TypeID) {
 					loadingPlayer.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
 				}
-				
+				else {
+					loadingPlayer.Plugin?.Init(level);
+				}
 			}
 
 			public void FinishLoading() {

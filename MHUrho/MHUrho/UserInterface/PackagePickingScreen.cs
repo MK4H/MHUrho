@@ -50,7 +50,7 @@ namespace MHUrho.UserInterface
 				backButton = (Button)window.GetChild("BackButton", true);
 				backButton.Released += BackButtonReleased;
 
-				foreach (var pack in PackageManager.Instance.AvailablePacks) {
+				foreach (var pack in Game.PackageManager.AvailablePacks) {
 					AddItem(pack);
 				}
 
@@ -103,7 +103,7 @@ namespace MHUrho.UserInterface
 				PackageListItem selectedItem = GetSelectedItem();
 
 				try {
-					PackageManager.Instance.RemoveGamePack(selectedItem.Pack);
+					Game.PackageManager.RemoveGamePack(selectedItem.Pack);
 					RemoveItem(selectedItem);
 				}
 				catch (FatalPackagingException e) {
@@ -121,14 +121,14 @@ namespace MHUrho.UserInterface
 			{
 				IPathResult result = await MenuUIManager
 											.FileBrowsingPopUp
-											.Request(MHUrhoApp.Files.PackageDirectoryPath,
+											.Request(Game.Files.PackageDirectoryPath,
 													SelectOption.File);
 				if (result == null) {
 					return;
 				}
 
 				try {
-					var newPack = PackageManager.Instance.AddGamePack(result.RelativePath);
+					var newPack = Game.PackageManager.AddGamePack(result.RelativePath);
 					AddItem(newPack);
 				}
 				catch (FatalPackagingException e) {
@@ -281,7 +281,7 @@ namespace MHUrho.UserInterface
 			MenuUIManager.SwitchToLoadingScreen(progress);
 			try
 			{
-				GamePack package = await PackageManager.Instance.LoadPackage(item.Pack, progress);
+				GamePack package = await Game.PackageManager.LoadPackage(item.Pack, progress);
 				MenuUIManager.SwitchToLevelPickingScreen(package);
 			}
 			catch (PackageLoadingException e)
