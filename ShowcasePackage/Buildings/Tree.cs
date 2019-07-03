@@ -22,15 +22,15 @@ namespace ShowcasePackage.Buildings
 
 			readonly TreeType type;
 
-			UIElement options;
-			Slider sizeSlider;
+			readonly UIElement uiElem;
+			readonly Slider sizeSlider;
 
 
 			public TreeBuilder(GameController input, GameUI ui, CameraMover camera, TreeType type)
 				: base(input, ui, camera, type.myType)
 			{
 				this.type = type;
-
+				InitUI(ui, out uiElem, out sizeSlider);
 			}
 
 			public override void OnMouseDown(MouseButtonDownEventArgs e)
@@ -55,25 +55,38 @@ namespace ShowcasePackage.Buildings
 				}
 			}
 
+			static void InitUI(GameUI ui, out UIElement uiElem, out Slider sizeSlider)
+			{
+				if ((uiElem = ui.CustomWindow.GetChild("TreeUI")) == null)
+				{
+					ui.CustomWindow.LoadLayout("Assets/UI/TreeCWUI.xml");
+					uiElem = ui.CustomWindow.GetChild("TreeUI");
+				}
+
+				sizeSlider = (Slider)uiElem.GetChild("sizeSlider", true);
+				sizeSlider.Range = 10;
+
+				uiElem.Visible = false;
+			}
+
+			public override void Dispose()
+			{
+				uiElem.Dispose();
+				sizeSlider.Dispose();
+			}
+
 			public override void Enable()
 			{
 				base.Enable();
 
-				if ((options = Ui.CustomWindow.GetChild("TreeOptions")) == null)
-				{
-					Ui.CustomWindow.LoadLayout("Assets/Buildings/Tree1/CWLayout.xml");
-					options = Ui.CustomWindow.GetChild("TreeOptions");
-				}
-
-				sizeSlider = (Slider)options.GetChild("sizeSlider");
-				options.Visible = true;
+				uiElem.Visible = true;
 			}
 
 			public override void Disable()
 			{
 				base.Disable();
 
-				options.Visible = false;
+				uiElem.Visible = false;
 			}
 
 		}
@@ -133,8 +146,8 @@ namespace ShowcasePackage.Buildings
 			}
 
 			ITile tile = level.Map.GetTileByTopLeftCorner(topLeftTileIndex);
-			//Check if the tile is free and the tree grows on the given tile type
-			return tile.Building == null && tileGrowth.ContainsKey(tile.Type);
+			//Check if the owner is neutral player, the tile is free and the tree grows on the given tile type
+			return owner == level.NeutralPlayer && tile.Building == null && tileGrowth.ContainsKey(tile.Type);
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
@@ -209,7 +222,7 @@ namespace ShowcasePackage.Buildings
 
 		readonly TreeType type;
 
-		static Random spreadRNG = new Random();
+		static readonly Random spreadRNG = new Random();
 
 		double spreadProbability = 0.01;
 		double spreadTimeout = 5;
@@ -269,9 +282,10 @@ namespace ShowcasePackage.Buildings
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
-			FinalSize = reader.GetNext<float>();
-			changePerSecond = reader.GetNext<float>();
-			currentSize = reader.GetNext<float>();
+			reader.GetNext(out float finalSize);
+			FinalSize = finalSize;
+			reader.GetNext(out changePerSecond);
+			reader.GetNext(out currentSize);
 
 			SetSize(currentSize);
 		}
@@ -286,8 +300,10 @@ namespace ShowcasePackage.Buildings
 		{
 			base.OnUpdate(timeStep);
 
-			Spread(timeStep);
-			Grow(timeStep);
+			if (!Level.EditorMode) {
+				Spread(timeStep);
+				Grow(timeStep);
+			}
 		}
 
 		/// <summary>
@@ -300,7 +316,8 @@ namespace ShowcasePackage.Buildings
 				FinalSize = newSize;
 			}
 
-			Building.Node.Scale = type.BaseScale * newSize;
+			currentSize = newSize;
+			Building.Node.Scale = type.BaseScale * currentSize;
 		}
 
 		public void Chomp()
@@ -353,8 +370,8 @@ namespace ShowcasePackage.Buildings
 
 			currentStepTimeout = stepSize;
 
-			currentSize += changePerSecond * stepSize;
-			SetSize(currentSize);
+			float newSize = currentSize + changePerSecond * stepSize;
+			SetSize(newSize);
 		} 
 	}
 

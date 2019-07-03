@@ -100,6 +100,7 @@ namespace MHUrho.EditorTools.MandK
 			this.unitTypes = new Dictionary<UIElement, UnitType>();
 
 			this.dynamicHighlight = new DynamicSizeHighlighter(input, ui, camera);
+			this.enabled = false;
 		}
 
 		public override void Enable() {
@@ -247,12 +248,19 @@ namespace MHUrho.EditorTools.MandK
 
 			foreach (var result in input.CursorRaycast()) {
 
-				if (Level.TryGetEntity(result.Node, out IEntity entity)) {
-					var visitor = new ClickDispatcher(this, e, result.Position);
-					if (entity.Accept(visitor)) {
-						return;
+				for (Node current = result.Node; current != Level.LevelNode; current = current.Parent) {
+					if (Level.TryGetEntity(current, out IEntity entity))
+					{
+						//Dispatch the click with the actual position of the click
+						var visitor = new ClickDispatcher(this, e, result.Position);
+						if (entity.Accept(visitor))
+						{
+							return;
+						}
 					}
 				}
+
+				
 				
 
 				var tile = Map.RaycastToTile(result);
@@ -288,8 +296,13 @@ namespace MHUrho.EditorTools.MandK
 		}
 
 		void AddUnit(UnitSelector unitSelector) {
-			//TODO: Check owner of the units
+			
 			var unit = unitSelector.Unit;
+
+			if (unit.Player != input.Player) {
+				return;
+			}
+
 			if (selected.TryGetValue(unit.UnitType, out SelectedInfo info)) {
 				if (info.UnitSelectors.Count == 0) {
 					info.Button.Visible = true;

@@ -45,6 +45,7 @@ namespace ShowcasePackage.Buildings
 		readonly GameUI ui;
 
 		readonly ExclusiveCheckBoxes checkBoxes;
+		readonly UIElement uiElem;
 
 		bool enabled;
 
@@ -57,6 +58,7 @@ namespace ShowcasePackage.Buildings
 			this.ui = ui;
 			this.builders = new Dictionary<CheckBox, Builder>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.enabled = false;
 
 			checkBoxes.SelectedChanged += OnSelectedChanged;
 
@@ -65,6 +67,9 @@ namespace ShowcasePackage.Buildings
 				BaseBuildingTypePlugin typePlugin = (BaseBuildingTypePlugin)Level.Package.GetBuildingType(builder).Plugin;
 				InitCheckbox(typePlugin.GetBuilder(input, ui, camera), input.Level.Package);
 			}
+
+			InitCheckbox(new Destroyer(input, ui, camera), input.Level.Package);
+			InitUI(ui, out uiElem);
 		}
 
 		public override void Dispose()
@@ -76,6 +81,7 @@ namespace ShowcasePackage.Buildings
 			}
 
 			checkBoxes.Dispose();
+			uiElem.Dispose();
 			builders = null;
 		}
 
@@ -84,6 +90,8 @@ namespace ShowcasePackage.Buildings
 			if (enabled) return;
 
 			checkBoxes.Show();
+			uiElem.Visible = true;
+
 
 			input.MouseWheelMoved += OnMouseWheelMoved;
 			input.MouseUp += OnMouseUp;
@@ -101,6 +109,7 @@ namespace ShowcasePackage.Buildings
 
 			checkBoxes.Deselect();
 			checkBoxes.Hide();
+			uiElem.Visible = false;
 
 			input.MouseWheelMoved -= OnMouseWheelMoved;
 			input.MouseUp -= OnMouseUp;
@@ -117,6 +126,17 @@ namespace ShowcasePackage.Buildings
 		public override void ClearPlayerSpecificState()
 		{
 
+		}
+
+		static void InitUI(GameUI ui, out UIElement uiElem)
+		{
+			if ((uiElem = ui.CustomWindow.GetChild("BuildingToolUI")) == null)
+			{
+				ui.CustomWindow.LoadLayout("Assets/UI/BuildingToolUI.xml");
+				uiElem = ui.CustomWindow.GetChild("BuildingToolUI");
+			}
+
+			uiElem.Visible = false;
 		}
 
 		void InitCheckbox(Builder builder, GamePack package)
@@ -137,27 +157,36 @@ namespace ShowcasePackage.Buildings
 			currentBuilder = null;
 
 			if (newSelected != null) {
+				uiElem.Visible = false;
 				currentBuilder = builders[newSelected];
 				currentBuilder.Enable();
+			}
+			else {
+				uiElem.Visible = true;
 			}
 		}
 
 		void OnMouseDown(MouseButtonDownEventArgs e)
 		{
-			if (ui.UIHovering) return;
-
 			if (currentBuilder == null) {
+				if (ui.UIHovering) return;
+
 				var raycast = input.CursorRaycast();
 				foreach (var result in raycast) {
-					if (!Level.TryGetBuilding(result.Node, out IBuilding building)) {
-						continue;
-					}
+					for (Node current = result.Node; current != Level.LevelNode; current = current.Parent)
+					{
+						if (!Level.TryGetBuilding(current, out IBuilding building))
+						{
+							continue;
+						}
 
-					Clicker clicker = null;
-					if ((clicker = building.GetDefaultComponent<Clicker>()) != null) {
-						clicker.Click(e.Button, e.Buttons, e.Qualifiers);
-						return;
-					}
+						Clicker clicker = null;
+						if ((clicker = building.GetDefaultComponent<Clicker>()) != null)
+						{
+							clicker.Click(e.Button, e.Buttons, e.Qualifiers);
+							return;
+						}
+					}					
 				}
 			}
 			else {
@@ -167,29 +196,21 @@ namespace ShowcasePackage.Buildings
 
 		void OnMouseMove(MHUrhoMouseMovedEventArgs e)
 		{
-			if (ui.UIHovering) return;
-
 			currentBuilder?.OnMouseMove(e);
 		}
 
 		void OnMouseUp(MouseButtonUpEventArgs e)
 		{
-			if (ui.UIHovering) return;
-
 			currentBuilder?.OnMouseUp(e);
 		}
 
 		void OnMouseWheelMoved(MouseWheelEventArgs e)
 		{
-			if (ui.UIHovering) return;
-
 			currentBuilder?.OnMouseWheelMoved(e);
 		}
 
 		void OnUpdate(float timeStep)
 		{
-			if (ui.UIHovering) return;
-
 			currentBuilder?.OnUpdate(timeStep);
 		}
 
@@ -202,5 +223,6 @@ namespace ShowcasePackage.Buildings
 		{
 			currentBuilder?.UIHoverEnd();
 		}
+
 	}
 }

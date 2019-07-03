@@ -18,7 +18,9 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools.MandK
 {
-	public class TileTypeTool : Base.TileTypeTool, IMandKTool { 
+	public class TileTypeTool : Base.TileTypeTool, IMandKTool {
+
+		const int MaxHighlightSize = 32;
 
 		Dictionary<CheckBox, TileType> tileTypes;
 
@@ -44,6 +46,8 @@ namespace MHUrho.EditorTools.MandK
 			this.tileTypes = new Dictionary<CheckBox, TileType>();
 			this.highlight = new StaticSizeHighlighter(input, ui, camera, 3, Color.Green);
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.mouseButtonDown = false;
+			this.enabled = false;
 			InitUI(ui, out uiElem, out sizeSlider);
 
 			foreach (var tileType in input.Level.Package.TileTypes) {
@@ -90,7 +94,8 @@ namespace MHUrho.EditorTools.MandK
 			sizeSlider.SliderChanged -= OnSliderChanged;
 			highlight.SquareChanged -= Highlight_SquareChanged;
 			
-			enabled = false;		
+			enabled = false;
+			mouseButtonDown = false;
 		}
 
 		public override void ClearPlayerSpecificState() {
@@ -152,6 +157,10 @@ namespace MHUrho.EditorTools.MandK
 			}
 
 			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+			//-1 due to lower bound being 0, so when we are reading the value, we are adding 1
+			sizeSlider.Range = MaxHighlightSize - 1;
+
+			uiElem.Visible = false;
 		}
 
 		void OnSliderChanged(SliderChangedEventArgs obj)

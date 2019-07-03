@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
+using MHUrho.CameraMovement;
 using MHUrho.Control;
 using MHUrho.EntityInfo;
 using MHUrho.Helpers;
@@ -14,19 +15,31 @@ using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.DefaultComponents;
+using MHUrho.Input.MandK;
+using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
+using ShowcasePackage.Misc;
 using Urho;
 
 namespace ShowcasePackage.Units
 {
-	public class ChickenType : UnitTypePlugin {
+	public class ChickenType : SpawnableUnitTypePlugin {
 
-		public override int ID => 3;
+		public static string TypeName = "Chicken";
+		public static int TypeID = 3;
 
-		public override string Name => "Chicken";
+
+		public override string Name => TypeName;
+		public override int ID => TypeID;
 
 		public ProjectileType ProjectileType { get; private set; }
+		public override Cost Cost => cost;
+		public override UnitType UnitType => myType;
 
+		const string CostElement = "cost";
+
+		Cost cost;
+		UnitType myType;
 
 		public ChickenType() {
 
@@ -47,7 +60,16 @@ namespace ShowcasePackage.Units
 			return true;
 		}
 
+		public override Spawner GetSpawner(GameController input, GameUI ui, CameraMover camera)
+		{
+			return new ChickenSpawner(input, ui, camera, myType, this);
+		}
+
 		protected override void Initialize(XElement extensionElement, GamePack package) {
+			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
+			cost = Cost.FromXml(costElem, package);
+
+			myType = package.GetUnitType(ID);
 			ProjectileType = package.GetProjectileType("EggProjectile");
 		}
 	}
@@ -120,7 +142,7 @@ namespace ShowcasePackage.Units
 			RegisterEvents(Walker, Shooter, Unit.GetDefaultComponent<UnitSelector>());
 
 			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
-			hp = sequentialData.GetNext<float>();
+			sequentialData.GetNext(out hp);
 			Init(hp);
 		}
 
@@ -326,6 +348,29 @@ namespace ShowcasePackage.Units
 			selector.UnitSelected += OnUnitSelected;
 		}
 
+
+	}
+
+	class ChickenSpawner : PointSpawner {
+
+		public override Cost Cost => myType.Cost;
+
+		readonly ChickenType myType;
+
+		public ChickenSpawner(GameController input, GameUI ui, CameraMover camera, UnitType type, ChickenType myType)
+			: base(input, ui, camera, type)
+		{
+			this.myType = myType;
+		}
+
+		public override IUnit SpawnAt(ITile tile, IPlayer player)
+		{
+			if (myType.CanSpawnAt(tile) && (Level.EditorMode || myType.Cost.HasResources(player))) {
+				return Level.SpawnUnit(UnitType, tile, Quaternion.Identity, player);
+			}
+
+			return null;
+		}
 
 	}
 }

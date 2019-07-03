@@ -10,6 +10,7 @@ using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.UserInterface.MandK;
 using Urho;
+using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
@@ -45,6 +46,10 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnMouseDown(MouseButtonDownEventArgs e)
 		{
+			if (ui.UIHovering) {
+				return;
+			}
+
 			if (e.Button == (int)MouseButton.Left) {
 				ITile startTile = input.GetTileUnderCursor();
 				if (startTile != null) {
@@ -55,36 +60,65 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnMouseUp(MouseButtonUpEventArgs e)
 		{
-			if (e.Button == (int)MouseButton.Left) {
-				ITile endTile = input.GetTileUnderCursor();
-				if (endTile == null) {
-					line = null;
-					return;
-				}
+			if (e.Button != (int) MouseButton.Left || line == null) {
+				return;
+			}
 
-				if (endTile != line[line.Count - 1]) {
-					line = GetLine(line[0], endTile);
-				}
+			if (ui.UIHovering) {
+				ClearSelection();
+				return;
+			}
 
-				if (line.All((tile) => BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType), input.Player ,Level))) {
-					foreach (var tile in line) {
-						Level.BuildBuilding(BuildingType,
-											GetBuildingRectangle(tile, BuildingType).TopLeft(),
-											Quaternion.Identity,
-											input.Player);
+			ITile endTile = input.GetTileUnderCursor();
+			if (endTile == null) {
+				ClearSelection();
+				return;
+			}
+
+			if (endTile != line[line.Count - 1]) {
+				line = GetLine(line[0], endTile);
+			}
+
+			if (line.All((tile) => BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType), input.Player ,Level))) {
+				foreach (var tile in line) {
+					IBuilding newBuilding = Level.BuildBuilding(BuildingType,
+																GetBuildingRectangle(tile, BuildingType).TopLeft(),
+																Quaternion.Identity,
+																input.Player);
+					if (newBuilding == null) {
+						break;
 					}
 				}
-				line = null;
 			}
+
+			ClearSelection();
 		}
 
 		public override void OnMouseMove(MHUrhoMouseMovedEventArgs e)
 		{
+			if (line == null) {
+				ITile tile = input.GetTileUnderCursor();
+				if (tile == null) {
+					return;
+				}
+				Color color = BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType),
+													input.Player,
+													Level)
+								? AbleColor
+								: UnableColor;
+				Level.Map.HighlightTileList(new []{tile}, color);
+				return;
+			}
+
 			UpdateHighlight();
 		}
 
 		public override void OnUpdate(float timeStep)
 		{
+			if (line == null) {
+				return;
+			}
+
 			UpdateHighlight();
 		}
 
@@ -129,6 +163,12 @@ namespace ShowcasePackage.Buildings
 																			Level))
 											? AbleColor
 											: UnableColor);
+		}
+
+		void ClearSelection()
+		{
+			Level.Map.DisableHighlight();
+			line = null;
 		}
 	}
 }

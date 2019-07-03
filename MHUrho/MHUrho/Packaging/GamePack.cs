@@ -1087,18 +1087,18 @@ namespace MHUrho.Packaging {
 		T LoadType<T>(XElement typeElement, IDictionary<string, T> typesByName, IDictionary<int, T> typesByID)
 			where T : ILoadableType, new() {
 			string name = GetTypeName(typeElement);
-			int ID = GetTypeID(typeElement);
+			int id = GetTypeID(typeElement);
 
 			T typeInstance;
 
 			bool byName = typesByName.TryGetValue(name, out T typeInstanceByName);
-			bool byID = typesByID.TryGetValue(ID, out T typeInstanceByID);
+			bool byID = typesByID.TryGetValue(id, out T typeInstanceByID);
 
 			if (!byName && !byID) {
 
 				typeInstance = new T();
 				typesByName.Add(name, typeInstance);
-				typesByID.Add(ID, typeInstance);
+				typesByID.Add(id, typeInstance);
 
 				typeInstance.Load(typeElement, this);
 
@@ -1109,11 +1109,11 @@ namespace MHUrho.Packaging {
 				}
 				else {
 					throw new
-						InvalidOperationException("There were two different types under the ID and Name of the loaded type");
+						InvalidOperationException($"There were two different types under the ID [{id}] and Name [{name}] of the loaded type");
 				}
 			}
 			else {
-				throw new InvalidOperationException("The type was only mapped by one of its parameters, not both");
+				throw new InvalidOperationException($"The type was only mapped by one of its parameters ID [{id}] and Name [{name}], not both");
 			}
 
 			return typeInstance;

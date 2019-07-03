@@ -10,6 +10,7 @@ using MHUrho.Logic;
 using MHUrho.UserInterface;
 using MHUrho.UserInterface.MandK;
 using ShowcasePackage.Buildings;
+using ShowcasePackage.Units;
 using Urho;
 
 namespace ShowcasePackage
@@ -37,11 +38,17 @@ namespace ShowcasePackage
 
 		public override void LoadTools()
 		{
-			LoadTool(new TerrainManipulatorTool(input, ui, cameraMover, new IntRect(0, 100, 50, 150)));
-			LoadTool(new TileTypeTool(input, ui, cameraMover, new IntRect(0, 150, 50, 200)));
-			LoadTool(new UnitSelectorTool(input, ui, cameraMover, new IntRect(0, 200, 50, 250)));
-			LoadTool(new UnitSpawningTool(input, ui, cameraMover, new IntRect(0, 0, 50, 50)));
-			LoadTool(new BuilderTool(input, ui, cameraMover, new IntRect(0, 50, 50, 100)));
+			if (level.EditorMode) {
+				LoadTool(new TerrainManipulatorTool(input, ui, cameraMover, new IntRect(0, 100, 50, 150)));
+				LoadTool(new TileTypeTool(input, ui, cameraMover, new IntRect(0, 150, 50, 200)));
+				LoadTool(new UnitSelectorTool(input, ui, cameraMover, new IntRect(0, 200, 50, 250)));
+				LoadTool(new SpawnerTool(input, ui, cameraMover, new IntRect(0, 0, 50, 50)));
+				LoadTool(new BuilderTool(input, ui, cameraMover, new IntRect(0, 50, 50, 100)));
+			}
+			else {
+				LoadTool(new UnitSelectorTool(input, ui, cameraMover, new IntRect(0, 200, 50, 250)));
+				LoadTool(new BuilderTool(input, ui, cameraMover, new IntRect(0, 50, 50, 100)));
+			}
 		}
 	}
 }

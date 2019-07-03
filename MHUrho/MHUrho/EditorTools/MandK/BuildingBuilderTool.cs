@@ -37,6 +37,7 @@ namespace MHUrho.EditorTools.MandK
 			this.ui = ui;
 			this.buildingTypes = new Dictionary<CheckBox, BuildingType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.enabled = false;
 
 			foreach (var buildingType in input.Level.Package.BuildingTypes) {
 

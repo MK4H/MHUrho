@@ -19,8 +19,12 @@ using Urho;
 namespace ShowcasePackage.Units
 {
 	public class DogType : UnitTypePlugin {
-		public override string Name => "Dog";
-		public override int ID => 4;
+
+		public static string TypeName = "Dog";
+		public static int TypeID = 4;
+
+		public override string Name => TypeName;
+		public override int ID => TypeID;
 		
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
@@ -83,7 +87,8 @@ namespace ShowcasePackage.Units
 
 			public static State Load(SequentialPluginDataReader reader, DogInstance dog)
 			{
-				States savedState = (States)reader.GetNext<int>();
+				reader.GetNext(out int stateInt);
+				States savedState = (States) stateInt;
 				switch (savedState)
 				{
 					case States.GoingToTree:
@@ -224,7 +229,7 @@ namespace ShowcasePackage.Units
 			public Chomping(SequentialPluginDataReader reader, DogInstance dog)
 				: base(dog)
 			{
-				double remaining = reader.GetNext<double>();
+				reader.GetNext(out double remaining);
 				chomping = new Timeout(duration, remaining);
 			}
 
@@ -267,9 +272,9 @@ namespace ShowcasePackage.Units
 			public BringingWood(SequentialPluginDataReader reader, DogInstance dog)
 				: base(dog)
 			{
-				bool isDestructing = reader.GetNext<bool>();
+				reader.GetNext(out bool isDestructing);
 				if (isDestructing) {
-					double remaining = reader.GetNext<double>();
+					reader.GetNext(out double remaining);
 					destruction = new Timeout(DestructionTime, remaining);
 				}
 			}
@@ -346,7 +351,7 @@ namespace ShowcasePackage.Units
 			public SearchingForTree(SequentialPluginDataReader reader, DogInstance dog)
 				: base(dog)
 			{
-				double remaining = reader.GetNext<double>();
+				reader.GetNext<double>(out double remaining);
 				timeout = new Timeout(searchTimeout, remaining);
 			}
 
@@ -409,7 +414,7 @@ namespace ShowcasePackage.Units
 			RegisterEvents(walker);
 
 			var reader = pluginData.GetReaderForWrappedSequentialData();
-			hp = reader.GetNext<float>();
+			reader.GetNext(out hp);
 			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), hp);
 			currentState = State.Load(reader, this);
 		}

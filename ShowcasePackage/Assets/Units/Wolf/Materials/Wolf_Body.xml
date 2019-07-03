@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <material>
 	<technique name="Techniques/Diff.xml" />
-	<texture name="Textures/Wolf_Body.jpg" unit="diffuse" />
+	<texture name="Assets/Units/Wolf/Textures/Wolf_Body.jpg" unit="diffuse" />
 	<parameter name="MatDiffColor" value="0.472432 0.472432 0.472432 1" />
 	<parameter name="MatSpecColor" value="0 0 0 50" />
 </material>

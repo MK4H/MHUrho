@@ -1,5 +1,5 @@
-Materials/Wolf_Body.xml
-Materials/Wolf_Eyes.xml
-Materials/Wolf_Claws.xml
-Materials/Wolf_Teeth.xml
-Materials/Wolf_Fur.xml
+Assets/Units/Wolf/Materials/Wolf_Body.xml
+Assets/Units/Wolf/Materials/Wolf_Eyes.xml
+Assets/Units/Wolf/Materials/Wolf_Claws.xml
+Assets/Units/Wolf/Materials/Wolf_Teeth.xml
+Assets/Units/Wolf/Materials/Wolf_Fur.xml

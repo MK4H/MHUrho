@@ -21,8 +21,33 @@ namespace ShowcasePackage.Buildings
 
 	class DirectionalBuilder : Builder
 	{
+		/// <summary>
+		/// Indexed by current orientation. So when facing PlusX, the top of the rectangle is right side.
+		/// </summary>
+		static readonly int[] TopColorMapping =
+		{
+			(int) Sides.Right, (int) Sides.Back, (int) Sides.Left, (int) Sides.Front
+		};
 
-		static readonly int[][] Mapping = {new []{0, 1, 2, 3, 4}, new []{1, 2, 3, 0, 4}, new []{2, 3, 0, 1, 4}, new []{3, 0, 1, 2, 4}};
+		static readonly int[] BottomColorMapping =
+		{
+			(int) Sides.Left, (int) Sides.Front, (int) Sides.Right, (int) Sides.Back
+		};
+
+		static readonly int[] RightColorMapping =
+		{
+			(int) Sides.Front, (int) Sides.Right, (int) Sides.Back, (int) Sides.Left
+		};
+
+		static readonly int[] LeftColorMapping =
+		{
+			(int) Sides.Back, (int) Sides.Left, (int) Sides.Front, (int) Sides.Right
+		};
+
+		static readonly int[] CenterColorMapping =
+		{
+			(int) Sides.Center, (int) Sides.Center, (int) Sides.Center, (int) Sides.Center
+		};
 
 		public Direction Direction { get; set; }
 
@@ -102,17 +127,23 @@ namespace ShowcasePackage.Buildings
 
 		public void SetColor(Sides side, bool ableToBuild, Color color)
 		{
-			ableColors[Mapping[(int)Direction][(int) side]] = color;
+			Color[] colors = ableToBuild ? ableColors : unableColors;
+			colors[(int) side] = color;
 		}
 
 		public Color GetColor(Sides side, bool ableToBuild)
 		{
+			//Colors are in the order front, right, back, left, center
 			Color[] colors = ableToBuild ? ableColors : unableColors;
-			return colors[Mapping[(int)Direction][(int)side]];
+			return colors[(int)side];
 		}
 
 		void HighlightBuildingRectangle()
 		{
+			if (ui.UIHovering && lockedTile == null) {
+				return;
+			}
+
 			ITile centerTile = lockedTile ?? input.GetTileUnderCursor();
 			if (centerTile == null) {
 				return;
@@ -121,37 +152,47 @@ namespace ShowcasePackage.Buildings
 			IntRect rect = GetBuildingRectangle(centerTile, BuildingType);
 
 			bool ableToBuild = BuildingType.CanBuild(rect.TopLeft(), rect.BottomRight(), input.Player, Level);
-			Map.HighlightRectangle(rect, (cTile) => GetPositionColor(rect, cTile.TopLeft, ableToBuild));
+			Color[] colors = ableToBuild ? ableColors : unableColors;
+			Map.HighlightRectangle(rect, (cTile) => GetPositionColor(rect, cTile.TopLeft, colors));
 		}
 
-		Color GetPositionColor(IntRect rectangle, IntVector2 currentPosition, bool ableToBuild)
+		/// <summary>
+		/// Returns color for the <paramref name="currentPosition"/> based on
+		/// the position inside the <paramref name="rectangle"/> and current <see cref="Direction"/>
+		/// </summary>
+		/// <param name="rectangle">The colored rectangle.</param>
+		/// <param name="currentPosition">Current position inside the <paramref name="rectangle"/>.</param>
+		/// <param name="colors">The set of colors to use.</param>
+		/// <returns>Color for the position <paramref name="currentPosition"/> inside the <paramref name="rectangle"/>.</returns>
+		Color GetPositionColor(IntRect rectangle, IntVector2 currentPosition, Color[] colors)
 		{
-			if (currentPosition.X == rectangle.Right)
-			{
-				return GetColor(Sides.Front, ableToBuild);
+			//Calculates the position as if the rectangle was in the MinusZ rotation
+			// then it gets translated by GetColor function according to current rotation
+
+			bool right = currentPosition.X == rectangle.Right;
+			bool left = currentPosition.X == rectangle.Left;
+			bool top = currentPosition.Y == rectangle.Top;
+			bool bottom = currentPosition.Y == rectangle.Bottom;
+
+			bool side = right || left || top || bottom;
+			bool corner = (right || left) && (top || bottom);
+			if (!side || corner) {
+				return GetColor(colors, CenterColorMapping);
 			}
-			else if (currentPosition.X == rectangle.Left)
-			{
-				return GetColor(Sides.Right, ableToBuild);
+			else if (right) {
+				return GetColor(colors, RightColorMapping);
 			}
-			else if (currentPosition.Y == rectangle.Top)
-			{
-				return GetColor(Sides.Back, ableToBuild);
+			else if (left) {
+				return GetColor(colors, LeftColorMapping);
 			}
-			else if (currentPosition.Y == rectangle.Bottom)
-			{
-				return GetColor(Sides.Left, ableToBuild);
+			else if (top) {
+				return GetColor(colors, TopColorMapping);
 			}
-			else
-			{
-				return GetColor(Sides.Center, ableToBuild);
+			else {
+				return GetColor(colors, BottomColorMapping);
 			}
 		}
 
-		public override void Enable()
-		{
-			
-		}
 
 		public override void Disable()
 		{
@@ -161,6 +202,10 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnMouseDown(MouseButtonDownEventArgs e)
 		{
+			if (ui.UIHovering){
+				return;
+			}
+
 			if (e.Button == (int) MouseButton.Left) {
 				BuildBuilding();
 			}
@@ -179,6 +224,10 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnMouseMove(MHUrhoMouseMovedEventArgs e)
 		{
+			if (ui.UIHovering) {
+				return;
+			}
+
 			if (lockedTile != null) {
 				ITile tile = input.GetTileUnderCursor();
 				if (tile != lockedTile) {
@@ -198,12 +247,18 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnUpdate(float timeStep)
 		{
+			if (ui.UIHovering) {
+				return;
+			}
+
 			HighlightBuildingRectangle();
 		}
 
 		public override void UIHoverBegin()
 		{
-			
+			if (lockedTile == null) {
+				Level.Map.DisableHighlight();
+			}
 		}
 
 		void BuildBuilding()
@@ -213,11 +268,32 @@ namespace ShowcasePackage.Buildings
 
 			IntRect rect = GetBuildingRectangle(tile, BuildingType);
 
-			if (BuildingType.CanBuild(rect.TopLeft(), rect.BottomRight(), input.Player, Level))
-			{
-				float angle = 90 * (int)Direction;
-				Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.FromAxisAngle(Vector3.UnitY, angle), input.Player);
+			if (BuildingType.CanBuild(rect.TopLeft(), rect.BottomRight(), input.Player, Level)) {
+				Vector3 facing;
+				switch (Direction) {
+					case Direction.PlusX:
+						facing = Vector3.UnitX;
+						break;
+					case Direction.PlusZ:
+						facing = Vector3.UnitZ;
+						break;
+					case Direction.MinusX:
+						facing = -Vector3.UnitX;
+						break;
+					case Direction.MinusZ:
+						facing = -Vector3.UnitZ;
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+				var building = Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.FromRotationTo(Vector3.UnitZ, facing), input.Player);
+				Urho.IO.Log.Write(LogLevel.Debug, $"{building.Forward}");
 			}
+		}
+
+		Color GetColor(Color[] colors, int[] colorMapping)
+		{
+			return colors[colorMapping[(int)Direction]];
 		}
 	}
 }

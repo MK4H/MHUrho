@@ -11,7 +11,7 @@ using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
-	public abstract class Builder {
+	public abstract class Builder : IDisposable {
 
 		public BuildingType BuildingType { get; private set; }
 
@@ -62,6 +62,11 @@ namespace ShowcasePackage.Buildings
 
 		}
 
+		public virtual void Dispose()
+		{
+
+		}
+
 		protected IntRect GetBuildingRectangle(ITile centerTile, BuildingType buildingType)
 		{
 			IntVector2 topLeft = centerTile.TopLeft - buildingType.Size / 2;
@@ -70,5 +75,7 @@ namespace ShowcasePackage.Buildings
 
 			return new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y);
 		}
+
+		
 	}
 }

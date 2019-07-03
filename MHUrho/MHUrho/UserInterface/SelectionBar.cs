@@ -66,14 +66,14 @@ namespace MHUrho.UserInterface
 
 			int newPos = buttonHolder.Position.X;
 			switch (e.Element.Name) {
-				case "LeftButton":
+				case "RightButton":
 					newPos -= 100;
 
 					if (newPos + buttonHolder.Size.X < centralWindow.Size.X) {
 						newPos = buttonHolder.Parent.Size.X - buttonHolder.Size.X;
 					}
 					break;
-				case "RightButton":
+				case "LeftButton":
 					newPos += 100;
 
 					if (newPos > 0) {

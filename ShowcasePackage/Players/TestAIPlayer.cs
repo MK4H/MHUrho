@@ -24,10 +24,6 @@ namespace ShowcasePackage.Players
 		public override string Name => "TestAI";
 
 		public UnitType Chicken { get; private set; }
-		public UnitType TestUnit { get; private set; }
-		public UnitType TestWorker { get; private set; }
-
-		public BuildingType TestBuilding { get; private set; }
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
@@ -42,9 +38,6 @@ namespace ShowcasePackage.Players
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
 			Chicken = package.GetUnitType("Chicken");
-			TestUnit = package.GetUnitType("TestUnit");
-			TestWorker = package.GetUnitType("TestWorker");
-			TestBuilding = package.GetBuildingType("TestBuilding");
 		}
 	}
 

@@ -15,7 +15,10 @@ using MHUrho.UserInterface.MandK;
 using MHUrho.Helpers.Extensions;
 using Urho;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using ShowcasePackage.Levels;
+using ShowcasePackage.Misc;
+using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
@@ -27,9 +30,20 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public Cost Cost { get; private set; }
+		public ViableTileTypes ViableTileTypes { get; private set; }
+
+		const string CostElement = "cost";
+		const string CanBuildOnElement = "canBuildOn";
+
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
+			Cost = Cost.FromXml(costElem, package);
 
+			XElement canBuildOnElem =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
+			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
@@ -47,12 +61,12 @@ namespace ShowcasePackage.Buildings
 			return topLeftTileIndex == bottomRightTileIndex && 
 					level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0);
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new LineBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID));
+			return new WallBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID), this);
 		}
 	}
 
@@ -60,7 +74,12 @@ namespace ShowcasePackage.Buildings
 
 		public static readonly object WallTag = "Wall";
 
+		const float height = 4;
+
 		IBuildingNode pathNode;
+
+		HealthBar healthBar;
+		double hp;
 
 		public Wall(ILevelManager level, IBuilding building)
 			: base(level, building)
@@ -75,17 +94,24 @@ namespace ShowcasePackage.Buildings
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
-
+			var writer = pluginData.GetWriterForWrappedSequentialData();
+			writer.StoreNext(hp);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
-
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			reader.GetNext(out hp);
 		}
 
 		public override void Dispose()
 		{
 			pathNode.Remove();
+		}
+
+		public override float? GetHeightAt(float x, float y)
+		{
+			return Level.Map.GetTerrainHeightAt(x, y) + height;
 		}
 
 		public override IBuildingNode TryGetNodeAt(ITile tile)
@@ -123,6 +149,37 @@ namespace ShowcasePackage.Buildings
 					node.CreateEdge(pathNode, movementType);
 				}
 			}
+		}
+	}
+
+	class WallBuilder : LineBuilder {
+		readonly BaseCustomWindowUI cwUI;
+
+		public WallBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type, WallType myType)
+			: base(input, ui, camera, type)
+		{
+			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+		}
+
+		public override void Enable()
+		{
+			base.Enable();
+
+			cwUI.Show();
+		}
+
+		public override void Disable()
+		{
+			cwUI.Hide();
+
+			base.Disable();
+		}
+
+		public override void Dispose()
+		{
+			cwUI.Dispose();
+
+			base.Dispose();
 		}
 	}
 }

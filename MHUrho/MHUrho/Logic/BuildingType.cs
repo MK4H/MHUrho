@@ -41,6 +41,33 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <summary>
+		/// This constructor enables creation of mock instances, that are not loaded from package and have other uses.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <param name="package"></param>
+		/// <param name="assets"></param>
+		/// <param name="iconRectangle"></param>
+		/// <param name="size"></param>
+		/// <param name="plugin"></param>
+		protected BuildingType(int id, 
+							string name,
+							GamePack package,
+							AssetContainer assets, 
+							IntRect iconRectangle, 
+							IntVector2 size, 
+							BuildingTypePlugin plugin)
+		{
+			this.ID = id;
+			this.Name = name;
+			this.Package = package;
+			this.Assets = assets;
+			this.IconRectangle = iconRectangle;
+			this.Size = size;
+			this.Plugin = plugin;
+		}
+
 		public void Load(XElement xml, GamePack package) {
 
 			Package = package;

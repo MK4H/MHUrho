@@ -17,6 +17,7 @@ using MHUrho.Helpers.Extensions;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
 using ShowcasePackage.Levels;
+using ShowcasePackage.Misc;
 using Urho;
 using Urho.Gui;
 
@@ -30,6 +31,12 @@ namespace ShowcasePackage.Buildings
 
 		public override string Name => TypeName;
 		public override int ID => TypeID;
+
+		public Cost Cost { get; private set; }
+		public ViableTileTypes ViableTileTypes { get; private set; }
+
+		const string CostElement = "cost";
+		const string CanBuildOnElement = "canBuildOn";
 
 		BuildingType myType;
 
@@ -47,21 +54,29 @@ namespace ShowcasePackage.Buildings
 		{
 			return level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0);
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new GateBuilder(input, ui, camera, myType);
+			return new GateBuilder(input, ui, camera, myType, this);
 		}
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
+			Cost = Cost.FromXml(costElem, package);
+
+			XElement canBuildOnElem =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
+			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
+
 			myType = package.GetBuildingType(ID);
 		}
 	}
 
 	public class GateInstance : WalkableBuildingPlugin {
+
 
 		class Door {
 
@@ -70,14 +85,33 @@ namespace ShowcasePackage.Buildings
 			/// </summary>
 			public double OpeningTime { get; set; }
 			public bool IsOpen { get; private set; }
+			public bool IsMoving { get; private set; }
 
 
-			Node node;
-			double openAngle;
-			double closedAngle;
-			double rotationChange;
+			readonly Node node;
+			readonly double openAngle;
+			readonly double closedAngle;
+
+			/// <summary>
+			/// Remaining amount of rotation to target.
+			/// </summary>
+			double remainingRotation;
+
+			/// <summary>
+			/// Angle of the door at the start of the movement.
+			/// </summary>
 			double start;
+
+			/// <summary>
+			/// Angle of the door at the end of the movement.
+			/// </summary>
 			double target;
+
+			/// <summary>
+			/// Target of the current movement is the Open position.
+			/// Differs from <see cref="IsOpen"/>, because it is changed at the start
+			/// of the movement, whereas <see cref="IsOpen"/> is changed at the end.
+			/// </summary>
 			bool isTargetOpen;
 
 			/// <summary>
@@ -96,7 +130,7 @@ namespace ShowcasePackage.Buildings
 				this.OpeningTime = openingTime;
 				this.IsOpen = isOpen;
 				this.isTargetOpen = isOpen;
-				this.rotationChange = isOpen ? openAngle - closedAngle : closedAngle - openAngle;
+				this.remainingRotation = 0;
 				this.start = isOpen ? closedAngle : openAngle;
 				this.target = isOpen ? openAngle : closedAngle;
 
@@ -105,18 +139,29 @@ namespace ShowcasePackage.Buildings
 
 			public void Open()
 			{
-				this.rotationChange = openAngle - closedAngle;
-				this.start = closedAngle;
-				this.target = openAngle;
-				this.isTargetOpen = true;
+				if (isTargetOpen) {
+					return;
+				}
+
+				remainingRotation = openAngle - closedAngle;
+				start = closedAngle;
+				target = openAngle;
+				isTargetOpen = true;
+				IsMoving = true;
 			}
 
 			public void Close()
 			{
-				this.rotationChange = closedAngle - openAngle;
-				this.start = openAngle;
-				this.target = closedAngle;
-				this.isTargetOpen = false;
+				if (!isTargetOpen)
+				{
+					return;
+				}
+
+				remainingRotation = closedAngle - openAngle;
+				start = openAngle;
+				target = closedAngle;
+				isTargetOpen = false;
+				IsMoving = true;
 			}
 
 			public void Show()
@@ -134,6 +179,8 @@ namespace ShowcasePackage.Buildings
 				Open();
 				SetAngle((float) target);
 				IsOpen = true;
+				isTargetOpen = true;
+				IsMoving = false;
 			}
 
 			public void SetClosed()
@@ -141,22 +188,29 @@ namespace ShowcasePackage.Buildings
 				Close();
 				SetAngle((float)target);
 				IsOpen = false;
+				isTargetOpen = false;
+				IsMoving = false;
 			}
 
 			public void OnUpdate(float timeStep)
 			{
-				double angle = node.Rotation.YawAngle;
-				if ((rotationChange < 0 && angle > target) || 
-					(rotationChange > 0 && angle < target)) {
-
-					//Moving to target angle
-					double tickRotation = (rotationChange / OpeningTime) * timeStep;
+				if (!IsMoving) {
+					return;
+				}
+				double rotation = target - start;
+				bool positiveMovement = rotation > 0;
+				bool positiveRemaining = remainingRotation > 0;
+				if ((positiveMovement && positiveRemaining) || (!positiveMovement && !positiveRemaining)) {
+					//Moving to target 
+					double tickRotation = (rotation / OpeningTime) * timeStep;
 					node.Rotate(Quaternion.FromAxisAngle(Vector3.UnitY, (float)tickRotation));
+					remainingRotation -= tickRotation;
 				}
 				else {
 					//On target angle
 					SetAngle((float)target);
 					IsOpen = isTargetOpen;
+					IsMoving = false;
 				}
 			}
 
@@ -166,31 +220,32 @@ namespace ShowcasePackage.Buildings
 			}
 		}
 
-
 		public static readonly object GateTunnelTag = "GateTunnel";
 		public static readonly object GateDoorTag = "GateDoor";
 		public static readonly object GateRoofTag = "GateRoof";
 
 		public bool IsOpen => leftDoor.IsOpen && rightDoor.IsOpen;
+		public bool IsDoorMoving => leftDoor.IsMoving || rightDoor.IsMoving;
 
 		readonly Door leftDoor;
 		readonly Door rightDoor;
 
-	
 		readonly Dictionary<ITile, IBuildingNode> roofNodes;
 		readonly Dictionary<ITile, IBuildingNode> tunnelNodes;
 
 		Clicker clicker;
 
+		GateWindow window;
+
 		GateInstance(ILevelManager level, IBuilding building)
 			: base(level, building)
 		{
 
-			this.leftDoor = new Door(building.Node.GetChild("Door_l"), 0, 90, 5, true);
-			this.rightDoor = new Door(building.Node.GetChild("Door_r"), 0, -90, 5, true);
+			this.leftDoor = new Door(building.Node.GetChild("Door_l"), 90, 180, 5, true);
+			this.rightDoor = new Door(building.Node.GetChild("Door_r"), 90, 0, 5, true);
 			this.roofNodes = new Dictionary<ITile, IBuildingNode>();
 			this.tunnelNodes = new Dictionary<ITile, IBuildingNode>();
-
+			this.window = new GateWindow(this);
 			
 			CreatePathfindingNodes();
 		}
@@ -230,7 +285,7 @@ namespace ShowcasePackage.Buildings
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
-			bool isOpen = reader.GetNext<bool>();
+			reader.GetNext(out bool isOpen);
 
 			if (isOpen) {
 				leftDoor.SetOpen();
@@ -248,18 +303,23 @@ namespace ShowcasePackage.Buildings
 		public override void Dispose()
 		{
 			clicker.Clicked -= OnClicked;
-			foreach (var node in roofNodes)
+			foreach (var node in roofNodes.Values)
 			{
-				node.Value.Remove();
+				node.Remove();
 			}
 
-			foreach (var node in tunnelNodes)
+			foreach (var node in tunnelNodes.Values)
 			{
-				node.Value.Remove();
+				node.Remove();
 			}
 		}
 
-		
+		public override void OnUpdate(float timeStep)
+		{
+			leftDoor.OnUpdate(timeStep);
+			rightDoor.OnUpdate(timeStep);
+			window?.OnUpdate(timeStep);
+		}
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
@@ -287,7 +347,7 @@ namespace ShowcasePackage.Buildings
 
 		void OnClicked(int button, int buttons, int qualifiers)
 		{
-			Level.UIManager.LoadLayoutToUI("Assets/Buildings/Gate/Window.xml");
+			window.Display();
 		}
 
 		void CreatePathfindingNodes()
@@ -375,9 +435,175 @@ namespace ShowcasePackage.Buildings
 	}
 
 	class GateBuilder : DirectionalBuilder {
-		public GateBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType buildingType)
+
+		readonly BaseCustomWindowUI cwUI;
+
+		public GateBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType buildingType, GateType myType)
 			: base(input, ui, camera, buildingType)
-		{ }
+		{
+			AbleFront = Color.Red;
+			AbleBack = Color.Yellow;
+
+			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+		}
+
+		public override void Enable()
+		{
+			base.Enable();
+
+			cwUI.Show();
+		}
+
+		public override void Disable()
+		{
+			cwUI.Hide();
+
+			base.Disable();
+		}
+
+		public override void Dispose()
+		{
+			cwUI.Dispose();
+
+			base.Dispose();
+		}
+
+		
 	}
+
+	class GateWindow : ExclusiveWindow
+	{
+
+		class GateWindowInstance : IDisposable
+		{
+
+			GateInstance Gate => gateWindow.gate;
+
+			readonly GateWindow gateWindow;
+
+			readonly Window window;
+			readonly Button hideButton;
+			readonly Button openButton;
+			readonly Button closeButton;
+
+			public GateWindowInstance(GateWindow gateWindow)
+			{
+				this.gateWindow = gateWindow;
+				Gate.Level.UIManager.LoadLayoutToUI("Assets/UI/GateWindow.xml");
+				this.window = (Window)Gate.Level.UIManager.UI.Root.GetChild("GateWindow");
+
+				this.hideButton = (Button)window.GetChild("HideButton");
+
+				this.openButton = (Button)window.GetChild("OpenButton", true);
+				this.closeButton = (Button)window.GetChild("CloseButton", true);
+
+				if (Gate.IsOpen)
+				{
+					openButton.Enabled = false;
+					closeButton.Enabled = true;
+				}
+
+				RegisterHandlers();
+			}
+
+			public void OnUpdate(float timeStep)
+			{
+				if (!window.Visible)
+				{
+					return;
+				}
+
+				if (Gate.IsDoorMoving)
+				{
+					openButton.Enabled = false;
+					closeButton.Enabled = false;
+					return;
+				}
+
+				if (Gate.IsOpen)
+				{
+					openButton.Enabled = false;
+					closeButton.Enabled = true;
+				}
+				else
+				{
+					openButton.Enabled = true;
+					closeButton.Enabled = false;
+				}
+			}
+
+			public void Dispose()
+			{
+				UnregisterHandlers();
+				hideButton.Dispose();
+				openButton.Dispose();
+				closeButton.Dispose();
+				window.Remove();
+			}
+
+			void RegisterHandlers()
+			{
+				hideButton.Pressed += HideButtonPressed;
+				openButton.Pressed += OpenButtonPressed;
+				closeButton.Pressed += CloseButtonPressed;
+			}
+
+			void UnregisterHandlers()
+			{
+				hideButton.Pressed -= HideButtonPressed;
+				openButton.Pressed -= OpenButtonPressed;
+				closeButton.Pressed -= CloseButtonPressed;
+			}
+
+			void CloseButtonPressed(PressedEventArgs obj)
+			{
+				Gate.Close();
+			}
+
+			void OpenButtonPressed(PressedEventArgs obj)
+			{
+				Gate.Open();
+			}
+
+			void HideButtonPressed(PressedEventArgs obj)
+			{
+				gateWindow.Hide();
+			}
+		}
+
+		readonly GateInstance gate;
+
+		GateWindowInstance instance;
+
+		public GateWindow(GateInstance gate)
+		{
+			this.gate = gate;
+		}
+
+		protected override void OnDisplay()
+		{
+			instance = new GateWindowInstance(this);
+		}
+
+		protected override void OnHide()
+		{
+			instance?.Dispose();
+			instance = null;
+		}
+
+		public void OnUpdate(float timeStep)
+		{
+			instance?.OnUpdate(timeStep);
+		}
+
+		public override void Dispose()
+		{
+			if (instance != null)
+			{
+				Hide();
+			}
+		}
+	}
+
 
 }

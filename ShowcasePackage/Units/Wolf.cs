@@ -4,27 +4,46 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using MHUrho.CameraMovement;
 using MHUrho.Control;
 using MHUrho.DefaultComponents;
 using MHUrho.EntityInfo;
+using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using MHUrho.UserInterface.MandK;
 using MoreLinq;
+using ShowcasePackage.Misc;
 using Urho;
 
 namespace ShowcasePackage.Units
 {
-	public class WolfType : UnitTypePlugin {
-		public override string Name => "Wolf";
-		public override int ID => 3;
+	public class WolfType : SpawnableUnitTypePlugin {
 
+		public static string TypeName = "Wolf";
+		public static int TypeID = 5;
+
+		public override string Name => TypeName;
+		public override int ID => TypeID;
+
+		public override Cost Cost => cost;
+		public override UnitType UnitType => myType;
+
+		const string CostElement = "cost";
+
+		Cost cost;
+		UnitType myType;
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
-			
+			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
+			cost = Cost.FromXml(costElem, package);
+
+
+			myType = package.GetUnitType(ID);
 		}
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
@@ -41,6 +60,11 @@ namespace ShowcasePackage.Units
 		{
 			//Can only spawn on a tile with no buildings and no other units
 			return centerTile.Building == null && centerTile.Units.Count == 0;
+		}
+
+		public override Spawner GetSpawner(GameController input, GameUI ui, CameraMover camera)
+		{
+			return new WolfSpawner(input, ui, camera, myType, this);
 		}
 	}
 
@@ -107,7 +131,7 @@ namespace ShowcasePackage.Units
 
 			RegisterEvents(walker);
 			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
-			hp = sequentialData.GetNext<float>();
+			sequentialData.GetNext(out hp);
 			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), hp);
 		}
 
@@ -192,23 +216,23 @@ namespace ShowcasePackage.Units
 
 		void OnMovementStarted(WorldWalker walker)
 		{
-			animationController.PlayExclusive("Units/Dog/Walk.ani", 0, true);
-			animationController.SetSpeed("Units/Dog/Walk.ani", 2);
+			animationController.PlayExclusive("Units/Wolf/Wolf_Walk_cycle_.ani", 0, true);
+			animationController.SetSpeed("Units/Wolf/Wolf_Walk_cycle_.ani", 2);
 		}
 
 		void OnMovementFinished(WorldWalker walker)
 		{
-			animationController.Stop("Units/Dog/Walk.ani");
+			animationController.Stop("Units/Wolf/Wolf_Walk_cycle_.ani");
 		}
 
 		void OnMovementFailed(WorldWalker walker)
 		{
-			animationController.Stop("Units/Dog/Walk.ani");
+			animationController.Stop("Units/Wolf/Wolf_Walk_cycle_.ani");
 		}
 
 		void OnMovementCanceled(WorldWalker walker)
 		{
-			animationController.Stop("Units/Dog/Walk.ani");
+			animationController.Stop("Units/Wolf/Wolf_Walk_cycle_.ani");
 		}
 
 		void RegisterEvents(WorldWalker walker)
@@ -218,6 +242,30 @@ namespace ShowcasePackage.Units
 			walker.MovementFailed += OnMovementFailed;
 			walker.MovementCanceled += OnMovementCanceled;
 
+		}
+	}
+
+	class WolfSpawner : PointSpawner {
+
+		public override Cost Cost => myType.Cost;
+
+		readonly WolfType myType;
+
+		public WolfSpawner(GameController input, GameUI ui, CameraMover camera, UnitType type, WolfType myType)
+			: base(input, ui, camera, type)
+		{
+			this.myType = myType;
+		}
+
+		
+
+		public override IUnit SpawnAt(ITile tile, IPlayer player)
+		{
+			if (myType.CanSpawnAt(tile) && (Level.EditorMode || myType.Cost.HasResources(player))) {
+				return Level.SpawnUnit(UnitType, tile, Quaternion.Identity, player);
+			}
+
+			return null;
 		}
 	}
 }

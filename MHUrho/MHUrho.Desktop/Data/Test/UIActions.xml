@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
-  <!--<mainMenu>
+  <mainMenu>
     <action>start</action>
   </mainMenu>
   <packagePicking>
@@ -20,14 +20,14 @@
     <values>
       <levelName>Test level 1</levelName>
       <description>The best test level 1</description>
-      <thumbnailPath>xamarin.png</thumbnailPath>
+      <thumbnailPath>Assets/xamarin.png</thumbnailPath>
       <logicTypeName>TestLogic</logicTypeName>
       <mapSize x="200" y="300"/>
     </values>
   </levelCreation>
   <loading>
     <action>none</action>
-  </loading>-->
+  </loading>
 
   <!--<levelPicking>
     <action>play</action>

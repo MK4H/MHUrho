@@ -84,19 +84,23 @@ namespace MHUrho.Logic
 					throw new CreationException(message, e);
 				}
 
-
+				Building newBuilding = null;
 				try {
 					new BuildingComponentSetup().SetupComponentsOnNode(buildingNode, level);
 
-					var newBuilding = new Building(id, level, rect, type, player);
+					newBuilding = new Building(id, level, rect, type, player);
 					buildingNode.AddComponent(newBuilding);
 
 					newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 					return newBuilding;
 				}
 				catch (Exception e) {
-					buildingNode.Remove();
-					buildingNode.Dispose();
+					if (newBuilding != null) {
+						newBuilding.RemoveFromLevel();
+					}
+					else {
+						buildingNode.Remove();
+					}					
 					string message = $"There was an Exception while creating a new building: {e.Message}";
 					Urho.IO.Log.Write(LogLevel.Error, message);
 					throw new CreationException(message, e);

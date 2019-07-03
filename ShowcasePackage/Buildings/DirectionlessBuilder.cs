@@ -10,6 +10,7 @@ using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.UserInterface.MandK;
 using Urho;
+using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
@@ -30,8 +31,22 @@ namespace ShowcasePackage.Buildings
 		}
 
 
+		public override void Disable()
+		{
+			Level.Map.DisableHighlight();
+		}
+
+		public override void UIHoverBegin()
+		{
+			Level.Map.DisableHighlight();
+		}
+
 		public override void OnMouseDown(MouseButtonDownEventArgs e)
 		{
+			if (Ui.UIHovering) {
+				return;
+			}
+
 			if (e.Button != (int) MouseButton.Left) {
 				return;
 			}
@@ -59,6 +74,11 @@ namespace ShowcasePackage.Buildings
 
 		protected void HighlightBuildingRectangle()
 		{
+			if (Ui.UIHovering)
+			{
+				return;
+			}
+
 			ITile tile = Input.GetTileUnderCursor();
 
 			if (tile == null) {

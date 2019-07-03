@@ -16,6 +16,8 @@ using MHUrho.Helpers.Extensions;
 using Urho;
 using MHUrho.Control;
 using ShowcasePackage.Levels;
+using ShowcasePackage.Misc;
+using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
@@ -27,9 +29,24 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public Cost Cost { get; private set; }
+		public ViableTileTypes ViableTileTypes { get; private set; }
+
+		const string CostElement = "cost";
+		const string CanBuildOnElement = "canBuildOn";
+
+		BuildingType myType;
+
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
+			Cost = Cost.FromXml(costElem, package);
 
+			XElement canBuildOnElem =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
+			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
+
+			myType = package.GetBuildingType(TypeID);
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
@@ -46,12 +63,12 @@ namespace ShowcasePackage.Buildings
 		{
 			return level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0);
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new DirectionalBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID));
+			return new TowerBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID), this);
 		}
 	}
 
@@ -59,7 +76,7 @@ namespace ShowcasePackage.Buildings
 	{
 
 		public static readonly object TowerTag = "Tower";
-		const int BuildingHeight = 5;
+		const int BuildingHeight = 8;
 
 		readonly Dictionary<ITile, IBuildingNode> nodes;
 
@@ -148,6 +165,38 @@ namespace ShowcasePackage.Buildings
 					}
 				}
 			}
+		}
+	}
+
+	class TowerBuilder : DirectionlessBuilder {
+
+		readonly BaseCustomWindowUI cwUI;
+
+		public TowerBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type, TowerType myType)
+			: base(input, ui, camera, type)
+		{
+			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+		}
+
+		public override void Enable()
+		{
+			base.Enable();
+
+			cwUI.Show();
+		}
+
+		public override void Disable()
+		{
+			cwUI.Hide();
+
+			base.Disable();
+		}
+
+		public override void Dispose()
+		{
+			cwUI.Dispose();
+
+			base.Dispose();
 		}
 	}
 }

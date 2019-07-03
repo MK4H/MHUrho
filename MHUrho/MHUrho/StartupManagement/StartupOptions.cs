@@ -146,25 +146,13 @@ namespace MHUrho.StartupManagement
 		/// <exception cref="XmlSchemaValidationException">Occurs when <paramref name="xmlFilePath"/> does not conform to the schema at Schemas/MenuActions.xsd</exception>
 		public ActionManager(XDocument xmlFile, FileManager files)
 		{
-			try {
+			var schema = new XmlSchemaSet();
+			schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
+						XmlReader.Create(files.OpenStaticFileRO(SchemaPath)));
 
+			xmlFile.Validate(schema, null);
 
-				var schema = new XmlSchemaSet();
-				schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
-							XmlReader.Create(files.OpenStaticFileRO(SchemaPath)));
-
-				xmlFile.Validate(schema, null);
-
-				actions = MenuScreenAction.Parse(xmlFile);
-			}
-			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Error, $"MenuAction did not conform to schema: {e.Message}");
-				throw;
-			}
-			catch (IOException e) {
-				Urho.IO.Log.Write(LogLevel.Error, $"Could not open MenuAction file: {e.Message}");
-				throw;
-			}
+			actions = MenuScreenAction.Parse(xmlFile);
 		}
 
 		public void RunActions(MHUrhoApp game)

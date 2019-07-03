@@ -38,6 +38,7 @@ namespace MHUrho.EditorTools.MandK {
 			this.checkBoxes = new ExclusiveCheckBoxes();
 			this.camera = camera;
 			this.manipulators = new Dictionary<UIElement, TerrainManipulator>();
+			this.enabled = false;
 
 			var selectorCheckBox = ui.SelectionBar.CreateCheckBox();
 			selectorCheckBox.Name = "Selector";

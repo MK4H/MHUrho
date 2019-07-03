@@ -60,13 +60,13 @@
     <Compile Include="Buildings\BFSRoofFormationController.cs" />
     <Compile Include="Buildings\Builder.cs" />
     <Compile Include="Buildings\BuilderTool.cs" />
+    <Compile Include="Buildings\Destroyer.cs" />
     <Compile Include="Buildings\DirectionalBuilder.cs" />
     <Compile Include="Buildings\DirectionlessBuilder.cs" />
     <Compile Include="Buildings\Gate.cs" />
     <Compile Include="Buildings\Keep.cs" />
     <Compile Include="Buildings\LineBuilder.cs" />
     <Compile Include="Buildings\SpiralFormationController.cs" />
-    <Compile Include="Buildings\TestBuilding.cs" />
     <Compile Include="Buildings\Tower.cs" />
     <Compile Include="Buildings\Tree.cs" />
     <Compile Include="Buildings\TreeCutter.cs" />
@@ -75,7 +75,11 @@
     <Compile Include="Levels\LevelPluginBase.cs" />
     <Compile Include="Levels\TestLevel.cs" />
     <Compile Include="Levels\TestLevelLogic2.cs" />
+    <Compile Include="Misc\BaseCustomWindowUI.cs" />
+    <Compile Include="Misc\Cost.cs" />
     <Compile Include="Misc\Timeout.cs" />
+    <Compile Include="Misc\ViableTileTypes.cs" />
+    <Compile Include="Misc\Window.cs" />
     <Compile Include="Players\AgressivePlayer.cs" />
     <Compile Include="Players\DefensivePlayer.cs" />
     <Compile Include="Players\TestAIPlayer.cs" />
@@ -86,11 +90,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToolManagerMandK.cs" />
     <Compile Include="Units\BaseDistCalc.cs" />
+    <Compile Include="Units\Deleter.cs" />
+    <Compile Include="Units\PointSpawner.cs" />
+    <Compile Include="Units\SpawnableUnitTypePlugin.cs" />
     <Compile Include="Units\Chicken.cs" />
     <Compile Include="Units\ClimbingDistCalc.cs" />
     <Compile Include="Units\Dog.cs" />
-    <Compile Include="Units\TestUnit.cs" />
-    <Compile Include="Units\TestWorker.cs" />
+    <Compile Include="Units\Spawner.cs" />
+    <Compile Include="Units\SpawnerTool.cs" />
     <Compile Include="Units\Wolf.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -161,7 +168,31 @@
     <Content Include="Assets\Buildings\Wall\prefab.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\stoneBasic.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Textures\toolIcons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\BaseBuildingCWUI.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\BuildingToolUI.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\GateWindow.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\KeepWindow.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\SizeSlider.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\SpawningToolUI.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\TreeCWUI.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Units\Chicken\Models\Chicken.txt">
@@ -184,6 +215,36 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Green.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Materials\Wolf_Body.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Materials\Wolf_Claws.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Materials\Wolf_Eyes.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Materials\Wolf_Fur.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Materials\Wolf_Teeth.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_obj_body.004.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\prefab.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Textures\Wolf_Body.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Wolf\Textures\Wolf_Eyes_1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Water.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Levels\LevelsFolder.txt">
@@ -298,6 +359,27 @@
     <None Include="Assets\Units\Dog\Walk.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Assets\Units\Wolf\Models\000.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Wolf\Models\Wolf_creep_cycle.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Wolf\Models\Wolf_Idle_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Wolf\Models\Wolf_obj_body.004.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Wolf\Models\Wolf_Run_Cycle_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Wolf\Models\Wolf_seat_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Wolf\Models\Wolf_Walk_cycle_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -326,9 +408,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\UI\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets" Condition="Exists('..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

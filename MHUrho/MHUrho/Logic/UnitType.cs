@@ -42,6 +42,30 @@ namespace MHUrho.Logic
 		}
 
 		/// <summary>
+		/// Provided for construction of mock types for auxiliary uses.
+		/// </summary>
+		/// <param name="id">Identifier.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="package">Package.</param>
+		/// <param name="assets">Asset container.</param>
+		/// <param name="iconRectangle">Icon rectangle in the <see cref="GamePack.UnitIconTexture"/></param>
+		/// <param name="plugin">Plugin.</param>
+		public UnitType(int id,
+						string name,
+						GamePack package,
+						AssetContainer assets,
+						IntRect iconRectangle,
+						UnitTypePlugin plugin)
+		{
+			this.ID = id;
+			this.Name = name;
+			this.Package = package;
+			this.Assets = assets;
+			this.IconRectangle = iconRectangle;
+			this.Plugin = plugin;
+		}
+
+		/// <summary>
 		/// Loads the standard data of the unitType from the xml
 		/// 
 		/// THE STANDARD DATA cannot reference any other types, it would cause infinite cycles

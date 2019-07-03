@@ -15,6 +15,7 @@ using MHUrho.UserInterface.MandK;
 using MHUrho.Helpers.Extensions;
 using ShowcasePackage.Misc;
 using Urho;
+using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
@@ -26,11 +27,18 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public Cost Cost { get; private set; }
+		public ViableTileTypes ViableTileTypes { get; private set; }
+
 		public UnitType WorkerType { get; private set; }
 		public ResourceType ProducedResource { get; private set; }
 
 		const string WorkerElement = "workerType";
 		const string ResourceElement = "resourceType";
+		const string CostElement = "cost";
+		const string CanBuildOnElement = "canBuildOn";
+
+		BuildingType myType;
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
@@ -40,16 +48,25 @@ namespace ShowcasePackage.Buildings
 			XElement resourceElement =
 				extensionElement.Element(package.PackageManager.GetQualifiedXName(ResourceElement));
 			ProducedResource = package.GetResourceType(resourceElement.Value);
+
+			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
+			Cost = Cost.FromXml(costElem, package);
+
+			XElement canBuildOnElem =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
+			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
+
+			myType = package.GetBuildingType(TypeID);
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
 		{
-			return new TreeCutter(level, building, this);
+			return TreeCutter.CreateNew(level, building, this);
 		}
 
 		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building)
 		{
-			return new TreeCutter(level, building, this);
+			return TreeCutter.CreateForLoading(level, building, this);
 		}
 
 		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
@@ -57,12 +74,12 @@ namespace ShowcasePackage.Buildings
 			return topLeftTileIndex == bottomRightTileIndex &&
 					level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0);
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new LineBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID));
+			return new TreeCutterBuilder(input, ui, camera, myType, this);
 		}
 	}
 
@@ -71,17 +88,21 @@ namespace ShowcasePackage.Buildings
 		class Worker {
 
 			public IUnit Unit { get; private set; }
+
+			public bool DoRespawn { get; set; }
+
 			readonly Timeout timeout;
 			readonly TreeCutter cutter;
 
 			public Worker(TreeCutter cutter, IUnit unit, double respawnTime)
 				:this(cutter, unit, respawnTime, respawnTime)
 			{
-
+				
 			}
 
 			Worker(TreeCutter cutter, IUnit unit, double respawnTime, double remainingTime)
 			{
+				this.DoRespawn = true;
 				this.Unit = unit;
 				if (unit != null)
 				{
@@ -93,21 +114,24 @@ namespace ShowcasePackage.Buildings
 				timeout = new Timeout(respawnTime, remainingTime);
 			}
 
-			public static Worker Load(SequentialPluginDataReader reader, TreeCutter cutter)
+			public static Worker Load(SequentialPluginDataReader reader, TreeCutter cutter, bool doRespawn)
 			{
-				int ID = reader.GetNext<int>();
-				double duration = reader.GetNext<double>();
-				double remaining = reader.GetNext<double>();
+				reader.GetNext(out int ID);
+				reader.GetNext(out double duration);
+				reader.GetNext(out double remaining);
 
 				IUnit unit = ID != 0 ? cutter.Level.GetUnit(ID) : null;
 
 
-				return new Worker(cutter, unit, duration, remaining);
+				return new Worker(cutter, unit, duration, remaining)
+						{
+							DoRespawn = doRespawn
+						};
 			}
 
 			public void OnUpdate(float timeStep)
 			{
-				if (Unit != null) {
+				if (Unit != null || !DoRespawn) {
 					return;
 				}
 
@@ -130,6 +154,11 @@ namespace ShowcasePackage.Buildings
 				writer.StoreNext(timeout.Remaining);
 			}
 
+			public void Despawn()
+			{
+				Unit?.RemoveFromLevel();
+			}
+
 			void OnWorkerDeath(IEntity worker)
 			{
 				if (worker != Unit) {
@@ -139,9 +168,12 @@ namespace ShowcasePackage.Buildings
 				timeout.Reset();
 				Unit = null;
 			}
+
 		}
 
 		public ResourceType ProducedResource => type.ProducedResource;
+
+		const int numberOfWorkers = 2;
 
 		/// <summary>
 		/// Respawn time in seconds.
@@ -152,20 +184,36 @@ namespace ShowcasePackage.Buildings
 
 		readonly Worker[] workers;
 
-		public TreeCutter(ILevelManager level, IBuilding building, TreeCutterType type)
+		TreeCutter(ILevelManager level, IBuilding building, TreeCutterType type)
 			: base(level, building)
 		{
 			this.type = type;
-			this.workers = new Worker[2];
-			StaticRangeTarget.CreateNew(this, level, building.Center);
-
-			using (var spawnPoints = building.Tiles[0].GetNeighbours().GetEnumerator()) {
-				workers[0] = new Worker(this, SpawnWorkerUnit(spawnPoints), workerRespawnTime);
-				workers[1] = new Worker(this, SpawnWorkerUnit(spawnPoints), workerRespawnTime);
-			}
-
+			this.workers = new Worker[numberOfWorkers];
 		}
 
+
+		public static TreeCutter CreateNew(ILevelManager level, IBuilding building, TreeCutterType type)
+		{
+			TreeCutter newCutter = new TreeCutter(level, building, type);
+			StaticRangeTarget.CreateNew(newCutter, level, building.Center);
+			using (var spawnPoints = building.Tiles[0].GetNeighbours().GetEnumerator())
+			{
+				for (int i = 0; i < numberOfWorkers; i++) {
+					IUnit workerUnit1 = level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
+					newCutter.workers[i] = new Worker(newCutter, workerUnit1, workerRespawnTime)
+											{
+												DoRespawn = !level.EditorMode
+											};
+				}
+			}
+
+			return newCutter;
+		}
+
+		public static TreeCutter CreateForLoading(ILevelManager level, IBuilding building, TreeCutterType type)
+		{
+			return new TreeCutter(level, building, type);
+		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
@@ -178,13 +226,17 @@ namespace ShowcasePackage.Buildings
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
-			workers[0] = Worker.Load(reader, this);
-			workers[1] = Worker.Load(reader, this);
+			for (int i = 0; i < numberOfWorkers; i++) {
+				workers[i] = Worker.Load(reader, this, Level.EditorMode);
+			}
 		}
 
 		public override void Dispose()
 		{
-
+			foreach (var worker in workers) {
+				worker.Despawn();
+				worker.DoRespawn = false;
+			}		
 		}
 
 		public override void OnUpdate(float timeStep)
@@ -212,6 +264,41 @@ namespace ShowcasePackage.Buildings
 			return null;
 		}
 
+	}
 
+	class TreeCutterBuilder : DirectionlessBuilder {
+
+		readonly BaseCustomWindowUI cwUI;
+
+		public TreeCutterBuilder(GameController input,
+								GameUI ui,
+								CameraMover camera,
+								BuildingType type,
+								TreeCutterType myType)
+			: base(input, ui, camera, type)
+		{
+			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+		}
+
+		public override void Enable()
+		{
+			base.Enable();
+
+			cwUI.Show();
+		}
+
+		public override void Disable()
+		{
+			cwUI.Hide();
+
+			base.Disable();
+		}
+
+		public override void Dispose()
+		{
+			cwUI.Dispose();
+
+			base.Dispose();
+		}
 	}
 }

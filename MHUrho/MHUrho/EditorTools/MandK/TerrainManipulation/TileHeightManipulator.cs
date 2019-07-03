@@ -17,6 +17,7 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
     class TileHeightManipulator : TerrainManipulator
     {
 		const float Sensitivity = 0.01f;
+		const int MaxHighlightSize = 32;
 
 		readonly GameController input;
 		readonly GameUI ui;
@@ -99,6 +100,10 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 			}
 
 			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+			//-1 due to lower bound being 0, so when we are reading the value, we are adding 1
+			sizeSlider.Range = MaxHighlightSize - 1;
+
+			uiElem.Visible = false;
 		}
 
 		void OnSliderChanged(SliderChangedEventArgs obj)

@@ -16,6 +16,8 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 {
 	class TerrainSmoothingManipulator : TerrainManipulator {
 
+		const int MaxHighlightSize = 32;
+
 		//https://en.wikipedia.org/wiki/Gaussian_blur
 		readonly Matrix3 matrix = new Matrix3(1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f,
 											2.0f / 16.0f, 4.0f / 16.0f, 2.0f / 16.0f,
@@ -132,6 +134,10 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 			}
 
 			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+			//-1 due to lower bound being 0, so when we are reading the value, we are adding 1
+			sizeSlider.Range = MaxHighlightSize - 1;
+
+			uiElem.Visible = false;
 		}
 
 		void OnSliderChanged(SliderChangedEventArgs obj)

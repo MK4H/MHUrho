@@ -59,7 +59,10 @@ namespace MHUrho.PathFinding.AStar
 
 		public void Remove()
 		{
-			foreach (var source in incomingEdges) {
+			//Enumerates over copy of incoming edges
+			// because with every RemoveEdge, the source calls RemoveAsTarget on this node
+			// which changes the incomingEdges list
+			foreach (var source in incomingEdges.ToArray()) {
 				source.RemoveEdge(this);
 			}
 

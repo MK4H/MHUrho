@@ -39,57 +39,44 @@
     </resourceType>
   </resourceTypes>
   <tileTypes>
-    <defaultTileType name="Default" ID="1">
+    <defaultTileType name="Sand" ID="1">
+      <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
+      <texturePath>Assets/sand.jpg</texturePath>
+      <minimapColor R="255" G="210" B="77"/>
+    </defaultTileType>
+    <tileType name="Xamarin" ID="2">
 	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
       <texturePath>Assets/xamarin.png</texturePath>
 			<minimapColor R="102" G="194" B="255"/>
-    </defaultTileType>
-    <tileType name="Sand" ID="2">
-	    <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
-      <texturePath>Assets/sand.jpg</texturePath>
-	    <minimapColor R="255" G="210" B="77"/>
     </tileType>
     <tileType name="Grass" ID="3">
       <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
       <texturePath>Assets/grass.png</texturePath>
       <minimapColor R="51" G="204" B="51"/>
     </tileType>
+    <tileType name="Water" ID="4">
+      <iconTextureRectangle left="0" top="300" right="100" bottom="400"/>
+      <texturePath>Assets/Water.png</texturePath>
+      <minimapColor R="52" G="120" B="215"/>
+    </tileType>
+    <tileType name="Stone" ID="5">
+      <iconTextureRectangle left="0" top="400" right="100" bottom="500"/>
+      <texturePath>Assets/stoneBasic.png</texturePath>
+      <minimapColor R="91" G="104" B="96"/>
+    </tileType>
   </tileTypes>
   <unitTypes>
-    <unitType name="TestUnit" ID="1">
-      <assets type="items">
-        <scale x="1" y="1" z="1"/>
-        <model type="static">
-          <modelPath>Assets/Box.mdl</modelPath>
-          <material>
-            <simpleMaterialPath>Assets/Green.xml</simpleMaterialPath>
-          </material>
-        </model>
-      </assets>
-      <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <extension>
-        <projectileType>TestProjectile</projectileType>
-      </extension>
-	    <iconTextureRectangle left="0" top="0" right="100" bottom="100"/>
-    </unitType>
-    <unitType name="TestWorker" ID="2">
-      <assets type="items">
-        <scale x="1" y="0.5" z="1"/>
-        <model type="static">
-          <modelPath>Assets/Box.mdl</modelPath>
-          <material>
-            <simpleMaterialPath>Assets/StoneMaterial.xml</simpleMaterialPath>
-          </material>
-        </model>
-      </assets>
-      <assemblyPath>ShowcasePackage.dll</assemblyPath>
-	    <iconTextureRectangle left="0" top="100" right="100" bottom="200"/>
-    </unitType>
     <unitType name="Chicken" ID="3">
       <assets type="xmlprefab">
         <path>Assets/Units/Chicken/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <extension>
+        <cost>
+          <Wood>0.2</Wood>
+          <Gold>0.5</Gold>
+        </cost>
+      </extension>
 	    <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
     </unitType>
     <unitType name="Dog" ID="4">
@@ -97,7 +84,20 @@
         <path>Assets/Units/Dog/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <iconTextureRectangle left="0" top="400" right="100" bottom="500"/>
+      <iconTextureRectangle left="0" top="1000" right="100" bottom="1100"/>
+    </unitType>
+    <unitType name="Wolf" ID="5">
+      <assets type="xmlprefab">
+        <path>Assets/Units/Wolf/prefab.xml</path>
+      </assets>
+      <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <extension>
+        <cost>
+          <Wood>0.4</Wood>
+          <Gold>0.2</Gold>
+        </cost>
+      </extension>
+      <iconTextureRectangle left="0" top="900" right="100" bottom="1000"/>
     </unitType>
   </unitTypes>
   <projectileTypes>
@@ -138,29 +138,6 @@
 		</projectileType>
   </projectileTypes>
   <buildingTypes>
-    <buildingType name="TestBuilding" ID="1">
-      <assets type="items">
-        <scale x="3" y="3" z="3"/>
-        <model type="static">
-          <modelPath>Assets/Box.mdl</modelPath>
-          <material>
-            <simpleMaterialPath>Assets/StoneMaterial.xml</simpleMaterialPath>
-          </material>
-        </model>
-        <collisionShape>
-          <box>
-            <size x="3" y="3" z="3"/>
-          </box>
-        </collisionShape>
-      </assets>
-      <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <extension>
-        <workerType>TestWorker</workerType>
-        <tileType>Sand</tileType>
-      </extension>
-	    <iconTextureRectangle left="0" top="300" right="100" bottom="400"/>
-	    <size x="3" y="3"/>
-    </buildingType>
     <buildingType name="Tree1" ID="2">
       <assets type="xmlprefab">
         <path>Assets/Buildings/Tree1/prefab.xml</path>
@@ -179,6 +156,16 @@
         <path>Assets/Buildings/Gate/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <extension>
+        <cost>
+          <Wood>10</Wood>
+        </cost>
+        <canBuildOn>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canBuildOn>
+      </extension>
       <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
       <size x="5" y="5"/>
     </buildingType>
@@ -187,7 +174,17 @@
         <path>Assets/Buildings/Wall/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <extension>
+        <cost>
+          <Wood>1</Wood>
+        </cost>
+        <canBuildOn>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canBuildOn>
+      </extension>
+      <iconTextureRectangle left="0" top="600" right="100" bottom="700"/>
       <size x="1" y="1"/>
     </buildingType>
     <buildingType name="Tower" ID="5">
@@ -195,7 +192,17 @@
         <path>Assets/Buildings/Tower/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <extension>
+        <cost>
+          <Wood>5</Wood>
+        </cost>
+        <canBuildOn>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canBuildOn>
+      </extension>
+      <iconTextureRectangle left="0" top="300" right="100" bottom="400"/>
       <size x="3" y="3"/>
     </buildingType>
     <buildingType name="TreeCutter" ID="6">
@@ -206,16 +213,32 @@
       <extension>
         <workerType>Dog</workerType>
         <resourceType>Wood</resourceType>
+        <cost>
+          <Wood>3</Wood>
+        </cost>
+        <canBuildOn>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canBuildOn>
       </extension>
-      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
-      <size x="3" y="3"/>
+      <iconTextureRectangle left="0" top="800" right="100" bottom="900"/>
+      <size x="1" y="1"/>
     </buildingType>
     <buildingType name="Keep" ID="7">
       <assets type="xmlprefab">
         <path>Assets/Buildings/Keep/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <iconTextureRectangle left="0" top="500" right="100" bottom="600"/>
+      <extension>
+        <producedResource rate="0.1">Gold</producedResource>
+        <canBuildOn>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canBuildOn>
+      </extension>
+      <iconTextureRectangle left="0" top="700" right="100" bottom="800"/>
       <size x="5" y="5"/>
     </buildingType>
   </buildingTypes>
