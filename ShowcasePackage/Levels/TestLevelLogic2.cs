@@ -53,7 +53,8 @@ namespace ShowcasePackage.Levels
 		}
 	}
 
-	public class TestLevelLogic2 : LevelLogicInstancePlugin {
+	public class TestLevelLogic2 : LevelInstancePluginBase
+	{
 		public TestLevelLogic2(ILevelManager level)
 			: base(level)
 		{ }

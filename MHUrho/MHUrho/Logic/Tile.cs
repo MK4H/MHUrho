@@ -115,7 +115,7 @@ namespace MHUrho.Logic
 		/// <summary>
 		/// The area in the map this tile represents
 		/// </summary>
-		public IntRect MapArea { get; private set; }
+		public IntRect MapArea { get;  }
 
 
 		public IntVector2 MapLocation => TopLeft;
@@ -179,6 +179,16 @@ namespace MHUrho.Logic
 		public static ITileLoader GetLoader(LevelManager level, Map map, StTile storedTile)
 		{
 			return new Loader(level, map, storedTile);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return MapLocation.GetHashCode();
 		}
 
 		public StTile Save()
@@ -254,13 +264,14 @@ namespace MHUrho.Logic
 		/// Is called every time any of the 4 corners of the tile change height
 		/// </summary>
 		public void CornerHeightChange()
-		{
-			
+		{			
 			foreach (var unit in Units) {
+				//Moves unit above terrain
 				float terrainHeight = Map.GetTerrainHeightAt(unit.XZPosition);
 				if (unit.Position.Y < terrainHeight) {
 					unit.SetHeight(terrainHeight);
-				}		
+				}
+				unit.TileHeightChanged(this);
 			}
 		}
 

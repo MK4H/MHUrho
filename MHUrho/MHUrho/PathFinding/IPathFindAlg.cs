@@ -8,6 +8,9 @@ namespace MHUrho.PathFinding
 {
 	public interface IPathFindAlg {
 
+
+		IEqualityComparer<INode> NodeEqualityComparer { get; }
+
 		/// <summary>
 		/// Find a path between the <paramref name="source"/> position and the <paramref name="target"/> node.
 		/// From <paramref name="source"/> position, the path will lead to the closest <see cref="INode"/> and then
@@ -72,5 +75,6 @@ namespace MHUrho.PathFinding
 		/// <returns>The newly created node.</returns>
 		/// <exception cref="Exception">May throw exception on failure.</exception>
 		ITempNode CreateTempNode(Vector3 position);
+
 	}
 }

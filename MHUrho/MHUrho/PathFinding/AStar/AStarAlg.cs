@@ -20,7 +20,18 @@ namespace MHUrho.PathFinding.AStar {
 
 	public class AStarAlg : IPathFindAlg {
 
+		public IEqualityComparer<INode> NodeEqualityComparer { get; } = new Node.EqualityComparer();
+
 		public IMap Map { get; private set; }
+
+		/// <summary>
+		/// Cuts off any nodes that are more than <see cref="Cutoff"/>
+		/// farther away in the game world than the closest we have got.
+		///
+		/// 50 is size of a chunk, which is enough.
+		/// Can be tweeked later.
+		/// </summary>
+		public double Cutoff { get; } = 50;
 
 		readonly TileNode[] nodeMap;
 
@@ -145,6 +156,7 @@ namespace MHUrho.PathFinding.AStar {
 			priorityQueue.Enqueue(startNode, 0);
 			// Add the starting node to touched nodes, so it does not get enqued again
 			touchedNodes.Add(startNode);
+			double minDistToTarget = Vector3.Distance(startNode.Position, targetNode.Position);
 
 			//Main loop
 			while (priorityQueue.Count != 0) {
@@ -161,7 +173,7 @@ namespace MHUrho.PathFinding.AStar {
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc);
+				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc,ref minDistToTarget);
 			}
 			//Did not find path
 			return null;
@@ -209,7 +221,7 @@ namespace MHUrho.PathFinding.AStar {
 					//Default to linear movement
 					Waypoint sourceWaypoint = waypoints[0];
 					Waypoint firstWaypoint = waypoints[1];
-					if (distCalc.GetTime(sourceWaypoint.Node, firstWaypoint.Node, out float time)) {
+					if (distCalc.GetTime(sourceWaypoint.Node, firstWaypoint.Node, MovementType.Linear, out float time)) {
 						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(time);
 					}
 					else {
@@ -246,7 +258,7 @@ namespace MHUrho.PathFinding.AStar {
 			if (sourceNode.Position == target.Position) {
 				time = 0.0f;
 			}
-			else if (!distCalc.GetTime(sourceNode, target, out time)) {
+			else if (!distCalc.GetTime(sourceNode, target, MovementType.Linear, out time)) {
 				return null;
 			}
 			

@@ -55,6 +55,16 @@ namespace MHUrho.Logic {
 			}	
 		}
 
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return ID;
+		}
+
 		public void ClearCache()
 		{
 			

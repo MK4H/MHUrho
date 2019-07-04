@@ -114,6 +114,16 @@ namespace MHUrho.Logic
 			}
 		}
 
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return ID;
+		}
+
 		/// <summary>
 		/// Clears any cache state dependent on the current level
 		/// </summary>

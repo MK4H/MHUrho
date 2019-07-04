@@ -54,7 +54,7 @@ namespace ShowcasePackage.Buildings
 		{
 			return level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
@@ -342,7 +342,7 @@ namespace ShowcasePackage.Buildings
 			if (!roofNodes.TryGetValue(tile, out IBuildingNode startNode)) {
 				return null;
 			}
-			return new BFSRoofFormationController((LevelPluginBase)Level.Plugin, startNode);
+			return new BFSRoofFormationController((LevelInstancePluginBase)Level.Plugin, startNode);
 		}
 
 		void OnClicked(int button, int buttons, int qualifiers)
@@ -405,7 +405,7 @@ namespace ShowcasePackage.Buildings
 			ITile doorInnerTile = Level.Map.GetContainingTile(doorPosition);
 			IBuildingNode doorNode = Level.Map.PathFinding.CreateBuildingNode(Building, 
 																		doorPosition, 
-																		GateTunnelTag);
+																		GateDoorTag);
 			tunnelNodes.Add(doorInnerTile, doorNode);
 			newTunnelNodes.Add(doorNode);
 

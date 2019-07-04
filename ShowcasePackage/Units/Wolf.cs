@@ -8,6 +8,7 @@ using MHUrho.CameraMovement;
 using MHUrho.Control;
 using MHUrho.DefaultComponents;
 using MHUrho.EntityInfo;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -15,7 +16,10 @@ using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UserInterface.MandK;
+using MHUrho.WorldMap;
 using MoreLinq;
+using ShowcasePackage.Buildings;
+using ShowcasePackage.Levels;
 using ShowcasePackage.Misc;
 using Urho;
 
@@ -32,7 +36,10 @@ namespace ShowcasePackage.Units
 		public override Cost Cost => cost;
 		public override UnitType UnitType => myType;
 
+		public ViableTileTypes PassableTileTypes { get; private set; }
+
 		const string CostElement = "cost";
+		const string PassableTileTypesElement = "canPass";
 
 		Cost cost;
 		UnitType myType;
@@ -42,18 +49,21 @@ namespace ShowcasePackage.Units
 			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
 			cost = Cost.FromXml(costElem, package);
 
+			XElement canPass =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(PassableTileTypesElement));
+			PassableTileTypes = ViableTileTypes.FromXml(canPass, package);
 
 			myType = package.GetUnitType(ID);
 		}
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
 		{
-			return Wolf.CreateNew(level, unit);
+			return Wolf.CreateNew(level, unit, this);
 		}
 
 		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit)
 		{
-			return Wolf.CreateForLoading(level, unit);
+			return Wolf.CreateForLoading(level, unit, this);
 		}
 
 		public override bool CanSpawnAt(ITile centerTile)
@@ -74,26 +84,143 @@ namespace ShowcasePackage.Units
 						UnitSelector.IUser,
 						MovingMeeleAttacker.IUser
 	{
+
+		class WolfDistCalc : ClimbingDistCalc
+		{
+			static readonly Dictionary<Tuple<NodeType, NodeType>, float> TeleportTimes =
+				new Dictionary<Tuple<NodeType, NodeType>, float>
+				{
+					{Tuple.Create(NodeType.Tile, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Tile, NodeType.Building), 1},
+					{Tuple.Create(NodeType.Tile, NodeType.Temp), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Building), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Temp), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Building), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Temp), 1},
+				};
+
+			/// <summary>
+			/// Coefficient of teleport times compared to base teleport times.
+			/// </summary>
+			public float TeleportCoef { get; set; }
+
+			ILevelManager Level => instance.Level;
+			IMap Map => Level.Map;
+
+			readonly Wolf instance;
+
+
+
+			/// <summary>
+			/// Creates new instance of Wolf distance calculator.
+			/// </summary>
+			/// <param name="wolf">The instance this calculator is calculating for.</param>
+			/// <param name="baseCoef">Coefficient of linear motion speed.</param>
+			/// <param name="angleCoef">Coefficient how much the linear motion speed is affected by angle.</param>
+			/// <param name="teleportCoef">Coefficient of teleport times.</param>
+			public WolfDistCalc(Wolf wolf, float baseCoef, float angleCoef, float teleportCoef)
+				:base(baseCoef, angleCoef)
+			{
+				this.instance = wolf;
+				this.TeleportCoef = teleportCoef;
+			}
+
+			protected override float GetTeleportTime(INode source, INode target)
+			{
+				return TeleportTimes[new Tuple<NodeType, NodeType>(source.NodeType, target.NodeType)] * TeleportCoef;
+			}
+
+			protected override bool CanPass(ITileNode source, ITileNode target)
+			{
+				if (!CanPassToTileNode(target))
+				{
+					return false;
+				}
+
+				//If the edge is diagonal and there are buildings on both sides of the edge, dont go there
+				return source.Tile.MapLocation.X == target.Tile.MapLocation.X ||
+						source.Tile.MapLocation.Y == target.Tile.MapLocation.Y ||
+						Map.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X, target.Tile.MapLocation.Y))
+							.Building == null ||
+						Map.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X, source.Tile.MapLocation.Y))
+							.Building == null;
+			}
+
+			protected override bool CanPass(ITileNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanPass(IBuildingNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanPass(IBuildingNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanTeleport(ITileNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanTeleport(ITileNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			bool CanPassToBuildingNode(IBuildingNode target)
+			{
+				//Is not closed gate door and is not roof
+				return (target.Tag != GateInstance.GateDoorTag || ((GateInstance) target.Building.Plugin).IsOpen);
+			}
+
+			bool CanPassToTileNode(ITileNode target)
+			{
+				//Is passable and is not covered by a building
+				return instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
+						target.Tile.Building == null;
+			}
+		}
+
+
 		static readonly Vector3 targetOffset = new Vector3(0, 0.5f, 0);
 
 		AnimationController animationController;
 		WorldWalker walker;
 		MovingMeeleAttacker attacker;
 
-		ClimbingDistCalc distCalc = new ClimbingDistCalc(0.5f, 0.2f);
+		readonly WolfDistCalc distCalc;
 
 		float hp;
 		HealthBar healthbar;
 
-		Wolf(ILevelManager level, IUnit unit)
+		readonly WolfType myType;
+
+		Wolf(ILevelManager level, IUnit unit, WolfType myType)
 			:base(level, unit)
 		{
-
+			this.myType = myType;
+			this.distCalc = new WolfDistCalc(this, 0.5f, 0.2f, 1);
 		}
 
-		public static Wolf CreateNew(ILevelManager level, IUnit unit)
+		public static Wolf CreateNew(ILevelManager level, IUnit unit, WolfType myType)
 		{
-			Wolf wolf = new Wolf(level, unit);
+			Wolf wolf = new Wolf(level, unit, myType);
 			wolf.animationController = unit.CreateComponent<AnimationController>();
 			wolf.walker = WorldWalker.CreateNew(wolf, level);
 			wolf.attacker = MovingMeeleAttacker.CreateNew(wolf,
@@ -112,9 +239,9 @@ namespace ShowcasePackage.Units
 			return wolf;
 		}
 
-		public static Wolf CreateForLoading(ILevelManager level, IUnit unit)
+		public static Wolf CreateForLoading(ILevelManager level, IUnit unit, WolfType myType)
 		{
-			return new Wolf(level, unit);
+			return new Wolf(level, unit, myType);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
@@ -138,6 +265,11 @@ namespace ShowcasePackage.Units
 		public override void Dispose()
 		{
 			healthbar.Dispose();
+		}
+
+		public override void TileHeightChanged(ITile tile)
+		{
+			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetHeightAt(Unit.XZPosition)));
 		}
 
 		public override void OnHit(IEntity other, object userData)

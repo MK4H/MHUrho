@@ -11,8 +11,9 @@ using Urho;
 
 namespace MHUrho.PathFinding.AStar
 {
-    public class TempNode : ITempNode, IHashTileHeightObserver	
-    {
+    public class TempNode : ITempNode, IHashTileHeightObserver {
+		public IPathFindAlg Algorithm => map.PathFinding;
+
 		public NodeType NodeType => NodeType.Temp;
 
 		public Vector3 Position { get; private set; }
@@ -29,6 +30,10 @@ namespace MHUrho.PathFinding.AStar
 			map.TileHeightChangeNotifier.WeakRegisterTileHeightObserver(this);							
 		}
 
+		public override int GetHashCode()
+		{
+			return containingTile.MapLocation.GetHashCode();
+		}
 
 		public INode CreateEdge(INode target, MovementType movementType)
 		{
@@ -40,24 +45,24 @@ namespace MHUrho.PathFinding.AStar
 			throw new NotImplementedException();
 		}
 
-		public void Accept(INodeVisitor visitor, INode target)
+		public void Accept(INodeVisitor visitor, INode target, MovementType movementType)
 		{
-			target.Accept(visitor, this);
+			target.Accept(visitor, this, movementType);
 		}
 
-		public void Accept(INodeVisitor visitor, ITileNode source)
+		public void Accept(INodeVisitor visitor, ITileNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
-		public void Accept(INodeVisitor visitor, IBuildingNode source)
+		public void Accept(INodeVisitor visitor, IBuildingNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
-		public void Accept(INodeVisitor visitor, ITempNode source)
+		public void Accept(INodeVisitor visitor, ITempNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
 		public void TileHeightsChanged(ImmutableHashSet<ITile> tiles)

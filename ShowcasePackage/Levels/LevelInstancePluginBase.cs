@@ -8,12 +8,12 @@ using ShowcasePackage.Buildings;
 
 namespace ShowcasePackage.Levels
 {
-	public abstract class LevelPluginBase : LevelLogicInstancePlugin
+	public abstract class LevelInstancePluginBase : LevelLogicInstancePlugin
 	{
 		Dictionary<IEntityType, double> buildingDamage;
 		Dictionary<IEntityType, double> unitDamage;
 
-		protected LevelPluginBase(ILevelManager level)
+		protected LevelInstancePluginBase(ILevelManager level)
 			: base(level)
 		{ }
 

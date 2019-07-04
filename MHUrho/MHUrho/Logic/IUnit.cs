@@ -53,5 +53,7 @@ namespace MHUrho.Logic {
 		StUnit Save();
 
 		void SetHeight(float newHeight);
+
+		void TileHeightChanged(ITile tile);
 	}
 }

@@ -13,18 +13,22 @@ namespace MHUrho.PathFinding.AStar
     {
 		public override NodeType NodeType => NodeType.Tile;
 
-		public ITile Tile { get; private set; }
+		public ITile Tile { get;  }
 
 		public IEnumerable<Node> NodesOnTile => nodesOnThisTile;
 
 		readonly List<Node> nodesOnThisTile;
 
 		public TileNode(ITile tile, AStarAlg aStar) 
-			:base(aStar)
+			:base(aStar, tile.Center3)
 		{
 			this.Tile = tile;
-			this.Position = Tile.Center3;
 			nodesOnThisTile = new List<Node>();
+		}
+
+		public override int GetHashCode()
+		{
+			return Tile.MapLocation.GetHashCode();
 		}
 
 		public void ConnectNeighbours()
@@ -65,11 +69,18 @@ namespace MHUrho.PathFinding.AStar
 												FastPriorityQueue<Node> priorityQueue,
 												List<Node> touchedNodes,
 												Node targetNode,
-												NodeDistCalculator distCalc)
+												NodeDistCalculator distCalc,
+												ref double minDistToTarget)
 		{
 			State = NodeState.Closed;
-			foreach (var neighbour in outgoingEdges.Keys) {
-				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc);
+			foreach (var neighbour in outgoingEdges) {
+				ProcessNeighbour(neighbour.Key,
+								priorityQueue,
+								touchedNodes,
+								targetNode,
+								distCalc,
+								neighbour.Value,
+								ref minDistToTarget);
 			}
 		}
 
@@ -79,7 +90,7 @@ namespace MHUrho.PathFinding.AStar
 				var borderNode = new TempNode(GetEdgePosition((ITileNode) PreviousNode), Map);
 				float totalTime = Time - PreviousNode.Time;
 
-				if (!nodeDist.GetTime(PreviousNode, borderNode, out float firstTime)) {
+				if (!nodeDist.GetTime(PreviousNode, borderNode, MovementType.Linear, out float firstTime)) {
 					throw new ArgumentException($"Wrong {nameof(nodeDist)} implementation, does not give the same result on path building.");
 				}
 				return new[]
@@ -99,16 +110,41 @@ namespace MHUrho.PathFinding.AStar
 			return outgoingEdges.TryGetValue(neighbour, out MovementType value) ? value : MovementType.Linear;
 		}
 
+		const double PrioritizedDistance = 0.1;
 		public Node GetClosestNode(Vector3 pointOnThisTile)
 		{
 			Node closestNode = this;
 			float minDist = Vector3.Distance(Position, pointOnThisTile);
 			foreach (var node in nodesOnThisTile) {
 				float newDist = Vector3.Distance(node.Position, pointOnThisTile);
-				if (newDist < minDist) {
-					closestNode = node;
-					minDist = newDist;
+				if (closestNode.NodeType == node.NodeType) {
+					if (newDist < minDist)
+					{
+						closestNode = node;
+						minDist = newDist;
+					}
 				}
+				else if (closestNode.NodeType == NodeType.Building) {
+					if (newDist + PrioritizedDistance < minDist ) {
+						closestNode = node;
+						minDist = newDist;
+					}
+				}
+				else if (node.NodeType == NodeType.Building) {
+					if (newDist < minDist + PrioritizedDistance)
+					{
+						closestNode = node;
+						minDist = newDist;
+					}
+				}
+				else {
+					if (newDist < minDist)
+					{
+						closestNode = node;
+						minDist = newDist;
+					}
+				}
+				
 			}
 
 			return closestNode;
@@ -125,24 +161,24 @@ namespace MHUrho.PathFinding.AStar
 			return nodesOnThisTile.Remove(aStarNode);
 		}
 
-		public override void Accept(INodeVisitor visitor, INode target)
+		public override void Accept(INodeVisitor visitor, INode target, MovementType movementType)
 		{
-			target.Accept(visitor, this);
+			target.Accept(visitor, this, movementType);
 		}
 
-		public override void Accept(INodeVisitor visitor, ITileNode source)
+		public override void Accept(INodeVisitor visitor, ITileNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
-		public override void Accept(INodeVisitor visitor, IBuildingNode source)
+		public override void Accept(INodeVisitor visitor, IBuildingNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
-		public override void Accept(INodeVisitor visitor, ITempNode source)
+		public override void Accept(INodeVisitor visitor, ITempNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
 	}

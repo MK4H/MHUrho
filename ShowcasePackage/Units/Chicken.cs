@@ -18,6 +18,7 @@ using MHUrho.DefaultComponents;
 using MHUrho.Input.MandK;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
+using ShowcasePackage.Buildings;
 using ShowcasePackage.Misc;
 using Urho;
 
@@ -36,7 +37,10 @@ namespace ShowcasePackage.Units
 		public override Cost Cost => cost;
 		public override UnitType UnitType => myType;
 
+		public ViableTileTypes PassableTileTypes { get; private set; }
+
 		const string CostElement = "cost";
+		const string PassableTileTypesElement = "canPass";
 
 		Cost cost;
 		UnitType myType;
@@ -48,11 +52,11 @@ namespace ShowcasePackage.Units
 
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
-			return new ChickenInstance(level, unit, this);
+			return ChickenInstance.CreateNew(level, unit, this);
 		}
 
 		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit) {
-			return new ChickenInstance(level, unit);
+			return ChickenInstance.CreateForLoading(level, unit, this);
 		}
 
 
@@ -69,6 +73,10 @@ namespace ShowcasePackage.Units
 			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
 			cost = Cost.FromXml(costElem, package);
 
+			XElement canPass =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(PassableTileTypesElement));
+			PassableTileTypes = ViableTileTypes.FromXml(canPass, package);
+
 			myType = package.GetUnitType(ID);
 			ProjectileType = package.GetProjectileType("EggProjectile");
 		}
@@ -80,6 +88,120 @@ namespace ShowcasePackage.Units
 									UnitSelector.IUser
 	{
 
+		class ChickenDistCalc : ClimbingDistCalc {
+
+			static readonly Dictionary<Tuple<NodeType, NodeType>, float> TeleportTimes =
+				new Dictionary<Tuple<NodeType, NodeType>, float>
+				{
+					{Tuple.Create(NodeType.Tile, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Tile, NodeType.Building), 2},
+					{Tuple.Create(NodeType.Tile, NodeType.Temp), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Building), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Temp), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Building), 2},
+					{Tuple.Create(NodeType.Temp, NodeType.Temp), 1},
+				};
+
+
+			/// <summary>
+			/// Coefficient of teleport times compared to base teleport times.
+			/// </summary>
+			public float TeleportCoef { get; set; }
+
+			ILevelManager Level => instance.Level;
+			IMap Map => Level.Map;
+
+			readonly ChickenInstance instance;
+
+
+
+			/// <summary>
+			/// Creates new instance of Chicken distance calculator.
+			/// </summary>
+			/// <param name="chicken">Chicken for which this is calculating.</param>
+			/// <param name="baseCoef">Coefficient of linear motion speed.</param>
+			/// <param name="angleCoef">Coefficient how much the linear motion speed is affected by angle.</param>
+			/// <param name="teleportCoef">Coefficient of teleport times.</param>
+			public ChickenDistCalc(ChickenInstance chicken, float baseCoef, float angleCoef, float teleportCoef)
+				: base(baseCoef, angleCoef)
+			{
+				this.instance = chicken;
+				this.TeleportCoef = teleportCoef;
+			}
+
+			protected override float GetTeleportTime(INode source, INode target)
+			{
+				return TeleportTimes[new Tuple<NodeType, NodeType>(source.NodeType, target.NodeType)] * TeleportCoef;
+			}
+
+
+			protected override bool CanPass(ITileNode source, ITileNode target)
+			{
+				if (!CanPassToTileNode(target))
+				{
+					return false;
+				}
+
+				//If the edge is diagonal and there are buildings on both sides of the edge, dont go there
+				return source.Tile.MapLocation.X == target.Tile.MapLocation.X ||
+						source.Tile.MapLocation.Y == target.Tile.MapLocation.Y ||
+						Map.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X, target.Tile.MapLocation.Y))
+							.Building == null ||
+						Map.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X, source.Tile.MapLocation.Y))
+							.Building == null;
+			}
+
+			protected override bool CanPass(ITileNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanPass(IBuildingNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanPass(IBuildingNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanTeleport(ITileNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanTeleport(ITileNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			bool CanPassToBuildingNode(IBuildingNode target)
+			{
+				//Is not closed gate door
+				return target.Tag != GateInstance.GateDoorTag || ((GateInstance)target.Building.Plugin).IsOpen;
+			}
+
+			bool CanPassToTileNode(ITileNode target)
+			{
+				//Is passable and is not covered by a building
+				return instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
+						target.Tile.Building == null;
+			}
+		}
+
 
 		AnimationController animationController;
 		public WorldWalker Walker { get; private set; }
@@ -87,7 +209,7 @@ namespace ShowcasePackage.Units
 
 		bool dying;
 
-		readonly ClimbingDistCalc distCalc;
+		readonly ChickenDistCalc distCalc;
 
 		float hp;
 		HealthBar healthbar;
@@ -99,32 +221,43 @@ namespace ShowcasePackage.Units
 		float shootTestTimer = timeBetweenTests;
 
 
-		public ChickenInstance(ILevelManager level, IUnit unit)
-			:base(level, unit)
-		{
-			distCalc = new ClimbingDistCalc(1,1);
-		}
+		readonly ChickenType myType;
 
 		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
 			:base(level,unit) {
-			animationController = unit.CreateComponent<AnimationController>();
-			Walker = WorldWalker.CreateNew(this, level);
-			Shooter = Shooter.CreateNew(this, level, type.ProjectileType, new Vector3(0,0.7f,-0.7f), 20);
-			Shooter.SearchForTarget = true;
-			Shooter.TargetSearchDelay = 2;
 
-			var selector = UnitSelector.CreateNew(this, level);
+			this.myType = type;
 
-
-			MovingRangeTarget.CreateNew(this, level, new Vector3(0, 0.5f, 0));
 			
 			unit.AlwaysVertical = true;
-			distCalc = new ClimbingDistCalc(1, 1);
+			distCalc = new ChickenDistCalc(this, 1, 1, 1);
+		}
 
-			RegisterEvents(Walker, Shooter, selector);
+		public static ChickenInstance CreateNew(ILevelManager level, IUnit unit, ChickenType type)
+		{
+			ChickenInstance newChicken = new ChickenInstance(level, unit, type);
 
-			hp = 100;
-			Init(hp);
+			newChicken.animationController = unit.CreateComponent<AnimationController>();
+			newChicken.Walker = WorldWalker.CreateNew(newChicken, level);
+			newChicken.Shooter = Shooter.CreateNew(newChicken, level, type.ProjectileType, new Vector3(0, 0.7f, -0.7f), 20);
+			newChicken.Shooter.SearchForTarget = true;
+			newChicken.Shooter.TargetSearchDelay = 2;
+
+			var selector = UnitSelector.CreateNew(newChicken, level);
+
+			MovingRangeTarget.CreateNew(newChicken, level, new Vector3(0, 0.5f, 0));
+
+			newChicken.RegisterEvents(newChicken.Walker, newChicken.Shooter, selector);
+
+			newChicken.hp = 100;
+			newChicken.Init(newChicken.hp);
+
+			return newChicken;
+		}
+
+		public static ChickenInstance CreateForLoading(ILevelManager level, IUnit unit, ChickenType type)
+		{
+			return new ChickenInstance(level, unit, type);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage)
@@ -169,6 +302,10 @@ namespace ShowcasePackage.Units
 			}
 		}
 
+		public override void TileHeightChanged(ITile tile)
+		{
+			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetHeightAt(Unit.XZPosition)));
+		}
 
 		public override void OnUpdate(float timeStep) {
 			if (dying) {

@@ -16,10 +16,10 @@ namespace ShowcasePackage.Misc
 
 		readonly HashSet<TileType> tileTypes;
 
-		public static ViableTileTypes FromXml(XElement canBuildOnElem, GamePack package)
+		public static ViableTileTypes FromXml(XElement viableTileTypesElement, GamePack package)
 		{
 			var tileTypes = new HashSet<TileType>();
-			foreach (var child in canBuildOnElem.Elements())
+			foreach (var child in viableTileTypesElement.Elements())
 			{
 				string tileTypeName = child.Name.LocalName;
 
@@ -35,9 +35,9 @@ namespace ShowcasePackage.Misc
 			this.tileTypes = tileTypes;
 		}
 
-		public bool CanBuildOn(ITile tile)
+		public bool IsViable(ITile tile)
 		{
-			return tileTypes.Contains(tile.Type);
+			return Contains(tile.Type);
 		}
 
 		public IEnumerator<TileType> GetEnumerator()
@@ -50,5 +50,9 @@ namespace ShowcasePackage.Misc
 			return GetEnumerator();
 		}
 
+		public bool Contains(TileType type)
+		{
+			return tileTypes.Contains(type);
+		}
 	}
 }

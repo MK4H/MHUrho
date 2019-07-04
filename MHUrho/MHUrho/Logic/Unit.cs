@@ -311,6 +311,16 @@ namespace MHUrho.Logic
 			SignalPositionChanged();
 		}
 
+		public void TileHeightChanged(ITile tile)
+		{
+			try {
+				UnitPlugin.TileHeightChanged(tile);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.TileHeightChanged)} failed with Exception: {e.Message}");
+			}
+		}
+
 		public void MoveBy(Vector3 moveBy) {
 			var newPosition = Position + moveBy;
 

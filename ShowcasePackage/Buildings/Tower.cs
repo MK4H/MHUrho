@@ -63,7 +63,7 @@ namespace ShowcasePackage.Buildings
 		{
 			return level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
@@ -123,7 +123,7 @@ namespace ShowcasePackage.Buildings
 			{
 				return null;
 			}
-			return new BFSRoofFormationController((LevelPluginBase)Level.Plugin, startNode);
+			return new BFSRoofFormationController((LevelInstancePluginBase)Level.Plugin, startNode);
 		}
 
 		void CreatePathfindingNodes()

@@ -21,19 +21,20 @@ namespace ShowcasePackage.Buildings
 		//The connected ground points
 		readonly Queue<INode> lowPrioNodes;
 
-		readonly HashSet<INode> filledNodes;
+		readonly HashSet<INode> enqueuedNodes;
 
-		readonly LevelPluginBase level;
+		readonly LevelInstancePluginBase level;
 
-		public BFSRoofFormationController(LevelPluginBase levelPlugin,
+		public BFSRoofFormationController(LevelInstancePluginBase levelPlugin,
 										IBuildingNode startNode)
 		{
 			level = levelPlugin;
 			buildingNodes = new Queue<INode>();
 			lowPrioNodes = new Queue<INode>();
-			filledNodes = new HashSet<INode>();
+			enqueuedNodes = new HashSet<INode>(startNode.Algorithm.NodeEqualityComparer);
 
 			buildingNodes.Enqueue(startNode);
+			enqueuedNodes.Add(startNode);
 		}
 
 
@@ -57,8 +58,7 @@ namespace ShowcasePackage.Buildings
 		public bool MoveToFormation(UnitGroup units)
 		{
 			bool executed = false;
-			while (units.IsValid())
-			{
+			for (; units.IsValid(); units.TryMoveNext()) {
 				if (MoveToFormation(units.Current))
 				{
 					executed = true;
@@ -84,18 +84,23 @@ namespace ShowcasePackage.Buildings
 
 		void DequeNextNode(INode node)
 		{
-			if (node != PeekNextNode())
-			{
+			//If we are still searching the first building or buildings connected to it
+			bool isHighPrio = buildingNodes.Count != 0;
+
+			//Dequeue from the correct queue and check that it is the given node
+			if (isHighPrio && node != buildingNodes.Dequeue()) {
+				throw new NotImplementedException("Wrong implementation of GateFormationController, should deque the current node");
+			}
+			else if (!isHighPrio && node != lowPrioNodes.Dequeue()) {
 				throw new NotImplementedException("Wrong implementation of GateFormationController, should deque the current node");
 			}
 
-			//If we are still searching the first building or buildings connected to it
-			bool isHighPrio = buildingNodes.Count != 0;
+
 
 
 			foreach (var neib in node.Neighbours)
 			{
-				if (filledNodes.Contains(neib))
+				if (enqueuedNodes.Contains(neib))
 				{
 					continue;
 				}
@@ -112,6 +117,8 @@ namespace ShowcasePackage.Buildings
 					//Other ground nodes or nodes connected through them
 					lowPrioNodes.Enqueue(neib);
 				}
+
+				enqueuedNodes.Add(neib);
 			}
 		}
 	}

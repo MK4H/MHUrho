@@ -10,6 +10,8 @@ namespace MHUrho.PathFinding
 
 	public interface INode
     {
+		IPathFindAlg Algorithm { get; }
+
 		NodeType NodeType { get; }
 
 		Vector3 Position { get; }
@@ -31,12 +33,12 @@ namespace MHUrho.PathFinding
 		/// <returns>Returns this INode for call chaining</returns>
 		INode RemoveEdge(INode target);
 
-		void Accept(INodeVisitor visitor, INode target);
+		void Accept(INodeVisitor visitor, INode target, MovementType movementType);
 
-		void Accept(INodeVisitor visitor, ITileNode source);
+		void Accept(INodeVisitor visitor, ITileNode source, MovementType movementType);
 
-		void Accept(INodeVisitor visitor, IBuildingNode source);
+		void Accept(INodeVisitor visitor, IBuildingNode source, MovementType movementType);
 
-		void Accept(INodeVisitor visitor, ITempNode source);
+		void Accept(INodeVisitor visitor, ITempNode source, MovementType movementType);
 	}
 }

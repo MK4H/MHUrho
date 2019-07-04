@@ -18,6 +18,8 @@ namespace MHUrho.PathFinding
 			this.actualAlg = pathFindAlg;
 		}
 
+		public IEqualityComparer<INode> NodeEqualityComparer => actualAlg.NodeEqualityComparer;
+
 		public Path FindPath(Vector3 source, INode target, INodeDistCalculator nodeDistCalculator)
 		{
 			try {

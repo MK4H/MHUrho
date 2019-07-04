@@ -12,7 +12,10 @@ using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.DefaultComponents;
+using MHUrho.Helpers.Extensions;
+using MHUrho.WorldMap;
 using ShowcasePackage.Buildings;
+using ShowcasePackage.Levels;
 using ShowcasePackage.Misc;
 using Urho;
 
@@ -25,16 +28,19 @@ namespace ShowcasePackage.Units
 
 		public override string Name => TypeName;
 		public override int ID => TypeID;
-		
+
+		const string PassableTileTypesElement = "canPass";
+
+		public ViableTileTypes PassableTileTypes { get; private set; }
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
 		{
-			return new DogInstance(level, unit, false);
+			return new DogInstance(level, unit, this, false);
 		}
 
 		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit)
 		{
-			return new DogInstance(level, unit, true);
+			return new DogInstance(level, unit, this, true);
 		}
 
 		public override bool CanSpawnAt(ITile centerTile)
@@ -45,7 +51,9 @@ namespace ShowcasePackage.Units
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
-
+			XElement canPass =
+				extensionElement.Element(package.PackageManager.GetQualifiedXName(PassableTileTypesElement));
+			PassableTileTypes = ViableTileTypes.FromXml(canPass, package);
 		}
 	}
 
@@ -53,28 +61,10 @@ namespace ShowcasePackage.Units
 								WorldWalker.IUser, 
 								MovingRangeTarget.IUser {
 
-		public TreeCutter Cutter { get; set; }
 
-		readonly Vector3 targetOffset = new Vector3(0, 0.5f, 0);
 
-		AnimationController animationController;
-		WorldWalker walker;
-
-		readonly ClimbingDistCalc distCalc = new ClimbingDistCalc(0.5f, 0.2f);
-
-		float hp;
-		HealthBar healthbar;
-
-		enum States { GoingToTree, Chomping, BringingWood, SearchingForTree}
-
-		State currentState;
-
-		Tree targetTree;
-
-		readonly HashSet<IBuilding> inaccesibleTrees = new HashSet<IBuilding>();
-		readonly Timeout clean = new Timeout(120);
-
-		abstract class State {
+		abstract class State
+		{
 
 			public abstract States Current { get; }
 
@@ -88,7 +78,7 @@ namespace ShowcasePackage.Units
 			public static State Load(SequentialPluginDataReader reader, DogInstance dog)
 			{
 				reader.GetNext(out int stateInt);
-				States savedState = (States) stateInt;
+				States savedState = (States)stateInt;
 				switch (savedState)
 				{
 					case States.GoingToTree:
@@ -141,14 +131,15 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		class GoingToTree : State {
+		class GoingToTree : State
+		{
 
 			public override States Current => States.GoingToTree;
-			
+
 			public GoingToTree(State oldState, DogInstance dog)
 				: base(dog)
 			{
-				
+
 			}
 
 			public GoingToTree(SequentialPluginDataReader reader, DogInstance dog)
@@ -157,7 +148,7 @@ namespace ShowcasePackage.Units
 
 			public override void Save(SequentialPluginDataWriter writer)
 			{
-				writer.StoreNext((int) Current);
+				writer.StoreNext((int)Current);
 			}
 
 			public override void OnUpdate(float timeStep)
@@ -212,7 +203,8 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		class Chomping : State {
+		class Chomping : State
+		{
 
 			public override States Current => States.Chomping;
 
@@ -242,20 +234,24 @@ namespace ShowcasePackage.Units
 
 			public override void OnUpdate(float timeStep)
 			{
-				if (chomping.Update(timeStep)) {
-					if (Dog.targetTree == null || Dog.targetTree.Building.IsRemovedFromLevel) {
+				if (chomping.Update(timeStep))
+				{
+					if (Dog.targetTree == null || Dog.targetTree.Building.IsRemovedFromLevel)
+					{
 						Dog.currentState = new SearchingForTree(this, Dog);
 					}
-					else {
+					else
+					{
 						Dog.targetTree.Chomp();
 						Dog.currentState = new BringingWood(this, Dog);
 					}
-					
+
 				}
 			}
 		}
 
-		class BringingWood : State {
+		class BringingWood : State
+		{
 
 			public override States Current => States.BringingWood;
 
@@ -273,7 +269,8 @@ namespace ShowcasePackage.Units
 				: base(dog)
 			{
 				reader.GetNext(out bool isDestructing);
-				if (isDestructing) {
+				if (isDestructing)
+				{
 					reader.GetNext(out double remaining);
 					destruction = new Timeout(DestructionTime, remaining);
 				}
@@ -288,16 +285,19 @@ namespace ShowcasePackage.Units
 
 			public override void OnUpdate(float timeStep)
 			{
-				if (destruction == null && Dog.walker.State != WorldWalkerState.Started) {
+				if (destruction == null && Dog.walker.State != WorldWalkerState.Started)
+				{
 					GoToCutter();
 					return;
 				}
 
-				if (destruction != null && destruction.Update(timeStep)) {
-					if (!GoToCutter()) {
+				if (destruction != null && destruction.Update(timeStep))
+				{
+					if (!GoToCutter())
+					{
 						Dog.Unit.RemoveFromLevel();
 					}
-				}		
+				}
 			}
 
 			public override void MovementFinished()
@@ -318,8 +318,10 @@ namespace ShowcasePackage.Units
 
 			bool GoToCutter()
 			{
-				foreach (var neighbour in Dog.Cutter.Building.Tiles[0].GetNeighbours()) {
-					if (Dog.walker.GoTo(Dog.Level.Map.PathFinding.GetTileNode(neighbour))) {
+				foreach (var neighbour in Dog.Cutter.Building.Tiles[0].GetNeighbours())
+				{
+					if (Dog.walker.GoTo(Dog.Level.Map.PathFinding.GetTileNode(neighbour)))
+					{
 						destruction = null;
 						return true;
 					}
@@ -327,14 +329,16 @@ namespace ShowcasePackage.Units
 
 
 				//Could not find path back to cutter
-				if (destruction == null) {
+				if (destruction == null)
+				{
 					destruction = new Timeout(DestructionTime);
-				}	
+				}
 				return false;
 			}
 		}
 
-		class SearchingForTree : State {
+		class SearchingForTree : State
+		{
 
 			public override States Current => States.SearchingForTree;
 
@@ -363,14 +367,16 @@ namespace ShowcasePackage.Units
 
 			public override void OnUpdate(float timeStep)
 			{
-				if (timeout.Update(timeStep)) {
+				if (timeout.Update(timeStep))
+				{
 					timeout.Reset();
 
 
 					var trees = Dog.Level
 									.NeutralPlayer
 									.GetBuildingsOfType(Dog.Level.Package.GetBuildingType(TreeType.TypeID));
-					if (trees.Count == 0) {
+					if (trees.Count == 0)
+					{
 						return;
 					}
 
@@ -382,9 +388,145 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		public DogInstance(ILevelManager level, IUnit unit, bool loading)
+		class DogDistCalc : ClimbingDistCalc {
+			static readonly Dictionary<Tuple<NodeType, NodeType>, float> TeleportTimes =
+				new Dictionary<Tuple<NodeType, NodeType>, float>
+				{
+					{Tuple.Create(NodeType.Tile, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Tile, NodeType.Building), 10},
+					{Tuple.Create(NodeType.Tile, NodeType.Temp), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Building, NodeType.Building), 10},
+					{Tuple.Create(NodeType.Building, NodeType.Temp), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Tile), 1},
+					{Tuple.Create(NodeType.Temp, NodeType.Building), 10},
+					{Tuple.Create(NodeType.Temp, NodeType.Temp), 1},
+				};
+
+
+			/// <summary>
+			/// Coefficient of teleport times compared to base teleport times.
+			/// </summary>
+			public float TeleportCoef { get; set; }
+
+			ILevelManager Level => instance.Level;
+			IMap Map => Level.Map;
+
+			readonly DogInstance instance;
+
+
+
+			/// <summary>
+			/// Creates new instance of Dog distance calculator.
+			/// </summary>
+			/// <param name="baseCoef">Coefficient of linear motion speed.</param>
+			/// <param name="angleCoef">Coefficient how much the linear motion speed is affected by angle.</param>
+			/// <param name="teleportCoef">Coefficient of teleport times.</param>
+			public DogDistCalc(DogInstance dog, float baseCoef, float angleCoef, float teleportCoef)
+				:base(baseCoef, angleCoef)
+			{
+				this.instance = dog;
+				this.TeleportCoef = teleportCoef;
+			}
+
+			protected override float GetTeleportTime(INode source, INode target)
+			{
+				return TeleportTimes[new Tuple<NodeType, NodeType>(source.NodeType, target.NodeType)] * TeleportCoef;
+			}
+
+
+			protected override bool CanPass(ITileNode source, ITileNode target)
+			{
+				if (!CanPassToTileNode(target)) {
+					return false;
+				}
+
+				//If the edge is diagonal and there are buildings on both sides of the edge, dont go there
+				return source.Tile.MapLocation.X == target.Tile.MapLocation.X || 
+						source.Tile.MapLocation.Y == target.Tile.MapLocation.Y || 
+						Map.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X, target.Tile.MapLocation.Y))
+							.Building == null || 
+						Map.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X,source.Tile.MapLocation.Y))
+							.Building == null;
+			}
+
+			protected override bool CanPass(ITileNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanPass(IBuildingNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanPass(IBuildingNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanTeleport(ITileNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanTeleport(ITileNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, ITileNode target)
+			{
+				return CanPassToTileNode(target);
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, IBuildingNode target)
+			{
+				return CanPassToBuildingNode(target);
+			}
+
+			bool CanPassToBuildingNode(IBuildingNode target)
+			{
+				//Is not closed gate door and is not roof
+				return (target.Tag != GateInstance.GateDoorTag || ((GateInstance)target.Building.Plugin).IsOpen) &&
+						!((LevelInstancePluginBase)Level.Plugin).IsRoofNode(target);
+			}
+
+			bool CanPassToTileNode(ITileNode target)
+			{
+				//Is passable and is not covered by a building
+				return instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
+						target.Tile.Building == null;
+			}
+		}
+
+		public TreeCutter Cutter { get; set; }
+
+		readonly Vector3 targetOffset = new Vector3(0, 0.5f, 0);
+
+		AnimationController animationController;
+		WorldWalker walker;
+
+		readonly DogDistCalc distCalc;
+
+		float hp;
+		HealthBar healthbar;
+
+		enum States { GoingToTree, Chomping, BringingWood, SearchingForTree}
+
+		State currentState;
+
+		Tree targetTree;
+
+		readonly HashSet<IBuilding> inaccesibleTrees = new HashSet<IBuilding>();
+		readonly Timeout clean = new Timeout(120);
+		readonly DogType myType;
+
+		public DogInstance(ILevelManager level, IUnit unit, DogType myType, bool loading)
 			: base(level, unit)
 		{
+			this.myType = myType;
+			this.distCalc = new DogDistCalc(this, 0.5f, 0.2f, 1);
 			if (loading) {
 				return;
 			}
@@ -422,6 +564,11 @@ namespace ShowcasePackage.Units
 		public override void Dispose()
 		{
 			healthbar.Dispose();
+		}
+
+		public override void TileHeightChanged(ITile tile)
+		{
+			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetHeightAt(Unit.XZPosition)));
 		}
 
 		public override void OnHit(IEntity other, object userData)

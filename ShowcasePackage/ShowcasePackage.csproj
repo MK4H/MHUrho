@@ -72,7 +72,7 @@
     <Compile Include="Buildings\TreeCutter.cs" />
     <Compile Include="Buildings\WalkableBuildingPlugin.cs" />
     <Compile Include="Buildings\Wall.cs" />
-    <Compile Include="Levels\LevelPluginBase.cs" />
+    <Compile Include="Levels\LevelInstancePluginBase.cs" />
     <Compile Include="Levels\TestLevel.cs" />
     <Compile Include="Levels\TestLevelLogic2.cs" />
     <Compile Include="Misc\BaseCustomWindowUI.cs" />

@@ -76,6 +76,12 @@
           <Wood>0.2</Wood>
           <Gold>0.5</Gold>
         </cost>
+        <canPass>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+          <Water/>
+        </canPass>
       </extension>
 	    <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
     </unitType>
@@ -84,6 +90,13 @@
         <path>Assets/Units/Dog/prefab.xml</path>
       </assets>
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
+      <extension>
+        <canPass>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canPass>
+      </extension>
       <iconTextureRectangle left="0" top="1000" right="100" bottom="1100"/>
     </unitType>
     <unitType name="Wolf" ID="5">
@@ -96,6 +109,11 @@
           <Wood>0.4</Wood>
           <Gold>0.2</Gold>
         </cost>
+        <canPass>
+          <Sand/>
+          <Xamarin/>
+          <Grass/>
+        </canPass>
       </extension>
       <iconTextureRectangle left="0" top="900" right="100" bottom="1000"/>
     </unitType>

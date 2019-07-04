@@ -70,7 +70,7 @@ namespace ShowcasePackage.Buildings
 			return owner.GetBuildingsOfType(myType).Count == 0 &&
 					level.Map
 						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.CanBuildOn(tile));
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
@@ -259,33 +259,40 @@ namespace ShowcasePackage.Buildings
 			readonly Button hideButton;
 			readonly UIElement container;
 
-			Dictionary<UIElement, SpawnableUnitTypePlugin> spawningButtons;
+			readonly Dictionary<UIElement, SpawnableUnitTypePlugin> spawningButtons;
 
 			public KeepWindowInstance(KeepWindow keepWindow)
 			{
 				this.keepWindow = keepWindow;
+				this.spawningButtons = new Dictionary<UIElement, SpawnableUnitTypePlugin>();
 
 				Keep.Level.UIManager.LoadLayoutToUI("Assets/UI/KeepWindow.xml");
 				this.window = (Window)Keep.Level.UIManager.UI.Root.GetChild("KeepWindow");
-
 				this.hideButton = (Button)window.GetChild("HideButton");
+				this.container = window.GetChild("Container");
+				try {
+					if (!Keep.Level.EditorMode) {
+						foreach (var unitTypeName in KeepType.SpawnedUnits) {
+							var unitType = this.Keep.Level.Package.GetUnitType(unitTypeName);
 
-				if (!Keep.Level.EditorMode) {
+							var button = container.CreateButton();
+							button.SetStyle("SpawningCheckBox");
+							button.Pressed += ButtonPressed;
+							button.Texture = Keep.Level.Package.UnitIconTexture;
+							button.ImageRect = unitType.IconRectangle;
+							button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
+
+							var unitTypePlugin = ((SpawnableUnitTypePlugin) unitType.Plugin);
+							spawningButtons.Add(button, unitTypePlugin);
+						}
+					}
 
 				}
-				foreach (var unitTypeName in KeepType.SpawnedUnits) {
-					var unitType = this.Keep.Level.Package.GetUnitType(unitTypeName);
-
-					var button = container.CreateButton();
-					button.SetStyle("SpawningCheckBox");
-					button.Pressed += ButtonPressed;
-					button.Texture = Keep.Level.Package.UnitIconTexture;
-					button.ImageRect = unitType.IconRectangle;
-					button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
-
-					var unitTypePlugin = ((SpawnableUnitTypePlugin) unitType.Plugin);
-					spawningButtons.Add(button, unitTypePlugin);
+				catch (Exception) {
+					Dispose();
+					throw;
 				}
+
 				RegisterHandlers();
 
 				window.Visible = false;
