@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using MHUrho.CameraMovement;
 using MHUrho.DefaultComponents;
+using MHUrho.EntityInfo;
 using MHUrho.Helpers;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
@@ -14,6 +15,7 @@ using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.UserInterface.MandK;
 using MHUrho.Helpers.Extensions;
+using ShowcasePackage.Levels;
 using ShowcasePackage.Misc;
 using ShowcasePackage.Units;
 using Urho;
@@ -29,6 +31,8 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public BuildingType MyTypeInstance { get; private set; }
+
 		public static IReadOnlyList<string> SpawnedUnits = new List<string>{ChickenType.TypeName, WolfType.TypeName};
 
 		public ViableTileTypes ViableTileTypes { get; private set; }
@@ -39,11 +43,11 @@ namespace ShowcasePackage.Buildings
 		const string ProducedResourceElement = "producedResource";
 		const string ProductionRateAttribute = "rate";
 
-		BuildingType myType;
+		const float MaxHeightDiff = 0.5f;
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
-			myType = package.GetBuildingType(ID);
+			MyTypeInstance = package.GetBuildingType(ID);
 
 			XElement canBuildOnElem =
 				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
@@ -65,17 +69,18 @@ namespace ShowcasePackage.Buildings
 			return Keep.CreateForLoading(level, building, this);
 		}
 
-		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level)
 		{
-			return owner.GetBuildingsOfType(myType).Count == 0 &&
+			return owner.GetBuildingsOfType(MyTypeInstance).Count == 0 &&
 					level.Map
-						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
+						.GetTilesInRectangle(MyTypeInstance.GetBuildingTilesRectangle(topLeftTileIndex))
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile)) &&
+					HeightDiffLow(topLeftTileIndex, MyTypeInstance.GetBottomRightTileIndex(topLeftTileIndex), level, MaxHeightDiff);
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new KeepBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID), this);
+			return new KeepBuilder(input, ui, camera, this);
 		}
 	}
 
@@ -88,18 +93,19 @@ namespace ShowcasePackage.Buildings
 		public ITile TileInFront { get; private set; }
 
 		readonly Dictionary<ITile, IBuildingNode> nodes;
-		readonly KeepWindow window;
-
+		
 		readonly KeepType myType;
 
+		KeepWindow window;
+		HealthBarControl healthBar;
 		Clicker clicker;
+		
 
 		Keep(ILevelManager level, IBuilding building, KeepType myType)
 			: base(level, building)
 		{
 			this.myType = myType;
-			window = building.Player == level.HumanPlayer ? new KeepWindow(this) : null;
-
+	
 			TileInFront = level.Map.GetContainingTile(building.Center + building.Forward * 3);
 
 
@@ -109,12 +115,21 @@ namespace ShowcasePackage.Buildings
 
 		public static Keep CreateNew(ILevelManager level, IBuilding building, KeepType myType)
 		{
-			Keep newKeep = new Keep(level, building, myType);
-			StaticRangeTarget.CreateNew(newKeep, level, building.Center);
-			newKeep.clicker = Clicker.CreateNew(newKeep, level);
-			newKeep.clicker.Clicked += newKeep.KeepClicked;
-
-			return newKeep;
+			Keep newKeep = null;
+			try {
+				newKeep = new Keep(level, building, myType);
+				StaticRangeTarget.CreateNew(newKeep, level, building.Center);
+				newKeep.clicker = Clicker.CreateNew(newKeep, level);
+				newKeep.clicker.Clicked += newKeep.KeepClicked;
+				newKeep.healthBar =
+					new HealthBarControl(level, building, 100, new Vector3(0, 3, 0), new Vector2(2f, 0.2f), false);
+				newKeep.window = building.Player == level.HumanPlayer ? new KeepWindow(newKeep) : null;
+				return newKeep;
+			}
+			catch (Exception e) {
+				newKeep?.Dispose();
+				throw;
+			}
 		}
 
 		public static Keep CreateForLoading(ILevelManager level, IBuilding building, KeepType myType)
@@ -124,12 +139,19 @@ namespace ShowcasePackage.Buildings
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
-
+			var writer = pluginData.GetWriterForWrappedSequentialData();
+			healthBar.Save(writer);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			healthBar = HealthBarControl.Load(Level, Building, reader);
 
+
+			clicker = Building.GetDefaultComponent<Clicker>();
+			clicker.Clicked += KeepClicked;
+			window = Building.Player == Level.HumanPlayer ? new KeepWindow(this) : null;
 		}
 
 		public override void OnUpdate(float timeStep)
@@ -148,6 +170,28 @@ namespace ShowcasePackage.Buildings
 			}
 
 			clicker.Clicked -= KeepClicked;
+			window?.Dispose();
+			healthBar?.Dispose();
+		}
+
+		public override void OnHit(IEntity byEntity, object userData)
+		{
+			if (Building.Player.IsFriend(byEntity.Player) || byEntity is IProjectile)
+			{
+				return;
+			}
+
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-damage)) {
+				//Player will see this and end himself
+				Building.RemoveFromLevel();
+			}
+		}
+
+		public override bool CanChangeTileHeight(int x, int y)
+		{
+			return false;
 		}
 
 		public override float? GetHeightAt(float x, float y)
@@ -219,10 +263,10 @@ namespace ShowcasePackage.Buildings
 
 		readonly BaseCustomWindowUI cwUI;
 
-		public KeepBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type, KeepType myType)
-			: base(input, ui, camera, type)
+		public KeepBuilder(GameController input, GameUI ui, CameraMover camera, KeepType type)
+			: base(input, ui, camera, type.MyTypeInstance)
 		{
-			cwUI = new BaseCustomWindowUI(ui, myType.Name, "");
+			cwUI = new BaseCustomWindowUI(ui, type.Name, "");
 		}
 
 		public override void Enable()
@@ -265,11 +309,13 @@ namespace ShowcasePackage.Buildings
 			{
 				this.keepWindow = keepWindow;
 				this.spawningButtons = new Dictionary<UIElement, SpawnableUnitTypePlugin>();
+				var packageUI = ((LevelInstancePluginBase)Keep.Level.Plugin).PackageUI;
+				packageUI.LoadLayoutToUI("Assets/UI/KeepWindow.xml");
 
-				Keep.Level.UIManager.LoadLayoutToUI("Assets/UI/KeepWindow.xml");
-				this.window = (Window)Keep.Level.UIManager.UI.Root.GetChild("KeepWindow");
+				this.window = (Window)packageUI.PackageRoot.GetChild("KeepWindow");
 				this.hideButton = (Button)window.GetChild("HideButton");
 				this.container = window.GetChild("Container");
+
 				try {
 					if (!Keep.Level.EditorMode) {
 						foreach (var unitTypeName in KeepType.SpawnedUnits) {
@@ -277,7 +323,6 @@ namespace ShowcasePackage.Buildings
 
 							var button = container.CreateButton();
 							button.SetStyle("SpawningCheckBox");
-							button.Pressed += ButtonPressed;
 							button.Texture = Keep.Level.Package.UnitIconTexture;
 							button.ImageRect = unitType.IconRectangle;
 							button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
@@ -336,6 +381,12 @@ namespace ShowcasePackage.Buildings
 
 			public void Dispose()
 			{
+				UnregisterHandlers();
+
+				foreach (var button in spawningButtons.Keys) {
+					((Button) button).Pressed -= ButtonPressed;
+				}
+
 				hideButton.Dispose();
 				container.Dispose();
 				window.Remove();
@@ -344,6 +395,24 @@ namespace ShowcasePackage.Buildings
 			void RegisterHandlers()
 			{
 				hideButton.Pressed += HideButtonPressed;
+
+				foreach (var pair in spawningButtons) {
+					Button button = (Button) pair.Key;
+					button.Pressed += ButtonPressed;
+					Keep.Level.UIManager.RegisterForHover(button);
+				}
+			}
+
+			void UnregisterHandlers()
+			{
+				hideButton.Pressed -= HideButtonPressed;
+
+				foreach (var pair in spawningButtons)
+				{
+					Button button = (Button)pair.Key;
+					button.Pressed -= ButtonPressed;
+					Keep.Level.UIManager.UnregisterForHover(button);
+				}
 			}
 
 			void HideButtonPressed(PressedEventArgs args)

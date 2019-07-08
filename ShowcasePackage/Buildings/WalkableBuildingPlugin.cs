@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
+using Urho;
 
 namespace ShowcasePackage.Buildings
 {

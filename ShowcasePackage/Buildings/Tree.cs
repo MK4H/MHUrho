@@ -27,7 +27,7 @@ namespace ShowcasePackage.Buildings
 
 
 			public TreeBuilder(GameController input, GameUI ui, CameraMover camera, TreeType type)
-				: base(input, ui, camera, type.myType)
+				: base(input, ui, camera, type.MyTypeInstance)
 			{
 				this.type = type;
 				InitUI(ui, out uiElem, out sizeSlider);
@@ -47,7 +47,7 @@ namespace ShowcasePackage.Buildings
 				}
 
 				IntRect rect = GetBuildingRectangle(tile, BuildingType);
-				if (BuildingType.CanBuild(rect, Input.Player, Level))
+				if (BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level))
 				{
 					IBuilding building = Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.Identity, Input.Player);
 					Tree tree = (Tree)building.BuildingPlugin;
@@ -66,11 +66,14 @@ namespace ShowcasePackage.Buildings
 				sizeSlider = (Slider)uiElem.GetChild("sizeSlider", true);
 				sizeSlider.Range = 10;
 
+				ui.RegisterForHover(sizeSlider);
+
 				uiElem.Visible = false;
 			}
 
 			public override void Dispose()
 			{
+				Ui.UnregisterForHover(sizeSlider);
 				uiElem.Dispose();
 				sizeSlider.Dispose();
 			}
@@ -98,6 +101,8 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public BuildingType MyTypeInstance { get; private set; }
+
 		/// <summary>
 		/// Contains tiles the tree grows in and the time it takes to grow to full
 		/// </summary>
@@ -114,7 +119,7 @@ namespace ShowcasePackage.Buildings
 
 		const float startSize = 0.05f;
 
-		BuildingType myType;
+
 
 		readonly Dictionary<TileType, double> tileGrowth;
 
@@ -138,13 +143,8 @@ namespace ShowcasePackage.Buildings
 			return new Tree(level, building, this);
 		}
 
-		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level)
 		{
-			//Tree is just 1 tile big
-			if (topLeftTileIndex != bottomRightTileIndex) {
-				throw new ArgumentException("Wrong size of rectangle provided");
-			}
-
 			ITile tile = level.Map.GetTileByTopLeftCorner(topLeftTileIndex);
 			//Check if the owner is neutral player, the tile is free and the tree grows on the given tile type
 			return owner == level.NeutralPlayer && tile.Building == null && tileGrowth.ContainsKey(tile.Type);
@@ -157,7 +157,7 @@ namespace ShowcasePackage.Buildings
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
-			myType = package.GetBuildingType(ID);
+			MyTypeInstance = package.GetBuildingType(ID);
 
 			IEnumerable<XElement> growsIn = extensionElement.Elements(package.PackageManager.GetQualifiedXName(growsInElem));
 			foreach (var element in growsIn)
@@ -224,10 +224,10 @@ namespace ShowcasePackage.Buildings
 
 		static readonly Random spreadRNG = new Random();
 
-		double spreadProbability = 0.01;
-		double spreadTimeout = 5;
-		IntVector2 spreadSize = new IntVector2(100, 100);
-		int spreadTries = 10;
+		const double SpreadProbability = 0.01;
+		const double SpreadTimeout = 5;
+		static readonly IntVector2 SpreadSize = new IntVector2(100, 100);
+		const int SpreadTries = 10;
 
 		double curSpreadTimeout;
 
@@ -240,9 +240,9 @@ namespace ShowcasePackage.Buildings
 		/// <summary>
 		/// Size of step in seconds.
 		/// </summary>
-		const float stepSize = 1;
+		const float StepSize = 1;
 
-		float currentStepTimeout = stepSize;
+		float currentStepTimeout = StepSize;
 
 		/// <summary>
 		/// 
@@ -253,11 +253,11 @@ namespace ShowcasePackage.Buildings
 		/// <param name="startSize">Start size of the tree as a multiplier of the standard size in prefab.</param>
 		/// <param name="finalSize">Final size of the tree as a multiplier of the standard size in prefab.</param>
 		/// <param name="type"></param>
-		public Tree(ILevelManager level, IBuilding building, float growthTime, float startSize, float finalSize,TreeType type)
+		public Tree(ILevelManager level, IBuilding building, float growthTime, float startSize, float finalSize, TreeType type)
 			: base(level, building)
 		{
 			this.type = type;
-			this.curSpreadTimeout = spreadTimeout;
+			this.curSpreadTimeout = SpreadTimeout;
 
 			this.FinalSize = finalSize;
 			this.changePerSecond = (finalSize - startSize) / growthTime;
@@ -268,7 +268,7 @@ namespace ShowcasePackage.Buildings
 		public Tree(ILevelManager level, IBuilding building, TreeType type)
 			: base(level, building)
 		{
-
+			this.type = type;
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
@@ -277,6 +277,8 @@ namespace ShowcasePackage.Buildings
 			writer.StoreNext(FinalSize);
 			writer.StoreNext(changePerSecond);
 			writer.StoreNext(currentSize);
+			writer.StoreNext(currentStepTimeout);
+			writer.StoreNext(curSpreadTimeout);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
@@ -286,6 +288,8 @@ namespace ShowcasePackage.Buildings
 			FinalSize = finalSize;
 			reader.GetNext(out changePerSecond);
 			reader.GetNext(out currentSize);
+			reader.GetNext(out currentStepTimeout);
+			reader.GetNext(out curSpreadTimeout);
 
 			SetSize(currentSize);
 		}
@@ -304,6 +308,16 @@ namespace ShowcasePackage.Buildings
 				Spread(timeStep);
 				Grow(timeStep);
 			}
+		}
+
+		public override bool CanChangeTileHeight(int x, int y)
+		{
+			return true;
+		}
+
+		public override void TileHeightChanged(ITile tile)
+		{
+			Building.ChangeHeight(Level.Map.GetHeightAt(tile.Center));
 		}
 
 		/// <summary>
@@ -335,16 +349,16 @@ namespace ShowcasePackage.Buildings
 				return;
 			}
 
-			curSpreadTimeout = spreadTimeout;
+			curSpreadTimeout = SpreadTimeout;
 
-			if (spreadRNG.NextDouble() > spreadProbability) {
+			if (spreadRNG.NextDouble() > SpreadProbability) {
 				return;
 			}
 
-			for (int i = 0; i < spreadTries; i++)
+			for (int i = 0; i < SpreadTries; i++)
 			{
-				IntVector2 offset = new IntVector2(spreadRNG.Next(-(spreadSize.X / 2), spreadSize.X / 2),
-													spreadRNG.Next(-(spreadSize.Y / 2), spreadSize.Y / 2));
+				IntVector2 offset = new IntVector2(spreadRNG.Next(-(SpreadSize.X / 2), SpreadSize.X / 2),
+													spreadRNG.Next(-(SpreadSize.Y / 2), SpreadSize.Y / 2));
 
 				ITile target = Level.Map.GetTileByTopLeftCorner(Building.TopLeft + offset);
 
@@ -368,11 +382,13 @@ namespace ShowcasePackage.Buildings
 				return;
 			}
 
-			currentStepTimeout = stepSize;
+			currentStepTimeout = StepSize;
 
-			float newSize = currentSize + changePerSecond * stepSize;
+			float newSize = currentSize + changePerSecond * StepSize;
 			SetSize(newSize);
-		} 
+		}
+
+
 	}
 
 	

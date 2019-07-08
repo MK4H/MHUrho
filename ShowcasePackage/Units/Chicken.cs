@@ -52,16 +52,18 @@ namespace ShowcasePackage.Units
 
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit) {
-			return ChickenInstance.CreateNew(level, unit, this);
+			return Chicken.CreateNew(level, unit, this);
 		}
 
 		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit) {
-			return ChickenInstance.CreateForLoading(level, unit, this);
+			return Chicken.CreateForLoading(level, unit, this);
 		}
 
 
 		public override bool CanSpawnAt(ITile centerTile) {
-			return true;
+			return PassableTileTypes.IsViable(centerTile) && 
+					(centerTile.Building == null ||
+					centerTile.Building.Plugin is WalkableBuildingPlugin);
 		}
 
 		public override Spawner GetSpawner(GameController input, GameUI ui, CameraMover camera)
@@ -82,13 +84,203 @@ namespace ShowcasePackage.Units
 		}
 	}
 
-	public class ChickenInstance : UnitInstancePlugin, 
+	public class Chicken : UnitInstancePlugin, 
 									WorldWalker.IUser, 
 									MovingRangeTarget.IUser,
 									UnitSelector.IUser
 	{
 
-		class ChickenDistCalc : ClimbingDistCalc {
+		/// <summary>
+		/// Records the tiles at which the unit would be blocked during normal pathfinding by a building
+		/// </summary>
+		public class ChickenDistCalcThroughWalls : ChickenDistCalc {
+
+			/// <summary>
+			/// Normaly blocked by a building
+			/// </summary>
+			public HashSet<ITile> CanBreakThrough { get; private set; }
+
+			public ChickenDistCalcThroughWalls(Chicken chicken)
+				: base(chicken, 1, 1, 1)
+			{
+				CanBreakThrough = new HashSet<ITile>();
+			}
+
+			protected override bool CanPass(ITileNode source, ITileNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToTile(target))
+				{
+					return false;
+				}
+
+				//Diagonal
+				if (source.Tile.MapLocation.X != target.Tile.MapLocation.X &&
+					source.Tile.MapLocation.Y != target.Tile.MapLocation.Y)
+				{
+					//Blocked by own or neutral buildings we can't destroy
+
+					var building1 = Map
+									.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X,
+																		target.Tile.MapLocation.Y))
+									.Building;
+					var building2 = Map
+									.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X,
+																		source.Tile.MapLocation.Y))
+									.Building;
+					if ((building1.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building1.Player)) &&
+						(building2.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building2.Player)))
+					{
+						return false;
+					}
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanPass(ITileNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target)) {
+					return true;
+				}
+
+				if (!CanPassToBuilding(target)) {
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+
+				return true;
+			}
+
+			protected override bool CanPass(IBuildingNode source, ITileNode target)
+			{
+				if (base.CanPass(source, target)) {
+					return true;
+				}
+
+				if (!CanPassToTile(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanPass(IBuildingNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target)) {
+					return true;
+				}
+
+				if (!CanPassToBuilding(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+				return true;
+			}
+
+			protected override bool CanTeleport(ITileNode source, ITileNode target)
+			{
+				if (base.CanTeleport(source, target)) {
+					return true;
+				}
+
+				if (!CanPassToTile(target)) {
+					return false;
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanTeleport(ITileNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target)) {
+					return true;
+				}
+
+				if (!CanPassToBuilding(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+
+				return true;
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, ITileNode target)
+			{
+				if (base.CanTeleport(source, target))
+				{
+					return true;
+				}
+
+				if (!Instance.myType.PassableTileTypes.Contains(target.Tile.Type))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToBuilding(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+				return true;
+			}
+
+			bool CanPassToTile(ITileNode target)
+			{
+				if (!Instance.myType.PassableTileTypes.Contains(target.Tile.Type))
+				{
+					return false;
+				}
+
+				if (target.Tile.Building != null &&
+					(target.Tile.Building.Player == Level.NeutralPlayer ||
+					Instance.Unit.Player.IsFriend(target.Tile.Building.Player)))
+				{
+					return false;
+				}
+				return true;
+			}
+
+			bool CanPassToBuilding(IBuildingNode target)
+			{
+				if (Instance.Unit.Player.IsFriend(target.Building.Player))
+				{
+					return false;
+				}
+				return true;
+			}
+		}
+
+		/// <summary>
+		/// Represents the view of the pathfinding graph by chicken unit.
+		/// Rejects edges that would not be present and returns the weights of the rest of the edges.
+		/// </summary>
+		public class ChickenDistCalc : ClimbingDistCalc {
 
 			static readonly Dictionary<Tuple<NodeType, NodeType>, float> TeleportTimes =
 				new Dictionary<Tuple<NodeType, NodeType>, float>
@@ -110,10 +302,10 @@ namespace ShowcasePackage.Units
 			/// </summary>
 			public float TeleportCoef { get; set; }
 
-			ILevelManager Level => instance.Level;
-			IMap Map => Level.Map;
+			protected ILevelManager Level => Instance.Level;
+			protected IMap Map => Level.Map;
 
-			readonly ChickenInstance instance;
+			protected readonly Chicken Instance;
 
 
 
@@ -124,10 +316,10 @@ namespace ShowcasePackage.Units
 			/// <param name="baseCoef">Coefficient of linear motion speed.</param>
 			/// <param name="angleCoef">Coefficient how much the linear motion speed is affected by angle.</param>
 			/// <param name="teleportCoef">Coefficient of teleport times.</param>
-			public ChickenDistCalc(ChickenInstance chicken, float baseCoef, float angleCoef, float teleportCoef)
+			public ChickenDistCalc(Chicken chicken, float baseCoef, float angleCoef, float teleportCoef)
 				: base(baseCoef, angleCoef)
 			{
-				this.instance = chicken;
+				this.Instance = chicken;
 				this.TeleportCoef = teleportCoef;
 			}
 
@@ -191,28 +383,26 @@ namespace ShowcasePackage.Units
 			bool CanPassToBuildingNode(IBuildingNode target)
 			{
 				//Is not closed gate door
-				return target.Tag != GateInstance.GateDoorTag || ((GateInstance)target.Building.Plugin).IsOpen;
+				return target.Tag != Gate.GateDoorTag || ((Gate)target.Building.Plugin).IsOpen;
 			}
 
 			bool CanPassToTileNode(ITileNode target)
 			{
 				//Is passable and is not covered by a building
-				return instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
+				return Instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
 						target.Tile.Building == null;
 			}
 		}
-
 
 		AnimationController animationController;
 		public WorldWalker Walker { get; private set; }
 		public Shooter Shooter{ get; private set; }
 
+		public bool AttackMove { get; set; }
+
 		bool dying;
 
-		readonly ChickenDistCalc distCalc;
-
-		float hp;
-		HealthBar healthbar;
+		HealthBarControl healthBar;
 
 		IRangeTarget explicitTarget;
 		bool targetMoved = false;
@@ -220,28 +410,29 @@ namespace ShowcasePackage.Units
 		const float timeBetweenTests = 1.0f;
 		float shootTestTimer = timeBetweenTests;
 
-
+		readonly ChickenDistCalc distCalc;
 		readonly ChickenType myType;
 
-		public ChickenInstance(ILevelManager level, IUnit unit, ChickenType type) 
-			:base(level,unit) {
+		public Chicken(ILevelManager level, IUnit unit, ChickenType type) 
+			:base(level,unit)
+		{
 
 			this.myType = type;
-
-			
+			this.AttackMove = false;
 			unit.AlwaysVertical = true;
 			distCalc = new ChickenDistCalc(this, 1, 1, 1);
 		}
 
-		public static ChickenInstance CreateNew(ILevelManager level, IUnit unit, ChickenType type)
+		public static Chicken CreateNew(ILevelManager level, IUnit unit, ChickenType type)
 		{
-			ChickenInstance newChicken = new ChickenInstance(level, unit, type);
+			Chicken newChicken = new Chicken(level, unit, type);
 
 			newChicken.animationController = unit.CreateComponent<AnimationController>();
 			newChicken.Walker = WorldWalker.CreateNew(newChicken, level);
 			newChicken.Shooter = Shooter.CreateNew(newChicken, level, type.ProjectileType, new Vector3(0, 0.7f, -0.7f), 20);
 			newChicken.Shooter.SearchForTarget = true;
 			newChicken.Shooter.TargetSearchDelay = 2;
+			newChicken.healthBar = new HealthBarControl(level, unit, 100, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), true);
 
 			var selector = UnitSelector.CreateNew(newChicken, level);
 
@@ -249,21 +440,19 @@ namespace ShowcasePackage.Units
 
 			newChicken.RegisterEvents(newChicken.Walker, newChicken.Shooter, selector);
 
-			newChicken.hp = 100;
-			newChicken.Init(newChicken.hp);
-
 			return newChicken;
 		}
 
-		public static ChickenInstance CreateForLoading(ILevelManager level, IUnit unit, ChickenType type)
+		public static Chicken CreateForLoading(ILevelManager level, IUnit unit, ChickenType type)
 		{
-			return new ChickenInstance(level, unit, type);
+			return new Chicken(level, unit, type);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginDataStorage)
 		{
-			var sequentialData = pluginDataStorage.GetWriterForWrappedSequentialData();
-			sequentialData.StoreNext(hp);
+			var writer = pluginDataStorage.GetWriterForWrappedSequentialData();
+			healthBar.Save(writer);
+			writer.StoreNext(AttackMove);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData) {
@@ -274,31 +463,25 @@ namespace ShowcasePackage.Units
 
 			RegisterEvents(Walker, Shooter, Unit.GetDefaultComponent<UnitSelector>());
 
-			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
-			sequentialData.GetNext(out hp);
-			Init(hp);
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			healthBar = HealthBarControl.Load(Level, Unit, reader);
+			reader.GetNext(out bool attackMove);
+			AttackMove = attackMove;
 		}
-
-
 
 		public override void OnHit(IEntity other, object userData)
 		{
-			if (other.Player == Unit.Player) {
+			if (Unit.Player.IsFriend(other.Player)) {
 				return;
 			}
 
-			hp -= 10;
-			
+			int damage = (int)userData;
 
-			if (hp < 0) {
-				healthbar.SetHealth(0);
-				animationController.PlayExclusive("Chicken/Models/Dying.ani", 0, false);
+			if (!healthBar.ChangeHitPoints(-damage)) {
+				animationController.PlayExclusive("Assets/Units/Chicken/Models/Dying.ani", 0, false);
 				dying = true;
 				Shooter.Enabled = false;
 				Walker.Enabled = false;
-			}
-			else {
-				healthbar.SetHealth((int)hp);
 			}
 		}
 
@@ -307,9 +490,21 @@ namespace ShowcasePackage.Units
 			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetHeightAt(Unit.XZPosition)));
 		}
 
+		public override void BuildingDestroyed(IBuilding building, ITile tile)
+		{
+			Walker.Stop();
+			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetTerrainHeightAt(Unit.Position.XZ2())));
+		}
+
+
+		public override void BuildingBuilt(IBuilding building, ITile tile)
+		{
+			throw new InvalidOperationException("Building building on top of units is not supported.");
+		}
+
 		public override void OnUpdate(float timeStep) {
 			if (dying) {
-				if (animationController.IsAtEnd("Chicken/Models/Dying.ani")) {
+				if (animationController.IsAtEnd("Assets/Units/Chicken/Models/Dying.ani")) {
 					Unit.RemoveFromLevel();
 				}
 				return;
@@ -342,15 +537,10 @@ namespace ShowcasePackage.Units
 
 		public override void Dispose()
 		{
-			healthbar.Dispose();
+			healthBar.Dispose();
 		}
 
-		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
-		{
-			return distCalc;
-		}
-
-		bool UnitSelector.IUser.ExecuteOrder(Order order)
+		public bool ExecuteOrder(Order order)
 		{
 			order.Executed = false;
 			if (order.PlatformOrder)
@@ -382,13 +572,26 @@ namespace ShowcasePackage.Units
 			return order.Executed;
 		}
 
-		void OnMovementStarted(WorldWalker walker) {
+		void OnMovementStarted(WorldWalker walker)
+		{
 			animationController.PlayExclusive("Assets/Units/Chicken/Models/Walk.ani", 0, true);
 			animationController.SetSpeed("Assets/Units/Chicken/Models/Walk.ani", 2);
 
 			Shooter.StopShooting();
-			Shooter.SearchForTarget = false;
+
+			if (!AttackMove)
+			{
+				Shooter.SearchForTarget = false;
+			}
+
 		}
+
+		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
+		{
+			return distCalc;
+		}
+
+		
 
 		void OnMovementFinished(WorldWalker walker) {
 			animationController.Stop("Assets/Units/Chicken/Models/Walk.ani");
@@ -411,11 +614,13 @@ namespace ShowcasePackage.Units
 
 		void OnUnitSelected(UnitSelector selector) {
 			if (Walker.State != WorldWalkerState.Started) {
-				animationController.Play("Assets/Units/Chicken/Models/Idle.ani", 0, true);
+				animationController.Play("Assets/Units/Chicken/Models/Idle.ani", 0, false);
 			}
 		}
 
 		void OnTargetAutoAcquired(Shooter shooter) {
+			Walker.Stop();
+
 			var targetPos = shooter.Target.CurrentPosition;
 
 			var diff = Unit.Position - targetPos;
@@ -444,13 +649,6 @@ namespace ShowcasePackage.Units
 		{
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
-
-		void Init(float health)
-		{
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), health);
-		}
-
-	
 
 		IRangeTarget SetExplicitTarget(IEntity targetEntity)
 		{

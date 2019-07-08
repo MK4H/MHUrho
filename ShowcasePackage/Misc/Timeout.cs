@@ -41,15 +41,28 @@ namespace ShowcasePackage.Misc
 		/// Moves the time of the timeout, returns true if expired, false otherwise.
 		/// </summary>
 		/// <param name="timeStep">How much time has elapsed.</param>
+		/// <param name="resetIfExpired">If the timeout should be automatically reset on expiration.</param>
 		/// <returns>True if expired, false otherwise.</returns>
-		public bool Update(double timeStep)
+		public bool Update(double timeStep, bool resetIfExpired = false)
 		{
 			if (Remaining < 0) {
+				if (resetIfExpired)
+				{
+					Reset();
+				}
 				return true;
 			}
 
 			Remaining -= timeStep;
-			return Remaining < 0;
+
+			if (Remaining > 0) {
+				return false;
+			}
+
+			if (resetIfExpired) {
+				Reset();
+			}
+			return true;
 		}
 
 		/// <summary>

@@ -30,14 +30,21 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public BuildingType MyTypeInstance { get; private set; }
+
 		public Cost Cost { get; private set; }
 		public ViableTileTypes ViableTileTypes { get; private set; }
+
 
 		const string CostElement = "cost";
 		const string CanBuildOnElement = "canBuildOn";
 
+
+
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			MyTypeInstance = package.GetBuildingType(ID);
+
 			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
 			Cost = Cost.FromXml(costElem, package);
 
@@ -48,19 +55,18 @@ namespace ShowcasePackage.Buildings
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
 		{
-			return new Wall(level, building);
+			return Wall.CreateNew(level, building);
 		}
 
 		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building)
 		{
-			return new Wall(level, building);
+			return Wall.CreateForLoading(level, building);
 		}
 
-		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level)
 		{
-			return topLeftTileIndex == bottomRightTileIndex && 
-					level.Map
-						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
+			return level.Map
+						.GetTilesInRectangle(MyTypeInstance.GetBuildingTilesRectangle(topLeftTileIndex))
 						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
 		}
 
@@ -74,44 +80,89 @@ namespace ShowcasePackage.Buildings
 
 		public static readonly object WallTag = "Wall";
 
-		const float height = 4;
+		const float Height = 4;
 
-		IBuildingNode pathNode;
+		HealthBarControl healthBar;
 
-		HealthBar healthBar;
-		double hp;
-
-		public Wall(ILevelManager level, IBuilding building)
+		readonly IBuildingNode pathNode;
+		Wall(ILevelManager level, IBuilding building)
 			: base(level, building)
 		{
-			StaticRangeTarget.CreateNew(this, level, building.Center);
-
 			Vector3 topPosition = building.Center;
 			topPosition = topPosition.WithY(GetHeightAt(topPosition.X, topPosition.Z).Value);
-			pathNode = Level.Map.PathFinding.CreateBuildingNode(building, topPosition, WallTag);
+			pathNode = level.Map.PathFinding.CreateBuildingNode(building, topPosition, WallTag);
 			ConnectNeighbours();
+		}
+
+		public static Wall CreateNew(ILevelManager level, IBuilding building)
+		{
+			Wall wall = null;
+			try {
+				wall = new Wall(level, building);
+
+				wall.healthBar =
+					new HealthBarControl(level, building, 100, new Vector3(0, 5, 0), new Vector2(0.5f, 0.2f), false);
+				StaticRangeTarget.CreateNew(wall, level, building.Center);
+				return wall;
+			}
+			catch (Exception e) {
+				wall?.Dispose();
+				throw;
+			}
+		}
+
+		public static Wall CreateForLoading(ILevelManager level, IBuilding building)
+		{
+			return new Wall(level, building);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
 			var writer = pluginData.GetWriterForWrappedSequentialData();
-			writer.StoreNext(hp);
+			healthBar.Save(writer);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
-			reader.GetNext(out hp);
+			healthBar = HealthBarControl.Load(Level, Building, reader);
 		}
 
 		public override void Dispose()
 		{
-			pathNode.Remove();
+			pathNode?.Remove();
+			healthBar?.Dispose();
+		}
+
+		public override void OnHit(IEntity byEntity, object userData)
+		{
+			if (Building.Player.IsFriend(byEntity.Player) || byEntity is IProjectile)
+			{
+				return;
+			}
+
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-damage))
+			{
+				Building.RemoveFromLevel();
+			}
+		}
+
+		public override bool CanChangeTileHeight(int x, int y)
+		{
+			return true;
+		}
+
+		public override void TileHeightChanged(ITile tile)
+		{
+			Building.ChangeHeight(Level.Map.GetTerrainHeightAt(Building.Position.XZ2()));
+			pathNode.ChangePosition(pathNode.Position.WithY(GetHeightAt(Building.Center.X, Building.Center.Z).Value));
 		}
 
 		public override float? GetHeightAt(float x, float y)
 		{
-			return Level.Map.GetTerrainHeightAt(x, y) + height;
+			return Level.Map.GetTerrainHeightAt(x, y) + Height;
 		}
 
 		public override IBuildingNode TryGetNodeAt(ITile tile)
@@ -139,7 +190,7 @@ namespace ShowcasePackage.Buildings
 					if (node.Tag == WallTag) {
 						movementType = MovementType.Linear;
 					}
-					else if (node.Tag == GateInstance.GateRoofTag) { 
+					else if (node.Tag == Gate.GateRoofTag) { 
 						movementType = MovementType.Teleport;
 					}
 					else {

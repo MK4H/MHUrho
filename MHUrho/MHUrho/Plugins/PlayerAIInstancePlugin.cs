@@ -11,7 +11,7 @@ namespace MHUrho.Plugins
     public abstract class PlayerAIInstancePlugin : InstancePlugin
     {
 
-		protected IPlayer Player;
+		public IPlayer Player { get; private set; }
 
 		protected PlayerAIInstancePlugin(ILevelManager level, IPlayer player)
 			:base(level)
@@ -32,12 +32,12 @@ namespace MHUrho.Plugins
 		public abstract void Init(ILevelManager level);
 
 
-		public virtual void OnBuildingDestroyed(IBuilding building)
+		public virtual void BuildingDestroyed(IBuilding building)
 		{
 
 		}
 
-		public virtual void OnUnitKilled(IUnit unit)
+		public virtual void UnitKilled(IUnit unit)
 		{
 
 		}

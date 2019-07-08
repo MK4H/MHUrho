@@ -70,7 +70,7 @@ namespace ShowcasePackage.Buildings
 		protected IntRect GetBuildingRectangle(ITile centerTile, BuildingType buildingType)
 		{
 			IntVector2 topLeft = centerTile.TopLeft - buildingType.Size / 2;
-			IntVector2 bottomRight = topLeft + buildingType.Size - new IntVector2(1, 1);
+			IntVector2 bottomRight = buildingType.GetBottomRightTileIndex(topLeft);
 			Map.SnapToMap(ref topLeft, ref bottomRight);
 
 			return new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y);

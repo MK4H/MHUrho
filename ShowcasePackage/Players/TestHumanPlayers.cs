@@ -11,7 +11,7 @@ namespace ShowcasePackage.Players
 {
 	public class TestHumanPlayer1Type : PlayerAITypePlugin
 	{
-		public override int ID => 2;
+		public override int ID => 5;
 
 		public override string Name => "testHuman1";
 
@@ -32,7 +32,8 @@ namespace ShowcasePackage.Players
 		}
 	}
 
-	class TestHumanPlayer1Instance : PlayerAIInstancePlugin {
+	class TestHumanPlayer1Instance : PlayerWithKeep {
+
 		public TestHumanPlayer1Instance(ILevelManager level, IPlayer player)
 			: base(level, player)
 		{ }

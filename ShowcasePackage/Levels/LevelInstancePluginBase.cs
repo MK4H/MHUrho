@@ -5,13 +5,13 @@ using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using ShowcasePackage.Buildings;
+using ShowcasePackage.Misc;
 
 namespace ShowcasePackage.Levels
 {
 	public abstract class LevelInstancePluginBase : LevelLogicInstancePlugin
 	{
-		Dictionary<IEntityType, double> buildingDamage;
-		Dictionary<IEntityType, double> unitDamage;
+		public PackageUI PackageUI { get; protected set; }
 
 		protected LevelInstancePluginBase(ILevelManager level)
 			: base(level)
@@ -19,7 +19,7 @@ namespace ShowcasePackage.Levels
 
 		public bool IsRoofNode(IBuildingNode node)
 		{
-			return node.Tag == GateInstance.GateRoofTag ||
+			return node.Tag == Gate.GateRoofTag ||
 					node.Tag == Wall.WallTag ||
 					node.Tag == Tower.TowerTag;
 		}

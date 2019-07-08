@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using MHUrho.CameraMovement;
 using MHUrho.DefaultComponents;
+using MHUrho.EntityInfo;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -32,16 +33,19 @@ namespace ShowcasePackage.Buildings
 
 		public UnitType WorkerType { get; private set; }
 		public ResourceType ProducedResource { get; private set; }
+		public BuildingType MyTypeInstance { get; private set; }
+
 
 		const string WorkerElement = "workerType";
 		const string ResourceElement = "resourceType";
 		const string CostElement = "cost";
 		const string CanBuildOnElement = "canBuildOn";
 
-		BuildingType myType;
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			MyTypeInstance = package.GetBuildingType(TypeID);
+
 			XElement workerElement = extensionElement.Element(package.PackageManager.GetQualifiedXName(WorkerElement));
 			WorkerType = package.GetUnitType(workerElement.Value);
 
@@ -55,8 +59,6 @@ namespace ShowcasePackage.Buildings
 			XElement canBuildOnElem =
 				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
 			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
-
-			myType = package.GetBuildingType(TypeID);
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
@@ -69,17 +71,16 @@ namespace ShowcasePackage.Buildings
 			return TreeCutter.CreateForLoading(level, building, this);
 		}
 
-		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level)
 		{
-			return topLeftTileIndex == bottomRightTileIndex &&
-					level.Map
-						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
+			return level.Map
+						.GetTilesInRectangle(MyTypeInstance.GetBuildingTilesRectangle(topLeftTileIndex))
 						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new TreeCutterBuilder(input, ui, camera, myType, this);
+			return new TreeCutterBuilder(input, ui, camera, this);
 		}
 	}
 
@@ -184,6 +185,8 @@ namespace ShowcasePackage.Buildings
 
 		readonly Worker[] workers;
 
+		HealthBarControl healthBar;
+
 		TreeCutter(ILevelManager level, IBuilding building, TreeCutterType type)
 			: base(level, building)
 		{
@@ -194,20 +197,29 @@ namespace ShowcasePackage.Buildings
 
 		public static TreeCutter CreateNew(ILevelManager level, IBuilding building, TreeCutterType type)
 		{
-			TreeCutter newCutter = new TreeCutter(level, building, type);
-			StaticRangeTarget.CreateNew(newCutter, level, building.Center);
-			using (var spawnPoints = building.Tiles[0].GetNeighbours().GetEnumerator())
-			{
-				for (int i = 0; i < numberOfWorkers; i++) {
-					IUnit workerUnit1 = level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
-					newCutter.workers[i] = new Worker(newCutter, workerUnit1, workerRespawnTime)
-											{
-												DoRespawn = !level.EditorMode
-											};
-				}
-			}
+			TreeCutter newCutter = null;
+			try {
+				newCutter = new TreeCutter(level, building, type);
+				newCutter.healthBar =
+					new HealthBarControl(level, building, 100, new Vector3(0, 3, 0), new Vector2(0.5f, 0.1f), false);
+				StaticRangeTarget.CreateNew(newCutter, level, building.Center);
 
-			return newCutter;
+				using (var spawnPoints = building.Tiles[0].GetNeighbours().GetEnumerator()) {
+					for (int i = 0; i < numberOfWorkers; i++) {
+						IUnit workerUnit1 = level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
+						newCutter.workers[i] = new Worker(newCutter, workerUnit1, workerRespawnTime)
+												{
+													DoRespawn = !level.EditorMode
+												};
+					}
+				}
+
+				return newCutter;
+			}
+			catch (Exception e) {
+				newCutter?.Dispose();
+				throw;
+			}
 		}
 
 		public static TreeCutter CreateForLoading(ILevelManager level, IBuilding building, TreeCutterType type)
@@ -218,6 +230,7 @@ namespace ShowcasePackage.Buildings
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
 			var writer = pluginData.GetWriterForWrappedSequentialData();
+			healthBar.Save(writer);
 			foreach (var worker in workers) {
 				worker.Store(writer);
 			}
@@ -226,8 +239,10 @@ namespace ShowcasePackage.Buildings
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
+			healthBar = HealthBarControl.Load(Level, Building, reader);
+
 			for (int i = 0; i < numberOfWorkers; i++) {
-				workers[i] = Worker.Load(reader, this, Level.EditorMode);
+				workers[i] = Worker.Load(reader, this, !Level.EditorMode);
 			}
 		}
 
@@ -236,7 +251,23 @@ namespace ShowcasePackage.Buildings
 			foreach (var worker in workers) {
 				worker.Despawn();
 				worker.DoRespawn = false;
-			}		
+			}
+			healthBar?.Dispose();
+		}
+
+		public override void OnHit(IEntity byEntity, object userData)
+		{
+			if (Building.Player.IsFriend(byEntity.Player))
+			{
+				return;
+			}
+
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-damage))
+			{
+				Building.RemoveFromLevel();
+			}
 		}
 
 		public override void OnUpdate(float timeStep)
@@ -246,9 +277,9 @@ namespace ShowcasePackage.Buildings
 			}
 		}
 
-		public override void OnHit(IEntity byEntity, object userData)
+		public override bool CanChangeTileHeight(int x, int y)
 		{
-
+			return false;
 		}
 
 		IUnit SpawnWorkerUnit(IEnumerator<ITile> spawnPoints)
@@ -263,7 +294,6 @@ namespace ShowcasePackage.Buildings
 
 			return null;
 		}
-
 	}
 
 	class TreeCutterBuilder : DirectionlessBuilder {
@@ -273,11 +303,10 @@ namespace ShowcasePackage.Buildings
 		public TreeCutterBuilder(GameController input,
 								GameUI ui,
 								CameraMover camera,
-								BuildingType type,
-								TreeCutterType myType)
-			: base(input, ui, camera, type)
+								TreeCutterType type)
+			: base(input, ui, camera, type.MyTypeInstance)
 		{
-			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+			cwUI = new BaseCustomWindowUI(ui, type.Name, $"Cost: {type.Cost}");
 		}
 
 		public override void Enable()

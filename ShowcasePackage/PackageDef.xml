@@ -17,15 +17,23 @@
 			<iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
 			<assemblyPath>ShowcasePackage.dll</assemblyPath>
 		</playerAIType>
-	  <playerAIType name="testHuman1" ID="2" category="human">
-	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
-	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
-	  </playerAIType>
-	  <playerAIType name="testNeutral1" ID="3" category="neutral">
+	  <playerAIType name="Aggressive" ID="2" category="ai">
 	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
 	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	  </playerAIType>
-	  <playerAIType name="testNeutral2" ID="4" category="neutral">
+	  <playerAIType name="Defensive" ID="3" category="ai">
+	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
+	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
+	  </playerAIType>
+	  <playerAIType name="testHuman1" ID="5" category="human">
+	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
+	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
+	  </playerAIType>
+	  <playerAIType name="testNeutral1" ID="6" category="neutral">
+	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
+	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
+	  </playerAIType>
+	  <playerAIType name="testNeutral2" ID="7" category="neutral">
 	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
 	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	  </playerAIType>

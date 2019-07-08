@@ -10,6 +10,7 @@ using MHUrho.PathFinding;
 using MHUrho.PathFinding.AStar;
 using MHUrho.Plugins;
 using MHUrho.Storage;
+using ShowcasePackage.Misc;
 using Urho.Gui;
 
 namespace ShowcasePackage.Levels
@@ -18,7 +19,7 @@ namespace ShowcasePackage.Levels
 		public override string Name => "TestLogic2";
 		public override int ID => 2;
 
-		public override int MaxNumberOfPlayers => 6;
+		public override int MaxNumberOfPlayers => 3;
 		public override int MinNumberOfPlayers => 1;
 
 		
@@ -29,22 +30,22 @@ namespace ShowcasePackage.Levels
 
 		public override LevelLogicInstancePlugin CreateInstanceForNewPlaying(LevelLogicCustomSettings levelSettings, ILevelManager level)
 		{
-			return new TestLevelLogic2(level);
+			return TestLevelLogic2.CreatePlayingNew(levelSettings, level);
 		}
 
 		public override LevelLogicInstancePlugin CreateInstanceForEditorLoading(ILevelManager level)
 		{
-			return new TestLevelLogic2(level);
+			return TestLevelLogic2.CreateEditingLoading(level);
 		}
 
 		public override LevelLogicInstancePlugin CreateInstanceForNewLevel(ILevelManager level)
 		{
-			return new TestLevelLogic2(level);
+			return TestLevelLogic2.CreateEditingNew(level);
 		}
 
 		public override LevelLogicInstancePlugin CreateInstanceForLoadingToPlaying(ILevelManager level)
 		{
-			return new TestLevelLogic2(level);
+			return TestLevelLogic2.CreatePlayingLoading(level);
 		}
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
@@ -55,23 +56,66 @@ namespace ShowcasePackage.Levels
 
 	public class TestLevelLogic2 : LevelInstancePluginBase
 	{
+		readonly Timeout updateResourcesTimeout;
+
 		public TestLevelLogic2(ILevelManager level)
 			: base(level)
-		{ }
+		{
+			updateResourcesTimeout = new Timeout(1);
+		}
+
+		public static TestLevelLogic2 CreatePlayingNew(LevelLogicCustomSettings levelSettings, ILevelManager level)
+		{
+			return new TestLevelLogic2(level);
+		}
+
+		public static TestLevelLogic2 CreatePlayingLoading(ILevelManager level)
+		{
+			return new TestLevelLogic2(level);
+		}
+
+		public static TestLevelLogic2 CreateEditingNew(ILevelManager level)
+		{
+			return new TestLevelLogic2(level);
+		}
+
+		public static TestLevelLogic2 CreateEditingLoading(ILevelManager level)
+		{
+			return new TestLevelLogic2(level);
+		}
+
+
+		public override void Initialize()
+		{
+			PackageUI = new PackageUI(Level.UIManager, Level, !Level.EditorMode);
+		}
+
+		public override void LoadState(PluginDataWrapper fromPluginData)
+		{
+			PackageUI = new PackageUI(Level.UIManager, Level, !Level.EditorMode);
+		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
 
 		}
 
-		public override void LoadState(PluginDataWrapper pluginData)
+		public override void OnStart()
 		{
+			PackageUI.UpdateResourceDisplay(Level.HumanPlayer.Resources);
+		}
 
+		public override void OnUpdate(float timeStep)
+		{
+			if (updateResourcesTimeout.Update(timeStep, true))
+			{
+				PackageUI.UpdateResourceDisplay(Level.HumanPlayer.Resources);
+			}
 		}
 
 		public override void Dispose()
 		{
-
+			PackageUI.Dispose();
 		}
 
 		public override IPathFindAlgFactory GetPathFindAlgFactory()

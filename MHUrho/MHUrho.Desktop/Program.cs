@@ -37,7 +37,7 @@ namespace MHUrho.Desktop
 			try {
 				new MHUrhoApp(new ApplicationOptions("Data")).Run();
 			}
-			catch (InvalidOperationException) {
+			catch (InvalidOperationException e) {
 				//Ignore, Error with the current release of UrhoSharp https://github.com/xamarin/urho-samples/issues/45
 			}
 

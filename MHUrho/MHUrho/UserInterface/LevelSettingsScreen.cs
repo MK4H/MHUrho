@@ -313,16 +313,6 @@ namespace MHUrho.UserInterface
 			screen = new Screen(this);
 		}
 
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
-			}
-
-			Level = null;
-			base.Hide();
-		}
-
 		/// <summary>
 		/// Starts the loading of the <see cref="Level"/> for playing.
 		/// Loads the level with neutral player of type <paramref name="neutralPlayerType"/>,

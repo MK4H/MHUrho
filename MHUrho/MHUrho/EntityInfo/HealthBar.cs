@@ -14,6 +14,7 @@ namespace MHUrho.EntityInfo
 {
     public class HealthBar : IDisposable {
 
+		public bool Visible => billboardSet.Enabled;
 
 		BillboardSet billboardSet;
 		uint billboardIndex;
@@ -87,7 +88,7 @@ namespace MHUrho.EntityInfo
 				billboardSet.Sorted = false;
 				billboardSet.Material = entity.Player.Insignia.HealthBarMat;
 				billboardSet.Scaled = false;
-				//TODO: BILLBOARD DRAW DISTANCE
+				//NOTE: BILLBOARD DRAW DISTANCE
 				billboardSet.DrawDistance = 50;
 
 				billboardIndex = 0;

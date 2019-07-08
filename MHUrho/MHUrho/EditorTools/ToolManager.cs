@@ -66,7 +66,13 @@ namespace MHUrho.EditorTools
 		public virtual void Dispose()
 		{
 			foreach (var tool in Tools) {
-				tool.Dispose();
+				try {
+					tool.Dispose();
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(Urho.LogLevel.Error,
+									$"Tool {tool.GetType().Name} threw an exception on the call to Dispose: {e.Message}");
+				}
 			}
 		}
 	}

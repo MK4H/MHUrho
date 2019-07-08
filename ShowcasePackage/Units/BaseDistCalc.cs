@@ -10,13 +10,10 @@ using Urho;
 
 namespace ShowcasePackage.Units
 {
-	abstract class BaseDistCalc : NodeDistCalculator
+	public abstract class BaseDistCalc : NodeDistCalculator
 	{
-		
-
-		
-
-		protected override bool GetTime(ITileNode source, ITileNode target, MovementType movementType, out float time)
+	
+		protected sealed override bool GetTime(ITileNode source, ITileNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -41,7 +38,7 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(ITempNode source, IBuildingNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(ITempNode source, IBuildingNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -57,7 +54,7 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(ITempNode source, ITempNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(ITempNode source, ITempNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -73,7 +70,7 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(IBuildingNode source, ITempNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(IBuildingNode source, ITempNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -89,7 +86,7 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(ITempNode source, ITileNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(ITempNode source, ITileNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -105,33 +102,7 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(IBuildingNode source, IBuildingNode target, MovementType movementType, out float time)
-		{
-			switch (movementType)
-			{
-				case MovementType.Linear:
-					if (!CanPass(source, target))
-					{
-						time = -1;
-						return false;
-					}
-					time = GetLinearTime(source.Position, target.Position);
-					return true;
-				case MovementType.Teleport:
-					if (!CanTeleport(source, target))
-					{
-						time = -1;
-						return false;
-					}
-					time = GetTeleportTime(source, target);
-					return true;
-				default:
-					time = -1;
-					return false;
-			}
-		}
-
-		protected override bool GetTime(ITileNode source, IBuildingNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(IBuildingNode source, IBuildingNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -157,7 +128,33 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(ITileNode source, ITempNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(ITileNode source, IBuildingNode target, MovementType movementType, out float time)
+		{
+			switch (movementType)
+			{
+				case MovementType.Linear:
+					if (!CanPass(source, target))
+					{
+						time = -1;
+						return false;
+					}
+					time = GetLinearTime(source.Position, target.Position);
+					return true;
+				case MovementType.Teleport:
+					if (!CanTeleport(source, target))
+					{
+						time = -1;
+						return false;
+					}
+					time = GetTeleportTime(source, target);
+					return true;
+				default:
+					time = -1;
+					return false;
+			}
+		}
+
+		protected sealed override bool GetTime(ITileNode source, ITempNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{
@@ -173,7 +170,7 @@ namespace ShowcasePackage.Units
 			}
 		}
 
-		protected override bool GetTime(IBuildingNode source, ITileNode target, MovementType movementType, out float time)
+		protected sealed override bool GetTime(IBuildingNode source, ITileNode target, MovementType movementType, out float time)
 		{
 			switch (movementType)
 			{

@@ -25,16 +25,19 @@ namespace ShowcasePackage.Players
 	public class DefensivePlayerType : PlayerAITypePlugin
 	{
 
-		public override int ID => 1;
+		public override int ID => 3;
 
-		public override string Name => "DefensivePlayer";
+		public override string Name => "Defensive";
 
 		public UnitType Chicken { get; private set; }
-		public UnitType TestUnit { get; private set; }
-		public UnitType TestWorker { get; private set; }
+		public UnitType Wolf { get; private set; }
 
-		public BuildingType TestBuilding { get; private set; }
+
+		public BuildingType Gate { get; private set; }
+		public BuildingType Tower { get; private set; }
 		public BuildingType Keep { get; private set; }
+		public BuildingType Wall { get; private set; }
+		public BuildingType TreeCutter { get; private set; }
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
@@ -48,11 +51,13 @@ namespace ShowcasePackage.Players
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
-			Chicken = package.GetUnitType("Chicken");
-			TestUnit = package.GetUnitType("TestUnit");
-			TestWorker = package.GetUnitType("TestWorker");
-			TestBuilding = package.GetBuildingType("TestBuilding");
-			Keep = package.GetBuildingType(KeepType.TypeName);
+			Chicken = package.GetUnitType(ChickenType.TypeID);
+			Wolf = package.GetUnitType(WolfType.TypeID);
+			Gate = package.GetBuildingType(GateType.TypeID);
+			Tower = package.GetBuildingType(TowerType.TypeID);
+			Keep = package.GetBuildingType(KeepType.TypeID);
+			Wall = package.GetBuildingType(WallType.TypeID);
+			TreeCutter = package.GetBuildingType(TreeCutterType.TypeID);
 		}
 	}
 
@@ -62,11 +67,27 @@ namespace ShowcasePackage.Players
 	public class DefensivePlayer : PlayerAIInstancePlugin
 	{
 
+		class State {
+
+		}
+
+		class BuildCutters : State {
+
+		}
+
+		class BuildCastle : State {
+
+		}
+
+		class AttackEnemy : State {
+
+		}
+
 		class ChickenWrapper
 		{
 			public const float DefaultWaitingTime = 4;
 
-			public ChickenInstance Chicken { get; private set; }
+			public Chicken Chicken { get; private set; }
 			public IRangeTarget NextTarget { get; set; }
 
 			public float TimeToNextTargetCheck { get; set; }
@@ -89,7 +110,7 @@ namespace ShowcasePackage.Players
 				}
 			}
 
-			public ChickenWrapper(ChickenInstance chicken)
+			public ChickenWrapper(Chicken chicken)
 			{
 				this.Chicken = chicken;
 				NextTarget = null;
@@ -141,7 +162,7 @@ namespace ShowcasePackage.Players
 					for (int i = 0; i < 1; i++, spiralPoint.MoveNext())
 					{
 						IUnit newChicken = Level.SpawnUnit(type.Chicken, Level.Map.GetTileByMapLocation(spiralPoint.Current), Quaternion.Identity, Player);
-						chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.UnitPlugin));
+						chickens.Add(new ChickenWrapper((Chicken)newChicken.UnitPlugin));
 					}
 
 					var target = FindTargets(spawnPoint).FirstOrDefault();
@@ -189,7 +210,7 @@ namespace ShowcasePackage.Players
 			state = indexedData.Get<int>(1);
 			spawnPoint = indexedData.Get<IntVector2>(2);
 			chickens = new List<ChickenWrapper>(from unit in indexedData.Get<IEnumerable<int>>(3)
-												select new ChickenWrapper((ChickenInstance)Level.GetUnit(unit).Plugin));
+												select new ChickenWrapper((Chicken)Level.GetUnit(unit).Plugin));
 
 			keep = GetKeep();
 		}
@@ -199,39 +220,49 @@ namespace ShowcasePackage.Players
 
 		}
 
-		public override void OnUnitKilled(IUnit unit)
+		public override void UnitAdded(IUnit unit)
 		{
-			if (Level.IsEnding || unit.UnitType != type.Chicken)
+
+		}
+
+		public override void UnitKilled(IUnit unit)
+		{
+			if (Level.IsEnding)
 			{
 				//Do nothing
 				return;
 			}
 
-			chickens.RemoveAll((chicken) => chicken.Chicken == unit.UnitPlugin);
 
-			foreach (var point in new Spiral(spawnPoint))
-			{
-				if (Level.Map.GetTileByMapLocation(point).Units.Count == 0)
-				{
-					IUnit newChicken = Level.SpawnUnit(type.Chicken, Level.Map.GetTileByMapLocation(point), Quaternion.Identity, Player);
-					chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.UnitPlugin));
-					break;
-				}
-			}
 		}
 
+		/// <summary>
+		/// Called when the player is being loaded into freshly started level that had not been played before.
+		/// This level therefore has no state specific to this player saved, so it must be initialized.
+		/// </summary>
+		/// <param name="level">The level being loaded</param>
 		public override void Init(ILevelManager level)
 		{
 			keep = GetKeep();
 		}
 
-		public override void OnBuildingDestroyed(IBuilding building)
+		public override void BuildingAdded(IBuilding building)
 		{
-			if (building == keep) {
-//#error DESTROY EVERYTHING, SIGNAL DEATH
+
+		}
+
+		public override void BuildingDestroyed(IBuilding building)
+		{
+			if (building == keep)
+			{
+				//#error DESTROY EVERYTHING, SIGNAL DEATH
 			}
 		}
 
+		public override double ResourceAmountChanged(ResourceType resourceType, double currentAmount, double requestedNewAmount)
+		{
+			return requestedNewAmount;
+		}
 		IEnumerable<IRangeTarget> FindTargets(IntVector2 sourcePoint)
 		{
 
@@ -253,7 +284,7 @@ namespace ShowcasePackage.Players
 			IReadOnlyList<IBuilding> keeps = Player.GetBuildingsOfType(type.Keep);
 			if (keeps.Count != 1)
 			{
-				throw new LevelLoadingException("Invalid number of keeps for a player, should be exactly one.");
+				throw new LevelLoadingException("Player is missing a keep.");
 			}
 			return keeps[0];
 		}

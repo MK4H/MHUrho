@@ -173,6 +173,7 @@ namespace ShowcasePackage.Projectiles
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
+			hitEntity.HitBy(Projectile, 20);
 			Projectile.RemoveFromLevel();
 		}
 

@@ -29,6 +29,20 @@ namespace MHUrho.Plugins
 		public abstract void TileHeightChanged(ITile tile);
 
 		/// <summary>
+		/// Notifies the unit plugin that a building was built on the tile the unit is standing on.
+		/// </summary>
+		/// <param name="building">The new building.</param>
+		/// <param name="tile">The tile the unit is standing on.</param>
+		public abstract void BuildingBuilt(IBuilding building, ITile tile);
+
+		/// <summary>
+		/// Notifies the unit plugin that a building was destroyed on the tile the unit is standing on.
+		/// </summary>
+		/// <param name="building">The destroyed building.</param>
+		/// <param name="tile">The tile the unit is standing on.</param>
+		public abstract void BuildingDestroyed(IBuilding building, ITile tile);
+
+		/// <summary>
 		/// Notifies the unit plugin that the unit has been hit by <paramref name="other"/> entity.
 		/// </summary>
 		/// <param name="other">The entity that hit this unit.</param>

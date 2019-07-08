@@ -226,6 +226,7 @@ namespace MHUrho.Logic
 		public new void Dispose()
 		{
 			IsEnding = true;
+			Scene.UpdateEnabled = false;
 			try {
 				Ending?.Invoke();
 			}
@@ -236,12 +237,14 @@ namespace MHUrho.Logic
 
 			List<IDisposable> toDispose = new List<IDisposable>();
 			toDispose.AddRange(entities.Values);
+			toDispose.AddRange(players.Values);
+
 
 			foreach (var thing in toDispose)
 			{
-				thing.Dispose();
+				thing?.Dispose();
 			}
-			
+
 			//Everything that is loaded anywhere else but the constructor may not be loaded at the time of disposing
 			PackageManager.ActivePackage.ClearCaches();
 			ToolManager?.Dispose();
@@ -262,7 +265,6 @@ namespace MHUrho.Logic
 			LevelNode?.Dispose();
 
 			base.Dispose();
-
 			CurrentLevel = null;
 			GC.Collect();
 		}
@@ -318,7 +320,7 @@ namespace MHUrho.Logic
 		/// <param name="player">Owner of the building</param>
 		/// <returns>The new building if building was built, or null if the building could not be built</returns>
 		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player) {
-			if (!buildingType.CanBuild(buildingType.GetBuildingTilesRectangle(topLeft), player, this)) {
+			if (!buildingType.CanBuild(topLeft, player, this)) {
 				return null;
 			}
 
@@ -423,6 +425,21 @@ namespace MHUrho.Logic
 			if (!projectile.IsRemovedFromLevel) {
 				projectile.RemoveFromLevel();
 			}
+			return removed;
+		}
+
+		public bool RemovePlayer(IPlayer player)
+		{
+			bool removed = players.Remove(player.ID);
+
+			if (!player.IsRemovedFromLevel) {
+				player.RemoveFromLevel();
+			}
+
+			if (player == HumanPlayer && !IsEnding) {
+				End();
+			}
+
 			return removed;
 		}
 
@@ -534,7 +551,14 @@ namespace MHUrho.Logic
 
 		public bool TryGetEntity(Node node, out IEntity entity)
 		{
-			return nodeToEntity.TryGetValue(node, out entity);
+			for (; node != LevelNode && node != null; node = node.Parent) {
+				if (nodeToEntity.TryGetValue(node, out entity)) {
+					return true;
+				}
+			}
+
+			entity = null;
+			return false;
 		}
 
 		public IRangeTarget GetRangeTarget(int ID) {
@@ -637,7 +661,7 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
 
-			if (!EnabledEffective) return;
+			if (IsDeleted || !EnabledEffective) return;
 
 			Plugin.OnUpdate(timeStep);
 

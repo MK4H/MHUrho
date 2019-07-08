@@ -79,7 +79,7 @@ namespace ShowcasePackage.Buildings
 				line = GetLine(line[0], endTile);
 			}
 
-			if (line.All((tile) => BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType), input.Player ,Level))) {
+			if (line.All((tile) => BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(), input.Player ,Level))) {
 				foreach (var tile in line) {
 					IBuilding newBuilding = Level.BuildBuilding(BuildingType,
 																GetBuildingRectangle(tile, BuildingType).TopLeft(),
@@ -101,7 +101,7 @@ namespace ShowcasePackage.Buildings
 				if (tile == null) {
 					return;
 				}
-				Color color = BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType),
+				Color color = BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(),
 													input.Player,
 													Level)
 								? AbleColor
@@ -158,7 +158,7 @@ namespace ShowcasePackage.Buildings
 
 			Level.Map.HighlightTileList(line,
 										line.All((tile) =>
-													BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType),
+													BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(),
 																			input.Player,
 																			Level))
 											? AbleColor

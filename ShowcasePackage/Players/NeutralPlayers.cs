@@ -12,7 +12,7 @@ namespace ShowcasePackage.Players
 	public class TestNeutralPlayer1Type : PlayerAITypePlugin
 	{
 		public override string Name => "testNeutral1";
-		public override int ID => 3;
+		public override int ID => 6;
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
@@ -58,7 +58,7 @@ namespace ShowcasePackage.Players
 
 	public class TestNeutralPlayer2Type : PlayerAITypePlugin {
 		public override string Name => "testNeutral2";
-		public override int ID => 4;
+		public override int ID => 7;
 
 
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)

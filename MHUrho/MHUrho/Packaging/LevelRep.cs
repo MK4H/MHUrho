@@ -33,7 +33,7 @@ namespace MHUrho.Packaging
 		/// Every state represents a source of the data, either generated, loaded from prototype or loaded from saved game
 		/// and the current state the level is in.
 		/// </summary>
-		abstract class LevelState {
+		abstract class State {
 
 			protected readonly LevelRep Context;
 
@@ -66,7 +66,7 @@ namespace MHUrho.Packaging
 			public string SavePath => Context.savePath;
 			public string ThumbnailPath => Context.ThumbnailPath;
 
-			protected LevelState(LevelRep context)
+			protected State(LevelRep context)
 			{
 				this.Context = context;
 			}
@@ -77,7 +77,7 @@ namespace MHUrho.Packaging
 
 			public abstract XElement SaveAsPrototype();
 
-			public abstract LevelState CloneToNewContext(LevelRep newContext);
+			public abstract State CloneToNewContext(LevelRep newContext);
 
 			public abstract void DetachFromRunningLevel();
 
@@ -96,11 +96,11 @@ namespace MHUrho.Packaging
 		/// <summary>
 		/// Represents level that was created but not yet loaded and generated for editing.
 		/// </summary>
-		class CreatedLevel : LevelState {
+		class NewlyCreated : State {
 
 			readonly IntVector2 mapSize;
 
-			public CreatedLevel(IntVector2 mapSize, LevelRep context)
+			public NewlyCreated(IntVector2 mapSize, LevelRep context)
 				:base(context)
 			{
 				this.mapSize = mapSize;
@@ -111,7 +111,7 @@ namespace MHUrho.Packaging
 				var loader = LevelManager.GetLoaderForDefaultLevel(Context, mapSize, parentProgress, subsectionSize);
 
 				loader.Finished += (notifier) => {
-					Context.state = new EditingLevel(Context, loader.Level);
+					Context.state = new Editing(Context, loader.Level);
 				};
 
 				return loader;
@@ -127,7 +127,7 @@ namespace MHUrho.Packaging
 				throw new InvalidOperationException("Cannot save a freshly created level");
 			}
 
-			public override LevelState CloneToNewContext(LevelRep newContext)
+			public override State CloneToNewContext(LevelRep newContext)
 			{
 				throw new
 					InvalidOperationException("Cannot clone freshly created level, load it, save it, then clone it");
@@ -139,21 +139,14 @@ namespace MHUrho.Packaging
 					InvalidOperationException("Cannot detach, there is no running level");
 			}
 
-			void LevelLoaded(IProgressNotifier task)
-			{
-				//TODO: Check for exceptions
-				//TODO: Maybe lock state
-				
-			}
-
 		}
 
 		/// <summary>
 		/// Level that was stored from editor and can be played from scratch.
 		/// </summary>
-		class LevelPrototype : LevelState {
+		class Prototype : State {
 
-			public LevelPrototype(LevelRep context)
+			public Prototype(LevelRep context)
 				:base(context)
 			{
 
@@ -165,7 +158,7 @@ namespace MHUrho.Packaging
 				var loader = LevelManager.GetLoaderForEditing(Context, savedLevel, parentProgress, subsectionSize);
 
 				loader.Finished += (notifier) => {
-										Context.state = new PlayingLevel(Context, this, loader.Level);
+										Context.state = new Editing(Context, loader.Level);
 				};
 
 				return loader;
@@ -177,7 +170,7 @@ namespace MHUrho.Packaging
 				var loader = LevelManager.GetLoaderForPlaying(Context, savedLevel, players, customSettings, parentProgress, subsectionSize);
 
 				loader.Finished += (notifier) => {
-										Context.state = new EditingLevel(Context, loader.Level);
+										Context.state = new Playing(Context, this, loader.Level);
 									};
 
 				return loader;
@@ -189,9 +182,9 @@ namespace MHUrho.Packaging
 					InvalidOperationException("Cannot save level prototype again, try cloning it with a new name and then saving it");
 			}
 
-			public override LevelState CloneToNewContext(LevelRep newContext)
+			public override State CloneToNewContext(LevelRep newContext)
 			{
-				return new ClonedLevelPrototype(newContext, this);
+				return new ClonedPrototype(newContext, this);
 			}
 
 			public override void DetachFromRunningLevel()
@@ -204,11 +197,11 @@ namespace MHUrho.Packaging
 		/// <summary>
 		/// Level that is currently loaded for editing.
 		/// </summary>
-		class EditingLevel : LevelState {
+		class Editing : State {
 
 			public ILevelManager RunningLevel { get; protected set; }
 
-			public EditingLevel(LevelRep context, ILevelManager runningLevel)
+			public Editing(LevelRep context, ILevelManager runningLevel)
 				:base(context)
 			{
 				this.RunningLevel = runningLevel;
@@ -257,32 +250,32 @@ namespace MHUrho.Packaging
 				return ToXml();
 			}
 
-			public override LevelState CloneToNewContext(LevelRep newContext)
+			public override State CloneToNewContext(LevelRep newContext)
 			{
-				return new ClonedEditingLevel(newContext, RunningLevel);
+				return new ClonedEditing(newContext, RunningLevel);
 			}
 
 			public override void DetachFromRunningLevel()
 			{
 				RunningLevel.Ending -= RunningLevelEnding;
-				Context.state = new LevelPrototype(Context);
+				Context.state = new Prototype(Context);
 			}
 
 			void RunningLevelEnding()
 			{
-				Context.state = new LevelPrototype(Context);
+				Context.state = new Prototype(Context);
 			}
 		}
 
 		/// <summary>
 		/// Level that is currently being played.
 		/// </summary>
-		class PlayingLevel : LevelState {
+		class Playing : State {
 			public ILevelManager RunningLevel { get; protected set; }
 
-			readonly LevelState sourceState;
+			readonly State sourceState;
 
-			public PlayingLevel(LevelRep context, LevelState sourceState, ILevelManager runningLevel)
+			public Playing(LevelRep context, State sourceState, ILevelManager runningLevel)
 				: base(context)
 			{
 				this.RunningLevel = runningLevel;
@@ -310,7 +303,7 @@ namespace MHUrho.Packaging
 				throw new InvalidOperationException("Cannot save level in play mode as prototype");
 			}
 
-			public override LevelState CloneToNewContext(LevelRep newContext)
+			public override State CloneToNewContext(LevelRep newContext)
 			{
 				throw new InvalidOperationException("Cannot clone level in play mode");
 			}
@@ -332,11 +325,11 @@ namespace MHUrho.Packaging
 		/// If the prototype was loaded without changing the name, the old level will be overwritten on the first save
 		/// If the prototype was loaded with new name, new level will be created
 		/// </summary>
-		class ClonedLevelPrototype : LevelState {
+		class ClonedPrototype : State {
 
-			LevelPrototype sourceState;
+			Prototype sourceState;
 
-			public ClonedLevelPrototype(LevelRep context, LevelPrototype sourceState)
+			public ClonedPrototype(LevelRep context, Prototype sourceState)
 				: base(context)
 			{
 				this.sourceState = sourceState;
@@ -368,13 +361,13 @@ namespace MHUrho.Packaging
 					throw;
 				}
 
-				Context.state = new LevelPrototype(Context);
+				Context.state = new Prototype(Context);
 				return ToXml();
 			}
 
-			public override LevelState CloneToNewContext(LevelRep newContext)
+			public override State CloneToNewContext(LevelRep newContext)
 			{
-				return new ClonedLevelPrototype(newContext, sourceState);
+				return new ClonedPrototype(newContext, sourceState);
 			}
 
 			public override void DetachFromRunningLevel()
@@ -390,8 +383,8 @@ namespace MHUrho.Packaging
 		/// Acts only as a temporary clone, until it is saved or discarded
 		/// After saving, changes to LevelPrototype
 		/// </summary>
-		class ClonedEditingLevel : EditingLevel {
-			public ClonedEditingLevel(LevelRep context, ILevelManager runningLevel)
+		class ClonedEditing : Editing {
+			public ClonedEditing(LevelRep context, ILevelManager runningLevel)
 				: base(context, runningLevel)
 			{ }
 
@@ -399,7 +392,7 @@ namespace MHUrho.Packaging
 			{
 				XElement xml = base.SaveAsPrototype();
 				RunningLevel = null;
-				Context.state = new LevelPrototype(Context);
+				Context.state = new Prototype(Context);
 				return xml;
 			}
 		}
@@ -407,12 +400,12 @@ namespace MHUrho.Packaging
 		/// <summary>
 		/// Level that was loaded from a saved game in the middle of playing the level.
 		/// </summary>
-		class LoadedSavedLevel : LevelState {
+		class LoadedSaved : State {
 
 			readonly string savedLevelPath;
 			StLevel savedLevel;
 
-			public LoadedSavedLevel(LevelRep context, string savedLevelPath, StLevel savedLevel)
+			public LoadedSaved(LevelRep context, string savedLevelPath, StLevel savedLevel)
 				: base(context)
 			{
 				this.savedLevelPath = savedLevelPath;
@@ -433,7 +426,7 @@ namespace MHUrho.Packaging
 
 				loader.Finished += (notifier) => {
 										savedLevel = null;
-										Context.state = new PlayingLevel(Context, this, loader.Level);
+										Context.state = new Playing(Context, this, loader.Level);
 				};
 
 				return loader;
@@ -444,7 +437,7 @@ namespace MHUrho.Packaging
 				throw new InvalidOperationException("Cannot save loaded saved level as a prototype");
 			}
 
-			public override LevelState CloneToNewContext(LevelRep newContext)
+			public override State CloneToNewContext(LevelRep newContext)
 			{
 				throw new InvalidOperationException("Cannot clone loaded saved level");
 			}
@@ -453,11 +446,6 @@ namespace MHUrho.Packaging
 			{
 				throw new
 					InvalidOperationException("Cannot detach, there is no running level");
-			}
-
-			void LevelLoaded(Task<ILevelManager> loadingTask)
-			{
-				
 			}
 		}
 
@@ -483,7 +471,7 @@ namespace MHUrho.Packaging
 
 		readonly string savePath;
 
-		LevelState state;
+		State state;
 
 		protected LevelRep(string name,
 						string description,
@@ -502,7 +490,7 @@ namespace MHUrho.Packaging
 
 			this.Thumbnail = GamePack.PackageManager.GetTexture2D(thumbnailPath);
 
-			state = new CreatedLevel(mapSize, this);
+			state = new NewlyCreated(mapSize, this);
 		}
 
 		/// <summary>
@@ -545,7 +533,7 @@ namespace MHUrho.Packaging
 
 			this.Thumbnail = GamePack.PackageManager.GetTexture2D(ThumbnailPath);
 
-			state = new LevelPrototype(this);
+			state = new Prototype(this);
 		}
 
 		/// <summary>
@@ -569,7 +557,7 @@ namespace MHUrho.Packaging
 
 			this.LevelLogicType = gamePack.GetLevelLogicType(storedLevel.Plugin.TypeID);
 
-			this.state = new LoadedSavedLevel(this, storedLevelPath, storedLevel);
+			this.state = new LoadedSaved(this, storedLevelPath, storedLevel);
 		}
 
 		public static LevelRep CreateNewLevel(string name,

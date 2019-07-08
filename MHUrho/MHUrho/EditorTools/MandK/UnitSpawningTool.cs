@@ -112,7 +112,7 @@ namespace MHUrho.EditorTools.MandK
 					}
 					
 					//Spawn only at buildings or map, not units, projectiles etc.
-					for (Node current = result.Node;current != Level.LevelNode ; current = current.Parent) {
+					for (Node current = result.Node;current != Level.LevelNode && current != null; current = current.Parent) {
 						if (!Level.TryGetBuilding(current, out IBuilding dontCare)) {
 							continue;
 						}

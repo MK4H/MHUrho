@@ -65,6 +65,7 @@ namespace ShowcasePackage.Units
 				ui.SelectionBar.RemoveChild(pair.Key);
 			}
 
+			checkBoxes.SelectedChanged -= OnSelectedChanged;
 			checkBoxes.Dispose();
 			uiElem.Dispose();
 			spawners = null;

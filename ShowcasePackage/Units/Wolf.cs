@@ -69,7 +69,9 @@ namespace ShowcasePackage.Units
 		public override bool CanSpawnAt(ITile centerTile)
 		{
 			//Can only spawn on a tile with no buildings and no other units
-			return centerTile.Building == null && centerTile.Units.Count == 0;
+			return PassableTileTypes.IsViable(centerTile) &&
+					(centerTile.Building == null ||
+					centerTile.Building.Plugin is WalkableBuildingPlugin);
 		}
 
 		public override Spawner GetSpawner(GameController input, GameUI ui, CameraMover camera)
@@ -85,7 +87,203 @@ namespace ShowcasePackage.Units
 						MovingMeeleAttacker.IUser
 	{
 
-		class WolfDistCalc : ClimbingDistCalc
+		/// <summary>
+		/// Records the tiles at which the unit would be blocked during normal pathfinding by a building
+		/// </summary>
+		public class WolfDistCalcThroughWalls : WolfDistCalc
+		{
+
+			/// <summary>
+			/// Normaly blocked by a building
+			/// </summary>
+			public HashSet<ITile> CanBreakThrough { get; private set; }
+
+			public WolfDistCalcThroughWalls(Wolf wolf)
+				: base(wolf, 1, 1, 1)
+			{
+				CanBreakThrough = new HashSet<ITile>();
+			}
+
+			protected override bool CanPass(ITileNode source, ITileNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToTile(target)) {
+					return false;
+				}
+
+				//Diagonal
+				if (source.Tile.MapLocation.X != target.Tile.MapLocation.X &&
+					source.Tile.MapLocation.Y != target.Tile.MapLocation.Y) {
+					//Blocked by own or neutral buildings we can't destroy
+
+					var building1 = Map
+									.GetTileByMapLocation(new IntVector2(source.Tile.MapLocation.X,
+																		target.Tile.MapLocation.Y))
+									.Building;
+					var building2 = Map
+									.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X,
+																		source.Tile.MapLocation.Y))
+									.Building;
+					if ((building1.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building1.Player)) &&
+						(building2.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building2.Player))) {
+						return false;
+					}
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanPass(ITileNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToBuilding(target)) {
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+				return true;
+			}
+
+			protected override bool CanPass(IBuildingNode source, ITileNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+
+				if (!CanPassToTile(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanPass(IBuildingNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+
+				if (!CanPassToBuilding(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+				return true;
+			}
+
+			protected override bool CanTeleport(ITileNode source, ITileNode target)
+			{
+				if (base.CanTeleport(source, target))
+				{
+					return true;
+				}
+
+
+				if (!CanPassToTile(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanTeleport(ITileNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToBuilding(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+
+				return true;
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, ITileNode target)
+			{
+				if (base.CanTeleport(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToTile(target)) {
+					return false;
+				}
+
+
+				CanBreakThrough.Add(target.Tile);
+				return true;
+			}
+
+			protected override bool CanTeleport(IBuildingNode source, IBuildingNode target)
+			{
+				if (base.CanPass(source, target))
+				{
+					return true;
+				}
+
+				if (!CanPassToBuilding(target))
+				{
+					return false;
+				}
+
+				CanBreakThrough.Add(Map.GetContainingTile(target.Position));
+				return true;
+			}
+
+			bool CanPassToTile(ITileNode target)
+			{
+				if (!Instance.myType.PassableTileTypes.Contains(target.Tile.Type))
+				{
+					return false;
+				}
+
+				if (target.Tile.Building != null &&
+					(target.Tile.Building.Player == Level.NeutralPlayer ||
+					Instance.Unit.Player.IsFriend(target.Tile.Building.Player)))
+				{
+					return false;
+				}
+				return true;
+			}
+
+			bool CanPassToBuilding(IBuildingNode target)
+			{
+				if (Instance.Unit.Player.IsFriend(target.Building.Player))
+				{
+					return false;
+				}
+				return true;
+			}
+		}
+
+		/// <summary>
+		/// Represents the view of the pathfinding graph by wolf unit.
+		/// Rejects edges that would not be present and returns the weights of the rest of the edges.
+		/// </summary>
+		public class WolfDistCalc : ClimbingDistCalc
 		{
 			static readonly Dictionary<Tuple<NodeType, NodeType>, float> TeleportTimes =
 				new Dictionary<Tuple<NodeType, NodeType>, float>
@@ -106,10 +304,10 @@ namespace ShowcasePackage.Units
 			/// </summary>
 			public float TeleportCoef { get; set; }
 
-			ILevelManager Level => instance.Level;
-			IMap Map => Level.Map;
+			protected ILevelManager Level => Instance.Level;
+			protected IMap Map => Level.Map;
 
-			readonly Wolf instance;
+			protected readonly Wolf Instance;
 
 
 
@@ -123,7 +321,7 @@ namespace ShowcasePackage.Units
 			public WolfDistCalc(Wolf wolf, float baseCoef, float angleCoef, float teleportCoef)
 				:base(baseCoef, angleCoef)
 			{
-				this.instance = wolf;
+				this.Instance = wolf;
 				this.TeleportCoef = teleportCoef;
 			}
 
@@ -186,28 +384,28 @@ namespace ShowcasePackage.Units
 			bool CanPassToBuildingNode(IBuildingNode target)
 			{
 				//Is not closed gate door and is not roof
-				return (target.Tag != GateInstance.GateDoorTag || ((GateInstance) target.Building.Plugin).IsOpen);
+				return (target.Tag != Gate.GateDoorTag || ((Gate) target.Building.Plugin).IsOpen);
 			}
 
 			bool CanPassToTileNode(ITileNode target)
 			{
 				//Is passable and is not covered by a building
-				return instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
+				return Instance.myType.PassableTileTypes.Contains(target.Tile.Type) &&
 						target.Tile.Building == null;
 			}
 		}
 
-
 		static readonly Vector3 targetOffset = new Vector3(0, 0.5f, 0);
+
+		public bool AttackMove { get; set; }
 
 		AnimationController animationController;
 		WorldWalker walker;
 		MovingMeeleAttacker attacker;
 
-		readonly WolfDistCalc distCalc;
+		HealthBarControl healthBar;
 
-		float hp;
-		HealthBar healthbar;
+		readonly WolfDistCalc distCalc;
 
 		readonly WolfType myType;
 
@@ -216,12 +414,14 @@ namespace ShowcasePackage.Units
 		{
 			this.myType = myType;
 			this.distCalc = new WolfDistCalc(this, 0.5f, 0.2f, 1);
+			this.AttackMove = true;
 		}
 
 		public static Wolf CreateNew(ILevelManager level, IUnit unit, WolfType myType)
 		{
 			Wolf wolf = new Wolf(level, unit, myType);
-			wolf.animationController = unit.CreateComponent<AnimationController>();
+
+			wolf.animationController = CreateAnimationController(unit);
 			wolf.walker = WorldWalker.CreateNew(wolf, level);
 			wolf.attacker = MovingMeeleAttacker.CreateNew(wolf,
 													level,
@@ -230,12 +430,11 @@ namespace ShowcasePackage.Units
 													1,
 													5,
 													0.5f);
+			wolf.healthBar = new HealthBarControl(level, unit, 100, new Vector3(0, 0.7f, 0), new Vector2(0.5f, 0.1f), true);
 			UnitSelector.CreateNew(wolf, level);
 			MovingRangeTarget.CreateNew(wolf, level, targetOffset);
 			unit.AlwaysVertical = false;
-			wolf.hp = 100;
-			wolf.healthbar = new HealthBar(level, unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), wolf.hp);
-
+			wolf.RegisterEvents();
 			return wolf;
 		}
 
@@ -246,25 +445,27 @@ namespace ShowcasePackage.Units
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
-			var sequentialData = pluginData.GetWriterForWrappedSequentialData();
-			sequentialData.StoreNext(hp);
+			var writer = pluginData.GetWriterForWrappedSequentialData();
+			healthBar.Save(writer);
+			writer.StoreNext(AttackMove);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
-			animationController = Unit.CreateComponent<AnimationController>();
+			animationController = CreateAnimationController(Unit);
 			walker = Unit.GetDefaultComponent<WorldWalker>();
 			attacker = Unit.GetDefaultComponent<MovingMeeleAttacker>();
 
-			RegisterEvents(walker);
-			var sequentialData = pluginData.GetReaderForWrappedSequentialData();
-			sequentialData.GetNext(out hp);
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), hp);
+			RegisterEvents();
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			healthBar = HealthBarControl.Load(Level, Unit, reader);
+			reader.GetNext(out bool attackMove);
+			AttackMove = attackMove;
 		}
 
 		public override void Dispose()
 		{
-			healthbar.Dispose();
+			healthBar.Dispose();
 		}
 
 		public override void TileHeightChanged(ITile tile)
@@ -272,38 +473,42 @@ namespace ShowcasePackage.Units
 			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetHeightAt(Unit.XZPosition)));
 		}
 
-		public override void OnHit(IEntity other, object userData)
+		public override void BuildingDestroyed(IBuilding building, ITile tile)
 		{
-			if (other.Player == Unit.Player)
-			{
-				return;
-			}
+			walker.Stop();
+			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetTerrainHeightAt(Unit.Position.XZ2())));
 
-			hp -= 5;
-			if (hp < 0)
-			{
-				healthbar.SetHealth(0);
+			if (healthBar.ChangeHitPoints(-30)) {
 				walker.Enabled = false;
 				attacker.Enabled = false;
 				Unit.RemoveFromLevel();
 			}
-			else
+		}
+
+
+		public override void BuildingBuilt(IBuilding building, ITile tile)
+		{
+			throw new InvalidOperationException("Building building on top of units is not supported.");
+		}
+
+		public override void OnHit(IEntity other, object userData)
+		{
+			if (Unit.Player.IsFriend(other.Player))
 			{
-				healthbar.SetHealth((int)hp);
+				return;
+			}
+
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-(damage * 0.5)))
+			{
+				walker.Enabled = false;
+				attacker.Enabled = false;
+				Unit.RemoveFromLevel();
 			}
 		}
 
-		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
-		{
-			return distCalc;
-		}
-
-		IEnumerable<Waypoint> MovingRangeTarget.IUser.GetFutureWaypoints(MovingRangeTarget target)
-		{
-			return walker.GetRestOfThePath(targetOffset);
-		}
-
-		bool UnitSelector.IUser.ExecuteOrder(Order order)
+		public bool ExecuteOrder(Order order)
 		{
 			order.Executed = false;
 			if (order.PlatformOrder)
@@ -331,9 +536,29 @@ namespace ShowcasePackage.Units
 			return order.Executed;
 		}
 
+		INodeDistCalculator WorldWalker.IUser.GetNodeDistCalculator()
+		{
+			return distCalc;
+		}
+
+		IEnumerable<Waypoint> MovingRangeTarget.IUser.GetFutureWaypoints(MovingRangeTarget target)
+		{
+			return walker.GetRestOfThePath(targetOffset);
+		}
+
+		
+
 		bool MeeleAttacker.IBaseUser.IsInRange(MeeleAttacker attacker, IEntity target)
 		{
-			return Vector3.Distance(target.Position, Unit.Position) < 1;
+			if (target is IBuilding building) {
+				IntRect rect = building.Rectangle;
+				rect.Top += 1;
+				rect.Bottom -= 2;
+				rect.Left += 1;
+				rect.Right -= 2;
+				return rect.Contains(Unit.XZPosition);
+			}
+			return Vector3.Distance(target.Position, Unit.Position) < 1.5;
 		}
 
 		IUnit MeeleAttacker.IBaseUser.PickTarget(ICollection<IUnit> possibleTargets)
@@ -341,39 +566,88 @@ namespace ShowcasePackage.Units
 			return possibleTargets.MinBy((target) => Vector3.Distance(target.Position, Unit.Position)).FirstOrDefault();
 		}
 
-		void MovingMeeleAttacker.IUser.MoveTo(Vector3 position)
+		bool MovingMeeleAttacker.IUser.MoveTo(IEntity target)
 		{
-			walker.GoTo(Level.Map.PathFinding.GetClosestNode(position));
+			if (target is IBuilding building) {
+				ITile[] tiles =
+				{
+					GetTileNextToBuilding(building, building.Forward),
+					GetTileNextToBuilding(building, building.Backward),
+					GetTileNextToBuilding(building, building.Left),
+					GetTileNextToBuilding(building, building.Right),
+				};
+
+				foreach (var tile in tiles.OrderBy(tile => Vector3.Distance(tile.Center3, Unit.Position))) {
+					if (walker.GoTo(Level.Map.PathFinding.GetTileNode(tile))) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+			else {
+				return walker.GoTo(Level.Map.PathFinding.GetClosestNode(target.Position));
+			}
 		}
 
 		void OnMovementStarted(WorldWalker walker)
 		{
-			animationController.PlayExclusive("Units/Wolf/Wolf_Walk_cycle_.ani", 0, true);
-			animationController.SetSpeed("Units/Wolf/Wolf_Walk_cycle_.ani", 2);
+			animationController.PlayExclusive("Assets/Units/Wolf/Models/Wolf_Run_cycle_.ani", 0, true);
+			animationController.SetSpeed("Assets/Units/Wolf/Models/Wolf_Run_cycle_.ani", 1);
 		}
 
 		void OnMovementFinished(WorldWalker walker)
 		{
-			animationController.Stop("Units/Wolf/Wolf_Walk_cycle_.ani");
+			animationController.Stop("Assets/Units/Wolf/Models/Wolf_Run_cycle_.ani");
 		}
 
 		void OnMovementFailed(WorldWalker walker)
 		{
-			animationController.Stop("Units/Wolf/Wolf_Walk_cycle_.ani");
+			animationController.Stop("Assets/Units/Wolf/Models/Wolf_Run_cycle_.ani");
 		}
 
 		void OnMovementCanceled(WorldWalker walker)
 		{
-			animationController.Stop("Units/Wolf/Wolf_Walk_cycle_.ani");
+			animationController.Stop("Assets/Units/Wolf/Models/Wolf_Run_cycle_.ani");
 		}
 
-		void RegisterEvents(WorldWalker walker)
+		void RegisterEvents()
 		{
 			walker.MovementStarted += OnMovementStarted;
 			walker.MovementFinished += OnMovementFinished;
 			walker.MovementFailed += OnMovementFailed;
 			walker.MovementCanceled += OnMovementCanceled;
+			attacker.Attacked += Attack;
+			attacker.TargetInRange += TargetInRange;
+			attacker.TargetLost += TargetLost;
+		}
 
+		void TargetLost(MeeleAttacker attacker)
+		{
+			attacker.SearchForTarget = true;
+		}
+
+		void TargetInRange(MeeleAttacker attacker, IEntity target)
+		{
+			walker.Stop();
+		}
+
+		void Attack(MeeleAttacker attacker, IEntity target)
+		{
+			target.HitBy(Unit, 10);
+		}
+
+		static AnimationController CreateAnimationController(IUnit unit)
+		{
+			//Animation controller has to be on the same node as animatedModel
+			var modelNode = unit.Node.GetComponent<AnimatedModel>(true).Node;
+			return modelNode.CreateComponent<AnimationController>();
+		}
+
+		ITile GetTileNextToBuilding(IBuilding building, Vector3 direction)
+		{
+			return Level.Map.GetContainingTile(building.Center +
+												new Vector3(direction.X * (building.Size.X / 2 + 1), 0, direction.Z * (building.Size.Y / 2 + 1)));
 		}
 	}
 

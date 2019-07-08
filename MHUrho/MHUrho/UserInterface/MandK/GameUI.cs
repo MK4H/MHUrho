@@ -28,6 +28,8 @@ namespace MHUrho.UserInterface.MandK
 
 		public CursorTooltips CursorTooltips { get; protected set; }
 
+		public override UIElement GameUIRoot => gameUI;
+
 		public bool UIHovering => hovering > 0;
 
 		public CustomElementsWindow CustomWindow { get; private set; }
@@ -49,7 +51,8 @@ namespace MHUrho.UserInterface.MandK
 		readonly ExpandingSelector playerSelection;
 		readonly UIMinimap minimap;
 
-	
+		readonly HashSet<UIElement> registeredForHover;
+
 		int hovering = 0;
 
 
@@ -63,6 +66,7 @@ namespace MHUrho.UserInterface.MandK
 			this.players = new Dictionary<UIElement, IPlayer>();
 			//TODO: User texture
 			this.CursorTooltips = new CursorTooltips(Level.PackageManager.GetTexture2D("Textures/xamarin.png"),this);
+			this.registeredForHover = new HashSet<UIElement>();
 
 			gameUI = UI.LoadLayout(Level.PackageManager.GetXmlFile("UI/GameLayout.xml", true),
 									Level.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
@@ -241,6 +245,30 @@ namespace MHUrho.UserInterface.MandK
 			playerSelection.Disable();
 		}
 
+		public override void RegisterForHover(UIElement element)
+		{
+			if (registeredForHover.Contains(element)) {
+				return;
+			}
+
+			element.HoverBegin += UIHoverBegin;
+			element.HoverEnd += UIHoverEnd;
+			registeredForHover.Add(element);
+		}
+
+		public override void UnregisterForHover(UIElement element)
+		{
+			if (!registeredForHover.Remove(element)) {
+				return;
+			}
+
+			if (element.Hovering) {
+				UIHoverEnd(new HoverEndEventArgs());
+			}
+			element.HoverBegin -= UIHoverBegin;
+			element.HoverEnd -= UIHoverEnd;
+		}
+
 		void UIHoverBegin(HoverBeginEventArgs e)
 		{
 			if (hovering == 0) {
@@ -276,6 +304,12 @@ namespace MHUrho.UserInterface.MandK
 
 			minimap.HoverBegin -= UIHoverBegin;
 			minimap.HoverEnd -= UIHoverEnd;
+
+			foreach (var element in registeredForHover) {
+				//TODO: Check if is deleted
+				element.HoverBegin -= UIHoverBegin;
+				element.HoverEnd -= UIHoverEnd;
+			}
 		}
 
 		void ToolSelected(UIElement newSelected, UIElement oldSelected)

@@ -113,7 +113,7 @@ namespace MHUrho.EditorTools.MandK
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
-			if (buildingType.CanBuild(topLeft, bottomRight, input.Player, Level)) {
+			if (buildingType.CanBuild(topLeft, input.Player, Level)) {
 				LevelManager.CurrentLevel.BuildBuilding(buildingTypes[checkBoxes.Selected], topLeft, Quaternion.Identity, input.Player);
 			}
 		}
@@ -132,7 +132,7 @@ namespace MHUrho.EditorTools.MandK
 
 		void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
 			topLeft = centerTile.TopLeft - buildingType.Size / 2;
-			bottomRight = topLeft + buildingType.Size - new IntVector2(1,1);
+			bottomRight = buildingType.GetBottomRightTileIndex(topLeft);
 			Map.SnapToMap(ref topLeft, ref bottomRight);
 		}
 
@@ -146,7 +146,7 @@ namespace MHUrho.EditorTools.MandK
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
-			Color color = buildingType.CanBuild(topLeft, bottomRight, input.Player, Level) ? Color.Green : Color.Red;
+			Color color = buildingType.CanBuild(topLeft, input.Player, Level) ? Color.Green : Color.Red;
 			Map.HighlightRectangle(topLeft, bottomRight, color);
 		}
 

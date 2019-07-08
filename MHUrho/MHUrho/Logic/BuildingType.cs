@@ -129,9 +129,9 @@ namespace MHUrho.Logic
 			return Building.CreateNew(buildingID, topLeft, initRotation, this, player, level);
 		}
 
-		public bool CanBuild(IntVector2 topLeft, IntVector2 bottomRight, IPlayer owner, ILevelManager level) {
+		public bool CanBuild(IntVector2 topLeft, IPlayer owner, ILevelManager level) {
 			try {
-				return Plugin.CanBuild(topLeft, bottomRight, owner, level);
+				return Plugin.CanBuild(topLeft, owner, level);
 			}
 			catch (Exception e) {
 				Urho.IO.Log.Write(LogLevel.Error,
@@ -139,10 +139,6 @@ namespace MHUrho.Logic
 				return false;
 			}
 			
-		}
-
-		public bool CanBuild(IntRect buildingTilesRectangle, IPlayer owner, ILevelManager level) {
-			return CanBuild(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), owner, level);
 		}
  
 		internal BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {
@@ -170,13 +166,19 @@ namespace MHUrho.Logic
 			
 		}
 
-		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft) {
+		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft)
+		{
+			IntVector2 bottomRight = GetBottomRightTileIndex(topLeft);
 			return new IntRect(topLeft.X,
 							   topLeft.Y,
-							   topLeft.X + Size.X - 1,
-							   topLeft.Y + Size.Y - 1);
+							   bottomRight.X,
+							   bottomRight.Y);
 		}
 
+		public IntVector2 GetBottomRightTileIndex(IntVector2 topLeft)
+		{
+			return topLeft + Size - new IntVector2(1, 1);
+		}
 
 		public void Dispose() {
 			Assets.Dispose();

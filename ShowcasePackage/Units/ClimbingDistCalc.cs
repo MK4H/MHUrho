@@ -6,7 +6,7 @@ using Urho;
 
 namespace ShowcasePackage.Units
 {
-	abstract class ClimbingDistCalc : BaseDistCalc {
+	public abstract class ClimbingDistCalc : BaseDistCalc {
 		
 		/// <summary>
 		/// Base speed of linear motion

@@ -68,6 +68,11 @@ namespace MHUrho.PathFinding.AStar
 			return outgoingEdges[neighbour];
 		}
 
+		public void ChangePosition(Vector3 newPosition)
+		{
+			Position = newPosition;
+		}
+
 		public void Remove()
 		{
 			//Enumerates over copy of incoming edges

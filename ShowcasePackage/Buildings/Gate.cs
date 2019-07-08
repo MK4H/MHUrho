@@ -13,6 +13,7 @@ using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
 using MHUrho.DefaultComponents;
+using MHUrho.EntityInfo;
 using MHUrho.Helpers.Extensions;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
@@ -32,38 +33,43 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public BuildingType MyTypeInstance { get; private set; }
+
 		public Cost Cost { get; private set; }
 		public ViableTileTypes ViableTileTypes { get; private set; }
 
 		const string CostElement = "cost";
 		const string CanBuildOnElement = "canBuildOn";
 
-		BuildingType myType;
+		const float MaxHeightDiff = 0.5f;
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
 		{
-			return GateInstance.CreateNew(level, building);
+			return Gate.CreateNew(level, building);
 		}
 
 		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building)
 		{
-			return GateInstance.CreateForLoading(level, building);
+			return Gate.CreateForLoading(level, building);
 		}
 
-		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level)
 		{
 			return level.Map
-						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
+						.GetTilesInRectangle(MyTypeInstance.GetBuildingTilesRectangle(topLeftTileIndex))
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile)) &&
+				HeightDiffLow(topLeftTileIndex, MyTypeInstance.GetBottomRightTileIndex(topLeftTileIndex), level, MaxHeightDiff);
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new GateBuilder(input, ui, camera, myType, this);
+			return new GateBuilder(input, ui, camera, this);
 		}
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
+			MyTypeInstance = package.GetBuildingType(ID);
+
 			XElement costElem = extensionElement.Element(package.PackageManager.GetQualifiedXName(CostElement));
 			Cost = Cost.FromXml(costElem, package);
 
@@ -71,11 +77,11 @@ namespace ShowcasePackage.Buildings
 				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
 			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
 
-			myType = package.GetBuildingType(ID);
+
 		}
 	}
 
-	public class GateInstance : WalkableBuildingPlugin {
+	public class Gate : WalkableBuildingPlugin {
 
 
 		class Door {
@@ -235,9 +241,11 @@ namespace ShowcasePackage.Buildings
 
 		Clicker clicker;
 
-		GateWindow window;
 
-		GateInstance(ILevelManager level, IBuilding building)
+		GateWindow window;
+		HealthBarControl healthBar;
+
+		Gate(ILevelManager level, IBuilding building)
 			: base(level, building)
 		{
 
@@ -245,23 +253,35 @@ namespace ShowcasePackage.Buildings
 			this.rightDoor = new Door(building.Node.GetChild("Door_r"), 90, 0, 5, true);
 			this.roofNodes = new Dictionary<ITile, IBuildingNode>();
 			this.tunnelNodes = new Dictionary<ITile, IBuildingNode>();
-			this.window = new GateWindow(this);
-			
+
+
 			CreatePathfindingNodes();
 		}
 
-		public static GateInstance CreateNew(ILevelManager level, IBuilding building)
+		public static Gate CreateNew(ILevelManager level, IBuilding building)
 		{
-			GateInstance newGate = new GateInstance(level, building);
-			StaticRangeTarget.CreateNew(newGate, level, building.Center);
-			newGate.clicker = Clicker.CreateNew(newGate, level);
-			newGate.clicker.Clicked += newGate.OnClicked;
-			return newGate;
+			Gate newGate = null;
+			try {
+				newGate = new Gate(level, building);
+				StaticRangeTarget.CreateNew(newGate, level, building.Center);
+				newGate.clicker = Clicker.CreateNew(newGate, level);
+				newGate.clicker.Clicked += newGate.OnClicked;
+				newGate.healthBar =
+					new HealthBarControl(level, building, 100, new Vector3(0, 3, 0), new Vector2(2f, 0.2f), false);
+				newGate.window = new GateWindow(newGate);
+
+				return newGate;
+			}
+			catch (Exception e) {
+				newGate?.Dispose();
+				throw;
+			}
+			
 		}
 
-		public static GateInstance CreateForLoading(ILevelManager level, IBuilding building)
+		public static Gate CreateForLoading(ILevelManager level, IBuilding building)
 		{
-			return new GateInstance(level, building);
+			return new Gate(level, building);
 		}
 
 		public void Open()
@@ -280,12 +300,14 @@ namespace ShowcasePackage.Buildings
 		{
 			var writer = pluginData.GetWriterForWrappedSequentialData();
 			writer.StoreNext(IsOpen);
+			healthBar.Save(writer);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
 			reader.GetNext(out bool isOpen);
+			healthBar = HealthBarControl.Load(Level, Building, reader);
 
 			if (isOpen) {
 				leftDoor.SetOpen();
@@ -298,11 +320,12 @@ namespace ShowcasePackage.Buildings
 
 			clicker = Building.GetDefaultComponent<Clicker>();
 			clicker.Clicked += OnClicked;
+			window = new GateWindow(this);
 		}
 
 		public override void Dispose()
 		{
-			clicker.Clicked -= OnClicked;
+
 			foreach (var node in roofNodes.Values)
 			{
 				node.Remove();
@@ -311,6 +334,13 @@ namespace ShowcasePackage.Buildings
 			foreach (var node in tunnelNodes.Values)
 			{
 				node.Remove();
+			}
+
+			window?.Hide();
+			window?.Dispose();
+			healthBar?.Dispose();
+			if (clicker != null) {
+				clicker.Clicked -= OnClicked;
 			}
 		}
 
@@ -323,12 +353,27 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
-			
+			if (Building.Player.IsFriend(byEntity.Player)  || byEntity is IProjectile)
+			{
+				return;
+			}
+
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-damage))
+			{
+				Building.RemoveFromLevel();
+			}
 		}
 
 		public override IBuildingNode TryGetNodeAt(ITile tile)
 		{
 			return roofNodes.TryGetValue(tile, out IBuildingNode value) ? value : null;
+		}
+
+		public override bool CanChangeTileHeight(int x, int y)
+		{
+			return false;
 		}
 
 		public override float? GetHeightAt(float x, float y)
@@ -438,13 +483,13 @@ namespace ShowcasePackage.Buildings
 
 		readonly BaseCustomWindowUI cwUI;
 
-		public GateBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType buildingType, GateType myType)
-			: base(input, ui, camera, buildingType)
+		public GateBuilder(GameController input, GameUI ui, CameraMover camera, GateType type)
+			: base(input, ui, camera, type.MyTypeInstance)
 		{
 			AbleFront = Color.Red;
 			AbleBack = Color.Yellow;
 
-			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+			cwUI = new BaseCustomWindowUI(ui, type.Name, $"Cost: {type.Cost}");
 		}
 
 		public override void Enable()
@@ -477,7 +522,7 @@ namespace ShowcasePackage.Buildings
 		class GateWindowInstance : IDisposable
 		{
 
-			GateInstance Gate => gateWindow.gate;
+			Gate Gate => gateWindow.gate;
 
 			readonly GateWindow gateWindow;
 
@@ -489,14 +534,15 @@ namespace ShowcasePackage.Buildings
 			public GateWindowInstance(GateWindow gateWindow)
 			{
 				this.gateWindow = gateWindow;
-				Gate.Level.UIManager.LoadLayoutToUI("Assets/UI/GateWindow.xml");
-				this.window = (Window)Gate.Level.UIManager.UI.Root.GetChild("GateWindow");
+				var packageUI = ((LevelInstancePluginBase)Gate.Level.Plugin).PackageUI;
+				packageUI.LoadLayoutToUI("Assets/UI/GateWindow.xml");
+				this.window = (Window)packageUI.PackageRoot.GetChild("GateWindow");
 
 				this.hideButton = (Button)window.GetChild("HideButton");
 
 				this.openButton = (Button)window.GetChild("OpenButton", true);
 				this.closeButton = (Button)window.GetChild("CloseButton", true);
-
+			
 				if (Gate.IsOpen)
 				{
 					openButton.Enabled = false;
@@ -543,6 +589,11 @@ namespace ShowcasePackage.Buildings
 
 			void RegisterHandlers()
 			{
+				Gate.Level.UIManager.RegisterForHover(window);
+				Gate.Level.UIManager.RegisterForHover(hideButton);
+				Gate.Level.UIManager.RegisterForHover(openButton);
+				Gate.Level.UIManager.RegisterForHover(closeButton);
+
 				hideButton.Pressed += HideButtonPressed;
 				openButton.Pressed += OpenButtonPressed;
 				closeButton.Pressed += CloseButtonPressed;
@@ -550,6 +601,10 @@ namespace ShowcasePackage.Buildings
 
 			void UnregisterHandlers()
 			{
+				Gate.Level.UIManager.UnregisterForHover(window);
+				Gate.Level.UIManager.UnregisterForHover(hideButton);
+				Gate.Level.UIManager.UnregisterForHover(openButton);
+				Gate.Level.UIManager.UnregisterForHover(closeButton);
 				hideButton.Pressed -= HideButtonPressed;
 				openButton.Pressed -= OpenButtonPressed;
 				closeButton.Pressed -= CloseButtonPressed;
@@ -571,11 +626,11 @@ namespace ShowcasePackage.Buildings
 			}
 		}
 
-		readonly GateInstance gate;
+		readonly Gate gate;
 
 		GateWindowInstance instance;
 
-		public GateWindow(GateInstance gate)
+		public GateWindow(Gate gate)
 		{
 			this.gate = gate;
 		}

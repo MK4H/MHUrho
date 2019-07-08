@@ -105,8 +105,7 @@ namespace MHUrho.Input.MandK
 		{
 			Disable();
 
-			UIManager.Dispose();
-			
+			UIManager.Dispose();	
 		}
 
 		public List<RayQueryResult> CursorRaycast() {

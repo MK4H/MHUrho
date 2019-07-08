@@ -12,7 +12,7 @@ namespace MHUrho.UserInterface
 
 		public UI UI => Game.UI;
 
-		protected MHUrhoApp Game => MHUrhoApp.Instance;
+		public MHUrhoApp Game => MHUrhoApp.Instance;
 
 		protected Urho.Input Input => Game.Input;
 

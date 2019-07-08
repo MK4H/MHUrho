@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
+using Urho;
 
 namespace MHUrho.PathFinding
 {
@@ -14,5 +15,7 @@ namespace MHUrho.PathFinding
 		bool IsRemoved { get; }
 
 		void Remove();
+
+		void ChangePosition(Vector3 newPosition);
 	}
 }

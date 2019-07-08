@@ -145,7 +145,7 @@ namespace MHUrho.DefaultComponents
 			var root = v4 - g * (g * x * x + 2 * y * v2);
 
 			if (root < 0) {
-				//TODO: No solution, cant do
+				//No solution, cant do
 				lowTime = 0;
 				lowVector = Vector3.Zero;
 				highTime = 0;

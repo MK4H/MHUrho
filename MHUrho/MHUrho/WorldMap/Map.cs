@@ -302,6 +302,11 @@ namespace MHUrho.WorldMap
 				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(1, 1));
 			}
 
+			public bool CanChangeCornerHeight(int x, int y)
+			{
+				return true;
+			}
+
 			public BorderTile(StBorderTile stBorderTile, Map map) {
 				this.MapArea = new IntRect(stBorderTile.TopLeftPosition.X, 
 										   stBorderTile.TopLeftPosition.Y, 
@@ -501,7 +506,8 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Creates map connected to mapNode with the PLAYING FIELD of width <paramref name="width"/> and length <paramref name="length"/>
 		/// </summary>
-		/// <param name="mapNode"></param>
+		/// <param name="mapNode">Scene node representing the map.</param>
+		/// <param name="octree">Octree of this level used for raycasting.</param>
 		/// <param name="width">Width of the playing field without borders</param>
 		/// <param name="length">Length of the playing field without borders</param>
 		protected Map(Node mapNode, Octree octree, int width, int length) 
@@ -848,16 +854,16 @@ namespace MHUrho.WorldMap
 			return result;
 		}
 
-		public IEnumerable<ITile> GetTilesInSpiral(ITile center)
+		public IEnumerable<ITile> GetTilesInSpiral(ITile center, int cutoff = -1)
 		{
 			var spiralPoint = new Spiral(center.MapLocation).GetSpiralEnumerator();
 			spiralPoint.MoveNext();
-			while (true) {
+			while (cutoff == -1 || spiralPoint.ContainingSquareSize < cutoff) {
 				yield return GetTileByMapLocation(spiralPoint.Current);
 
 				spiralPoint.MoveNext();
 				//While the points are outside of the map
-				while (!IsInside(spiralPoint.Current)) {
+				while (!IsInside(spiralPoint.Current) && spiralPoint.ContainingSquareSize <= Math.Max(Width, Length)) {
 					//Check if there is a part of the spiral still intersecting with the map
 					IntRect square = spiralPoint.GetContainingSquare();
 					if (!IsInside(square.TopLeft()) && !IsInside(square.BottomRight())) {
@@ -1385,7 +1391,7 @@ namespace MHUrho.WorldMap
 
 		public void Dispose() 
 		{
-			((IDisposable) graphics).Dispose();
+			((IDisposable) graphics)?.Dispose();
 			node.Dispose();
 		}
 
@@ -1731,11 +1737,19 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Changes heights in the logic tiles, does not change the height in the map model
 		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="height"></param>
+		/// <param name="x">The x coord of the corner to change.</param>
+		/// <param name="y">The y coord of the corner to change.</param>
+		/// <param name="height">Either the height to set the corner to (<paramref name="absolute"/> == true),
+		/// or the relative change of the height(<paramref name="absolute"/> == false).</param>
+		/// <param name="absolute">If the <paramref name="height"/> is absolute or relative.</param>
 		void ChangeCornerHeight(int x, int y, float height, bool absolute)
 		{
+			foreach (var tile in GetTilesAroundCorner(x,y)) {
+				if (!tile.CanChangeCornerHeight(x,y)) {
+					return;
+				}
+			}
+
 			if (IsBorderCorner(x, y)) {
 				foreach (var tile in GetTilesAroundCorner(new IntVector2(x, y), true)) {
 					if (IsBorderTile(tile)) {
@@ -1756,19 +1770,23 @@ namespace MHUrho.WorldMap
 						}
 					}
 					else if (tile.TopLeft == new IntVector2(x, y)) {
-						if (absolute)
+						if (absolute) {
 							tile.SetTopLeftHeight(height);
-						else
+						}
+						else {
 							tile.ChangeTopLeftHeight(height);
+						}
+
 					}
 				}
 			}
 			else {
-				if (absolute)
+				if (absolute) {
 					GetTileByTopLeftCorner(x, y).SetTopLeftHeight(height);
-				else
+				}
+				else {
 					GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(height);
-
+				}
 			}
 
 		}

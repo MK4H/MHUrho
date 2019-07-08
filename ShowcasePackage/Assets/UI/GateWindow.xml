@@ -32,12 +32,12 @@
 		<attribute name="Pivot" value="0.5 0.5" />
 		<attribute name="Layout Mode" value="Horizontal" />
 		<attribute name="Layout Spacing" value="10" />
-		<element type="Button">
+		<element type="Button" style="DoorCloseButton">
 			<attribute name="Name" value="CloseButton" />
 			<attribute name="Min Size" value="50 50" />
 			<attribute name="Pivot" value="0 0" />
 		</element>
-		<element type="Button">
+		<element type="Button" style="DoorOpenButton">
 			<attribute name="Name" value="OpenButton" />
 			<attribute name="Min Size" value="50 50" />
 			<attribute name="Pivot" value="0 0" />

@@ -92,7 +92,7 @@ namespace MHUrho.Logic
 
 				try {
 					new UnitComponentSetup().SetupComponentsOnNode(unitNode, level);
-					var unit = new Unit(id, level, type, tile, player, unitNode);
+					var unit = new Unit(id, level, type, tile, player);
 					unitNode.AddComponent(unit);
 
 					unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
@@ -157,9 +157,7 @@ namespace MHUrho.Logic
 
 				new UnitComponentSetup().SetupComponentsOnNode(centerNode, level);
 
-				var unitID = storedUnit.Id;
-
-				loadingUnit = new Unit(unitID, level, type, centerNode);
+				loadingUnit = new Unit(storedUnit.Id, level, type);
 				centerNode.AddComponent(loadingUnit);
 
 				//Unit is automatically registered by the loaders
@@ -207,15 +205,14 @@ namespace MHUrho.Logic
 		public override IEntityType Type => UnitType;
 
 		public override Vector3 Position {
-			get => LegNode.Position;
-			protected set => LegNode.Position = value;
+			get => Node.Position;
+			protected set => Node.Position = value;
 		}
 
 		public override InstancePlugin Plugin => UnitPlugin;
 
 		/// <summary>
-		/// Tile this unit is standing on
-		/// TODO: Maybe include all the tiles this unit touches, which may be up to 4 tiles
+		/// Tile this unit is standing on.
 		/// </summary>
 		public ITile Tile { get; private set; }
 
@@ -223,25 +220,15 @@ namespace MHUrho.Logic
 
 		public bool AlwaysVertical { get; set; } = false;
 
-		/// <summary>
-		/// Node used for movement and collisions with the terrain and buildings
-		/// </summary>
-		public Node LegNode { get; private set; }
-
-		/// <summary>
-		/// Node used for model, collisions with projectiles and logic
-		/// </summary>
-		public Node CenterNode => Node;
-
-		public override Vector3 Forward => LegNode.WorldDirection;
+		public override Vector3 Forward => Node.WorldDirection;
 
 		public override Vector3 Backward => -Forward;
 
-		public override Vector3 Right => LegNode.WorldRight;
+		public override Vector3 Right => Node.WorldRight;
 
 		public override Vector3 Left => -Right;
 
-		public override Vector3 Up => LegNode.WorldUp;
+		public override Vector3 Up => Node.WorldUp;
 
 		public override Vector3 Down => -Up;
 
@@ -249,11 +236,10 @@ namespace MHUrho.Logic
 		/// Initializes everything apart from the things referenced by their ID or position
 		/// </summary>
 		/// <param name="type">type of the loading unit</param>
-		protected Unit(int id, ILevelManager level, UnitType type, Node legNode)
+		protected Unit(int id, ILevelManager level, UnitType type)
 			:base(id, level)
 		{
 			this.UnitType = type;
-			this.LegNode = legNode;
 
 			ReceiveSceneUpdates = true;
 		}
@@ -267,13 +253,12 @@ namespace MHUrho.Logic
 		/// <param name="type">the type of the unit</param>
 		/// <param name="tile">Tile where the unit spawned</param>
 		/// <param name="player">Owner of the unit</param>
-		protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player, Node legNode) 
+		protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player) 
 			: base(id, level)
 		{
 			this.Tile = tile;
 			this.Player = player;
 			this.UnitType = type;
-			this.LegNode = legNode;
 
 			ReceiveSceneUpdates = true;
 		}
@@ -321,6 +306,40 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <summary>
+		/// Notifies the unit that a building was built on the tile it was standing on.
+		/// </summary>
+		/// <param name="building">The new building.</param>
+		/// <param name="tile">The tile this unit is standing on.</param>
+		public void BuildingBuilt(IBuilding building, ITile tile)
+		{
+			try
+			{
+				UnitPlugin.BuildingBuilt(building, tile);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.BuildingBuilt)} failed with Exception: {e.Message}");
+			}
+		}
+
+		/// <summary>
+		/// Notifies the unit that a building on the tile it was standing on was destroyed.
+		/// </summary>
+		/// <param name="building">The destroyed building.</param>
+		/// <param name="tile">The tile this unit is standing on.</param>
+		public void BuildingDestroyed(IBuilding building, ITile tile)
+		{
+			try
+			{
+				UnitPlugin.BuildingDestroyed(building, tile);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.BuildingDestroyed)} failed with Exception: {e.Message}");
+			}
+		}
+
 		public void MoveBy(Vector3 moveBy) {
 			var newPosition = Position + moveBy;
 
@@ -361,25 +380,15 @@ namespace MHUrho.Logic
 		public void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false) {
 			if (AlwaysVertical || rotateAroundY) {
 				//Only rotate around Y
-				LegNode.LookAt(new Vector3(lookPosition.X, Position.Y, lookPosition.Z), Node.Up);
+				Node.LookAt(new Vector3(lookPosition.X, Position.Y, lookPosition.Z), Node.Up);
 			}
 			else {
-				LegNode.LookAt(lookPosition, Tile.Map.GetUpDirectionAt(Position.XZ2()));
-				if (LegNode.Up.Y < 0) {
+				Node.LookAt(lookPosition, Tile.Map.GetUpDirectionAt(Position.XZ2()));
+				if (Node.Up.Y < 0) {
 					Tile.Map.GetUpDirectionAt(Position.XZ2());
 				}
 			}
 
-			SignalRotationChanged();
-		}
-
-		public void RotateAroundFeet(float pitch, float yaw, float roll) {
-			LegNode.Rotate(new Quaternion(pitch, yaw, roll));
-			SignalRotationChanged();
-		}
-
-		public void RotateAroundCenter(float pitch, float yaw, float roll) {
-			Node.Rotate(new Quaternion(pitch, yaw, roll));
 			SignalRotationChanged();
 		}
 
@@ -400,10 +409,9 @@ namespace MHUrho.Logic
 			Level.RemoveUnit(this);
 			Tile?.RemoveUnit(this);
 			Player?.RemoveUnit(this);
-			LegNode.Remove();
-			LegNode.Dispose();
-			
-			Dispose();	
+			Node.Remove();
+
+			base.Dispose();
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -427,7 +435,7 @@ namespace MHUrho.Logic
 			//Level.LevelNode.Enabled is here because there seems to be a bug
 			// where child nodes of level still receive updates even though 
 			// the level node is not enabled
-			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}
 

@@ -311,8 +311,8 @@ namespace MHUrho.Logic
 
 			Plugin?.Dispose();
 			Node.Remove();
-			Node.Dispose();
-			Dispose();
+
+			base.Dispose();
 		}
 
 		public bool Move(Vector3 movement)
@@ -382,7 +382,7 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep) 
 		{
 
-			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}
 
@@ -402,7 +402,6 @@ namespace MHUrho.Logic
 		{
 			if (TriggerCollisions) {
 				IEntity hitEntity = Level.GetEntity(args.OtherNode);
-				hitEntity.HitBy(this);
 				try {
 					ProjectilePlugin.OnEntityHit(hitEntity);
 				}

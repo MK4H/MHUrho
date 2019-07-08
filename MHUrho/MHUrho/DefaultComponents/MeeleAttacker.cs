@@ -176,7 +176,7 @@ namespace MHUrho.DefaultComponents
 		/// Sets <paramref name="newTarget"/> as the current target.
 		/// </summary>
 		/// <param name="newTarget">The new target to attack.</param>
-		public void Attack(IEntity newTarget)
+		public virtual void Attack(IEntity newTarget)
 		{
 			Target = newTarget;
 		}
@@ -184,7 +184,7 @@ namespace MHUrho.DefaultComponents
 		/// <summary>
 		/// Stops attacking any current target.
 		/// </summary>
-		public void StopAttacking()
+		public virtual void StopAttacking()
 		{
 			Target = null;
 		}
@@ -246,7 +246,7 @@ namespace MHUrho.DefaultComponents
 			Level.Map.ForEachInRectangle(topLeft, topLeft + searchRectangleSize,
 									(tile) => {
 										unitsInRange.AddRange(from unit in tile.Units
-															where unit.Player != Entity.Player
+															where Entity.Player.IsEnemy(unit.Player)
 															select unit);
 									});
 
@@ -293,7 +293,7 @@ namespace MHUrho.DefaultComponents
 			}
 		}
 
-		void InvokeOnAttacked(IEntity target)
+		protected void InvokeOnAttacked(IEntity target)
 		{
 			try {
 				Attacked?.Invoke(this, target);
@@ -305,7 +305,7 @@ namespace MHUrho.DefaultComponents
 			}
 		}
 
-		void InvokeTargetInRange(IEntity target)
+		protected void InvokeTargetInRange(IEntity target)
 		{
 			try
 			{
@@ -318,7 +318,7 @@ namespace MHUrho.DefaultComponents
 			}
 		}
 
-		void InvokeTargetFound(IEntity target)
+		protected void InvokeTargetFound(IEntity target)
 		{
 			try
 			{
@@ -331,7 +331,7 @@ namespace MHUrho.DefaultComponents
 			}
 		}
 
-		void InvokeTargetLost()
+		protected void InvokeTargetLost()
 		{
 			try
 			{

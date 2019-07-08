@@ -131,6 +131,7 @@ namespace MHUrho.Logic
 				Urho.IO.Log.Write(LogLevel.Warning,
 								$"There was an unexpected exception during the invocation of {nameof(OnRemoval)}: {e.Message}");
 			}
+			OnRemoval = null;
 		}
 
 		public abstract void HitBy(IEntity other, object additionalData);

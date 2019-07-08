@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MHUrho.EntityInfo;
 using MHUrho.Input;
@@ -56,6 +57,18 @@ namespace MHUrho.Logic
 
 			protected LevelManager Level;
 
+			protected readonly TaskFactory TaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None,
+																			TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+
+			protected Task PostToMainThread(Action func)
+			{
+				return TaskFactory.StartNew(func);
+			}
+			protected Task<T> PostToMainThread<T>(Func<T> func)
+			{
+				return TaskFactory.StartNew(func);
+			}
+
 			protected BaseLoader(LevelRep levelRep, bool editorMode, IProgressEventWatcher parentProgress, double loadingSubsectionSize)
 			{
 				this.LevelRep = levelRep;
@@ -78,7 +91,6 @@ namespace MHUrho.Logic
 					octree = scene.CreateComponent<Octree>();
 					var physics = scene.CreateComponent<PhysicsWorld>();
 
-					//TODO: Test if i can just use it to manually call UpdateCollisions with all rigidBodies kinematic
 					physics.Enabled = true;
 
 					LoadSceneParts(scene);
@@ -284,35 +296,32 @@ namespace MHUrho.Logic
 				try
 				{
 					Progress.SendTextUpdate("Initializing level");
-					Level = await MHUrhoApp.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
+					Level = await PostToMainThread<LevelManager>(InitializeLevel);
 					Progress.SendUpdate(initLPartSize, "Initialized level");
 
 					PlayerInsignia.InitInsignias(Game.PackageManager);
 
 					Progress.SendTextUpdate("Loading map");
-					Node mapNode = await MHUrhoApp.InvokeOnMainSafeAsync(() => Level.LevelNode.CreateChild("MapNode"));
-
-
-					//This will take a long time, run it in another thread			
-					Level.map = await Task.Run<Map>(() => WorldMap.Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, Level.Plugin.GetPathFindAlgFactory(), mapSize, new ProgressWatcher(Progress, mapLPartSize)));
+							
+					Level.map = await PostToMainThread(CreateDefaultMap);
 					//Map percentage is updated by Subsection watcher
 					Progress.SendTextUpdate("Loaded map");
 
 					Level.Minimap = new Minimap(Level, 4);
 
-					MHUrhoApp.InvokeOnMainSafe(CreateCamera);
+					await PostToMainThread(CreateCamera);
 
 
 					Progress.SendTextUpdate("Creating players");
-					MHUrhoApp.InvokeOnMainSafe(CreatePlayers);
+					await PostToMainThread(CreatePlayers);
 					Progress.SendUpdate(playersLPartSize, "Created players");
 
 					Progress.SendTextUpdate("Giving player controls");
-					MHUrhoApp.InvokeOnMainSafe(CreateControl);
+					await PostToMainThread(CreateControl);
 					Progress.SendUpdate(controlLPartSize, "Player controls created");
 
 					Progress.SendTextUpdate("Starting level");
-					MHUrhoApp.InvokeOnMainSafe(StartLevel);
+					await PostToMainThread(StartLevel);
 
 					Progress.SendFinished();
 					return Level;
@@ -360,6 +369,12 @@ namespace MHUrho.Logic
 				RegisterPlayersToUI();
 			}
 
+			Map CreateDefaultMap()
+			{
+				Node mapNode = Level.LevelNode.CreateChild("MapNode");
+				return WorldMap.Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, Level.Plugin.GetPathFindAlgFactory(), mapSize, new ProgressWatcher(Progress, mapLPartSize));
+			}
+
 			void CreateControl()
 			{
 				Level.cameraController = Game.ControllerFactory.CreateCameraController(Level.Input, Level.Camera);
@@ -369,6 +384,8 @@ namespace MHUrho.Logic
 
 			void StartLevel()
 			{
+				Level.Plugin.Initialize();
+				Level.Plugin.OnStart();
 				Level.UIManager.ShowUI();
 				Level.Scene.UpdateEnabled = true;
 				Level.LevelNode.Enabled = true;
@@ -412,30 +429,30 @@ namespace MHUrho.Logic
 				{
 					Loaders = new List<ILoader>();
 					Progress.SendTextUpdate("Initializing level");
-					Level = await MHUrhoApp.InvokeOnMainSafeAsync<LevelManager>(InitializeLevel);
+					Level = await PostToMainThread(InitializeLevel);
 					Progress.SendUpdate(initLPartSize, "Initialized level");
 
 					PlayerInsignia.InitInsignias(Game.PackageManager);
 
 
-					var mapLoader = await LoadMap();
+					var mapLoader = await PostToMainThread(StartMapLoader);
 					Loaders.Add(mapLoader);
 					Level.map = mapLoader.Map;
 					Level.Minimap = new Minimap(Level, 4);
 
 
-					MHUrhoApp.InvokeOnMainSafe(CreateCamera);
+					await PostToMainThread(CreateCamera);
 
 					//ALT: Maybe give each its own subsection watcher
-					MHUrhoApp.InvokeOnMainSafe(LoadUnits);
-					MHUrhoApp.InvokeOnMainSafe(LoadBuildings);
-					MHUrhoApp.InvokeOnMainSafe(LoadProjectiles);
-					MHUrhoApp.InvokeOnMainSafe(LoadPlayers);
-					MHUrhoApp.InvokeOnMainSafe(LoadToolsAndControllers);
-					MHUrhoApp.InvokeOnMainSafe(LoadLevelPlugin);
-					MHUrhoApp.InvokeOnMainSafe(ConnectReferences);
-					MHUrhoApp.InvokeOnMainSafe(FinishLoading);
-					MHUrhoApp.InvokeOnMainSafe(StartLevel);
+					await PostToMainThread(LoadUnits);
+					await PostToMainThread(LoadBuildings);
+					await PostToMainThread(LoadProjectiles);
+					await PostToMainThread(LoadPlayers);
+					await PostToMainThread(LoadToolsAndControllers);
+					await PostToMainThread(LoadLevelPlugin);
+					await PostToMainThread(ConnectReferences);
+					await PostToMainThread(FinishLoading);
+					await PostToMainThread(StartLevel);
 
 					Progress.SendFinished();
 					return Level;
@@ -535,6 +552,7 @@ namespace MHUrho.Logic
 				Progress.SendTextUpdate("Starting level");
 
 				CurrentLevel = Level;
+				Level.Plugin.OnStart();
 				Level.UIManager.ShowUI();
 				Level.Scene.UpdateEnabled = true;
 				Level.LevelNode.Enabled = true;
@@ -555,19 +573,24 @@ namespace MHUrho.Logic
 				LoadCamera(Level, new Vector2(10, 10));
 			}
 
-			Task<IMapLoader> LoadMap()
+			/// <summary>
+			/// Creates map loader and does the first step of loading.
+			/// We are nod doing concurrency, just splitting it up into more steps.
+			/// </summary>
+			/// <returns>Map loader after the fist step.</returns>
+			IMapLoader StartMapLoader()
 			{
 				Node mapNode = Level.LevelNode.CreateChild("MapNode");
-				return Task.Run(() => {
-					var loader = WorldMap.Map.GetLoader(Level,
-														mapNode,
-														Level.octree,
-														Level.Plugin.GetPathFindAlgFactory(),
-														StoredLevel.Map,
-														new ProgressWatcher(Progress, mapLPartSize));
-					loader.StartLoading();
-					return loader;
-				});
+				var loader = WorldMap.Map.GetLoader(Level,
+													mapNode,
+													Level.octree,
+													Level.Plugin.GetPathFindAlgFactory(),
+													StoredLevel.Map,
+													new ProgressWatcher(Progress, mapLPartSize));
+				//Does the first step of loading
+				loader.StartLoading();
+				return loader;
+
 			}
 
 

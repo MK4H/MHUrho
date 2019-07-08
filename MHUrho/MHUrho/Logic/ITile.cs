@@ -194,5 +194,13 @@ namespace MHUrho.Logic
 		/// </summary>
 		/// <returns>Enumerable of all neighboring tiles.</returns>
 		IEnumerable<ITile> GetNeighbours();
+
+		/// <summary>
+		/// Checks if it is possible to change the height of the corner at [<paramref name="x"/>,<paramref name="y"/>].
+		/// </summary>
+		/// <param name="x">The x coord of the corner.</param>
+		/// <param name="y">The y coord of the corner.</param>
+		/// <returns>If it is possible to change the height of the corner.</returns>
+		bool CanChangeCornerHeight(int x, int y);
 	}
 }

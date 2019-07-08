@@ -69,7 +69,7 @@ namespace ShowcasePackage.Buildings
 
 			var raycast = Input.CursorRaycast();
 			foreach (var result in raycast) {
-				for (Node current = result.Node; current != Level.LevelNode; current = current.Parent)
+				for (Node current = result.Node; current != Level.LevelNode && current != null; current = current.Parent)
 				{
 					if (Level.TryGetBuilding(current, out IBuilding building))
 					{

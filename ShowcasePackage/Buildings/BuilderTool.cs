@@ -78,7 +78,10 @@ namespace ShowcasePackage.Buildings
 			foreach (var pair in builders)
 			{
 				ui.SelectionBar.RemoveChild(pair.Key);
+				pair.Value.Dispose();
 			}
+
+			checkBoxes.SelectedChanged -= OnSelectedChanged;
 
 			checkBoxes.Dispose();
 			uiElem.Dispose();
@@ -173,7 +176,7 @@ namespace ShowcasePackage.Buildings
 
 				var raycast = input.CursorRaycast();
 				foreach (var result in raycast) {
-					for (Node current = result.Node; current != Level.LevelNode; current = current.Parent)
+					for (Node current = result.Node; current != Level.LevelNode && current != null; current = current.Parent)
 					{
 						if (!Level.TryGetBuilding(current, out IBuilding building))
 						{

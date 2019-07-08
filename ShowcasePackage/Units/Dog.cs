@@ -45,7 +45,8 @@ namespace ShowcasePackage.Units
 
 		public override bool CanSpawnAt(ITile centerTile)
 		{
-			return centerTile.Building == null && centerTile.Units.Count == 0;
+			return PassableTileTypes.IsViable(centerTile) &&
+					centerTile.Building == null;
 
 		}
 
@@ -63,6 +64,9 @@ namespace ShowcasePackage.Units
 
 
 
+		/// <summary>
+		/// State for the State design pattern
+		/// </summary>
 		abstract class State
 		{
 
@@ -131,6 +135,9 @@ namespace ShowcasePackage.Units
 			}
 		}
 
+		/// <summary>
+		/// State representing the state when the unit is going from building to the tree
+		/// </summary>
 		class GoingToTree : State
 		{
 
@@ -203,6 +210,9 @@ namespace ShowcasePackage.Units
 			}
 		}
 
+		/// <summary>
+		/// Represents a state when the unit is standing next to the tree and waiting to chop it down.
+		/// </summary>
 		class Chomping : State
 		{
 
@@ -250,6 +260,9 @@ namespace ShowcasePackage.Units
 			}
 		}
 
+		/// <summary>
+		/// Represents the state when the unit is going back from the tree with the chopped wood.
+		/// </summary>
 		class BringingWood : State
 		{
 
@@ -337,6 +350,9 @@ namespace ShowcasePackage.Units
 			}
 		}
 
+		/// <summary>
+		/// Represents the state when unit is searching for trees to chop down.
+		/// </summary>
 		class SearchingForTree : State
 		{
 
@@ -388,6 +404,11 @@ namespace ShowcasePackage.Units
 			}
 		}
 
+
+		/// <summary>
+		/// Represents the view of the pathfinding graph by dog unit.
+		/// Rejects edges that would not be present and returns the weights of the rest of the edges.
+		/// </summary>
 		class DogDistCalc : ClimbingDistCalc {
 			static readonly Dictionary<Tuple<NodeType, NodeType>, float> TeleportTimes =
 				new Dictionary<Tuple<NodeType, NodeType>, float>
@@ -488,7 +509,7 @@ namespace ShowcasePackage.Units
 			bool CanPassToBuildingNode(IBuildingNode target)
 			{
 				//Is not closed gate door and is not roof
-				return (target.Tag != GateInstance.GateDoorTag || ((GateInstance)target.Building.Plugin).IsOpen) &&
+				return (target.Tag != Gate.GateDoorTag || ((Gate)target.Building.Plugin).IsOpen) &&
 						!((LevelInstancePluginBase)Level.Plugin).IsRoofNode(target);
 			}
 
@@ -507,10 +528,7 @@ namespace ShowcasePackage.Units
 		AnimationController animationController;
 		WorldWalker walker;
 
-		readonly DogDistCalc distCalc;
-
-		float hp;
-		HealthBar healthbar;
+		HealthBarControl healthBar;
 
 		enum States { GoingToTree, Chomping, BringingWood, SearchingForTree}
 
@@ -518,6 +536,7 @@ namespace ShowcasePackage.Units
 
 		Tree targetTree;
 
+		readonly DogDistCalc distCalc;
 		readonly HashSet<IBuilding> inaccesibleTrees = new HashSet<IBuilding>();
 		readonly Timeout clean = new Timeout(120);
 		readonly DogType myType;
@@ -527,24 +546,24 @@ namespace ShowcasePackage.Units
 		{
 			this.myType = myType;
 			this.distCalc = new DogDistCalc(this, 0.5f, 0.2f, 1);
+			unit.AlwaysVertical = false;
+
 			if (loading) {
 				return;
 			}
 
 			animationController = unit.CreateComponent<AnimationController>();
 			walker = WorldWalker.CreateNew(this, level);
+			RegisterEvents(walker);
 			MovingRangeTarget.CreateNew(this, level, targetOffset);
-
-			unit.AlwaysVertical = false;
-			hp = 100;
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), hp);
+			healthBar = new HealthBarControl(level, unit, 100, new Vector3(0, 3, 0), new Vector2(0.5f, 0.1f), true);
 			currentState = new SearchingForTree((State)null, this);
 		}
 
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
 			var writer = pluginData.GetWriterForWrappedSequentialData();
-			writer.StoreNext(hp);
+			healthBar.Save(writer);
 			currentState.Save(writer);
 		}
 
@@ -556,14 +575,13 @@ namespace ShowcasePackage.Units
 			RegisterEvents(walker);
 
 			var reader = pluginData.GetReaderForWrappedSequentialData();
-			reader.GetNext(out hp);
-			healthbar = new HealthBar(Level, Unit, new Vector3(0, 15, 0), new Vector2(0.5f, 0.1f), hp);
+			healthBar = HealthBarControl.Load(Level, Unit, reader);
 			currentState = State.Load(reader, this);
 		}
 
 		public override void Dispose()
 		{
-			healthbar.Dispose();
+			healthBar.Dispose();
 		}
 
 		public override void TileHeightChanged(ITile tile)
@@ -571,23 +589,36 @@ namespace ShowcasePackage.Units
 			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetHeightAt(Unit.XZPosition)));
 		}
 
+		public override void BuildingDestroyed(IBuilding building, ITile tile)
+		{
+			walker.Stop();
+			Unit.MoveTo(Unit.Position.WithY(Level.Map.GetTerrainHeightAt(Unit.Position.XZ2())));
+
+			if (healthBar.ChangeHitPoints(-30))
+			{
+				walker.Enabled = false;
+				Unit.RemoveFromLevel();
+			}
+		}
+
+
+		public override void BuildingBuilt(IBuilding building, ITile tile)
+		{
+			throw new InvalidOperationException("Building building on top of units is not supported.");
+		}
+
 		public override void OnHit(IEntity other, object userData)
 		{
-			if (other.Player == Unit.Player)
+			if (Unit.Player.IsFriend(other.Player))
 			{
 				return;
 			}
 
-			hp -= 20;
-			if (hp < 0)
-			{
-				healthbar.SetHealth(0);
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-(damage*2))) {
 				walker.Enabled = false;
 				Unit.RemoveFromLevel();
-			}
-			else
-			{
-				healthbar.SetHealth((int)hp);
 			}
 		}
 
@@ -612,29 +643,29 @@ namespace ShowcasePackage.Units
 
 		void OnMovementStarted(WorldWalker walker)
 		{
-			animationController.PlayExclusive("Units/Dog/Walk.ani", 0, true);
-			animationController.SetSpeed("Units/Dog/Walk.ani", 2);
+			animationController.PlayExclusive("Assets/Units/Dog/Walk.ani", 0, true);
+			animationController.SetSpeed("Assets/Units/Dog/Walk.ani", 2);
 
 			currentState.MovementStarted();
 		}
 
 		void OnMovementFinished(WorldWalker walker)
 		{
-			animationController.Stop("Units/Dog/Walk.ani");
+			animationController.Stop("Assets/Units/Dog/Walk.ani");
 
 			currentState.MovementFinished();
 		}
 
 		void OnMovementFailed(WorldWalker walker)
 		{
-			animationController.Stop("Units/Dog/Walk.ani");
+			animationController.Stop("Assets/Units/Dog/Walk.ani");
 
 			currentState.MovementFailed();
 		}
 
 		void OnMovementCanceled(WorldWalker walker)
 		{
-			animationController.Stop("Units/Dog/Walk.ani");
+			animationController.Stop("Assets/Units/Dog/Walk.ani");
 
 			currentState.MovementCanceled();
 		}
@@ -647,5 +678,6 @@ namespace ShowcasePackage.Units
 			walker.MovementCanceled += OnMovementCanceled;
 
 		}
+
 	}
 }

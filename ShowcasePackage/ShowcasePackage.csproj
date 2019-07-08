@@ -77,14 +77,17 @@
     <Compile Include="Levels\TestLevelLogic2.cs" />
     <Compile Include="Misc\BaseCustomWindowUI.cs" />
     <Compile Include="Misc\Cost.cs" />
+    <Compile Include="Misc\HealthBarControl.cs" />
+    <Compile Include="Misc\PackageUI.cs" />
     <Compile Include="Misc\Timeout.cs" />
     <Compile Include="Misc\ViableTileTypes.cs" />
     <Compile Include="Misc\Window.cs" />
     <Compile Include="Players\AgressivePlayer.cs" />
     <Compile Include="Players\DefensivePlayer.cs" />
+    <Compile Include="Players\PlayerWithKeep.cs" />
     <Compile Include="Players\TestAIPlayer.cs" />
     <Compile Include="Players\TestHumanPlayers.cs" />
-    <Compile Include="Players\TestNeutralPlayers.cs" />
+    <Compile Include="Players\NeutralPlayers.cs" />
     <Compile Include="Projectiles\EggProjectile.cs" />
     <Compile Include="Projectiles\TestProjectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -171,10 +174,16 @@
     <Content Include="Assets\stoneBasic.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\Textures\ShowcaseUI.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Textures\toolIcons.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\UI\BaseBuildingCWUI.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\BaseLayout.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\UI\BuildingToolUI.xml">
@@ -184,6 +193,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\UI\KeepWindow.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UI\UIStyle.xml">
+      <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\UI\SizeSlider.xml">

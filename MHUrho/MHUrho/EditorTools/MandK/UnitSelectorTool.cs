@@ -185,10 +185,17 @@ namespace MHUrho.EditorTools.MandK
 			}
 		}
 
+		/// <summary>
+		/// Tries to handle a click on a unit.
+		/// </summary>
+		/// <param name="unit">The clicked unit.</param>
+		/// <param name="e">Event data.</param>
+		/// <returns>True if the event was handled and should not be propagated to other things behind the clicked unit.</returns>
 		protected virtual bool HandleUnitClick(IUnit unit, MouseButtonUpEventArgs e)
 		{
 			if ((MouseButton)e.Button == MouseButton.Right) {
 				Level.Camera.Follow(unit);
+				return true;
 			}
 
 
@@ -218,8 +225,29 @@ namespace MHUrho.EditorTools.MandK
 			}
 		}
 
+		/// <summary>
+		/// Tries to handle a click on a building.
+		/// </summary>
+		/// <param name="building">The clicked building.</param>
+		/// <param name="e">Event data.</param>
+		/// <param name="worldPosition">Position of the intersection of raycast used for click and the building geometry.</param>
+		/// <returns>True if the event was handled and should not be propagated to other things behind the clicked building.</returns>
 		protected virtual bool HandleBuildingClick(IBuilding building, MouseButtonUpEventArgs e, Vector3 worldPosition)
 		{
+			//Right clicked enemy building
+			if ((MouseButton)e.Button == MouseButton.Right)
+			{
+				if (building.Player == input.Player) {
+					return false;
+				}
+				var executed = false;
+				foreach (var selectedUnit in GetAllSelectedUnitSelectors())
+				{
+					executed |= selectedUnit.Order(new AttackOrder(building));
+				}
+				return executed;
+			}
+
 			var formationController = building.GetFormationController(worldPosition);
 			if (formationController == null) {
 				return false;
@@ -229,6 +257,12 @@ namespace MHUrho.EditorTools.MandK
 			return true;
 		}
 
+		/// <summary>
+		/// Tries to handle a click on a tile.
+		/// </summary>
+		/// <param name="tile">The clicked tile.</param>
+		/// <param name="e">Event data.</param>
+		/// <returns>True if the event was handled and should not be propagated to other things behind the clicked tile.</returns>
 		protected virtual bool HandleTileClick(ITile tile, MouseButtonUpEventArgs e)
 		{
 			switch (e.Button) {
@@ -248,7 +282,7 @@ namespace MHUrho.EditorTools.MandK
 
 			foreach (var result in input.CursorRaycast()) {
 
-				for (Node current = result.Node; current != Level.LevelNode; current = current.Parent) {
+				for (Node current = result.Node; current != Level.LevelNode && current != null; current = current.Parent) {
 					if (Level.TryGetEntity(current, out IEntity entity))
 					{
 						//Dispatch the click with the actual position of the click
@@ -259,9 +293,6 @@ namespace MHUrho.EditorTools.MandK
 						}
 					}
 				}
-
-				
-				
 
 				var tile = Map.RaycastToTile(result);
 				if (tile == null) {

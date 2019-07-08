@@ -84,7 +84,6 @@ namespace MHUrho.UserInterface
 					throw new ArgumentOutOfRangeException();
 			}
 
-			//TODO: disable buttons
 			buttonHolder.Position = new IntVector2(newPos, buttonHolder.Position.Y);
 		}
 

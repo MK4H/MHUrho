@@ -151,7 +151,7 @@ namespace ShowcasePackage.Buildings
 
 			IntRect rect = GetBuildingRectangle(centerTile, BuildingType);
 
-			bool ableToBuild = BuildingType.CanBuild(rect.TopLeft(), rect.BottomRight(), input.Player, Level);
+			bool ableToBuild = BuildingType.CanBuild(rect.TopLeft(), input.Player, Level);
 			Color[] colors = ableToBuild ? ableColors : unableColors;
 			Map.HighlightRectangle(rect, (cTile) => GetPositionColor(rect, cTile.TopLeft, colors));
 		}
@@ -268,7 +268,7 @@ namespace ShowcasePackage.Buildings
 
 			IntRect rect = GetBuildingRectangle(tile, BuildingType);
 
-			if (BuildingType.CanBuild(rect.TopLeft(), rect.BottomRight(), input.Player, Level)) {
+			if (BuildingType.CanBuild(rect.TopLeft(), input.Player, Level)) {
 				Vector3 facing;
 				switch (Direction) {
 					case Direction.PlusX:

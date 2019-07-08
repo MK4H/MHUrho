@@ -57,7 +57,7 @@ namespace ShowcasePackage.Buildings
 			}
 
 			IntRect rect = GetBuildingRectangle(tile, BuildingType);
-			if (BuildingType.CanBuild(rect, Input.Player, Level)) {
+			if (BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level)) {
 				Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.Identity, Input.Player);
 			}
 		}
@@ -86,7 +86,7 @@ namespace ShowcasePackage.Buildings
 			}
 
 			IntRect rect = GetBuildingRectangle(tile, BuildingType);
-			Color color = BuildingType.CanBuild(rect, Input.Player, Level) ? AbleColor : UnableColor;
+			Color color = BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level) ? AbleColor : UnableColor;
 			Map.HighlightRectangle(rect, color);
 		}
 	}

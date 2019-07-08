@@ -172,7 +172,7 @@ namespace MHUrho.CameraMovement
 			Vector3 localDirection = Vector3.Normalize(CameraHolder.WorldToLocal(CameraHolder.WorldPosition + cameraWorldDirection));
 			//Urho.IO.Log.Write(LogLevel.Debug, $"LocalDirection: {localDirection}");
 			CameraNode.Position = -localDirection * cameraDistance;
-			//TODO: Check return value
+			//NOTE: Should probably check return value, but don't know what to do on failure.
 			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
 		}
 	}

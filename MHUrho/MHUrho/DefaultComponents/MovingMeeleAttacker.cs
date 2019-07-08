@@ -110,7 +110,7 @@ namespace MHUrho.DefaultComponents
 		}
 
 		public interface IUser : IBaseUser {
-			void MoveTo(Vector3 position);
+			bool MoveTo(IEntity target);
 		}
 
 
@@ -213,6 +213,15 @@ namespace MHUrho.DefaultComponents
 			return Loader.SaveState(this);
 		}
 
+		public override void Attack(IEntity newTarget)
+		{
+			base.Attack(newTarget);
+
+			//Start moving to target immediately
+			timeToNextPositionCheck = -1;
+			CheckTargetPosition(0.1f);
+		}
+
 		protected override void OnUpdateChecked(float timeStep)
 		{
 			if (Target == null) {
@@ -248,21 +257,26 @@ namespace MHUrho.DefaultComponents
 
 			timeToNextPositionCheck = timeBetweenPositionChecks;
 
-			//NOTE: Maybe intersect intersect
+			//NOTE: Maybe intersect
 			if (Target.Position != previousTargetPosition) {
-				MoveTo(Target.Position);
+				if (!MoveTo(Target)) {
+					Target = null;
+					InvokeTargetLost();
+					return;
+				}
 				previousTargetPosition = Target.Position;
 			}
 		}
 
-		void MoveTo(Vector3 position)
+		bool MoveTo(IEntity target)
 		{
 			try {
-				user.MoveTo(position);
+				return user.MoveTo(target);
 			}
 			catch (Exception e) {
 				Urho.IO.Log.Write(LogLevel.Warning,
 								$"There was an unexpected exception in {nameof(user.MoveTo)}: {e.Message}");
+				return false;
 			}
 		}
 	}

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MHUrho.Control;
 using MHUrho.DefaultComponents;
+using MHUrho.Logic;
 using MHUrho.PathFinding;
 using ShowcasePackage.Levels;
 
@@ -22,6 +23,7 @@ namespace ShowcasePackage.Buildings
 		readonly Queue<INode> lowPrioNodes;
 
 		readonly HashSet<INode> enqueuedNodes;
+		readonly HashSet<UnitType> failedTypes;
 
 		readonly LevelInstancePluginBase level;
 
@@ -32,6 +34,7 @@ namespace ShowcasePackage.Buildings
 			buildingNodes = new Queue<INode>();
 			lowPrioNodes = new Queue<INode>();
 			enqueuedNodes = new HashSet<INode>(startNode.Algorithm.NodeEqualityComparer);
+			failedTypes = new HashSet<UnitType>();
 
 			buildingNodes.Enqueue(startNode);
 			enqueuedNodes.Add(startNode);
@@ -40,6 +43,10 @@ namespace ShowcasePackage.Buildings
 
 		public bool MoveToFormation(UnitSelector unit)
 		{
+			if (failedTypes.Contains(unit.Unit.UnitType)) {
+				return false;
+			}
+
 			INode node;
 			if ((node = PeekNextNode()) == null)
 			{
@@ -52,6 +59,7 @@ namespace ShowcasePackage.Buildings
 				return true;
 			}
 
+			failedTypes.Add(unit.Unit.UnitType);
 			return false;
 		}
 

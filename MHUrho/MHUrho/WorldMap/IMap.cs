@@ -342,8 +342,9 @@ namespace MHUrho.WorldMap {
 		/// Returns an <see cref="IEnumerable{ITile}"/> which enumerates tiles in a spiral, starting from <paramref name="center"/>
 		/// </summary>
 		/// <param name="center">Center tile of the spiral. Starting point of the spiral</param>
+		/// <param name="cutoff">The size of the spiral to enumerate. -1 means infinite spiral.</param>
 		/// <returns>Returns an <see cref="IEnumerable{ITile}"/> which enumerates the tiles in a spiral, starting from <paramref name="center"/></returns>
-		IEnumerable<ITile> GetTilesInSpiral(ITile center);
+		IEnumerable<ITile> GetTilesInSpiral(ITile center, int cutoff = -1);
 
 		/// <summary>
 		/// Returns an <see cref="IFormationController"/> that orders provided units to tiles around the <paramref name="center"/>

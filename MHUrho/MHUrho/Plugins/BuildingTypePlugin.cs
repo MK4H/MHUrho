@@ -26,6 +26,6 @@ namespace MHUrho.Plugins
 		/// <returns>New instance, that will be loaded in the next step</returns>
 		public abstract BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building);
 
-		public abstract bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level);
+		public abstract bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level);
 	}
 }

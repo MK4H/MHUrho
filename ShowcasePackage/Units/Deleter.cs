@@ -49,7 +49,7 @@ namespace ShowcasePackage.Units
 			var raycast = input.CursorRaycast();
 			foreach (var result in raycast) {
 				
-				for (Node currentNode = result.Node; currentNode != Level.LevelNode; currentNode = currentNode.Parent) {
+				for (Node currentNode = result.Node; currentNode != Level.LevelNode && currentNode != null; currentNode = currentNode.Parent) {
 					if (Level.TryGetUnit(currentNode, out IUnit unit))
 					{
 						unit.RemoveFromLevel();

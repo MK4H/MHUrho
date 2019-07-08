@@ -90,5 +90,16 @@ namespace ShowcasePackage.Misc
 				player.ChangeResourceAmount(cost.Key, -cost.Value);
 			}
 		}
+
+		public bool TryTakeFrom(IPlayer player)
+		{
+			if (!HasResources(player)) {
+				return false;
+			}
+
+			TakeFrom(player);
+			return true;
+
+		}
 	}
 }

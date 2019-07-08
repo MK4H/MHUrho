@@ -222,8 +222,13 @@ namespace MHUrho.Logic
 		}
 
 		public void SetBuilding(IBuilding building) {
-			if (Building != null) {
+			if (Building != null && building != Building) {
 				throw new InvalidOperationException("There is a building already on this tile");
+			}
+			//Enumerate on a copy because some units may be destroyed during the enumeration
+			foreach (var unit in units?.ToArray() ?? Enumerable.Empty<IUnit>())
+			{
+				unit.BuildingBuilt(building, this);
 			}
 
 			Building = building;
@@ -232,6 +237,10 @@ namespace MHUrho.Logic
 		public void RemoveBuilding(IBuilding building) {
 			if (Building != building) {
 				throw new ArgumentException("Removing building that is not on this tile");
+			}
+			//Enumerate on a copy because some units may be destroyed during the enumeration
+			foreach (var unit in units?.ToArray() ?? Enumerable.Empty<IUnit>()) {
+				unit.BuildingDestroyed(building, this);
 			}
 
 			Building = null;
@@ -265,7 +274,8 @@ namespace MHUrho.Logic
 		/// </summary>
 		public void CornerHeightChange()
 		{			
-			foreach (var unit in Units) {
+			//Enumerate on a copy because some units may be destroyed during the enumeration
+			foreach (var unit in units?.ToArray() ?? Enumerable.Empty<IUnit>()) {
 				//Moves unit above terrain
 				float terrainHeight = Map.GetTerrainHeightAt(unit.XZPosition);
 				if (unit.Position.Y < terrainHeight) {
@@ -273,6 +283,8 @@ namespace MHUrho.Logic
 				}
 				unit.TileHeightChanged(this);
 			}
+
+			Building?.TileHeightChanged(this);
 		}
 
 		public float GetHeightAt(float x, float y)
@@ -307,6 +319,11 @@ namespace MHUrho.Logic
 					yield return tile;
 				}
 			}
+		}
+
+		public bool CanChangeCornerHeight(int x, int y)
+		{
+			return Building?.CanChangeTileHeight(x, y) ?? true;
 		}
 	} 
 }

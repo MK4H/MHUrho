@@ -42,7 +42,7 @@ namespace ShowcasePackage.Units
 					return;
 				}
 
-				for (Node current = result.Node; current != Level.LevelNode; current = current.Parent)
+				for (Node current = result.Node; current != Level.LevelNode && current != null; current = current.Parent)
 				{
 					//If it is part of a building
 					if (Level.TryGetBuilding(current, out IBuilding building))

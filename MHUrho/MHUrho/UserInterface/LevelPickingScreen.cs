@@ -293,7 +293,7 @@ namespace MHUrho.UserInterface
 
 		}
 
-		//TODO: Check this if it is null, prohibit changing when the screen is visible etc.
+
 		public GamePack Package { get; set; }
 
 		protected override ScreenBase ScreenInstance {
@@ -341,8 +341,12 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
+			if (Package == null) {
+				throw new InvalidOperationException("Package has to be set before listing levels.");
+			}
+
 			screen = new Screen(this);
 		}
-	
+
 	}
 }

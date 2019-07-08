@@ -76,6 +76,7 @@ namespace MHUrho.EditorTools.MandK
 			input.MouseUp += OnMouseUp;
 			sizeSlider.SliderChanged += OnSliderChanged;
 			highlight.SquareChanged += Highlight_SquareChanged;
+			ui.RegisterForHover(sizeSlider);
 			enabled = true;
 		}
 
@@ -93,7 +94,8 @@ namespace MHUrho.EditorTools.MandK
 			input.MouseUp -= OnMouseUp;
 			sizeSlider.SliderChanged -= OnSliderChanged;
 			highlight.SquareChanged -= Highlight_SquareChanged;
-			
+			ui.UnregisterForHover(sizeSlider);
+
 			enabled = false;
 			mouseButtonDown = false;
 		}

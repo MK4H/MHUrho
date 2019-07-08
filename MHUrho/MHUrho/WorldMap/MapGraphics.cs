@@ -369,9 +369,9 @@ namespace MHUrho.WorldMap
 				public void Dispose()
 				{
 					model?.Dispose();
-					vertexBuffer.Dispose();
-					indexBuffer.Dispose();
-					chunkNode.Dispose();
+					vertexBuffer?.Dispose();
+					indexBuffer?.Dispose();
+					chunkNode?.Dispose();
 				}
 
 				public unsafe void ChangeTileType(int x, int y, TileType newType)

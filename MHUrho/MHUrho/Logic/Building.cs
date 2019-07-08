@@ -59,7 +59,7 @@ namespace MHUrho.Logic
 											BuildingType type,
 											IPlayer player,
 											ILevelManager level) {
-				if (!type.CanBuild(type.GetBuildingTilesRectangle(topLeftCorner), player, level)) {
+				if (!type.CanBuild(topLeftCorner, player, level)) {
 					return null;
 				}
 
@@ -157,9 +157,10 @@ namespace MHUrho.Logic
 				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
 				new BuildingComponentSetup().SetupComponentsOnNode(buildingNode, level);
 
+				loadingBuilding = new Building(storedBuilding.Id, level, rect, type);
 				buildingNode.AddComponent(loadingBuilding);
 				
-				loadingBuilding = new Building(storedBuilding.Id, level, rect, type);
+
 				loadingBuilding.BuildingPlugin = type.GetInstancePluginForLoading(loadingBuilding, level);
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponents)
@@ -309,9 +310,8 @@ namespace MHUrho.Logic
 
 			Player?.RemoveBuilding(this);
 			Node.Remove();
-			
-			Dispose();
-			
+
+			base.Dispose();
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -339,6 +339,53 @@ namespace MHUrho.Logic
 
 		}
 
+		public bool CanChangeTileHeight(int x, int y)
+		{
+			try
+			{
+				return BuildingPlugin.CanChangeTileHeight(x,y);
+			}
+			catch (Exception e)
+			{
+				//Log and ignore
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.CanChangeTileHeight)} failed with Exception: {e.Message}");
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Notifies the building that the height of the tile it occupies has changed.
+		/// </summary>
+		/// <param name="tile">The tile with the changed height.</param>
+		public void TileHeightChanged(ITile tile)
+		{
+			try
+			{
+				BuildingPlugin.TileHeightChanged(tile);
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.TileHeightChanged)} failed with Exception: {e.Message}");
+			}
+		}
+
+		/// <summary>
+		/// Changes the height of the building.
+		/// </summary>
+		/// <param name="newHeight">The new height of the building.</param>
+		public void ChangeHeight(float newHeight)
+		{
+			Node.Position = Node.Position.WithY(newHeight);
+			foreach (var tile in Tiles) {
+				foreach (var unit in tile.Units) {
+					unit.TileHeightChanged(tile);
+				}
+			}
+			SignalPositionChanged();
+		}
+
 		public IFormationController GetFormationController(Vector3 centerPosition)
 		{
 			try {
@@ -362,7 +409,7 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep)
 		{
 			base.OnUpdate(timeStep);
-			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}
 

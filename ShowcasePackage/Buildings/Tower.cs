@@ -15,6 +15,7 @@ using MHUrho.UserInterface.MandK;
 using MHUrho.Helpers.Extensions;
 using Urho;
 using MHUrho.Control;
+using MHUrho.EntityInfo;
 using ShowcasePackage.Levels;
 using ShowcasePackage.Misc;
 using Urho.Gui;
@@ -29,13 +30,16 @@ namespace ShowcasePackage.Buildings
 		public override string Name => TypeName;
 		public override int ID => TypeID;
 
+		public BuildingType MyTypeInstance { get; private set; }
+
 		public Cost Cost { get; private set; }
 		public ViableTileTypes ViableTileTypes { get; private set; }
 
 		const string CostElement = "cost";
 		const string CanBuildOnElement = "canBuildOn";
 
-		BuildingType myType;
+		const float MaxHeightDiff = 0.5f;
+
 
 		protected override void Initialize(XElement extensionElement, GamePack package)
 		{
@@ -46,29 +50,30 @@ namespace ShowcasePackage.Buildings
 				extensionElement.Element(package.PackageManager.GetQualifiedXName(CanBuildOnElement));
 			ViableTileTypes = ViableTileTypes.FromXml(canBuildOnElem, package);
 
-			myType = package.GetBuildingType(TypeID);
+			MyTypeInstance = package.GetBuildingType(TypeID);
 		}
 
 		public override BuildingInstancePlugin CreateNewInstance(ILevelManager level, IBuilding building)
 		{
-			return new Tower(level, building);
+			return Tower.CreateNew(level, building);
 		}
 
 		public override BuildingInstancePlugin GetInstanceForLoading(ILevelManager level, IBuilding building)
 		{
-			return new Tower(level, building);
+			return Tower.CreateForLoading(level, building);
 		}
 
-		public override bool CanBuild(IntVector2 topLeftTileIndex, IntVector2 bottomRightTileIndex, IPlayer owner, ILevelManager level)
+		public override bool CanBuild(IntVector2 topLeftTileIndex, IPlayer owner, ILevelManager level)
 		{
 			return level.Map
-						.GetTilesInRectangle(topLeftTileIndex, bottomRightTileIndex)
-						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile));
+						.GetTilesInRectangle(MyTypeInstance.GetBuildingTilesRectangle(topLeftTileIndex))
+						.All((tile) => tile.Building == null && tile.Units.Count == 0 && ViableTileTypes.IsViable(tile)) &&
+					HeightDiffLow(topLeftTileIndex, MyTypeInstance.GetBottomRightTileIndex(topLeftTileIndex), level, MaxHeightDiff);
 		}
 
 		public override Builder GetBuilder(GameController input, GameUI ui, CameraMover camera)
 		{
-			return new TowerBuilder(input, ui, camera, input.Level.Package.GetBuildingType(ID), this);
+			return new TowerBuilder(input, ui, camera, this);
 		}
 	}
 
@@ -80,23 +85,47 @@ namespace ShowcasePackage.Buildings
 
 		readonly Dictionary<ITile, IBuildingNode> nodes;
 
-		public Tower(ILevelManager level, IBuilding building)
+		HealthBarControl healthBar;
+
+		Tower(ILevelManager level, IBuilding building)
 			: base(level, building)
 		{
-			StaticRangeTarget.CreateNew(this, level, building.Center);
-
 			nodes = new Dictionary<ITile, IBuildingNode>();
 			CreatePathfindingNodes();
 		}
 
+		public static Tower CreateNew(ILevelManager level, IBuilding building)
+		{
+			Tower newTower = null;
+			try {
+				newTower = new Tower(level, building);
+				StaticRangeTarget.CreateNew(newTower, level, building.Center);
+				newTower.healthBar =
+					new HealthBarControl(level, building, 100, new Vector3(0, 5, 0), new Vector2(1f, 0.2f), false);
+
+				return newTower;
+			}
+			catch (Exception e) {
+				newTower?.Dispose();
+				throw;
+			}
+		}
+
+		public static Tower CreateForLoading(ILevelManager level, IBuilding building)
+		{
+			return new Tower(level, building);
+		}
+
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
-
+			var writer = pluginData.GetWriterForWrappedSequentialData();
+			healthBar.Save(writer);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
-
+			var reader = pluginData.GetReaderForWrappedSequentialData();
+			healthBar = HealthBarControl.Load(Level, Building,reader);
 		}
 
 		public override void Dispose()
@@ -104,6 +133,28 @@ namespace ShowcasePackage.Buildings
 			foreach (var node in nodes) {
 				node.Value.Remove();
 			}
+
+			healthBar?.Dispose();
+		}
+
+		public override void OnHit(IEntity byEntity, object userData)
+		{
+			if (Building.Player.IsFriend(byEntity.Player) || byEntity is IProjectile)
+			{
+				return;
+			}
+
+			int damage = (int)userData;
+
+			if (!healthBar.ChangeHitPoints(-damage))
+			{
+				Building.RemoveFromLevel();
+			}
+		}
+
+		public override bool CanChangeTileHeight(int x, int y)
+		{
+			return false;
 		}
 
 		public override float? GetHeightAt(float x, float y)
@@ -172,10 +223,10 @@ namespace ShowcasePackage.Buildings
 
 		readonly BaseCustomWindowUI cwUI;
 
-		public TowerBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type, TowerType myType)
-			: base(input, ui, camera, type)
+		public TowerBuilder(GameController input, GameUI ui, CameraMover camera, TowerType type)
+			: base(input, ui, camera, type.MyTypeInstance)
 		{
-			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
+			cwUI = new BaseCustomWindowUI(ui, type.Name, $"Cost: {type.Cost}");
 		}
 
 		public override void Enable()

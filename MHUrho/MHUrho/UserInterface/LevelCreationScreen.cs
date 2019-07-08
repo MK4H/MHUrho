@@ -391,7 +391,7 @@ namespace MHUrho.UserInterface
 	
 						}
 						else {
-							//TODO: Simulate changing values - needs changes to the Action class too
+							//FUTURE: Simulate changing values - needs changes to the Action class too
 						}
 						EditLevel(Level);
 						break;
@@ -442,8 +442,6 @@ namespace MHUrho.UserInterface
 									MenuUIManager.Clear();
 								};
 			loader.Failed += (progress, message) => {
-								Level?.Dispose();
-								Level = null;
 								MenuUIManager.SwitchBack();
 								MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level loading failed with: \"{message}\"");
 							};

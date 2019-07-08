@@ -50,7 +50,7 @@ namespace MHUrho
 
 		public IMenuController MenuController { get; private set; }
 
-		public ControllerFactory ControllerFactory { get; private set; }
+		public IControllerFactory ControllerFactory { get; private set; }
 
 		static int mainThreadID;
 

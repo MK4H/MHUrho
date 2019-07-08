@@ -71,6 +71,7 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 
 		public override void Dispose()
 		{
+			ui.UnregisterForHover(sizeSlider);
 			highlight.Dispose();
 			sizeSlider.Dispose();
 			uiElem.Dispose();
@@ -80,6 +81,7 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 		{
 			highlight.Enable();
 			sizeSlider.SliderChanged += OnSliderChanged;
+			ui.RegisterForHover(sizeSlider);
 			uiElem.Visible = true;
 			
 		}
@@ -88,6 +90,7 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 		{
 			highlight.Disable();
 			sizeSlider.SliderChanged -= OnSliderChanged;
+			ui.UnregisterForHover(sizeSlider);
 			uiElem.Visible = false;
 		}
 

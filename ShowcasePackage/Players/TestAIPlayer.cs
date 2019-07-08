@@ -46,7 +46,7 @@ namespace ShowcasePackage.Players
 		class ChickenWrapper {
 			public const float DefaultWaitingTime = 4;
 
-			public ChickenInstance Chicken { get; private set; }
+			public Chicken Chicken { get; private set; }
 			public IRangeTarget NextTarget { get; set; }
 
 			public float TimeToNextTargetCheck { get; set; }
@@ -66,7 +66,7 @@ namespace ShowcasePackage.Players
 				}
 			}
 
-			public ChickenWrapper(ChickenInstance chicken)
+			public ChickenWrapper(Chicken chicken)
 			{
 				this.Chicken = chicken;
 				NextTarget = null;
@@ -114,7 +114,7 @@ namespace ShowcasePackage.Players
 					spiralPoint.MoveNext();
 					for (int i = 0; i < 1; i++, spiralPoint.MoveNext()) {
 						IUnit newChicken = Level.SpawnUnit(type.Chicken, Level.Map.GetTileByMapLocation(spiralPoint.Current), Quaternion.Identity, Player);
-						chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.UnitPlugin));
+						chickens.Add(new ChickenWrapper((Chicken)newChicken.UnitPlugin));
 					}
 
 					var target = FindTargets(spawnPoint).FirstOrDefault();
@@ -158,7 +158,7 @@ namespace ShowcasePackage.Players
 			state = indexedData.Get<int>(1);
 			spawnPoint = indexedData.Get<IntVector2>(2);
 			chickens = new List<ChickenWrapper>(from unit in indexedData.Get<IEnumerable<int>>(3)
-												select new ChickenWrapper((ChickenInstance)Level.GetUnit(unit).Plugin));
+												select new ChickenWrapper((Chicken)Level.GetUnit(unit).Plugin));
 
 		}
 
@@ -172,7 +172,7 @@ namespace ShowcasePackage.Players
 			
 		}
 
-		public override void OnUnitKilled(IUnit unit) {
+		public override void UnitKilled(IUnit unit) {
 			if (Level.IsEnding || unit.UnitType != type.Chicken) {
 				//Do nothing
 				return;
@@ -183,7 +183,7 @@ namespace ShowcasePackage.Players
 			foreach (var point in new Spiral(spawnPoint)) {
 				if (Level.Map.GetTileByMapLocation(point).Units.Count == 0) {
 					IUnit newChicken = Level.SpawnUnit(type.Chicken, Level.Map.GetTileByMapLocation(point), Quaternion.Identity, Player);
-					chickens.Add(new ChickenWrapper((ChickenInstance)newChicken.UnitPlugin));
+					chickens.Add(new ChickenWrapper((Chicken)newChicken.UnitPlugin));
 					break;
 				}
 			}
