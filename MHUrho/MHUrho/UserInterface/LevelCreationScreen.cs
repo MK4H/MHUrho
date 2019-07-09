@@ -272,7 +272,6 @@ namespace MHUrho.UserInterface
 
 			async void EditButtonReleased(ReleasedEventArgs args)
 			{
-				//TODO: SAVE THE CHANGES TO EXISTING LEVEL
 				//Creating new level
 				if (proxy.Level == null) {
 					proxy.Level = LevelRep.CreateNewLevel(Name,

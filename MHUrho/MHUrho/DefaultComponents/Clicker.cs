@@ -13,7 +13,7 @@ namespace MHUrho.DefaultComponents
 	/// </summary>
 	/// <param name="button">Pressed button</param>
 	/// <param name="buttons">Other buttons down during the button press</param>
-	/// <param name="qualifiers">Qualifiers like shift, ctrl, alt etc. </param> TODO: Provide which value is which
+	/// <param name="qualifiers">Qualifiers like shift, ctrl, alt etc. </param>
 	public delegate void ClickedDelegate(int button, int buttons, int qualifiers);
 
     public class Clicker : DefaultComponent

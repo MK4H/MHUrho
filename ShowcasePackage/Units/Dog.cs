@@ -35,18 +35,18 @@ namespace ShowcasePackage.Units
 
 		public override UnitInstancePlugin CreateNewInstance(ILevelManager level, IUnit unit)
 		{
-			return new DogInstance(level, unit, this, false);
+			return new Dog(level, unit, this, false);
 		}
 
 		public override UnitInstancePlugin GetInstanceForLoading(ILevelManager level, IUnit unit)
 		{
-			return new DogInstance(level, unit, this, true);
+			return new Dog(level, unit, this, true);
 		}
 
-		public override bool CanSpawnAt(ITile centerTile)
+		public override bool CanSpawnAt(ITile tile)
 		{
-			return PassableTileTypes.IsViable(centerTile) &&
-					centerTile.Building == null;
+			return PassableTileTypes.IsViable(tile) &&
+					tile.Building == null;
 
 		}
 
@@ -58,7 +58,7 @@ namespace ShowcasePackage.Units
 		}
 	}
 
-	public class DogInstance : UnitInstancePlugin, 
+	public class Dog : UnitInstancePlugin, 
 								WorldWalker.IUser, 
 								MovingRangeTarget.IUser {
 
@@ -72,14 +72,14 @@ namespace ShowcasePackage.Units
 
 			public abstract States Current { get; }
 
-			protected DogInstance Dog;
+			protected readonly Dog Dog;
 
-			protected State(DogInstance dog)
+			protected State(Dog dog)
 			{
 				this.Dog = dog;
 			}
 
-			public static State Load(SequentialPluginDataReader reader, DogInstance dog)
+			public static State Load(SequentialPluginDataReader reader, Dog dog)
 			{
 				reader.GetNext(out int stateInt);
 				States savedState = (States)stateInt;
@@ -143,13 +143,13 @@ namespace ShowcasePackage.Units
 
 			public override States Current => States.GoingToTree;
 
-			public GoingToTree(State oldState, DogInstance dog)
+			public GoingToTree(State oldState, Dog dog)
 				: base(dog)
 			{
 
 			}
 
-			public GoingToTree(SequentialPluginDataReader reader, DogInstance dog)
+			public GoingToTree(SequentialPluginDataReader reader, Dog dog)
 				: base(dog)
 			{ }
 
@@ -166,14 +166,12 @@ namespace ShowcasePackage.Units
 
 			public override void MovementFailed()
 			{
-				Tree tree = CheckTree();
-				GoToTree(tree);
+
 			}
 
 			public override void MovementCanceled()
 			{
-				Tree tree = CheckTree();
-				GoToTree(tree);
+
 			}
 
 			public override void MovementFinished()
@@ -193,16 +191,14 @@ namespace ShowcasePackage.Units
 
 			void GoToTree(Tree tree)
 			{
-				if (Dog.walker.State != WorldWalkerState.Started)
-				{
-					foreach (var neighbour in tree.Building.Tiles[0].GetNeighbours())
+				if (Dog.walker.State != WorldWalkerState.Started) {
+					var neighbour = tree.Building.Tiles[0].GetNeighbours().RandomSubset(1).First();
+					
+					if (Dog.walker.GoTo(Dog.Level.Map.PathFinding.GetTileNode(neighbour)))
 					{
-						if (Dog.walker.GoTo(Dog.Level.Map.PathFinding.GetTileNode(neighbour)))
-						{
-							return;
-						}
+						return;
 					}
-
+					
 					//Cannot get to tree
 					Dog.inaccesibleTrees.Add(tree.Building);
 					Dog.currentState = new SearchingForTree(this, Dog);
@@ -222,13 +218,13 @@ namespace ShowcasePackage.Units
 			const double duration = 10;
 			readonly Timeout chomping;
 
-			public Chomping(State oldState, DogInstance dog)
+			public Chomping(State oldState, Dog dog)
 				: base(dog)
 			{
 				chomping = new Timeout(duration);
 			}
 
-			public Chomping(SequentialPluginDataReader reader, DogInstance dog)
+			public Chomping(SequentialPluginDataReader reader, Dog dog)
 				: base(dog)
 			{
 				reader.GetNext(out double remaining);
@@ -274,11 +270,11 @@ namespace ShowcasePackage.Units
 			const double DestructionTime = 5;
 			Timeout destruction = null;
 
-			public BringingWood(State oldState, DogInstance dog)
+			public BringingWood(State oldState, Dog dog)
 				: base(dog)
 			{ }
 
-			public BringingWood(SequentialPluginDataReader reader, DogInstance dog)
+			public BringingWood(SequentialPluginDataReader reader, Dog dog)
 				: base(dog)
 			{
 				reader.GetNext(out bool isDestructing);
@@ -321,12 +317,12 @@ namespace ShowcasePackage.Units
 
 			public override void MovementFailed()
 			{
-				GoToCutter();
+
 			}
 
 			public override void MovementCanceled()
 			{
-				GoToCutter();
+
 			}
 
 			bool GoToCutter()
@@ -362,13 +358,13 @@ namespace ShowcasePackage.Units
 
 			readonly Timeout timeout;
 
-			public SearchingForTree(State oldState, DogInstance dog)
+			public SearchingForTree(State oldState, Dog dog)
 				: base(dog)
 			{
 				this.timeout = new Timeout(searchTimeout);
 			}
 
-			public SearchingForTree(SequentialPluginDataReader reader, DogInstance dog)
+			public SearchingForTree(SequentialPluginDataReader reader, Dog dog)
 				: base(dog)
 			{
 				reader.GetNext<double>(out double remaining);
@@ -396,7 +392,10 @@ namespace ShowcasePackage.Units
 						return;
 					}
 
-					var closest = trees.Where(tree => !Dog.inaccesibleTrees.Contains(tree)).MinBy((tree) => Vector3.Distance(Dog.Entity.Position, tree.Position)).First();
+					var closest = trees.Where(tree => !Dog.inaccesibleTrees.Contains(tree)).MinBy((tree) => Vector3.Distance(Dog.Entity.Position, tree.Position)).FirstOrDefault();
+					if (closest == null) {
+						return;
+					}
 					Dog.targetTree = (Tree)closest.Plugin;
 
 					Dog.currentState = new GoingToTree(this, Dog);
@@ -433,7 +432,7 @@ namespace ShowcasePackage.Units
 			ILevelManager Level => instance.Level;
 			IMap Map => Level.Map;
 
-			readonly DogInstance instance;
+			readonly Dog instance;
 
 
 
@@ -443,7 +442,7 @@ namespace ShowcasePackage.Units
 			/// <param name="baseCoef">Coefficient of linear motion speed.</param>
 			/// <param name="angleCoef">Coefficient how much the linear motion speed is affected by angle.</param>
 			/// <param name="teleportCoef">Coefficient of teleport times.</param>
-			public DogDistCalc(DogInstance dog, float baseCoef, float angleCoef, float teleportCoef)
+			public DogDistCalc(Dog dog, float baseCoef, float angleCoef, float teleportCoef)
 				:base(baseCoef, angleCoef)
 			{
 				this.instance = dog;
@@ -541,7 +540,7 @@ namespace ShowcasePackage.Units
 		readonly Timeout clean = new Timeout(120);
 		readonly DogType myType;
 
-		public DogInstance(ILevelManager level, IUnit unit, DogType myType, bool loading)
+		public Dog(ILevelManager level, IUnit unit, DogType myType, bool loading)
 			: base(level, unit)
 		{
 			this.myType = myType;
@@ -565,6 +564,8 @@ namespace ShowcasePackage.Units
 			var writer = pluginData.GetWriterForWrappedSequentialData();
 			healthBar.Save(writer);
 			currentState.Save(writer);
+			writer.StoreNext(Cutter.Building.ID);
+			writer.StoreNext(targetTree?.Building.ID ?? 0);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
@@ -577,6 +578,10 @@ namespace ShowcasePackage.Units
 			var reader = pluginData.GetReaderForWrappedSequentialData();
 			healthBar = HealthBarControl.Load(Level, Unit, reader);
 			currentState = State.Load(reader, this);
+			reader.GetNext(out int treeID);
+			targetTree = treeID != 0 ? (Tree)Level.GetBuilding(treeID).BuildingPlugin : null;
+			reader.GetNext(out int cutterID);
+			Cutter = (TreeCutter) Level.GetBuilding(cutterID).BuildingPlugin;
 		}
 
 		public override void Dispose()

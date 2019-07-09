@@ -149,7 +149,9 @@ namespace MHUrho.UserInterface
 			this.minValue = minValue;
 			this.maxValue = maxValue;
 
-			//TODO: Check that it is not negative
+			if (minValue > maxValue) {
+				throw new ArgumentException("Max value has to be greater or equal to min value.");
+			}
 			slider.Range = maxValue - minValue;
 
 			slider.SliderChanged += SliderChanged;

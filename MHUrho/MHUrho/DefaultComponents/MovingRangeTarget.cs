@@ -125,7 +125,7 @@ namespace MHUrho.DefaultComponents
 		}
 
 		public static MovingRangeTarget CreateNew<T>(T plugin, ILevelManager level, Vector3 offset)
-			where T : EntityInstancePlugin, IUser {
+			where T : UnitInstancePlugin, IUser {
 
 			if (plugin == null) {
 				throw new ArgumentNullException(nameof(plugin));

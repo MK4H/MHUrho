@@ -66,12 +66,12 @@ namespace ShowcasePackage.Units
 			return Wolf.CreateForLoading(level, unit, this);
 		}
 
-		public override bool CanSpawnAt(ITile centerTile)
+		public override bool CanSpawnAt(ITile tile)
 		{
 			//Can only spawn on a tile with no buildings and no other units
-			return PassableTileTypes.IsViable(centerTile) &&
-					(centerTile.Building == null ||
-					centerTile.Building.Plugin is WalkableBuildingPlugin);
+			return PassableTileTypes.IsViable(tile) &&
+					(tile.Building == null ||
+					tile.Building.Plugin is WalkableBuildingPlugin);
 		}
 
 		public override Spawner GetSpawner(GameController input, GameUI ui, CameraMover camera)

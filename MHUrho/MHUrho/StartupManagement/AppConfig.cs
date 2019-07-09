@@ -66,13 +66,13 @@ namespace MHUrho.StartupManagement
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 11)]
 		public int Monitor { get; set; }
 
-		//TODO: Dont know what this does
+		//NOTE: Dont know what this does
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 12)]
 		public int RefreshRateCap { get; set; }
 
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 13)]
 		public bool DebugHUD { get; set; }
-		//TODO: Other things
+		//FUTURE: Other things
 
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 14)]
 		public float CameraScrollSensitivity { get; set; }

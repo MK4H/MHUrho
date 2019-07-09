@@ -35,7 +35,7 @@ namespace ShowcasePackage.Buildings
 
 			public override void OnMouseDown(MouseButtonDownEventArgs e)
 			{
-				if (e.Button != (int)MouseButton.Left)
+				if (e.Button != (int)MouseButton.Left || Ui.UIHovering)
 				{
 					return;
 				}
@@ -304,7 +304,8 @@ namespace ShowcasePackage.Buildings
 		{
 			base.OnUpdate(timeStep);
 
-			if (!Level.EditorMode) {
+			//TODO: Testing
+			if (Level.EditorMode) {
 				Spread(timeStep);
 				Grow(timeStep);
 			}

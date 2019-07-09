@@ -371,10 +371,19 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
 		IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle);
 
-		//TODO: Comment
+		/// <summary>
+		/// Returns all four tiles around the corner at [<paramref name="x"/>,<paramref name="y"/>]
+		/// </summary>
+		/// <param name="x">The x coord of the corner.</param>
+		/// <param name="y">The z coord of the corner.</param>
+		/// <returns>The four tiles around the given corner.</returns>
 		IEnumerable<ITile> GetTilesAroundCorner(int x, int y);
 
-		//TODO: Comment
+		/// <summary>
+		/// Returns all four tiles around the corner at <paramref name="cornerCoords"/>
+		/// </summary>
+		/// <param name="cornerCoords">The coords of the corner.</param>
+		/// <returns>The four tiles around the given corner.</returns>
 		IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords);
 
 		IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000);

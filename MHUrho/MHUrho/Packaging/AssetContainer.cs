@@ -647,7 +647,7 @@ namespace MHUrho.Packaging
 
 		static ItemsAssetContainer()
 		{
-			//TODO: Add other asset parsers
+			//FUTURE: Add other asset parsers
 			Parsers = new Dictionary<XName, ParseAssetLoaderDelegate>
 					{
 						{AssetsXml.Inst.Model, AnimatedModelLoader.Load},

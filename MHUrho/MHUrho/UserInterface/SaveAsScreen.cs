@@ -163,7 +163,6 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		//TODO: Check the setting
 		public ILevelManager Level { get; set; }
 
 		protected override ScreenBase ScreenInstance {
@@ -191,17 +190,12 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen = new Screen(this);
-		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
+			if (Level == null)
+			{
+				throw new InvalidOperationException("Level has to be set before saving trying to save it.");
 			}
 
-			Level = null;
-			base.Hide();
+			screen = new Screen(this);
 		}
 
 	}

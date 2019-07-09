@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MHUrho;
 using MHUrho.Logic;
 using MHUrho.UserInterface;
 using Urho.Gui;
+using Urho.Resources;
 
 namespace ShowcasePackage.Misc
 {
@@ -21,12 +23,23 @@ namespace ShowcasePackage.Misc
 		{
 			this.gameUI = ui;
 
-			var packageUILayout = gameUI.Game.PackageManager.GetXmlFile("Assets/UI/BaseLayout.xml", true);
-			PackageRoot = ui.UI.LoadLayout(packageUILayout);
-			gameUI.GameUIRoot.AddChild(PackageRoot);
+			using (var packageUILayout = gameUI.Game.PackageManager.GetXmlFile("Assets/UI/BaseLayout.xml", true)) {
+				var style = gameUI.Game.PackageManager.GetXmlFile("Assets/UI/UIStyle.xml", true);
+				PackageRoot = ui.UI.LoadLayout(packageUILayout, style);
+				PackageRoot.SetDefaultStyle(style);
+				gameUI.GameUIRoot.AddChild(PackageRoot);
+			}
 
-			var defaultStyle = gameUI.Game.PackageManager.GetXmlFile("Assets/UI/UIStyle.xml", true); ;
-			PackageRoot.SetDefaultStyle(defaultStyle);
+
+
+			if (gameUI.Game.Config.DebugHUD) {
+				using (Window topBar = (Window) PackageRoot.GetChild("TopBar")) {
+					topBar.MinWidth = topBar.MinWidth - 100;
+					topBar.Width = topBar.Width - 100;
+					topBar.MaxWidth = topBar.MinWidth;
+				}
+					
+			}
 
 			resourceDisplays = new Dictionary<ResourceType, Text>();
 			var resourceDisplay = PackageRoot.GetChild("ResourceDisplay", true);
@@ -50,9 +63,14 @@ namespace ShowcasePackage.Misc
 			}
 		}
 
-		public void LoadLayoutToUI(string path)
+		public void LoadLayoutToUI(string path, string stylePath)
 		{
-			gameUI.UI.LoadLayoutToElement(PackageRoot, gameUI. Game.ResourceCache, path);
+			using (var layout = gameUI.Game.PackageManager.GetXmlFile(path, true)) {
+				using (var styleFile = gameUI.Game.PackageManager.GetXmlFile(stylePath)) {
+					PackageRoot.AddChild(gameUI.UI.LoadLayout(layout, styleFile));
+				}
+			}
+			
 		}
 
 		public void Dispose()

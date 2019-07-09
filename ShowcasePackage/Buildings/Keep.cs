@@ -299,6 +299,7 @@ namespace ShowcasePackage.Buildings
 
 			readonly KeepWindow keepWindow;
 
+			readonly UIElement holder;
 			readonly Window window;
 			readonly Button hideButton;
 			readonly UIElement container;
@@ -310,9 +311,10 @@ namespace ShowcasePackage.Buildings
 				this.keepWindow = keepWindow;
 				this.spawningButtons = new Dictionary<UIElement, SpawnableUnitTypePlugin>();
 				var packageUI = ((LevelInstancePluginBase)Keep.Level.Plugin).PackageUI;
-				packageUI.LoadLayoutToUI("Assets/UI/KeepWindow.xml");
+				packageUI.LoadLayoutToUI("Assets/UI/KeepWindow.xml", "Assets/UI/UIStyle.xml");
 
-				this.window = (Window)packageUI.PackageRoot.GetChild("KeepWindow");
+				this.holder = packageUI.PackageRoot.GetChild("KeepWindowHolder");
+				this.window = (Window)holder.GetChild("KeepWindow");
 				this.hideButton = (Button)window.GetChild("HideButton");
 				this.container = window.GetChild("Container");
 
@@ -389,7 +391,8 @@ namespace ShowcasePackage.Buildings
 
 				hideButton.Dispose();
 				container.Dispose();
-				window.Remove();
+				window.Dispose();
+				holder.Remove();
 			}
 
 			void RegisterHandlers()

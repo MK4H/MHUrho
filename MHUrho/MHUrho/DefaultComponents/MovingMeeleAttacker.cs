@@ -189,7 +189,7 @@ namespace MHUrho.DefaultComponents
 														float timeBetweenPositionChecks,
 														float timeBetweenAttacks
 														)
-			where T : EntityInstancePlugin, IUser
+			where T : UnitInstancePlugin, IUser
 		{
 			if (plugin == null) {
 				throw new ArgumentNullException(nameof(plugin));

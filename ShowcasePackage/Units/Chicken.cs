@@ -60,10 +60,10 @@ namespace ShowcasePackage.Units
 		}
 
 
-		public override bool CanSpawnAt(ITile centerTile) {
-			return PassableTileTypes.IsViable(centerTile) && 
-					(centerTile.Building == null ||
-					centerTile.Building.Plugin is WalkableBuildingPlugin);
+		public override bool CanSpawnAt(ITile tile) {
+			return PassableTileTypes.IsViable(tile) && 
+					(tile.Building == null ||
+					tile.Building.Plugin is WalkableBuildingPlugin);
 		}
 
 		public override Spawner GetSpawner(GameController input, GameUI ui, CameraMover camera)
@@ -534,6 +534,7 @@ namespace ShowcasePackage.Units
 				Unit.FaceTowards(Unit.Position + diff);
 			}
 		}
+
 
 		public override void Dispose()
 		{

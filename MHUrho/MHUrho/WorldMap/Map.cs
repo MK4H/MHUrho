@@ -225,7 +225,6 @@ namespace MHUrho.WorldMap
 				private set => TopLeftHeight = value;
 			}
 
-			//TODO: WHEN SETTING THESE CORNERHEIGHTCHANGE is NOT called
 			public float TopLeftHeight { get; set; }
 			public float TopRightHeight { get; set; }
 			public float BottomLeftHeight { get; set; }

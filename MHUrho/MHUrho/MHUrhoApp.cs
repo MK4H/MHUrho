@@ -167,7 +167,6 @@ namespace MHUrho
 				Files.CopyStaticToDynamic(Files.ConfigFilePath);
 			}
 
-			//TODO: Copy from static if not present
 			using (Stream configFile = Files.OpenDynamicFile(Files.ConfigFilePath, System.IO.FileMode.Open, FileAccess.Read)) {
 				Config = AppConfig.LoadFrom(configFile);
 			}

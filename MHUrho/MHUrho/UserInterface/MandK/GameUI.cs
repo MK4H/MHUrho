@@ -26,8 +26,6 @@ namespace MHUrho.UserInterface.MandK
 
 		public GameController InputCtl { get; protected set; }
 
-		public CursorTooltips CursorTooltips { get; protected set; }
-
 		public override UIElement GameUIRoot => gameUI;
 
 		public bool UIHovering => hovering > 0;
@@ -64,8 +62,6 @@ namespace MHUrho.UserInterface.MandK
 			this.cameraMover = cameraMover;
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
-			//TODO: User texture
-			this.CursorTooltips = new CursorTooltips(Level.PackageManager.GetTexture2D("Textures/xamarin.png"),this);
 			this.registeredForHover = new HashSet<UIElement>();
 
 			gameUI = UI.LoadLayout(Level.PackageManager.GetXmlFile("UI/GameLayout.xml", true),
@@ -306,7 +302,6 @@ namespace MHUrho.UserInterface.MandK
 			minimap.HoverEnd -= UIHoverEnd;
 
 			foreach (var element in registeredForHover) {
-				//TODO: Check if is deleted
 				element.HoverBegin -= UIHoverBegin;
 				element.HoverEnd -= UIHoverEnd;
 			}

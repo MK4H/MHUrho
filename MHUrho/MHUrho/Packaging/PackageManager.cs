@@ -347,7 +347,6 @@ namespace MHUrho.Packaging
 		}
 
 		public GamePackRep GetGamePack(string name) {
-			//TODO: React if it does not exist
 			return availablePacks[name];
 		}
 

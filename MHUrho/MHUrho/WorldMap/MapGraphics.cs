@@ -589,7 +589,6 @@ namespace MHUrho.WorldMap
 
 					VertexBuffer InitializeVertexBufferImpl()
 					{
-						//TODO: Context
 						VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false) {Shadowed = true};
 
 						vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
@@ -1033,8 +1032,6 @@ namespace MHUrho.WorldMap
 			}
 
 			void CreateMaterial(MHUrhoApp game, int tileTypeCount, IEnumerable<TileType> tileTypes) {
-
-				//TODO: Context
 				Image mapImage = new Image();
 
 				if (!mapImage.SetSize(Tile.ImageWidth * tileTypeCount, Tile.ImageHeight, 4)) {

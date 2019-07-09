@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
 <gamePack xmlns="http://www.MobileHold.cz/GamePack.xsd" name="[Package name]">
+  <!--All paths are relative to the directory this file will be placed in-->
   <description>[Description text]</description>
   <levels>
     <dataDirPath>[Path to directory where level data will be stored]</dataDirPath>
@@ -7,12 +8,14 @@
   <levelLogicTypes>
     <levelLogicType name="[Name]" ID="[Number]">
       <assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+      <extension>[User defined part of XML]</extension>
     </levelLogicType>
   </levelLogicTypes>
 	<playerAITypes>
 		<playerAIType name="[Name]" ID="[Number]" category="[ai|human|neutral]">
 			<iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
 			<assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+		  <extension>[User defined part of XML]</extension>
 		</playerAIType>
 	</playerAITypes>
   <resourceTypes>
@@ -26,7 +29,7 @@
       <texturePath>[Path to texture file]</texturePath>
       <minimapColor R="[0-255]" G="[0-255]" B="[0-255]"/>
     </defaultTileType>
-    <tileType name="[Name]" ID="2">
+    <tileType name="[Name]" ID="[Number]">
       <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
       <texturePath>[Path to texture file]</texturePath>
       <minimapColor R="[0-255]" G="[0-255]" B="[0-255]"/>
@@ -34,56 +37,32 @@
   </tileTypes>
   <unitTypes>
     <unitType name="[Name]" ID="[Number]">
-      <assets type="xmlprefab">
-        <path>Assets/Units/Chicken/prefab.xml</path>
-      </assets>
-      <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <extension>
-      </extension>
-	    <iconTextureRectangle left="0" top="200" right="100" bottom="300"/>
+      <assets type="[xmlprefab|binaryprefab|items]">[content dependent on type]</assets>
+      <assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+      <extension>[User defined part of XML]</extension>
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
     </unitType>
   </unitTypes>
   <projectileTypes>
 		<projectileType name="[Name]" ID="[Number]">
-      <assets type="items">
-        <scale x="0.2" y="0.2" z="0.3"/>
-        <model type="static">
-          <modelPath>Models/Sphere.mdl</modelPath>
-          <material>
-            <simpleMaterialPath>Assets/EggMaterial.xml</simpleMaterialPath>
-          </material>
-        </model>
-        <collisionShape>
-          <box>
-            <size x="0.2" y="0.2" z="0.3"/>
-          </box>
-        </collisionShape>
-      </assets>
-			<assemblyPath>ShowcasePackage.dll</assemblyPath>
-			<extension>
-				<speed>10</speed>
-			</extension>
+		  <assets type="[xmlprefab|binaryprefab|items]">[content dependent on type]</assets>
+			<assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+			<extension>[User defined part of XML]</extension>
 		</projectileType>
   </projectileTypes>
   <buildingTypes>
     <buildingType name="[Name]" ID="[Number]">
-      <assets type="xmlprefab">
-        <path>Assets/Buildings/Tree1/prefab.xml</path>
-      </assets>
-      <assemblyPath>ShowcasePackage.dll</assemblyPath>
-      <extension>
-        <growsIn type="Grass" time="10"/>
-        <growsIn type="Sand" time="1000"/>
-        <baseScale x="0.1" y="0.1" z="0.1"/>
-      </extension>
-      <iconTextureRectangle left="0" top="400" right="100" bottom="500"/>
-      <size x="1" y="1"/>
+      <assets type="[xmlprefab|binaryprefab|items]">[content dependent on type]</assets>
+      <assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+      <extension>[User defined part of XML]</extension>
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+      <size x="[Number of tiles]" y="[Number of tiles]"/>
     </buildingType>
   </buildingTypes>
-	<resourceIconTexturePath>Assets/Textures/tileIcons.png</resourceIconTexturePath>
-	<tileIconTexturePath>Assets/Textures/tileIcons.png</tileIconTexturePath>
-	<unitIconTexturePath>Assets/Textures/entityIcons.png</unitIconTexturePath>
-	<buildingIconTexturePath>Assets/Textures/entityIcons.png</buildingIconTexturePath>
-	<playerIconTexturePath>Assets/Textures/tileIcons.png</playerIconTexturePath>
-  <toolIconTexturePath>Assets/Textures/toolIcons.png</toolIconTexturePath>
+	<resourceIconTexturePath>[Path to texture]</resourceIconTexturePath>
+	<tileIconTexturePath>[Path to texture]</tileIconTexturePath>
+	<unitIconTexturePath>[Path to texture]</unitIconTexturePath>
+	<buildingIconTexturePath>[Path to texture]</buildingIconTexturePath>
+	<playerIconTexturePath>[Path to texture]</playerIconTexturePath>
+  <toolIconTexturePath>[Path to texture]</toolIconTexturePath>
 </gamePack>

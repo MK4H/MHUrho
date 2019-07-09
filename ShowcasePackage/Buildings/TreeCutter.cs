@@ -15,6 +15,7 @@ using MHUrho.Storage;
 using MHUrho.UserInterface.MandK;
 using MHUrho.Helpers.Extensions;
 using ShowcasePackage.Misc;
+using ShowcasePackage.Units;
 using Urho;
 using Urho.Gui;
 
@@ -105,8 +106,8 @@ namespace ShowcasePackage.Buildings
 			{
 				this.DoRespawn = true;
 				this.Unit = unit;
-				if (unit != null)
-				{
+				if (unit != null) {
+					((Dog) unit.UnitPlugin).Cutter = cutter;
 					unit.OnRemoval += OnWorkerDeath;
 				}
 
@@ -140,6 +141,7 @@ namespace ShowcasePackage.Buildings
 					foreach (var tile in cutter.Building.Tiles[0].GetNeighbours()) {
 						Unit = cutter.Level.SpawnUnit(cutter.type.WorkerType, tile, Quaternion.Identity, cutter.Building.Player);
 						if (Unit != null) {
+							((Dog)Unit.UnitPlugin).Cutter = cutter;
 							Unit.OnRemoval += OnWorkerDeath;
 							timeout.Reset();
 							return;
@@ -206,10 +208,12 @@ namespace ShowcasePackage.Buildings
 
 				using (var spawnPoints = building.Tiles[0].GetNeighbours().GetEnumerator()) {
 					for (int i = 0; i < numberOfWorkers; i++) {
-						IUnit workerUnit1 = level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
+						//TODO: Testing
+						IUnit workerUnit1 = !level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
 						newCutter.workers[i] = new Worker(newCutter, workerUnit1, workerRespawnTime)
 												{
-													DoRespawn = !level.EditorMode
+													//TODO: Testing
+													DoRespawn = level.EditorMode
 												};
 					}
 				}

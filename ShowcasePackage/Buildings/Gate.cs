@@ -526,6 +526,7 @@ namespace ShowcasePackage.Buildings
 
 			readonly GateWindow gateWindow;
 
+			readonly UIElement holder;
 			readonly Window window;
 			readonly Button hideButton;
 			readonly Button openButton;
@@ -535,14 +536,15 @@ namespace ShowcasePackage.Buildings
 			{
 				this.gateWindow = gateWindow;
 				var packageUI = ((LevelInstancePluginBase)Gate.Level.Plugin).PackageUI;
-				packageUI.LoadLayoutToUI("Assets/UI/GateWindow.xml");
-				this.window = (Window)packageUI.PackageRoot.GetChild("GateWindow");
+				packageUI.LoadLayoutToUI("Assets/UI/GateWindow.xml", "Assets/UI/UIStyle.xml");
+				this.holder = packageUI.PackageRoot.GetChild("GateWindowHolder");
+				this.window = (Window)holder.GetChild("GateWindow");
 
 				this.hideButton = (Button)window.GetChild("HideButton");
 
 				this.openButton = (Button)window.GetChild("OpenButton", true);
 				this.closeButton = (Button)window.GetChild("CloseButton", true);
-			
+
 				if (Gate.IsOpen)
 				{
 					openButton.Enabled = false;
@@ -584,7 +586,8 @@ namespace ShowcasePackage.Buildings
 				hideButton.Dispose();
 				openButton.Dispose();
 				closeButton.Dispose();
-				window.Remove();
+				window.Dispose();
+				holder.Remove();
 			}
 
 			void RegisterHandlers()

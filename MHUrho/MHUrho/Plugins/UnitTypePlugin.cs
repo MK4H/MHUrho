@@ -35,11 +35,11 @@ namespace MHUrho.Plugins
 
 
 		/// <summary>
-		/// Checks if the UnitType can be spawned at <paramref name="centerTile"/>
+		/// Checks if the UnitType can be spawned at <paramref name="tile"/>
 		/// </summary>
-		/// <param name="centerTile">Tile to spawn the unit at, the center of the unit will be at the center of the tile</param>
+		/// <param name="tile">Tile to spawn the unit at, the center of the unit will be at the center of the tile</param>
 		/// <returns>true if can, false if cannot</returns>
-		public abstract bool CanSpawnAt(ITile centerTile);
+		public abstract bool CanSpawnAt(ITile tile);
 
 	}
 }

@@ -72,7 +72,6 @@ namespace MHUrho.EditorTools.MandK
 			checkBoxes.Deselect();
 			checkBoxes.Hide();
 
-			input.UIManager.CursorTooltips.Clear();
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMove;
 			Level.Update -= OnUpdate;
