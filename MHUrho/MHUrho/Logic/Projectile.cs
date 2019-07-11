@@ -309,8 +309,20 @@ namespace MHUrho.Logic
 				RemoveFromLevel();
 			}
 
-			Plugin?.Dispose();
-			Node.Remove();
+			try
+			{
+				Plugin?.Dispose();
+			}
+			catch (Exception e)
+			{
+				//Log and ignore
+				Urho.IO.Log.Write(LogLevel.Error, $"Projectile  plugin call {nameof(Plugin.Dispose)} failed with Exception: {e.Message}");
+			}
+			
+			if (!IsDeleted)
+			{
+				Node.Remove();
+			}
 
 			base.Dispose();
 		}

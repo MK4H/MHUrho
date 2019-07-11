@@ -9,6 +9,7 @@ using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.UserInterface.MandK;
+using ShowcasePackage.Misc;
 using Urho;
 using Urho.Gui;
 
@@ -22,12 +23,15 @@ namespace ShowcasePackage.Buildings
 		protected readonly GameUI Ui;
 		protected readonly CameraMover Camera;
 
-		public DirectionlessBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type)
+		readonly Cost cost;
+
+		public DirectionlessBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type, Cost cost)
 			: base(input.Level, type)
 		{
 			this.Input = input;
 			this.Ui = ui;
 			this.Camera = camera;
+			this.cost = cost;
 		}
 
 
@@ -57,8 +61,10 @@ namespace ShowcasePackage.Buildings
 			}
 
 			IntRect rect = GetBuildingRectangle(tile, BuildingType);
-			if (BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level)) {
-				Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.Identity, Input.Player);
+			if (BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level) && cost.HasResources(Input.Player)) {
+				if (Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.Identity, Input.Player) != null) {
+					cost.TakeFrom(Input.Player);
+				}
 			}
 		}
 
@@ -86,7 +92,7 @@ namespace ShowcasePackage.Buildings
 			}
 
 			IntRect rect = GetBuildingRectangle(tile, BuildingType);
-			Color color = BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level) ? AbleColor : UnableColor;
+			Color color = BuildingType.CanBuild(rect.TopLeft(), Input.Player, Level) && cost.HasResources(Input.Player) ? AbleColor : UnableColor;
 			Map.HighlightRectangle(rect, color);
 		}
 	}

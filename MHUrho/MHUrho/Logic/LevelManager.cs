@@ -437,7 +437,7 @@ namespace MHUrho.Logic
 			}
 
 			if (player == HumanPlayer && !IsEnding) {
-				End();
+				Input.EndLevelToEndScreen(false);
 			}
 
 			return removed;
@@ -663,10 +663,22 @@ namespace MHUrho.Logic
 
 			if (IsDeleted || !EnabledEffective) return;
 
-			Plugin.OnUpdate(timeStep);
-
 			Minimap.OnUpdate(timeStep);
-			try { 
+
+			try {
+				Plugin.OnUpdate(timeStep);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"Level plugin call {nameof(Plugin.OnUpdate)} failed with Exception: {e.Message}");
+			}
+
+			if (IsEnding) {
+				return;
+			}
+
+			try {
+				
 				Update?.Invoke(timeStep);
 			}
 			catch (Exception e)
@@ -701,7 +713,14 @@ namespace MHUrho.Logic
 		bool RemoveEntity(IEntity entity)
 		{
 			bool removed = entities.Remove(entity.ID);
-			return nodeToEntity.Remove(entity.Node) && removed;
+			if (!IsEnding) {
+				return nodeToEntity.Remove(entity.Node) && removed;
+			}
+			else {
+				//DO NOT TOUCH THE NODES, they may be deleted
+				return removed;
+			}
+			
 		}
 
 	}

@@ -20,6 +20,7 @@ using ShowcasePackage.Misc;
 using ShowcasePackage.Units;
 using Urho;
 using Urho.Gui;
+using MHUrho.Control;
 
 namespace ShowcasePackage.Buildings
 {
@@ -204,6 +205,16 @@ namespace ShowcasePackage.Buildings
 			return nodes.TryGetValue(tile, out IBuildingNode node) ? node : null;
 		}
 
+		public override IFormationController GetFormationController(Vector3 centerPosition)
+		{
+			ITile tile = Level.Map.GetContainingTile(centerPosition);
+			if (!nodes.TryGetValue(tile, out IBuildingNode startNode))
+			{
+				return null;
+			}
+			return new BFSRoofFormationController((LevelInstancePluginBase)Level.Plugin, startNode);
+		}
+
 		void CreatePathfindingNodes()
 		{
 
@@ -264,8 +275,10 @@ namespace ShowcasePackage.Buildings
 		readonly BaseCustomWindowUI cwUI;
 
 		public KeepBuilder(GameController input, GameUI ui, CameraMover camera, KeepType type)
-			: base(input, ui, camera, type.MyTypeInstance)
+			: base(input, ui, camera, type.MyTypeInstance, Cost.Free)
 		{
+			AbleFront = Color.Blue;
+
 			cwUI = new BaseCustomWindowUI(ui, type.Name, "");
 		}
 
@@ -320,18 +333,23 @@ namespace ShowcasePackage.Buildings
 
 				try {
 					if (!Keep.Level.EditorMode) {
-						foreach (var unitTypeName in KeepType.SpawnedUnits) {
-							var unitType = this.Keep.Level.Package.GetUnitType(unitTypeName);
+						using (var styleFile = packageUI.GetStyleFile()) {
+							foreach (var unitTypeName in KeepType.SpawnedUnits)
+							{
+								var unitType = this.Keep.Level.Package.GetUnitType(unitTypeName);
 
-							var button = container.CreateButton();
-							button.SetStyle("SpawningCheckBox");
-							button.Texture = Keep.Level.Package.UnitIconTexture;
-							button.ImageRect = unitType.IconRectangle;
-							button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
+								var button = container.CreateButton();
+								button.SetStyle("SpawningButton", styleFile);
+								button.Texture = Keep.Level.Package.UnitIconTexture;
+								button.ImageRect = unitType.IconRectangle;
+								button.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
+								button.PressedOffset = new IntVector2(unitType.IconRectangle.Width() * 2, 0);
 
-							var unitTypePlugin = ((SpawnableUnitTypePlugin) unitType.Plugin);
-							spawningButtons.Add(button, unitTypePlugin);
+								var unitTypePlugin = ((SpawnableUnitTypePlugin)unitType.Plugin);
+								spawningButtons.Add(button, unitTypePlugin);
+							}
 						}
+						
 					}
 
 				}
@@ -451,6 +469,9 @@ namespace ShowcasePackage.Buildings
 
 		public override void Dispose()
 		{
+			if (Current == this) {
+				Hide();
+			}
 			instance?.Dispose();
 			instance = null;
 		}

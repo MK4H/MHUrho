@@ -128,7 +128,10 @@ namespace ShowcasePackage.Units
 									.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X,
 																		source.Tile.MapLocation.Y))
 									.Building;
-					if ((building1.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building1.Player)) &&
+
+					if (building1 != null && 
+						building2 != null &&
+						(building1.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building1.Player)) &&
 						(building2.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building2.Player))) {
 						return false;
 					}
@@ -265,6 +268,12 @@ namespace ShowcasePackage.Units
 					Instance.Unit.Player.IsFriend(target.Tile.Building.Player)))
 				{
 					return false;
+				}
+
+				if (target.Tile.Building != null &&
+					(target.Tile.Building.Player != Level.NeutralPlayer ||
+					Instance.Unit.Player.IsEnemy(target.Tile.Building.Player))) {
+					return true;
 				}
 				return true;
 			}

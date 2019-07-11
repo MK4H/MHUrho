@@ -87,7 +87,8 @@ namespace ShowcasePackage.Units
 	public class Chicken : UnitInstancePlugin, 
 									WorldWalker.IUser, 
 									MovingRangeTarget.IUser,
-									UnitSelector.IUser
+									UnitSelector.IUser,
+									RangeTargetComponent.IShooter
 	{
 
 		/// <summary>
@@ -132,7 +133,9 @@ namespace ShowcasePackage.Units
 									.GetTileByMapLocation(new IntVector2(target.Tile.MapLocation.X,
 																		source.Tile.MapLocation.Y))
 									.Building;
-					if ((building1.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building1.Player)) &&
+					if (building1 != null &&
+						building2 != null &&
+						(building1.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building1.Player)) &&
 						(building2.Player == Level.NeutralPlayer || Instance.Unit.Player.IsFriend(building2.Player)))
 					{
 						return false;
@@ -551,7 +554,7 @@ namespace ShowcasePackage.Units
 					case MoveOrder moveOrder:
 						Shooter.StopShooting();
 						Shooter.SearchForTarget = false;
-						explicitTarget = null;
+						ResetExplicitTarget();
 						order.Executed = Walker.GoTo(moveOrder.Target);
 						break;
 					case AttackOrder attackOrder:
@@ -592,7 +595,10 @@ namespace ShowcasePackage.Units
 			return distCalc;
 		}
 
-		
+		void RangeTargetComponent.IShooter.OnTargetDestroy(IRangeTarget target)
+		{
+			ResetExplicitTarget();
+		}
 
 		void OnMovementFinished(WorldWalker walker) {
 			animationController.Stop("Assets/Units/Chicken/Models/Walk.ani");
@@ -642,8 +648,7 @@ namespace ShowcasePackage.Units
 			if (explicitTarget != null) {
 				Debug.Assert(target == explicitTarget);
 
-				explicitTarget = null;
-				targetMoved = false;
+				ResetExplicitTarget();
 			}
 		}
 		IEnumerable<Waypoint> MovingRangeTarget.IUser.GetFutureWaypoints(MovingRangeTarget movingRangeTarget)
@@ -651,14 +656,25 @@ namespace ShowcasePackage.Units
 			return Walker.GetRestOfThePath(new Vector3(0, 0.5f, 0));
 		}
 
+		void ResetExplicitTarget()
+		{
+			explicitTarget?.RemoveShooter(this);
+			explicitTarget = null;
+			targetMoved = false;
+		}
+
 		IRangeTarget SetExplicitTarget(IEntity targetEntity)
 		{
+		
 			IRangeTarget target = targetEntity.GetDefaultComponent<RangeTargetComponent>();
 
 			if (target == null) return null;
 
+			ResetExplicitTarget();
+
 			explicitTarget = target;
 			target.TargetMoved += ExplicitTargetMoved;
+			target.AddShooter(this);
 
 			return target;
 		}
@@ -685,6 +701,7 @@ namespace ShowcasePackage.Units
 		}
 
 
+		
 	}
 
 	class ChickenSpawner : PointSpawner {

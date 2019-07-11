@@ -120,16 +120,16 @@ namespace MHUrho.Logic
 
 			public void ConnectReferences() {
 				foreach (var unitID in storedPlayer.UnitIDs) {
-					loadingPlayer.AddUnit(level.GetUnit(unitID));
+					loadingPlayer.AddUnitImpl(level.GetUnit(unitID));
 				}
 
 				foreach (var buildingID in storedPlayer.BuildingIDs) {
-					loadingPlayer.AddBuilding(level.GetBuilding(buildingID));
+					loadingPlayer.AddBuildingImpl(level.GetBuilding(buildingID));
 				}
 
 				foreach (var resource in storedPlayer.Resources) {
 					ResourceType resourceType = level.PackageManager.ActivePackage.GetResourceType(resource.Id);
-					loadingPlayer.ChangeResourceAmount(resourceType, resource.Amount);
+					loadingPlayer.resources.Add(resourceType, resource.Amount);
 				}
 
 				//If the stored data is from the same plugin type as the new type, load the data
@@ -305,7 +305,10 @@ namespace MHUrho.Logic
 			}
 
 			Level.RemovePlayer(this);
-			Remove();
+			if (!IsDeleted)
+			{
+				Remove();
+			}
 
 			base.Dispose();
 		}
@@ -319,13 +322,9 @@ namespace MHUrho.Logic
 		/// Adds unit to players units.
 		/// </summary>
 		/// <param name="unit">Unit to add.</param>
-		public void AddUnit(IUnit unit) {
-			if (units.TryGetValue(unit.UnitType, out var unitList)) {
-				unitList.Add(unit);
-			}
-			else {
-				units.Add(unit.UnitType, new List<IUnit> {unit});
-			}
+		public void AddUnit(IUnit unit)
+		{
+			AddUnitImpl(unit);
 
 			try {
 				Plugin.UnitAdded(unit);
@@ -342,13 +341,9 @@ namespace MHUrho.Logic
 		/// Adds building to players ownership.
 		/// </summary>
 		/// <param name="building">The added building.</param>
-		public void AddBuilding(IBuilding building) {
-			if (buildings.TryGetValue(building.BuildingType, out var buildingList)) {
-				buildingList.Add(building);
-			}
-			else {
-				buildings.Add(building.BuildingType, new List<IBuilding> {building});
-			}
+		public void AddBuilding(IBuilding building)
+		{
+			AddBuildingImpl(building);
 
 			try {
 				Plugin.BuildingAdded(building); 
@@ -390,6 +385,13 @@ namespace MHUrho.Logic
 		/// <returns>True if the unit was removed, false if the unit did not belong to this player.</returns>
 		public bool RemoveUnit(IUnit unit) {
 			bool removed = units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
+			
+			//Just deleting all the players units from the level
+			if (IsRemovedFromLevel)
+			{
+				return removed;
+			}
+
 			if (removed) {
 				try {
 					Plugin.UnitKilled(unit);
@@ -409,7 +411,14 @@ namespace MHUrho.Logic
 		/// <param name="building">The building to remove.</param>
 		/// <returns>True if the building was removed, false if the building did not belong to this player.</returns>
 		public bool RemoveBuilding(IBuilding building) {
+			
 			bool removed = buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
+
+			//Just deleting all the players units from the level
+			if (IsRemovedFromLevel)
+			{
+				return removed;
+			}
 
 			if (removed) {
 				try {
@@ -466,9 +475,7 @@ namespace MHUrho.Logic
 
 		public bool IsFriend(IPlayer player)
 		{
-			//TODO: TESTING
-			return player == this;
-			//return player.TeamID == TeamID;
+			return player.TeamID == TeamID;
 		}
 
 		public bool IsEnemy(IPlayer player)
@@ -501,5 +508,40 @@ namespace MHUrho.Logic
 				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnUpdate)} failed with Exception: {e.Message}");
 			}
 		}
+
+		/// <summary>
+		/// Adds unit owned by this player.
+		/// Split from the public AddUnit to be used for loading.
+		/// </summary>
+		/// <param name="unit">The unit to add.</param>
+		void AddUnitImpl(IUnit unit)
+		{
+			if (units.TryGetValue(unit.UnitType, out var unitList))
+			{
+				unitList.Add(unit);
+			}
+			else
+			{
+				units.Add(unit.UnitType, new List<IUnit> { unit });
+			}
+		}
+
+
+		/// <summary>
+		/// Adds building owned by this player.
+		/// Split from the public AddBuilding to be used for loading.
+		/// </summary>
+		/// <param name="unit">The building to add.</param>
+		void AddBuildingImpl(IBuilding building)
+		{
+			if (buildings.TryGetValue(building.BuildingType, out var buildingList))
+			{
+				buildingList.Add(building);
+			}
+			else
+			{
+				buildings.Add(building.BuildingType, new List<IBuilding> { building });
+			}
+		} 
 	}
 }

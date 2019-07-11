@@ -9,6 +9,7 @@ using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
 using MHUrho.UserInterface.MandK;
+using ShowcasePackage.Misc;
 using Urho;
 using Urho.Gui;
 
@@ -22,18 +23,21 @@ namespace ShowcasePackage.Buildings
 		readonly GameController input;
 		readonly GameUI ui;
 		readonly CameraMover camera;
+		readonly Cost cost;
 
 		List<ITile> line;
 
 		public LineBuilder(GameController input,
 							GameUI ui,
 							CameraMover camera, 
-							BuildingType type)
+							BuildingType type,
+							Cost cost)
 			: base(input.Level, type)
 		{
 			this.input = input;
 			this.ui = ui;
 			this.camera = camera;
+			this.cost = cost;
 
 			line = null;
 		}
@@ -79,7 +83,8 @@ namespace ShowcasePackage.Buildings
 				line = GetLine(line[0], endTile);
 			}
 
-			if (line.All((tile) => BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(), input.Player ,Level))) {
+			if (cost.HasResources(input.Player, line.Count) &&
+				line.All((tile) => BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(), input.Player ,Level))) {
 				foreach (var tile in line) {
 					IBuilding newBuilding = Level.BuildBuilding(BuildingType,
 																GetBuildingRectangle(tile, BuildingType).TopLeft(),
@@ -87,6 +92,9 @@ namespace ShowcasePackage.Buildings
 																input.Player);
 					if (newBuilding == null) {
 						break;
+					}
+					else {
+						cost.TakeFrom(input.Player);
 					}
 				}
 			}
@@ -103,7 +111,8 @@ namespace ShowcasePackage.Buildings
 				}
 				Color color = BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(),
 													input.Player,
-													Level)
+													Level) && 
+							cost.HasResources(input.Player)
 								? AbleColor
 								: UnableColor;
 				Level.Map.HighlightTileList(new []{tile}, color);
@@ -160,7 +169,8 @@ namespace ShowcasePackage.Buildings
 										line.All((tile) =>
 													BuildingType.CanBuild(GetBuildingRectangle(tile, BuildingType).TopLeft(),
 																			input.Player,
-																			Level))
+																			Level)) &&
+										cost.HasResources(input.Player, line.Count)
 											? AbleColor
 											: UnableColor);
 		}

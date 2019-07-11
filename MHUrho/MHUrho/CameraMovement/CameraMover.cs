@@ -271,6 +271,11 @@ namespace MHUrho.CameraMovement
 
 		protected override void OnUpdate(float timeStep)
 		{
+			if (IsDeleted || !EnabledEffective)
+			{
+				return;
+			}
+
 			//NOTE: Probably isn't needed, had a problem with 0 timeStep ticks
 			if (timeStep <= 0) {
 				return;

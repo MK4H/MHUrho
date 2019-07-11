@@ -39,6 +39,11 @@ namespace MHUrho.Input.Touch
 			throw new NotImplementedException();
 		}
 
+		public void SwitchToEndScreen(bool victory)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void SavePausedLevel(string fileName)
 		{
 			throw new NotImplementedException();

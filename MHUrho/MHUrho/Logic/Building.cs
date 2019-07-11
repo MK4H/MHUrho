@@ -241,6 +241,14 @@ namespace MHUrho.Logic
 
 		readonly ITile[] tiles;
 
+		/// <summary>
+		/// Constructor for creating new building during the game.
+		/// </summary>
+		/// <param name="id">Identifier.</param>
+		/// <param name="level">Running level.</param>
+		/// <param name="rectangle">Rectangle in the map taken by this building.</param>
+		/// <param name="type">Type of this building.</param>
+		/// <param name="player">Owner of the new building.</param>
 		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type, IPlayer player) 
 			:base(id, level)
 		{
@@ -248,15 +256,24 @@ namespace MHUrho.Logic
 			this.BuildingType = type;
 			this.Player = player;
 			this.Rectangle = rectangle;
-			this.tiles = AllocTiles();
+			this.tiles = AllocTiles(true);
 		}
 
+
+		/// <summary>
+		/// Constructor for loading instance.
+		/// </summary>
+		/// <param name="id">Identifier.</param>
+		/// <param name="level">Loading level.</param>
+		/// <param name="rectangle">Rectangle in the map taken by this building.</param>
+		/// <param name="type">Type of this building.</param>
 		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type) 
 			:base(id, level)
 		{
 			this.BuildingType = type;
 			this.Rectangle = rectangle;
-			this.tiles = AllocTiles();
+			//Tiles remember which buildings were on them.
+			this.tiles = AllocTiles(false);
 		}
 
 
@@ -309,8 +326,10 @@ namespace MHUrho.Logic
 			}
 
 			Player?.RemoveBuilding(this);
-			Node.Remove();
-
+			if (!IsDeleted) {
+				Node.Remove();
+			}
+			
 			base.Dispose();
 		}
 
@@ -433,14 +452,16 @@ namespace MHUrho.Logic
 		}
 
 
-		ITile[] AllocTiles() {
+		ITile[] AllocTiles(bool registerBuilding) {
 			var newTiles = new ITile[BuildingType.Size.X * BuildingType.Size.Y];
 
 			for (int y = 0; y < BuildingType.Size.Y; y++) {
 				for (int x = 0; x < BuildingType.Size.X; x++) {
 					var tile = Level.Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
 					newTiles[GetTileIndex(x, y)] = tile;
-					tile.SetBuilding(this);
+					if (registerBuilding) {
+						tile.SetBuilding(this);
+					}	
 				}
 			}
 

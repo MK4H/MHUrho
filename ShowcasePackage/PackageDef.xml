@@ -5,15 +5,15 @@
     <dataDirPath>Levels</dataDirPath>
   </levels>
   <levelLogicTypes>
-    <levelLogicType name="TestLogic" ID="1">
+    <levelLogicType name="TwoPlayers" ID="1">
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
     </levelLogicType>
-    <levelLogicType name="TestLogic2" ID="2">
+    <levelLogicType name="FourPlayersFixedResources" ID="2">
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
     </levelLogicType>
   </levelLogicTypes>
 	<playerAITypes>
-		<playerAIType name="TestAI" ID="1" category="ai">
+		<playerAIType name="LazyPlayer" ID="1" category="ai">
 			<iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
 			<assemblyPath>ShowcasePackage.dll</assemblyPath>
 		</playerAIType>
@@ -21,20 +21,12 @@
 	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
 	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	  </playerAIType>
-	  <playerAIType name="Defensive" ID="3" category="ai">
-	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
-	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
-	  </playerAIType>
-	  <playerAIType name="testHuman1" ID="5" category="human">
+	  <playerAIType name="HumanAI" ID="5" category="human">
 	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
 	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	  </playerAIType>
-	  <playerAIType name="testNeutral1" ID="6" category="neutral">
+	  <playerAIType name="NeutralAI" ID="6" category="neutral">
 	    <iconTextureRectangle left="0" top="0" right="50" bottom="50"/>
-	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
-	  </playerAIType>
-	  <playerAIType name="testNeutral2" ID="7" category="neutral">
-	    <iconTextureRectangle left="0" top="50" right="50" bottom="100"/>
 	    <assemblyPath>ShowcasePackage.dll</assemblyPath>
 	  </playerAIType>
 	</playerAITypes>
@@ -81,8 +73,8 @@
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
       <extension>
         <cost>
-          <Wood>0.2</Wood>
-          <Gold>0.5</Gold>
+          <Wood>6</Wood>
+          <Gold>8</Gold>
         </cost>
         <canPass>
           <Sand/>
@@ -114,8 +106,8 @@
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
       <extension>
         <cost>
-          <Wood>0.4</Wood>
-          <Gold>0.2</Gold>
+          <Wood>10</Wood>
+          <Gold>5</Gold>
         </cost>
         <canPass>
           <Sand/>

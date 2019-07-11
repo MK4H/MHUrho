@@ -112,6 +112,9 @@
     <Content Include="Data\UI\EditorPauseMenuLayout.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\UI\EndScreenLayout.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\UI\ExpandingElementExpandingListItemPrototype.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -221,6 +224,7 @@
     <Content Include="Data\UI\TileTypeToolUI.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Log.txt" />
     <Content Include="shield_grey.ico" />
     <None Include="App.config" />
     <Content Include="config.xml">

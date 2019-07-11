@@ -44,7 +44,7 @@ namespace ShowcasePackage.Misc
 			resourceDisplays = new Dictionary<ResourceType, Text>();
 			var resourceDisplay = PackageRoot.GetChild("ResourceDisplay", true);
 			foreach (var resourceType in level.Package.ResourceTypes) {
-				var display = resourceDisplay.CreateText();
+				var display = (Text) resourceDisplay.GetChild(resourceType.Name);
 				resourceDisplays.Add(resourceType, display);
 			}
 
@@ -55,7 +55,7 @@ namespace ShowcasePackage.Misc
 		{
 			foreach (var display in resourceDisplays) {
 				if (values.TryGetValue(display.Key, out double value)) {
-					display.Value.Value = display.Key.Name + ": " + value;
+					display.Value.Value = display.Key.Name + ": " + value.ToString("F2");
 				}
 				else {
 					display.Value.Value = display.Key.Name + ": 0";
@@ -71,6 +71,11 @@ namespace ShowcasePackage.Misc
 				}
 			}
 			
+		}
+
+		public XmlFile GetStyleFile()
+		{
+			return gameUI.Game.PackageManager.GetXmlFile("Assets/UI/UIStyle.xml");
 		}
 
 		public void Dispose()

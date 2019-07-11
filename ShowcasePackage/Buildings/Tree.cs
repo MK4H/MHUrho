@@ -10,6 +10,7 @@ using MHUrho.Storage;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input.MandK;
 using MHUrho.UserInterface.MandK;
+using ShowcasePackage.Misc;
 using Urho;
 using Urho.Gui;
 
@@ -27,7 +28,7 @@ namespace ShowcasePackage.Buildings
 
 
 			public TreeBuilder(GameController input, GameUI ui, CameraMover camera, TreeType type)
-				: base(input, ui, camera, type.MyTypeInstance)
+				: base(input, ui, camera, type.MyTypeInstance, Cost.Free)
 			{
 				this.type = type;
 				InitUI(ui, out uiElem, out sizeSlider);
@@ -304,8 +305,7 @@ namespace ShowcasePackage.Buildings
 		{
 			base.OnUpdate(timeStep);
 
-			//TODO: Testing
-			if (Level.EditorMode) {
+			if (!Level.EditorMode) {
 				Spread(timeStep);
 				Grow(timeStep);
 			}

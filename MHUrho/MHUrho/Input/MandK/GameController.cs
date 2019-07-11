@@ -296,6 +296,12 @@ namespace MHUrho.Input.MandK
 			Level.UnPause();
 		}
 
+		public void EndLevelToEndScreen(bool victory)
+		{
+			Game.MenuController.SwitchToEndScreen(victory);
+			Level.End();
+		}
+
 		public void EndLevel()
 		{
 			Level.End();

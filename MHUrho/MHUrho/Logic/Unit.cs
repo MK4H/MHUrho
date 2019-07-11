@@ -409,7 +409,10 @@ namespace MHUrho.Logic
 			Level.RemoveUnit(this);
 			Tile?.RemoveUnit(this);
 			Player?.RemoveUnit(this);
-			Node.Remove();
+			if (!IsDeleted)
+			{
+				Node.Remove();
+			}
 
 			base.Dispose();
 		}

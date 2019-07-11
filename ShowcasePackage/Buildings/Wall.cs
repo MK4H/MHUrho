@@ -207,7 +207,7 @@ namespace ShowcasePackage.Buildings
 		readonly BaseCustomWindowUI cwUI;
 
 		public WallBuilder(GameController input, GameUI ui, CameraMover camera, BuildingType type, WallType myType)
-			: base(input, ui, camera, type)
+			: base(input, ui, camera, type, input.Level.EditorMode ? Cost.Free : myType.Cost)
 		{
 			cwUI = new BaseCustomWindowUI(ui, myType.Name, $"Cost: {myType.Cost}");
 		}

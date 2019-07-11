@@ -484,7 +484,7 @@ namespace ShowcasePackage.Buildings
 		readonly BaseCustomWindowUI cwUI;
 
 		public GateBuilder(GameController input, GameUI ui, CameraMover camera, GateType type)
-			: base(input, ui, camera, type.MyTypeInstance)
+			: base(input, ui, camera, type.MyTypeInstance, input.Level.EditorMode ? Cost.Free : type.Cost)
 		{
 			AbleFront = Color.Red;
 			AbleBack = Color.Yellow;

@@ -208,12 +208,10 @@ namespace ShowcasePackage.Buildings
 
 				using (var spawnPoints = building.Tiles[0].GetNeighbours().GetEnumerator()) {
 					for (int i = 0; i < numberOfWorkers; i++) {
-						//TODO: Testing
-						IUnit workerUnit1 = !level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
+						IUnit workerUnit1 = level.EditorMode ? null : newCutter.SpawnWorkerUnit(spawnPoints);
 						newCutter.workers[i] = new Worker(newCutter, workerUnit1, workerRespawnTime)
 												{
-													//TODO: Testing
-													DoRespawn = level.EditorMode
+													DoRespawn = !level.EditorMode
 												};
 					}
 				}
@@ -308,7 +306,7 @@ namespace ShowcasePackage.Buildings
 								GameUI ui,
 								CameraMover camera,
 								TreeCutterType type)
-			: base(input, ui, camera, type.MyTypeInstance)
+			: base(input, ui, camera, type.MyTypeInstance, input.Level.EditorMode ? Cost.Free : type.Cost)
 		{
 			cwUI = new BaseCustomWindowUI(ui, type.Name, $"Cost: {type.Cost}");
 		}

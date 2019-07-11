@@ -78,8 +78,11 @@ namespace MHUrho.UserInterface
 
 			async void SaveButton_Pressed(PressedEventArgs args)
 			{
-				await MenuUIManager.ErrorPopUp.DisplayError("Invalid name", "Name of the saved game cannot be empty");
-				if (LineEdit.Text == "") return;
+				
+				if (LineEdit.Text == "") {
+					await MenuUIManager.ErrorPopUp.DisplayError("Invalid name", "Name of the saved game cannot be empty");
+					return;
+				}
 
 				string newAbsoluteFilePath = Path.Combine(Game.Files.SaveGameDirAbsolutePath, LineEdit.Text);
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using MHUrho.EntityInfo;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -128,7 +129,7 @@ namespace MHUrho.UserInterface
 
 			readonly LevelLogicCustomSettings pluginCustomSettings;
 
-			public Screen(LevelSettingsScreen proxy)
+			public Screen(LevelSettingsScreen proxy, out string errorMessage)
 				:base(proxy)
 			{
 				this.proxy = proxy;
@@ -173,7 +174,17 @@ namespace MHUrho.UserInterface
 					PlayerItem.CreateAndAddToList(playerList, this, insigniaGetter.GetNextUnusedInsignia(), i + 2, PlayerTypeCategory.AI);
 				}
 
-				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);
+				try {
+					pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow, Game);
+					errorMessage = null;
+				}
+				catch (Exception e) {
+					string message =
+						$"Level plugin threw an exception when getting the Custom settings window contents: {e.Message}";
+					Urho.IO.Log.Write(Urho.LogLevel.Error, message);
+					pluginCustomSettings = null;
+					errorMessage = message;
+				}
 			}
 
 			public override void EnableInput()
@@ -310,7 +321,11 @@ namespace MHUrho.UserInterface
 				throw new InvalidOperationException($"{nameof(Level)} has to be set before Showing this screen");
 			}
 
-			screen = new Screen(this);
+
+			screen = new Screen(this, out string errorMessage);
+			if (errorMessage != null) {
+				MenuUIManager.ErrorPopUp.DisplayError("Plugin error", errorMessage, this).ContinueWith((_)=> MenuUIManager.SwitchBack(), TaskScheduler.FromCurrentSynchronizationContext());
+			}
 		}
 
 		/// <summary>

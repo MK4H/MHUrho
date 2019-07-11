@@ -14,8 +14,6 @@ namespace MHUrho.EntityInfo
 {
     public class HealthBar : IDisposable {
 
-		public bool Visible => billboardSet.Enabled;
-
 		BillboardSet billboardSet;
 		uint billboardIndex;
 

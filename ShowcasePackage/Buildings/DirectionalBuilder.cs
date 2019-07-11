@@ -11,6 +11,7 @@ using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
+using ShowcasePackage.Misc;
 using Urho;
 using Urho.Gui;
 
@@ -108,17 +109,21 @@ namespace ShowcasePackage.Buildings
 		readonly Color[] ableColors;
 		readonly Color[] unableColors;
 
+		readonly Cost cost;
+
 		ITile lockedTile;
 
 		public DirectionalBuilder(GameController input, 
 								GameUI ui, 
 								CameraMover camera,
-								BuildingType buildingType)
+								BuildingType buildingType,
+								Cost cost)
 			:base(input.Level, buildingType)
 		{
 			this.input = input;
 			this.ui = ui;
 			this.camera = camera;
+			this.cost = cost;
 			Direction = Direction.PlusX;
 			ableColors = new[] {Color.Green, Color.Green, Color.Green, Color.Green, Color.Green };
 			unableColors = new[] {Color.Red, Color.Red, Color.Red, Color.Red, Color.Red};
@@ -151,7 +156,7 @@ namespace ShowcasePackage.Buildings
 
 			IntRect rect = GetBuildingRectangle(centerTile, BuildingType);
 
-			bool ableToBuild = BuildingType.CanBuild(rect.TopLeft(), input.Player, Level);
+			bool ableToBuild = BuildingType.CanBuild(rect.TopLeft(), input.Player, Level) && cost.HasResources(input.Player);
 			Color[] colors = ableToBuild ? ableColors : unableColors;
 			Map.HighlightRectangle(rect, (cTile) => GetPositionColor(rect, cTile.TopLeft, colors));
 		}
@@ -287,7 +292,9 @@ namespace ShowcasePackage.Buildings
 						throw new ArgumentOutOfRangeException();
 				}
 				var building = Level.BuildBuilding(BuildingType, rect.TopLeft(), Quaternion.FromRotationTo(Vector3.UnitZ, facing), input.Player);
-				Urho.IO.Log.Write(LogLevel.Debug, $"{building.Forward}");
+				if (building != null) {
+					cost.TakeFrom(input.Player);
+				}
 			}
 		}
 

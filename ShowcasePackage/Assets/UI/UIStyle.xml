@@ -34,7 +34,7 @@
     <attribute name="Image Rect" value="0 0 16 16" />
     <attribute name="Disabled Image Offset" value="0 208" />
   </element>
-  <element type="PackageSpawningCheckbox" style="BorderImage"  auto="false">
+  <element type="SpawningButton" style="BorderImage"  auto="false">
     <attribute name="Min Size" value="50 50" />
     <attribute name="Max Size" value="50 50" />
     <attribute name="Border" value="4 4 4 4" />

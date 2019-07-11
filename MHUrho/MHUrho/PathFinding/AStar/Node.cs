@@ -170,10 +170,11 @@ namespace MHUrho.PathFinding.AStar
 			double distance = Vector3.Distance(neighbour.Position, targetNode.Position);
 			//If the neighbor is too far out of the way from the closest path we found yet
 			if (distance > minDistToTarget + AStar.Cutoff) {
-				neighbour.State = NodeState.Closed;
-				if (neighbour.State == NodeState.Untouched) {
+				if (neighbour.State == NodeState.Untouched)
+				{
 					touchedNodes.Add(neighbour);
 				}
+				neighbour.State = NodeState.Closed;		
 				return;
 			}
 			else if (distance < minDistToTarget) {

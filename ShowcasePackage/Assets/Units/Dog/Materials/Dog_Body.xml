@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<material>
+	<technique name="Techniques/Diff.xml" />
+	<texture name="Assets/Units/Dog/Textures/Dog_Body.jpg" unit="diffuse" />
+	<parameter name="MatDiffColor" value="1 1 1 1" />
+	<parameter name="MatSpecColor" value="0 0 0 50" />
+</material>

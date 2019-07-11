@@ -34,6 +34,8 @@ namespace MHUrho.Input
 
 		void EndPausedLevel();
 
+		void SwitchToEndScreen(bool victory);
+
 		void SavePausedLevel(string fileName);
 
 		ILevelLoader GetLevelLoaderForEditing(LevelRep level, IProgressEventWatcher parentProgress = null, double subsectionSize = 100);

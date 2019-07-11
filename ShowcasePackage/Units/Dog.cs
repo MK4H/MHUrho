@@ -551,11 +551,11 @@ namespace ShowcasePackage.Units
 				return;
 			}
 
-			animationController = unit.CreateComponent<AnimationController>();
+			animationController = CreateAnimationController(Unit);
 			walker = WorldWalker.CreateNew(this, level);
 			RegisterEvents(walker);
 			MovingRangeTarget.CreateNew(this, level, targetOffset);
-			healthBar = new HealthBarControl(level, unit, 100, new Vector3(0, 3, 0), new Vector2(0.5f, 0.1f), true);
+			healthBar = new HealthBarControl(level, unit, 100, new Vector3(0, 1, 0), new Vector2(0.5f, 0.1f), true);
 			currentState = new SearchingForTree((State)null, this);
 		}
 
@@ -564,13 +564,13 @@ namespace ShowcasePackage.Units
 			var writer = pluginData.GetWriterForWrappedSequentialData();
 			healthBar.Save(writer);
 			currentState.Save(writer);
-			writer.StoreNext(Cutter.Building.ID);
 			writer.StoreNext(targetTree?.Building.ID ?? 0);
+			writer.StoreNext(Cutter.Building.ID);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
-			animationController = Unit.CreateComponent<AnimationController>();
+			animationController = CreateAnimationController(Unit);
 			walker = Unit.GetDefaultComponent<WorldWalker>();
 
 			RegisterEvents(walker);
@@ -648,7 +648,7 @@ namespace ShowcasePackage.Units
 
 		void OnMovementStarted(WorldWalker walker)
 		{
-			animationController.PlayExclusive("Assets/Units/Dog/Walk.ani", 0, true);
+			animationController.PlayExclusive("Assets/Units/Dog/Models/Dog_Run_Cycle_.ani", 0, true);
 			animationController.SetSpeed("Assets/Units/Dog/Walk.ani", 2);
 
 			currentState.MovementStarted();
@@ -656,21 +656,21 @@ namespace ShowcasePackage.Units
 
 		void OnMovementFinished(WorldWalker walker)
 		{
-			animationController.Stop("Assets/Units/Dog/Walk.ani");
+			animationController.Stop("Assets/Units/Dog/Models/Dog_Run_Cycle_.ani");
 
 			currentState.MovementFinished();
 		}
 
 		void OnMovementFailed(WorldWalker walker)
 		{
-			animationController.Stop("Assets/Units/Dog/Walk.ani");
+			animationController.Stop("Assets/Units/Dog/Models/Dog_Run_Cycle_.ani");
 
 			currentState.MovementFailed();
 		}
 
 		void OnMovementCanceled(WorldWalker walker)
 		{
-			animationController.Stop("Assets/Units/Dog/Walk.ani");
+			animationController.Stop("Assets/Units/Dog/Models/Dog_Run_Cycle_.ani");
 
 			currentState.MovementCanceled();
 		}
@@ -683,6 +683,11 @@ namespace ShowcasePackage.Units
 			walker.MovementCanceled += OnMovementCanceled;
 
 		}
-
+		static AnimationController CreateAnimationController(IUnit unit)
+		{
+			//Animation controller has to be on the same node as animatedModel
+			var modelNode = unit.Node.GetComponent<AnimatedModel>(true).Node;
+			return modelNode.CreateComponent<AnimationController>();
+		}
 	}
 }

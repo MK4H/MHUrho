@@ -73,8 +73,9 @@
     <Compile Include="Buildings\WalkableBuildingPlugin.cs" />
     <Compile Include="Buildings\Wall.cs" />
     <Compile Include="Levels\LevelInstancePluginBase.cs" />
-    <Compile Include="Levels\TestLevel.cs" />
-    <Compile Include="Levels\TestLevelLogic2.cs" />
+    <Compile Include="Levels\ResourceCreationWindow.cs" />
+    <Compile Include="Levels\TwoPlayerLogic.cs" />
+    <Compile Include="Levels\FourPlayerLogic.cs" />
     <Compile Include="Misc\BaseCustomWindowUI.cs" />
     <Compile Include="Misc\Cost.cs" />
     <Compile Include="Misc\HealthBarControl.cs" />
@@ -83,11 +84,10 @@
     <Compile Include="Misc\ViableTileTypes.cs" />
     <Compile Include="Misc\Window.cs" />
     <Compile Include="Players\AgressivePlayer.cs" />
-    <Compile Include="Players\DefensivePlayer.cs" />
     <Compile Include="Players\PlayerWithKeep.cs" />
-    <Compile Include="Players\TestAIPlayer.cs" />
-    <Compile Include="Players\TestHumanPlayers.cs" />
-    <Compile Include="Players\NeutralPlayers.cs" />
+    <Compile Include="Players\LazyPlayer.cs" />
+    <Compile Include="Players\HumanPlayer.cs" />
+    <Compile Include="Players\NeutralPlayer.cs" />
     <Compile Include="Projectiles\EggProjectile.cs" />
     <Compile Include="Projectiles\TestProjectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -189,6 +189,9 @@
     <Content Include="Assets\UI\BuildingToolUI.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\UI\CreationWindowLayout.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\UI\GateWindow.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -228,6 +231,33 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Green.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Materials\Dog_Body.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Materials\Dog_Claws.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Materials\Dog_Eyes.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Materials\Dog_Fur.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Materials\Dog_Teeth.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_obj_body.004.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\prefab.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Textures\Dog_Body.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Units\Dog\Textures\Dog_Eyes_1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Units\Wolf\Materials\Wolf_Body.xml">
@@ -283,18 +313,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Textures\tileIcons.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Units\Dog\Cube.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Units\Dog\dogUV.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Units\Dog\Material.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Units\Dog\prefab.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Box.mdl">
@@ -366,10 +384,25 @@
     <None Include="Assets\Buildings\Wall\Models\Building.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\Units\Dog\Cube.mdl">
+    <None Include="Assets\Units\Dog\Models\000.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\Units\Dog\Walk.ani">
+    <None Include="Assets\Units\Dog\Models\Dog_creep_cycle.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Dog\Models\Dog_Idle_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Dog\Models\Dog_obj_body.004.mdl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Dog\Models\Dog_Run_Cycle_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Dog\Models\Dog_seat_.ani">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Units\Dog\Models\Dog_Walk_cycle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\Units\Wolf\Models\000.ani">

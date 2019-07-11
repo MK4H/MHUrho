@@ -224,7 +224,7 @@ namespace ShowcasePackage.Buildings
 		readonly BaseCustomWindowUI cwUI;
 
 		public TowerBuilder(GameController input, GameUI ui, CameraMover camera, TowerType type)
-			: base(input, ui, camera, type.MyTypeInstance)
+			: base(input, ui, camera, type.MyTypeInstance, input.Level.EditorMode ? Cost.Free : type.Cost)
 		{
 			cwUI = new BaseCustomWindowUI(ui, type.Name, $"Cost: {type.Cost}");
 		}

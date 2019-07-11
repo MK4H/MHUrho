@@ -12,6 +12,8 @@ namespace ShowcasePackage.Misc
 {
 	public class Cost : IReadOnlyDictionary<ResourceType, double> {
 
+		public static Cost Free => new Cost(new Dictionary<ResourceType, double>());
+
 		public int Count => costs.Count;
 
 		public double this[ResourceType key] => costs[key];
@@ -74,30 +76,30 @@ namespace ShowcasePackage.Misc
 			return costs.TryGetValue(key, out value);
 		}
 
-		public bool HasResources(IPlayer player)
+		public bool HasResources(IPlayer player, int numberOfThings = 1)
 		{
 			foreach (var cost in costs) {
-				if (player.GetResourceAmount(cost.Key) < cost.Value) {
+				if (player.GetResourceAmount(cost.Key) < cost.Value * numberOfThings) {
 					return false;
 				}
 			}
 			return true;
 		}
 
-		public void TakeFrom(IPlayer player)
+		public void TakeFrom(IPlayer player, int numberOfTimes = 1)
 		{
 			foreach (var cost in costs) {
-				player.ChangeResourceAmount(cost.Key, -cost.Value);
+				player.ChangeResourceAmount(cost.Key, -cost.Value * numberOfTimes);
 			}
 		}
 
-		public bool TryTakeFrom(IPlayer player)
+		public bool TryTakeFrom(IPlayer player, int numberOfTimes = 1)
 		{
-			if (!HasResources(player)) {
+			if (!HasResources(player, numberOfTimes)) {
 				return false;
 			}
 
-			TakeFrom(player);
+			TakeFrom(player, numberOfTimes);
 			return true;
 
 		}

@@ -70,9 +70,9 @@ namespace MHUrho.Logic {
 			
 		}
 
-		public LevelLogicCustomSettings GetCustomSettings(Window customSettingsWindow)
+		public LevelLogicCustomSettings GetCustomSettings(Window customSettingsWindow, MHUrhoApp game)
 		{
-			return Plugin.GetCustomSettings(customSettingsWindow);
+			return Plugin.GetCustomSettings(customSettingsWindow, game);
 		}
 
 		public LevelLogicInstancePlugin CreateInstancePluginForBrandNewLevel(ILevelManager level)

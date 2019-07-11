@@ -94,14 +94,15 @@ namespace ShowcasePackage.Players
 														new IntVector2(-2, 8),
 													};
 
-			static readonly  HashSet<IntVector2> TakenPositions = new HashSet<IntVector2>();
+			
 
 			readonly TreeCutter cutter;
 			readonly AggressivePlayer player;
+			readonly IntVector2 position;
 
-			public static void SaveCutters(SequentialPluginDataWriter writer, IEnumerable<CutterWrapper> cutters)
+			public static void SaveCutters(AggressivePlayer player, SequentialPluginDataWriter writer, IEnumerable<CutterWrapper> cutters)
 			{
-				writer.StoreNext(TakenPositions.Count);
+				writer.StoreNext(player.takenPositions.Count);
 				foreach (var cutter in cutters) {
 					cutter.Save(writer);
 				}
@@ -115,6 +116,7 @@ namespace ShowcasePackage.Players
 				for (int i = 0; i < numberOfCutters; i++) {
 					CutterWrapper newWrapper = new CutterWrapper(reader, player, level);
 					cutters.Add(newWrapper.cutter.Building, newWrapper);
+					player.takenPositions.Add(newWrapper.position);
 				}
 				return cutters;
 			}
@@ -124,7 +126,7 @@ namespace ShowcasePackage.Players
 				foreach (var position in PossiblePositions) {
 
 					ITile tile = GetTileRelativeToKeepCenter(position, player);
-					if (TakenPositions.Contains(position) ||
+					if (player.takenPositions.Contains(position) ||
 						!player.type.TreeCutter.CanBuild(tile.MapLocation, player.Player, level)) {
 						continue;
 					}
@@ -134,17 +136,23 @@ namespace ShowcasePackage.Players
 																Quaternion.Identity,
 																player.Player);
 					if (newBuilding != null) {
-						TakenPositions.Add(position);
-						return new CutterWrapper(newBuilding, player);
+						player.takenPositions.Add(position);
+						return new CutterWrapper(newBuilding, player, position);
 					}
 				}
 				return null;
 			}
 
-			CutterWrapper(IBuilding building, AggressivePlayer player)
+			public void Destroyed()
+			{
+				player.takenPositions.Remove(position);
+			}
+
+			CutterWrapper(IBuilding building, AggressivePlayer player, IntVector2 position)
 			{
 				this.cutter = (TreeCutter) building.BuildingPlugin;
 				this.player = player;
+				this.position = position;
 			}
 
 			CutterWrapper(SequentialPluginDataReader reader, AggressivePlayer player, ILevelManager level)
@@ -152,6 +160,7 @@ namespace ShowcasePackage.Players
 				reader.GetNext(out int id);
 				this.cutter = (TreeCutter)level.GetBuilding(id).Plugin;
 				this.player = player;
+				reader.GetNext(out position);
 			}
 
 			static ITile GetTileRelativeToKeepCenter(IntVector2 relativeDiff, AggressivePlayer player)
@@ -166,6 +175,7 @@ namespace ShowcasePackage.Players
 			void Save(SequentialPluginDataWriter writer)
 			{
 				writer.StoreNext(cutter.Building.ID);
+				writer.StoreNext(position);
 			}
 		
 		}
@@ -219,8 +229,9 @@ namespace ShowcasePackage.Players
 
 			public virtual void BuildingDestroyed(IBuilding building)
 			{
-				if (Player.cutters.Remove(building))
-				{
+				if (Player.cutters.TryGetValue(building, out var cutter)) {
+					cutter.Destroyed();
+					Player.cutters.Remove(building);
 					return;
 				}
 			}
@@ -288,7 +299,7 @@ namespace ShowcasePackage.Players
 
 			public override void Save(SequentialPluginDataWriter writer)
 			{
-				writer.StoreNext(Ident);
+				writer.StoreNext((int)Ident);
 			}
 		}
 
@@ -420,7 +431,7 @@ namespace ShowcasePackage.Players
 
 			public override void Save(SequentialPluginDataWriter writer)
 			{
-				writer.StoreNext(Ident);
+				writer.StoreNext((int)Ident);
 			}
 
 			void SpawnWolf()
@@ -521,7 +532,7 @@ namespace ShowcasePackage.Players
 
 			public override void OnUpdate(float timeStep)
 			{
-				if (target == null || (Player.wolfs.Count < 3 && Player.chickens.Count < 3)) {
+				if (target == null || (Player.wolfs.Count < MinWolfs && Player.chickens.Count < MinChickens)) {
 					Player.currentState = new BuildUnits(this, Player);
 				}
 
@@ -541,7 +552,7 @@ namespace ShowcasePackage.Players
 
 			public override void Save(SequentialPluginDataWriter writer)
 			{
-				writer.StoreNext(Ident);
+				writer.StoreNext((int)Ident);
 			}
 
 			void Attack()
@@ -701,9 +712,11 @@ namespace ShowcasePackage.Players
 			}
 		}
 
-		const int TargetNumberOfCutters = 5;
-		const int TargetNumberOfWolfs = 10;
-		const int TargetNumberOfChickens = 10;
+		const int TargetNumberOfCutters = 1;
+		const int TargetNumberOfWolfs = 3;
+		const int TargetNumberOfChickens = 3;
+		const int MinWolfs = 1;
+		const int MinChickens = 1;
 
 		IEnumerable<UnitSelector> AllUnits =>
 			chickens.Values
@@ -713,6 +726,8 @@ namespace ShowcasePackage.Players
 		Dictionary<IBuilding, CutterWrapper> cutters;
 		Dictionary<IUnit, Chicken> chickens;
 		Dictionary<IUnit, Wolf> wolfs;
+
+		readonly HashSet<IntVector2> takenPositions;
 
 		readonly AggressivePlayerType type;
 
@@ -732,9 +747,10 @@ namespace ShowcasePackage.Players
 		}
 
 		protected AggressivePlayer(ILevelManager level, IPlayer player, AggressivePlayerType type)
-			: base(level, player)
+			: base(level, player, type.Keep)
 		{
 			this.type = type;
+			this.takenPositions = new HashSet<IntVector2>();
 			this.cutters = new Dictionary<IBuilding, CutterWrapper>();
 			this.chickens = new Dictionary<IUnit, Chicken>();
 			this.wolfs = new Dictionary<IUnit, Wolf>();
@@ -749,15 +765,26 @@ namespace ShowcasePackage.Players
 		public override void SaveState(PluginDataWrapper pluginData)
 		{
 			var writer = pluginData.GetWriterForWrappedSequentialData();
-			CutterWrapper.SaveCutters(writer, cutters.Values);
+			CutterWrapper.SaveCutters(this, writer, cutters.Values);
+			currentState.Save(writer);
 		}
 
 		public override void LoadState(PluginDataWrapper pluginData)
 		{
+			Keep = GetKeep();
 			var reader = pluginData.GetReaderForWrappedSequentialData();
 			cutters = CutterWrapper.LoadCutters(reader, this, Level);
+			currentState = State.Load(reader, this);
 
-			Keep = GetKeep();
+			foreach (var wolf in Player.GetUnitsOfType(type.Wolf.UnitType)) {
+				wolfs.Add(wolf, (Wolf) wolf.Plugin);
+			}
+
+			foreach (var chicken in Player.GetUnitsOfType(type.Chicken.UnitType))
+			{
+				chickens.Add(chicken, (Chicken)chicken.Plugin);
+			}
+
 		}
 
 		public override void Dispose()
@@ -803,9 +830,9 @@ namespace ShowcasePackage.Players
 				return;
 			}
 
-			if (building == Keep.Building)
-			{
-				//#error DESTROY EVERYTHING, SIGNAL DEATH
+			if (building == Keep.Building) {
+				Player.RemoveFromLevel();
+				return;
 			}
 
 			currentState.BuildingDestroyed(building);
@@ -818,19 +845,5 @@ namespace ShowcasePackage.Players
 
 
 
-		/// <summary>
-		/// Gets players keep and checks there is really only one.
-		/// </summary>
-		/// <returns>The players keep.</returns>
-		/// <exception cref="LevelLoadingException">Thrown when there is invalid number of keeps.</exception>
-		Keep GetKeep()
-		{
-			IReadOnlyList<IBuilding> keeps = Player.GetBuildingsOfType(type.Keep.MyTypeInstance);
-			if (keeps.Count != 1)
-			{
-				throw new LevelLoadingException("Player is missing a keep.");
-			}
-			return (Keep)keeps[0].Plugin;
-		}
 	}
 }

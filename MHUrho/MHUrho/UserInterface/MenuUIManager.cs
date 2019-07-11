@@ -29,7 +29,7 @@ namespace MHUrho.UserInterface
 		public LevelSettingsScreen LevelSettingsScreen { get; private set; }
 		public LevelCreationScreen LevelCreationScreen { get; private set; }
 		public SaveAsScreen SaveAsScreen { get; private set; }
-
+		public EndScreen EndScreen { get; private set; }
 
 		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
 		public ConfirmationPopUp ConfirmationPopUp { get; private set; }
@@ -63,6 +63,7 @@ namespace MHUrho.UserInterface
 			LevelSettingsScreen = new LevelSettingsScreen(this);
 			LevelCreationScreen = new LevelCreationScreen(this);
 			SaveAsScreen = new SaveAsScreen(this);
+			EndScreen = new EndScreen(this);
 			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
 			ConfirmationPopUp = new ConfirmationPopUp(this);
 			ErrorPopUp = new ErrorPopUp(this);
@@ -140,6 +141,13 @@ namespace MHUrho.UserInterface
 			SaveAsScreen.Level = level;
 			SwitchToScreen(SaveAsScreen);
 			return SaveAsScreen;
+		}
+
+		public EndScreen SwitchToEndScreen(bool victory)
+		{
+			EndScreen.Victory = victory;
+			SwitchToScreen(EndScreen);
+			return EndScreen;
 		}
 
 		public void SwitchBack()

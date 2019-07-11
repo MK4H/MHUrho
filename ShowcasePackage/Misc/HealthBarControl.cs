@@ -21,7 +21,7 @@ namespace ShowcasePackage.Misc
 		/// If the health bar is visible
 		/// </summary>
 		public bool Visible {
-			get => healthBar.Visible;
+			get => visible;
 			set {
 				if (value) {
 					Show();
@@ -29,12 +29,16 @@ namespace ShowcasePackage.Misc
 				else {
 					Hide();
 				}
+
+				visible = value;
 			}
 		}
 
 		readonly HealthBar healthBar;
 		readonly Vector3 offset;
 		readonly Vector2 size;
+
+		bool visible;
 
 		public HealthBarControl(ILevelManager level, IEntity entity, double hitPoints, Vector3 barOffset, Vector2 barSize, bool visible)
 		{
@@ -106,11 +110,13 @@ namespace ShowcasePackage.Misc
 
 		protected void Show()
 		{
+			visible = true;
 			healthBar.Show();
 		}
 
 		protected void Hide()
 		{
+			visible = false;
 			healthBar.Hide();
 		}
 

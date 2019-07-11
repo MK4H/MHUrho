@@ -175,6 +175,11 @@ namespace MHUrho.PathFinding.AStar {
 				//If not finished, add untouched neighbours to the queue and touched nodes
 				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc,ref minDistToTarget);
 			}
+
+			if (visualization == Visualization.TouchedNodes)
+			{
+				VisualizeTouchedNodes(targetNode.Time);
+			}
 			//Did not find path
 			return null;
 		}

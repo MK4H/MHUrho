@@ -63,6 +63,11 @@ namespace MHUrho.Input.MandK
 			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
+		public void SwitchToEndScreen(bool victory)
+		{
+			UIController.SwitchToEndScreen(victory);
+		}
+
 		public ILevelLoader GetLevelLoaderForEditing(LevelRep level, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 		{
 			if (pausedLevelController != null) {
