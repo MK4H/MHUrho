@@ -15,7 +15,7 @@ namespace MHUrho.Input.MandK
 
 		public float MouseSensitivity { get; set; }
 
-		protected MyGame Game => MyGame.Instance;
+		protected MHUrhoApp Game => MHUrhoApp.Instance;
 
 		protected Urho.Input Input => Game.Input;
 		protected UI UI => Game.UI;
@@ -71,7 +71,7 @@ namespace MHUrho.Input.MandK
 
 		void CreateCursor()
 		{
-			XmlFile style = PackageManager.Instance.GetXmlFile("UI/DefaultCursorStyle.xml", true);
+			XmlFile style = Game.PackageManager.GetXmlFile("UI/DefaultCursorStyle.xml", true);
 
 			Cursor cursor = UI.Root.CreateCursor("UICursor");
 			UI.Cursor = cursor;

@@ -28,21 +28,22 @@ namespace MHUrho.EditorTools.MandK
 
 		bool enabled;
 
-		public UnitSpawningTool(GameController input, GameUI ui, CameraMover camera)
-			:base(input)
+		public UnitSpawningTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			:base(input, iconRectangle)
 		{
 
 			this.input = input;
 			this.ui = ui;
 			this.unitTypes = new Dictionary<CheckBox, UnitType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.enabled = false;
 
-			foreach (var unitType in PackageManager.Instance.ActivePackage.UnitTypes) {
+			foreach (var unitType in input.Level.Package.UnitTypes) {
 
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnUnitTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActivePackage.UnitIconTexture;
+				checkBox.Texture = input.Level.Package.UnitIconTexture;
 				checkBox.ImageRect = unitType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(unitType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * unitType.IconRectangle.Width(), 0);
@@ -98,19 +99,32 @@ namespace MHUrho.EditorTools.MandK
 			if (checkBoxes.Selected != null) {
 
 				foreach (var result in input.CursorRaycast()) {
-					//Spawn only at buildings or map, not units, projectiles etc.
-					if (!Level.TryGetBuilding(result.Node, out IBuilding dontCare) && !Level.Map.IsRaycastToMap(result)) {
-						continue;
-					}
 
-					//Spawn at the first possible raycast hit
-					if (Level.SpawnUnit(unitTypes[checkBoxes.Selected], 
-										 Map.GetContainingTile(result.Position),
-										 Quaternion.Identity,
-										 input.Player) != null)
+
+					if (Level.Map.IsRaycastToMap(result))
 					{
+						//Try spawn
+						Level.SpawnUnit(unitTypes[checkBoxes.Selected],
+										Map.GetContainingTile(result.Position),
+										Quaternion.Identity,
+										input.Player);
 						return;
 					}
+					
+					//Spawn only at buildings or map, not units, projectiles etc.
+					for (Node current = result.Node;current != Level.LevelNode && current != null; current = current.Parent) {
+						if (!Level.TryGetBuilding(current, out IBuilding dontCare)) {
+							continue;
+						}
+
+						if (Level.SpawnUnit(unitTypes[checkBoxes.Selected],
+											Map.GetContainingTile(result.Position),
+											Quaternion.Identity,
+											input.Player) != null) {
+							//Spawned
+							return;
+						}
+					}				
 				}
 			}
 		}

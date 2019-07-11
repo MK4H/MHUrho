@@ -9,7 +9,7 @@ using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.WorldMap;
 using Urho.Physics;
 
@@ -39,7 +39,7 @@ namespace MHUrho.Logic
 				this.storedBuilding = storedBuilding;
 				componentLoaders = new List<DefaultComponentLoader>();
 
-				type = PackageManager.Instance.ActivePackage.GetBuildingType(storedBuilding.TypeID);
+				type = level.Package.GetBuildingType(storedBuilding.TypeID);
 				if (type == null) {
 					throw new ArgumentException("Type of this building was not loaded");
 				}
@@ -59,7 +59,7 @@ namespace MHUrho.Logic
 											BuildingType type,
 											IPlayer player,
 											ILevelManager level) {
-				if (!type.CanBuildIn(type.GetBuildingTilesRectangle(topLeftCorner), level)) {
+				if (!type.CanBuild(topLeftCorner, player, level)) {
 					return null;
 				}
 
@@ -84,19 +84,23 @@ namespace MHUrho.Logic
 					throw new CreationException(message, e);
 				}
 
-
+				Building newBuilding = null;
 				try {
 					new BuildingComponentSetup().SetupComponentsOnNode(buildingNode, level);
 
-					var newBuilding = new Building(id, level, rect, type, player);
+					newBuilding = new Building(id, level, rect, type, player);
 					buildingNode.AddComponent(newBuilding);
 
 					newBuilding.BuildingPlugin = newBuilding.BuildingType.GetNewInstancePlugin(newBuilding, level);
 					return newBuilding;
 				}
 				catch (Exception e) {
-					buildingNode.Remove();
-					buildingNode.Dispose();
+					if (newBuilding != null) {
+						newBuilding.RemoveFromLevel();
+					}
+					else {
+						buildingNode.Remove();
+					}					
 					string message = $"There was an Exception while creating a new building: {e.Message}";
 					Urho.IO.Log.Write(LogLevel.Error, message);
 					throw new CreationException(message, e);
@@ -153,9 +157,10 @@ namespace MHUrho.Logic
 				Node buildingNode = type.Assets.Instantiate(level, position, rotation);
 				new BuildingComponentSetup().SetupComponentsOnNode(buildingNode, level);
 
+				loadingBuilding = new Building(storedBuilding.Id, level, rect, type);
 				buildingNode.AddComponent(loadingBuilding);
 				
-				loadingBuilding = new Building(storedBuilding.Id, level, rect, type);
+
 				loadingBuilding.BuildingPlugin = type.GetInstancePluginForLoading(loadingBuilding, level);
 
 				foreach (var defaultComponent in storedBuilding.DefaultComponents)
@@ -214,6 +219,8 @@ namespace MHUrho.Logic
 
 		public BuildingType BuildingType { get; private set; }
 
+		public override IEntityType Type => BuildingType;
+
 		public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
 		public override Vector3 Forward => Node.WorldDirection;
@@ -230,8 +237,18 @@ namespace MHUrho.Logic
 
 		public BuildingInstancePlugin BuildingPlugin { get; private set; }
 
+		public IReadOnlyList<ITile> Tiles => tiles;
+
 		readonly ITile[] tiles;
 
+		/// <summary>
+		/// Constructor for creating new building during the game.
+		/// </summary>
+		/// <param name="id">Identifier.</param>
+		/// <param name="level">Running level.</param>
+		/// <param name="rectangle">Rectangle in the map taken by this building.</param>
+		/// <param name="type">Type of this building.</param>
+		/// <param name="player">Owner of the new building.</param>
 		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type, IPlayer player) 
 			:base(id, level)
 		{
@@ -239,15 +256,24 @@ namespace MHUrho.Logic
 			this.BuildingType = type;
 			this.Player = player;
 			this.Rectangle = rectangle;
-			this.tiles = AllocTiles();
+			this.tiles = AllocTiles(true);
 		}
 
+
+		/// <summary>
+		/// Constructor for loading instance.
+		/// </summary>
+		/// <param name="id">Identifier.</param>
+		/// <param name="level">Loading level.</param>
+		/// <param name="rectangle">Rectangle in the map taken by this building.</param>
+		/// <param name="type">Type of this building.</param>
 		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type) 
 			:base(id, level)
 		{
 			this.BuildingType = type;
 			this.Rectangle = rectangle;
-			this.tiles = AllocTiles();
+			//Tiles remember which buildings were on them.
+			this.tiles = AllocTiles(false);
 		}
 
 
@@ -281,7 +307,7 @@ namespace MHUrho.Logic
 
 		public override void RemoveFromLevel() {
 
-			if (RemovedFromLevel) return;
+			if (IsRemovedFromLevel) return;
 
 			base.RemoveFromLevel();
 
@@ -300,10 +326,11 @@ namespace MHUrho.Logic
 			}
 
 			Player?.RemoveBuilding(this);
-			Node.Remove();
+			if (!IsDeleted) {
+				Node.Remove();
+			}
 			
-			Dispose();
-			
+			base.Dispose();
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -331,6 +358,53 @@ namespace MHUrho.Logic
 
 		}
 
+		public bool CanChangeTileHeight(int x, int y)
+		{
+			try
+			{
+				return BuildingPlugin.CanChangeTileHeight(x,y);
+			}
+			catch (Exception e)
+			{
+				//Log and ignore
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.CanChangeTileHeight)} failed with Exception: {e.Message}");
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Notifies the building that the height of the tile it occupies has changed.
+		/// </summary>
+		/// <param name="tile">The tile with the changed height.</param>
+		public void TileHeightChanged(ITile tile)
+		{
+			try
+			{
+				BuildingPlugin.TileHeightChanged(tile);
+			}
+			catch (Exception e)
+			{
+				//NOTE: Maybe add cap to prevent message flood
+				Urho.IO.Log.Write(LogLevel.Error, $"Building  plugin call {nameof(BuildingPlugin.TileHeightChanged)} failed with Exception: {e.Message}");
+			}
+		}
+
+		/// <summary>
+		/// Changes the height of the building.
+		/// </summary>
+		/// <param name="newHeight">The new height of the building.</param>
+		public void ChangeHeight(float newHeight)
+		{
+			Node.Position = Node.Position.WithY(newHeight);
+			foreach (var tile in Tiles) {
+				foreach (var unit in tile.Units) {
+					unit.TileHeightChanged(tile);
+				}
+			}
+			SignalPositionChanged();
+		}
+
 		public IFormationController GetFormationController(Vector3 centerPosition)
 		{
 			try {
@@ -354,7 +428,7 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep)
 		{
 			base.OnUpdate(timeStep);
-			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}
 
@@ -378,14 +452,16 @@ namespace MHUrho.Logic
 		}
 
 
-		ITile[] AllocTiles() {
+		ITile[] AllocTiles(bool registerBuilding) {
 			var newTiles = new ITile[BuildingType.Size.X * BuildingType.Size.Y];
 
 			for (int y = 0; y < BuildingType.Size.Y; y++) {
 				for (int x = 0; x < BuildingType.Size.X; x++) {
-					var tile = Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
+					var tile = Level.Map.GetTileByTopLeftCorner(TopLeft.X + x, TopLeft.Y + y);
 					newTiles[GetTileIndex(x, y)] = tile;
-					tile.SetBuilding(this);
+					if (registerBuilding) {
+						tile.SetBuilding(this);
+					}	
 				}
 			}
 

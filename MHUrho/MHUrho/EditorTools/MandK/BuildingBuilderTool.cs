@@ -30,20 +30,21 @@ namespace MHUrho.EditorTools.MandK
 
 		bool enabled;
 
-		public BuildingBuilderTool(GameController input, GameUI ui, CameraMover camera)
-			: base(input)
+		public BuildingBuilderTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 			this.input = input;
 			this.ui = ui;
 			this.buildingTypes = new Dictionary<CheckBox, BuildingType>();
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.enabled = false;
 
-			foreach (var buildingType in PackageManager.Instance.ActivePackage.BuildingTypes) {
+			foreach (var buildingType in input.Level.Package.BuildingTypes) {
 
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnBuildingTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActivePackage.BuildingIconTexture;
+				checkBox.Texture = input.Level.Package.BuildingIconTexture;
 				checkBox.ImageRect = buildingType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(buildingType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * buildingType.IconRectangle.Width(), 0);
@@ -71,7 +72,6 @@ namespace MHUrho.EditorTools.MandK
 			checkBoxes.Deselect();
 			checkBoxes.Hide();
 
-			input.UIManager.CursorTooltips.Clear();
 			input.MouseDown -= OnMouseDown;
 			input.MouseMove -= OnMouseMove;
 			Level.Update -= OnUpdate;
@@ -98,16 +98,7 @@ namespace MHUrho.EditorTools.MandK
 
 		void OnBuildingTypeToggled(ToggledEventArgs e)
 		{
-			if (e.State) {
-				//TODO: THINGS
-				//var text = input.UIManager.CursorTooltips.AddText();
-				//text.SetStyleAuto();
-				//text.Value = "Hello world";
-				//text.Position = new IntVector2(10, 0);
-
-				//input.UIManager.CursorTooltips.AddImage(new IntRect(0, 0, 200, 200));
-			}
-
+			//NOTE: Can display stuff on toggle
 		}
 
 
@@ -121,7 +112,7 @@ namespace MHUrho.EditorTools.MandK
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
-			if (buildingType.CanBuildIn(topLeft, bottomRight, Level)) {
+			if (buildingType.CanBuild(topLeft, input.Player, Level)) {
 				LevelManager.CurrentLevel.BuildBuilding(buildingTypes[checkBoxes.Selected], topLeft, Quaternion.Identity, input.Player);
 			}
 		}
@@ -140,7 +131,7 @@ namespace MHUrho.EditorTools.MandK
 
 		void GetBuildingRectangle(ITile centerTile, BuildingType buildingType, out IntVector2 topLeft, out IntVector2 bottomRight) {
 			topLeft = centerTile.TopLeft - buildingType.Size / 2;
-			bottomRight = topLeft + buildingType.Size - new IntVector2(1,1);
+			bottomRight = buildingType.GetBottomRightTileIndex(topLeft);
 			Map.SnapToMap(ref topLeft, ref bottomRight);
 		}
 
@@ -154,7 +145,7 @@ namespace MHUrho.EditorTools.MandK
 
 			GetBuildingRectangle(tile, buildingType, out IntVector2 topLeft, out IntVector2 bottomRight);
 
-			Color color = buildingType.CanBuildIn(topLeft, bottomRight, Level) ? Color.Green : Color.Red;
+			Color color = buildingType.CanBuild(topLeft, input.Player, Level) ? Color.Green : Color.Red;
 			Map.HighlightRectangle(topLeft, bottomRight, color);
 		}
 

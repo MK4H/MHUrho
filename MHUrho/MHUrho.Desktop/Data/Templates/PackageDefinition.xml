@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<gamePack xmlns="http://www.MobileHold.cz/GamePack.xsd" name="[Package name]">
+  <!--All paths are relative to the directory this file will be placed in-->
+  <description>[Description text]</description>
+  <levels>
+    <dataDirPath>[Path to directory where level data will be stored]</dataDirPath>
+  </levels>
+  <levelLogicTypes>
+    <levelLogicType name="[Name]" ID="[Number]">
+      <assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+      <extension>[User defined part of XML]</extension>
+    </levelLogicType>
+  </levelLogicTypes>
+	<playerAITypes>
+		<playerAIType name="[Name]" ID="[Number]" category="[ai|human|neutral]">
+			<iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+			<assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+		  <extension>[User defined part of XML]</extension>
+		</playerAIType>
+	</playerAITypes>
+  <resourceTypes>
+    <resourceType name="[Name]" ID="[Number]">
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+    </resourceType>
+  </resourceTypes>
+  <tileTypes>
+    <defaultTileType name="[Name]" ID="[Number]">
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+      <texturePath>[Path to texture file]</texturePath>
+      <minimapColor R="[0-255]" G="[0-255]" B="[0-255]"/>
+    </defaultTileType>
+    <tileType name="[Name]" ID="[Number]">
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+      <texturePath>[Path to texture file]</texturePath>
+      <minimapColor R="[0-255]" G="[0-255]" B="[0-255]"/>
+    </tileType>
+  </tileTypes>
+  <unitTypes>
+    <unitType name="[Name]" ID="[Number]">
+      <assets type="[xmlprefab|binaryprefab|items]">[content dependent on type]</assets>
+      <assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+      <extension>[User defined part of XML]</extension>
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+    </unitType>
+  </unitTypes>
+  <projectileTypes>
+		<projectileType name="[Name]" ID="[Number]">
+		  <assets type="[xmlprefab|binaryprefab|items]">[content dependent on type]</assets>
+			<assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+			<extension>[User defined part of XML]</extension>
+		</projectileType>
+  </projectileTypes>
+  <buildingTypes>
+    <buildingType name="[Name]" ID="[Number]">
+      <assets type="[xmlprefab|binaryprefab|items]">[content dependent on type]</assets>
+      <assemblyPath>[Path to assembly of the plugin]</assemblyPath>
+      <extension>[User defined part of XML]</extension>
+      <iconTextureRectangle left="[Number]" top="[Number]" right="[Number]" bottom="[Number]"/>
+      <size x="[Number of tiles]" y="[Number of tiles]"/>
+    </buildingType>
+  </buildingTypes>
+	<resourceIconTexturePath>[Path to texture]</resourceIconTexturePath>
+	<tileIconTexturePath>[Path to texture]</tileIconTexturePath>
+	<unitIconTexturePath>[Path to texture]</unitIconTexturePath>
+	<buildingIconTexturePath>[Path to texture]</buildingIconTexturePath>
+	<playerIconTexturePath>[Path to texture]</playerIconTexturePath>
+  <toolIconTexturePath>[Path to texture]</toolIconTexturePath>
+</gamePack>

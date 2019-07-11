@@ -15,7 +15,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
-	public class UnitType : ILoadableType, IDisposable
+	public class UnitType : IEntityType, IDisposable
 	{
 
 		public int ID { get; private set; }
@@ -30,6 +30,8 @@ namespace MHUrho.Logic
 
 		public UnitTypePlugin Plugin { get; private set; }
 
+		TypePlugin IEntityType.Plugin => Plugin;
+
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
 		/// It is done this way to allow cyclic references during the Load method, so anything 
@@ -37,6 +39,30 @@ namespace MHUrho.Logic
 		/// </summary>
 		public UnitType() {
 
+		}
+
+		/// <summary>
+		/// Provided for construction of mock types for auxiliary uses.
+		/// </summary>
+		/// <param name="id">Identifier.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="package">Package.</param>
+		/// <param name="assets">Asset container.</param>
+		/// <param name="iconRectangle">Icon rectangle in the <see cref="GamePack.UnitIconTexture"/></param>
+		/// <param name="plugin">Plugin.</param>
+		public UnitType(int id,
+						string name,
+						GamePack package,
+						AssetContainer assets,
+						IntRect iconRectangle,
+						UnitTypePlugin plugin)
+		{
+			this.ID = id;
+			this.Name = name;
+			this.Package = package;
+			this.Assets = assets;
+			this.IconRectangle = iconRectangle;
+			this.Plugin = plugin;
 		}
 
 		/// <summary>
@@ -48,24 +74,54 @@ namespace MHUrho.Logic
 		/// <see cref="UnitType.ParseExtensionData(XElement, GamePack)"/>
 		/// </summary>
 		/// <param name="xml">xml element describing the type, according to <see cref="PackageManager.XMLNamespace"/> schema</param>
-		/// <param name="newID">ID of this type in the current game</param>
 		/// <param name="package">Package this unitType belongs to</param>
 		/// <returns>UnitType with filled standard members</returns>
 		public void Load(XElement xml, GamePack package) {
-			//TODO: Check for errors
-			ID = XmlHelpers.GetID(xml);
-			Name = XmlHelpers.GetName(xml);
+			
 			Package = package;
 
-			XElement pathElement = xml.Element(UnitTypeXml.Inst.AssemblyPath);
+			//The XML should be validated, there should be no errors
+			string assemblyPath = null;
+			XElement assetsElement = null;
+			XElement extensionElem = null;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				IconRectangle = XmlHelpers.GetIconRectangle(xml);
+				assemblyPath = XmlHelpers.GetPath(xml.Element(UnitTypeXml.Inst.AssemblyPath));
+				assetsElement = xml.Element(UnitTypeXml.Inst.Assets);
+				extensionElem = XmlHelpers.GetExtensionElement(xml);
+			}
+			catch (Exception e) {
+				LoadError($"Unit type loading failed: Invalid XML of the package {package.Name}", e);
+			}
 
-			Plugin = TypePlugin.LoadTypePlugin<UnitTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
+			try
+			{
+				Assets = AssetContainer.FromXml(assetsElement, package);
+			}
+			catch (Exception e)
+			{
+				LoadError($"Unit type \"{Name}\"[{ID}] loading failed: Asset instantiation failed with exception: {e.Message}", e);
+			}
 
-			Assets = AssetContainer.FromXml(xml.Element(UnitTypeXml.Inst.Assets));
-			IconRectangle = XmlHelpers.GetIconRectangle(xml);
+			try {
+				Plugin = TypePlugin.LoadTypePlugin<UnitTypePlugin>(assemblyPath, package, Name, ID, extensionElem);
 
-			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-									 package);
+			}
+			catch (Exception e) {
+				LoadError($"Unit type \"{Name}\"[{ID}] loading failed: Plugin loading failed with exception: {e.Message}", e);
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return ID;
 		}
 
 		/// <summary>
@@ -139,7 +195,16 @@ namespace MHUrho.Logic
 		}
 
 
-
+		/// <summary>
+		/// Logs message and throws a <see cref="PackageLoadingException"/>
+		/// </summary>
+		/// <param name="message">Message to log and propagate via exception</param>
+		/// <exception cref="PackageLoadingException">Always throws this exception</exception>
+		void LoadError(string message, Exception e)
+		{
+			Urho.IO.Log.Write(LogLevel.Error, message);
+			throw new PackageLoadingException(message, e);
+		}
 
 	}
 }

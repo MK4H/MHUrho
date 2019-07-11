@@ -10,9 +10,9 @@ namespace MHUrho.PathFinding.AStar
 		bool canPass;
 		float resTime;
 
-		public bool GetTime(INode source, INode target, out float time)
+		public bool GetTime(INode source, INode target, MovementType movementType, out float time)
 		{
-			source.Accept(this, target);
+			source.Accept(this, target, movementType);
 			time = resTime;
 			return canPass;
 		}
@@ -37,43 +37,43 @@ namespace MHUrho.PathFinding.AStar
 
 		//These methods translate the Visitor API to nicer GetTime virtual methods 
 
-		void INodeVisitor.Visit(ITileNode source, ITileNode target)
+		void INodeVisitor.Visit(ITileNode source, ITileNode target, MovementType movementType)
 		{
-			canPass = GetTime(source, target, out resTime);
+			canPass = GetTime(source, target, movementType, out resTime);
 		}
-		void INodeVisitor.Visit(ITileNode source, IBuildingNode target)
+		void INodeVisitor.Visit(ITileNode source, IBuildingNode target, MovementType movementType)
 		{
-			canPass = GetTime(source, target, out resTime);
+			canPass = GetTime(source, target, movementType, out resTime);
 		}
-		void INodeVisitor.Visit(ITileNode source, ITempNode target)
+		void INodeVisitor.Visit(ITileNode source, ITempNode target, MovementType movementType)
 		{
-			canPass = GetTime(source, target, out resTime);
-		}
-
-		void INodeVisitor.Visit(IBuildingNode source, ITileNode target)
-		{
-			canPass = GetTime(source, target, out resTime);
-		}
-		void INodeVisitor.Visit(IBuildingNode source, IBuildingNode target)
-		{
-			canPass = GetTime(source, target, out resTime);
-		}
-		void INodeVisitor.Visit(IBuildingNode source, ITempNode target)
-		{
-			canPass = GetTime(source, target, out resTime);
+			canPass = GetTime(source, target, movementType, out resTime);
 		}
 
-		void INodeVisitor.Visit(ITempNode source, ITileNode target)
+		void INodeVisitor.Visit(IBuildingNode source, ITileNode target, MovementType movementType)
 		{
-			canPass = GetTime(source, target, out resTime);
+			canPass = GetTime(source, target, movementType, out resTime);
 		}
-		void INodeVisitor.Visit(ITempNode source, IBuildingNode target)
+		void INodeVisitor.Visit(IBuildingNode source, IBuildingNode target, MovementType movementType)
 		{
-			canPass = GetTime(source, target, out resTime);
+			canPass = GetTime(source, target, movementType, out resTime);
 		}
-		void INodeVisitor.Visit(ITempNode source, ITempNode target)
+		void INodeVisitor.Visit(IBuildingNode source, ITempNode target, MovementType movementType)
 		{
-			canPass = GetTime(source, target, out resTime);
+			canPass = GetTime(source, target, movementType, out resTime);
+		}
+
+		void INodeVisitor.Visit(ITempNode source, ITileNode target, MovementType movementType)
+		{
+			canPass = GetTime(source, target, movementType, out resTime);
+		}
+		void INodeVisitor.Visit(ITempNode source, IBuildingNode target, MovementType movementType)
+		{
+			canPass = GetTime(source, target, movementType, out resTime);
+		}
+		void INodeVisitor.Visit(ITempNode source, ITempNode target, MovementType movementType)
+		{
+			canPass = GetTime(source, target, movementType, out resTime);
 		}
 
 		//These methods are for the user to reimplement
@@ -84,9 +84,10 @@ namespace MHUrho.PathFinding.AStar
 		/// </summary>
 		/// <param name="source">Source node</param>
 		/// <param name="target">Target node</param>
+		/// <param name="movementType">Movement type from <paramref name="source"/> to <paramref name="target"/>.</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(ITileNode source, ITileNode target, out float time)
+		protected virtual bool GetTime(ITileNode source, ITileNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -100,7 +101,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(ITileNode source, IBuildingNode target, out float time)
+		protected virtual bool GetTime(ITileNode source, IBuildingNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -114,7 +115,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(ITileNode source, ITempNode target, out float time)
+		protected virtual bool GetTime(ITileNode source, ITempNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -128,7 +129,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(IBuildingNode source, ITileNode target, out float time)
+		protected virtual bool GetTime(IBuildingNode source, ITileNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -142,7 +143,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(IBuildingNode source, IBuildingNode target, out float time)
+		protected virtual bool GetTime(IBuildingNode source, IBuildingNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -156,7 +157,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(IBuildingNode source, ITempNode target, out float time)
+		protected virtual bool GetTime(IBuildingNode source, ITempNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -170,7 +171,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(ITempNode source, ITileNode target, out float time)
+		protected virtual bool GetTime(ITempNode source, ITileNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -184,7 +185,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(ITempNode source, IBuildingNode target, out float time)
+		protected virtual bool GetTime(ITempNode source, IBuildingNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;
@@ -198,7 +199,7 @@ namespace MHUrho.PathFinding.AStar
 		/// <param name="target">Target node</param>
 		/// <param name="time">Result time it will take to get from <paramref name="source"/> to <paramref name="target"/></param>
 		/// <returns>If it is possible to get to the</returns>
-		protected virtual bool GetTime(ITempNode source, ITempNode target, out float time)
+		protected virtual bool GetTime(ITempNode source, ITempNode target, MovementType movementType, out float time)
 		{
 			time = -1;
 			return false;

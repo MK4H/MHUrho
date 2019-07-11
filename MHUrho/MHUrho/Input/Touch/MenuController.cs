@@ -17,6 +17,8 @@ namespace MHUrho.Input.Touch
 	class MenuController : Controller, IMenuController
 	{
 		public InputType InputType => InputType.Touch;
+		public event OnScreenChangeDelegate ScreenChanged;
+
 		public void InitialSwitchToMainMenu(string loadingErrorTitle = null, string loadingErrorDescription = null)
 		{
 			throw new NotImplementedException();
@@ -37,20 +39,28 @@ namespace MHUrho.Input.Touch
 			throw new NotImplementedException();
 		}
 
+		public void SwitchToEndScreen(bool victory)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void SavePausedLevel(string fileName)
 		{
 			throw new NotImplementedException();
 		}
 
-		public ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
+		public ILevelLoader GetLevelLoaderForEditing(LevelRep level,
+													IProgressEventWatcher parentProgress = null,
+													double subsectionSize = 100)
 		{
 			throw new NotImplementedException();
 		}
 
-		public ILevelLoader StartLoadingLevelForPlaying(LevelRep level,
-												PlayerSpecification players,
-												LevelLogicCustomSettings customSettings,
-												ILoadingSignaler loadingSignaler)
+		public ILevelLoader GetLevelLoaderForPlaying(LevelRep level,
+													PlayerSpecification players,
+													LevelLogicCustomSettings customSettings,
+													IProgressEventWatcher parentProgress = null,
+													double subsectionSize = 100)
 		{
 			throw new NotImplementedException();
 		}

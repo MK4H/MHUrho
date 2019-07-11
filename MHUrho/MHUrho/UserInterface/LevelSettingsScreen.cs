@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using MHUrho.EntityInfo;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -37,7 +38,7 @@ namespace MHUrho.UserInterface
 					elementToTeamMap = new Dictionary<UIElement, int>();
 
 					var child =
-						screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerItemLayout.xml", true));
+						screen.Game.UI.LoadLayout(screen.Game.PackageManager.GetXmlFile("UI/PlayerItemLayout.xml", true));
 
 					AddChild(child);
 
@@ -84,9 +85,9 @@ namespace MHUrho.UserInterface
 				}
 
 
-				static UIElement InitTypeItem(PlayerType player, MyGame game, MenuUIManager menuUIManager)
+				static UIElement InitTypeItem(PlayerType player, MHUrhoApp game, MenuUIManager menuUIManager)
 				{
-					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/PlayerTypeItemLayout.xml", true),
+					var newElement = game.UI.LoadLayout(game.PackageManager.GetXmlFile("UI/PlayerTypeItemLayout.xml", true),
 														menuUIManager.MenuRoot.GetDefaultStyle());
 
 					BorderImage playerIcon = (BorderImage)newElement.GetChild("PlayerIcon");
@@ -103,9 +104,9 @@ namespace MHUrho.UserInterface
 					return newElement;
 				}
 
-				static UIElement InitTeamItem(int teamID, MyGame game, MenuUIManager menuUIManager)
+				static UIElement InitTeamItem(int teamID, MHUrhoApp game, MenuUIManager menuUIManager)
 				{
-					var newElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/TeamListItemLayout.xml", true),
+					var newElement = game.UI.LoadLayout(game.PackageManager.GetXmlFile("UI/TeamListItemLayout.xml", true),
 														menuUIManager.MenuRoot.GetDefaultStyle());
 
 					Text textElement = (Text)newElement.GetChild("TeamIDText");
@@ -128,7 +129,7 @@ namespace MHUrho.UserInterface
 
 			readonly LevelLogicCustomSettings pluginCustomSettings;
 
-			public Screen(LevelSettingsScreen proxy)
+			public Screen(LevelSettingsScreen proxy, out string errorMessage)
 				:base(proxy)
 			{
 				this.proxy = proxy;
@@ -138,7 +139,7 @@ namespace MHUrho.UserInterface
 
 				customSettingsWindow = (Window)window.GetChild("CustomSettings", true);
 
-				UIElement descriptionTextElement = Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/DescriptionTextLayout.xml", true),
+				UIElement descriptionTextElement = Game.UI.LoadLayout(Game.PackageManager.GetXmlFile("UI/DescriptionTextLayout.xml", true),
 																	MenuUIManager.MenuRoot.GetDefaultStyle());
 				descriptionText = (Text) descriptionTextElement.GetChild("DescriptionText");
 				descriptionText.Value = Level.Description;
@@ -173,7 +174,17 @@ namespace MHUrho.UserInterface
 					PlayerItem.CreateAndAddToList(playerList, this, insigniaGetter.GetNextUnusedInsignia(), i + 2, PlayerTypeCategory.AI);
 				}
 
-				pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow);
+				try {
+					pluginCustomSettings = Level.LevelLogicType.GetCustomSettings(customSettingsWindow, Game);
+					errorMessage = null;
+				}
+				catch (Exception e) {
+					string message =
+						$"Level plugin threw an exception when getting the Custom settings window contents: {e.Message}";
+					Urho.IO.Log.Write(Urho.LogLevel.Error, message);
+					pluginCustomSettings = null;
+					errorMessage = message;
+				}
 			}
 
 			public override void EnableInput()
@@ -223,9 +234,11 @@ namespace MHUrho.UserInterface
 					aiPlayers.Add(Tuple.Create(item.ChosenType, item.ChosenTeam, item.Insignia));
 				}
 
-				Play(neutralPlayerItem.ChosenType,
-					Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam, humanPlayerItem.Insignia),
-					aiPlayers);
+				//Has to be last statement in the method, this instance will be released during execution.
+				proxy.Play(neutralPlayerItem.ChosenType,
+							Tuple.Create(humanPlayerItem.ChosenType, humanPlayerItem.ChosenTeam, humanPlayerItem.Insignia),
+							aiPlayers,
+							 pluginCustomSettings);
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -233,23 +246,7 @@ namespace MHUrho.UserInterface
 				MenuUIManager.SwitchBack();
 			}
 
-			void Play(PlayerType neutralPlayerType,
-					Tuple<PlayerType,int, PlayerInsignia> humanPlayer,
-					IEnumerable<Tuple<PlayerType, int, PlayerInsignia>> aiPlayers)
-			{
-				PlayerSpecification players = new PlayerSpecification();
-
-				players.SetNeutralPlayer(neutralPlayerType);
-				players.SetHumanPlayer(humanPlayer.Item1, humanPlayer.Item2, humanPlayer.Item3);
-				foreach (var aiPlayer in aiPlayers) {
-					players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2, aiPlayer.Item3);
-				}
-
-				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it
-				LevelRep level = Level;
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(() => MenuUIManager.Clear());
-				MenuUIManager.MenuController.StartLoadingLevelForPlaying(level, players, pluginCustomSettings, screen.LoadingWatcher);
-			}
+			
 
 			public void SimulateBackButton()
 			{
@@ -268,17 +265,17 @@ namespace MHUrho.UserInterface
 								 insigniaGetter.GetNextUnusedInsignia());
 
 
-
-				Play(neutralPlayerType,
-					humanPlayer,
-					from aiPlayer in screenAction.AIPlayers
-					select Tuple.Create(Level.GamePack.GetPlayerType(aiPlayer.Item1),
-										aiPlayer.Item2,
-										insigniaGetter.GetNextUnusedInsignia()));
+				//Has to be last statement in the method, this instance will be released during the execution
+				proxy.Play(neutralPlayerType,
+							humanPlayer,
+							from aiPlayer in screenAction.AIPlayers
+							select Tuple.Create(Level.GamePack.GetPlayerType(aiPlayer.Item1),
+												aiPlayer.Item2,
+												insigniaGetter.GetNextUnusedInsignia()),
+							 pluginCustomSettings);
 			}
 		}
 
-		//TODO: Ensure that Show cannot be called with Level null, that level is not changed after show etc.
 		public LevelRep Level { get; set; }
 
 		protected override ScreenBase ScreenInstance {
@@ -320,19 +317,56 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen = new Screen(this);
-		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
+			if (Level == null) {
+				throw new InvalidOperationException($"{nameof(Level)} has to be set before Showing this screen");
 			}
 
-			Level = null;
-			base.Hide();
+
+			screen = new Screen(this, out string errorMessage);
+			if (errorMessage != null) {
+				MenuUIManager.ErrorPopUp.DisplayError("Plugin error", errorMessage, this).ContinueWith((_)=> MenuUIManager.SwitchBack(), TaskScheduler.FromCurrentSynchronizationContext());
+			}
 		}
 
+		/// <summary>
+		/// Starts the loading of the <see cref="Level"/> for playing.
+		/// Loads the level with neutral player of type <paramref name="neutralPlayerType"/>,
+		/// human player of type <paramref name="humanPlayer"/>,
+		/// ai players of types <paramref name="aiPlayers"/> and
+		/// gives the level plugin the <paramref name="pluginCustomSettings"/> it defined in the provided window.
+		/// </summary>
+		/// <param name="neutralPlayerType">The type of the neutral player in the loaded level.</param>
+		/// <param name="humanPlayer">The type of the human player in the loaded level.</param>
+		/// <param name="aiPlayers">The types of ai players in the loaded level.</param>
+		/// <param name="pluginCustomSettings">Data the plugin requested from the user.</param>
+		void Play(PlayerType neutralPlayerType,
+				Tuple<PlayerType, int, PlayerInsignia> humanPlayer,
+				IEnumerable<Tuple<PlayerType, int, PlayerInsignia>> aiPlayers,
+				LevelLogicCustomSettings pluginCustomSettings)
+		{
+			PlayerSpecification players = new PlayerSpecification();
 
+			players.SetNeutralPlayer(neutralPlayerType);
+			players.SetHumanPlayer(humanPlayer.Item1, humanPlayer.Item2, humanPlayer.Item3);
+			foreach (var aiPlayer in aiPlayers)
+			{
+				players.AddAIPlayer(aiPlayer.Item1, aiPlayer.Item2, aiPlayer.Item3);
+			}
+
+
+			ILevelLoader loader = MenuUIManager.MenuController.GetLevelLoaderForPlaying(Level, players, pluginCustomSettings);
+			MenuUIManager.SwitchToLoadingScreen(loader);
+
+			loader.Finished += (progress) => {
+									MenuUIManager.Clear();
+								};
+			loader.Failed += (progress, message) => {
+								//Switch back from the loading screen
+								MenuUIManager.SwitchBack();
+								MenuUIManager.ErrorPopUp.DisplayError("Error", message, this);
+							};
+
+			loader.StartLoading();
+		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MHUrho.Logic;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 
 namespace MHUrho.Plugins

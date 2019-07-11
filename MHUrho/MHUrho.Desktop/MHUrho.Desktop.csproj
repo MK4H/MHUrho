@@ -9,14 +9,14 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MHUrho.Desktop</RootNamespace>
     <AssemblyName>MHUrho.Desktop</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -41,12 +42,15 @@
   <PropertyGroup>
     <ApplicationIcon>shield_grey.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Google.Protobuf, Version=3.5.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Google.Protobuf.3.5.1\lib\net45\Google.Protobuf.dll</HintPath>
+    <Reference Include="Google.Protobuf, Version=3.7.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Google.Protobuf.3.7.0\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
-    <Reference Include="Priority Queue, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\OptimizedPriorityQueue.4.1.1\lib\net45\Priority Queue.dll</HintPath>
+    <Reference Include="Priority Queue, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\OptimizedPriorityQueue.4.2.0\lib\net45\Priority Queue.dll</HintPath>
     </Reference>
     <Reference Include="protobuf-net, Version=2.4.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <HintPath>..\..\packages\protobuf-net.2.4.0\lib\net40\protobuf-net.dll</HintPath>
@@ -58,8 +62,8 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml" />
-    <Reference Include="Urho, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\UrhoSharp.1.8.93\lib\net45\Urho.dll</HintPath>
+    <Reference Include="UrhoSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\UrhoSharp.1.9.67\lib\net45\UrhoSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -68,17 +72,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\prefab.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Data\Templates\PackageDefinition.xml">
       <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Levels\LevelsFolder.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Textures\entityIcons.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Textures\tileIcons.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Test\UIActions.xml">
@@ -115,6 +110,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\UI\EditorPauseMenuLayout.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\UI\EndScreenLayout.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\UI\ExpandingElementExpandingListItemPrototype.xml">
@@ -214,15 +212,21 @@
     <Content Include="Data\UI\FileBrowserStyle.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\UI\SmoothingManipulatorUI.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\UI\TeamListItemLayout.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="shield_grey.ico" />
-    <None Include="App.config" />
-    <Content Include="..\..\DefaultPackage\bin\Debug\netstandard2.0\DefaultPackage.dll">
-      <Link>Data\Test\ResourceDir\TEST2RP\DefaultPackage.dll</Link>
+    <Content Include="Data\UI\TileHeightManipulatorUI.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\UI\TileTypeToolUI.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Log.txt" />
+    <Content Include="shield_grey.ico" />
+    <None Include="App.config" />
     <Content Include="config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -241,52 +245,7 @@
     <Content Include="Data\Materials\BoxMaterial.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\Test\ResourceDir\DirDescription.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\ChickenIcon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Materials\Chicken.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Materials\Comb.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Materials\Material.001.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Chicken.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Textures\ChickenNorm.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Textures\UV-Texture.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\EggMaterial.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\xamarin.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Green.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\sand.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\StoneDiffuse.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\StoneNormal.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\testResPack2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\StoneMaterial.xml">
+    <Content Include="Data\Test\ResourceDir\Packages.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Textures\HealthBars.png">
@@ -300,51 +259,6 @@
     </Content>
     <Content Include="Data\Schemas\GamePack.xsd">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Box.mdl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\BeginPecking.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Chicken.mdl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Dying.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Eating.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\EndPecking.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Idle.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Idle1.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Idle2.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Pecking1.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Pecking2.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Pecking3.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Stand.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\StopPecking.ani">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Test\ResourceDir\TEST2RP\Chicken\Models\Walk.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Schemas\MenuActions.xsd">
@@ -361,11 +275,17 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\packages\UrhoSharp.1.8.93\build\net45\UrhoSharp.targets" Condition="Exists('..\..\packages\UrhoSharp.1.8.93\build\net45\UrhoSharp.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>rd /s /q "$(TargetDir)DynData\Packages"
+md "$(TargetDir)DynData\Packages\ShowcasePackage"
+copy "$(TargetDir)Data\Test\ResourceDir\Packages.xml" "$(TargetDir)DynData\Packages\Packages.xml"
+xcopy /s /e "$(SolutionDir)ShowcasePackage\bin\$(ConfigurationName)" "$(TargetDir)DynData\Packages\ShowcasePackage"</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets" Condition="Exists('..\..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\UrhoSharp.1.8.93\build\net45\UrhoSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\UrhoSharp.1.8.93\build\net45\UrhoSharp.targets'))" />
+    <Error Condition="!Exists('..\..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\UrhoSharp.1.9.67\build\net45\UrhoSharp.targets'))" />
   </Target>
 </Project>

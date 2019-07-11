@@ -6,7 +6,7 @@ using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
 using MHUrho.Plugins;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 using MHUrho.WorldMap;
 
@@ -30,14 +30,14 @@ namespace MHUrho.Logic
 
 		public ILevelManager Level { get; protected set; }
 
-		public Map Map => Level.Map;
-
 		public abstract Vector3 Position { get; protected set; }
 
 		public Vector2 XZPosition {
 			get => Position.XZ2();
 			set => Position = new Vector3(value.X, Position.Y, value.Y);
 		}
+
+		public new abstract IEntityType Type { get; }
 
 		public abstract Vector3 Forward { get; }
 
@@ -54,17 +54,19 @@ namespace MHUrho.Logic
 		public abstract InstancePlugin Plugin { get; }
 	
 
-		public bool RemovedFromLevel { get; protected set; }
+		public bool IsRemovedFromLevel { get; protected set; }
 
 		public event Action<IEntity> PositionChanged;
 
 		public event Action<IEntity> RotationChanged;
 
-		public event Action OnRemoval;
+		public event Action<IEntity> OnRemoval;
 
 		protected Dictionary<Type, IList<DefaultComponent>> defaultComponents;
 
-		protected Entity(int ID, ILevelManager level) {
+		protected Entity(int ID, ILevelManager level)
+		{
+			this.ReceiveSceneUpdates = true;
 			this.ID = ID;
 			this.Level = level;
 			this.defaultComponents = new Dictionary<Type, IList<DefaultComponent>>();
@@ -120,20 +122,42 @@ namespace MHUrho.Logic
 
 		public virtual void RemoveFromLevel()
 		{
-			RemovedFromLevel = true;
-			OnRemoval?.Invoke();
+			IsRemovedFromLevel = true;
+			try {
+				OnRemoval?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(OnRemoval)}: {e.Message}");
+			}
+			OnRemoval = null;
 		}
 
 		public abstract void HitBy(IEntity other, object additionalData);
 
 		protected void SignalPositionChanged()
 		{
-			PositionChanged?.Invoke(this);
+			try {
+				PositionChanged?.Invoke(this);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(PositionChanged)}: {e.Message}");
+			}
+			
 		}
 
 		protected void SignalRotationChanged()
 		{
-			RotationChanged?.Invoke(this);
+			try {
+				RotationChanged?.Invoke(this);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(RotationChanged)}: {e.Message}");
+			}
 		}
 	}
 }

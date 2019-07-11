@@ -4,6 +4,7 @@ using System.Text;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.StartupManagement;
+using Urho;
 using Urho.Gui;
 
 namespace MHUrho.UserInterface
@@ -12,11 +13,9 @@ namespace MHUrho.UserInterface
 	{
 		class Screen : ScreenBase {
 
-			public LoadingWatcher LoadingWatcher { get; private set; }
+			IProgressNotifier ProgressNotifier => proxy.ProgressNotifier;
 
 			readonly LoadingScreen proxy;
-
-			
 
 			readonly Window window;
 
@@ -27,28 +26,18 @@ namespace MHUrho.UserInterface
 			{
 
 				this.proxy = proxy;
-				this.LoadingWatcher = new LoadingWatcher();
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/LoadingScreenLayout.xml");
 
 				window = (Window)MenuUIManager.MenuRoot.GetChild("LoadingScreen");
 				text = (Text)window.GetChild("Text");
 
-				LoadingWatcher.OnTextUpdate += OnTextUpdate;
-				LoadingWatcher.OnFinishedLoading += OnLoadingFinished;
+				ProgressNotifier.TextUpdate += OnTextUpdate;
+				ProgressNotifier.Finished += OnLoadingFinished;
+				ProgressNotifier.Failed += OnLoadingFailed;
 			}
 
-			public void OnLoadingFinished(ILoadingWatcher finishedLoading)
-			{
-				text.Value = "Loading finished";
-				Action handlers = proxy.OnLoadingFinished;
-				handlers?.Invoke();
-			}
-
-			public void OnTextUpdate(string newText)
-			{
-				text.Value = newText;
-			}
+			
 
 			public override void EnableInput()
 			{
@@ -67,8 +56,9 @@ namespace MHUrho.UserInterface
 
 			public override void Dispose()
 			{
-				LoadingWatcher.OnTextUpdate -= OnTextUpdate;
-				LoadingWatcher.OnFinishedLoading -= OnLoadingFinished;
+				ProgressNotifier.TextUpdate -= OnTextUpdate;
+				ProgressNotifier.Finished -= OnLoadingFinished;
+				ProgressNotifier.Failed -= OnLoadingFailed;
 
 				window.RemoveAllChildren();
 				window.Remove();
@@ -76,11 +66,29 @@ namespace MHUrho.UserInterface
 				window.Dispose();
 				text.Dispose();
 			}
+
+			void OnLoadingFinished(IProgressNotifier finished)
+			{
+				//Update UI text, must be called from main thread
+				MHUrhoApp.InvokeOnMainSafe(() => { text.Value = "Loading finished"; });
+			}
+
+			void OnLoadingFailed(IProgressNotifier failed, string message)
+			{
+				//Update UI text, must be called from main thread
+				MHUrhoApp.InvokeOnMainSafe(() => { text.Value = "Loading failed"; });
+			}
+
+			void OnTextUpdate(string newText)
+			{
+				//Update UI text, must be called from main thread
+				MHUrhoApp.InvokeOnMainSafe(() => { text.Value = newText; ; });	
+			}
 		}
 
-		public LoadingWatcher LoadingWatcher => screen.LoadingWatcher;
+		public IProgressNotifier ProgressNotifier { get; set; } 
+	
 
-		public event Action OnLoadingFinished;
 
 		protected override ScreenBase ScreenInstance {
 			get => screen;
@@ -98,7 +106,21 @@ namespace MHUrho.UserInterface
 
 		public override void ExecuteAction(MenuScreenAction action)
 		{
-			throw new NotImplementedException();
+			if (action is LoadingScreenAction myAction)
+			{
+				switch (myAction.Action)
+				{
+					case LoadingScreenAction.Actions.None:
+						//Nothing
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(action), myAction.Action, "Unknown action type");
+				}
+			}
+			else
+			{
+				throw new ArgumentException("Action does not belong to the current screen", nameof(action));
+			}
 		}
 
 		public override void Show()
@@ -107,7 +129,11 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			//TODO: Check that loading watcher is set
+
+			if (ProgressNotifier == null) {
+				throw new
+					InvalidOperationException($"{nameof(ProgressNotifier)} has to be set before Showing this screen");
+			}
 
 			screen = new Screen(this);
 		}
@@ -117,12 +143,10 @@ namespace MHUrho.UserInterface
 			if (screen == null) {
 				return;
 			}
-			
 
 			screen.Dispose();
 			screen = null;
-
-			OnLoadingFinished = null;
+			ProgressNotifier = null;
 		}
 	}
 }

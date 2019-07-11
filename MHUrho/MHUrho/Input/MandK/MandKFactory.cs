@@ -8,14 +8,14 @@ using Urho;
 
 namespace MHUrho.Input.MandK
 {
-    public class MandKFactory : ControllerFactory
+    public class MandKFactory : IControllerFactory
     {
 		public MandKFactory()
 		{
 
 		}
 
-		public override ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover)
+		public ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover)
 		{
 			if (!(gameController is GameController typedController))
 			{
@@ -24,14 +24,14 @@ namespace MHUrho.Input.MandK
 			return new CameraController(typedController, typedController.UIManager , cameraMover);
 		}
 
-		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
+		public IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
 		{
 			return new GameController(levelManager, octree, player, cameraMover);
 		}
 
-		public override IMenuController CreateMenuController()
+		public IMenuController CreateMenuController(MHUrhoApp app)
 		{
-			return new MenuController();
+			return new MenuController(app);
 		}
 	}
 }

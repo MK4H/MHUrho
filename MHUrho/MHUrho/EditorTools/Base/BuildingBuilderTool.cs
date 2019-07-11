@@ -8,8 +8,8 @@ using Urho;
 namespace MHUrho.EditorTools.Base
 {
 	public abstract class BuildingBuilderTool : Tool {
-		protected BuildingBuilderTool(IGameController input)
-			: base(input, new IntRect(0, 50, 50, 100))
+		protected BuildingBuilderTool(IGameController input, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 
 		}

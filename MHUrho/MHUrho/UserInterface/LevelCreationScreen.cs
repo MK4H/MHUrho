@@ -151,7 +151,7 @@ namespace MHUrho.UserInterface
 				{
 					this.LogicType = logicType;
 					this.LayoutMode = LayoutMode.Horizontal;
-					var newItem = screen.Game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/LevelLogicTypeItemLayout.xml", true),
+					var newItem = screen.Game.UI.LoadLayout(screen.Game.PackageManager.GetXmlFile("UI/LevelLogicTypeItemLayout.xml", true),
 															screen.MenuUIManager.MenuRoot.GetDefaultStyle());
 
 					((Text) newItem.GetChild("LogicTypeText")).Value = logicType.Name;
@@ -270,9 +270,8 @@ namespace MHUrho.UserInterface
 				window.Dispose();
 			}
 
-			void EditButtonReleased(ReleasedEventArgs args)
+			async void EditButtonReleased(ReleasedEventArgs args)
 			{
-				//TODO: SAVE THE CHANGES TO EXISTING LEVEL
 				//Creating new level
 				if (proxy.Level == null) {
 					proxy.Level = LevelRep.CreateNewLevel(Name,
@@ -280,7 +279,7 @@ namespace MHUrho.UserInterface
 														ThumbnailPath,
 														((LogicTypeItem)logicTypeList.SelectedItem).LogicType,
 														mapSize.Value,
-														PackageManager.Instance.ActivePackage);
+														Game.PackageManager.ActivePackage);
 				}
 				else {
 					//Creates clone with the new or old name
@@ -293,25 +292,13 @@ namespace MHUrho.UserInterface
 						proxy.Level.GamePack.SaveLevelPrototype(proxy.Level, true);
 					}
 					catch (Exception e) {
-						MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level cloning failed with: \"{e.Message}\"");
+						await MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level cloning failed with: \"{e.Message}\"");
 						return;
 					}
 				}
 
-				//Need to save Level to local variable because Switch to loading screen will hide this screen and dispose it
-				LevelRep level = proxy.Level;
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
-
-				ILevelLoader loader = MenuUIManager.MenuController.StartLoadingLevelForEditing(level, screen.LoadingWatcher);
-				loader.CurrentLoading.ContinueWith((newLevel) => MenuUIManager.Clear(), 
-													CancellationToken.None, 
-													TaskContinuationOptions.OnlyOnRanToCompletion,
-													TaskScheduler.FromCurrentSynchronizationContext());
-
-				loader.CurrentLoading.ContinueWith(DisplayError,
-													CancellationToken.None,
-													TaskContinuationOptions.OnlyOnFaulted,
-													TaskScheduler.FromCurrentSynchronizationContext());
+				//Has to be the last statement in the method, this instance will be released during the execution
+				proxy.EditLevel(proxy.Level);
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -342,7 +329,7 @@ namespace MHUrho.UserInterface
 
 			void FillLogicTypes()
 			{
-				foreach (var logicType in PackageManager.Instance.ActivePackage.LevelLogicTypes) {
+				foreach (var logicType in Game.PackageManager.ActivePackage.LevelLogicTypes) {
 					logicTypeList.AddItem(new LogicTypeItem(this, logicType));
 				}
 			}
@@ -354,43 +341,20 @@ namespace MHUrho.UserInterface
 
 					var result = await MenuUIManager.
 										FileBrowsingPopUp.
-										Request(PackageManager.Instance.ActivePackage.RootedDirectoryPath,
+										Request(Game.PackageManager.ActivePackage.RootedDirectoryPath,
 												SelectOption.File,
 												 pathText.HasDefaultValue ? null : pathText.Value);
 					
 
 					string newText = result == null ? oldText : result.RelativePath;
-					MyGame.InvokeOnMainSafeAsync(() => pathText.Value = newText);
+					await MHUrhoApp.InvokeOnMainSafeAsync(() => pathText.Value = newText);
 				}
 				catch (OperationCanceledException) {
 					//Text should not have changed
 				}
 			}
 
-			void DisplayError(Task<ILevelManager> levelLoading)
-			{
-				MenuUIManager.SwitchBack();
-				MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level loading failed with: \"{levelLoading.Exception.InnerException.Message}\"");
-			}
-
-			public void SimulateEditNewLevel(string name, string description, string thumbnailPath, string logicTypeName, IntVector2 mapSize, GamePack package)
-			{
-
-				proxy.Level = LevelRep.CreateNewLevel(name,
-													  description,
-													  thumbnailPath,
-													package.GetLevelLogicType(logicTypeName),
-													  mapSize,
-													  package);
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
-				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level, screen.LoadingWatcher);
-			}
-
-			public void SimulateEditExistingLevel()
-			{
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen(MenuUIManager.Clear);
-				MenuUIManager.MenuController.StartLoadingLevelForEditing(proxy.Level, screen.LoadingWatcher);
-			}
+			
 
 			public void SimulateBackButtonPress()
 			{
@@ -417,17 +381,18 @@ namespace MHUrho.UserInterface
 				switch (myAction.Action) {
 					case LevelCreationScreenAction.Actions.Edit:
 						if (Level == null) {
-							screen.SimulateEditNewLevel(myAction.LevelName,
-														myAction.Description,
-														myAction.ThumbnailPath,
-														myAction.LogicTypeName,
-														myAction.MapSize,
-														PackageManager.Instance.ActivePackage);
+							Level = LevelRep.CreateNewLevel(myAction.LevelName,
+															myAction.Description,
+															myAction.ThumbnailPath,
+															Game.PackageManager.ActivePackage.GetLevelLogicType(myAction.LogicTypeName),
+															myAction.MapSize,
+															Game.PackageManager.ActivePackage);
+	
 						}
 						else {
-							//TODO: Simulate changing values - needs changes to the Action class too
-							screen.SimulateEditExistingLevel();
+							//FUTURE: Simulate changing values - needs changes to the Action class too
 						}
+						EditLevel(Level);
 						break;
 					case LevelCreationScreenAction.Actions.Back:
 						screen.SimulateBackButtonPress();
@@ -460,5 +425,27 @@ namespace MHUrho.UserInterface
 		//	Level = null;
 		//	base.Hide();
 		//}
+
+		/// <summary>
+		/// Starts the loading process of the <paramref name="level"/> for editing.
+		/// Cannot be implemented in <see cref="Screen"/> because it switches to different screens
+		/// during execution, which releases our <see cref="screen"/>.
+		/// </summary>
+		/// <param name="level">The level to load for editing</param>
+		void EditLevel(LevelRep level)
+		{
+			ILevelLoader loader = MenuUIManager.MenuController.GetLevelLoaderForEditing(level);
+			MenuUIManager.SwitchToLoadingScreen(loader);
+
+			loader.Finished += (progress) => {
+									MenuUIManager.Clear();
+								};
+			loader.Failed += (progress, message) => {
+								MenuUIManager.SwitchBack();
+								MenuUIManager.ErrorPopUp.DisplayError("Error", $"Level loading failed with: \"{message}\"");
+							};
+
+			loader.StartLoading();
+		}
 	}
 }

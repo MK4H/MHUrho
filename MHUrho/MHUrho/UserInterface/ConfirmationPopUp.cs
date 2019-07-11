@@ -16,7 +16,7 @@ namespace MHUrho.UserInterface
 
 			readonly ConfirmationPopUp proxy;
 
-			MyGame Game => MyGame.Instance;
+			MHUrhoApp Game => MHUrhoApp.Instance;
 
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
@@ -26,10 +26,14 @@ namespace MHUrho.UserInterface
 
 			TaskCompletionSource<bool> taskSource;
 			CancellationTokenSource timeoutCancel;
+			MenuScreen underlyingMenuScreen;
 
-			public Screen(ConfirmationPopUp proxy, string title, string description, TimeSpan? timeout)
+			public Screen(ConfirmationPopUp proxy, string title, string description, TimeSpan? timeout = null, MenuScreen underlyingMenuScreen = null)
 			{
 				this.proxy = proxy;
+				this.underlyingMenuScreen = underlyingMenuScreen;
+
+				underlyingMenuScreen?.DisableInput();
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/PopUpConfirmationLayout.xml");
 				this.popUpWindow = (Window)MenuUIManager.MenuRoot.GetChild("PopUpConfirmationWindow");
@@ -59,10 +63,10 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			void TimeOutExpired(Task task)
+			async void TimeOutExpired(Task task)
 			{
 				//Do not wait
-				MyGame.InvokeOnMainSafeAsync(() => Reply(false));
+				await MHUrhoApp.InvokeOnMainSafeAsync(() => Reply(false));
 			}
 
 			void Button_Released(ReleasedEventArgs args)
@@ -73,6 +77,7 @@ namespace MHUrho.UserInterface
 
 			void Reply(bool confirmed)
 			{
+				underlyingMenuScreen?.ResetInput();
 				taskSource.SetResult(confirmed);
 				proxy.Hide();
 			}
@@ -109,11 +114,13 @@ namespace MHUrho.UserInterface
 		/// <param name="title"></param>
 		/// <param name="description"></param>
 		/// <param name="timeout">Time after which it is considered as pressing the cancel button</param>
+		/// <param name="underlyingMenuScreen">Underlying menu screen that will have input disabled for the duration of the confirmation popup</param>
 		public Task<bool> RequestConfirmation(string title,
 											string description,
-											TimeSpan? timeout = null)
+											TimeSpan? timeout = null,
+											MenuScreen underlyingMenuScreen = null)
 		{
-			screen = new Screen(this, title, description, timeout);
+			screen = new Screen(this, title, description, timeout, underlyingMenuScreen);
 			return screen.ConfirmationTask;
 		}
 

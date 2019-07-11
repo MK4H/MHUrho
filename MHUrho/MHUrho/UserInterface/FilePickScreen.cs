@@ -44,16 +44,18 @@ namespace MHUrho.UserInterface
 			protected string MatchSelected;
 			protected string Filename;
 
+			readonly FilePickScreen proxy;
 
 			protected FilePickScreenBase(FilePickScreen proxy)
 				:base(proxy)
 			{
+				this.proxy = proxy;
 				Filenames = new List<NameTextPair>();
 			}
 
 			protected void LoadFileNames(string absolutePath)
 			{
-				foreach (var file in MyGame.Files.GetFSEntriesInDirectory(MyGame.Files.SaveGameDirAbsolutePath, true, false))
+				foreach (var file in Game.Files.GetFSEntriesInDirectory(Game.Files.SaveGameDirAbsolutePath, true, false))
 				{
 					Filenames.Add(new NameTextPair(Path.GetFileName(file)));
 				}
@@ -185,36 +187,39 @@ namespace MHUrho.UserInterface
 				return filename.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
 			}
 
-			void DeleteButton_Pressed(PressedEventArgs args)
+			async void DeleteButton_Pressed(PressedEventArgs args)
 			{
 				if (MatchSelected == null) return;
 
-				DisableInput();
-				MenuUIManager.ConfirmationPopUp
-							.RequestConfirmation("Deleting file",
-												$"Do you really want to delete the file \"{MatchSelected}\"?")
-							.ContinueWith(DeleteFile, TaskScheduler.FromCurrentSynchronizationContext());
+				bool confirmed = await MenuUIManager.ConfirmationPopUp
+													.RequestConfirmation("Deleting file",
+																		$"Do you really want to delete the file \"{MatchSelected}\"?",
+																		null,
+																		proxy);
+				if (!confirmed) return;
 
-
+				DeleteFile();
 			}
 
-			void DeleteFile(Task<bool> confirmed)
+			void DeleteFile()
 			{
-				EnableInput();
-				if (!confirmed.Result) {
-					return;
+				try {
+					Game.Files.DeleteDynamicFile(Path.Combine(Game.Files.SaveGameDirPath, MatchSelected));
+					int index = Filenames.FindIndex((pair) => pair.Name.Equals(MatchSelected, StringComparison.CurrentCultureIgnoreCase));
+
+					FileView.RemoveItem(Filenames[index].Text);
+					Filenames[index].Text.Dispose();
+					Filenames.RemoveAt(index);
+
+					MatchSelected = null;
+					TotalMatchDeselected();
+					LineEdit.Text = "";
 				}
-
-				MyGame.Files.DeleteDynamicFile(Path.Combine(MyGame.Files.SaveGameDirPath, MatchSelected));
-				int index = Filenames.FindIndex((pair) => pair.Name.Equals(MatchSelected, StringComparison.CurrentCultureIgnoreCase));
-
-				FileView.RemoveItem(Filenames[index].Text);
-				Filenames[index].Text.Dispose();
-				Filenames.RemoveAt(index);
-
-				MatchSelected = null;
-				TotalMatchDeselected();
-				LineEdit.Text = "";
+				catch (Exception) {
+					MenuUIManager.ErrorPopUp.DisplayError("File Error",
+														"There was an error while deleting a file, see log for details",
+														proxy);
+				}
 			}
 
 			void BackButton_Pressed(PressedEventArgs args)

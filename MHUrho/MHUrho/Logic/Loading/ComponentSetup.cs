@@ -27,12 +27,15 @@ namespace MHUrho.Logic
 
 		public virtual void SetupComponentsOnNode(Node node, ILevelManager level)
 		{
-			//TODO: Maybe loop through child nodes
-			foreach (var component in node.Components)
-			{
-				if (setupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value))
-				{
-					value(component, level);
+			Stack<Node> nodesToSetup = new Stack<Node>();
+			nodesToSetup.Push(node);
+
+			while (nodesToSetup.Count != 0) {
+				Node current = nodesToSetup.Pop();
+
+				SetupNodeComponents(current, level);
+				foreach (var child in current.Children) {
+					nodesToSetup.Push(child);
 				}
 			}
 		}
@@ -63,6 +66,17 @@ namespace MHUrho.Logic
 		void SetupAnimationControllerWeak(Component animationControllerComponent, ILevelManager level)
 		{
 			SetupAnimationController((AnimationController)animationControllerComponent, level);
+		}
+
+		void SetupNodeComponents(Node node, ILevelManager level)
+		{
+			foreach (var component in node.Components)
+			{
+				if (setupDispatch.TryGetValue(component.Type, out ComponentSetupDelegate value))
+				{
+					value(component, level);
+				}
+			}
 		}
 	}
 }

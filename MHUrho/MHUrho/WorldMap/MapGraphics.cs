@@ -358,7 +358,7 @@ namespace MHUrho.WorldMap
 					this.topLeftCorner = topLeftCorner;
 					//Because size is in tiles, this is correct position of the top left corner of the bottom right tile
 					this.bottomRightTileTLCorner = topLeftCorner + Size - new IntVector2(1,1);
-					MyGame.InvokeOnMainSafe(() => {
+					MHUrhoApp.InvokeOnMainSafe(() => {
 												this.chunkNode = map.node.CreateChild("chunkNode");
 												chunkNode.Position = new Vector3(topLeftCorner.X + Size.X / 2.0f, 0, topLeftCorner.Y + Size.Y / 2.0f);
 					});
@@ -369,9 +369,9 @@ namespace MHUrho.WorldMap
 				public void Dispose()
 				{
 					model?.Dispose();
-					vertexBuffer.Dispose();
-					indexBuffer.Dispose();
-					chunkNode.Dispose();
+					vertexBuffer?.Dispose();
+					indexBuffer?.Dispose();
+					chunkNode?.Dispose();
 				}
 
 				public unsafe void ChangeTileType(int x, int y, TileType newType)
@@ -585,11 +585,10 @@ namespace MHUrho.WorldMap
 
 				static VertexBuffer InitializeVertexBuffer(uint numVerticies)
 				{
-					return MyGame.InvokeOnMainSafe(InitializeVertexBufferImpl);
+					return MHUrhoApp.InvokeOnMainSafe(InitializeVertexBufferImpl);
 
 					VertexBuffer InitializeVertexBufferImpl()
 					{
-						//TODO: Context
 						VertexBuffer vb = new VertexBuffer(Application.CurrentContext, false) {Shadowed = true};
 
 						vb.SetSize(numVerticies, ElementMask.Position | ElementMask.Normal | ElementMask.TexCoord1, false);
@@ -599,7 +598,7 @@ namespace MHUrho.WorldMap
 
 				static IndexBuffer InitializeIndexBuffer(uint numIndicies)
 				{
-					return MyGame.InvokeOnMainSafe(InitializeIndexBufferImpl);
+					return MHUrhoApp.InvokeOnMainSafe(InitializeIndexBufferImpl);
 
 					IndexBuffer InitializeIndexBufferImpl()
 					{
@@ -613,17 +612,17 @@ namespace MHUrho.WorldMap
 
 				static IntPtr LockVertexBufferSafe(VertexBuffer vb, uint numVerticies)
 				{
-					return MyGame.InvokeOnMainSafe(() => vb.Lock(0, numVerticies));
+					return MHUrhoApp.InvokeOnMainSafe(() => vb.Lock(0, numVerticies));
 				}
 
 				static IntPtr LockIndexBufferSafe(IndexBuffer ib, uint numIndicies)
 				{
-					return MyGame.InvokeOnMainSafe(() => ib.Lock(0, numIndicies));
+					return MHUrhoApp.InvokeOnMainSafe(() => ib.Lock(0, numIndicies));
 				}
 
 				void FinalizeModelCreation(VertexBuffer vb, IndexBuffer ib, uint numIndicies)
 				{
-					MyGame.InvokeOnMainSafe(FinalizeModelCreationImpl);
+					MHUrhoApp.InvokeOnMainSafe(FinalizeModelCreationImpl);
 
 					void FinalizeModelCreationImpl()
 					{
@@ -647,14 +646,13 @@ namespace MHUrho.WorldMap
 
 				void SetModel(ILevelManager level)
 				{
-					MyGame.InvokeOnMainSafe(SetModelImpl);
+					MHUrhoApp.InvokeOnMainSafe(SetModelImpl);
 
 					void SetModelImpl()
 					{
 						StaticModel staticModel = chunkNode.CreateComponent<StaticModel>();
 						staticModel.Model = model;
 						staticModel.SetMaterial(graphics.material);
-						//TODO: Draw distance
 						staticModel.DrawDistance = level.App.Config.TerrainDrawDistance;
 					}
 				}
@@ -772,8 +770,13 @@ namespace MHUrho.WorldMap
 			/// <returns></returns>
 			public static MapGraphics Build(Map map,
 											IntVector2 chunkSize,
-											LoadingWatcher loadingProgress)
+											IProgressEventWatcher loadingProgress = null)
 			{
+				const double initializingPartSize = 10;
+				const double materialPartSize = 50;
+				const double modelPartSize = 40;
+
+				loadingProgress?.SendTextUpdate("Initializing map graphics");
 				IntVector2 mapSize = new IntVector2(map.Width, map.Length);
 
 				if (mapSize.X % chunkSize.X != 0 ||
@@ -782,13 +785,19 @@ namespace MHUrho.WorldMap
 				}
 
 				MapGraphics graphics = new MapGraphics(map, chunkSize, mapSize);
+				loadingProgress?.SendUpdate(initializingPartSize, "Initialized map graphics");
 
-				loadingProgress.TextUpdate("Creating terrain texture");
-				graphics.CreateMaterial();
+				loadingProgress?.SendTextUpdate("Creating terrain texture");
+				graphics.CreateMaterial(map.levelManager.App, 
+										map.LevelManager.Package.TileTypeCount,
+										map.LevelManager.Package.TileTypes);
+				loadingProgress?.SendUpdate(materialPartSize, "Created terrain texture");
 
-				loadingProgress.TextUpdate("Creating map geometry");
+				loadingProgress?.SendTextUpdate("Creating map geometry");
 				graphics.CreateModel();
+				loadingProgress?.SendUpdate(modelPartSize, "Created map geometry");
 
+				loadingProgress?.SendFinished();
 				return graphics;
 			}
 
@@ -1022,11 +1031,7 @@ namespace MHUrho.WorldMap
 				material.Dispose();
 			}
 
-			void CreateMaterial() {
-				//Count for output image size
-				int tileTypeCount = PackageManager.Instance.ActivePackage.TileTypeCount;
-
-				//TODO: Context
+			void CreateMaterial(MHUrhoApp game, int tileTypeCount, IEnumerable<TileType> tileTypes) {
 				Image mapImage = new Image();
 
 				if (!mapImage.SetSize(Tile.ImageWidth * tileTypeCount, Tile.ImageHeight, 4)) {
@@ -1038,7 +1043,7 @@ namespace MHUrho.WorldMap
 				int mapImageHeight = Tile.ImageHeight;
 
 				IntRect subimageRect = new IntRect(0, 0, Tile.ImageWidth - 1, Tile.ImageHeight - 1);
-				foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
+				foreach (var tileType in tileTypes) {
 					var tileTypeImage = tileType.GetImage();
 
 					if (tileTypeImage.Compressed) {
@@ -1066,7 +1071,7 @@ namespace MHUrho.WorldMap
 					subimageRect.Right += Tile.ImageWidth;
 				}
 
-				material = PackageManager.Instance.GetMaterialFromImage(mapImage);
+				material = game.PackageManager.GetMaterialFromImage(mapImage);
 			}
 
 			void CreateModel()

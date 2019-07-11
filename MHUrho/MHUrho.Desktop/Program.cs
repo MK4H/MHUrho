@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
 using Urho;
 using MHUrho;
 using System.IO;
@@ -8,21 +10,36 @@ using MHUrho.StartupManagement;
 
 namespace MHUrho.Desktop
 {
-	class Program
-	{
-		static void Main(string[] args) {
+	class Program {
+		const string appDataDirName = "MHUrho";
 
-			MyGame.Files = FileManagerDesktop.LoadFileManager();
-
-
-			if (!MyGame.Files.FileExists(Path.Combine(MyGame.Files.PackageDirectoryAbsolutePath, PackageManager.GamePackDirFileName))) {
-				MyGame.Files.Copy(Path.Combine(MyGame.Files.StaticDirPath, "Data", "Test", "ResourceDir"),
-								MyGame.Files.PackageDirectoryAbsolutePath, false);
+		static void Main(string[] args)
+		{
+#if DEBUG
+			string appDataAppPath = Path.Combine(Directory.GetCurrentDirectory(), "DynData");
+#else
+			string appDataAppPath = null;
+			if ((appDataAppPath = ConfigurationManager.AppSettings["appDataPath"]) == null) {
+				appDataAppPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appDataDirName);
 			}
+#endif
 
-			MyGame.StartupOptions = StartupOptions.FromCommandLineParams(args);
 
-			new MyGame(new ApplicationOptions("Data")).Run();
+			MHUrhoApp.FileManager = FileManagerDesktop.LoadFileManager(Directory.GetCurrentDirectory(),
+															  appDataAppPath,
+															  Path.Combine(appDataAppPath, "Packages"),
+															  Path.Combine(appDataAppPath, "Log.txt"),
+															  "config.xml",
+															  "SavedGames");
+
+			MHUrhoApp.StartupArgs = StartupOptions.FromCommandLineParams(args, MHUrhoApp.FileManager);
+
+			try {
+				new MHUrhoApp(new ApplicationOptions("Data")).Run();
+			}
+			catch (InvalidOperationException e) {
+				//Ignore, Error with the current release of UrhoSharp https://github.com/xamarin/urho-samples/issues/45
+			}
 
 		}
 	}

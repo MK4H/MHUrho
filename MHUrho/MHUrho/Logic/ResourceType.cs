@@ -12,8 +12,6 @@ using Urho.Resources;
 namespace MHUrho.Logic
 {
 	public class ResourceType : ILoadableType, IDisposable {
-		const string IDAttributeName = "ID";
-		const string NameAttribute = "name";
 
 		public int ID { get; private set; }
 
@@ -24,11 +22,30 @@ namespace MHUrho.Logic
 	
 		public IntRect IconRectangle { get; private set; }
 
-		public void Load(XElement xml, GamePack package) {
-			ID = xml.GetIntFromAttribute(IDAttributeName);
-			Name = xml.Attribute(NameAttribute).Value;
-			IconRectangle = XmlHelpers.GetIconRectangle(xml);
+		public void Load(XElement xml, GamePack package)
+		{
 			Package = package;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				IconRectangle = XmlHelpers.GetIconRectangle(xml);
+			}
+			catch (Exception e)
+			{
+				string message = $"Resource type loading failed: Invalid XML of the package {package.Name}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new PackageLoadingException(message, e);
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return ID;
 		}
 
 		/// <summary>

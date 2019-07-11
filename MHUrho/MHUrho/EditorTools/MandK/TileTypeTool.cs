@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
+using MHUrho.EditorTools.MandK.MapHighlighting;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
@@ -17,36 +18,44 @@ using Urho.Urho2D;
 
 namespace MHUrho.EditorTools.MandK
 {
-	public class TileTypeTool : Base.TileTypeTool, IMandKTool { 
+	public class TileTypeTool : Base.TileTypeTool, IMandKTool {
+
+		const int MaxHighlightSize = 32;
 
 		Dictionary<CheckBox, TileType> tileTypes;
 
 		readonly GameController input;
 		readonly GameUI ui;
 
-		readonly StaticSquareTool highlight;
+		readonly StaticSizeHighlighter highlight;
 
 		readonly ExclusiveCheckBoxes checkBoxes;
+
+		readonly UIElement uiElem;
+		readonly Slider sizeSlider;
 
 		bool mouseButtonDown;
 		bool enabled;
 
-		public TileTypeTool(GameController input, GameUI ui, CameraMover camera)
-			: base(input)
+		public TileTypeTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 
 			this.input = input;
 			this.ui = ui;
 			this.tileTypes = new Dictionary<CheckBox, TileType>();
-			this.highlight = new StaticSquareTool(input, ui, camera, 3);
+			this.highlight = new StaticSizeHighlighter(input, ui, camera, 3, Color.Green);
 			this.checkBoxes = new ExclusiveCheckBoxes();
+			this.mouseButtonDown = false;
+			this.enabled = false;
+			InitUI(ui, out uiElem, out sizeSlider);
 
-			foreach (var tileType in PackageManager.Instance.ActivePackage.TileTypes) {
+			foreach (var tileType in input.Level.Package.TileTypes) {
 
 				var checkBox = ui.SelectionBar.CreateCheckBox();
 				checkBox.SetStyle("SelectionBarCheckBox");
 				checkBox.Toggled += OnTileTypeToggled;
-				checkBox.Texture = PackageManager.Instance.ActivePackage.TileIconTexture;
+				checkBox.Texture = input.Level.Package.TileIconTexture;
 				checkBox.ImageRect = tileType.IconRectangle;
 				checkBox.HoverOffset = new IntVector2(tileType.IconRectangle.Width(), 0);
 				checkBox.CheckedOffset = new IntVector2(2 * tileType.IconRectangle.Width(), 0);
@@ -60,11 +69,14 @@ namespace MHUrho.EditorTools.MandK
 			if (enabled) return;
 
 			checkBoxes.Show();
+			uiElem.Visible = true;
 
 			highlight.Enable();
 			input.MouseDown += OnMouseDown;
 			input.MouseUp += OnMouseUp;
+			sizeSlider.SliderChanged += OnSliderChanged;
 			highlight.SquareChanged += Highlight_SquareChanged;
+			ui.RegisterForHover(sizeSlider);
 			enabled = true;
 		}
 
@@ -75,14 +87,17 @@ namespace MHUrho.EditorTools.MandK
 
 			checkBoxes.Hide();
 			checkBoxes.Deselect();
+			uiElem.Visible = false;
 
 			highlight.Disable();
 			input.MouseDown -= OnMouseDown;
 			input.MouseUp -= OnMouseUp;
+			sizeSlider.SliderChanged -= OnSliderChanged;
 			highlight.SquareChanged -= Highlight_SquareChanged;
-			
+			ui.UnregisterForHover(sizeSlider);
+
 			enabled = false;
-			
+			mouseButtonDown = false;
 		}
 
 		public override void ClearPlayerSpecificState() {
@@ -100,6 +115,8 @@ namespace MHUrho.EditorTools.MandK
 
 			highlight.Dispose();
 			checkBoxes.Dispose();
+			sizeSlider.Dispose();
+			uiElem.Dispose();
 		}
 
 		void OnTileTypeToggled(ToggledEventArgs e) {
@@ -119,7 +136,7 @@ namespace MHUrho.EditorTools.MandK
 			}
 		}
 
-		void Highlight_SquareChanged(Base.StaticSquareChangedArgs args)
+		void Highlight_SquareChanged(Base.MapHighlighting.StaticSquareChangedArgs args)
 		{
 			if (ui.UIHovering) return;
 
@@ -132,6 +149,27 @@ namespace MHUrho.EditorTools.MandK
 
 		void OnMouseUp(MouseButtonUpEventArgs e) {
 			mouseButtonDown = false;
+		}
+
+		static void InitUI(GameUI ui, out UIElement uiElem, out Slider sizeSlider)
+		{
+			if ((uiElem = ui.CustomWindow.GetChild("TileTypeToolUI")) == null) {
+				ui.CustomWindow.LoadLayout("UI/TileTypeToolUI.xml");
+				uiElem = ui.CustomWindow.GetChild("TileTypeToolUI");
+			}
+
+			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+			//-1 due to lower bound being 0, so when we are reading the value, we are adding 1
+			sizeSlider.Range = MaxHighlightSize - 1;
+
+			uiElem.Visible = false;
+		}
+
+		void OnSliderChanged(SliderChangedEventArgs obj)
+		{
+			int sliderValue = (int)Math.Round(obj.Value);
+			highlight.EdgeSize = 1 + sliderValue;
+			((Slider)obj.Element).Value = sliderValue;
 		}
 	}
 }

@@ -10,7 +10,7 @@ using MHUrho.WorldMap;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.PathFinding;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.PathFinding.AStar;
 using Urho;
 
@@ -506,7 +506,7 @@ namespace NUnit.Tests {
 				throw new NotImplementedException();
 			}
 
-			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, ChangeCornerHeightDelegate newHeightFunction)
+			public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, GetCornerHeightDelegate newHeightFunction)
 			{
 				throw new NotImplementedException();
 			}

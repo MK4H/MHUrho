@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using MHUrho.Helpers;
+using MHUrho.UserInterface;
 using Urho;
 
 namespace MHUrho.StartupManagement
@@ -25,7 +26,7 @@ namespace MHUrho.StartupManagement
 			UIActions = uiActions;
 		}
 
-		public static StartupOptions FromCommandLineParams(string[] args)
+		public static StartupOptions FromCommandLineParams(string[] args, FileManager files)
 		{
 			ActionManager uiActions = null;
 
@@ -34,7 +35,7 @@ namespace MHUrho.StartupManagement
 			while (argsEnumerator.MoveNext()) {
 				switch (argsEnumerator.Current) {
 					case "-ui":
-						uiActions = GetUIActions(argsEnumerator);
+						uiActions = GetUIActions(argsEnumerator, files);
 						break;
 				}
 			}
@@ -44,7 +45,7 @@ namespace MHUrho.StartupManagement
 			return new StartupOptions(uiActions);
 		}
 
-		static ActionManager GetUIActions(IEnumerator<string> argsEnumerator)
+		static ActionManager GetUIActions(IEnumerator<string> argsEnumerator, FileManager files)
 		{
 			bool fromDynamic = true;
 			if (argsEnumerator.MoveNext()) {
@@ -80,19 +81,19 @@ namespace MHUrho.StartupManagement
 			Stream file = null;
 			try {
 				file = fromDynamic
-							? MyGame.Files.OpenDynamicFile(argsEnumerator.Current,
+							? files.OpenDynamicFile(argsEnumerator.Current,
 															System.IO.FileMode.Open,
 															System.IO.FileAccess.Read)
-							: MyGame.Files.OpenStaticFileRO(argsEnumerator.Current);
+							: files.OpenStaticFileRO(argsEnumerator.Current);
 				XDocument xmlFile = XDocument.Load(file);
 
 				try
 				{
-					return new ActionManager(xmlFile);
+					return new ActionManager(xmlFile, files);
 				}
 				catch (IOException e)
 				{
-					//TODO: This means could not open xml schema
+					//NOTE: This may mean we could not open xml schema
 					throw new ArgumentException("-ui xmlFilePath, could not read actions from the file xmlFilePath", e);
 				}
 				catch (XmlSchemaValidationException e)
@@ -111,44 +112,54 @@ namespace MHUrho.StartupManagement
 
 	public class ActionManager {
 
+		class Execution {
+			readonly MHUrhoApp game;
+			readonly IEnumerator<MenuScreenAction> actions;
+
+			public Execution(MHUrhoApp game, IEnumerator<MenuScreenAction> actions)
+			{
+				this.game = game;
+				this.actions = actions;
+			}
+
+			public void TriggerNext()
+			{
+				if (actions.MoveNext()) {
+					game.MenuController.ExecuteActionOnCurrentScreen(actions.Current);
+				}
+				else {
+					game.MenuController.ScreenChanged -= TriggerNext;
+				}
+			}
+		}
+
 		static readonly string SchemaPath = Path.Combine("Data", "Schemas", "MenuActions.xsd");
 
 		readonly List<MenuScreenAction> actions;
 
 		/// <summary>
-		/// 
+		/// Creates new action manager from the given <paramref name="xmlFile"/>.
 		/// </summary>
-		/// <param name="xmlFilePath"></param>
+		/// <param name="xmlFIle">XML file to parse the actions from.</param>
+		/// <param name="files">File management system.</param>
 		/// <exception cref="IOException">Occurs when the <paramref name="xmlFilePath"/> is not valid path or the file could not be opened</exception>
 		/// <exception cref="XmlSchemaValidationException">Occurs when <paramref name="xmlFilePath"/> does not conform to the schema at Schemas/MenuActions.xsd</exception>
-		public ActionManager(XDocument xmlFile)
+		public ActionManager(XDocument xmlFile, FileManager files)
 		{
-			try {
+			var schema = new XmlSchemaSet();
+			schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
+						XmlReader.Create(files.OpenStaticFileRO(SchemaPath)));
 
+			xmlFile.Validate(schema, null);
 
-				var schema = new XmlSchemaSet();
-				schema.Add(MenuScreenAction.XMLNamespace.NamespaceName,
-							XmlReader.Create(MyGame.Files.OpenStaticFileRO(SchemaPath)));
-
-				xmlFile.Validate(schema, null);
-
-				actions = MenuScreenAction.Parse(xmlFile);
-			}
-			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Error, $"MenuAction did not conform to schema: {e.Message}");
-				throw;
-			}
-			catch (IOException e) {
-				Urho.IO.Log.Write(LogLevel.Error, $"Could not open MenuAction file: {e.Message}");
-				throw;
-			}
+			actions = MenuScreenAction.Parse(xmlFile);
 		}
 
-		public void RunActions(MyGame game)
+		public void RunActions(MHUrhoApp game)
 		{
-			foreach (var action in actions) {
-				game.MenuController.ExecuteActionOnCurrentScreen(action);
-			}
+			var exec = new Execution(game, actions.GetEnumerator());
+			game.MenuController.ScreenChanged += exec.TriggerNext;
+			exec.TriggerNext();
 		}
 	}
 
@@ -162,7 +173,8 @@ namespace MHUrho.StartupManagement
 				{PackagePickScreenAction.Name, PackagePickScreenAction.FromXml },
 				{LevelPickScreenAction.Name, LevelPickScreenAction.FromXml },
 				{LevelCreationScreenAction.Name, LevelCreationScreenAction.FromXml },
-				{LevelSettingsScreenAction.Name, LevelSettingsScreenAction.FromXml }
+				{LevelSettingsScreenAction.Name, LevelSettingsScreenAction.FromXml },
+				{LoadingScreenAction.Name, LoadingScreenAction.FromXml }
 			};
 																					
 
@@ -785,6 +797,46 @@ namespace MHUrho.StartupManagement
 					return Actions.Back;
 				case "play":
 					return Actions.Play;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(stringRepr), stringRepr, "Unknown action string");
+			}
+		}
+	}
+
+	public class LoadingScreenAction : MenuScreenAction {
+		public enum Actions { None };
+
+		public static string Name = "loading";
+
+		public Actions Action { get; private set; }
+
+		protected LoadingScreenAction(Actions action)
+		{
+			this.Action = action;
+		}
+
+		public static LoadingScreenAction GetNoneAction()
+		{
+			return new LoadingScreenAction(Actions.None);
+		}
+
+		public static LoadingScreenAction FromXml(XElement element)
+		{
+			CheckName(Name, element);
+
+			//Element should exist and its value should be correct thanks to schema validation
+			string actionStr = element.Element(XMLNamespace + "action").Value;
+
+			return new LoadingScreenAction(StringToAction(actionStr));
+		}
+
+		static Actions StringToAction(string stringRepr)
+		{
+			// STRINGS HAVE TO MATCH THOSE IN THE SCHEMA
+			switch (stringRepr)
+			{
+				case "none":
+					return Actions.None;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(stringRepr), stringRepr, "Unknown action string");
 			}

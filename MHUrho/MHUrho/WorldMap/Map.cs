@@ -11,7 +11,7 @@ using MHUrho.Storage;
 using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using MHUrho.PathFinding;
 using Urho.IO;
 
@@ -29,11 +29,11 @@ namespace MHUrho.WorldMap
 			readonly Octree octree;
 			readonly IPathFindAlgFactory pathFindAlgFactory;
 			readonly StMap storedMap;
-			readonly LoadingWatcher loadingProgress;
+			readonly IProgressEventWatcher loadingProgress;
 
 			readonly List<ILoader> tileLoaders;
 
-			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, LoadingWatcher loadingProgress)
+			public Loader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, IProgressEventWatcher loadingProgress)
 			{
 				this.level = level;
 				this.mapNode = mapNode;
@@ -53,11 +53,14 @@ namespace MHUrho.WorldMap
 			/// Last step is to FinishLoading, after all references are connected
 			/// </summary>
 			/// <returns>Map with loaded data, but without connected references and without geometry</returns>
-			public void StartLoading() {
+			public void StartLoading()
+			{
+				loadingProgress?.SendTextUpdate("Loading map");
+
 				Map = new Map(mapNode, octree, storedMap) {levelManager = level};
 
 				foreach (var storedMapTarget in storedMap.MapRangeTargets) {
-					var newTarget = MapRangeTarget.Load(level, storedMapTarget);
+					var newTarget = MapRangeTarget.Load(level, Map, storedMapTarget);
 					Map.mapRangeTargets.Add(newTarget.CurrentPosition, newTarget);
 				}
 
@@ -70,8 +73,7 @@ namespace MHUrho.WorldMap
 							ITileLoader newTileLoader;
 							if (Map.IsBorderTileMapLocation(x, y)) {
 								if (!borderTiles.MoveNext()) {
-									//TODO: Exception
-									throw new Exception("Corrupted save file");
+									throw new LevelLoadingException("Corrupted save file, invalid number of border tiles compared to the stored map size");
 								}
 
 								newTileLoader = BorderTile.GetLoader(Map, borderTiles.Current);
@@ -79,8 +81,7 @@ namespace MHUrho.WorldMap
 							}
 							else {
 								if (!tiles.MoveNext()) {
-									//TODO: Exception
-									throw new Exception("Corrupted save file");
+									throw new LevelLoadingException("Corrupted save file, invalid number of tiles compared to the stored map size");
 								}
 
 								newTileLoader = Tile.GetLoader(level, Map, tiles.Current);
@@ -104,8 +105,8 @@ namespace MHUrho.WorldMap
 					borderTiles?.Dispose();
 				}
 
-
-				
+				loadingProgress?.SendUpdate(100, "Loaded map");
+				loadingProgress?.SendFinished();
 			}
 
 			public void ConnectReferences() {
@@ -122,7 +123,7 @@ namespace MHUrho.WorldMap
 					loader.FinishLoading();
 				}
 
-				Map.BuildGeometry(loadingProgress);
+				Map.BuildGeometry(null);
 			}
 
 		}
@@ -224,7 +225,6 @@ namespace MHUrho.WorldMap
 				private set => TopLeftHeight = value;
 			}
 
-			//TODO: WHEN SETTING THESE CORNERHEIGHTCHANGE is NOT called
 			public float TopLeftHeight { get; set; }
 			public float TopRightHeight { get; set; }
 			public float BottomLeftHeight { get; set; }
@@ -299,6 +299,11 @@ namespace MHUrho.WorldMap
 				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(-1, 1));
 				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(0, 1));
 				yield return Map.GetTileWithBorders(TopLeft + new IntVector2(1, 1));
+			}
+
+			public bool CanChangeCornerHeight(int x, int y)
+			{
+				return true;
 			}
 
 			public BorderTile(StBorderTile stBorderTile, Map map) {
@@ -419,11 +424,17 @@ namespace MHUrho.WorldMap
 		/// <param name="mapNode">Node to connect the map to</param>
 		/// <param name="size">Size of the playing field, excluding the borders</param>
 		/// <returns>Fully created map</returns>
-		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, LoadingWatcher loadingProgress) 
+		/// <exception cref="Exception">Exception might be thrown by <paramref name="pathFindAlg"/> factory</exception>
+		internal static Map CreateDefaultMap(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, IntVector2 size, IProgressEventWatcher progress = null)
 		{
+			const double mapPartSize = 50;
+			const double pathfindPartSize = 40;
+			const double geometryPartSize = 10;
+
+			progress?.SendTextUpdate("Creating map");
 			Map newMap = new Map(mapNode, octree, size.X, size.Y) {levelManager = level};
 
-			TileType defaultTileType = PackageManager.Instance.ActivePackage.DefaultTileType;
+			TileType defaultTileType = level.Package.DefaultTileType;
 
 			for (int i = 0; i < newMap.tiles.Length; i++) {
 				IntVector2 tilePosition = new IntVector2(i % newMap.WidthWithBorders, i / newMap.WidthWithBorders);
@@ -440,17 +451,24 @@ namespace MHUrho.WorldMap
 				}
 
 			}
+			progress?.SendUpdate(mapPartSize, "Created map");
 
-			loadingProgress.TextUpdate("Creating pathfinding graph");
+			progress?.SendTextUpdate("Creating pathfinding graph");
 			newMap.PathFinding = pathFindAlg.GetPathFindAlg(newMap);
+			progress?.SendUpdate(pathfindPartSize, "Created pathfinding graph");
 
-			newMap.BuildGeometry(loadingProgress);
+			progress?.SendTextUpdate("Creating geometry");
+			newMap.BuildGeometry(new ProgressWatcher(progress, geometryPartSize));
+
+			progress?.SendTextUpdate("Created map");
+			progress?.SendFinished();
+
 			return newMap;
 		}
 
-		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, LoadingWatcher loadingProgress)
+		internal static IMapLoader GetLoader(LevelManager level, Node mapNode, Octree octree, IPathFindAlgFactory pathFindAlg, StMap storedMap, ProgressWatcher progress)
 		{
-			return new Loader(level, mapNode, octree, pathFindAlg, storedMap, loadingProgress);
+			return new Loader(level, mapNode, octree, pathFindAlg, storedMap, progress);
 		}
 
 		public StMap Save() 
@@ -487,7 +505,8 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Creates map connected to mapNode with the PLAYING FIELD of width <paramref name="width"/> and length <paramref name="length"/>
 		/// </summary>
-		/// <param name="mapNode"></param>
+		/// <param name="mapNode">Scene node representing the map.</param>
+		/// <param name="octree">Octree of this level used for raycasting.</param>
 		/// <param name="width">Width of the playing field without borders</param>
 		/// <param name="length">Length of the playing field without borders</param>
 		protected Map(Node mapNode, Octree octree, int width, int length) 
@@ -834,16 +853,16 @@ namespace MHUrho.WorldMap
 			return result;
 		}
 
-		public IEnumerable<ITile> GetTilesInSpiral(ITile center)
+		public IEnumerable<ITile> GetTilesInSpiral(ITile center, int cutoff = -1)
 		{
 			var spiralPoint = new Spiral(center.MapLocation).GetSpiralEnumerator();
 			spiralPoint.MoveNext();
-			while (true) {
+			while (cutoff == -1 || spiralPoint.ContainingSquareSize < cutoff) {
 				yield return GetTileByMapLocation(spiralPoint.Current);
 
 				spiralPoint.MoveNext();
 				//While the points are outside of the map
-				while (!IsInside(spiralPoint.Current)) {
+				while (!IsInside(spiralPoint.Current) && spiralPoint.ContainingSquareSize <= Math.Max(Width, Length)) {
 					//Check if there is a part of the spiral still intersecting with the map
 					IntRect square = spiralPoint.GetContainingSquare();
 					if (!IsInside(square.TopLeft()) && !IsInside(square.BottomRight())) {
@@ -899,7 +918,7 @@ namespace MHUrho.WorldMap
 		{
 			var results = octree.Raycast(ray: ray, maxDistance: maxDistance);
 
-			//TODO: Check it intersects from the correct side
+			//NOTE: Maybe check it intersects from the correct side
 			return from result in results
 					where IsRaycastToMap(result)
 					select result;
@@ -1037,7 +1056,7 @@ namespace MHUrho.WorldMap
 
 		public void ChangeTileHeight(ITile centerTile, 
 									 IntVector2 rectangleSize,
-									 ChangeCornerHeightDelegate newHeightFunction) 
+									 GetCornerHeightDelegate newHeightFunction) 
 		{
 
 			//COPYING IS FREQUENT SOURCE OF ERRORS
@@ -1050,7 +1069,15 @@ namespace MHUrho.WorldMap
 
 			for (int y = topLeft.Y; y <= bottomRight.Y; y++) {
 				for (int x = topLeft.X; x <= bottomRight.X; x++) {
-					ChangeCornerHeight(x, y, newHeightFunction(GetTerrainHeightAt(x, y), x, y), true);
+					float height = GetTerrainHeightAt(x, y);
+					try {
+						height = newHeightFunction(height, x, y);
+					}
+					catch (Exception e) {
+						Urho.IO.Log.Write(LogLevel.Warning,
+										$"There was an unexpected exception during the calculation of new height: {e.Message}");
+					} 
+					ChangeCornerHeight(x, y, height, true);
 				}
 			}
 
@@ -1339,7 +1366,7 @@ namespace MHUrho.WorldMap
 		public IRangeTarget GetRangeTarget(Vector3 position) 
 		{
 			if (!mapRangeTargets.TryGetValue(position, out MapRangeTarget mapTarget)) {
-				mapTarget = MapRangeTarget.CreateNew(levelManager, position);
+				mapTarget = MapRangeTarget.CreateNew(levelManager, this, position);
 				mapRangeTargets.Add(position, mapTarget);
 			}
 
@@ -1363,14 +1390,14 @@ namespace MHUrho.WorldMap
 
 		public void Dispose() 
 		{
-			((IDisposable) graphics).Dispose();
+			((IDisposable) graphics)?.Dispose();
 			node.Dispose();
 		}
 
 
 
 
-		void BuildGeometry(LoadingWatcher loadingProgress)
+		void BuildGeometry(IProgressEventWatcher loadingProgress)
 		{
 			graphics = MapGraphics.Build(this, 
 										 ChunkSize,
@@ -1709,11 +1736,19 @@ namespace MHUrho.WorldMap
 		/// <summary>
 		/// Changes heights in the logic tiles, does not change the height in the map model
 		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <param name="height"></param>
+		/// <param name="x">The x coord of the corner to change.</param>
+		/// <param name="y">The y coord of the corner to change.</param>
+		/// <param name="height">Either the height to set the corner to (<paramref name="absolute"/> == true),
+		/// or the relative change of the height(<paramref name="absolute"/> == false).</param>
+		/// <param name="absolute">If the <paramref name="height"/> is absolute or relative.</param>
 		void ChangeCornerHeight(int x, int y, float height, bool absolute)
 		{
+			foreach (var tile in GetTilesAroundCorner(x,y)) {
+				if (!tile.CanChangeCornerHeight(x,y)) {
+					return;
+				}
+			}
+
 			if (IsBorderCorner(x, y)) {
 				foreach (var tile in GetTilesAroundCorner(new IntVector2(x, y), true)) {
 					if (IsBorderTile(tile)) {
@@ -1734,19 +1769,23 @@ namespace MHUrho.WorldMap
 						}
 					}
 					else if (tile.TopLeft == new IntVector2(x, y)) {
-						if (absolute)
+						if (absolute) {
 							tile.SetTopLeftHeight(height);
-						else
+						}
+						else {
 							tile.ChangeTopLeftHeight(height);
+						}
+
 					}
 				}
 			}
 			else {
-				if (absolute)
+				if (absolute) {
 					GetTileByTopLeftCorner(x, y).SetTopLeftHeight(height);
-				else
+				}
+				else {
 					GetTileByTopLeftCorner(x, y).ChangeTopLeftHeight(height);
-
+				}
 			}
 
 		}

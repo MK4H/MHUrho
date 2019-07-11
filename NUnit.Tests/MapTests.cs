@@ -156,21 +156,21 @@ namespace NUnit.Tests {
 		{
 
 
-			slopedInX10x10 = Map.CreateDefaultMap(null, new Node(), null, new AStarFactory(), new IntVector2(10, 10), new LoadingWatcher() );
+			slopedInX10x10 = Map.CreateDefaultMap(null, new Node(), null, new AStarFactory(), new IntVector2(10, 10), new ProgressWatcher() );
 			slopedInX10x10.ChangeTileHeight(slopedInX10x10.GetTileByMapLocation(5, 5),
 											new IntVector2(12, 12),
 											(cHeight, x, y) => x);
 
 			
 
-			slopedInY10x10 = Map.CreateDefaultMap(null, new Node(), null, new AStarFactory(), new IntVector2(10, 10), new LoadingWatcher());
+			slopedInY10x10 = Map.CreateDefaultMap(null, new Node(), null, new AStarFactory(), new IntVector2(10, 10), new ProgressWatcher());
 			slopedInY10x10.ChangeTileHeight(slopedInX10x10.GetTileByMapLocation(5, 5),
 											new IntVector2(12, 12),
 											(cHeight, x, y) => y);
 
 
 			
-			cone10x10 = Map.CreateDefaultMap(null, new Node(), null, new AStarFactory(), new IntVector2(10, 10), new LoadingWatcher());
+			cone10x10 = Map.CreateDefaultMap(null, new Node(), null, new AStarFactory(), new IntVector2(10, 10), new ProgressWatcher());
 			cone10x10.ChangeTileHeight(slopedInX10x10.GetTileByMapLocation(5, 5),
 										new IntVector2(12, 12),
 										(cHeight, x, y) => Math.Max(Math.Abs(y - 5), Math.Abs(x - 5)));

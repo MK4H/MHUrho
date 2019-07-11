@@ -27,6 +27,7 @@ namespace MHUrho.UserInterface.Touch
 
 		public override bool ToolSelectionEnabled { get; } = false;
 		public override bool PlayerSelectionEnabled { get; } = false;
+		public override UIElement GameUIRoot => throw new NotImplementedException();
 
 		public override void AddTool(Tool tool) {
 			throw new NotImplementedException();
@@ -92,6 +93,16 @@ namespace MHUrho.UserInterface.Touch
 		}
 
 		public override void HideUI() {
+			throw new NotImplementedException();
+		}
+
+		public override void RegisterForHover(UIElement element)
+		{
+			throw new NotImplementedException();
+		}
+
+		public override void UnregisterForHover(UIElement element)
+		{
 			throw new NotImplementedException();
 		}
 	}

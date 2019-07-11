@@ -21,12 +21,23 @@ namespace MHUrho.Input.MandK
 
 		public InputType InputType => InputType.MouseAndKeyboard;
 
+		public event OnScreenChangeDelegate ScreenChanged {
+			add {
+				UIController.ScreenChanged += value;
+			}
+			remove {
+				UIController.ScreenChanged -= value;
+			}
+		}
+
 		readonly MenuUI UIController;
+		readonly MHUrhoApp app;
 
 		IGameController pausedLevelController;
 
-		public MenuController()
+		public MenuController(MHUrhoApp app)
 		{
+			this.app = app;
 			UIController = new MenuUI(this);
 		}
 
@@ -39,10 +50,10 @@ namespace MHUrho.Input.MandK
 			UIController.Clear();
 			UIController.SwitchToMainMenu();
 			if (loadingErrorTitle != null && loadingErrorDescription != null) {
-				UIController.CurrentScreen.DisableInput();
 				UIController.ErrorPopUp
-							.DisplayError(loadingErrorTitle, loadingErrorDescription)
-							.ContinueWith((task) => { UIController.CurrentScreen.ResetInput(); });
+							.DisplayError(loadingErrorTitle,
+										loadingErrorDescription,
+										UIController.MainMenu);
 			}	
 		}
 
@@ -52,23 +63,32 @@ namespace MHUrho.Input.MandK
 			UIController.SwitchToPauseMenu(pausedLevelController.Level);
 		}
 
-		public ILevelLoader StartLoadingLevelForEditing(LevelRep level, ILoadingSignaler loadingSignaler)
+		public void SwitchToEndScreen(bool victory)
+		{
+			UIController.SwitchToEndScreen(victory);
+		}
+
+		public ILevelLoader GetLevelLoaderForEditing(LevelRep level, IProgressEventWatcher parentProgress = null, double subsectionSize = 100)
 		{
 			if (pausedLevelController != null) {
 				EndPausedLevel();
 			}
 
-			return level.LoadForEditing(loadingSignaler);
+			return level.GetLoaderForEditing(parentProgress, subsectionSize);
 		}
 
-		public ILevelLoader StartLoadingLevelForPlaying(LevelRep level, PlayerSpecification players, LevelLogicCustomSettings customSettings, ILoadingSignaler loadingSignaler)
+		public ILevelLoader GetLevelLoaderForPlaying(LevelRep level, 
+														PlayerSpecification players, 
+														LevelLogicCustomSettings customSettings, 
+														IProgressEventWatcher parentProgress = null, 
+														double subsectionSize = 100)
 		{
 			if (pausedLevelController != null)
 			{
 				EndPausedLevel();
 			}
 
-			return level.LoadForPlaying(players, customSettings, loadingSignaler);
+			return level.GetLoaderForPlaying(players, customSettings, parentProgress, subsectionSize);
 		}
 
 		public void ExecuteActionOnCurrentScreen(MenuScreenAction action)
@@ -90,19 +110,18 @@ namespace MHUrho.Input.MandK
 
 		public void SavePausedLevel(string fileName)
 		{
-			//TODO: More checks for the fileName
+			//NOTE:Maybe add more checks for the fileName
 			if (string.IsNullOrEmpty(fileName) || Path.GetFileName(fileName) != fileName) {
 				throw new ArgumentException("Invalid fileName for the save file", nameof(fileName));
 			}
 
-			string dynamicPath = Path.Combine(MyGame.Files.SaveGameDirPath, fileName);
+			string dynamicPath = Path.Combine(app.Files.SaveGameDirPath, fileName);
 			try {
-				Stream file = MyGame.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
+				Stream file = app.Files.OpenDynamicFile(dynamicPath, System.IO.FileMode.Create, FileAccess.Write);
 				pausedLevelController.Level.SaveTo(file);
 			}
 			catch (IOException e) {
 				Urho.IO.Log.Write(LogLevel.Error, $"Saving a level failed with exception: {e}");
-				//TODO: Inform user
 				throw;
 			}
 		}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.CameraMovement;
+using MHUrho.EditorTools.MandK.MapHighlighting;
 using MHUrho.Input;
 using MHUrho.Input.MandK;
 using MHUrho.Logic;
@@ -9,10 +10,13 @@ using MHUrho.UserInterface;
 using MHUrho.UserInterface.MandK;
 using MHUrho.WorldMap;
 using Urho;
+using Urho.Gui;
 
 namespace MHUrho.EditorTools.MandK.TerrainManipulation
 {
 	class TerrainSmoothingManipulator : TerrainManipulator {
+
+		const int MaxHighlightSize = 32;
 
 		//https://en.wikipedia.org/wiki/Gaussian_blur
 		readonly Matrix3 matrix = new Matrix3(1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f,
@@ -21,7 +25,10 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 
 		readonly GameController input;
 		readonly GameUI ui;
-		readonly StaticSquareTool highlight;
+
+		readonly UIElement uiElem;
+		readonly Slider sizeSlider;
+		readonly StaticSizeHighlighter highlight;
 		readonly IMap map;
 
 		bool mouseButtonDown;
@@ -32,17 +39,26 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 			this.input = input;
 			this.ui = ui;
 			this.map = map;
-			highlight = new StaticSquareTool(input, ui, camera, 3);
+			InitUI(ui, out uiElem, out sizeSlider);
+			highlight = new StaticSizeHighlighter(input, ui, camera, 3, Color.Green);
 		}
 
 		public override void OnEnabled()
 		{
 			highlight.Enable();
+			sizeSlider.SliderChanged += OnSliderChanged;
+			ui.RegisterForHover(sizeSlider);
+			uiElem.Visible = true;
 		}
+
+		
 
 		public override void OnDisabled()
 		{
 			highlight.Disable();
+			sizeSlider.SliderChanged -= OnSliderChanged;
+			ui.UnregisterForHover(sizeSlider);
+			uiElem.Visible = false;
 		}
 
 		public override void OnMouseDown(MouseButtonDownEventArgs args)
@@ -71,7 +87,10 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 
 		public override void Dispose()
 		{
+			ui.UnregisterForHover(sizeSlider);
 			highlight.Dispose();
+			sizeSlider.Dispose();
+			uiElem.Dispose();
 		}
 
 		float CalculateTileHeight(float previousHeight, int x, int y)
@@ -107,6 +126,28 @@ namespace MHUrho.EditorTools.MandK.TerrainManipulation
 				}
 
 			}
+		}
+
+		static void InitUI(GameUI ui, out UIElement uiElem, out Slider sizeSlider)
+		{
+			if ((uiElem = ui.CustomWindow.GetChild("SmoothingManipulatorUI")) == null)
+			{
+				ui.CustomWindow.LoadLayout("UI/SmoothingManipulatorUI.xml");
+				uiElem = ui.CustomWindow.GetChild("SmoothingManipulatorUI");
+			}
+
+			sizeSlider = (Slider)uiElem.GetChild("SizeSlider");
+			//-1 due to lower bound being 0, so when we are reading the value, we are adding 1
+			sizeSlider.Range = MaxHighlightSize - 1;
+
+			uiElem.Visible = false;
+		}
+
+		void OnSliderChanged(SliderChangedEventArgs obj)
+		{
+			int sliderValue = (int)Math.Round(obj.Value);
+			highlight.EdgeSize = 1 + sliderValue;
+			((Slider)obj.Element).Value = sliderValue;
 		}
 	}
 }

@@ -15,8 +15,8 @@ namespace MHUrho.CameraMovement
 
 		bool cameraMoved;
 
-		public FixedCamera(IMap map, Node levelNode, Node cameraNode, Vector2 initialPosition, SwitchState switchState)
-			: base(map, cameraNode, levelNode.CreateChild("CameraHolder"), switchState)
+		public FixedCamera(IMap map, Node levelNode, Node cameraNode, Vector2 initialPosition, StateSwitchedDelegate stateSwitched)
+			: base(map, cameraNode, levelNode.CreateChild("CameraHolder"), stateSwitched)
 		{
 			CameraHolder.Position = new Vector3(initialPosition.X,
 												map.GetTerrainHeightAt(initialPosition),

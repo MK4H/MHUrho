@@ -134,7 +134,15 @@ namespace MHUrho.UserInterface
 
 			void SaveLevelPrototype(bool overrideLevel)
 			{
-				Level.LevelRep.SaveToGamePack(overrideLevel);
+				try {
+					Level.LevelRep.SaveToGamePack(overrideLevel);
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(Urho.LogLevel.Error, $"Saving level failed with exception: {e.Message}");
+					MenuUIManager.ErrorPopUp.DisplayError("Saving failed",
+														"Saving the current level failed with an error, see Log for details.",
+														Proxy);
+				}
 			}
 
 			void SaveLevelPrototypeAs()

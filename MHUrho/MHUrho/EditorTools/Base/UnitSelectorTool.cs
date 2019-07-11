@@ -9,8 +9,8 @@ namespace MHUrho.EditorTools.Base
 {
 	public abstract class UnitSelectorTool : Tool
 	{
-		protected UnitSelectorTool(IGameController input)
-			:base(input, new IntRect(0,200, 50, 250))
+		protected UnitSelectorTool(IGameController input, IntRect iconRectangle)
+			:base(input, iconRectangle)
 		{
 
 		}

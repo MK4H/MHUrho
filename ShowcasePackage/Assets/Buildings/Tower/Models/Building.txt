@@ -1,0 +1,2 @@
+Assets/Buildings/Tower/Materials/Material.xml
+Assets/Buildings/Tower/Materials/TopMaterial.xml

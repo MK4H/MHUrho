@@ -74,7 +74,7 @@ namespace MHUrho.Logic
 			/// </summary>
 			public void ConnectReferences()
 			{
-				Tile.Type = PackageManager.Instance.ActivePackage.GetTileType(storedTile.TileTypeID);
+				Tile.Type = level.Package.GetTileType(storedTile.TileTypeID);
 
 				if (storedTile.UnitIDs.Count != 0) {
 					Tile.units = new List<IUnit>();
@@ -115,7 +115,7 @@ namespace MHUrho.Logic
 		/// <summary>
 		/// The area in the map this tile represents
 		/// </summary>
-		public IntRect MapArea { get; private set; }
+		public IntRect MapArea { get;  }
 
 
 		public IntVector2 MapLocation => TopLeft;
@@ -181,6 +181,16 @@ namespace MHUrho.Logic
 			return new Loader(level, map, storedTile);
 		}
 
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return MapLocation.GetHashCode();
+		}
+
 		public StTile Save()
 		{
 			return Loader.Save(this);
@@ -212,12 +222,25 @@ namespace MHUrho.Logic
 		}
 
 		public void SetBuilding(IBuilding building) {
+			if (Building != null && building != Building) {
+				throw new InvalidOperationException("There is a building already on this tile");
+			}
+			//Enumerate on a copy because some units may be destroyed during the enumeration
+			foreach (var unit in units?.ToArray() ?? Enumerable.Empty<IUnit>())
+			{
+				unit.BuildingBuilt(building, this);
+			}
+
 			Building = building;
 		}
 
 		public void RemoveBuilding(IBuilding building) {
 			if (Building != building) {
 				throw new ArgumentException("Removing building that is not on this tile");
+			}
+			//Enumerate on a copy because some units may be destroyed during the enumeration
+			foreach (var unit in units?.ToArray() ?? Enumerable.Empty<IUnit>()) {
+				unit.BuildingDestroyed(building, this);
 			}
 
 			Building = null;
@@ -250,14 +273,18 @@ namespace MHUrho.Logic
 		/// Is called every time any of the 4 corners of the tile change height
 		/// </summary>
 		public void CornerHeightChange()
-		{
-			
-			foreach (var unit in Units) {
+		{			
+			//Enumerate on a copy because some units may be destroyed during the enumeration
+			foreach (var unit in units?.ToArray() ?? Enumerable.Empty<IUnit>()) {
+				//Moves unit above terrain
 				float terrainHeight = Map.GetTerrainHeightAt(unit.XZPosition);
 				if (unit.Position.Y < terrainHeight) {
 					unit.SetHeight(terrainHeight);
-				}		
+				}
+				unit.TileHeightChanged(this);
 			}
+
+			Building?.TileHeightChanged(this);
 		}
 
 		public float GetHeightAt(float x, float y)
@@ -270,25 +297,33 @@ namespace MHUrho.Logic
 			return GetHeightAt(position.X, position.Y);
 		}
 
+		static readonly IntVector2[] NeighborDiff =
+		{
+			new IntVector2(-1, -1),
+			new IntVector2(0, -1),
+			new IntVector2(1, -1),
+			new IntVector2(-1, 0),
+			new IntVector2(-1, 1),
+			new IntVector2(0, 1),
+			new IntVector2(1, 1),
+			new IntVector2(1, 0)
+		};
+
+
+		/// <inheritdoc />
 		public IEnumerable<ITile> GetNeighbours()
 		{
-			//Top left neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, -1));
-			//Top neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(0, -1));
-			//Top right neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, -1));
-			//Right neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, 0));
-			//Bottom right neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(-1, 1));
-			//Bottom neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(0, 1));
-			//Bottom left neighbour 
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, 1));
-			//Left neighbour
-			yield return Map.GetTileByMapLocation(MapLocation + new IntVector2(1, 0));
+			foreach (var diff in NeighborDiff) {
+				ITile tile = Map.GetTileByMapLocation(MapLocation + diff);
+				if (tile != null) {
+					yield return tile;
+				}
+			}
+		}
 
+		public bool CanChangeCornerHeight(int x, int y)
+		{
+			return Building?.CanChangeTileHeight(x, y) ?? true;
 		}
 	} 
 }

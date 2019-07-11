@@ -20,7 +20,7 @@ namespace MHUrho.EntityInfo
 
 
 		public OverheadImage(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size, string picture)
-			: this(level, entity, offset, size, PackageManager.Instance.GetImage(picture))
+			: this(level, entity, offset, size, level.PackageManager.GetImage(picture))
 		{
 
 		}
@@ -28,7 +28,7 @@ namespace MHUrho.EntityInfo
 		public OverheadImage(ILevelManager level, IEntity entity, Vector3 offset, Vector2 size, Image image)
 		{
 			this.level = level;
-			material = PackageManager.Instance.GetMaterialFromImage(image);
+			material = level.PackageManager.GetMaterialFromImage(image);
 
 			AddToEntity(entity, offset, size);
 		}

@@ -12,7 +12,7 @@ namespace MHUrho.PathFinding.AStar
     {
 		public override NodeType NodeType => NodeType.Building;
 
-		public IBuilding Building { get; private set; }
+		public IBuilding Building { get; }
 
 		public object Tag { get; private set; }
 
@@ -24,13 +24,17 @@ namespace MHUrho.PathFinding.AStar
 							Vector3 position,
 							object tag,
 							AStarAlg aStar)
-			: base(aStar)
+			: base(aStar, position)
 		{
 			this.Building = building;
-			this.Position = position;
 			this.Tag = tag;
 			incomingEdges = new List<INode>();
 			AStar.GetTileNode(position).AddNodeOnThisTile(this);
+		}
+
+		public override int GetHashCode()
+		{
+			return Building.ID;
 		}
 
 		public override void ProcessNeighbours(Node source,
@@ -38,11 +42,17 @@ namespace MHUrho.PathFinding.AStar
 												List<Node> touchedNodes,
 												Node targetNode,
 												NodeDistCalculator distCalc,
-												Func<Vector3, float> heuristic)
+												ref double minDistToTarget)
 		{
 			State = NodeState.Closed;
-			foreach (var neighbour in outgoingEdges.Keys) {
-				ProcessNeighbour(neighbour, priorityQueue, touchedNodes, targetNode, distCalc, heuristic);
+			foreach (var neighbour in outgoingEdges) {
+				ProcessNeighbour(neighbour.Key,
+								priorityQueue,
+								touchedNodes,
+								targetNode,
+								distCalc,
+								neighbour.Value,
+								ref minDistToTarget);
 			}
 		}
 
@@ -58,9 +68,17 @@ namespace MHUrho.PathFinding.AStar
 			return outgoingEdges[neighbour];
 		}
 
+		public void ChangePosition(Vector3 newPosition)
+		{
+			Position = newPosition;
+		}
+
 		public void Remove()
 		{
-			foreach (var source in incomingEdges) {
+			//Enumerates over copy of incoming edges
+			// because with every RemoveEdge, the source calls RemoveAsTarget on this node
+			// which changes the incomingEdges list
+			foreach (var source in incomingEdges.ToArray()) {
 				source.RemoveEdge(this);
 			}
 
@@ -68,24 +86,24 @@ namespace MHUrho.PathFinding.AStar
 			IsRemoved = true;
 		}
 
-		public override void Accept(INodeVisitor visitor, INode target)
+		public override void Accept(INodeVisitor visitor, INode target, MovementType movementType)
 		{
-			target.Accept(visitor, this);
+			target.Accept(visitor, this, movementType);
 		}
 
-		public override void Accept(INodeVisitor visitor, ITileNode source)
+		public override void Accept(INodeVisitor visitor, ITileNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
-		public override void Accept(INodeVisitor visitor, IBuildingNode source)
+		public override void Accept(INodeVisitor visitor, IBuildingNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
-		public override void Accept(INodeVisitor visitor, ITempNode source)
+		public override void Accept(INodeVisitor visitor, ITempNode source, MovementType movementType)
 		{
-			visitor.Visit(source, this);
+			visitor.Visit(source, this, movementType);
 		}
 
 		protected override void AddedAsTarget(Node source)

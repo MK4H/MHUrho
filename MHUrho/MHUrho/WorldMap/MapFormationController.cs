@@ -4,7 +4,7 @@ using System.Text;
 using MHUrho.Control;
 using MHUrho.Helpers;
 using MHUrho.Logic;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 
 namespace MHUrho.WorldMap
@@ -13,27 +13,43 @@ namespace MHUrho.WorldMap
     {
 		readonly IMap map;
 		readonly Spiral.SpiralEnumerator spiral;
+		readonly HashSet<UnitType> failedTypes;
 
 		public MapFormationController(IMap map, ITile tile)
 		{
 			this.map = map;
 			spiral = new Spiral(tile.MapLocation).GetSpiralEnumerator();
+			spiral.MoveNext();
+
+			failedTypes = new HashSet<UnitType>();
 		}
 
 		public bool MoveToFormation(UnitSelector unit)
 		{
+			if (failedTypes.Contains(unit.Unit.UnitType)) {
+				return false;
+			}
 
-			while (spiral.ContainingSquareSize < map.Width || spiral.ContainingSquareSize < map.Length) {
+			var targetTile = map.GetTileByTopLeftCorner(spiral.Current);
+			while (targetTile == null &&
+					(spiral.ContainingSquareSize < map.Width ||
+					spiral.ContainingSquareSize < map.Length))
+			{
 				//Move the spiral coords
 				spiral.MoveNext();
-				var targetTile = map.GetTileByTopLeftCorner(spiral.Current);
+			} 
 
-				if (targetTile != null && unit.Order(new MoveOrder(map.PathFinding.GetTileNode(targetTile)))) {
-					return true;
-				}
-
-
+			if (targetTile == null) {
+				return false;
 			}
+
+			if (unit.Order(new MoveOrder(map.PathFinding.GetTileNode(targetTile)))) {
+				//Move the spiral coords only on successfully filling the position
+				spiral.MoveNext();
+				return true;
+			}
+
+			failedTypes.Add(unit.Unit.UnitType);			
 			return false;
 		}
 
@@ -46,8 +62,6 @@ namespace MHUrho.WorldMap
 			if (units == null) {
 				return false;
 			}
-
-
 
 			bool executed = false;
 			while (units.IsValid()) {

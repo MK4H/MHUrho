@@ -33,13 +33,13 @@ namespace MHUrho.UserInterface
 
 		protected bool ExpandOnSelect;
 
-		protected ExpandingListItem(MyGame game, string stylePath, bool expandOnSelect)
+		protected ExpandingListItem(MHUrhoApp game, string stylePath, bool expandOnSelect)
 		{
 			this.LayoutMode = LayoutMode.Horizontal;
 			this.ExpandOnSelect = expandOnSelect;
 
-			OuterElement = game.UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/ExpandingItemLayout.xml", true),
-											PackageManager.Instance.GetXmlFile(stylePath, true));
+			OuterElement = game.UI.LoadLayout(game.PackageManager.GetXmlFile("UI/ExpandingItemLayout.xml", true),
+											game.PackageManager.GetXmlFile(stylePath, true));
 
 			AddChild(OuterElement);
 

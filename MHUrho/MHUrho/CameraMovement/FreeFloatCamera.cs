@@ -22,8 +22,8 @@ namespace MHUrho.CameraMovement
 		/// </summary>
 		readonly Node cameraNode;
 
-		public FreeFloatCamera(IMap map, Node levelNode, Node cameraNode, SwitchState switchState)
-			:base(map, switchState)
+		public FreeFloatCamera(IMap map, Node levelNode, Node cameraNode, StateSwitchedDelegate stateSwitched)
+			:base(map, stateSwitched)
 		{
 			this.levelNode = levelNode;
 			this.cameraNode = cameraNode;

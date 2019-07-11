@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using MHUrho.Logic;
+using Urho;
 
 namespace MHUrho.WorldMap
 {
@@ -65,12 +66,38 @@ namespace MHUrho.WorldMap
 		{
 			ImmutableHashSet<ITile> changedTilesSet = ImmutableHashSet.CreateRange(changedTiles);
 
-			TileHeightsChangedCol?.Invoke(changedTiles);
-			TileHeightsChangedHash?.Invoke(changedTilesSet);
+			//Possible user methods
+			try {
+				TileHeightsChangedCol?.Invoke(changedTiles);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(TileHeightsChangedCol)}: {e.Message}");
+			}
+
+			//Possible user methods
+			try { 
+				TileHeightsChangedHash?.Invoke(changedTilesSet);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(TileHeightsChangedHash)}: {e.Message}");
+			}
+
 
 			foreach (var weakObserver in weakColObservers) {
 				if (weakObserver.TryGetTarget(out var observer)) {
-					observer.TileHeightsChanged(changedTiles);
+					//Possible user methods
+					try {
+						observer.TileHeightsChanged(changedTiles);
+					}
+					catch (Exception e)
+					{
+						Urho.IO.Log.Write(LogLevel.Warning,
+										$"There was an unexpected exception during the invocation of {nameof(observer.TileHeightsChanged)}: {e.Message}");
+					}
 				}
 			}
 
@@ -78,7 +105,14 @@ namespace MHUrho.WorldMap
 			{
 				if (weakObserver.TryGetTarget(out var observer))
 				{
-					observer.TileHeightsChanged(changedTilesSet);
+					//Possible user methods
+					try {
+						observer.TileHeightsChanged(changedTilesSet);
+					}
+					catch (Exception e) {
+						Urho.IO.Log.Write(LogLevel.Warning,
+										$"There was an unexpected exception during the invocation of {nameof(observer.TileHeightsChanged)}: {e.Message}");
+					}
 				}
 			}
 		}

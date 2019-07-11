@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<node id="16777217">
+	<attribute name="Is Enabled" value="true" />
+	<attribute name="Name" value="" />
+	<attribute name="Tags" />
+	<attribute name="Position" value="0 0 0" />
+	<attribute name="Rotation" value="1 0 0 0" />
+	<attribute name="Scale" value="2.5 2.5 2.5" />
+	<attribute name="Variables" />
+	<component type="StaticModel" id="16777231">
+		<attribute name="Model" value="Model;Assets/Buildings/Keep/Models/Building.mdl" />
+		<attribute name="Material" value="Material;Assets/Buildings/Keep/Materials/Material.xml;Assets/Buildings/Keep/Materials/DoorMat.xml;Assets/Buildings/Keep/Materials/TopMat.xml" />
+	</component>
+	<component type="RigidBody" id="16777251" />
+	<component type="CollisionShape" id="16777252">
+		<attribute name="Size" value="2 2 2" />
+		<attribute name="Offset Position" value="0 1 0" />
+	</component>
+</node>

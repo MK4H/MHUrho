@@ -12,7 +12,7 @@ using MHUrho.Helpers.Extensions;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 using Urho.Physics;
 
@@ -52,7 +52,7 @@ namespace MHUrho.Logic
 				this.storedUnit = storedUnit;
 				this.defComponentLoaders = new List<DefaultComponentLoader>();
 
-				type = PackageManager.Instance.ActivePackage.GetUnitType(storedUnit.TypeID);
+				type = level.Package.GetUnitType(storedUnit.TypeID);
 				if (type == null) {
 					throw new ArgumentException("Type of this unit was not loaded");
 				}
@@ -68,9 +68,13 @@ namespace MHUrho.Logic
 			/// <param name="tile">tile where the unit will spawn</param>
 			/// <param name="rotation">Initial rotation of the unit</param>
 			/// <param name="player">owner of the unit</param>
-			/// <returns>the unit component, already added to the node</returns>
+			/// <returns>the unit component, already added to the node, or null if the unit cannot be spawned on the <paramref name="tile"/></returns>
 			/// <exception cref="CreationException">Throws an exception when unit creation fails</exception>
 			public static Unit CreateNew(int id, UnitType type, ILevelManager level, ITile tile, Quaternion rotation, IPlayer player) {
+				if (!type.CanSpawnAt(tile)) {
+					return null;
+				}
+
 				Vector3 position = new Vector3(tile.Center.X,
 												level.Map.GetHeightAt(tile.Center.X, tile.Center.Y),
 												tile.Center.Y);
@@ -88,7 +92,7 @@ namespace MHUrho.Logic
 
 				try {
 					new UnitComponentSetup().SetupComponentsOnNode(unitNode, level);
-					var unit = new Unit(id, level, type, tile, player, unitNode);
+					var unit = new Unit(id, level, type, tile, player);
 					unitNode.AddComponent(unit);
 
 					unit.UnitPlugin = type.GetNewInstancePlugin(unit, level);
@@ -141,7 +145,6 @@ namespace MHUrho.Logic
 			/// </summary>
 			/// <returns>Loaded unit component, already added to the node</returns>
 			public void StartLoading() {
-				//TODO: Check arguments - node cant have more than one Unit component
 				if (type.ID != storedUnit.TypeID) {
 					throw new ArgumentException("provided type is not the type of the stored unit", nameof(type));
 				}
@@ -154,9 +157,7 @@ namespace MHUrho.Logic
 
 				new UnitComponentSetup().SetupComponentsOnNode(centerNode, level);
 
-				var unitID = storedUnit.Id;
-
-				loadingUnit = new Unit(unitID, level, type, centerNode);
+				loadingUnit = new Unit(storedUnit.Id, level, type);
 				centerNode.AddComponent(loadingUnit);
 
 				//Unit is automatically registered by the loaders
@@ -199,19 +200,19 @@ namespace MHUrho.Logic
 
 		}
 
-		#region Public members
 		public UnitType UnitType { get; private set;}
 
+		public override IEntityType Type => UnitType;
+
 		public override Vector3 Position {
-			get => LegNode.Position;
-			protected set => LegNode.Position = value;
+			get => Node.Position;
+			protected set => Node.Position = value;
 		}
 
 		public override InstancePlugin Plugin => UnitPlugin;
 
 		/// <summary>
-		/// Tile this unit is standing on
-		/// TODO: Maybe include all the tiles this unit touches, which may be up to 4 tiles
+		/// Tile this unit is standing on.
 		/// </summary>
 		public ITile Tile { get; private set; }
 
@@ -219,47 +220,26 @@ namespace MHUrho.Logic
 
 		public bool AlwaysVertical { get; set; } = false;
 
-		/// <summary>
-		/// Node used for movement and collisions with the terrain and buildings
-		/// </summary>
-		public Node LegNode { get; private set; }
-
-		/// <summary>
-		/// Node used for model, collisions with projectiles and logic
-		/// </summary>
-		public Node CenterNode => Node;
-
-		public override Vector3 Forward => LegNode.WorldDirection;
+		public override Vector3 Forward => Node.WorldDirection;
 
 		public override Vector3 Backward => -Forward;
 
-		public override Vector3 Right => LegNode.WorldRight;
+		public override Vector3 Right => Node.WorldRight;
 
 		public override Vector3 Left => -Right;
 
-		public override Vector3 Up => LegNode.WorldUp;
+		public override Vector3 Up => Node.WorldUp;
 
 		public override Vector3 Down => -Up;
-
-		#endregion
-
-		#region Private members
-
-
-
-		#endregion
-
-		#region Constructors
 
 		/// <summary>
 		/// Initializes everything apart from the things referenced by their ID or position
 		/// </summary>
 		/// <param name="type">type of the loading unit</param>
-		protected Unit(int id, ILevelManager level, UnitType type, Node legNode)
+		protected Unit(int id, ILevelManager level, UnitType type)
 			:base(id, level)
 		{
 			this.UnitType = type;
-			this.LegNode = legNode;
 
 			ReceiveSceneUpdates = true;
 		}
@@ -273,20 +253,15 @@ namespace MHUrho.Logic
 		/// <param name="type">the type of the unit</param>
 		/// <param name="tile">Tile where the unit spawned</param>
 		/// <param name="player">Owner of the unit</param>
-		protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player, Node legNode) 
+		protected Unit(int id, ILevelManager level, UnitType type, ITile tile, IPlayer player) 
 			: base(id, level)
 		{
 			this.Tile = tile;
 			this.Player = player;
 			this.UnitType = type;
-			this.LegNode = legNode;
 
 			ReceiveSceneUpdates = true;
 		}
-
-		#endregion
-
-		#region Public methods
 
 		public static IUnitLoader GetLoader(LevelManager level, StUnit storedUnit)
 		{
@@ -321,6 +296,50 @@ namespace MHUrho.Logic
 			SignalPositionChanged();
 		}
 
+		public void TileHeightChanged(ITile tile)
+		{
+			try {
+				UnitPlugin.TileHeightChanged(tile);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.TileHeightChanged)} failed with Exception: {e.Message}");
+			}
+		}
+
+		/// <summary>
+		/// Notifies the unit that a building was built on the tile it was standing on.
+		/// </summary>
+		/// <param name="building">The new building.</param>
+		/// <param name="tile">The tile this unit is standing on.</param>
+		public void BuildingBuilt(IBuilding building, ITile tile)
+		{
+			try
+			{
+				UnitPlugin.BuildingBuilt(building, tile);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.BuildingBuilt)} failed with Exception: {e.Message}");
+			}
+		}
+
+		/// <summary>
+		/// Notifies the unit that a building on the tile it was standing on was destroyed.
+		/// </summary>
+		/// <param name="building">The destroyed building.</param>
+		/// <param name="tile">The tile this unit is standing on.</param>
+		public void BuildingDestroyed(IBuilding building, ITile tile)
+		{
+			try
+			{
+				UnitPlugin.BuildingDestroyed(building, tile);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error, $"Unit plugin call {nameof(UnitPlugin.BuildingDestroyed)} failed with Exception: {e.Message}");
+			}
+		}
+
 		public void MoveBy(Vector3 moveBy) {
 			var newPosition = Position + moveBy;
 
@@ -338,7 +357,7 @@ namespace MHUrho.Logic
 			Position = newPosition;
 			ITile newTile;
 
-			if ((newTile = Map.GetContainingTile(Position)) != Tile) {
+			if ((newTile = Level.Map.GetContainingTile(Position)) != Tile) {
 				Tile.RemoveUnit(this);
 				Tile = newTile;
 				Tile.AddUnit(this);
@@ -348,7 +367,7 @@ namespace MHUrho.Logic
 		}
 
 		public void MoveTo(Vector2 newLocation) {
-			MoveTo(new Vector3(newLocation.X, Map.GetTerrainHeightAt(newLocation), newLocation.Y));
+			MoveTo(new Vector3(newLocation.X, Level.Map.GetTerrainHeightAt(newLocation), newLocation.Y));
 		}
 
 		/// <summary>
@@ -361,11 +380,11 @@ namespace MHUrho.Logic
 		public void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false) {
 			if (AlwaysVertical || rotateAroundY) {
 				//Only rotate around Y
-				LegNode.LookAt(new Vector3(lookPosition.X, Position.Y, lookPosition.Z), Node.Up);
+				Node.LookAt(new Vector3(lookPosition.X, Position.Y, lookPosition.Z), Node.Up);
 			}
 			else {
-				LegNode.LookAt(lookPosition, Tile.Map.GetUpDirectionAt(Position.XZ2()));
-				if (LegNode.Up.Y < 0) {
+				Node.LookAt(lookPosition, Tile.Map.GetUpDirectionAt(Position.XZ2()));
+				if (Node.Up.Y < 0) {
 					Tile.Map.GetUpDirectionAt(Position.XZ2());
 				}
 			}
@@ -373,19 +392,9 @@ namespace MHUrho.Logic
 			SignalRotationChanged();
 		}
 
-		public void RotateAroundFeet(float pitch, float yaw, float roll) {
-			LegNode.Rotate(new Quaternion(pitch, yaw, roll));
-			SignalRotationChanged();
-		}
-
-		public void RotateAroundCenter(float pitch, float yaw, float roll) {
-			Node.Rotate(new Quaternion(pitch, yaw, roll));
-			SignalRotationChanged();
-		}
-
 		public override void RemoveFromLevel()
 		{
-			if (RemovedFromLevel) return;
+			if (IsRemovedFromLevel) return;
 
 			base.RemoveFromLevel();
 			//We need removeFromLevel to work during any phase of loading, where connect references may not have been called yet
@@ -400,10 +409,12 @@ namespace MHUrho.Logic
 			Level.RemoveUnit(this);
 			Tile?.RemoveUnit(this);
 			Player?.RemoveUnit(this);
-			LegNode.Remove();
-			LegNode.Dispose();
-			
-			Dispose();	
+			if (!IsDeleted)
+			{
+				Node.Remove();
+			}
+
+			base.Dispose();
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -421,16 +432,13 @@ namespace MHUrho.Logic
 		{
 			RemoveFromLevel();
 		}
-		#endregion
-
-		#region Protected Methods
 
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
 			//Level.LevelNode.Enabled is here because there seems to be a bug
 			// where child nodes of level still receive updates even though 
 			// the level node is not enabled
-			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}
 
@@ -443,15 +451,6 @@ namespace MHUrho.Logic
 			}
 			
 		}
-
-		#endregion
-
-		#region Private Methods
-
-
-
-		#endregion
-
 	 
 	}
 }

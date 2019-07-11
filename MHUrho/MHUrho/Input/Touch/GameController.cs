@@ -42,6 +42,11 @@ namespace MHUrho.Input.Touch
 			throw new NotImplementedException();
 		}
 
+		public void EndLevelToEndScreen(bool victory)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void EndLevel()
 		{
 			throw new NotImplementedException();

@@ -116,13 +116,13 @@ namespace MHUrho.UserInterface
 
 					var result = await MenuUIManager.
 										FileBrowsingPopUp.
-										Request(PackageManager.Instance.ActivePackage.RootedDirectoryPath,
+										Request(Game.PackageManager.ActivePackage.RootedDirectoryPath,
 												SelectOption.File,
 												thumbnailPathText.HasDefaultValue ? null : thumbnailPathText.Value);
 
 
 					string newPath = result == null ? oldPath : result.RelativePath;
-					MyGame.InvokeOnMainSafeAsync(() => thumbnailPathText.Value = newPath);
+					await MHUrhoApp.InvokeOnMainSafeAsync(() => thumbnailPathText.Value = newPath);
 				}
 				catch (OperationCanceledException)
 				{
@@ -134,16 +134,27 @@ namespace MHUrho.UserInterface
 			{
 				if (Level.LevelRep.GamePack.TryGetLevel(name, out LevelRep oldLevel)) {
 					bool confirm = await MenuUIManager.ConfirmationPopUp.RequestConfirmation("Override level",
-																							"Do you want to override existing level with the same name?");
+																							"Do you want to override existing level with the same name?",
+																							 null,
+																							 proxy);
 					if (!confirm) {
 						return;
 					}
 				}
 
-				LevelRep newLevelRep = Level.LevelRep.CreateClone(name, description, ThumbnailPath);
-				newLevelRep.SaveToGamePack(true);
-				Level.ChangeRep(newLevelRep);
-				MenuUIManager.SwitchBack();
+				LevelRep newLevelRep = null;
+				try {
+					newLevelRep = Level.LevelRep.CreateClone(name, description, ThumbnailPath);
+					newLevelRep.SaveToGamePack(true);
+					Level.ChangeRep(newLevelRep);
+					MenuUIManager.SwitchBack();
+				}
+				catch (Exception) {
+					newLevelRep?.Dispose();
+					await MenuUIManager.ErrorPopUp.DisplayError("Package Error",
+																"There was an error while saving the level to package, see log for details.",
+																proxy);
+				}
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -152,7 +163,6 @@ namespace MHUrho.UserInterface
 			}
 		}
 
-		//TODO: Check the setting
 		public ILevelManager Level { get; set; }
 
 		protected override ScreenBase ScreenInstance {
@@ -180,17 +190,12 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			screen = new Screen(this);
-		}
-
-		public override void Hide()
-		{
-			if (screen == null) {
-				return;
+			if (Level == null)
+			{
+				throw new InvalidOperationException("Level has to be set before saving trying to save it.");
 			}
 
-			Level = null;
-			base.Hide();
+			screen = new Screen(this);
 		}
 
 	}

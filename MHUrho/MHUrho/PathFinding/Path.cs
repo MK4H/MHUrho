@@ -37,12 +37,12 @@ namespace MHUrho.PathFinding
 		Vector3 currentPosition;
 
 		/// <summary>
-		/// Original time to TargetWaypoint on the call of <see cref="WaypointReached(GetTime)"/>
+		/// Original time to TargetWaypoint on the call of <see cref="WaypointReached(INodeDistCalculator)"/>
 		/// </summary>
 		float originalTime;
 		int previousWaypointIndex = 0;
 
-		IMap map;
+		readonly IMap map;
 
 		protected Path(IMap map) {
 			this.waypoints = new List<Waypoint>();
@@ -99,6 +99,13 @@ namespace MHUrho.PathFinding
 		}
 
 
+		/// <summary>
+		/// Updates the current position of the entity on the path.
+		/// </summary>
+		/// <param name="newPosition">New position on the path.</param>
+		/// <param name="secondsFromLastUpdate">Time since the last update in seconds.</param>
+		/// <param name="nodeDistCalculator">Calculator to recalculate the time to next node.</param>
+		/// <returns>True if the path is still viable, false if the path cannot be followed.</returns>
 		public bool Update(Vector3 newPosition, float secondsFromLastUpdate, INodeDistCalculator nodeDistCalculator)
 		{
 			switch (TargetWaypoint.MovementType) {
@@ -111,12 +118,39 @@ namespace MHUrho.PathFinding
 					//Default to linear movement
 					currentPosition = newPosition;
 					break;
-
-
 			}
 
-			if (nodeDistCalculator.GetTime(waypoints[previousWaypointIndex].Node, TargetWaypoint.Node, out var newTime)) {
-				//Still can teleport to TargetWaypoint
+			INode prevNode = waypoints[previousWaypointIndex].Node;
+			INode targetNode = TargetWaypoint.Node;
+
+			if (previousWaypointIndex != 0) {
+				//When testing the ability to go to a node, we need to test it between two non temp nodes
+				// so if prevNode is temp, we need to find the previous node
+				// if there is no previous node, then we are starting the movement and can default to is able to pass
+				INode testPrevNode = waypoints[previousWaypointIndex].Node;
+				//Same as prevNode, we need to test the ability to pass between two non temp nodes
+				INode testTargetNode = targetNode;
+				if (testPrevNode.NodeType == NodeType.Temp || testTargetNode.NodeType == NodeType.Temp)
+				{
+					if (testPrevNode.NodeType == NodeType.Temp) {
+						//We tested that previousWaypointIndex != 0
+						testPrevNode = waypoints[previousWaypointIndex - 1].Node;
+					}
+
+					if (testTargetNode.NodeType == NodeType.Temp && targetWaypointIndex - 1 < waypoints.Count) {
+						testTargetNode = waypoints[targetWaypointIndex + 1].Node;
+					}
+
+					//Cannot pass
+					if (!nodeDistCalculator.GetTime(testPrevNode, testTargetNode, TargetWaypoint.MovementType, out var time)) {
+						return false;
+					}
+				}
+			}
+		
+
+			if (nodeDistCalculator.GetTime(prevNode, targetNode, TargetWaypoint.MovementType, out var newTime)) {
+				//Still can move to TargetWaypoint
 
 				//Scale the remaining time if the time from previous waypoint to targetWaypoint changed
 				float remainingTime = TargetWaypoint.TimeToWaypoint * (newTime / originalTime);
@@ -150,7 +184,7 @@ namespace MHUrho.PathFinding
 				return false;
 			}
 
-			if (!nodeDistCalculator.GetTime(PreviousWaypoint.Node, TargetWaypoint.Node, out float newTimeToWaypoint))
+			if (!nodeDistCalculator.GetTime(PreviousWaypoint.Node, TargetWaypoint.Node, TargetWaypoint.MovementType, out float newTimeToWaypoint))
 			{
 				//Cant get to the waypoint, path changed, end of the current path
 				return false;

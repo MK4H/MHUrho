@@ -196,7 +196,7 @@ namespace MHUrho.UserInterface
 
 					resolutionsElement.AddItem(text);
 
-					//TODO: Text style
+					//NOTE:Maybe text style
 					text.SetStyleAuto();
 				}
 
@@ -219,28 +219,22 @@ namespace MHUrho.UserInterface
 
 					windowTypesElement.AddItem(text);
 
-					//TODO: Text style
+					//NOTE:Maybe text style
 					text.SetStyleAuto();
 				}
 			}
 
-			void SaveButton_Released(ReleasedEventArgs args)
+			async void SaveButton_Released(ReleasedEventArgs args)
 			{
 				if (changed) {
 					Game.Config.SetGraphicsMode(Game.Graphics);
-					DisableInput();
-					MenuUIManager.ConfirmationPopUp
-								.RequestConfirmation("Save config",
-													"Do you wish to save these settings ?",
-													TimeSpan.FromSeconds(10))
-								.ContinueWith(SaveConfirmation, TaskScheduler.FromCurrentSynchronizationContext())
-								.ContinueWith((confirmed) => {
-												if (!confirmed.Result)
-												{
-													ResetInput();
-												}
-											}, 
-											TaskScheduler.FromCurrentSynchronizationContext());
+
+					bool confirmed = await MenuUIManager.ConfirmationPopUp
+														.RequestConfirmation("Save config",
+																			"Do you wish to save these settings ?",
+																			TimeSpan.FromSeconds(10),
+																			 proxy);
+					SaveConfirmation(confirmed);
 				}
 				else {
 					SaveConfirmation(true);
@@ -248,38 +242,26 @@ namespace MHUrho.UserInterface
 
 			}
 
-			void BackButton_Released(ReleasedEventArgs args)
+			async void BackButton_Released(ReleasedEventArgs args)
 			{
 				if (changed) {
-					DisableInput();
-					MenuUIManager.ConfirmationPopUp
-								.RequestConfirmation("Exit config",
-													"Do you wish to revert these settings to their previous state?")
-								.ContinueWith(ExitConfirmation, TaskScheduler.FromCurrentSynchronizationContext())
-								.ContinueWith((confirmed) => {
-												if (!confirmed.Result) {
-													ResetInput();
-												}
-											}, 
-											TaskScheduler.FromCurrentSynchronizationContext());
+					bool confirmed = await MenuUIManager.ConfirmationPopUp
+														.RequestConfirmation("Exit config",
+																			"Do you wish to revert these settings to their previous state?",
+																			 null,
+																			 proxy);
+					ExitConfirmation(confirmed);
 				}
 				else {
 					ExitConfirmation(true);
 				}
 			}
 
-			bool ExitConfirmation(Task<bool> confirmed)
-			{
-				bool result = confirmed.Result;
-				ExitConfirmation(result);
-				return result;
-			}
-
 			void ExitConfirmation(bool confirmed)
 			{
 				if (confirmed) {
 					if (changed) {
-						Game.Config.Reload();
+						Game.Config.Reload(Game.Files);
 						SetValues(Game.Config);
 					}
 					changed = false;
@@ -287,25 +269,18 @@ namespace MHUrho.UserInterface
 				}
 			}
 
-			bool SaveConfirmation(Task<bool> confirmed)
-			{
-				bool result = confirmed.Result;
-				SaveConfirmation(confirmed.Result);
-				return result;
-			}
-
 			void SaveConfirmation(bool confirmed)
 			{
 				if (confirmed) {
 					if (changed) {
-						Game.Config.Save();
+						Game.Config.Save(Game.Files);
 						changed = false;
 					}
 					MenuUIManager.SwitchBack();
 				}
 				else {
 					if (changed) {
-						Game.Config.Reload();
+						Game.Config.Reload(Game.Files);
 						SetValues(Game.Config);
 						Game.Config.SetGraphicsMode(Game.Graphics);
 						changed = false;
@@ -315,7 +290,7 @@ namespace MHUrho.UserInterface
 
 			void SetValues(AppConfig config)
 			{
-				MyGame.InvokeOnMainSafe(SetValuesImpl);
+				MHUrhoApp.InvokeOnMainSafe(SetValuesImpl);
 
 				void SetValuesImpl()
 				{

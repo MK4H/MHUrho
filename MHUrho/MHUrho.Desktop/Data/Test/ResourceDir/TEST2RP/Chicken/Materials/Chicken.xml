@@ -1,9 +1,0 @@
-<material>
-	<technique name="Techniques/DiffNormal.xml"/>
-	<texture name="Chicken/Textures/UV-Texture.png" unit="diffuse"/>
-	<texture name="Chicken/Textures/ChickenNorm.png" unit="normal"/>
-	<parameter name="MatDiffColor" value="1 1 1 1"/>
-	<parameter name="MatSpecColor" value="0 0 0 50"/>
-	<cull value="none"/>
-	<shadowcull value="none"/>
-</material>

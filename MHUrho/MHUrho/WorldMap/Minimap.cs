@@ -69,9 +69,9 @@ namespace MHUrho.WorldMap
 				uint* imageData = (uint*)image.Data;
 
 				/*
-				 * TODO: try one access to tile and immediate fill of all the pixels for that tile
-				 * TODO: try sequential fill of pixels, while every fill acesses the tile
-				 * TODO: try sequential fill of pixels, while only the first fill acesses the tile
+				 * FUTURE: try one access to tile and immediate fill of all the pixels for that tile
+				 * FUTURE: try sequential fill of pixels, while every fill acesses the tile
+				 * FUTURE: try sequential fill of pixels, while only the first fill acesses the tile
 				*/
 
 				//One axis has to be inverted, because what works on screen ([0,0] top left corner) does not work in the 3D world
@@ -133,7 +133,7 @@ namespace MHUrho.WorldMap
 		}
 
 		/// <summary>
-		/// TODO: summary
+		/// Changes the size of the displayed part of the map.
 		/// </summary>
 		/// <param name="times">How much zoom, + is zoom in, - is zoom out</param>
 		/// <returns>true if it is possible to zoom further in the given direction, false if not</returns>

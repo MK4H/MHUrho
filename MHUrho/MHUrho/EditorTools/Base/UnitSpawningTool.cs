@@ -9,8 +9,8 @@ namespace MHUrho.EditorTools.Base
 {
 	public abstract class UnitSpawningTool :Tool
 	{
-		protected UnitSpawningTool(IGameController input)
-			: base(input, new IntRect(0, 0, 50, 50))
+		protected UnitSpawningTool(IGameController input, IntRect iconRectangle)
+			: base(input, iconRectangle)
 		{
 
 		}

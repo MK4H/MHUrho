@@ -95,7 +95,7 @@ namespace MHUrho.Input.MandK
 			camera.Dispose();
 		}
 
-		//TODO: Read from config
+		//FUTURE: Read from config
 		void RegisterCameraControlKeys()
 		{
 			input.RegisterKeyDownAction(Key.W, StartCameraMoveForward);

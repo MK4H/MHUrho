@@ -1,14 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <menuActions xmlns="http://www.MobileHold.cz/MenuActions.xsd">
-  <!--<mainMenu>
+  <mainMenu>
     <action>start</action>
   </mainMenu>
   <packagePicking>
     <action>pick</action>
     <values>
-      <packageName>testRP2</packageName>
+      <packageName>Showcase Package</packageName>
     </values>
   </packagePicking>
+  <loading>
+    <action>none</action>
+  </loading>
   <levelPicking>
     <action>editnew</action>
   </levelPicking>
@@ -17,11 +20,15 @@
     <values>
       <levelName>Test level 1</levelName>
       <description>The best test level 1</description>
-      <thumbnailPath>xamarin.png</thumbnailPath>
-      <logicTypeName>TestLogic</logicTypeName>
+      <thumbnailPath>Assets/xamarin.png</thumbnailPath>
+      <logicTypeName>TwoPlayers</logicTypeName>
       <mapSize x="200" y="300"/>
     </values>
-  </levelCreation>-->
+  </levelCreation>
+  <loading>
+    <action>none</action>
+  </loading>
+
   <!--<levelPicking>
     <action>play</action>
     <values>

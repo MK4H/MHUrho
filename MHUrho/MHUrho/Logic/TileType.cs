@@ -14,11 +14,6 @@ using Urho.Urho2D;
 namespace MHUrho.Logic
 {
 	public class TileType : ILoadableType {
-		static readonly string IDAttributeName = "ID";
-		static readonly string NameAttributeName = "name";
-		static readonly XName TexturePathElementName = PackageManager.XMLNamespace + "texturePath";
-		static readonly XName IconTextureElementName = PackageManager.XMLNamespace + "iconTextureRectangle";
-		static readonly XName MinimapColorElement = PackageManager.XMLNamespace + "minimapColor";
 
 		public int ID { get; private set; }
 
@@ -26,7 +21,6 @@ namespace MHUrho.Logic
 
 		public GamePack Package { get; private set; }
 
-		//TODO: Check that texture is null
 		public Rect TextureCoords { get; private set; }
 
 		public Color MinimapColor { get; private set; }
@@ -36,13 +30,29 @@ namespace MHUrho.Logic
 		string imagePath;
 
 		public void Load(XElement xml, GamePack package) {
-			//TODO: Check for errors
-			ID = xml.GetIntFromAttribute(IDAttributeName);
-			Name = xml.Attribute(NameAttributeName).Value;
-			imagePath = XmlHelpers.GetPath(xml.Element(TexturePathElementName));
-			IconRectangle = XmlHelpers.GetIntRect(xml.Element(IconTextureElementName));
-			MinimapColor = XmlHelpers.GetColor(xml.Element(MinimapColorElement));
 			Package = package;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				imagePath = XmlHelpers.GetPath(xml.Element(TileTypeXml.Inst.TexturePath));
+				IconRectangle = XmlHelpers.GetIntRect(xml.Element(TileTypeXml.Inst.IconTextureRectangle));
+				MinimapColor = XmlHelpers.GetColor(xml.Element(TileTypeXml.Inst.MinimapColor));
+			}
+			catch (Exception e) {
+				string message = $"Tile type loading failed: Invalid XML of the package {package.Name}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new PackageLoadingException(message, e);
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return ID;
 		}
 
 		/// <summary>
@@ -67,7 +77,7 @@ namespace MHUrho.Logic
 		}
 
 		public Image GetImage() {
-			return PackageManager.Instance.GetImage(imagePath);
+			return Package.PackageManager.GetImage(imagePath, true);
 		}
 
 

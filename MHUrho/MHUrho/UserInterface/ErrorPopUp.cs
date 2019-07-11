@@ -14,7 +14,7 @@ namespace MHUrho.UserInterface
 
 			readonly ErrorPopUp proxy;
 
-			MyGame Game => MyGame.Instance;
+			MHUrhoApp Game => MHUrhoApp.Instance;
 
 			MenuUIManager MenuUIManager => proxy.menuUIManager;
 
@@ -61,9 +61,10 @@ namespace MHUrho.UserInterface
 
 			void CloseButtonReleased(ReleasedEventArgs obj)
 			{
+				
+				underlyingMenuScreen?.ResetInput();
 				//Dummy boolean value, publicly the task present as plain Task without return value
 				taskSource.SetResult(false);
-				underlyingMenuScreen?.ResetInput();
 				proxy.Hide();
 			}
 

@@ -17,6 +17,13 @@ namespace MHUrho.Plugins
 			this.Building = building;
 		}
 
+		public abstract bool CanChangeTileHeight(int x, int y);
+
+		public virtual void TileHeightChanged(ITile tile)
+		{
+
+		}
+
 		public virtual float? GetHeightAt(float x, float y)
 		{
 			return null;
@@ -27,6 +34,9 @@ namespace MHUrho.Plugins
 			return null;
 		}
 
-		public abstract void OnHit(IEntity byEntity, object userData);
+		public virtual void OnHit(IEntity byEntity, object userData)
+		{
+
+		}
 	}
 }

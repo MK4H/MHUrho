@@ -22,11 +22,11 @@ namespace MHUrho.UserInterface.MandK
 		static Color mouseOverColor = new Color(0.9f, 0.9f, 0.9f);
 
 		static Texture2D DefaultButtonTexture =
-			PackageManager.Instance.GetTexture2D("Textures/xamarin.png");
+			MHUrhoApp.Instance.PackageManager.GetTexture2D("Textures/xamarin.png");
 
 		public GameController InputCtl { get; protected set; }
 
-		public CursorTooltips CursorTooltips { get; protected set; }
+		public override UIElement GameUIRoot => gameUI;
 
 		public bool UIHovering => hovering > 0;
 
@@ -49,7 +49,8 @@ namespace MHUrho.UserInterface.MandK
 		readonly ExpandingSelector playerSelection;
 		readonly UIMinimap minimap;
 
-	
+		readonly HashSet<UIElement> registeredForHover;
+
 		int hovering = 0;
 
 
@@ -61,15 +62,14 @@ namespace MHUrho.UserInterface.MandK
 			this.cameraMover = cameraMover;
 			this.tools = new Dictionary<UIElement, Tool>();
 			this.players = new Dictionary<UIElement, IPlayer>();
-			//TODO: User texture
-			this.CursorTooltips = new CursorTooltips(PackageManager.Instance.GetTexture2D("Textures/xamarin.png"),this);
+			this.registeredForHover = new HashSet<UIElement>();
 
-			gameUI = UI.LoadLayout(PackageManager.Instance.GetXmlFile("UI/GameLayout.xml", true), 
-									PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
+			gameUI = UI.LoadLayout(Level.PackageManager.GetXmlFile("UI/GameLayout.xml", true),
+									Level.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
 			UI.Root.AddChild(gameUI);
 			gameUI.Visible = false;
 
-			CustomWindow = new CustomElementsWindow((Window)gameUI.GetChild("CustomWindow"));
+			CustomWindow = new CustomElementsWindow((Window)gameUI.GetChild("CustomWindow"), UI, Game.ResourceCache);
 			CustomWindow.HoverBegin += UIHoverBegin;
 			CustomWindow.HoverEnd += UIHoverEnd;
 
@@ -154,8 +154,8 @@ namespace MHUrho.UserInterface.MandK
 		{
 
 			CheckBox checkBox = toolSelection.CreateCheckBox();
-			checkBox.SetStyle("ToolCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
-
+			checkBox.SetStyle("ToolCheckBox", Game.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
+			checkBox.Texture = InputCtl.Level.Package.ToolIconTexture;
 			checkBox.ImageRect = tool.IconRectangle;
 
 			tools.Add(checkBox, tool);
@@ -202,7 +202,7 @@ namespace MHUrho.UserInterface.MandK
 		{
 
 			CheckBox checkBox = playerSelection.CreateCheckBox();
-			checkBox.SetStyle("PlayerCheckBox", PackageManager.Instance.GetXmlFile("UI/GameUIStyle.xml", true));
+			checkBox.SetStyle("PlayerCheckBox", Game.PackageManager.GetXmlFile("UI/GameUIStyle.xml", true));
 
 
 			checkBox.ImageRect = player.Insignia.ShieldRectangle;
@@ -241,6 +241,30 @@ namespace MHUrho.UserInterface.MandK
 			playerSelection.Disable();
 		}
 
+		public override void RegisterForHover(UIElement element)
+		{
+			if (registeredForHover.Contains(element)) {
+				return;
+			}
+
+			element.HoverBegin += UIHoverBegin;
+			element.HoverEnd += UIHoverEnd;
+			registeredForHover.Add(element);
+		}
+
+		public override void UnregisterForHover(UIElement element)
+		{
+			if (!registeredForHover.Remove(element)) {
+				return;
+			}
+
+			if (element.Hovering) {
+				UIHoverEnd(new HoverEndEventArgs());
+			}
+			element.HoverBegin -= UIHoverBegin;
+			element.HoverEnd -= UIHoverEnd;
+		}
+
 		void UIHoverBegin(HoverBeginEventArgs e)
 		{
 			if (hovering == 0) {
@@ -276,6 +300,11 @@ namespace MHUrho.UserInterface.MandK
 
 			minimap.HoverBegin -= UIHoverBegin;
 			minimap.HoverEnd -= UIHoverEnd;
+
+			foreach (var element in registeredForHover) {
+				element.HoverBegin -= UIHoverBegin;
+				element.HoverEnd -= UIHoverEnd;
+			}
 		}
 
 		void ToolSelected(UIElement newSelected, UIElement oldSelected)

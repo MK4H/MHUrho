@@ -12,6 +12,8 @@ using Urho.Resources;
 
 namespace MHUrho.UserInterface
 {
+
+
 	abstract class MenuUIManager : UIManager
 	{
 		public IMenuController MenuController { get; private set; }
@@ -27,7 +29,7 @@ namespace MHUrho.UserInterface
 		public LevelSettingsScreen LevelSettingsScreen { get; private set; }
 		public LevelCreationScreen LevelCreationScreen { get; private set; }
 		public SaveAsScreen SaveAsScreen { get; private set; }
-
+		public EndScreen EndScreen { get; private set; }
 
 		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
 		public ConfirmationPopUp ConfirmationPopUp { get; private set; }
@@ -39,12 +41,14 @@ namespace MHUrho.UserInterface
 
 		public MenuScreen CurrentScreen { get; protected set; }
 
+		public OnScreenChangeDelegate ScreenChanged;
+
 		protected Stack<MenuScreen> PreviousScreens;
 
 		protected MenuUIManager( IMenuController menuController)
 		{
 			MenuRoot = UI.Root;
-			MenuRoot.SetDefaultStyle(PackageManager.Instance.GetXmlFile("UI/MainMenuStyle.xml", true));
+			MenuRoot.SetDefaultStyle(Game.PackageManager.GetXmlFile("UI/MainMenuStyle.xml", true));
 
 			this.MenuController = menuController;
 
@@ -59,6 +63,7 @@ namespace MHUrho.UserInterface
 			LevelSettingsScreen = new LevelSettingsScreen(this);
 			LevelCreationScreen = new LevelCreationScreen(this);
 			SaveAsScreen = new SaveAsScreen(this);
+			EndScreen = new EndScreen(this);
 			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
 			ConfirmationPopUp = new ConfirmationPopUp(this);
 			ErrorPopUp = new ErrorPopUp(this);
@@ -85,9 +90,9 @@ namespace MHUrho.UserInterface
 			return OptionsScreen;
 		}
 
-		public LoadingScreen SwitchToLoadingScreen(Action onLoadingFinished = null)
+		public LoadingScreen SwitchToLoadingScreen(IProgressNotifier progressNotifier)
 		{
-			LoadingScreen.OnLoadingFinished += onLoadingFinished;
+			LoadingScreen.ProgressNotifier = progressNotifier;
 			SwitchToScreen(LoadingScreen);
 			return LoadingScreen;
 		}
@@ -138,6 +143,13 @@ namespace MHUrho.UserInterface
 			return SaveAsScreen;
 		}
 
+		public EndScreen SwitchToEndScreen(bool victory)
+		{
+			EndScreen.Victory = victory;
+			SwitchToScreen(EndScreen);
+			return EndScreen;
+		}
+
 		public void SwitchBack()
 		{
 			CurrentScreen.Hide();
@@ -168,10 +180,17 @@ namespace MHUrho.UserInterface
 
 				CurrentScreen = newScreen;
 				newScreen.Show();
+				try {
+					ScreenChanged?.Invoke();
+				}
+				catch (Exception e) {
+					Urho.IO.Log.Write(LogLevel.Warning,
+									$"Invocation of {nameof(ScreenChanged)} threw an exception: {e.Message}");
+				}
 			}
 			catch (Exception e) {
 				string message =
-					$"There was an error while switching menu screens, probably some missing or corrupted files: {e.Message}";
+					$"There was an error while switching menu screens: {e.Message}";
 
 				Urho.IO.Log.Write(LogLevel.Error, message);
 				Game.ErrorExit(message);

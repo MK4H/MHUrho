@@ -10,7 +10,7 @@ using MHUrho.Helpers;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 
 namespace MHUrho.Logic
 {
@@ -36,7 +36,7 @@ namespace MHUrho.Logic
 				this.storedProjectile = storedProjectile;
 				this.componentLoaders = new List<DefaultComponentLoader>();
 
-				type = PackageManager.Instance.ActivePackage.GetProjectileType(storedProjectile.TypeID);
+				type = level.Package.GetProjectileType(storedProjectile.TypeID);
 				if (type == null) {
 					throw new ArgumentException($"Projectile type {storedProjectile.TypeID} was not loaded");
 				}
@@ -182,6 +182,8 @@ namespace MHUrho.Logic
 
 		public ProjectileType ProjectileType { get; private set; }
 
+		public override IEntityType Type => ProjectileType;
+
 		public override Vector3 Position {
 			get => Node.Position;
 			protected set => Node.Position = value;
@@ -251,7 +253,7 @@ namespace MHUrho.Logic
 			ID = newID;
 			Enabled = true;
 			Node.NodeCollisionStart += CollisionHandler;
-			RemovedFromLevel = false;
+			IsRemovedFromLevel = false;
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
@@ -277,7 +279,7 @@ namespace MHUrho.Logic
 		public override void RemoveFromLevel() 
 		{
 			Enabled = false;
-			if (RemovedFromLevel) return;
+			if (IsRemovedFromLevel) return;
 			base.RemoveFromLevel();
 
 			Node.NodeCollisionStart -= CollisionHandler;
@@ -303,14 +305,26 @@ namespace MHUrho.Logic
 
 		public void HardRemove()
 		{
-			if (!RemovedFromLevel) {
+			if (!IsRemovedFromLevel) {
 				RemoveFromLevel();
 			}
 
-			Plugin?.Dispose();
-			Node.Remove();
-			Node.Dispose();
-			Dispose();
+			try
+			{
+				Plugin?.Dispose();
+			}
+			catch (Exception e)
+			{
+				//Log and ignore
+				Urho.IO.Log.Write(LogLevel.Error, $"Projectile  plugin call {nameof(Plugin.Dispose)} failed with Exception: {e.Message}");
+			}
+			
+			if (!IsDeleted)
+			{
+				Node.Remove();
+			}
+
+			base.Dispose();
 		}
 
 		public bool Move(Vector3 movement)
@@ -324,7 +338,7 @@ namespace MHUrho.Logic
 				SignalRotationChanged();
 			}
 
-			if (!Map.IsInside(Position)) {
+			if (!Level.Map.IsInside(Position)) {
 				try
 				{
 					ProjectilePlugin.OnTerrainHit();
@@ -380,7 +394,7 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep) 
 		{
 
-			if (!EnabledEffective || !Level.LevelNode.Enabled) {
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}
 
@@ -400,7 +414,6 @@ namespace MHUrho.Logic
 		{
 			if (TriggerCollisions) {
 				IEntity hitEntity = Level.GetEntity(args.OtherNode);
-				hitEntity.HitBy(this);
 				try {
 					ProjectilePlugin.OnEntityHit(hitEntity);
 				}

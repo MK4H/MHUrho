@@ -1,0 +1,5 @@
+Assets/Units/Dog/Materials/Dog_Body.xml
+Assets/Units/Dog/Materials/Dog_Eyes.xml
+Assets/Units/Dog/Materials/Dog_Claws.xml
+Assets/Units/Dog/Materials/Dog_Teeth.xml
+Assets/Units/Dog/Materials/Dog_Fur.xml

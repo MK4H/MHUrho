@@ -11,6 +11,11 @@ using Urho.Urho2D;
 
 namespace MHUrho.Packaging
 {
+	/// <summary>
+	/// Represents a game package that can be loaded into the currently running instance of the platform.
+	/// Can start the loading of the package.
+	/// This class is used to enable quick validation of the package integrity and partial load, to preserve memory.
+	/// </summary>
     public class GamePackRep {
 
 		public string Name { get; private set; }
@@ -40,7 +45,7 @@ namespace MHUrho.Packaging
 			Stream file = null;
 			XDocument data = null;
 			try {
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				file = packageManager.App.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				data = XDocument.Load(file);
 				data.Validate(schemas, null);
 			}
@@ -81,12 +86,12 @@ namespace MHUrho.Packaging
 			//Thumbnail path element is optional in the XML schema
 			string thumbnailPath = packageElement.Element(GamePackXml.Inst.PathToThumbnail)?.Value;
 			if (thumbnailPath != null) {
-				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.CorrectRelativePath(thumbnailPath));
-				Thumbnail = PackageManager.Instance.GetTexture2D(thumbnailPath);
+				thumbnailPath = Path.Combine(XmlDirectoryPath, FileManager.ReplaceDirectorySeparators(thumbnailPath));
+				Thumbnail = packageManager.GetTexture2D(thumbnailPath);
 			}
 			else {
 				//If no thumbnail provided, show default icon
-				Thumbnail = PackageManager.Instance.DefaultIcon;
+				Thumbnail = packageManager.DefaultIcon;
 			}
 			
 		}
@@ -99,7 +104,7 @@ namespace MHUrho.Packaging
 		/// <param name="loadingProgress"></param>
 		/// <returns></returns>
 		/// <exception cref="PackageLoadingException">Thrown when the package loading failed</exception>
-		public Task<GamePack> LoadPack(XmlSchemaSet schemas, ILoadingSignaler loadingProgress)
+		public Task<GamePack> LoadPack(XmlSchemaSet schemas, IProgressEventWatcher loadingProgress)
 		{
 			return GamePack.Load(pathToXml, this, schemas, loadingProgress);
 		}

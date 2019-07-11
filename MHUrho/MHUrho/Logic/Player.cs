@@ -29,7 +29,7 @@ namespace MHUrho.Logic
 			readonly PlayerType type;
 			readonly int teamID;
 
-			public Loader(LevelManager level, IList<StPlayer> storedPlayers, PlayerInfo newInfo, InsigniaGetter insigniaGetter, bool overrideType)
+			public Loader(LevelManager level, IList<StPlayer> storedPlayers, InsigniaGetter insigniaGetter, PlayerInfo newInfo)
 			{
 				this.level = level;
 				this.storedPlayer = (from stPlayer in storedPlayers
@@ -41,33 +41,35 @@ namespace MHUrho.Logic
 						ArgumentException("StoredPlayers did not contain player entry for player with provided playerInfo", nameof(storedPlayers));
 				}
 
-				if (storedPlayer.TypeID != 0 && !overrideType) {
-					throw new ArgumentException("storedPlayer had a type and the override flag was not set",
-												nameof(storedPlayer));
-				}
-
 				this.type = newInfo.PlayerType;
 				this.teamID = newInfo.TeamID;
 				this.insignia = insigniaGetter.MarkUsed(newInfo.Insignia);
-				//Clear typespecific data from the safe
 
+				//Clear the stored player plugin data
 				storedPlayer.UserPlugin = new PluginData();
 			}
 
-			public Loader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter, bool loadType)
+			public Loader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter, bool loadPlaceholder)
 			{
 				this.level = level;
 				this.storedPlayer = storedPlayer;
 				this.insignia = insigniaGetter.GetUnusedInsignia(storedPlayer.InsigniaID);
+				if (loadPlaceholder) {
+					this.type = PlayerType.Placeholder;
+					teamID = 0;
 
-				if (loadType) {
-					if (storedPlayer.TypeID == 0) {
+				}
+				else {
+					if (storedPlayer.TypeID == 0)
+					{
 						throw new ArgumentException("StoredPlayer had no type", nameof(storedPlayer));
 					}
 
-					type = PackageManager.Instance.ActivePackage.GetPlayerType(storedPlayer.TypeID);
+					type = level.Package.GetPlayerType(storedPlayer.TypeID);
 					teamID = storedPlayer.TeamID;
 				}
+				
+
 			}
 
 			public static StPlayer Save(Player player)
@@ -76,7 +78,7 @@ namespace MHUrho.Logic
 									{
 										Id = player.ID,
 										TeamID = player.TeamID,
-										TypeID = player.type?.ID ?? 0,
+										TypeID = player.PlayerType?.ID ?? 0,
 										InsigniaID = player.Insignia.Index
 									};
 
@@ -95,7 +97,7 @@ namespace MHUrho.Logic
 
 				storedPlayer.UserPlugin = new PluginData();
 				try {
-					player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.level));
+					player.Plugin?.SaveState(new PluginDataWrapper(storedPlayer.UserPlugin, player.Level));
 				}
 				catch (Exception e)
 				{
@@ -109,41 +111,35 @@ namespace MHUrho.Logic
 
 			public void StartLoading()
 			{
-				if (type != null) {
-					//If the stored type is the same as the new type, the stored plugin data can be loaded
-					// If it is a different type, it will probably not know the format of the data, so just create new plugin instance
-					bool newPluginInstance = type.ID != storedPlayer.TypeID;
-					loadingPlayer = new Player(storedPlayer.Id, teamID, level, insignia, type, newPluginInstance);
-				}
-				else {
-					loadingPlayer =
-						CreatePlaceholderPlayer(storedPlayer.Id,
-												level,
-												insignia);
-				}
+
+				//If the stored type is the same as the new type, the stored plugin data can be loaded
+				// If it is a different type, it will probably not know the format of the data, so just create new plugin instance
+				bool newPluginInstance = type.ID != storedPlayer.TypeID;
+				loadingPlayer = new Player(storedPlayer.Id, teamID, level, insignia, type, newPluginInstance);
 			}
 
 			public void ConnectReferences() {
 				foreach (var unitID in storedPlayer.UnitIDs) {
-					loadingPlayer.AddUnit(level.GetUnit(unitID));
+					loadingPlayer.AddUnitImpl(level.GetUnit(unitID));
 				}
 
 				foreach (var buildingID in storedPlayer.BuildingIDs) {
-					loadingPlayer.AddBuilding(level.GetBuilding(buildingID));
+					loadingPlayer.AddBuildingImpl(level.GetBuilding(buildingID));
 				}
 
 				foreach (var resource in storedPlayer.Resources) {
-					//TODO: Try get
 					ResourceType resourceType = level.PackageManager.ActivePackage.GetResourceType(resource.Id);
-					loadingPlayer.ChangeResourceAmount(resourceType, resource.Amount);
+					loadingPlayer.resources.Add(resourceType, resource.Amount);
 				}
 
 				//If the stored data is from the same plugin type as the new type, load the data
 				// otherwise we created new fresh plugin instance, that most likely does not understand the stored data
-				if (type != null && type.ID == storedPlayer.TypeID) {
+				if (type.ID == storedPlayer.TypeID) {
 					loadingPlayer.Plugin?.LoadState(new PluginDataWrapper(storedPlayer.UserPlugin, level));
 				}
-				
+				else {
+					loadingPlayer.Plugin?.Init(level);
+				}
 			}
 
 			public void FinishLoading() {
@@ -159,6 +155,15 @@ namespace MHUrho.Logic
 
 		public int TeamID { get; private set; }
 
+		public ILevelManager Level { get; private set; }
+
+		public PlayerType PlayerType { get; private set; }
+
+		public bool IsRemovedFromLevel { get; private set; }
+
+		public IReadOnlyDictionary<ResourceType, double> Resources => resources;
+
+		public event Action<IPlayer> OnRemoval;
 
 		readonly Dictionary<UnitType,List<IUnit>> units;
 
@@ -166,34 +171,26 @@ namespace MHUrho.Logic
 
 		readonly Dictionary<ResourceType, double> resources;
 
-		readonly PlayerType type;
-
-		readonly ILevelManager level;
-
-		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia) {
+		/// <summary>
+		/// Creates new instance of a player.
+		/// </summary>
+		/// <param name="id">Unique identifier of the player.</param>
+		/// <param name="teamID">Identifier of the team this player is on.</param>
+		/// <param name="level">The level this player is spawning into.</param>
+		/// <param name="insignia">The graphical identifications of the player.</param>
+		/// <param name="type">The type of the player.</param>
+		/// <param name="newPluginInstance">If new plugin instance should be created.</param>
+		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia, PlayerType type, bool newPluginInstance)
+		{
 			ReceiveSceneUpdates = true;
-
 			this.ID = id;
 			this.TeamID = teamID;
 			units = new Dictionary<UnitType, List<IUnit>>();
 			buildings = new Dictionary<BuildingType, List<IBuilding>>();
 			resources = new Dictionary<ResourceType, double>();
-			this.level = level;
+			this.Level = level;
 			this.Insignia = insignia;
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="level"></param>
-		/// <param name="insignia"></param>
-		/// <param name="type"></param>
-		/// <param name="newPluginInstance"></param>
-		protected Player(int id, int teamID, ILevelManager level, PlayerInsignia insignia, PlayerType type, bool newPluginInstance)
-			:this(id, teamID,level, insignia)
-		{
-			this.type = type;
+			this.PlayerType = type;
 			this.Plugin = newPluginInstance
 							? type.GetNewInstancePlugin(this, level)
 							: type.GetInstancePluginForLoading(this, level);
@@ -202,81 +199,132 @@ namespace MHUrho.Logic
 		/// <summary>
 		/// Creates a player for level editing, where player serves only as a container of his units, buildings and resources
 		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="level"></param>
-		/// <param name="insignia"></param>
-		/// <returns></returns>
+		/// <param name="id">Unique identifier of the player.</param>
+		/// <param name="level">The level this player is spawning into.</param>
+		/// <param name="insignia">The graphical identifications of the player.</param>
+		/// <returns>New instance of placeholder player.</returns>
 		public static Player CreatePlaceholderPlayer(int id, ILevelManager level, PlayerInsignia insignia)
 		{
-			return new Player(id, 0, level, insignia);
+			return new Player(id, 0, level, insignia, PlayerType.Placeholder, true);
 		}
 
 		/// <summary>
-		/// Loads player without the plugin and with cleared playerType
-		///
-		/// Loaded player serve only as a container of units, buildings and resources
+		/// Loads player as is stored in the <paramref name="storedPlayer"/>.
 		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="storedPlayer"></param>
-		/// <returns></returns>
-		public static IPlayerLoader GetLoaderToEditor(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
+		/// <param name="level">Level into which the player is being loaded.</param>
+		/// <param name="storedPlayer">Stored data of the player.</param>
+		/// <param name="insigniaGetter">Provider of graphical identifications for players.</param>
+		/// <returns>Loader that loads the player as is stored in the <paramref name="storedPlayer"/>.</returns>
+		public static IPlayerLoader GetLoader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
 		{
 			return new Loader(level, storedPlayer, insigniaGetter, false);
 		}
 
 		/// <summary>
-		/// Loads player with the type it is stored with
-		///
-		/// Throws if there is no playerType stored for the player
+		/// Loads placeholder player with ownership of units and buildings.
 		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="storedPlayer"></param>
-		/// <returns></returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayer"/> does not contain a player type</exception>
-		public static IPlayerLoader GetLoaderStoredType(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
+		/// <param name="level">The level the placeholder player is loading into.</param>
+		/// <param name="storedPlayer">The stored data for this placeholder player.</param>
+		/// <param name="insigniaGetter">Provider of graphical identifications for players.</param>
+		/// <returns>Loader that loads the placeholder player from the data in the <paramref name="storedPlayer"/>.</returns>
+		public static IPlayerLoader GetLoaderToPlaceholder(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter)
 		{
 			return new Loader(level, storedPlayer, insigniaGetter, true);
 		}
 
 		/// <summary>
-		/// Loads player with the <paramref name="fillType"/> as its new type
-		///
-		/// If <paramref name="overrideType"/> is true, overrides any existing player type stored with this player,
-		/// if it is false, throws exception if there is a playerType stored with the player
+		/// Loads a player from <paramref name="storedPlayers"/> which matches the identifications given in <paramref name="playerInfo"/>
+		/// , overriding any player type info the player may have been stored with.
 		/// </summary>
-		/// <param name="level"></param>
-		/// <param name="storedPlayers"></param>
-		/// <param name="playerInfo"></param>
-		/// <param name="overrideType"></param>
-		/// <returns></returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="storedPlayers"/> contains a playerType and the flag <paramref name="overrideType"/> was not set</exception>
+		/// <param name="level">The level the player is loading into.</param>
+		/// <param name="storedPlayers">Data of the all stored players.</param>
+		/// <param name="playerInfo">The new info to match or override the stored info with.</param>
+		/// <param name="insigniaGetter">Provider of graphical identifications for players.</param>
+		/// <returns>Loader that loads a player from <paramref name="storedPlayers"/> which matches the identifications given in <paramref name="playerInfo"/></returns>
 		public static IPlayerLoader GetLoaderFromInfo(LevelManager level,
 													IList<StPlayer> storedPlayers,
 													PlayerInfo playerInfo,
-													InsigniaGetter insigniaGetter,
-													bool overrideType)
+													InsigniaGetter insigniaGetter)
 		{
 
 
-			return new Loader(level, storedPlayers, playerInfo, insigniaGetter, overrideType);
+			return new Loader(level, storedPlayers, insigniaGetter, playerInfo);
 		}
 
+		/// <summary>
+		/// Serializes the current state of the player to an instance of <see cref="StPlayer"/>.
+		/// </summary>
+		/// <returns>Serialized current state of the player.</returns>
 		public StPlayer Save()
 		{
 			return Loader.Save(this);
 		}
 
 		/// <summary>
-		/// Adds unit to players units
+		/// Removes player from level, with all the buildings and units that belong to him.
+		/// Player can be removed either by calling this or by calling the <see cref="ILevelManager.RemovePlayer(IPlayer)"/>.
 		/// </summary>
-		/// <param name="unit">unit to add</param>
-		public void AddUnit(IUnit unit) {
-			if (units.TryGetValue(unit.UnitType, out var unitList)) {
-				unitList.Add(unit);
+		public void RemoveFromLevel()
+		{
+			if (IsRemovedFromLevel) return;
+			IsRemovedFromLevel = true;
+
+			try
+			{
+				OnRemoval?.Invoke(this);
 			}
-			else {
-				units.Add(unit.UnitType, new List<IUnit> {unit});
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(OnRemoval)}: {e.Message}");
 			}
+			OnRemoval = null;
+
+			//We need removeFromLevel to work during any phase of loading, where connect references may not have been called yet
+			try
+			{
+				Plugin?.Dispose();
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.Dispose)} failed with Exception: {e.Message}");
+			}
+
+			//Enumerate over copies of the collections, because with each removal the unit will get removed from the live collection.
+			foreach (var unitsOfType in units.Values.ToArray()) {
+				foreach (var unit in unitsOfType.ToArray()) {
+					unit.RemoveFromLevel();
+				}
+			}
+
+			//Enumerate over copies of the collections, because with each removal the unit will get removed from the live collection.
+			foreach (var buildingsOfType in buildings.Values.ToArray()) {
+				foreach (var building in buildingsOfType.ToArray()) {
+					building.RemoveFromLevel();
+				}
+			}
+
+			Level.RemovePlayer(this);
+			if (!IsDeleted)
+			{
+				Remove();
+			}
+
+			base.Dispose();
+		}
+
+		public new void Dispose()
+		{
+			RemoveFromLevel();
+		}
+
+		/// <summary>
+		/// Adds unit to players units.
+		/// </summary>
+		/// <param name="unit">Unit to add.</param>
+		public void AddUnit(IUnit unit)
+		{
+			AddUnitImpl(unit);
 
 			try {
 				Plugin.UnitAdded(unit);
@@ -289,13 +337,13 @@ namespace MHUrho.Logic
 			
 		}
 
-		public void AddBuilding(IBuilding building) {
-			if (buildings.TryGetValue(building.BuildingType, out var buildingList)) {
-				buildingList.Add(building);
-			}
-			else {
-				buildings.Add(building.BuildingType, new List<IBuilding> {building});
-			}
+		/// <summary>
+		/// Adds building to players ownership.
+		/// </summary>
+		/// <param name="building">The added building.</param>
+		public void AddBuilding(IBuilding building)
+		{
+			AddBuildingImpl(building);
 
 			try {
 				Plugin.BuildingAdded(building); 
@@ -308,6 +356,12 @@ namespace MHUrho.Logic
 			
 		}
 
+		/// <summary>
+		/// Tries to change the amount of <paramref name="resourceType"/> owned by the player by <paramref name="change"/>.
+		/// Checks with the <see cref="Plugin"/> if it is possible, if not, may change by different amount or not at all.
+		/// </summary>
+		/// <param name="resourceType">The resourceType to change the amount of.</param>
+		/// <param name="change">The size of the change.</param>
 		public void ChangeResourceAmount(ResourceType resourceType, double change)
 		{
 			//if key does not exist, tryGetValue sets the out variable to default(), which here is zero
@@ -324,32 +378,56 @@ namespace MHUrho.Logic
 			
 		}
 
+		/// <summary>
+		/// Removes unit from the player.
+		/// </summary>
+		/// <param name="unit">The unit to remove.</param>
+		/// <returns>True if the unit was removed, false if the unit did not belong to this player.</returns>
 		public bool RemoveUnit(IUnit unit) {
 			bool removed = units.TryGetValue(unit.UnitType, out var unitList) && unitList.Remove(unit);
+			
+			//Just deleting all the players units from the level
+			if (IsRemovedFromLevel)
+			{
+				return removed;
+			}
+
 			if (removed) {
 				try {
-					Plugin.OnUnitKilled(unit);
+					Plugin.UnitKilled(unit);
 				}
 				catch (Exception e) {
 					//NOTE: Maybe add cap to prevent message flood
-					Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnUnitKilled)} failed with Exception: {e.Message}");
+					Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.UnitKilled)} failed with Exception: {e.Message}");
 				}
 			}
 
 			return removed;
 		}
 
+		/// <summary>
+		/// Removes building from the player.
+		/// </summary>
+		/// <param name="building">The building to remove.</param>
+		/// <returns>True if the building was removed, false if the building did not belong to this player.</returns>
 		public bool RemoveBuilding(IBuilding building) {
+			
 			bool removed = buildings.TryGetValue(building.BuildingType, out var buildingList) && buildingList.Remove(building);
+
+			//Just deleting all the players units from the level
+			if (IsRemovedFromLevel)
+			{
+				return removed;
+			}
 
 			if (removed) {
 				try {
-					Plugin.OnBuildingDestroyed(building);
+					Plugin.BuildingDestroyed(building);
 				}
 				catch (Exception e)
 				{
 					//NOTE: Maybe add cap to prevent message flood
-					Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnBuildingDestroyed)} failed with Exception: {e.Message}");
+					Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.BuildingDestroyed)} failed with Exception: {e.Message}");
 				}
 			}
 
@@ -376,6 +454,11 @@ namespace MHUrho.Logic
 			return buildings.TryGetValue(buildingType, out var buildingList) ? buildingList : new List<IBuilding>();
 		}
 
+		public IReadOnlyDictionary<ResourceType, double> GetAllResources()
+		{
+			return Resources;
+		}
+
 		public double GetResourceAmount(ResourceType resourceType)
 		{
 			resources.TryGetValue(resourceType, out double count);
@@ -383,7 +466,7 @@ namespace MHUrho.Logic
 		}
 
 		public IEnumerable<IPlayer> GetEnemyPlayers() {
-			return from player in level.Players
+			return from player in Level.Players
 				   where IsEnemy(player)
 				   select player;
 
@@ -414,7 +497,7 @@ namespace MHUrho.Logic
 
 		protected override void OnUpdate(float timeStep)
 		{
-			if (!EnabledEffective || !level.LevelNode.Enabled) return;
+			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) return;
 
 			try {
 				Plugin.OnUpdate(timeStep);
@@ -425,5 +508,40 @@ namespace MHUrho.Logic
 				Urho.IO.Log.Write(LogLevel.Error, $"Player plugin call {nameof(Plugin.OnUpdate)} failed with Exception: {e.Message}");
 			}
 		}
+
+		/// <summary>
+		/// Adds unit owned by this player.
+		/// Split from the public AddUnit to be used for loading.
+		/// </summary>
+		/// <param name="unit">The unit to add.</param>
+		void AddUnitImpl(IUnit unit)
+		{
+			if (units.TryGetValue(unit.UnitType, out var unitList))
+			{
+				unitList.Add(unit);
+			}
+			else
+			{
+				units.Add(unit.UnitType, new List<IUnit> { unit });
+			}
+		}
+
+
+		/// <summary>
+		/// Adds building owned by this player.
+		/// Split from the public AddBuilding to be used for loading.
+		/// </summary>
+		/// <param name="unit">The building to add.</param>
+		void AddBuildingImpl(IBuilding building)
+		{
+			if (buildings.TryGetValue(building.BuildingType, out var buildingList))
+			{
+				buildingList.Add(building);
+			}
+			else
+			{
+				buildings.Add(building.BuildingType, new List<IBuilding> { building });
+			}
+		} 
 	}
 }

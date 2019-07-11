@@ -20,12 +20,12 @@ namespace MHUrho.Threading
 
 		public override void Post(SendOrPostCallback d, object state)
 		{
-			MyGame.InvokeOnMainSafeAsync(() => d(state));
+			MHUrhoApp.InvokeOnMainSafeAsync(() => d(state));
 		}
 
 		public override void Send(SendOrPostCallback d, object state)
 		{
-			MyGame.InvokeOnMainSafe(() => d(state));
+			MHUrhoApp.InvokeOnMainSafe(() => d(state));
 		}
 	}
 }

@@ -50,7 +50,7 @@ namespace MHUrho.UserInterface
 				backButton = (Button)window.GetChild("BackButton", true);
 				backButton.Released += BackButtonReleased;
 
-				foreach (var pack in PackageManager.Instance.AvailablePacks) {
+				foreach (var pack in Game.PackageManager.AvailablePacks) {
 					AddItem(pack);
 				}
 
@@ -103,7 +103,7 @@ namespace MHUrho.UserInterface
 				PackageListItem selectedItem = GetSelectedItem();
 
 				try {
-					PackageManager.Instance.RemoveGamePack(selectedItem.Pack);
+					Game.PackageManager.RemoveGamePack(selectedItem.Pack);
 					RemoveItem(selectedItem);
 				}
 				catch (FatalPackagingException e) {
@@ -121,14 +121,14 @@ namespace MHUrho.UserInterface
 			{
 				IPathResult result = await MenuUIManager
 											.FileBrowsingPopUp
-											.Request(MyGame.Files.PackageDirectoryAbsolutePath,
+											.Request(Game.Files.PackageDirectoryPath,
 													SelectOption.File);
 				if (result == null) {
 					return;
 				}
 
 				try {
-					var newPack = PackageManager.Instance.AddGamePack(result.RelativePath);
+					var newPack = Game.PackageManager.AddGamePack(result.RelativePath);
 					AddItem(newPack);
 				}
 				catch (FatalPackagingException e) {
@@ -145,7 +145,7 @@ namespace MHUrho.UserInterface
 
 			void SelectButtonReleased(ReleasedEventArgs args)
 			{
-				ItemSelectionConfirmed(GetSelectedItem());
+				proxy.ItemSelectionConfirmed(GetSelectedItem());
 			}
 
 			void BackButtonReleased(ReleasedEventArgs args)
@@ -192,23 +192,7 @@ namespace MHUrho.UserInterface
 			}
 
 
-			async void ItemSelectionConfirmed(PackageListItem item)
-			{
-				LoadingScreen screen = MenuUIManager.SwitchToLoadingScreen();
-				try {
-					GamePack package = await PackageManager.Instance.LoadPackage(item.Pack, screen.LoadingWatcher);
-					MenuUIManager.SwitchToLevelPickingScreen(package);
-				}
-				catch (PackageLoadingException e) {
-					//Switch back from loading screen
-					MenuUIManager.SwitchBack();
-					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
-				}
-				catch (Exception e) {
-					MenuUIManager.SwitchBack();
-					MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, proxy);
-				}
-			}
+			
 
 			IEnumerable<PackageListItem> GetItems()
 			{
@@ -226,7 +210,7 @@ namespace MHUrho.UserInterface
 			{
 				foreach (var item in GetItems()) {
 					if (item.Pack.Name == packageName) {
-						ItemSelectionConfirmed(item);
+						proxy.ItemSelectionConfirmed(item);
 						return;
 					}
 				}
@@ -283,6 +267,34 @@ namespace MHUrho.UserInterface
 
 			screen = new Screen(this);
 
+		}
+
+		/// <summary>
+		/// Starts loading the picked package and switches to loading screen.
+		/// Due to the switch to other screen, cannot be implemented inside the <see cref="Screen"/>,
+		/// because that will be released.
+		/// </summary>
+		/// <param name="item">The list item representing the picked package</param>
+		async void ItemSelectionConfirmed(PackageListItem item)
+		{
+			ProgressWatcher progress = new ProgressWatcher();
+			MenuUIManager.SwitchToLoadingScreen(progress);
+			try
+			{
+				GamePack package = await Game.PackageManager.LoadPackage(item.Pack, progress);
+				MenuUIManager.SwitchToLevelPickingScreen(package);
+			}
+			catch (PackageLoadingException e)
+			{
+				//Switch back from loading screen
+				MenuUIManager.SwitchBack();
+				await MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, this);
+			}
+			catch (Exception e)
+			{
+				MenuUIManager.SwitchBack();
+				await MenuUIManager.ErrorPopUp.DisplayError("Error", e.Message, this);
+			}
 		}
 
 	}

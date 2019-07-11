@@ -8,24 +8,24 @@ using Urho;
 
 namespace MHUrho.Input.Touch
 {
-    public class TouchFactory : ControllerFactory
+    public class TouchFactory : IControllerFactory
     {
 		public TouchFactory()
 		{
 
 		}
 
-		public override ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover)
+		public ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
+		public IGameController CreateGameController(CameraMover cameraMover, ILevelManager levelManager, Octree octree, IPlayer player)
 		{
 			return new GameController(levelManager, octree, player, cameraMover);
 		}
 
-		public override IMenuController CreateMenuController()
+		public IMenuController CreateMenuController(MHUrhoApp app)
 		{
 			return new MenuController();
 		}

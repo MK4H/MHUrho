@@ -33,12 +33,10 @@ namespace MHUrho.UserInterface
 			this.defaultTexture = checkBox.Texture;
 			this.defaultImageRect = checkBox.ImageRect;
 
-			//TODO: Style
 			checkBox.Toggled += MainBoxToggled;
 			checkBox.HoverBegin += OnHoverBegin;
 			checkBox.HoverEnd += OnHoverEnd;
 
-			//TODO: Style
 			this.expansionWindow = expansionWindow;
 			expansionWindow.VisibilityChanged += OnExpansionWindowVisibilityChanged;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MHUrho.Helpers.Extensions;
 using MHUrho.Logic;
 using MHUrho.WorldMap;
 using Priority_Queue;
@@ -14,6 +15,21 @@ namespace MHUrho.PathFinding.AStar
 
 	public abstract class Node : FastPriorityQueueNode, INode {
 
+		public class EqualityComparer : IEqualityComparer<INode>
+		{
+			public bool Equals(INode x, INode y)
+			{
+				return object.ReferenceEquals(x, y);
+			}
+
+			public int GetHashCode(INode obj)
+			{
+				return obj.GetHashCode();
+			}
+		}
+
+		public IPathFindAlg Algorithm => AStar;
+
 		public abstract NodeType NodeType { get; }
 
 		public Node PreviousNode { get; protected set; }
@@ -25,6 +41,8 @@ namespace MHUrho.PathFinding.AStar
 		public float Time { get; set; }
 
 		public Vector3 Position { get; protected set; }
+
+		public IEnumerable<INode> Neighbours => outgoingEdges.Keys;
 
 		protected NodeState State;
 
@@ -38,11 +56,12 @@ namespace MHUrho.PathFinding.AStar
 
 		protected IMap Map => AStar.Map;
 
-		protected Node(AStarAlg aStar)
+		protected Node(AStarAlg aStar, Vector3 position)
 		{
 			this.AStar = aStar;
+			this.Position = position;
 			State = NodeState.Untouched;
-			outgoingEdges = new Dictionary<Node, MovementType>();
+			outgoingEdges = new Dictionary<Node, MovementType>(new EqualityComparer());
 		}
 
 		public void Reset()
@@ -58,7 +77,7 @@ namespace MHUrho.PathFinding.AStar
 											List<Node> touchedNodes,
 											Node targetNode,
 											NodeDistCalculator distCalc,
-											Func<Vector3, float> heuristic);
+											ref double minDistToTarget);
 
 
 		/// <summary>
@@ -127,59 +146,66 @@ namespace MHUrho.PathFinding.AStar
 
 		public abstract MovementType GetMovementTypeToNeighbour(Node neighbour);
 
-		public abstract void Accept(INodeVisitor visitor, INode target);
+		public abstract void Accept(INodeVisitor visitor, INode target, MovementType movementType);
 
-		public abstract void Accept(INodeVisitor visitor, ITileNode source);
+		public abstract void Accept(INodeVisitor visitor, ITileNode source, MovementType movementType);
 
-		public abstract void Accept(INodeVisitor visitor, IBuildingNode source);
+		public abstract void Accept(INodeVisitor visitor, IBuildingNode source, MovementType movementType);
 
-		public abstract void Accept(INodeVisitor visitor, ITempNode source);
+		public abstract void Accept(INodeVisitor visitor, ITempNode source, MovementType movementType);
 
 		protected void ProcessNeighbour(Node neighbour,
 										FastPriorityQueue<Node> priorityQueue,
 										List<Node> touchedNodes,
 										Node targetNode,
 										NodeDistCalculator distCalc,
-										Func<Vector3, float> getHeuristic)
+										MovementType movementType,
+										ref double minDistToTarget)
 		{
-			//If already opened or closed
 			if (neighbour.State == NodeState.Closed) {
 				//Already closed, either not passable or the best path there can be found
 				return;
-
 			}
-			else if (neighbour.State == NodeState.Opened) {
-				//if it is closer through the current sourceNode
 
-				if (distCalc.GetTime(this, neighbour, out float timeToTarget)) {
-					float newTime = Time + timeToTarget;
-					if (newTime < neighbour.Time) {
-						neighbour.Time = newTime;
-						neighbour.PreviousNode = this;
-						priorityQueue.UpdatePriority(neighbour, neighbour.Value);
-					}
+			double distance = Vector3.Distance(neighbour.Position, targetNode.Position);
+			//If the neighbor is too far out of the way from the closest path we found yet
+			if (distance > minDistToTarget + AStar.Cutoff) {
+				if (neighbour.State == NodeState.Untouched)
+				{
+					touchedNodes.Add(neighbour);
 				}
-
+				neighbour.State = NodeState.Closed;		
+				return;
 			}
-			else /*NodeState.Untouched*/{
-				// Compute the heuristic for the new tile
-				float heuristic = getHeuristic(neighbour.Position);
+			else if (distance < minDistToTarget) {
+				minDistToTarget = distance;
+			}
+			
 
-				if (!distCalc.GetTime(this, neighbour, out float timeToTarget)) {
-					//Unit cannot pass to target node from source node
-					return;
-				}
-				else {
+			//If Unit can pass to target node from source node
+			if (distCalc.GetTime(this, neighbour, movementType, out float timeToTarget)) {
+				if (neighbour.State == NodeState.Untouched) {
+					// Compute the heuristic for the new node
+					float heuristic = distCalc.GetMinimalAproxTime(neighbour.Position.XZ(), targetNode.Position.XZ());
 					neighbour.State = NodeState.Opened;
 					neighbour.Heuristic = heuristic;
 					neighbour.PreviousNode = this;
 					neighbour.Time = Time + timeToTarget;
 
-					//Unit can pass through this tile, enqueue it
+					//Unit can pass through this node, enqueue it
 					priorityQueue.Enqueue(neighbour, neighbour.Value);
 					touchedNodes.Add(neighbour);
 				}
-
+				else if (neighbour.State == NodeState.Opened) {
+					float newTime = Time + timeToTarget;
+					//if it is closer through the current sourceNode
+					if (newTime < neighbour.Time)
+					{
+						neighbour.Time = newTime;
+						neighbour.PreviousNode = this;
+						priorityQueue.UpdatePriority(neighbour, neighbour.Value);
+					}
+				}
 			}
 		}
 

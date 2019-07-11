@@ -13,8 +13,17 @@ namespace MHUrho.Logic
 {
 	public enum PlayerTypeCategory { Human, Neutral, AI };
 
-    public class PlayerType : ILoadableType, IDisposable
-    {
+    public class PlayerType : ILoadableType, IDisposable {
+		public static PlayerType Placeholder { get; private set; } = new PlayerType()
+																	{
+																		ID = 0,
+																		Name = "MHUrhoPlaceholder",
+																		Package = null,
+																		IconRectangle = new IntRect(0,0,0,0),
+																		Category = PlayerTypeCategory.Neutral,
+																		Plugin = new PlaceholderPlayerPluginType()
+																	};
+
 		public int ID { get; private set; }
 
 		public string Name { get; private set; }
@@ -29,20 +38,39 @@ namespace MHUrho.Logic
 
 		public void Load(XElement xml, GamePack package)
 		{
-			//TODO: Check for errors
-			ID = XmlHelpers.GetID(xml);
-			Category = StringToCategory(xml.Attribute("category").Value);
-			Name = XmlHelpers.GetName(xml);
 			Package = package;
 
-			XElement pathElement = xml.Element(PlayerAITypeXml.Inst.AssemblyPath);
+			string path = null;
+			XElement extensionElem = null;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Category = StringToCategory(xml.Attribute("category").Value);
+				Name = XmlHelpers.GetName(xml);
+				IconRectangle = XmlHelpers.GetIconRectangle(xml);
+				path = XmlHelpers.GetPath(xml.Element(PlayerAITypeXml.Inst.AssemblyPath));
+				extensionElem = XmlHelpers.GetExtensionElement(xml);
+			}
+			catch (Exception e) {
+				LoadError($"Player type loading failed: Invalid XML of the package {package.Name}", e);
+			}
 
-			Plugin = TypePlugin.LoadTypePlugin<PlayerAITypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
+			try {
+				Plugin = TypePlugin.LoadTypePlugin<PlayerAITypePlugin>(path, package, Name, ID, extensionElem);
+			}
+			catch (Exception e) {
+				LoadError($"Player type \"{Name}\"[{ID}] loading failed: Plugin loading failed with exception: {e.Message}", e);
+			}
+			
+		}
 
-			IconRectangle = XmlHelpers.GetIconRectangle(xml);
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
 
-			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-							package);
+		public override int GetHashCode()
+		{
+			return ID;
 		}
 
 		/// <summary>
@@ -99,6 +127,17 @@ namespace MHUrho.Logic
 													categoryString,
 													"Category string value does not match any known categories");
 			}
+		}
+
+		/// <summary>
+		/// Logs message and throws a <see cref="PackageLoadingException"/>
+		/// </summary>
+		/// <param name="message">Message to log and propagate via exception</param>
+		/// <exception cref="PackageLoadingException">Always throws this exception</exception>
+		void LoadError(string message, Exception e)
+		{
+			Urho.IO.Log.Write(LogLevel.Error, message);
+			throw new PackageLoadingException(message, e);
 		}
 	}
 }

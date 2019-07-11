@@ -16,11 +16,22 @@ using Priority_Queue;
 
 namespace MHUrho.PathFinding.AStar {
 
-
+	public enum Visualization { None, TouchedNodes, FinalPath }
 
 	public class AStarAlg : IPathFindAlg {
 
+		public IEqualityComparer<INode> NodeEqualityComparer { get; } = new Node.EqualityComparer();
+
 		public IMap Map { get; private set; }
+
+		/// <summary>
+		/// Cuts off any nodes that are more than <see cref="Cutoff"/>
+		/// farther away in the game world than the closest we have got.
+		///
+		/// 50 is size of a chunk, which is enough.
+		/// Can be tweeked later.
+		/// </summary>
+		public double Cutoff { get; } = 50;
 
 		readonly TileNode[] nodeMap;
 
@@ -33,11 +44,14 @@ namespace MHUrho.PathFinding.AStar {
 		Node targetNode;
 		NodeDistCalculator distCalc;
 
-		public AStarAlg(IMap map) {
+		readonly Visualization visualization;
+
+		public AStarAlg(IMap map, Visualization visualization = Visualization.None) {
 			this.Map = map;
 			nodeMap = new TileNode[map.Width * map.Length];
 			touchedNodes = new List<Node>();
 			priorityQueue = new FastPriorityQueue<Node>(map.Width * map.Length / 4);
+			this.visualization = visualization;
 
 			FillNodeMap();
 			map.TileHeightChangeNotifier.TileHeightsChangedCol += TileHeightsChanged;
@@ -116,51 +130,6 @@ namespace MHUrho.PathFinding.AStar {
 			return new TempNode(position, Map);
 		}
 
-		//		public Path GetPathToIntersection(Vector2 source,
-		//										Path targetPath,
-		//										CanGoToNeighbour canPassFromTo,
-		//										GetMovementSpeed getMovementSpeed,
-		//										float maxMovementSpeed)
-		//		{
-		//			Dictionary<Node, float> waypoints = GetWaypointDictionary(targetPath);
-
-		//			Node startNode = GetTileNode(map.GetContainingTile(source));
-		//			this.canPassTo = canPassFromTo;
-		//			this.getMovementSpeed = getMovementSpeed;
-		//			this.maxMovementSpeed = maxMovementSpeed;
-
-		//			// Add the starting node to touched nodes, so it does not get enqued again
-		//			touchedNodes.Add(startNode);
-
-
-
-		//			//Main loop
-		//			while (priorityQueue.Count != 0) {
-		//				Node currentNode = priorityQueue.Dequeue();
-
-		//				//If we hit the target, finish and return the sourceNode
-		//				if (currentNode == targetNode) {
-		//#if DEBUG
-		//					//VisualizeTouchedNodes();
-		//#endif
-		//					return currentNode;
-		//				}
-
-		//				//If not finished, add untouched neighbours to the queue and touched nodes
-		//				currentNode.Neighbours.Process(this);
-
-		//				currentNode.State = NodeState.Closed;
-		//			}
-		//			//Did not find path
-		//			return null;
-
-		//		}
-
-		float Heuristic(Vector3 source)
-		{
-			return distCalc.GetMinimalAproxTime(source.XZ(), targetNode.Position.XZ());
-		}
-
 		void TileHeightsChanged(IReadOnlyCollection<ITile> tiles)
 		{
 			foreach (var tile in tiles) {
@@ -187,6 +156,7 @@ namespace MHUrho.PathFinding.AStar {
 			priorityQueue.Enqueue(startNode, 0);
 			// Add the starting node to touched nodes, so it does not get enqued again
 			touchedNodes.Add(startNode);
+			double minDistToTarget = Vector3.Distance(startNode.Position, targetNode.Position);
 
 			//Main loop
 			while (priorityQueue.Count != 0) {
@@ -194,14 +164,21 @@ namespace MHUrho.PathFinding.AStar {
 
 				//If we hit the target, finish and return the sourceNode
 				if (currentNode == targetNode) {
-#if DEBUG
-					//VisualizeTouchedNodes();
-#endif
+
+					if (visualization == Visualization.TouchedNodes) {
+						VisualizeTouchedNodes(targetNode.Time);
+					}
+					
 					return currentNode;
 				}
 
 				//If not finished, add untouched neighbours to the queue and touched nodes
-				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc, Heuristic);
+				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc,ref minDistToTarget);
+			}
+
+			if (visualization == Visualization.TouchedNodes)
+			{
+				VisualizeTouchedNodes(targetNode.Time);
 			}
 			//Did not find path
 			return null;
@@ -222,12 +199,16 @@ namespace MHUrho.PathFinding.AStar {
 				target = target.PreviousNode;
 			}
 
+			//Reverse so that source is first and target is last
+			nodes.Reverse();
+
+			if (visualization == Visualization.FinalPath) {
+				VisualizePath(nodes);
+			}
+
 			if (nodes.Count == 1) {
 				return StartIsFinish(nodes[0], source);
 			}
-
-			//Reverse so that source is first and target is last
-			nodes.Reverse();
 
 			List<Waypoint> waypoints = new List<Waypoint>();
 			waypoints.Add(new Waypoint(new TempNode(source, Map), 0, MovementType.None));
@@ -245,7 +226,7 @@ namespace MHUrho.PathFinding.AStar {
 					//Default to linear movement
 					Waypoint sourceWaypoint = waypoints[0];
 					Waypoint firstWaypoint = waypoints[1];
-					if (distCalc.GetTime(sourceWaypoint.Node, firstWaypoint.Node, out float time)) {
+					if (distCalc.GetTime(sourceWaypoint.Node, firstWaypoint.Node, MovementType.Linear, out float time)) {
 						waypoints[1] = firstWaypoint.WithTimeToWaypointSet(time);
 					}
 					else {
@@ -282,7 +263,7 @@ namespace MHUrho.PathFinding.AStar {
 			if (sourceNode.Position == target.Position) {
 				time = 0.0f;
 			}
-			else if (!distCalc.GetTime(sourceNode, target, out time)) {
+			else if (!distCalc.GetTime(sourceNode, target, MovementType.Linear, out time)) {
 				return null;
 			}
 			
@@ -303,9 +284,25 @@ namespace MHUrho.PathFinding.AStar {
 			distCalc = null;
 		}
 
-		void VisualizeTouchedNodes()
+		void VisualizeTouchedNodes(float finalTime)
 		{
-			Map.HighlightTileList(from node in touchedNodes select GetTileNode(node).Tile, Color.Green);
+			Map.HighlightTileList(from node in touchedNodes select GetTileNode(node).Tile,
+								(tile) => {
+									TileNode node = GetTileNode(tile);
+									float time = node.Time;
+									return new Color(time / finalTime, 1 - time / finalTime, 0, 1);
+								});
+		}
+
+		void VisualizePath(IReadOnlyList<Node> pathNodes)
+		{
+			float finalTime = pathNodes[pathNodes.Count].Time;
+			Map.HighlightTileList(from node in pathNodes select GetTileNode(node).Tile,
+								(tile) => {
+									TileNode node = GetTileNode(tile);
+									float time = node.Time;
+									return new Color(time / finalTime, 1 - time / finalTime, 0, 1);
+								});
 		}
 
 		void FillNodeMap()
@@ -330,39 +327,6 @@ namespace MHUrho.PathFinding.AStar {
 		{
 			return GetTileNode(node.Position);
 		}
-
-		//Dictionary<Node, float> GetWaypointDictionary(Path path)
-		//{
-		//	Dictionary<Node, float> waypointDict = new Dictionary<Node, float>();
-		//	bool center = false;
-		//	float totalTime = 0;
-		//	foreach (var waypoint in path) {
-		//		totalTime += waypoint.TimeToWaypoint;
-
-		//		if (center) {
-		//			Node node = GetTileNode(map.GetContainingTile(waypoint.Position));
-		//			waypointDict.Add(node, waypoint.TimeToWaypoint);
-		//		}
-
-		//		center = !center;
-		//	}
-
-		//	return waypointDict;
-		//}
-
-		//bool ProcessStartForIntersection(Node startNode, Vector2 source, IDictionary<Node, float> waypointDict)
-		//{
-		//	if (waypointDict.TryGetValue(startNode, out float targetTimeToStartNode)) {
-
-		//	}
-		//	else {
-		//		startNode.Neighbours.Process(this);
-
-				
-
-		//		return false;
-		//	}
-		//}
 	}
 
 

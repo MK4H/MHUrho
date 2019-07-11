@@ -22,30 +22,30 @@ namespace MHUrho.CameraMovement
 
 		bool cameraMoved;
 
-		public EntityFollowingCamera(IMap map, Node cameraNode, SwitchState switchState)
-			:base(map, cameraNode, null, switchState)
+		public EntityFollowingCamera(IMap map, Node cameraNode, StateSwitchedDelegate stateSwitched)
+			:base(map, cameraNode, null, stateSwitched)
 		{
 
 		}
 
 		public override void MoveTo(Vector2 xzPosition)
 		{
-			SwitchState(CameraStates.Fixed);
+			StateSwitched(CameraStates.Fixed);
 		}
 
 		public override void MoveTo(Vector3 position)
 		{
-			SwitchState(CameraStates.Fixed);
+			StateSwitched(CameraStates.Fixed);
 		}
 
 		public override void MoveBy(Vector2 xzMovement)
 		{
-			SwitchState(CameraStates.Fixed);
+			StateSwitched(CameraStates.Fixed);
 		}
 
 		public override void MoveBy(Vector3 movement)
 		{
-			SwitchState(CameraStates.Fixed);
+			StateSwitched(CameraStates.Fixed);
 		}
 
 		public override void Reset()
@@ -172,7 +172,7 @@ namespace MHUrho.CameraMovement
 			Vector3 localDirection = Vector3.Normalize(CameraHolder.WorldToLocal(CameraHolder.WorldPosition + cameraWorldDirection));
 			//Urho.IO.Log.Write(LogLevel.Debug, $"LocalDirection: {localDirection}");
 			CameraNode.Position = -localDirection * cameraDistance;
-			//TODO: Check return value
+			//NOTE: Should probably check return value, but don't know what to do on failure.
 			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
 		}
 	}

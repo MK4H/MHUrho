@@ -21,15 +21,16 @@ namespace MHUrho.Plugins
 
 		}
 
-		public virtual void OnLoad(ILevelManager levelManager)
+		public virtual void OnStart()
 		{
 
 		}
 
-		public virtual void OnStart(ILevelManager levelManager)
-		{
-
-		}
+		/// <summary>
+		/// Called after all platform instances of game objects are loaded.
+		/// Equivalent to LoadState call, but on a level creation instead of loading.
+		/// </summary>
+		public abstract void Initialize();
 
 		public abstract IPathFindAlgFactory GetPathFindAlgFactory();
 

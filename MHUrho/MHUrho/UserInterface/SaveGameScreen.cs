@@ -12,12 +12,15 @@ namespace MHUrho.UserInterface
 	{
 		class Screen : FilePickScreenBase {
 
+			readonly SaveGameScreen proxy;
+
 			readonly Button saveButton;
 
 			public Screen(SaveGameScreen proxy)
 				: base(proxy)
 			{
-				LoadFileNames(MyGame.Files.SaveGameDirAbsolutePath);
+				this.proxy = proxy;
+				LoadFileNames(Game.Files.SaveGameDirAbsolutePath);
 
 				Game.UI.LoadLayoutToElement(MenuUIManager.MenuRoot, Game.ResourceCache, "UI/SaveLayout.xml");
 
@@ -73,38 +76,39 @@ namespace MHUrho.UserInterface
 				saveButton.Enabled = (Filename != "");
 			}
 
-			void SaveButton_Pressed(PressedEventArgs args)
+			async void SaveButton_Pressed(PressedEventArgs args)
 			{
-				//TODO: Pop up invalid name
-				if (LineEdit.Text == "") return;
-
-				string newAbsoluteFilePath = Path.Combine(MyGame.Files.SaveGameDirAbsolutePath, LineEdit.Text);
-
-
-				if (MyGame.Files.FileExists(newAbsoluteFilePath)) {
-					DisableInput();
-					MenuUIManager.ConfirmationPopUp
-								.RequestConfirmation("Overriding file",
-													$"Do you really want to override the file \"{MatchSelected}\"?")
-								.ContinueWith(OverrideFile, TaskScheduler.FromCurrentSynchronizationContext());
+				
+				if (LineEdit.Text == "") {
+					await MenuUIManager.ErrorPopUp.DisplayError("Invalid name", "Name of the saved game cannot be empty");
+					return;
 				}
-				else {
+
+				string newAbsoluteFilePath = Path.Combine(Game.Files.SaveGameDirAbsolutePath, LineEdit.Text);
+
+				if (Game.Files.FileExists(newAbsoluteFilePath)) {
+
+					bool confirmed = await MenuUIManager.ConfirmationPopUp
+														.RequestConfirmation("Overriding file",
+																			$"Do you really want to override the file \"{MatchSelected}\"?",
+																			 null,
+																			 proxy);
+					if (!confirmed) return;
+				}
+
+				try {
 					MenuUIManager.MenuController.SavePausedLevel(LineEdit.Text);
 					MenuUIManager.SwitchBack();
 				}
+				catch (Exception) {
+					await MenuUIManager.ErrorPopUp.DisplayError("Saving Error",
+																"There was an error while saving the level, see log for details.",
+																proxy);
+				}
+				
+
 			}
 
-
-
-
-			void OverrideFile(Task<bool> confirmed)
-			{
-				EnableInput();
-				if (!confirmed.Result) return;
-
-				MenuUIManager.MenuController.SavePausedLevel(LineEdit.Text);
-				MenuUIManager.SwitchBack();
-			}
 		}
 
 		protected override ScreenBase ScreenInstance {

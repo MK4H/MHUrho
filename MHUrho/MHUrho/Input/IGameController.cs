@@ -32,6 +32,8 @@ namespace MHUrho.Input
 
 		void UnPause();
 
+		void EndLevelToEndScreen(bool victory);
+
 		void EndLevel();
 
 		List<RayQueryResult> CursorRaycast();

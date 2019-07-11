@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using MHUrho.Helpers;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 
 namespace MHUrho.Control
 {

@@ -1,0 +1,55 @@
+<elements>
+	<element type="BorderImage" >
+		<attribute name="Texture" value="Texture2D;Assets/Textures/ShowcaseUI.png" />
+		<attribute name="Blend Mode" value="alpha" />
+	</element>
+	<element type="Text">
+		<attribute name="Font" value="Font;Fonts/Anonymous Pro.ttf" />
+		<attribute name="Font Size" value="11" />
+		<attribute name="Color" value="0.85 0.85 0.85" />
+	</element>
+	<element type="CheckBox" style="BorderImage">
+		<attribute name="Min Size" value="16 16" />
+		<attribute name="Max Size" value="16 16" />
+		<attribute name="Image Rect" value="0 64 16 80" />
+		<attribute name="Border" value="4 4 4 4" />
+		<attribute name="Checked Image Offset" value="32 0" />
+		<attribute name="Hover Image Offset" value="16 0" />
+	</element>
+  <element type="Button" style="BorderImage">
+    <attribute name="Image Rect" value="0 160 16 176" />
+    <attribute name="Border" value="4 4 4 4" />
+    <attribute name="Pressed Image Offset" value="32 0" />
+    <attribute name="Hover Image Offset" value="16 0" />
+    <attribute name="Pressed Child Offset" value="-1 1" />
+  </element>
+  <element type="CloseButton" style="Button" auto="false">
+    <attribute name="Image Rect" value="0 176 16 192" />
+  </element>
+  <element type="DoorCloseButton" style="Button"  auto="false">
+    <attribute name="Image Rect" value="0 192 16 208" />
+    <attribute name="Disabled Image Offset" value="0 16" />
+  </element>
+  <element type="DoorOpenButton" style="Button"  auto="false">
+    <attribute name="Image Rect" value="0 0 16 16" />
+    <attribute name="Disabled Image Offset" value="0 208" />
+  </element>
+  <element type="SpawningButton" style="BorderImage"  auto="false">
+    <attribute name="Min Size" value="50 50" />
+    <attribute name="Max Size" value="50 50" />
+    <attribute name="Border" value="4 4 4 4" />
+    <attribute name="Checked Image Offset" value="100 0" />
+    <attribute name="Hover Image Offset" value="50 0" />
+  </element>
+  <element type="DisabledButton" style="Button"  auto="false">
+    <attribute name="Image Rect" value="0 208 16 224" />
+  </element>
+  <element type="TopBar" style="BorderImage">
+    <attribute name="Border" value="4 4 4 4" />
+    <attribute name="Image Rect" value="0 64 16 80"/>
+  </element>
+  <element type="BuildingWindow" style="BorderImage">
+    <attribute name="Border" value="4 4 4 4" />
+    <attribute name="Image Rect" value="0 80 16 96"/>
+  </element>
+</elements>

@@ -30,20 +30,15 @@ namespace MHUrho.EditorTools.MandK {
 
 		bool enabled;
 
-		public TerrainManipulatorTool(GameController input, GameUI ui, CameraMover camera)
-			:base(input)
+		public TerrainManipulatorTool(GameController input, GameUI ui, CameraMover camera, IntRect iconRectangle)
+			:base(input, iconRectangle)
 		{
-
-			//var buttonTexture = new Texture2D();
-			//buttonTexture.FilterMode = TextureFilterMode.Nearest;
-			//buttonTexture.SetNumLevels(1);
-			//buttonTexture.SetSize(tileImage.Width, tileImage.Height, Urho.Graphics.RGBAFormat, TextureUsage.Static);
-			//buttonTexture.SetData(tileType.GetImage());
 			this.input = input;
 			this.ui = ui;
 			this.checkBoxes = new ExclusiveCheckBoxes();
 			this.camera = camera;
 			this.manipulators = new Dictionary<UIElement, TerrainManipulator>();
+			this.enabled = false;
 
 			var selectorCheckBox = ui.SelectionBar.CreateCheckBox();
 			selectorCheckBox.Name = "Selector";

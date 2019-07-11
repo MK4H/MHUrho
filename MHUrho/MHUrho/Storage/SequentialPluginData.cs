@@ -49,16 +49,27 @@ namespace MHUrho.Storage
 			return(T) FromDataConvertors[typeof(T)](dataEnumerator.Current, Level);
 		}
 
+		public void GetCurrent<T>(out T value)
+		{
+			value = GetCurrent<T>();
+		}
+
 		/// <summary>
-		/// Moves the enumerator to next value and returns it,
-		/// if there is no next value, returns default(T) and sets Finished to true
+		/// Moves the enumerator to next value and sets <paramref name="value"/> to it's value and returns true,
+		/// if there is no next value, returns false and sets Finished to true
 		/// </summary>
-		/// <typeparam name="T">Type of the stored value</typeparam>
-		/// <returns>Next stored value, or default(T) if <see cref="Finished"/> is true</returns>
-		public T GetNext<T>()
+		/// <param name="value">The loaded value (true) or default(<typeparamref name="T"/>) (false).</param>
+		/// <typeparam name="T">Type of the stored value.</typeparam>
+		/// <returns>True if the <paramref name="value"/> is valid, false if there is nothing more to read.</returns>
+		public bool GetNext<T>(out T value)
 		{
 			Finished = !MoveNext();
-			return Finished ? default(T) : GetCurrent<T>();
+			if (Finished) {
+				value = default(T);
+				return false;
+			}
+			value = GetCurrent<T>();
+			return true;
 		}
 
 		public void Reset() {

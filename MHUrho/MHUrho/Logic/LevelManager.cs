@@ -13,7 +13,7 @@ using MHUrho.Packaging;
 using Urho;
 using Urho.Physics;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho.Actions;
 using MHUrho.WorldMap;
 using MHUrho.Helpers;
@@ -30,6 +30,9 @@ namespace MHUrho.Logic
 
 	public delegate void OnEndDelegate();
 
+	/// <summary>
+	/// Main class representing the current level
+	/// </summary>
 	partial class LevelManager : Component, ILevelManager, IDisposable
 	{
 		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
@@ -57,18 +60,19 @@ namespace MHUrho.Logic
 
 		public LevelRep LevelRep { get; private set; }
 
-		public MyGame App { get; private set; }
+		public MHUrhoApp App { get; private set; }
 
 		public Node LevelNode { get; private set; }
 
-		public Map Map { get; private set; }
+		public IMap Map => map;
 
 		public Minimap Minimap { get; private set; }
 
 		public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
-		public PackageManager PackageManager => PackageManager.Instance;
+		public PackageManager PackageManager => App.PackageManager;
 
+		public GamePack Package => PackageManager.ActivePackage;
 
 		public bool EditorMode { get; private set; }
 
@@ -113,8 +117,9 @@ namespace MHUrho.Logic
 		readonly Dictionary<Node, IEntity> nodeToEntity;
 
 		readonly Random rng;
+		Map map;
 
-		protected LevelManager(Node levelNode, LevelRep levelRep, MyGame app, Octree octree, bool editorMode)
+		protected LevelManager(Node levelNode, LevelRep levelRep, MHUrhoApp app, Octree octree, bool editorMode)
 		{
 			this.LevelNode = levelNode;
 			this.LevelRep = levelRep;
@@ -138,16 +143,37 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
-		public static ILevelLoader GetLoader()
+		public static ILevelLoader GetLoaderForPlaying(LevelRep levelRep,
+														StLevel storedLevel,
+														PlayerSpecification players,
+														LevelLogicCustomSettings customSettings,
+														IProgressEventWatcher parentProgress = null,
+														double loadingSubsectionSize = 100)
 		{
-			return new Loader();
+			return new SavedLevelPlayingLoader(levelRep, storedLevel, players, customSettings, parentProgress, loadingSubsectionSize);
+		}
+
+		public static ILevelLoader GetLoaderForEditing(LevelRep levelRep,
+														StLevel storedLevel,
+														IProgressEventWatcher parentProgress = null,
+														double loadingSubsectionSize = 100)
+		{
+			return new SavedLevelEditorLoader(levelRep, storedLevel, parentProgress, loadingSubsectionSize);
+		}
+
+		public static ILevelLoader GetLoaderForDefaultLevel(LevelRep levelRep,
+															IntVector2 mapSize,
+															IProgressEventWatcher parentProgress = null,
+															double loadingSubsectionSize = 100)
+		{
+			return new DefaultLevelLoader(levelRep, mapSize, parentProgress, loadingSubsectionSize);
 		}
 
 		public StLevel Save() {
 			StLevel level = new StLevel() {
 				LevelName = LevelRep.Name,
 				Map = this.Map.Save(),
-				PackageName = PackageManager.Instance.ActivePackage.Name,
+				PackageName = PackageManager.ActivePackage.Name,
 				Plugin = new StLevelPlugin()
 			};
 
@@ -200,16 +226,25 @@ namespace MHUrho.Logic
 		public new void Dispose()
 		{
 			IsEnding = true;
-			Ending?.Invoke();
+			Scene.UpdateEnabled = false;
+			try {
+				Ending?.Invoke();
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(Ending)}: {e.Message}");
+			}
 
 			List<IDisposable> toDispose = new List<IDisposable>();
 			toDispose.AddRange(entities.Values);
+			toDispose.AddRange(players.Values);
+
 
 			foreach (var thing in toDispose)
 			{
-				thing.Dispose();
+				thing?.Dispose();
 			}
-			
+
 			//Everything that is loaded anywhere else but the constructor may not be loaded at the time of disposing
 			PackageManager.ActivePackage.ClearCaches();
 			ToolManager?.Dispose();
@@ -217,7 +252,7 @@ namespace MHUrho.Logic
 			cameraController?.Dispose();
 			Camera?.Dispose();
 			Input = null;
-			Map?.Dispose();
+			map?.Dispose();
 			Minimap?.Dispose();
 			octree?.Dispose();
 
@@ -230,7 +265,6 @@ namespace MHUrho.Logic
 			LevelNode?.Dispose();
 
 			base.Dispose();
-
 			CurrentLevel = null;
 			GC.Collect();
 		}
@@ -264,6 +298,11 @@ namespace MHUrho.Logic
 				return null;
 			}
 
+			//Could not spawn unit, user restrictions
+			if (newUnit == null) {
+				return null;
+			}
+
 			RegisterEntity(newUnit);
 			units.Add(newUnit.ID,newUnit);
 			player.AddUnit(newUnit);
@@ -281,7 +320,7 @@ namespace MHUrho.Logic
 		/// <param name="player">Owner of the building</param>
 		/// <returns>The new building if building was built, or null if the building could not be built</returns>
 		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player) {
-			if (!buildingType.CanBuildIn(buildingType.GetBuildingTilesRectangle(topLeft), this)) {
+			if (!buildingType.CanBuild(topLeft, player, this)) {
 				return null;
 			}
 
@@ -290,6 +329,11 @@ namespace MHUrho.Logic
 				newBuilding = buildingType.BuildNewBuilding(GetNewID(entities), this, topLeft, initRotation, player);
 			}
 			catch (CreationException) {
+				return null;
+			}
+
+			//Could not build building because of user restrictions
+			if (newBuilding == null) {
 				return null;
 			}
 
@@ -319,7 +363,12 @@ namespace MHUrho.Logic
 			catch (CreationException) {
 				return null;
 			}
-			
+			//Could not spawn projectile, maybe out of range
+			if (newProjectile == null) {
+				return null;
+			}
+
+
 			RegisterEntity(newProjectile);
 			projectiles.Add(newProjectile.ID, newProjectile);
 				
@@ -352,7 +401,7 @@ namespace MHUrho.Logic
 		{
 			bool removed = units.Remove(unit.ID) && RemoveEntity(unit);
 
-			if (!unit.RemovedFromLevel) {
+			if (!unit.IsRemovedFromLevel) {
 				unit.RemoveFromLevel();
 			}
 
@@ -363,7 +412,7 @@ namespace MHUrho.Logic
 		{
 			bool removed = buildings.Remove(building.ID) && RemoveEntity(building);
 
-			if (!building.RemovedFromLevel) {
+			if (!building.IsRemovedFromLevel) {
 				building.RemoveFromLevel();
 			}
 			return removed;
@@ -373,9 +422,24 @@ namespace MHUrho.Logic
 		{
 			bool removed = projectiles.Remove(projectile.ID) && RemoveEntity(projectile);
 
-			if (!projectile.RemovedFromLevel) {
+			if (!projectile.IsRemovedFromLevel) {
 				projectile.RemoveFromLevel();
 			}
+			return removed;
+		}
+
+		public bool RemovePlayer(IPlayer player)
+		{
+			bool removed = players.Remove(player.ID);
+
+			if (!player.IsRemovedFromLevel) {
+				player.RemoveFromLevel();
+			}
+
+			if (player == HumanPlayer && !IsEnding) {
+				Input.EndLevelToEndScreen(false);
+			}
+
 			return removed;
 		}
 
@@ -487,7 +551,14 @@ namespace MHUrho.Logic
 
 		public bool TryGetEntity(Node node, out IEntity entity)
 		{
-			return nodeToEntity.TryGetValue(node, out entity);
+			for (; node != LevelNode && node != null; node = node.Parent) {
+				if (nodeToEntity.TryGetValue(node, out entity)) {
+					return true;
+				}
+			}
+
+			entity = null;
+			return false;
 		}
 
 		public IRangeTarget GetRangeTarget(int ID) {
@@ -590,13 +661,32 @@ namespace MHUrho.Logic
 		protected override void OnUpdate(float timeStep) {
 			base.OnUpdate(timeStep);
 
-			if (!EnabledEffective) return;
-
-			Plugin.OnUpdate(timeStep);
+			if (IsDeleted || !EnabledEffective) return;
 
 			Minimap.OnUpdate(timeStep);
 
-			Update?.Invoke(timeStep);
+			try {
+				Plugin.OnUpdate(timeStep);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"Level plugin call {nameof(Plugin.OnUpdate)} failed with Exception: {e.Message}");
+			}
+
+			if (IsEnding) {
+				return;
+			}
+
+			try {
+				
+				Update?.Invoke(timeStep);
+			}
+			catch (Exception e)
+			{
+				Urho.IO.Log.Write(LogLevel.Warning,
+								$"There was an unexpected exception during the invocation of {nameof(Update)}: {e.Message}");
+			}
+
 		}
 
 	
@@ -623,7 +713,14 @@ namespace MHUrho.Logic
 		bool RemoveEntity(IEntity entity)
 		{
 			bool removed = entities.Remove(entity.ID);
-			return nodeToEntity.Remove(entity.Node) && removed;
+			if (!IsEnding) {
+				return nodeToEntity.Remove(entity.Node) && removed;
+			}
+			else {
+				//DO NOT TOUCH THE NODES, they may be deleted
+				return removed;
+			}
+			
 		}
 
 	}

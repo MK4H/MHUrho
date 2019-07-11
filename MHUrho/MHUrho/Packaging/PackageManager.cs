@@ -28,13 +28,15 @@ namespace MHUrho.Packaging
 	public class PackageManager  {
 		public static XNamespace XMLNamespace = "http://www.MobileHold.cz/GamePack.xsd";
 
-		public static PackageManager Instance { get; private set; }
+		public const string GamePackDirFileName = "Packages.xml";
 
-		public static string PackageDirectoryPath => MyGame.Files.PackageDirectoryPath;
+		public MHUrhoApp App { get; private set; }
 
-		public static string PackageDirectoryAbsolutePath => MyGame.Files.PackageDirectoryAbsolutePath;
+		public string PackageDirectoryPath => App.Files.PackageDirectoryPath;
 
-		public const string GamePackDirFileName = "DirDescription.xml";
+		public string PackageDirectoryAbsolutePath => App.Files.PackageDirectoryPath;
+
+		
 
 		public IEnumerable<GamePackRep> AvailablePacks => availablePacks.Values;
 
@@ -45,11 +47,13 @@ namespace MHUrho.Packaging
 		/// </summary>
 		static readonly string GamePackageSchemaPath = Path.Combine("Data","Schemas","GamePack.xsd");
 
-		static string GamePackDirFilePath => Path.Combine(PackageDirectoryPath, GamePackDirFileName);
+		static readonly string defaultIconPath = Path.Combine("Textures", "xamarin.png");
 
-		static string GamePackDirFileAbsolutePath => Path.Combine(PackageDirectoryAbsolutePath, GamePackDirFileName);
+		string GamePackDirFilePath => Path.Combine(PackageDirectoryPath, GamePackDirFileName);
 
-		static readonly string defaultIconPath = Path.Combine("Textures","xamarin.png");
+		string GamePackDirFileAbsolutePath => Path.Combine(PackageDirectoryAbsolutePath, GamePackDirFileName);
+
+		
 
 
 		public Texture2D DefaultIcon { get; private set; }
@@ -63,47 +67,117 @@ namespace MHUrho.Packaging
 		readonly ResourceCache resourceCache;
 
 
-		protected PackageManager(ResourceCache resourceCache) {
-			this.resourceCache = resourceCache;
+		public PackageManager(MHUrhoApp app) {
+			this.App = app;
+			this.resourceCache = app.ResourceCache;
 
 			schemas = new XmlSchemaSet();
-		}
 
-		
+			try
+			{
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="resourceCache"></param>
-		/// <returns>Paths of the packages that failed to load</returns>
-		public static string[] CreateInstance(ResourceCache resourceCache) {
-			Instance = new PackageManager(resourceCache);
-			try {
-
-				Instance.schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(MyGame.Files.OpenStaticFileRO(GamePackageSchemaPath)));
+				schemas.Add(XMLNamespace.NamespaceName, XmlReader.Create(App.Files.OpenStaticFileRO(GamePackageSchemaPath)));
 			}
-			catch (IOException e) {
+			catch (IOException e)
+			{
 				string message = $"Error loading GamePack schema: {e.Message}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
 				//Reading of static file of this app failed, something is horribly wrong, die
-				//TODO: Error reading static data of app, game data corrupted
 				throw new FatalPackagingException(message, e);
 			}
 
-			try {
-				Instance.DefaultIcon = resourceCache.GetTexture2D(defaultIconPath);
+			try
+			{
+				DefaultIcon = resourceCache.GetTexture2D(defaultIconPath);
 			}
-			catch (IOException e) {
+			catch (IOException e)
+			{
 				string message = $"Error loading the default icon at {defaultIconPath}";
 				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
-				//TODO: Error loading the default icon, game corrupted
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
+				//Reading of static file of this app failed, something is horribly wrong, die
+				throw new FatalPackagingException(message, e);
+			}
+		}
+
+		/// <summary>
+		/// Pulls data about the resource packs contained in this directory from XML file
+		/// </summary>
+		/// <returns>Array of package paths that could not be loaded</returns>
+		/// <exception cref="FatalPackagingException">Thrown when package directory loading completely failed, and the game can terminate</exception>
+		public string[] ParseGamePackDir()
+		{
+			IEnumerable<string> packagePaths = null;
+
+			try
+			{
+
+				XDocument doc = LoadGamePackDirXml(GamePackDirFilePath);
+
+				packagePaths = from packagePath in doc.Root.Elements(GamePackDirectoryXml.Inst.GamePack)
+							   select packagePath.Value;
+			}
+			catch (IOException e)
+			{
+				//Creation of the FileStream failed, cannot load this directory
+				string message = $"Opening ResourcePack directory file at {GamePackDirFilePath} failed: {e}";
+				Log.Write(LogLevel.Error, message);
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
+				throw new FatalPackagingException(message, e);
+			}
+			catch (XmlSchemaValidationException e)
+			{
+				string message =
+					$"ResourcePack directory file at {GamePackDirFilePath} does not conform to the schema: {e.Message}";
+				//Invalid resource pack description file, dont load this pack directory
+				Log.Write(LogLevel.Error, message);
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
+				throw new FatalPackagingException(message, e);
+			}
+			catch (XmlException e)
+			{
+				string message = $"ResourcePack directory file at {GamePackDirFilePath} was corrupted : {e.Message}";
+				Log.Write(LogLevel.Error, message);
+				if (Debugger.IsAttached)
+				{
+					Debugger.Break();
+				}
 				throw new FatalPackagingException(message, e);
 			}
 
-			return Instance.ParseGamePackDir();
+			List<string> failedPackagePaths = new List<string>();
+			//Adds all the discovered packs into the availablePacks list
+			foreach (var packagePath in packagePaths)
+			{
+				try
+				{
+					GamePackRep newPack = LoadPack(packagePath);
+					AddToAvailable(newPack, packagePath);
+				}
+				catch (Exception)
+				{
+					//The package writes the error to the log by itself
+					//Urho.IO.Log.Write(LogLevel.Warning, $"Loading package at {packagePath} failed with: {e}");
+					failedPackagePaths.Add(packagePath);
+				}
+			}
+
+			return failedPackagePaths.ToArray();
 		}
+
 
 		/// <summary>
 		///	<para>Unloads the <see cref="ActivePackage"/> if there is any
@@ -119,7 +193,7 @@ namespace MHUrho.Packaging
 		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="packageName"/> is null</exception>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="packageName"/> is not present in the <see cref="AvailablePacks"/></exception>
 		public Task<GamePack> LoadPackage(string packageName, 
-										ILoadingSignaler loadingProgress = null)
+										IProgressEventWatcher loadingProgress = null)
 		{
 			if (packageName == null) {
 				throw new ArgumentNullException(nameof(packageName), "Package name cannot be null");
@@ -147,20 +221,27 @@ namespace MHUrho.Packaging
 		/// <param name="loadingProgress">Optional watcher of the loading progress</param>
 		/// <returns>A task that represents the asynchronous loading of the package</returns>
 		/// <exception cref="PackageLoadingException">Thrown when the loading of the new package failed</exception>
-		public async Task<GamePack> LoadPackage(GamePackRep package, ILoadingSignaler loadingProgress = null)
+		public async Task<GamePack> LoadPackage(GamePackRep package, IProgressEventWatcher loadingProgress = null)
 		{
+			const double clearPartSize = 10;
+			const double loadPartSize = 90;
+
 			if (loadingProgress == null) {
-				loadingProgress = new LoadingWatcher();
+				loadingProgress = new ProgressWatcher();
 			}
 
-			loadingProgress.TextUpdate("Clearing previous games");
+			loadingProgress.SendTextUpdate("Clearing previous games");
 			if (ActivePackage != null) {
 				UnloadActivePack();
 			}
+			loadingProgress.SendUpdate(clearPartSize ,"Cleared previous games");
 
-			resourceCache.AddResourceDir(Path.Combine(MyGame.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
+			resourceCache.AddResourceDir(Path.Combine(App.Files.DynamicDirPath,package.XmlDirectoryPath), 1);
 
-			ActivePackage = await package.LoadPack(schemas, loadingProgress.GetWatcherForSubsection());
+			loadingProgress.SendTextUpdate("Loading new package");
+			ActivePackage = await package.LoadPack(schemas, new ProgressWatcher(loadingProgress, loadPartSize));
+
+			loadingProgress.SendFinished();
 			return ActivePackage;
 		}
 
@@ -266,7 +347,6 @@ namespace MHUrho.Packaging
 		}
 
 		public GamePackRep GetGamePack(string name) {
-			//TODO: React if it does not exist
 			return availablePacks[name];
 		}
 
@@ -277,236 +357,186 @@ namespace MHUrho.Packaging
 			UnloadPackage(activePackage);
 		}
 
+		public XName GetQualifiedXName(string elementName)
+		{
+			return XMLNamespace + elementName;
+		}
+
 		public bool Exists(string name)
 		{
-			return MyGame.InvokeOnMainSafe(() => resourceCache.Exists(name));
+			return MHUrhoApp.InvokeOnMainSafe(() => resourceCache.Exists(name));
 		}
 
 		public Animation GetAnimation(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetAnimation(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public AnimationSet2D GetAnimationSet2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetAnimationSet2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Urho.IO.File GetFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Font GetFont(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetFont(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetFont(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Image GetImage(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetImage(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetImage(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public JsonFile GetJsonFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetJsonFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Material GetMaterial(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetMaterial(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Model GetModel(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetModel(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetModel(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public ParticleEffect GetParticleEffect(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetParticleEffect(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public ParticleEffect2D GetParticleEffect2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetParticleEffect2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public PListFile GetPListFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetPListFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Shader GetShader(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetShader(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetShader(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Sound GetSound(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSound(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetSound(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Sprite2D GetSprite2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetSprite2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public SpriteSheet2D GetSpriteSheet2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetSpriteSheet2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Technique GetTechnique(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTechnique(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Texture2D GetTexture2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTexture2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Texture3D GetTexture3D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTexture3D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Texture GetTextureCube(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTextureCube(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public TmxFile2D GetTmxFile2D(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetTmxFile2D(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public ValueAnimation GetValueAnimation(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetValueAnimation(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public XmlFile GetXmlFile(string name, bool throwOnFailure = false)
 		{
-			var resource = MyGame.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
+			var resource = MHUrhoApp.InvokeOnMainSafe(() => resourceCache.GetXmlFile(name));
 			return !throwOnFailure ? resource : resource ?? throw new ResourceLoadingException(name);
 
 		}
 
 		public Material GetMaterialFromImage(Image image)
 		{
-			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image));
+			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image));
 		}
 
 		public Material GetMaterialFromImage(string image)
 		{
-			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image));
+			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image));
 		}
 
 		public Material GetMaterialFromImage(string image, string normals)
 		{
-			return MyGame.InvokeOnMainSafe(() => Material.FromImage(image, normals));
+			return MHUrhoApp.InvokeOnMainSafe(() => Material.FromImage(image, normals));
 		}
 
-		/// <summary>
-		/// Pulls data about the resource packs contained in this directory from XML file
-		/// </summary>
-		/// <returns>Array of package paths that could not be loaded</returns>
-		/// <exception cref="FatalPackagingException">Thrown when package directory loading completely failed, and the game can terminate</exception>
-		string[] ParseGamePackDir()
-		{
-			IEnumerable<string> packagePaths = null;
-
-			try {
-
-				XDocument doc = LoadGamePackDirXml(GamePackDirFilePath);
-
-				packagePaths = from packagePath in doc.Root.Elements(GamePackDirectoryXml.Inst.GamePack)
-							   select packagePath.Value;
-			}
-			catch (IOException e)
-			{
-				//Creation of the FileStream failed, cannot load this directory
-				string message = $"Opening ResourcePack directory file at {GamePackDirFilePath} failed: {e}";
-				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
-				throw new FatalPackagingException(message, e);
-			}
-			//TODO: Exceptions
-			catch (XmlSchemaValidationException e) {
-				string message =
-					$"ResourcePack directory file at {GamePackDirFilePath} does not conform to the schema: {e.Message}";
-				//Invalid resource pack description file, dont load this pack directory
-				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
-				throw new FatalPackagingException(message, e);
-			}
-			catch (XmlException e) {
-				string message = $"ResourcePack directory file at {GamePackDirFilePath} was corrupted : {e.Message}";
-				Log.Write(LogLevel.Error, message);
-				if (Debugger.IsAttached) Debugger.Break();
-				throw new FatalPackagingException(message, e);
-			}
-
-			List<string> failedPackagePaths = new List<string>();
-			//Adds all the discovered packs into the availablePacks list
-			foreach (var packagePath in packagePaths) {
-				try {
-					GamePackRep newPack = LoadPack(packagePath);
-					AddToAvailable(newPack, packagePath);
-				}
-				catch (Exception) {
-					//The package writes the error to the log by itself
-					//Urho.IO.Log.Write(LogLevel.Warning, $"Loading package at {packagePath} failed with: {e}");
-					failedPackagePaths.Add(packagePath);
-				}
-			}
-
-			return failedPackagePaths.ToArray();
-		}
+		
 
 		/// <summary>
 		/// 
@@ -522,7 +552,7 @@ namespace MHUrho.Packaging
 				throw new ArgumentNullException(nameof(path), "Path cannot be null");
 			}
 
-			using (Stream stream = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
+			using (Stream stream = App.Files.OpenDynamicFile(path, System.IO.FileMode.Open, FileAccess.Read)) {
 				XDocument doc = XDocument.Load(stream);
 				doc.Validate(schemas, null);
 				return doc;
@@ -542,7 +572,7 @@ namespace MHUrho.Packaging
 		void WriteGamePackDir(XDocument document, string path)
 		{
 			document.Validate(schemas, null);
-			using (Stream stream = MyGame.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
+			using (Stream stream = App.Files.OpenDynamicFile(path, System.IO.FileMode.Truncate, FileAccess.Write)) {
 				document.Save(stream);
 			}
 		}
@@ -555,7 +585,7 @@ namespace MHUrho.Packaging
 
 		GamePackRep LoadPack(string pathInDirEntry)
 		{
-			string packXmlPath = Path.Combine(PackageDirectoryPath, FileManager.CorrectRelativePath(pathInDirEntry));
+			string packXmlPath = Path.Combine(PackageDirectoryPath, FileManager.ReplaceDirectorySeparators(pathInDirEntry));
 			GamePackRep newPack = null;
 	
 			newPack = new GamePackRep(packXmlPath,

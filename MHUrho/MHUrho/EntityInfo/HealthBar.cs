@@ -6,14 +6,13 @@ using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho.Resources;
 using Urho.Urho2D;
 
 namespace MHUrho.EntityInfo
 {
     public class HealthBar : IDisposable {
-
 
 		BillboardSet billboardSet;
 		uint billboardIndex;
@@ -87,7 +86,7 @@ namespace MHUrho.EntityInfo
 				billboardSet.Sorted = false;
 				billboardSet.Material = entity.Player.Insignia.HealthBarMat;
 				billboardSet.Scaled = false;
-				//TODO: BILLBOARD DRAW DISTANCE
+				//NOTE: BILLBOARD DRAW DISTANCE
 				billboardSet.DrawDistance = 50;
 
 				billboardIndex = 0;

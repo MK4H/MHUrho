@@ -14,7 +14,7 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
-	public class BuildingType : ILoadableType, IDisposable
+	public class BuildingType : IEntityType, IDisposable
 	{
 		public int ID { get; private set; }
 
@@ -29,7 +29,9 @@ namespace MHUrho.Logic
 		public IntVector2 Size { get; private set; }
 
 		public BuildingTypePlugin Plugin { get; private set; }
-		
+
+		TypePlugin IEntityType.Plugin => Plugin;
+
 		/// <summary>
 		/// Data has to be loaded after constructor by <see cref="Load(XElement, int, GamePack)"/>
 		/// It is done this way to allow cyclic references during the Load method, so anything 
@@ -39,19 +41,75 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <summary>
+		/// This constructor enables creation of mock instances, that are not loaded from package and have other uses.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <param name="package"></param>
+		/// <param name="assets"></param>
+		/// <param name="iconRectangle"></param>
+		/// <param name="size"></param>
+		/// <param name="plugin"></param>
+		protected BuildingType(int id, 
+							string name,
+							GamePack package,
+							AssetContainer assets, 
+							IntRect iconRectangle, 
+							IntVector2 size, 
+							BuildingTypePlugin plugin)
+		{
+			this.ID = id;
+			this.Name = name;
+			this.Package = package;
+			this.Assets = assets;
+			this.IconRectangle = iconRectangle;
+			this.Size = size;
+			this.Plugin = plugin;
+		}
+
 		public void Load(XElement xml, GamePack package) {
-			ID = XmlHelpers.GetID(xml);
-			Name = XmlHelpers.GetName(xml);
-			Assets = AssetContainer.FromXml(xml.Element(BuildingTypeXml.Inst.Assets));
-			IconRectangle = XmlHelpers.GetIconRectangle(xml);
+
 			Package = package;
-			Size = XmlHelpers.GetIntVector2(xml.Element(BuildingTypeXml.Inst.Size));
 
-			XElement pathElement = xml.Element(BuildingTypeXml.Inst.AssemblyPath);
+			XElement extensionElem = null;
+			string assemblyPath = null;
+			try {
+				ID = XmlHelpers.GetID(xml);
+				Name = XmlHelpers.GetName(xml);
+				IconRectangle = XmlHelpers.GetIconRectangle(xml);
+				Size = XmlHelpers.GetIntVector2(xml.Element(BuildingTypeXml.Inst.Size));
+				assemblyPath = XmlHelpers.GetPath(xml.Element(BuildingTypeXml.Inst.AssemblyPath));
+				extensionElem = XmlHelpers.GetExtensionElement(xml);
+			}
+			catch (Exception e) {
+				LoadError($"Building type loading failed: Invalid XML of the package {package.Name}", e);
+			}
 
-			Plugin = TypePlugin.LoadTypePlugin<BuildingTypePlugin>(XmlHelpers.GetPath(pathElement), package, Name);
-			Plugin.Initialize(XmlHelpers.GetExtensionElement(xml),
-										 package);
+			try {
+				Assets = AssetContainer.FromXml(xml.Element(BuildingTypeXml.Inst.Assets), package);
+			}
+			catch (Exception e) {
+				LoadError($"Building type \"{Name}\"[{ID}] loading failed: Asset instantiation failed with exception: {e.Message}", e);
+			}
+
+			try {
+				Plugin = TypePlugin.LoadTypePlugin<BuildingTypePlugin>(assemblyPath, package, Name, ID, extensionElem);
+			}
+			catch (Exception e) {
+				LoadError($"Building type \"{Name}\"[{ID}] loading failed: Plugin loading failed with exception: {e.Message}", e);
+			}
+			
+		}
+
+		public override bool Equals(object obj)
+		{
+			return object.ReferenceEquals(this, obj);
+		}
+
+		public override int GetHashCode()
+		{
+			return ID;
 		}
 
 		/// <summary>
@@ -71,20 +129,16 @@ namespace MHUrho.Logic
 			return Building.CreateNew(buildingID, topLeft, initRotation, this, player, level);
 		}
 
-		public bool CanBuildIn(IntVector2 topLeft, IntVector2 bottomRight, ILevelManager level) {
+		public bool CanBuild(IntVector2 topLeft, IPlayer owner, ILevelManager level) {
 			try {
-				return Plugin.CanBuildIn(topLeft, bottomRight, level);
+				return Plugin.CanBuild(topLeft, owner, level);
 			}
 			catch (Exception e) {
 				Urho.IO.Log.Write(LogLevel.Error,
-								$"Building type plugin call {nameof(Plugin.CanBuildIn)} failed with Exception: {e.Message}");
+								$"Building type plugin call {nameof(Plugin.CanBuild)} failed with Exception: {e.Message}");
 				return false;
 			}
 			
-		}
-
-		public bool CanBuildIn(IntRect buildingTilesRectangle, ILevelManager level) {
-			return CanBuildIn(buildingTilesRectangle.TopLeft(), buildingTilesRectangle.BottomRight(), level);
 		}
  
 		internal BuildingInstancePlugin GetNewInstancePlugin(IBuilding building, ILevelManager level) {
@@ -112,16 +166,33 @@ namespace MHUrho.Logic
 			
 		}
 
-		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft) {
+		public IntRect GetBuildingTilesRectangle(IntVector2 topLeft)
+		{
+			IntVector2 bottomRight = GetBottomRightTileIndex(topLeft);
 			return new IntRect(topLeft.X,
 							   topLeft.Y,
-							   topLeft.X + Size.X - 1,
-							   topLeft.Y + Size.Y - 1);
+							   bottomRight.X,
+							   bottomRight.Y);
 		}
 
+		public IntVector2 GetBottomRightTileIndex(IntVector2 topLeft)
+		{
+			return topLeft + Size - new IntVector2(1, 1);
+		}
 
 		public void Dispose() {
 			Assets.Dispose();
+		}
+
+		/// <summary>
+		/// Logs message and throws a <see cref="PackageLoadingException"/>
+		/// </summary>
+		/// <param name="message">Message to log and propagate via exception</param>
+		/// <exception cref="PackageLoadingException">Always throws this exception</exception>
+		void LoadError(string message, Exception e)
+		{
+			Urho.IO.Log.Write(LogLevel.Error, message);
+			throw new PackageLoadingException(message, e);
 		}
 	}
 }

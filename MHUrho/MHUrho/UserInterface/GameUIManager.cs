@@ -17,6 +17,8 @@ namespace MHUrho.UserInterface
 
 		public abstract bool PlayerSelectionEnabled { get; }
 
+		public abstract UIElement GameUIRoot { get; }
+
 		protected Dictionary<UIElement, Tool> tools;
 		protected Dictionary<UIElement, IPlayer> players;
 
@@ -58,6 +60,15 @@ namespace MHUrho.UserInterface
 		public abstract void ShowUI();
 
 		public abstract void HideUI();
+
+		public abstract void RegisterForHover(UIElement element);
+
+		public abstract void UnregisterForHover(UIElement element);
+
+		public void LoadLayoutToUI(string path)
+		{
+			UI.LoadLayoutToElement(GameUIRoot, Game.ResourceCache, path);
+		}
 
 		protected void OnHoverBegin()
 		{

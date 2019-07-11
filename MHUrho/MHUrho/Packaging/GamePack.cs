@@ -16,12 +16,18 @@ using Urho.Urho2D;
 
 namespace MHUrho.Packaging {
 
+	/// <summary>
+	/// Class representing loaded game package.
+	/// Contains all loaded types, textures etc.
+	/// Implements the loading of package into the running game.
+	/// Provides API to get references to types, either by ID or by name.
+	/// </summary>
 	public class GamePack : IDisposable {
-		const string DefaultThumbnailPath = "Textures/xamarin.png";
-
 		public GamePackRep GamePackRep { get; private set; }
 
 		public string Name => GamePackRep.Name;
+
+		public MHUrhoApp App => PackageManager.App;
 
 		public PackageManager PackageManager => GamePackRep.PackageManager;
 
@@ -35,7 +41,7 @@ namespace MHUrho.Packaging {
 		/// <summary>
 		/// See <see cref="DirectoryPath"/>
 		/// </summary>
-		public string RootedDirectoryPath => Path.Combine(MyGame.Files.DynamicDirPath, DirectoryPath);
+		public string RootedDirectoryPath => Path.Combine(App.Files.DynamicDirPath, DirectoryPath);
 
 		public TileType DefaultTileType { get; private set; }
 
@@ -82,6 +88,7 @@ namespace MHUrho.Packaging {
 		public Texture2D UnitIconTexture { get; private set; }
 		public Texture2D BuildingIconTexture { get; private set; }
 		public Texture2D PlayerIconTexture { get; private set; }
+		public Texture2D ToolIconTexture { get; private set; }
 	   
 		readonly Dictionary<string, TileType> tileTypesByName;
 		readonly Dictionary<string, UnitType> unitTypesByName;
@@ -147,76 +154,109 @@ namespace MHUrho.Packaging {
 		}
 
 		/// <summary>
-		/// 
+		/// Starts a task loading new game pack from XML file at <paramref name="pathToXml"/>,
+		/// represented by <paramref name="gamePackRep"/>.
+		/// You can watch the progress of loading by providing <paramref name="loadingProgress"/>, which will be updated from 0 to 100%.
 		/// </summary>
-		/// <param name="pathToXml"></param>
-		/// <param name="gamePackRep"></param>
-		/// <param name="schemas"></param>
-		/// <param name="loadingProgress"></param>
-		/// <returns></returns>
+		/// <param name="pathToXml">Path to the XML file describing the Game pack</param>
+		/// <param name="gamePackRep">Representant of the GamePack</param>
+		/// <param name="schemas">Schemas to validate the loaded XML file with.</param>
+		/// <param name="loadingProgress">Optional loading progress watcher, which will be updated from 0 to 100%.</param>
+		/// <returns>A task representing the loading of the gamePack</returns>
 		/// <exception cref="PackageLoadingException">Thrown when the package loading failed</exception>
 		public static async Task<GamePack> Load(string pathToXml,
 												GamePackRep gamePackRep,
 												XmlSchemaSet schemas,
-												ILoadingSignaler loadingProgress)
+												IProgressEventWatcher loadingProgress = null)
 		{
+			//Relative loading time of the parts, should add up to 100. Used to send accurate percentage update.
+			const double tileTypesPartSize = 12.5;
+			const double unitTypesPartSize = 12.5;
+			const double buildingTypesPartSize = 12.5;
+			const double projectileTypesPartSize = 12.5;
+			const double resourceTypesPartSize = 12.5;
+			const double playerTypesPartSize = 12.5;
+			const double levelLogicTypesPartSize = 12.5;
+			const double levelsPartSize = 12.5;
+
 			GamePack newPack = new GamePack(pathToXml, gamePackRep, schemas);
 
-			pathToXml = FileManager.CorrectRelativePath(pathToXml);
+			pathToXml = FileManager.ReplaceDirectorySeparators(pathToXml);
 
 			try {
-				newPack.data = await MyGame.InvokeOnMainSafeAsync(() => StartLoading(pathToXml, schemas));
+				newPack.data = await MHUrhoApp.InvokeOnMainSafeAsync(() => newPack.LoadXml(pathToXml, schemas));
 
 				//Validation in StartLoading should take care of any missing elements
-				newPack.levelSavingDirPath = FileManager.CorrectRelativePath(newPack.data.Root
+				newPack.levelSavingDirPath = FileManager.ReplaceDirectorySeparators(newPack.data.Root
 																					.Element(GamePackXml.Inst.Levels)
 																					.Element(LevelsXml.Inst.DataDirPath)
 																					.Value.Trim());
 
-				loadingProgress.TextUpdate("Loading tile types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
+				loadingProgress?.SendTextUpdate("Loading tile types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllTileTypes);
+				loadingProgress?.SendUpdate(tileTypesPartSize,"Loaded tile types");
 
-				loadingProgress.TextUpdate("Loading unit types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
+				loadingProgress?.SendTextUpdate("Loading unit types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllUnitTypes);
+				loadingProgress?.SendUpdate(unitTypesPartSize, "Loaded unit types");
 
-				loadingProgress.TextUpdate("Loading building types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
+				loadingProgress?.SendTextUpdate("Loading building types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllBuildingTypes);
+				loadingProgress?.SendUpdate(buildingTypesPartSize, "Loaded building types");
 
-				loadingProgress.TextUpdate("Loading projectile types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
+				loadingProgress?.SendTextUpdate("Loading projectile types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllProjectileTypes);
+				loadingProgress?.SendUpdate(projectileTypesPartSize, "Loaded projectile types");
 
-				loadingProgress.TextUpdate("Loading resource types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
+				loadingProgress?.SendTextUpdate("Loading resource types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllResourceTypes);
+				loadingProgress?.SendUpdate(resourceTypesPartSize, "Loaded resource types");
 
-				loadingProgress.TextUpdate("Loading player types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
+				loadingProgress?.SendTextUpdate("Loading player types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllPlayerTypes);
+				loadingProgress?.SendUpdate(playerTypesPartSize, "Loaded player types");
 
-				loadingProgress.TextUpdate("Loading level logic types");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
+				loadingProgress?.SendTextUpdate("Loading level logic types");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllLevelLogicTypes);
+				loadingProgress?.SendUpdate(levelLogicTypesPartSize, "Loaded level logic types");
 
-				loadingProgress.TextUpdate("Loading levels");
-				await MyGame.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
+				loadingProgress?.SendTextUpdate("Loading icon textures");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadIconTextures);
+				loadingProgress?.SendUpdate(playerTypesPartSize, "Loaded icon textures");
+
+				loadingProgress?.SendTextUpdate("Loading levels");
+				await MHUrhoApp.InvokeOnMainSafeAsync(newPack.LoadAllLevels);
+				loadingProgress?.SendUpdate(levelsPartSize, "Loaded levels");
 			}
 			catch (MethodInvocationException e)
 			{
+				//TODO: Dispose on error
 				string message = $"Package loading failed with: \"{e.InnerException?.Message ?? ""}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}
-			//TODO: Catch only the expected exceptions
 			catch (Exception e) {
+				//TODO: Dispose on error
 				string message = $"Package loading failed with: \"{e.Message}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
 				throw new PackageLoadingException(message, e);
 			}			
 			finally
 			{
-				newPack.FinishLoading();
+				newPack.ReleaseXml();
 			}
 
+			loadingProgress?.SendFinished();
 			return newPack;
 		}
 
+		/// <summary>
+		/// Returns the <see cref="TileType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="TileType"/></param>
+		/// <returns>Returns the <see cref="TileType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when argument is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public TileType GetTileType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name),"Name of the tileType cannot be null");
@@ -233,6 +273,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown tile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="TileType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="TileType"/></param>
+		/// <returns>Returns the <see cref="TileType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public TileType GetTileType(int ID) {
 
 			if (tileTypesByID.TryGetValue(ID, out TileType value)) {
@@ -246,6 +292,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown tile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="UnitType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="UnitType"/></param>
+		/// <returns>Returns the <see cref="UnitType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public UnitType GetUnitType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the unitType cannot be null");
@@ -263,6 +316,12 @@ namespace MHUrho.Packaging {
 
 		}
 
+		/// <summary>
+		/// Returns the <see cref="UnitType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="UnitType"/></param>
+		/// <returns>Returns the <see cref="UnitType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public UnitType GetUnitType(int ID) {
 
 			if (unitTypesByID.TryGetValue(ID, out  UnitType value)) {
@@ -277,6 +336,13 @@ namespace MHUrho.Packaging {
 
 		}
 
+		/// <summary>
+		/// Returns the <see cref="BuildingType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="BuildingType"/></param>
+		/// <returns>Returns the <see cref="BuildingType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public BuildingType GetBuildingType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the buildingType cannot be null");
@@ -297,6 +363,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown building type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="BuildingType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="BuildingType"/></param>
+		/// <returns>Returns the <see cref="BuildingType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public BuildingType GetBuildingType(int ID) {
 
 			if (buildingTypesByID.TryGetValue(ID, out BuildingType value)) {
@@ -314,6 +386,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown building type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ProjectileType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="ProjectileType"/></param>
+		/// <returns>Returns the <see cref="ProjectileType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public ProjectileType GetProjectileType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the projectileType cannot be null");
@@ -334,6 +413,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown projectile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ProjectileType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="ProjectileType"/></param>
+		/// <returns>Returns the <see cref="ProjectileType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public ProjectileType GetProjectileType(int ID) {
 
 			if (projectileTypesByID.TryGetValue(ID, out ProjectileType value)) {
@@ -351,6 +436,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown projectile type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ResourceType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="ResourceType"/></param>
+		/// <returns>Returns the <see cref="ResourceType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public ResourceType GetResourceType(string name) {
 			if (name == null) {
 				throw new ArgumentNullException(nameof(name), "Name of the ResourceType cannot be null");
@@ -371,6 +463,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown resource type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="ResourceType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="ResourceType"/></param>
+		/// <returns>Returns the <see cref="ResourceType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public ResourceType GetResourceType(int ID) {
 			if (resourceTypesByID.TryGetValue(ID, out ResourceType value)) {
 				return value;
@@ -388,6 +486,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown resource type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="PlayerType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="PlayerType"/></param>
+		/// <returns>Returns the <see cref="PlayerType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public PlayerType GetPlayerType(string name)
 		{
 			if (name == null) {
@@ -409,6 +514,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown player type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="PlayerType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="PlayerType"/></param>
+		/// <returns>Returns the <see cref="PlayerType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public PlayerType GetPlayerType(int ID) {
 
 			if (playerAITypesByID.TryGetValue(ID, out PlayerType value)) {
@@ -426,6 +537,13 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown player type");
 		}
 
+		/// <summary>
+		/// Returns every <see cref="PlayerType"/> with the <paramref name="category"/>.
+		///
+		/// Mainly used to get all the AI player types, Human player types or Neutral player types.
+		/// </summary>
+		/// <param name="category">Category of the wanted playerTypes</param>
+		/// <returns>Returns every <see cref="PlayerType"/> with the <paramref name="category"/>.</returns>
 		public IEnumerable<PlayerType> GetPlayersWithTypeCategory(PlayerTypeCategory category)
 		{
 			return from playerType in PlayerTypes
@@ -433,6 +551,13 @@ namespace MHUrho.Packaging {
 					select playerType;
 		}
 
+		/// <summary>
+		/// Returns the <see cref="LevelLogicType"/> with the given <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Name of the wanted <see cref="LevelLogicType"/></param>
+		/// <returns>Returns the <see cref="LevelLogicType"/> with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is null</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type of that name is not present in this package</exception>
 		public LevelLogicType GetLevelLogicType(string name)
 		{
 			if (name == null)
@@ -457,6 +582,12 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(name), name, "Unknown level logic type");
 		}
 
+		/// <summary>
+		/// Returns the <see cref="LevelLogicType"/> with the given <paramref name="ID"/>.
+		/// </summary>
+		/// <param name="ID">ID of the wanted <see cref="LevelLogicType"/></param>
+		/// <returns>Returns the <see cref="LevelLogicType"/> with the given <paramref name="ID"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when type with the given <paramref name="ID"/> is not present in this package</exception>
 		public LevelLogicType GetLevelLogicType(int ID)
 		{
 			if (levelLogicTypesByID.TryGetValue(ID, out LevelLogicType value))
@@ -476,6 +607,17 @@ namespace MHUrho.Packaging {
 			throw new ArgumentOutOfRangeException(nameof(ID), ID, "Unknown level logic type");
 		}
 
+		/// <summary>
+		/// Returns an instance of <see cref="LevelRep"/> representing the level with the given <paramref name="name"/>.
+		///
+		/// This instance can be used to manipulate the level.
+		/// Throws an exception if a level with the given <paramref name="name"/> cannot be found.
+		/// Alternatively you can use <see cref="TryGetLevel(string, out LevelRep)"/> to check the existence of the level.
+		/// </summary>
+		/// <param name="name">Name of the wanted level.</param>
+		/// <returns>Returns an instance of <see cref="LevelRep"/> representing the level with the given <paramref name="name"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when a level with the given <paramref name="name"/> cannot be found.</exception>
+		/// <exception cref="ArgumentNullException">Thrown when the given <paramref name="name"/> is null.</exception>
 		public LevelRep GetLevel(string name)
 		{
 			if (TryGetLevel(name, out LevelRep value)) {
@@ -486,6 +628,18 @@ namespace MHUrho.Packaging {
 			}
 		}
 
+		/// <summary>
+		/// Gets an instance of <see cref="LevelRep"/> representing the level with the given <paramref name="name"/> if
+		/// such level exists.
+		///
+		/// Alternatively, you can use <see cref="GetLevel(string)"/> to be informed by exception if the level is not present.
+		/// </summary>
+		/// <param name="name">Name of the wanted level.</param>
+		/// <param name="value">If return value is true, contains the <see cref="LevelRep"/> representing the level with the given <paramref name="name"/></param>
+		/// <returns>True if level with the given <paramref name="name"/> was found,
+		/// and sets the <paramref name="value"/> to the <see cref="LevelRep"/> representing the level,
+		/// or returns false if no level with this <paramref name="name"/> exists.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="name"/> is null.</exception>
 		public bool TryGetLevel(string name, out LevelRep value)
 		{
 			//To enable loading saved games even if their source level was deleted
@@ -507,6 +661,7 @@ namespace MHUrho.Packaging {
 		/// <param name="level"></param>
 		/// <param name="overrideLevel"></param>
 		/// <exception cref="InvalidOperationException">Thrown when a level with the same name as <paramref name="level"/> already exists and the <paramref name="overrideLevel"/> is not set</exception>
+		/// <exception cref="PackageLoadingException">Thrown when we could not open or write to the package file.</exception>
 		public void SaveLevelPrototype(LevelRep level, bool overrideLevel)
 		{
 			bool removeExisting = false;
@@ -522,7 +677,7 @@ namespace MHUrho.Packaging {
 				}
 			}
 
-			data = StartLoading(pathToXml, schemas);
+			data = LoadXml(pathToXml, schemas);
 			//Save the level to xml only if the saving went without exception
 			XElement element = level.SaveAsPrototype();
 
@@ -535,31 +690,41 @@ namespace MHUrho.Packaging {
 			levels.Add(element);
 
 			WriteData();
-			FinishLoading();
+			ReleaseXml();
 		}
 
 
+		/// <summary>
+		/// Removes the <paramref name="level"/> from this package.
+		///
+		/// Also removes the data of the level.
+		/// </summary>
+		/// <param name="level">Representant of the level to remove.</param>
+		/// <exception cref="ArgumentException">Thrown when the <paramref name="level"/> is not part of this package.</exception>
+		/// <exception cref="PackageLoadingException">Thrown when the package file could not be opened, read or written.</exception>
 		public void RemoveLevel(LevelRep level)
 		{
 			if (level.GamePack != this) {
 				throw new ArgumentException("The provided level was not part of this gamePack", nameof(level));
 			}
 
-			data = StartLoading(pathToXml, schemas);
+			data = LoadXml(pathToXml, schemas);
 
 			RemoveLevelFromLoadedXml(level, true);
 
 			WriteData();
-			FinishLoading();
+			ReleaseXml();
 		}
 
 		/// <summary>
-		/// Returns the path to the file to which the level should be saved
+		/// Generates a path to the file to which the level should be saved.
+		/// This path is derived from the given <paramref name="levelName"/>,
+		///  but is made unique if any levels with the same or similar name already exist.
 		///
 		/// The path is relative to the <see cref="DirectoryPath"/>
 		/// </summary>
-		/// <param name="levelName"></param>
-		/// <returns></returns>
+		/// <param name="levelName">Name of the level the path is for.</param>
+		/// <returns>Returns the path to the file to which the level should be saved.</returns>
 		public string GetLevelProtoSavePath(string levelName)
 		{
 			//Just strip it to bare minimum
@@ -569,9 +734,9 @@ namespace MHUrho.Packaging {
 				newPath.Append(ch);
 			}
 
-			//TODO: Better generation of random filename
+			//NOTE: Maybe do better generation of random filename
 			var random = new Random();
-			while (MyGame.Files.FileExists(newPath.ToString())) {
+			while (App.Files.FileExists(newPath.ToString())) {
 				int randomDigit = random.Next(10);
 				newPath.Append(randomDigit);
 			}
@@ -592,6 +757,7 @@ namespace MHUrho.Packaging {
 			UnitIconTexture.Dispose();
 			BuildingIconTexture.Dispose();
 			PlayerIconTexture.Dispose();
+			ToolIconTexture.Dispose();
 
 			foreach (var unitType in unitTypesByName.Values) {
 				unitType.Dispose();
@@ -606,11 +772,19 @@ namespace MHUrho.Packaging {
 			}
 		}
 
+		/// <summary>
+		/// Alias of <see cref="Dispose"/>
+		/// </summary>
 		public void UnLoad()
 		{
 			Dispose();
 		}
 
+		/// <summary>
+		/// Clears caches of all type in this package.
+		/// Caches are used in types to enable reuse of instances of the type.
+		/// Should be called on level end.
+		/// </summary>
 		public void ClearCaches()
 		{
 
@@ -639,22 +813,38 @@ namespace MHUrho.Packaging {
 			};
 		}
 
-		static XDocument StartLoading(string pathToXml, XmlSchemaSet schemas)
+		/// <summary>
+		/// Loads XML data from file at <paramref name="pathToXml"/> and
+		/// validates this data against  <paramref name="schemas"/>.
+		/// </summary>
+		/// <param name="pathToXml">Path to the XML to load.</param>
+		/// <param name="schemas">XSD schema to validate against.</param>
+		/// <returns>Loaded XML document.</returns>
+		XDocument LoadXml(string pathToXml, XmlSchemaSet schemas)
 		{
 			Stream file = null;
 			XDocument data;
-			//TODO: Handler and signal that resource pack is in invalid state
 			try {
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+				file = App.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Open, System.IO.FileAccess.Read);
 				data = XDocument.Load(file);
 				data.Validate(schemas, null);
 			}
 			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
-				//TODO: Exception
-				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+				string message = $"Package XML was invalid. Package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
 			}
-			//TODO: Catch file opening failed
+			catch (IOException e) {
+				string message = $"Failed to open or read the package file at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
+			catch (Exception e)
+			{
+				string message = $"There was an unexpected exception while reading the package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
 			finally {
 				file?.Dispose();
 			}
@@ -666,9 +856,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			TileIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.TileIconTexturePath)));
 
 			var tileTypesElement = data.Root.Element(GamePackXml.Inst.TileTypes);
 
@@ -688,10 +875,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			UnitIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.UnitIconTexturePath)));
-
 			var unitTypesElement = data.Root.Element(GamePackXml.Inst.UnitTypes);
 
 			//unitTypes element cannot be null because xsd does not allow it
@@ -706,9 +889,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			BuildingIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.BuildingIconTexturePath)));
 
 			var buildingTypesElement = data.Root.Element(GamePackXml.Inst.BuildingTypes);
 
@@ -743,10 +923,6 @@ namespace MHUrho.Packaging {
 		{
 			CheckIfLoading();
 
-			//data.Root cannot be null because xsd does not allow it
-			ResourceIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ResourceIconTexturePath)));
-
 			var resourceTypesElement = data.Root.Element(GamePackXml.Inst.ResourceTypes);
 
 			//resourceTypes element cannot be null because xsd does not allow it
@@ -761,10 +937,6 @@ namespace MHUrho.Packaging {
 		IEnumerable<PlayerType> LoadAllPlayerTypes()
 		{
 			CheckIfLoading();
-
-			//data.Root cannot be null because xsd does not allow it
-			PlayerIconTexture =
-				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.PlayerIconTexturePath)));
 
 			XElement playerTypes = data.Root.Element(GamePackXml.Inst.PlayerAITypes);
 
@@ -792,6 +964,24 @@ namespace MHUrho.Packaging {
 								.ToArray();
 		}
 
+		void LoadIconTextures()
+		{
+			CheckIfLoading();
+			//data.Root cannot be null because xsd does not allow it
+			TileIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.TileIconTexturePath)));
+			UnitIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.UnitIconTexturePath)));
+			BuildingIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.BuildingIconTexturePath)));
+			ResourceIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ResourceIconTexturePath)));
+			PlayerIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.PlayerIconTexturePath)));
+			ToolIconTexture =
+				PackageManager.GetTexture2D(XmlHelpers.GetPath(data.Root.Element(GamePackXml.Inst.ToolIconTexturePath)));
+		}
+
 		IEnumerable<LevelRep> LoadAllLevels()
 		{
 			CheckIfLoading();
@@ -808,7 +998,7 @@ namespace MHUrho.Packaging {
 						.ToArray();
 		}
 
-		void FinishLoading()
+		void ReleaseXml()
 		{
 			data = null;
 		}
@@ -832,7 +1022,7 @@ namespace MHUrho.Packaging {
 		/// <param name="dictionary">removes items with Value.ID 0 from this dictionary</param>
 		/// <returns>true if deleted something, false if didnt delete anything</returns>
 		bool RemoveUnused<T>(IDictionary<string,T> dictionary)
-			where T : IIDNameAndPackage {
+			where T : IIdentifiable {
 
 			bool deleted = false;
 			var toRemove = new List<string>();
@@ -871,14 +1061,13 @@ namespace MHUrho.Packaging {
 
 		XElement GetXmlTypeDescription(IEnumerator<XElement> typeElements) {
 			if (!typeElements.MoveNext()) {
-				throw new ArgumentException("type of that name does not exist in this package");
+				throw new ArgumentException("Type of that name does not exist in this package");
 			}
 
 			var typeElement = typeElements.Current;
 
 			if (typeElements.MoveNext()) {
-				//TODO: Exception
-				throw new Exception("Duplicate type names");
+				throw new ArgumentException("Duplicate type names in a package");
 			}
 
 			typeElements.Dispose();
@@ -898,18 +1087,18 @@ namespace MHUrho.Packaging {
 		T LoadType<T>(XElement typeElement, IDictionary<string, T> typesByName, IDictionary<int, T> typesByID)
 			where T : ILoadableType, new() {
 			string name = GetTypeName(typeElement);
-			int ID = GetTypeID(typeElement);
+			int id = GetTypeID(typeElement);
 
 			T typeInstance;
 
 			bool byName = typesByName.TryGetValue(name, out T typeInstanceByName);
-			bool byID = typesByID.TryGetValue(ID, out T typeInstanceByID);
+			bool byID = typesByID.TryGetValue(id, out T typeInstanceByID);
 
 			if (!byName && !byID) {
 
 				typeInstance = new T();
 				typesByName.Add(name, typeInstance);
-				typesByID.Add(ID, typeInstance);
+				typesByID.Add(id, typeInstance);
 
 				typeInstance.Load(typeElement, this);
 
@@ -920,11 +1109,11 @@ namespace MHUrho.Packaging {
 				}
 				else {
 					throw new
-						InvalidOperationException("There were two different types under the ID and Name of the loaded type");
+						InvalidOperationException($"There were two different types under the ID [{id}] and Name [{name}] of the loaded type");
 				}
 			}
 			else {
-				throw new InvalidOperationException("The type was only mapped by one of its parameters, not both");
+				throw new InvalidOperationException($"The type was only mapped by one of its parameters ID [{id}] and Name [{name}], not both");
 			}
 
 			return typeInstance;
@@ -978,20 +1167,27 @@ namespace MHUrho.Packaging {
 		void WriteData()
 		{
 			Stream file = null;
-			//TODO: Handler and signal that resource pack is in invalid state
 			try {
 				//Validate before truncating the file
 				data.Validate(schemas, null);
-				file = MyGame.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
+				file = App.Files.OpenDynamicFile(pathToXml, System.IO.FileMode.Truncate, System.IO.FileAccess.Write);
 				data.Save(file);
 			}
-			//TODO: Other exceptions
 			catch (XmlSchemaValidationException e) {
-				Urho.IO.Log.Write(LogLevel.Warning, $"Package XML was invalid. Package at: {pathToXml}");
-				//TODO: Exception
-				throw new ApplicationException($"Package XML was invalid. Package at: {pathToXml}", e);
+				string message = $"Package XML was invalid. Package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
 			}
-			//TODO: Catch file opening failed
+			catch (IOException e) {
+				string message = $"Could not open or write to the package file at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
+			catch (Exception e) {
+				string message = $"There was an unexpected exception while saving the package at: {pathToXml}";
+				Urho.IO.Log.Write(LogLevel.Warning, message);
+				throw new PackageLoadingException(message, e);
+			}
 			finally {
 				file?.Dispose();
 			}

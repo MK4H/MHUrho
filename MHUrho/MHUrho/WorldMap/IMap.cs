@@ -4,7 +4,7 @@ using MHUrho.Control;
 using MHUrho.Logic;
 using MHUrho.PathFinding;
 using MHUrho.Storage;
-using MHUrho.UnitComponents;
+using MHUrho.DefaultComponents;
 using Urho;
 using Urho.Gui;
 
@@ -19,7 +19,7 @@ namespace MHUrho.WorldMap {
 	/// <param name="x">X coord of the tile corner</param>
 	/// <param name="y">Y coord of the tile corner</param>
 	/// <returns>New height of the [x,y] corner</returns>
-	public delegate float ChangeCornerHeightDelegate(float previousHeight, int x, int y);
+	public delegate float GetCornerHeightDelegate(float previousHeight, int x, int y);
 
 	/// <summary>
 	/// Represents a level map, with XZ plane horizontal and Y plane vertical. <para/>
@@ -342,8 +342,9 @@ namespace MHUrho.WorldMap {
 		/// Returns an <see cref="IEnumerable{ITile}"/> which enumerates tiles in a spiral, starting from <paramref name="center"/>
 		/// </summary>
 		/// <param name="center">Center tile of the spiral. Starting point of the spiral</param>
+		/// <param name="cutoff">The size of the spiral to enumerate. -1 means infinite spiral.</param>
 		/// <returns>Returns an <see cref="IEnumerable{ITile}"/> which enumerates the tiles in a spiral, starting from <paramref name="center"/></returns>
-		IEnumerable<ITile> GetTilesInSpiral(ITile center);
+		IEnumerable<ITile> GetTilesInSpiral(ITile center, int cutoff = -1);
 
 		/// <summary>
 		/// Returns an <see cref="IFormationController"/> that orders provided units to tiles around the <paramref name="center"/>
@@ -370,10 +371,19 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns an enumerable that iterates over the tiles inside the rectangle</returns>
 		IEnumerable<ITile> GetTilesInRectangle(IntRect rectangle);
 
-		//TODO: Comment
+		/// <summary>
+		/// Returns all four tiles around the corner at [<paramref name="x"/>,<paramref name="y"/>]
+		/// </summary>
+		/// <param name="x">The x coord of the corner.</param>
+		/// <param name="y">The z coord of the corner.</param>
+		/// <returns>The four tiles around the given corner.</returns>
 		IEnumerable<ITile> GetTilesAroundCorner(int x, int y);
 
-		//TODO: Comment
+		/// <summary>
+		/// Returns all four tiles around the corner at <paramref name="cornerCoords"/>
+		/// </summary>
+		/// <param name="cornerCoords">The coords of the corner.</param>
+		/// <returns>The four tiles around the given corner.</returns>
 		IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords);
 
 		IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000);
@@ -445,7 +455,7 @@ namespace MHUrho.WorldMap {
 
 		void ChangeTileHeight(ITile centerTile,
 							IntVector2 rectangleSize,
-							ChangeCornerHeightDelegate newHeightFunction);
+							GetCornerHeightDelegate newHeightFunction);
 
 		float GetTerrainHeightAt(int x, int y);
 

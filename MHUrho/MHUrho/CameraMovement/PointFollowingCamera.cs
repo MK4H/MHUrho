@@ -33,8 +33,8 @@ namespace MHUrho.CameraMovement
 		/// </summary>
 		protected float WantedCameraVerticalOffset;
 
-		protected PointFollowingCamera(IMap map, Node cameraNode, Node cameraHolder, SwitchState switchState)
-			:base(map, switchState)
+		protected PointFollowingCamera(IMap map, Node cameraNode, Node cameraHolder, StateSwitchedDelegate stateSwitched)
+			:base(map, stateSwitched)
 		{
 			this.Map = map;
 			this.CameraNode = cameraNode;
