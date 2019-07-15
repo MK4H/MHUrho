@@ -6,7 +6,13 @@ using Urho.Gui;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// This class encapsulates the access of the level plugin to the CustomSettings window on the LeveLSettingsScreen.
+	/// </summary>
 	public class LevelLogicCustomSettings : IDisposable {
+		/// <summary>
+		/// This instance is given to the level when it is loaded from a game saved in play mode.
+		/// </summary>
 		public static LevelLogicCustomSettings LoadFromSavedGame { get; } = new LevelLogicCustomSettings();
 
 		public virtual void Dispose()
@@ -15,8 +21,15 @@ namespace MHUrho.Plugins
 
 	public abstract class LevelLogicTypePlugin : TypePlugin
 	{
+		/// <summary>
+		/// Maximum number of players in the level controlled by this plugin.
+		/// </summary>
 		public abstract int MaxNumberOfPlayers { get; }
 
+
+		/// <summary>
+		/// Minimum number of players in the level controlled by this plugin.
+		/// </summary>
 		public abstract int MinNumberOfPlayers { get; }
 
 		/// <summary>

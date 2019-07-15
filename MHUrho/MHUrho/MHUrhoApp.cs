@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using MHUrho.Input;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Input.Touch;
 using MHUrho.Logic;
 using MHUrho.Packaging;
@@ -189,7 +189,7 @@ namespace MHUrho
 				ControllerFactory = new TouchFactory();
 			}
 			else {
-				ControllerFactory = new MandKFactory();
+				ControllerFactory = new MouseKeyboardFactory();
 			}
 
 			MenuController = ControllerFactory.CreateMenuController(this);

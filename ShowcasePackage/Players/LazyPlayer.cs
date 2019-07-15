@@ -81,6 +81,19 @@ namespace ShowcasePackage.Players
 			Keep = GetKeep();
 		}
 
+		public override void BuildingDestroyed(IBuilding building)
+		{
+			if (Level.IsEnding)
+			{
+				return;
+			}
+
+			if (building == Keep.Building)
+			{
+				Player.RemoveFromLevel();
+			}
+		}
+
 		public override void Dispose()
 		{
 

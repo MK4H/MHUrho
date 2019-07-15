@@ -16,7 +16,7 @@ using Priority_Queue;
 
 namespace MHUrho.PathFinding.AStar {
 
-	public enum Visualization { None, TouchedNodes, FinalPath }
+
 
 	public class AStarAlg : IPathFindAlg {
 
@@ -44,14 +44,11 @@ namespace MHUrho.PathFinding.AStar {
 		Node targetNode;
 		NodeDistCalculator distCalc;
 
-		readonly Visualization visualization;
-
-		public AStarAlg(IMap map, Visualization visualization = Visualization.None) {
+		public AStarAlg(IMap map) {
 			this.Map = map;
 			nodeMap = new TileNode[map.Width * map.Length];
 			touchedNodes = new List<Node>();
 			priorityQueue = new FastPriorityQueue<Node>(map.Width * map.Length / 4);
-			this.visualization = visualization;
 
 			FillNodeMap();
 			map.TileHeightChangeNotifier.TileHeightsChangedCol += TileHeightsChanged;
@@ -165,7 +162,7 @@ namespace MHUrho.PathFinding.AStar {
 				//If we hit the target, finish and return the sourceNode
 				if (currentNode == targetNode) {
 
-					if (visualization == Visualization.TouchedNodes) {
+					if (MHUrhoApp.Instance.Config.PathFindingVisualization == Visualization.TouchedNodes) {
 						VisualizeTouchedNodes(targetNode.Time);
 					}
 					
@@ -176,7 +173,7 @@ namespace MHUrho.PathFinding.AStar {
 				currentNode.ProcessNeighbours(currentNode, priorityQueue, touchedNodes, targetNode, distCalc,ref minDistToTarget);
 			}
 
-			if (visualization == Visualization.TouchedNodes)
+			if (MHUrhoApp.Instance.Config.PathFindingVisualization == Visualization.TouchedNodes)
 			{
 				VisualizeTouchedNodes(targetNode.Time);
 			}
@@ -202,7 +199,7 @@ namespace MHUrho.PathFinding.AStar {
 			//Reverse so that source is first and target is last
 			nodes.Reverse();
 
-			if (visualization == Visualization.FinalPath) {
+			if (MHUrhoApp.Instance.Config.PathFindingVisualization == Visualization.FinalPath) {
 				VisualizePath(nodes);
 			}
 
@@ -296,7 +293,7 @@ namespace MHUrho.PathFinding.AStar {
 
 		void VisualizePath(IReadOnlyList<Node> pathNodes)
 		{
-			float finalTime = pathNodes[pathNodes.Count].Time;
+			float finalTime = pathNodes[pathNodes.Count - 1].Time;
 			Map.HighlightTileList(from node in pathNodes select GetTileNode(node).Tile,
 								(tile) => {
 									TileNode node = GetTileNode(tile);

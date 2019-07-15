@@ -11,8 +11,15 @@ namespace MHUrho.CameraMovement
 		FreeFloating,
 		Following
 	}
+
+	/// <summary>
+	/// Arguments of the CameraMoved event invoked on each camera movement.
+	/// </summary>
     public struct CameraMovedEventArgs
     {
+		/// <summary>
+		/// Position of the camera in the game world.
+		/// </summary>
 		public Vector3 WorldPosition { get; private set; }
 		public Quaternion WorldRotation { get; private set; }
 		public CameraMode CameraMode { get; private set; }

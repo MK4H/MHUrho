@@ -11,6 +11,9 @@ namespace MHUrho.Plugins
 
 	public abstract class UnitInstancePlugin : EntityInstancePlugin {
 
+		/// <summary>
+		/// The unit controlled by this plugin.
+		/// </summary>
 		public IUnit Unit { get; private set; }
 
 		protected UnitInstancePlugin(ILevelManager level, IUnit unit) 

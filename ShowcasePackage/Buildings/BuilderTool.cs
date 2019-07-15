@@ -5,21 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using MHUrho.CameraMovement;
 using MHUrho.EditorTools;
-using MHUrho.EditorTools.MandK;
+using MHUrho.EditorTools.MouseKeyboard;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.DefaultComponents;
-using MHUrho.UserInterface.MandK;
+using MHUrho.UserInterface.MouseKeyboard;
 using ShowcasePackage.Buildings;
 using Urho;
 using Urho.Gui;
 
 namespace ShowcasePackage.Buildings
 {
-	class BuilderTool : Tool, IMandKTool {
+	class BuilderTool : Tool, IMouseKeyboardTool {
 		static readonly string[] PlayBuilders =
 		{
 			GateType.TypeName,

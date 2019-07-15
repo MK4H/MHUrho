@@ -98,7 +98,7 @@ namespace MHUrho.UserInterface
 					playerIcon.ImageRect = player.IconRectangle;
 
 					playerName.Value = player.Name;
-					//TODO: Description
+					//FUTURE: Description
 					playerDescription.Value = "Nothing for now";
 
 					return newElement;
@@ -222,8 +222,6 @@ namespace MHUrho.UserInterface
 
 			void PlayButtonReleased(ReleasedEventArgs args)
 			{
-				//TODO: Sanity checks
-
 				PlayerItem neutralPlayerItem = ((PlayerItem) playerList.GetItem(0));
 
 

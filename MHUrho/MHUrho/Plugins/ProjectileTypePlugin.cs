@@ -28,6 +28,12 @@ namespace MHUrho.Plugins
 		/// <returns>New instance, that will be loaded in the next step</returns>
 		public abstract ProjectileInstancePlugin GetInstanceForLoading(ILevelManager level, IProjectile projectile);
 
+		/// <summary>
+		/// Decides if the <paramref name="target"/> is in range of this projectile when shot from the position <paramref name="source"/>.
+		/// </summary>
+		/// <param name="source">The source position of the projectile.</param>
+		/// <param name="target">The target of the projectile.</param>
+		/// <returns>True if projectile of this type can reach the target from the <paramref name="source"/> position, false otherwise.</returns>
 		public abstract bool IsInRange(Vector3 source, IRangeTarget target);
 	}
 }

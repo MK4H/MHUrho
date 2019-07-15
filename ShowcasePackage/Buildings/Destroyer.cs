@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using MHUrho.CameraMovement;
 using MHUrho.Helpers.Extensions;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Logic;
-using MHUrho.UserInterface.MandK;
+using MHUrho.UserInterface.MouseKeyboard;
 using ShowcasePackage.Misc;
 using Urho;
 

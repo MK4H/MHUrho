@@ -159,7 +159,7 @@ namespace ShowcasePackage.Levels
 				throw new NotImplementedException();
 			}
 
-			return new ToolManagerMandK(levelManager);
+			return new ToolManagerMouseKeyboard(levelManager);
 		}
 	}
 }

@@ -102,7 +102,8 @@ namespace MHUrho.DefaultComponents {
 		protected override void OnDeleted() {
 			base.OnDeleted();
 
-			foreach (var shooter in shooters) {
+			//Make a copy so that if shooters delete themselfs from us, we don't crash
+			foreach (var shooter in shooters.ToArray()) {
 				try {
 					shooter.OnTargetDestroy(this);
 				}

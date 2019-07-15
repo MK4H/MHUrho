@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 using MHUrho.CameraMovement;
 using MHUrho.DefaultComponents;
 using MHUrho.EditorTools;
-using MHUrho.EditorTools.MandK;
+using MHUrho.EditorTools.MouseKeyboard;
 using MHUrho.Helpers.Extensions;
 using MHUrho.Input;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Logic;
 using MHUrho.Packaging;
-using MHUrho.UserInterface.MandK;
+using MHUrho.UserInterface.MouseKeyboard;
 using ShowcasePackage.Buildings;
 using Urho;
 using Urho.Gui;
 
 namespace ShowcasePackage.Units
 {
-	class SpawnerTool : Tool, IMandKTool {
+	class SpawnerTool : Tool, IMouseKeyboardTool {
 		static readonly string[] ActiveSpawners = {ChickenType.TypeName, WolfType.TypeName};
 
 		Dictionary<CheckBox, Spawner> spawners;

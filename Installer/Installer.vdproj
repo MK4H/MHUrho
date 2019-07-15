@@ -400,7 +400,7 @@
         "Entry"
         {
         "MsmKey" = "8:_548F3BB062F089719412F37E2201C9BB"
-        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
+        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -412,7 +412,7 @@
         "Entry"
         {
         "MsmKey" = "8:_548F3BB062F089719412F37E2201C9BB"
-        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
+        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -742,13 +742,13 @@
         "Entry"
         {
         "MsmKey" = "8:_945D412D9AD45A084DB123892A3AB751"
-        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
+        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_945D412D9AD45A084DB123892A3AB751"
-        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
+        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -766,7 +766,7 @@
         "Entry"
         {
         "MsmKey" = "8:_9765F876A1D1ABAA6630B3026C49453C"
-        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
+        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -778,7 +778,7 @@
         "Entry"
         {
         "MsmKey" = "8:_9765F876A1D1ABAA6630B3026C49453C"
-        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
+        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1048,13 +1048,13 @@
         "Entry"
         {
         "MsmKey" = "8:_CB307D6A7E487BA36313006F38747DC8"
-        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
+        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_CB307D6A7E487BA36313006F38747DC8"
-        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
+        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1228,7 +1228,7 @@
         "Entry"
         {
         "MsmKey" = "8:_E12205EE7AA50E6C12C227EE9B32C5A5"
-        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
+        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1240,7 +1240,7 @@
         "Entry"
         {
         "MsmKey" = "8:_E12205EE7AA50E6C12C227EE9B32C5A5"
-        "OwnerKey" = "8:_3027C1CDC1F2FC73B7880D39AA5841C5"
+        "OwnerKey" = "8:_2E3D57F4747F45CFBD1D9D05054B6AA3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2104,6 +2104,18 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_ABB45E22CA068A61BCF36D4581E10E3E"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_E3473D33E77A9995637A78F2F73374CB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_9765F876A1D1ABAA6630B3026C49453C"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2134,12 +2146,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_ABB45E22CA068A61BCF36D4581E10E3E"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_700946DF117B70C3C5961721868BFD19"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2153,12 +2159,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_E12205EE7AA50E6C12C227EE9B32C5A5"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E3473D33E77A9995637A78F2F73374CB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2191,6 +2191,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -2207,6 +2215,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -2228,7 +2252,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:.NETFramework,Version=v4.6.1"
+                "FrameworkVersion" = "8:.NETFramework,Version=v4.7.2"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=671728"
                 }
@@ -6117,7 +6141,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:MHUrho"
         "ProductCode" = "8:{C1E9924C-AC97-4D51-8118-C59CC809ACF2}"
-        "PackageCode" = "8:{5407233F-59A8-4203-82C2-A9C4108B94F8}"
+        "PackageCode" = "8:{C5677425-E7F8-4B48-8CCD-D4D08E12AD3A}"
         "UpgradeCode" = "8:{6C34B546-EBC7-44BE-8B00-ACF2EFDAFF63}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -6638,7 +6662,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2E3D57F4747F45CFBD1D9D05054B6AA3"
             {
-            "SourcePath" = "8:..\\MHUrho\\MHUrho.Desktop\\obj\\Release\\MHUrho.Desktop.exe"
+            "SourcePath" = "8:..\\MHUrho\\MHUrho.Desktop\\obj\\Debug\\MHUrho.Desktop.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_F9A6924B3154456DB919BDB898E2A7DA"
@@ -6694,7 +6718,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D6E8293471AD4DBDB6C3F39993C4B0D0"
             {
-            "SourcePath" = "8:..\\ShowcasePackage\\obj\\Release\\ShowcasePackage.dll"
+            "SourcePath" = "8:..\\ShowcasePackage\\obj\\Debug\\ShowcasePackage.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_7BC32D7B08754CF382CF1DA724B6FD73"

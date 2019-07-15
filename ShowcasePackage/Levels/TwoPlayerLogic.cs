@@ -152,7 +152,7 @@ namespace ShowcasePackage.Levels
 
 		public override IPathFindAlgFactory GetPathFindAlgFactory()
 		{
-			return new AStarFactory(Visualization.TouchedNodes);
+			return new AStarFactory();
 		}
 
 		public override ToolManager GetToolManager(ILevelManager levelManager, InputType inputType)
@@ -161,7 +161,7 @@ namespace ShowcasePackage.Levels
 				throw new NotImplementedException();
 			}
 
-			return new ToolManagerMandK(levelManager);
+			return new ToolManagerMouseKeyboard(levelManager);
 		}
 
 		public override void Dispose()

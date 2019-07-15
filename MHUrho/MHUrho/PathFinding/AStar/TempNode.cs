@@ -45,6 +45,11 @@ namespace MHUrho.PathFinding.AStar
 			throw new NotImplementedException();
 		}
 
+		public bool HasEdgeTo(INode neighbour)
+		{
+			return false;
+		}
+
 		public void Accept(INodeVisitor visitor, INode target, MovementType movementType)
 		{
 			target.Accept(visitor, this, movementType);

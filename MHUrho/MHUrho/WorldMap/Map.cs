@@ -753,8 +753,7 @@ namespace MHUrho.WorldMap
 					topLeft.X = Right;
 					break;
 				default:
-					//TODO: Exceptions
-					throw new Exception("Switch not updated for the current implementation of WhereIsX");
+					throw new ImplementationException("Switch not updated for the current implementation of WhereIsX");
 			}
 
 			switch (WhereIsX(bottomRight.X)) {
@@ -767,8 +766,7 @@ namespace MHUrho.WorldMap
 					bottomRight.X = Right;
 					break;
 				default:
-					//TODO: Exceptions
-					throw new Exception("Switch not updated for the current implementation of WhereIsX");
+					throw new ImplementationException("Switch not updated for the current implementation of WhereIsX");
 			}
 
 			switch (WhereIsZ(topLeft.Y)) {
@@ -781,8 +779,7 @@ namespace MHUrho.WorldMap
 					topLeft.Y = Bottom;
 					break;
 				default:
-					//TODO: Exceptions
-					throw new Exception("Switch not updated for the current implementation of WhereIsY");
+					throw new ImplementationException("Switch not updated for the current implementation of WhereIsY");
 			}
 
 			switch (WhereIsZ(bottomRight.Y)) {
@@ -795,8 +792,7 @@ namespace MHUrho.WorldMap
 					bottomRight.Y = Bottom;
 					break;
 				default:
-					//TODO: Exceptions
-					throw new Exception("Switch not updated for the current implementation of WhereIsY");
+					throw new ImplementationException("Switch not updated for the current implementation of WhereIsY");
 			}
 		}
 

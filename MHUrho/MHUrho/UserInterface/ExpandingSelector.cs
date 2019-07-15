@@ -87,7 +87,7 @@ namespace MHUrho.UserInterface
 				return;
 			}
 
-			SelectedBox(box);
+			box.Checked = true;
 		}
 
 		public void Deselect()
@@ -137,6 +137,7 @@ namespace MHUrho.UserInterface
 
 		void ExpandedBoxToggled(ToggledEventArgs e)
 		{
+			//Necessary to prevent infinite recursion when setting checked to false
 			if (e.Element == currentSelected) {
 				return;
 			}
@@ -176,7 +177,9 @@ namespace MHUrho.UserInterface
 			CheckBox oldSelected = currentSelected;
 
 			if (oldSelected != null) {
+				//Triggers CheckBox.Toggled event, is handled by ignoring events on currentSelected
 				oldSelected.Checked = false;
+				oldSelected.Enabled = true;
 			}
 			currentSelected = box;
 
@@ -185,6 +188,7 @@ namespace MHUrho.UserInterface
 
 			HideExpansionWindow();
 
+			currentSelected.Enabled = false;
 			Selected?.Invoke(box, oldSelected);
 		}
 

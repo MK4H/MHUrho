@@ -11,7 +11,15 @@ using Urho;
 namespace MHUrho.Plugins
 {
 	public abstract class TypePlugin : IDisposable {
+
+		/// <summary>
+		/// The name of the type, should be identical to the one listed in the XML description.
+		/// </summary>
 		public abstract string Name { get; }
+
+		/// <summary>
+		/// ID of the type, should be identical to the one listed in the XML description.
+		/// </summary>
 		public abstract int ID { get; }
 
 	

@@ -429,7 +429,7 @@
 	<element>
 		<attribute name="Name" value="Game settings" />
 		<attribute name="Position" value="534 30" />
-		<attribute name="Size" value="450 160" />
+		<attribute name="Size" value="450 195" />
 		<attribute name="Pivot" value="0 0" />
 		<attribute name="Layout Mode" value="Vertical" />
 		<attribute name="Layout Spacing" value="15" />
@@ -654,6 +654,49 @@
 					<attribute name="Min Anchor" value="0.5 0.5" />
 					<attribute name="Max Anchor" value="0.5 0.5" />
 					<attribute name="Pivot" value="0.5 0.5" />
+				</element>
+			</element>
+		</element>
+		<element>
+			<attribute name="Name" value="PathFindingVisualizationElement" />
+			<attribute name="Pivot" value="0 0" />
+			<attribute name="Layout Mode" value="Horizontal" />
+			<element type="Text">
+				<attribute name="Min Anchor" value="0 0.5" />
+				<attribute name="Max Anchor" value="0 0.5" />
+				<attribute name="Pivot" value="0 0.5" />
+				<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+				<attribute name="Text" value="PathFindng visualization" />
+			</element>
+			<element type="DropDownList">
+				<attribute name="Name" value="PathFindingVisualization" />
+				<attribute name="Pivot" value="0 0" />
+				<attribute name="Selection" value="-1" />
+				<element internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+					<element type="Text" internal="true" style="none">
+						<attribute name="Pivot" value="0 0" />
+						<attribute name="Top Left Color" value="0.85 0.85 0.85 1" />
+						<attribute name="Top Right Color" value="0.85 0.85 0.85 1" />
+						<attribute name="Bottom Left Color" value="0.85 0.85 0.85 1" />
+						<attribute name="Bottom Right Color" value="0.85 0.85 0.85 1" />
+					</element>
+				</element>
+				<element popup="true" type="Window" internal="true" style="none">
+					<attribute name="Pivot" value="0 0" />
+					<attribute name="Priority" value="2147483647" />
+					<element type="ListView" internal="true" style="none">
+						<attribute name="Pivot" value="0 0" />
+						<element type="BorderImage" internal="true" style="none">
+							<attribute name="Pivot" value="0 0" />
+							<element internal="true" style="none">
+								<attribute name="Pivot" value="0 0" />
+							</element>
+						</element>
+					</element>
 				</element>
 			</element>
 		</element>

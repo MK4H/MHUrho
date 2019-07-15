@@ -146,7 +146,6 @@ namespace MHUrho.UserInterface
 				try {
 					newLevelRep = Level.LevelRep.CreateClone(name, description, ThumbnailPath);
 					newLevelRep.SaveToGamePack(true);
-					Level.ChangeRep(newLevelRep);
 					MenuUIManager.SwitchBack();
 				}
 				catch (Exception) {

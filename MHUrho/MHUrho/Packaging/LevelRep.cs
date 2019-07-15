@@ -522,16 +522,30 @@ namespace MHUrho.Packaging
 		protected LevelRep(GamePack gamePack, XElement levelXmlElement)
 		{
 			this.GamePack = gamePack;
-			//TODO: Check for errors
-			Name = XmlHelpers.GetName(levelXmlElement);
-			Description = levelXmlElement.Element(LevelXml.Inst.Description).GetString();
-			ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.Thumbnail));
-			LevelLogicType = gamePack.GetLevelLogicType(levelXmlElement.Element(LevelXml.Inst.LogicTypeName).Value);
-			savePath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.DataPath));
 
-			this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(LevelXml.Inst.MapSize));
+			try {
+				Name = XmlHelpers.GetName(levelXmlElement);
+				Description = levelXmlElement.Element(LevelXml.Inst.Description).GetString();
+				ThumbnailPath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.Thumbnail));
+				LevelLogicType = gamePack.GetLevelLogicType(levelXmlElement.Element(LevelXml.Inst.LogicTypeName).Value);
+				savePath = XmlHelpers.GetPath(levelXmlElement.Element(LevelXml.Inst.DataPath));
 
-			this.Thumbnail = GamePack.PackageManager.GetTexture2D(ThumbnailPath);
+				this.MapSize = XmlHelpers.GetIntVector2(levelXmlElement.Element(LevelXml.Inst.MapSize));
+			}
+			catch (Exception e) {
+				string message = $"Level prototype loading failed: Invalid XML of the package {GamePack.Name}";
+				Urho.IO.Log.Write(LogLevel.Error, message);
+				throw new PackageLoadingException(message, e);
+			}
+
+			try {
+				this.Thumbnail = GamePack.PackageManager.GetTexture2D(ThumbnailPath, true);
+			}
+			catch (Exception e) {
+				Urho.IO.Log.Write(LogLevel.Error, e.Message);
+				throw new PackageLoadingException(e.Message, e);
+			}
+			
 
 			state = new Prototype(this);
 		}
@@ -550,8 +564,8 @@ namespace MHUrho.Packaging
 
 			this.Name = storedLevel.LevelName;
 			this.Description = "Temporary level loaded from a saved game";
-			//TODO: Default thumbnail
-			//this.Thumbnail = 
+			//FUTURE: Default thumbnail
+			this.Thumbnail = null;
 
 			this.MapSize = storedLevel.Map.Size.ToIntVector2();
 
@@ -724,8 +738,8 @@ namespace MHUrho.Packaging
 
 		public void Dispose()
 		{
-			Thumbnail.Dispose();
-			LevelLogicType.Dispose();
+			Thumbnail?.Dispose();
+			LevelLogicType?.Dispose();
 		}
 
 		/// <summary>

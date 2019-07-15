@@ -35,7 +35,9 @@ namespace MHUrho.Desktop
 			MHUrhoApp.StartupArgs = StartupOptions.FromCommandLineParams(args, MHUrhoApp.FileManager);
 
 			try {
-				new MHUrhoApp(new ApplicationOptions("Data")).Run();
+				var appOptions = new ApplicationOptions("Data");
+				new MHUrhoApp(appOptions).Run();
+
 			}
 			catch (InvalidOperationException e) {
 				//Ignore, Error with the current release of UrhoSharp https://github.com/xamarin/urho-samples/issues/45

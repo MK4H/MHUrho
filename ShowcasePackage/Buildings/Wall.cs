@@ -5,13 +5,13 @@ using System.Text;
 using System.Xml.Linq;
 using MHUrho.CameraMovement;
 using MHUrho.DefaultComponents;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UserInterface.MandK;
+using MHUrho.UserInterface.MouseKeyboard;
 using MHUrho.Helpers.Extensions;
 using Urho;
 using MHUrho.Control;
@@ -91,7 +91,6 @@ namespace ShowcasePackage.Buildings
 			Vector3 topPosition = building.Center;
 			topPosition = topPosition.WithY(GetHeightAt(topPosition.X, topPosition.Z).Value);
 			pathNode = level.Map.PathFinding.CreateBuildingNode(building, topPosition, WallTag);
-			ConnectNeighbours();
 		}
 
 		public static Wall CreateNew(ILevelManager level, IBuilding building)
@@ -99,7 +98,7 @@ namespace ShowcasePackage.Buildings
 			Wall wall = null;
 			try {
 				wall = new Wall(level, building);
-
+				wall.ConnectNeighbours();
 				wall.healthBar =
 					new HealthBarControl(level, building, 100, new Vector3(0, 5, 0), new Vector2(0.5f, 0.2f), false);
 				StaticRangeTarget.CreateNew(wall, level, building.Center);
@@ -126,6 +125,8 @@ namespace ShowcasePackage.Buildings
 		{
 			var reader = pluginData.GetReaderForWrappedSequentialData();
 			healthBar = HealthBarControl.Load(Level, Building, reader);
+
+			ConnectNeighbours();
 		}
 
 		public override void Dispose()
@@ -136,7 +137,7 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
-			if (Building.Player.IsFriend(byEntity.Player) || byEntity is IProjectile)
+			if (Building.Player.IsFriend(byEntity.Player) || !(byEntity is IProjectile))
 			{
 				return;
 			}
@@ -186,6 +187,15 @@ namespace ShowcasePackage.Buildings
 
 				if (neighbor.Building.BuildingPlugin is WalkableBuildingPlugin plugin) {
 					IBuildingNode node = plugin.TryGetNodeAt(neighbor);
+
+
+					//Either is not loaded yet, will connect from the other side
+					// or does not contain a node (impossible in the current version)
+					if (node == null) {
+						continue;
+					}
+
+
 					MovementType movementType;
 					if (node.Tag == WallTag) {
 						movementType = MovementType.Linear;
@@ -196,8 +206,14 @@ namespace ShowcasePackage.Buildings
 					else {
 						continue;
 					}
-					pathNode.CreateEdge(node, movementType);
-					node.CreateEdge(pathNode, movementType);
+
+					if (!pathNode.HasEdgeTo(node)) {
+						pathNode.CreateEdge(node, movementType);
+					}
+
+					if (!node.HasEdgeTo(pathNode)) {
+						node.CreateEdge(pathNode, movementType);
+					}		
 				}
 			}
 		}

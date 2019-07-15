@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using MHUrho.CameraMovement;
 using MHUrho.Control;
 using MHUrho.Helpers;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
@@ -15,7 +15,7 @@ using MHUrho.Storage;
 using MHUrho.DefaultComponents;
 using MHUrho.EntityInfo;
 using MHUrho.Helpers.Extensions;
-using MHUrho.UserInterface.MandK;
+using MHUrho.UserInterface.MouseKeyboard;
 using MHUrho.WorldMap;
 using ShowcasePackage.Levels;
 using ShowcasePackage.Misc;
@@ -253,9 +253,6 @@ namespace ShowcasePackage.Buildings
 			this.rightDoor = new Door(building.Node.GetChild("Door_r"), 90, 0, 5, true);
 			this.roofNodes = new Dictionary<ITile, IBuildingNode>();
 			this.tunnelNodes = new Dictionary<ITile, IBuildingNode>();
-
-
-			CreatePathfindingNodes();
 		}
 
 		public static Gate CreateNew(ILevelManager level, IBuilding building)
@@ -263,6 +260,7 @@ namespace ShowcasePackage.Buildings
 			Gate newGate = null;
 			try {
 				newGate = new Gate(level, building);
+				newGate.CreatePathfindingNodes();
 				StaticRangeTarget.CreateNew(newGate, level, building.Center);
 				newGate.clicker = Clicker.CreateNew(newGate, level);
 				newGate.clicker.Clicked += newGate.OnClicked;
@@ -321,6 +319,8 @@ namespace ShowcasePackage.Buildings
 			clicker = Building.GetDefaultComponent<Clicker>();
 			clicker.Clicked += OnClicked;
 			window = new GateWindow(this);
+
+			CreatePathfindingNodes();
 		}
 
 		public override void Dispose()
@@ -353,7 +353,7 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
-			if (Building.Player.IsFriend(byEntity.Player)  || byEntity is IProjectile)
+			if (Building.Player.IsFriend(byEntity.Player)  || !(byEntity is IProjectile))
 			{
 				return;
 			}
@@ -425,9 +425,25 @@ namespace ShowcasePackage.Buildings
 					}
 					else if (neighbour.Building != null &&
 							neighbour.Building.BuildingPlugin is WalkableBuildingPlugin plugin) {
-						INode foreighNode = plugin.TryGetNodeAt(neighbour);
-						foreighNode.CreateEdge(node, MovementType.Teleport);
-						node.CreateEdge(foreighNode, MovementType.Teleport);
+						IBuildingNode foreighNode = plugin.TryGetNodeAt(neighbour);
+
+						//Either is not loaded yet, will connect from the other side
+						// or does not contain a node (impossible in the current version)
+						if (foreighNode == null) {
+							continue;
+						}
+
+						if (foreighNode.Tag == Keep.KeepTag) {
+							continue;
+						}
+
+						if (!foreighNode.HasEdgeTo(node)) {
+							foreighNode.CreateEdge(node, MovementType.Teleport);
+						}
+
+						if (!node.HasEdgeTo(foreighNode)) {
+							node.CreateEdge(foreighNode, MovementType.Teleport);
+						}
 					}
 				}
 			}

@@ -144,6 +144,11 @@ namespace MHUrho.PathFinding.AStar
 			return this;
 		}
 
+		public bool HasEdgeTo(INode neighbour)
+		{
+			return outgoingEdges.ContainsKey((Node) neighbour);
+		}
+
 		public abstract MovementType GetMovementTypeToNeighbour(Node neighbour);
 
 		public abstract void Accept(INodeVisitor visitor, INode target, MovementType movementType);

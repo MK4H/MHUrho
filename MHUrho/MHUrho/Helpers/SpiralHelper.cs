@@ -102,7 +102,6 @@ namespace MHUrho.Helpers
 			return new SpiralEnumerator(this);
 		}
 
-		//TODO: TEST
 		public SpiralEnumerator GetSpiralEnumerator(int emptyInnerSize)
 		{
 			return new SpiralEnumerator(this, emptyInnerSize);

@@ -58,6 +58,8 @@ namespace MHUrho.UserInterface
 
 			SliderLineEditCombo ZoomSpeed { get; set; }
 
+			DropDownList PathFindingVisualization => (DropDownList)window.GetChild("PathFindingVisualization", true);
+
 			CheckBox BorderMovement => (CheckBox)window.GetChild("BorderMoveCheckBox", true);
 
 			bool changed;
@@ -99,6 +101,7 @@ namespace MHUrho.UserInterface
 
 				FillResolutions();
 				FillWindowTypes();
+				FillPathFindingVisualization();
 
 				UnitDrawDistance.ValueChanged += UnitDrawDistanceChanged;
 				ProjectileDrawDistance.ValueChanged += ProjectileDrawDistanceChanged;
@@ -114,6 +117,7 @@ namespace MHUrho.UserInterface
 				VSync.Toggled += VSyncToggled;
 				DebugHUD.Toggled += DebugHUDToggled;
 				BorderMovement.Toggled += BorderMovementToggled;
+				PathFindingVisualization.ItemSelected += PathFindingVisualizationSelected;
 
 				//Initializes values
 				SetValues(Game.Config);
@@ -135,6 +139,7 @@ namespace MHUrho.UserInterface
 				VSync.Toggled -= VSyncToggled;
 				DebugHUD.Toggled -= DebugHUDToggled;
 				BorderMovement.Toggled -= BorderMovementToggled;
+				PathFindingVisualization.ItemSelected -= PathFindingVisualizationSelected;
 
 				UnitDrawDistance.Dispose();
 				ProjectileDrawDistance.Dispose();
@@ -222,6 +227,25 @@ namespace MHUrho.UserInterface
 					//NOTE:Maybe text style
 					text.SetStyleAuto();
 				}
+			}
+
+			void FillPathFindingVisualization()
+			{
+				var pahtfindingElement = PathFindingVisualization;
+
+				foreach (var visualization in Game.Config.SupportedPathFindingVisualizations) {
+					Text text = new Text
+								{
+									Value = visualization.ToString()
+								};
+
+
+					pahtfindingElement.AddItem(text);
+
+					//NOTE:Maybe text style
+					text.SetStyleAuto();
+				}
+
 			}
 
 			async void SaveButton_Released(ReleasedEventArgs args)
@@ -325,6 +349,9 @@ namespace MHUrho.UserInterface
 					ZoomSpeed.Value = config.ZoomSensitivity;
 
 					BorderMovement.Checked = config.MouseBorderCameraMovement;
+
+					PathFindingVisualization.Selection =
+						(uint) Game.Config.SupportedPathFindingVisualizations.IndexOf(Game.Config.PathFindingVisualization);
 				}
 			}
 		
@@ -441,6 +468,11 @@ namespace MHUrho.UserInterface
 	
 			void ZoomSpeedChanged(float newValue) {
 				Game.Config.ZoomSensitivity = newValue;
+				changed = true;
+			}
+
+			void PathFindingVisualizationSelected(ItemSelectedEventArgs args) {
+				Game.Config.PathFindingVisualization = Game.Config.SupportedPathFindingVisualizations[args.Selection];
 				changed = true;
 			}
 		}

@@ -24,4 +24,5 @@
   <MouseRotationSensitivity>0.5</MouseRotationSensitivity>
   <ZoomSensitivity>10</ZoomSensitivity>
   <MouseBorderCameraMovement>true</MouseBorderCameraMovement>
+  <PathFindingVisualization>None</PathFindingVisualization>
 </AppConfig>

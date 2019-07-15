@@ -7,13 +7,13 @@ using MHUrho.CameraMovement;
 using MHUrho.DefaultComponents;
 using MHUrho.EntityInfo;
 using MHUrho.Helpers;
-using MHUrho.Input.MandK;
+using MHUrho.Input.MouseKeyboard;
 using MHUrho.Logic;
 using MHUrho.Packaging;
 using MHUrho.PathFinding;
 using MHUrho.Plugins;
 using MHUrho.Storage;
-using MHUrho.UserInterface.MandK;
+using MHUrho.UserInterface.MouseKeyboard;
 using MHUrho.Helpers.Extensions;
 using ShowcasePackage.Levels;
 using ShowcasePackage.Misc;
@@ -111,7 +111,6 @@ namespace ShowcasePackage.Buildings
 
 
 			nodes = new Dictionary<ITile, IBuildingNode>();
-			CreatePathfindingNodes();
 		}
 
 		public static Keep CreateNew(ILevelManager level, IBuilding building, KeepType myType)
@@ -119,6 +118,7 @@ namespace ShowcasePackage.Buildings
 			Keep newKeep = null;
 			try {
 				newKeep = new Keep(level, building, myType);
+				newKeep.CreatePathfindingNodes();
 				StaticRangeTarget.CreateNew(newKeep, level, building.Center);
 				newKeep.clicker = Clicker.CreateNew(newKeep, level);
 				newKeep.clicker.Clicked += newKeep.KeepClicked;
@@ -153,6 +153,8 @@ namespace ShowcasePackage.Buildings
 			clicker = Building.GetDefaultComponent<Clicker>();
 			clicker.Clicked += KeepClicked;
 			window = Building.Player == Level.HumanPlayer ? new KeepWindow(this) : null;
+
+			CreatePathfindingNodes();
 		}
 
 		public override void OnUpdate(float timeStep)
@@ -177,7 +179,7 @@ namespace ShowcasePackage.Buildings
 
 		public override void OnHit(IEntity byEntity, object userData)
 		{
-			if (Building.Player.IsFriend(byEntity.Player) || byEntity is IProjectile)
+			if (Building.Player.IsFriend(byEntity.Player) || !(byEntity is IProjectile))
 			{
 				return;
 			}
@@ -240,18 +242,14 @@ namespace ShowcasePackage.Buildings
 					{
 						continue;
 					}
+
 					//Connect to neighbor roof nodes
 					if (nodes.TryGetValue(neighbour, out IBuildingNode neighbourNode))
 					{
 						node.CreateEdge(neighbourNode, MovementType.Linear);
 					}
-					else if (neighbour.Building != null &&
-							neighbour.Building.BuildingPlugin is WalkableBuildingPlugin plugin)
-					{
-						INode foreighNode = plugin.TryGetNodeAt(neighbour);
-						foreighNode.CreateEdge(node, MovementType.Teleport);
-						node.CreateEdge(foreighNode, MovementType.Teleport);
-					}
+
+					//Connects just to own nodes, does not connect to other buildings.
 				}
 			}
 

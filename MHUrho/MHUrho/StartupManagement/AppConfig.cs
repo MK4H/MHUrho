@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Runtime.Serialization;
 using System.Xml;
+using MHUrho.PathFinding;
 using Urho;
 
 namespace MHUrho.StartupManagement
@@ -27,8 +28,13 @@ namespace MHUrho.StartupManagement
 																			new Resolution(1024,768),
 																		};
 
+		static readonly List<Visualization> SupportedPathFindingVisualizationsStatic =
+			new List<Visualization> {Visualization.None, Visualization.TouchedNodes, Visualization.FinalPath};
+
 		public IReadOnlyList<Resolution> SupportedResolutions => SupportedResolutionsStatic;
 
+		public IReadOnlyList<Visualization> SupportedPathFindingVisualizations =>
+			SupportedPathFindingVisualizationsStatic;
 
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 0)]
 		public float UnitDrawDistance { get; set; }
@@ -89,6 +95,8 @@ namespace MHUrho.StartupManagement
 		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 18)]
 		public bool MouseBorderCameraMovement { get; set; }
 
+		[DataMember(EmitDefaultValue = true, IsRequired = true, Order = 20)]
+		public Visualization PathFindingVisualization { get; set; }
 
 		public static AppConfig LoadFrom(Stream stream)
 		{
@@ -167,7 +175,8 @@ namespace MHUrho.StartupManagement
 						CameraRotationSensitivity = 10.0f,
 						MouseRotationSensitivity = 0.5f,
 						ZoomSensitivity = 10.0f,
-						MouseBorderCameraMovement = true
+						MouseBorderCameraMovement = true,
+						PathFindingVisualization = Visualization.None
 					};
 		}
 
@@ -211,6 +220,8 @@ namespace MHUrho.StartupManagement
 			ZoomSensitivity = other.ZoomSensitivity;
 
 			MouseBorderCameraMovement = other.MouseBorderCameraMovement;
+
+			PathFindingVisualization = other.PathFindingVisualization;
 
 		}
 	}

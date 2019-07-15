@@ -106,8 +106,9 @@ namespace MHUrho.Logic
 			
 		}
 
-		public void Dispose() {
-
+		public void Dispose()
+		{
+			Plugin?.Dispose();
 		}
 
 		static PlayerTypeCategory StringToCategory(string categoryString)

@@ -777,11 +777,10 @@ namespace ShowcasePackage.Players
 			currentState = State.Load(reader, this);
 
 			foreach (var wolf in Player.GetUnitsOfType(type.Wolf.UnitType)) {
-				wolfs.Add(wolf, (Wolf) wolf.Plugin);
+				wolfs.Add(wolf, (Wolf)wolf.Plugin);
 			}
 
-			foreach (var chicken in Player.GetUnitsOfType(type.Chicken.UnitType))
-			{
+			foreach (var chicken in Player.GetUnitsOfType(type.Chicken.UnitType)) {
 				chickens.Add(chicken, (Chicken)chicken.Plugin);
 			}
 
@@ -817,6 +816,14 @@ namespace ShowcasePackage.Players
 		{
 			Keep = GetKeep();
 			currentState = new BuildCutters((State)null, this);
+
+			foreach (var wolf in Player.GetUnitsOfType(type.Wolf.UnitType)) {
+				wolfs.Add(wolf, (Wolf)wolf.Plugin);
+			}
+
+			foreach (var chicken in Player.GetUnitsOfType(type.Chicken.UnitType)) {
+				chickens.Add(chicken, (Chicken)chicken.Plugin);
+			}
 		}
 
 		public override void BuildingAdded(IBuilding building)

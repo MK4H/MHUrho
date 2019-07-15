@@ -65,7 +65,7 @@ namespace MHUrho.CameraMovement
 
 		public override void PostChangesUpdate()
 		{
-			//TODO: Signal that camera moved if the terrain moved
+			//FUTURE: Signal that camera moved if the terrain moved
 			Vector2 newHolderXZPosition = RoundPositionToMap(CameraHolder.Position.XZ2());
 			CameraHolder.Position = new Vector3(newHolderXZPosition.X,
 												Map.GetTerrainHeightAt(newHolderXZPosition),

@@ -230,15 +230,17 @@ namespace MHUrho.Packaging {
 			}
 			catch (MethodInvocationException e)
 			{
-				//TODO: Dispose on error
+				newPack.Dispose();
 				string message = $"Package loading failed with: \"{e.InnerException?.Message ?? ""}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
+				loadingProgress?.SendFailed(message);
 				throw new PackageLoadingException(message, e);
 			}
 			catch (Exception e) {
-				//TODO: Dispose on error
+				newPack.Dispose();
 				string message = $"Package loading failed with: \"{e.Message}\"";
 				Urho.IO.Log.Write(LogLevel.Warning, message);
+				loadingProgress?.SendFailed(message);
 				throw new PackageLoadingException(message, e);
 			}			
 			finally
@@ -752,12 +754,13 @@ namespace MHUrho.Packaging {
 				return;
 			}
 
-			ResourceIconTexture.Dispose();
-			TileIconTexture.Dispose();
-			UnitIconTexture.Dispose();
-			BuildingIconTexture.Dispose();
-			PlayerIconTexture.Dispose();
-			ToolIconTexture.Dispose();
+			//Null checks to enable disposing during loading
+			ResourceIconTexture?.Dispose();
+			TileIconTexture?.Dispose();
+			UnitIconTexture?.Dispose();
+			BuildingIconTexture?.Dispose();
+			PlayerIconTexture?.Dispose();
+			ToolIconTexture?.Dispose();
 
 			foreach (var unitType in unitTypesByName.Values) {
 				unitType.Dispose();
@@ -769,6 +772,18 @@ namespace MHUrho.Packaging {
 
 			foreach (var projectileType in projectileTypesByName.Values) {
 				projectileType.Dispose();
+			}
+
+			foreach (var playerType in playerAITypesByName.Values) {
+				playerType.Dispose();
+			}
+
+			foreach (var levelLogicType in levelLogicTypesByName.Values) {
+				levelLogicType.Dispose();
+			}
+
+			foreach (var level in levelsByName.Values) {
+				level.Dispose();
 			}
 		}
 

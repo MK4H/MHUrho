@@ -55,6 +55,11 @@
 		<attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
 		<attribute name="Image Rect" value="0 132 16 148"/>
 	</element>
+  <element type="DeselectButton" style="Button" auto="false">
+    <attribute name="Texture" value="Texture2D;Textures/DefaultUITextures.png"/>
+    <attribute name="Image Rect" value="0 176 16 192" />
+    <attribute name="Disabled Image Offset" value="0 32" />
+  </element>
 	<element type="ToolCheckBox" style="ExpansionWindowCheckBox">
 	</element>
 	<element type="PlayerCheckBox" style="ExpansionWindowCheckBox">

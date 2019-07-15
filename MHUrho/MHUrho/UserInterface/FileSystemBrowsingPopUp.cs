@@ -541,7 +541,6 @@ namespace MHUrho.UserInterface
 
 		public void Cancel()
 		{
-			//TODO: throw if not running
 			screen?.Cancel();
 		}
 

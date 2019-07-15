@@ -91,7 +91,7 @@
     <Compile Include="Projectiles\EggProjectile.cs" />
     <Compile Include="Projectiles\TestProjectile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ToolManagerMandK.cs" />
+    <Compile Include="ToolManagerMouseKeyboard.cs" />
     <Compile Include="Units\BaseDistCalc.cs" />
     <Compile Include="Units\Deleter.cs" />
     <Compile Include="Units\PointSpawner.cs" />
@@ -321,21 +321,21 @@
     <Content Include="Assets\xamarin.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Assets\Buildings\Gate\Models\Building.mdl">
+    <Content Include="Assets\Buildings\Gate\Models\Building.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Buildings\Gate\Models\Door.mdl">
+    </Content>
+    <Content Include="Assets\Buildings\Gate\Models\Door.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Buildings\Keep\Models\Building.mdl">
+    </Content>
+    <Content Include="Assets\Buildings\Keep\Models\Building.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Buildings\Tower\Models\Building.mdl">
+    </Content>
+    <Content Include="Assets\Buildings\Tower\Models\Building.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Buildings\Tree1\Models\Default.mdl">
+    </Content>
+    <Content Include="Assets\Buildings\Tree1\Models\Default.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Assets\Units\Chicken\Models\BeginPecking.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -378,54 +378,54 @@
     <Content Include="Assets\Units\Chicken\Models\Walk.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Assets\Buildings\TreeCutter\Models\Cylinder.mdl">
+    <Content Include="Assets\Buildings\TreeCutter\Models\Cylinder.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Buildings\Wall\Models\Building.mdl">
+    </Content>
+    <Content Include="Assets\Buildings\Wall\Models\Building.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\000.ani">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\000.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\Dog_creep_cycle.ani">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_creep_cycle.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\Dog_Idle_.ani">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_Idle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\Dog_obj_body.004.mdl">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_obj_body.004.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\Dog_Run_Cycle_.ani">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_Run_Cycle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\Dog_seat_.ani">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_seat_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Dog\Models\Dog_Walk_cycle_.ani">
+    </Content>
+    <Content Include="Assets\Units\Dog\Models\Dog_Walk_cycle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\000.ani">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\000.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\Wolf_creep_cycle.ani">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_creep_cycle.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\Wolf_Idle_.ani">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_Idle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\Wolf_obj_body.004.mdl">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_obj_body.004.mdl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\Wolf_Run_Cycle_.ani">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_Run_Cycle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\Wolf_seat_.ani">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_seat_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Units\Wolf\Models\Wolf_Walk_cycle_.ani">
+    </Content>
+    <Content Include="Assets\Units\Wolf\Models\Wolf_Walk_cycle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

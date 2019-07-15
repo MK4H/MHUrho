@@ -11,7 +11,7 @@ using Urho.Resources;
 
 namespace MHUrho.Logic
 {
-	public class ResourceType : ILoadableType, IDisposable {
+	public class ResourceType : ILoadableType {
 
 		public int ID { get; private set; }
 
@@ -54,10 +54,6 @@ namespace MHUrho.Logic
 		public void ClearCache()
 		{
 			//If you add any cache dependent on current level, clear it here
-		}
-
-		public void Dispose() {
-
 		}
 
 	}

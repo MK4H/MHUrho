@@ -33,6 +33,8 @@ namespace MHUrho.PathFinding
 		/// <returns>Returns this INode for call chaining</returns>
 		INode RemoveEdge(INode target);
 
+		bool HasEdgeTo(INode neighbour);
+
 		void Accept(INodeVisitor visitor, INode target, MovementType movementType);
 
 		void Accept(INodeVisitor visitor, ITileNode source, MovementType movementType);

@@ -674,7 +674,6 @@ namespace MHUrho.Packaging
 			try {
 				foreach (var element in assetsElement.Elements()) {
 					if (Parsers.TryGetValue(element.Name, out ParseAssetLoaderDelegate parse)) {
-						//TODO: Possible exceptions
 						loaders.Add(parse(element, package));
 					}
 				}
