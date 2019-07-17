@@ -13,11 +13,21 @@ using Urho.Urho2D;
 
 namespace MHUrho.WorldMap
 {
+
+	/// <summary>
+	/// Provides a 2D representation of the map
+	/// </summary>
     public class Minimap : IDisposable {
 
+		/// <summary>
+		/// The 2D representation of the map
+		/// </summary>
 		public Texture2D Texture { get; private set; }
 
 		float refreshRate;
+		/// <summary>
+		/// The frequency of updates of the state showed by minimap.
+		/// </summary>
 		public float RefreshRate {
 			get => refreshRate;
 			set {
@@ -30,29 +40,45 @@ namespace MHUrho.WorldMap
 
 		float timeToRefresh;
 
-		Image image;
+		readonly Image image;
 
-		readonly ILevelManager Level;
+		/// <summary>
+		/// The level this minimap is displaying the state of.
+		/// </summary>
+		readonly ILevelManager level;
 
-		IMap Map => Level.Map;
+		/// <summary>
+		/// Map of the level
+		/// </summary>
+		IMap Map => level.Map;
 
 		/// <summary>
 		/// In both width and height, because tiles are square even in the minimap
 		/// </summary>
 		int pixelsPerTile = 8;
 
+		/// <summary>
+		/// Position of the top left corner of the rectangle displayed by minimap
+		///
+		/// Top left as in the map meaning, left as lowest x coord, top as lowest z coord.
+		/// </summary>
 		IntVector2 topLeftPosition = new IntVector2(1,1);
 
 		int TilesPerColumn => image.Height / pixelsPerTile;
 		int TilesPerRow => image.Width / pixelsPerTile;
 
-		
+		/// <summary>
+		/// Creates new instance of minimap to display the state of the <paramref name="level"/> updated
+		/// <paramref name="refreshRate"/> times per second.
+		/// </summary>
+		/// <param name="level">The level to display by this minimap.</param>
+		/// <param name="refreshRate">The number of updates per second.</param>
 		public Minimap(ILevelManager level, float refreshRate)
 		{
 			image = new Image();
 			image.SetSize(256, 256, 4);
 			image.Clear(Color.Black);
-			this.Level = level;
+			this.level = level;
 			Texture = new Texture2D();
 			Texture.SetData(image);
 
@@ -60,10 +86,13 @@ namespace MHUrho.WorldMap
 			timeToRefresh = 1.0f / RefreshRate;
 		}
 
+		/// <summary>
+		/// Trigger the update of the minimap.
+		/// </summary>
 		public void Refresh()
 		{
 			timeToRefresh = 1.0f / RefreshRate;
-			MoveTo(Level.Camera.PositionXZ.ToIntVector2());
+			MoveTo(level.Camera.PositionXZ.ToIntVector2());
 
 			unsafe {
 				uint* imageData = (uint*)image.Data;
@@ -114,6 +143,10 @@ namespace MHUrho.WorldMap
 			Texture.SetData(image);
 		}
 
+		/// <summary>
+		/// Step the timer to automatic refresh.
+		/// </summary>
+		/// <param name="timeStep">The time to step the timer.</param>
 		public void OnUpdate(float timeStep)
 		{
 			timeToRefresh -= timeStep;
@@ -122,11 +155,20 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <summary>
+		/// Move the displayed area to <paramref name="centerTileMapLocation"/> where <paramref name="centerTileMapLocation"/> will
+		///  be displayed at the center of the minimap.
+		/// </summary>
+		/// <param name="centerTileMapLocation">The coordinates to display at the center of the minimap.</param>
 		public void MoveTo(IntVector2 centerTileMapLocation)
 		{
 			topLeftPosition = centerTileMapLocation - new IntVector2(image.Width, image.Height) / (2 * pixelsPerTile);
 		}
 
+		/// <summary>
+		/// Move the displayed area to have <paramref name="centerTile"/> displayed at the center of the minimap.
+		/// </summary>
+		/// <param name="centerTile">The tile to display at the center of the minimap.</param>
 		public void MoveTo(ITile centerTile)
 		{
 			MoveTo(centerTile.MapLocation);
@@ -154,6 +196,11 @@ namespace MHUrho.WorldMap
 			return true;
 		}
 
+		/// <summary>
+		/// Converts position on the minimap to a position in the world map.
+		/// </summary>
+		/// <param name="minimapPosition">The position on the minimap.</param>
+		/// <returns>The position in the world map corresponding to the <paramref name="minimapPosition"/>.</returns>
 		public Vector2? MinimapToWorld(IntVector2 minimapPosition)
 		{
 			IntVector2 tilesOffset = minimapPosition / pixelsPerTile;
@@ -179,6 +226,11 @@ namespace MHUrho.WorldMap
  
 		}
 
+		/// <summary>
+		/// Converts coordinates from world position to a position on the minimap.
+		/// </summary>
+		/// <param name="worldPosition">The position in the world map to convert.</param>
+		/// <returns>The position on the minimap corresponding to the <paramref name="worldPosition"/>.</returns>
 		public IntVector2? WorldToMinimap(Vector2 worldPosition)
 		{
 			IntRect mapRectangle = new IntRect(topLeftPosition.X,
@@ -201,11 +253,29 @@ namespace MHUrho.WorldMap
 			return minimapTileTopLeft + (inTileOffset * pixelsPerTile).FloorToIntVector2();
 		}
 
+		/// <summary>
+		/// Releases all resources held by this instance.
+		/// </summary>
+		public void Dispose()
+		{
+			image.Dispose();
+		}
+
+		/// <summary>
+		/// Gets the color to display on the minimap for the tile at <paramref name="tileMapLocation"/>
+		/// </summary>
+		/// <param name="tileMapLocation">The location of tile to get the color of.</param>
+		/// <returns>RGBA color to display for the tile at <paramref name="tileMapLocation"/>.</returns>
 		protected uint GetTileColor(IntVector2 tileMapLocation)
 		{
 			return GetTileColor(Map.GetTileByMapLocation(tileMapLocation));
 		}
 
+		/// <summary>
+		/// Gets the color to display on the minimap for the <paramref name="tile"/>.
+		/// </summary>
+		/// <param name="tile">The tile to get the color of.</param>
+		/// <returns>RGBA color to display for the <paramref name="tile"/>.</returns>
 		protected uint GetTileColor(ITile tile)
 		{
 			if (tile == null) {
@@ -225,9 +295,6 @@ namespace MHUrho.WorldMap
 			return tile.Type.MinimapColor.ToUInt();
 		}
 
-		public void Dispose()
-		{
-			image.Dispose();
-		}
+
 	}
 }

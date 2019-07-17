@@ -139,6 +139,9 @@ namespace MHUrho.UserInterface
 		{
 			//Necessary to prevent infinite recursion when setting checked to false
 			if (e.Element == currentSelected) {
+				if (e.State == false) {
+					e.Element.Enabled = true;
+				}
 				return;
 			}
 
@@ -179,7 +182,6 @@ namespace MHUrho.UserInterface
 			if (oldSelected != null) {
 				//Triggers CheckBox.Toggled event, is handled by ignoring events on currentSelected
 				oldSelected.Checked = false;
-				oldSelected.Enabled = true;
 			}
 			currentSelected = box;
 
