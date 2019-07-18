@@ -83,7 +83,7 @@ namespace MHUrho.UserInterface
 						MenuUIManager.SwitchToOptions();
 						break;
 					case AboutButtonName:
-
+						MenuUIManager.SwitchToAboutScreen();
 						break;
 					case ExitButtonName:
 						//DO NOT WAIT, THIS IS CORRECT

@@ -3,12 +3,13 @@
   <description>Package to showcase the abilities of our platform.</description>
   <levels>
     <dataDirPath>Levels</dataDirPath>
-    <level name="Test level 1">
-      <description>The best test level 1</description>
-      <thumbnail>Assets/xamarin.png</thumbnail>
-      <logicTypeName>TwoPlayers</logicTypeName>
-      <dataPath>Levels/Testlevel1</dataPath>
-      <mapSize x="200" y="300" />
+
+    <level name="Showcase level with four players">
+      <description>This player showcases the four player logic.</description>
+      <thumbnail>Assets/grass.png</thumbnail>
+      <logicTypeName>FourPlayersFixedResources</logicTypeName>
+      <dataPath>Levels/Showcaselevelwithfourplayers</dataPath>
+      <mapSize x="200" y="200" />
     </level>
   </levels>
   <levelLogicTypes>
@@ -80,8 +81,8 @@
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
       <extension>
         <cost>
-          <Wood>6</Wood>
-          <Gold>8</Gold>
+          <Wood>3</Wood>
+          <Gold>4</Gold>
         </cost>
         <canPass>
           <Sand/>
@@ -113,8 +114,8 @@
       <assemblyPath>ShowcasePackage.dll</assemblyPath>
       <extension>
         <cost>
-          <Wood>10</Wood>
-          <Gold>5</Gold>
+          <Wood>6</Wood>
+          <Gold>2</Gold>
         </cost>
         <canPass>
           <Sand/>

@@ -30,10 +30,12 @@ namespace MHUrho.UserInterface
 		public LevelCreationScreen LevelCreationScreen { get; private set; }
 		public SaveAsScreen SaveAsScreen { get; private set; }
 		public EndScreen EndScreen { get; private set; }
+		public AboutScreen AboutScreen { get; private set; }
 
 		public FileSystemBrowsingPopUp FileBrowsingPopUp { get; private set; }
 		public ConfirmationPopUp ConfirmationPopUp { get; private set; }
 		public ErrorPopUp ErrorPopUp { get; private set; }
+
 
 
 		public UIElement MenuRoot { get; private set; }
@@ -64,6 +66,7 @@ namespace MHUrho.UserInterface
 			LevelCreationScreen = new LevelCreationScreen(this);
 			SaveAsScreen = new SaveAsScreen(this);
 			EndScreen = new EndScreen(this);
+			AboutScreen = new AboutScreen(this);
 			FileBrowsingPopUp = new FileSystemBrowsingPopUp(this);
 			ConfirmationPopUp = new ConfirmationPopUp(this);
 			ErrorPopUp = new ErrorPopUp(this);
@@ -148,6 +151,12 @@ namespace MHUrho.UserInterface
 			EndScreen.Victory = victory;
 			SwitchToScreen(EndScreen);
 			return EndScreen;
+		}
+
+		public AboutScreen SwitchToAboutScreen()
+		{
+			SwitchToScreen(AboutScreen);
+			return AboutScreen;
 		}
 
 		public void SwitchBack()

@@ -479,14 +479,19 @@ namespace ShowcasePackage.Buildings
 			//Connect front node and back node to outside tiles
 			ITile backTile = Level.Map.GetContainingTile(centerPosition - 3 * Building.Forward);
 			ITile frontTile = Level.Map.GetContainingTile(centerPosition + 3 * Building.Forward);
-			INode backNode = Level.Map.PathFinding.GetTileNode(backTile);
-			INode frontNode = Level.Map.PathFinding.GetTileNode(frontTile);
 
-			backNode.CreateEdge(newTunnelNodes[0], MovementType.Linear);
-			newTunnelNodes[0].CreateEdge(backNode, MovementType.Linear);
-			frontNode.CreateEdge(newTunnelNodes[newTunnelNodes.Count - 1], MovementType.Linear);
-			newTunnelNodes[newTunnelNodes.Count - 1].CreateEdge(frontNode, MovementType.Linear);
+			if (backTile != null) {
+				INode backNode = Level.Map.PathFinding.GetTileNode(backTile);
+				backNode.CreateEdge(newTunnelNodes[0], MovementType.Linear);
+				newTunnelNodes[0].CreateEdge(backNode, MovementType.Linear);
+			}
 
+			if (frontTile != null) {
+				INode frontNode = Level.Map.PathFinding.GetTileNode(frontTile);
+				frontNode.CreateEdge(newTunnelNodes[newTunnelNodes.Count - 1], MovementType.Linear);
+				newTunnelNodes[newTunnelNodes.Count - 1].CreateEdge(frontNode, MovementType.Linear);
+			}
+			
 			//Connect roof with the tunnel
 			ITile centerTile = Level.Map.GetContainingTile(Building.Center);
 			tunnelNodes[centerTile].CreateEdge(roofNodes[centerTile], MovementType.Teleport);

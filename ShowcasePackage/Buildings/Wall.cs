@@ -200,7 +200,7 @@ namespace ShowcasePackage.Buildings
 					if (node.Tag == WallTag) {
 						movementType = MovementType.Linear;
 					}
-					else if (node.Tag == Gate.GateRoofTag) { 
+					else if (node.Tag == Gate.GateRoofTag || node.Tag == Tower.TowerTag) { 
 						movementType = MovementType.Teleport;
 					}
 					else {

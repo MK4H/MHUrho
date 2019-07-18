@@ -426,7 +426,7 @@
     <Content Include="Assets\Units\Wolf\Models\Wolf_Walk_cycle_.ani">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Levels\Testlevel1">
+    <Content Include="Levels\Showcaselevelwithfourplayers">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />

@@ -718,11 +718,11 @@ namespace ShowcasePackage.Players
 			}
 		}
 
-		const int TargetNumberOfCutters = 1;
-		const int TargetNumberOfWolfs = 0;
-		const int TargetNumberOfChickens = 1;
-		const int MinWolfs = 1;
-		const int MinChickens = 1;
+		const int TargetNumberOfCutters = 5;
+		const int TargetNumberOfWolfs = 6;
+		const int TargetNumberOfChickens = 6;
+		const int MinWolfs = 2;
+		const int MinChickens = 2;
 
 		IEnumerable<UnitSelector> AllUnits =>
 			chickens.Values

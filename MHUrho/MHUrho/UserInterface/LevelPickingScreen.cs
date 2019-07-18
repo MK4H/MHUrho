@@ -85,14 +85,15 @@ namespace MHUrho.UserInterface
 					item.Dispose();
 				}
 
-				window.RemoveAllChildren();
-				window.Remove();
-
-				window.Dispose();
 				listView.Dispose();
 				deleteButton.Dispose();
 				editButton.Dispose();
 				playButton.Dispose();
+
+				window.RemoveAllChildren();
+				window.Remove();
+
+				window.Dispose();
 			}
 
 	

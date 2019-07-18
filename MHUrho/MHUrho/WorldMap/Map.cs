@@ -706,6 +706,11 @@ namespace MHUrho.WorldMap
 				topLeft.X += dist;
 				bottomRight.X += dist;
 			}
+			else if ((where = WhereIsX(bottomRight.X)) != 0) {
+				int dist = (where == -1) ? this.TopLeft.X - topLeft.X : this.BottomRight.X - bottomRight.X;
+				topLeft.X += dist;
+				bottomRight.X += dist;
+			}
 
 			if (recLength > Length) {
 				//Rectangle is wider than the map, center it on the map
@@ -716,6 +721,11 @@ namespace MHUrho.WorldMap
 				fits = false;
 			}
 			else if ((where = WhereIsZ(topLeft.Y)) != 0) {
+				int dist = (where == -1) ? this.TopLeft.Y - topLeft.Y : this.BottomRight.Y - bottomRight.Y;
+				topLeft.Y += dist;
+				bottomRight.Y += dist;
+			}
+			else if ((where = WhereIsZ(bottomRight.Y)) != 0) {
 				int dist = (where == -1) ? this.TopLeft.Y - topLeft.Y : this.BottomRight.Y - bottomRight.Y;
 				topLeft.Y += dist;
 				bottomRight.Y += dist;

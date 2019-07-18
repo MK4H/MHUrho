@@ -15,7 +15,7 @@
   <levelPicking>
     <action>play</action>
     <values>
-      <levelName>Test level 1</levelName>
+      <levelName>Showcase level with four players</levelName>
     </values>
   </levelPicking>
   <levelSettings>
@@ -24,6 +24,8 @@
       <neutralPlayer typeName="NeutralAI"/>
       <humanPlayer typeName="HumanAI" teamID="1"/>
       <aiPlayer typeName="Aggressive" teamID="2"/>
+      <aiPlayer typeName="Aggressive" teamID="3"/>
+      <aiPlayer typeName="Aggressive" teamID="4"/>
     </values>
   </levelSettings>
   <loading>

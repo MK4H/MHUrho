@@ -327,12 +327,7 @@ namespace ShowcasePackage.Buildings
 		/// <param name="newSize">New current size of the tree.</param>
 		public void SetSize(float newSize)
 		{
-			if (FinalSize < newSize) {
-				FinalSize = newSize;
-			}
-
-			currentSize = newSize;
-			Building.Node.Scale = type.BaseScale * currentSize;
+			SetSizeImpl(newSize, true);
 		}
 
 		public void Chomp()
@@ -386,9 +381,30 @@ namespace ShowcasePackage.Buildings
 			currentStepTimeout = StepSize;
 
 			float newSize = currentSize + changePerSecond * StepSize;
-			SetSize(newSize);
+			SetSizeImpl(newSize, false);
 		}
 
+		/// <summary>
+		/// Sets current size of the tree, if greater than <see cref="FinalSize"/> and <paramref name="adjustFinalSize"/> is true, sets final size too. 
+		/// </summary>
+		/// <param name="newSize">New current size of the tree.</param>
+		/// <param name="adjustFinalSize">If the final size should be adjusted when the newSize is bigger, or if the newsize should be capped at final size.</param>
+		void SetSizeImpl(float newSize, bool adjustFinalSize)
+		{
+			if (adjustFinalSize) {
+				if (FinalSize < newSize) {
+					FinalSize = newSize;
+				}
+			}
+			else {
+				if (newSize > FinalSize) {
+					newSize = FinalSize;
+				}
+			}
+
+			currentSize = newSize;
+			Building.Node.Scale = type.BaseScale * currentSize;
+		}
 
 	}
 
