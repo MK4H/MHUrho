@@ -13,18 +13,19 @@
     <action>none</action>
   </loading>
   <levelPicking>
-    <action>editnew</action>
-  </levelPicking>
-  <levelCreation>
-    <action>edit</action>
+    <action>play</action>
     <values>
       <levelName>Test level 1</levelName>
-      <description>The best test level 1</description>
-      <thumbnailPath>Assets/xamarin.png</thumbnailPath>
-      <logicTypeName>TwoPlayers</logicTypeName>
-      <mapSize x="200" y="300"/>
     </values>
-  </levelCreation>
+  </levelPicking>
+  <levelSettings>
+    <action>play</action>
+    <values>
+      <neutralPlayer typeName="NeutralAI"/>
+      <humanPlayer typeName="HumanAI" teamID="1"/>
+      <aiPlayer typeName="Aggressive" teamID="2"/>
+    </values>
+  </levelSettings>
   <loading>
     <action>none</action>
   </loading>

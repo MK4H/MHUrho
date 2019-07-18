@@ -620,16 +620,24 @@ namespace ShowcasePackage.Players
 						continue;
 					}
 
+					//Get last tile that we dont have to break through anything
+					ITile beforeBreakthrough = null;
 					for (int i = 0; i < tileList.Count; i++) {
 						if (!distCalc.CanBreakThrough.Contains(tileList[i])) {
 							continue;
 						}
 
-						if (!wolf.ExecuteOrder(new MoveOrder(Level.Map.PathFinding.GetTileNode(tileList[i - 1]))))
-						{
-							break;
-						}
+						beforeBreakthrough = tileList[i - 1];
+						break;
 					}
+
+					//If we can get to the end, get to the end
+					if (beforeBreakthrough == null) {
+						beforeBreakthrough = tileList[tileList.Count - 1];
+					}
+
+					//Try go to the last tile we dont have to break through anything to get to.
+					wolf.ExecuteOrder(new MoveOrder(Level.Map.PathFinding.GetTileNode(beforeBreakthrough)));
 
 				}
 			}
@@ -640,9 +648,10 @@ namespace ShowcasePackage.Players
 				{
 					var distCalc = new Chicken.ChickenDistCalcThroughWalls(chicken);
 					List<ITile> tileList = Level.Map.PathFinding.GetTileList(chicken.Unit.Position,
-																			Level
-																				.Map.PathFinding
-																				.GetClosestNode(target.Keep.Building
+																			Level.Map
+																				.PathFinding
+																				.GetClosestNode(target.Keep
+																									.Building
 																									.Center),
 																			distCalc);
 
@@ -654,10 +663,8 @@ namespace ShowcasePackage.Players
 	
 					if (distCalc.CanBreakThrough.Contains(tileList[0]))
 					{
-						if (!chicken.ExecuteOrder(new AttackOrder(tileList[0].Building)))
-						{
-							break;
-						}
+						chicken.ExecuteOrder(new AttackOrder(tileList[0].Building));
+						continue;
 					}
 					
 					for (int i = 1; i < tileList.Count; i++)
@@ -684,7 +691,7 @@ namespace ShowcasePackage.Players
 							if (buildingDiag1 == null || buildingDiag2 == null)
 							{
 								chicken.ExecuteOrder(new AttackOrder(buildingStraight));
-								continue;
+								break;
 							}
 
 							if (buildingDiag1 != null &&
@@ -692,16 +699,15 @@ namespace ShowcasePackage.Players
 								!buildingDiag1.Player.IsFriend(Player.Player))
 							{
 								chicken.ExecuteOrder(new AttackOrder(buildingDiag1));
-								continue;
+								break;
 							}
 
 							chicken.ExecuteOrder(new AttackOrder(buildingDiag2));
-							continue;
+							break;
 						}
 
-						if (!chicken.ExecuteOrder(new MoveOrder(Level.Map.PathFinding.GetTileNode(tileList[i - 1])))) {
-							return;
-						}
+						chicken.ExecuteOrder(new MoveOrder(Level.Map.PathFinding.GetTileNode(tileList[i - 1])));
+						break;
 					}
 				}
 			}
@@ -713,8 +719,8 @@ namespace ShowcasePackage.Players
 		}
 
 		const int TargetNumberOfCutters = 1;
-		const int TargetNumberOfWolfs = 3;
-		const int TargetNumberOfChickens = 3;
+		const int TargetNumberOfWolfs = 0;
+		const int TargetNumberOfChickens = 1;
 		const int MinWolfs = 1;
 		const int MinChickens = 1;
 

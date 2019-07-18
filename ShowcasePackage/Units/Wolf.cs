@@ -270,11 +270,6 @@ namespace ShowcasePackage.Units
 					return false;
 				}
 
-				if (target.Tile.Building != null &&
-					(target.Tile.Building.Player != Level.NeutralPlayer ||
-					Instance.Unit.Player.IsEnemy(target.Tile.Building.Player))) {
-					return true;
-				}
 				return true;
 			}
 

@@ -3,6 +3,13 @@
   <description>Package to showcase the abilities of our platform.</description>
   <levels>
     <dataDirPath>Levels</dataDirPath>
+    <level name="Test level 1">
+      <description>The best test level 1</description>
+      <thumbnail>Assets/xamarin.png</thumbnail>
+      <logicTypeName>TwoPlayers</logicTypeName>
+      <dataPath>Levels/Testlevel1</dataPath>
+      <mapSize x="200" y="300" />
+    </level>
   </levels>
   <levelLogicTypes>
     <levelLogicType name="TwoPlayers" ID="1">

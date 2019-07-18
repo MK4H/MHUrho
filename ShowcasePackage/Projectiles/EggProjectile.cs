@@ -105,6 +105,7 @@ namespace ShowcasePackage.Projectiles
 
 		public override void OnEntityHit(IEntity hitEntity)
 		{
+
 			hitEntity.HitBy(Projectile, 5);
 			if (hitEntity is IBuilding || hitEntity.Player != Projectile.Player) {
 				Projectile.RemoveFromLevel();
