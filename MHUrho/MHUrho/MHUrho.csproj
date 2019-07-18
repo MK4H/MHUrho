@@ -26,6 +26,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>C:\mypreciouss\Safe\VSProjects\MHUrho\MHUrho\MHUrho\MHUrho.xml</DocumentationFile>
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
