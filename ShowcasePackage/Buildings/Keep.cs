@@ -163,6 +163,11 @@ namespace ShowcasePackage.Buildings
 			if (!Level.EditorMode) {
 				Building.Player.ChangeResourceAmount(myType.ProducedResource, myType.ProductionRate * timeStep);
 			}
+
+			if (healthBar.HitPoints <= 0) {
+				//Player will see this and end himself
+				Building.RemoveFromLevel();
+			}
 		}
 
 		public override void Dispose()
@@ -186,10 +191,8 @@ namespace ShowcasePackage.Buildings
 
 			int damage = (int)userData;
 
-			if (!healthBar.ChangeHitPoints(-damage)) {
-				//Player will see this and end himself
-				Building.RemoveFromLevel();
-			}
+			healthBar.ChangeHitPoints(-damage); 
+			//Checked in OnUpdate
 		}
 
 		public override bool CanChangeTileHeight(int x, int y)
