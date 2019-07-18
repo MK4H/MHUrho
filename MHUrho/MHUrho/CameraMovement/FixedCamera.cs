@@ -11,10 +11,22 @@ namespace MHUrho.CameraMovement
 {
     class FixedCamera : PointFollowingCamera
     {
+		/// <inheritdoc />
 		public override CameraMode CameraMode => CameraMode.RTS;
 
+		/// <summary>
+		/// If the camera moved during the current update calculation
+		/// </summary>
 		bool cameraMoved;
 
+		/// <summary>
+		/// Creates new camera behavior that follows an artificial invisible fixed point in the game world.
+		/// </summary>
+		/// <param name="map">The map of the level the camera exists in.</param>
+		/// <param name="levelNode">The <see cref="Node"/> representing the whole level.</param>
+		/// <param name="cameraNode">The <see cref="Node"/> containing the <see cref="Camera"/> component.</param>
+		/// <param name="initialPosition">The initial position of the followed point in the game world.</param>
+		/// <param name="stateSwitched">The handler to invoke when a state switch occurs.</param>
 		public FixedCamera(IMap map, Node levelNode, Node cameraNode, Vector2 initialPosition, StateSwitchedDelegate stateSwitched)
 			: base(map, cameraNode, levelNode.CreateChild("CameraHolder"), stateSwitched)
 		{
@@ -23,6 +35,11 @@ namespace MHUrho.CameraMovement
 												initialPosition.Y);
 		}
 
+		/// <summary>
+		/// Moves the followed point to the <paramref name="xzPosition"/> in the XZ plane,
+		/// adjusts the height of the followed point to be on the terrain.
+		/// </summary>
+		/// <param name="xzPosition">The new position of the followed point in the XZ plane.</param>
 		public override void MoveTo(Vector2 xzPosition)
 		{
 			Vector2 newPosition = RoundPositionToMap(xzPosition);
@@ -32,17 +49,39 @@ namespace MHUrho.CameraMovement
 			cameraMoved = true;
 		}
 
+		/// <inheritdoc />
+		/// <summary>
+		/// Moves the followed point to the <paramref name="position"/> in the game world.
+		/// </summary>
+		/// <param name="position">The new position of the followed point in the game world.</param>
 		public override void MoveTo(Vector3 position)
 		{
 			MoveTo(position.XZ2());
 		}
 
+		/// <inheritdoc />
+		/// <summary>
+		/// Moves the followed point by <paramref name="xzMovement"/> in XZ plane from the
+		/// camera perspective. The X coordinate represents movement to the right of the camera,
+		/// Z coordinate represents movement forward from the direction of view of the camera WHEN
+		/// PROJECTED into the game world XZ plane.
+		/// </summary>
+		/// <param name="xzMovement">The X coordinate represents movement to the right of the camera,
+		/// Z coordinate represents movement forward from the direction of view of the camera WHEN
+		/// PROJECTED into the game world XZ plane.</param>
 		public override void MoveBy(Vector2 xzMovement)
 		{
 			MoveHorizontal(xzMovement.X, xzMovement.Y);
 			cameraMoved = true;
 		}
 
+		/// <summary>
+		/// Moves the followed point by <paramref name="movement"/>. The X and Z coordinates
+		/// are used as in <see cref="MoveBy(Vector2)"/>, the Y coordinate is used for movement in
+		/// the world Y axis direction.
+		/// </summary>
+		/// <param name="movement">The change of position of the followed point, where X and Z are used as in
+		/// <see cref="MoveBy(Vector2)"/> and Y is used for movement in world vertical direction.</param>
 		public override void MoveBy(Vector3 movement)
 		{
 			MoveHorizontal(movement.X, movement.Z);
@@ -50,6 +89,10 @@ namespace MHUrho.CameraMovement
 			cameraMoved = true;
 		}
 
+		/// <summary>
+		/// Resets the camera to default offset from the followed point and turns the
+		/// camera to look at the followed point.
+		/// </summary>
 		public override void Reset()
 		{
 			CameraNode.Position = new Vector3(0, 10, -5);
@@ -57,12 +100,16 @@ namespace MHUrho.CameraMovement
 			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
 		}
 
+		/// <inheritdoc />
 		public override void PreChangesUpdate()
 		{
+			//Resets the cameraMoved flag so that we can detect camera movement
+			// during the current update.
 			cameraMoved = false;
 			base.PreChangesUpdate();
 		}
 
+		/// <inheritdoc />
 		public override void PostChangesUpdate()
 		{
 			//FUTURE: Signal that camera moved if the terrain moved
@@ -79,6 +126,7 @@ namespace MHUrho.CameraMovement
 			}
 		}
 
+		/// <inheritdoc />
 		public override void SwitchToThis(CameraState fromState)
 		{
 			if (fromState == null) {
@@ -144,15 +192,19 @@ namespace MHUrho.CameraMovement
 				
 			}
 			else {
-				throw new ArgumentOutOfRangeException(nameof(fromState), "Unknow camera state");
+				throw new ArgumentOutOfRangeException(nameof(fromState), "Unknown camera state");
 			}
 		}
 
+		/// <inheritdoc />
 		public override void SwitchFromThis(CameraState toState)
 		{
 
 		}
 
+		/// <summary>
+		/// Handles the signal from predecessor methods that the camera was moved.
+		/// </summary>
 		protected override void SignalCameraMoved()
 		{
 			cameraMoved = true;
@@ -192,10 +244,6 @@ namespace MHUrho.CameraMovement
 			position.Y += delta / CameraHolder.Scale.Y;
 			CameraNode.Position = position;
 		}
-
-
-
-
 
 	}
 }

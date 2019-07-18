@@ -9,10 +9,24 @@ namespace MHUrho.CameraMovement
 {
     abstract class PointFollowingCamera : CameraState
     {
+		/// <summary>
+		/// Limit of zooming so that we don't get too close to the followed point.
+		/// </summary>
 		protected const float MinZoomDistance = 0.5f;
+
+		/// <summary>
+		/// Minimal distance in the vertical direction from the terrain or building below. 
+		/// </summary>
 		protected const float MinOffsetFromTerrain = 0.5f;
 
+		/// <summary>
+		/// Position of the followed point in the game world.
+		/// </summary>
 		public override Vector3 CameraWorldPosition => CameraHolder.WorldPosition;
+
+		/// <summary>
+		/// Rotation of the followed point in the game world.
+		/// </summary>
 		public override Quaternion CameraWorldRotation => CameraHolder.WorldRotation;
 
 		/// <summary>
@@ -33,6 +47,13 @@ namespace MHUrho.CameraMovement
 		/// </summary>
 		protected float WantedCameraVerticalOffset;
 
+		/// <summary>
+		/// Creates new instance representing a camera behavior that follows a set point in a game world.
+		/// </summary>
+		/// <param name="map">The level map in which the camera exists.</param>
+		/// <param name="cameraNode">The node containing the <see cref="Camera"/> component. </param>
+		/// <param name="cameraHolder">The point the camera will be offset from and following.</param>
+		/// <param name="stateSwitched">The handler to invoke when a state switch occurs.</param>
 		protected PointFollowingCamera(IMap map, Node cameraNode, Node cameraHolder, StateSwitchedDelegate stateSwitched)
 			:base(map, stateSwitched)
 		{
@@ -42,6 +63,12 @@ namespace MHUrho.CameraMovement
 
 		}
 
+		/// <summary>
+		/// Rotates the camera around the followed point. X represents rotation around the vertical axis,
+		/// Y represents the rotation around the axis pointing right from the current direction of camera.
+		/// </summary>
+		/// <param name="rotation">The applied rotation of the camera, X represents rotation around the vertical axis,
+		/// Y represents the rotation around the axis pointing right from the current direction of camera.</param>
 		public override void Rotate(Vector2 rotation)
 		{
 			//Horizontal rotation
@@ -54,9 +81,9 @@ namespace MHUrho.CameraMovement
 		}
 
 		/// <summary>
-		///
+		/// Moves the camera closer to or further from the followed point, where + means further and - means closer.
 		/// </summary>
-		/// <param name="delta"></param>
+		/// <param name="delta">The change of distance from the followed point, + means further away, - means closer.</param>
 		public override void Zoom(float delta)
 		{
 			Vector3 newPosition = CameraNode.Position + Vector3.Divide(Vector3.Normalize(CameraNode.Position) * (-delta), CameraHolder.Scale);
@@ -76,20 +103,24 @@ namespace MHUrho.CameraMovement
 			SignalCameraMoved();
 		}
 
+		/// <inheritdoc />
 		public override void PreChangesUpdate()
 		{
-			//Urho.IO.Log.Write(LogLevel.Debug, $"Pre: {WantedCameraHeight}");
+			//moves the camera to the wanted offset from the ground, in case it was stretched upwards because of terrain or buildings below.
+			// applied here so that all the calculations are based off of the correct height.
 			CameraNode.Position = CameraHolder.WorldToLocal(CameraNode.WorldPosition.WithY(CameraHolder.WorldPosition.Y + WantedCameraVerticalOffset));
 		}
 
+		/// <inheritdoc />
 		public override void PostChangesUpdate()
 		{
+			//After the calculations of movement, rotation, zoom etc. stores the wanted vertical offset from the
+			// ground below and then possibly stretches the vertical offset to prevent clipping.
 			WantedCameraVerticalOffset = CameraNode.WorldPosition.Y - CameraHolder.WorldPosition.Y;
-			//Urho.IO.Log.Write(LogLevel.Debug, $"Post before Fix: {WantedCameraHeight}");
 			FixCameraNodeTerrainClipping();
 
-			//Urho.IO.Log.Write(LogLevel.Debug, $"Post after Fix: {WantedCameraHeight}");
-
+			//If we set some other value into the Y coord, signal that the camera moved.
+			// does not matter if it did just by a small amount, it moved.
 			if (CameraNode.WorldPosition.Y != WantedCameraVerticalOffset) {
 				SignalCameraMoved();
 			}
@@ -116,6 +147,11 @@ namespace MHUrho.CameraMovement
 			CameraNode.LookAt(CameraHolder.WorldPosition, Vector3.UnitY);
 		}
 
+		/// <summary>
+		/// Uses the stored information in the previous <see cref="PointFollowingCamera"/> state we are
+		/// switching from so that the camera does not suddenly jump and stuff.
+		/// </summary>
+		/// <param name="pointFollowingCamera"></param>
 		protected void SwitchToThisFromPFC(PointFollowingCamera pointFollowingCamera)
 		{
 			Node prevCameraHolder = CameraNode.Parent;
@@ -129,6 +165,9 @@ namespace MHUrho.CameraMovement
 
 		}
 
+		/// <summary>
+		/// Signals that the camera moved.
+		/// </summary>
 		protected abstract void SignalCameraMoved();
 	}
 }

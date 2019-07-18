@@ -21,8 +21,21 @@ namespace MHUrho.CameraMovement
 		/// Position of the camera in the game world.
 		/// </summary>
 		public Vector3 WorldPosition { get; private set; }
+
+		/// <summary>
+		/// Rotation of the camera in the game world.
+		/// </summary>
 		public Quaternion WorldRotation { get; private set; }
+
+		/// <summary>
+		/// Current mode of the camera.
+		/// </summary>
 		public CameraMode CameraMode { get; private set; }
+
+		/// <summary>
+		/// If the camera mode is <see cref="CameraMode.Following"/>,
+		/// holds the followed entity, otherwise is null.
+		/// </summary>
 		public IEntity FollowedEntity { get; private set; }
 
 		public CameraMovedEventArgs(Vector3 worldPosition,

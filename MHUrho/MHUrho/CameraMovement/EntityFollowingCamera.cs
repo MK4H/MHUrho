@@ -9,8 +9,13 @@ namespace MHUrho.CameraMovement
 {
     class EntityFollowingCamera : PointFollowingCamera
     {
+
+		/// <inheritdoc />
 		public override CameraMode CameraMode => CameraMode.Following;
 
+		/// <summary>
+		/// The entity being followed by the camera.
+		/// </summary>
 		public IEntity Followed { get; private set; }
 
 		/// <summary>
@@ -28,26 +33,50 @@ namespace MHUrho.CameraMovement
 
 		}
 
+		/// <inheritdoc />
+		/// <summary>
+		/// Switches to Fixed camera mode, manual movement of the camera
+		/// is not allowed when following an entity.
+		/// </summary>
 		public override void MoveTo(Vector2 xzPosition)
 		{
 			StateSwitched(CameraStates.Fixed);
 		}
 
+		/// <inheritdoc />
+		/// <summary>
+		/// Switches to Fixed camera mode, manual movement of the camera
+		/// is not allowed when following an entity.
+		/// </summary>
 		public override void MoveTo(Vector3 position)
 		{
 			StateSwitched(CameraStates.Fixed);
 		}
 
+		/// <inheritdoc />
+		/// /// <summary>
+		/// Switches to Fixed camera mode, manual movement of the camera
+		/// is not allowed when following an entity.
+		/// </summary>
 		public override void MoveBy(Vector2 xzMovement)
 		{
 			StateSwitched(CameraStates.Fixed);
 		}
 
+		/// <inheritdoc />
+		/// /// <summary>
+		/// Switches to Fixed camera mode, manual movement of the camera
+		/// is not allowed when following an entity.
+		/// </summary>
 		public override void MoveBy(Vector3 movement)
 		{
 			StateSwitched(CameraStates.Fixed);
 		}
 
+		/// <inheritdoc />
+		/// <summary>
+		/// Resets the camera to default position relative to the followed entity.
+		/// </summary>
 		public override void Reset()
 		{
 			/*
@@ -63,12 +92,19 @@ namespace MHUrho.CameraMovement
 			WantedCameraVerticalOffset = 10;
 		}
 
+		/// <summary>
+		/// Corrects the direction, canceling any movement of the followed entity.
+		/// </summary>
 		public override void PreChangesUpdate()
 		{
 			CorrectWorldDirection();
 			base.PreChangesUpdate();
 		}
 
+		/// <summary>
+		/// Stores the wanted camera direction and position, in case the followed entity
+		/// moves or rotates. Invokes CameraMoved if the camera moved.
+		/// </summary>
 		public override void PostChangesUpdate()
 		{
 			base.PostChangesUpdate();
@@ -82,6 +118,7 @@ namespace MHUrho.CameraMovement
 			cameraMoved = false;
 		}
 
+		/// <inheritdoc />
 		public override void SwitchToThis(CameraState fromState)
 		{
 			if (Followed == null) {
@@ -121,11 +158,17 @@ namespace MHUrho.CameraMovement
 			CorrectWorldDirection();
 		}
 
+		/// <inheritdoc />
 		public override void SwitchFromThis(CameraState toState)
 		{
 			ClearFollowed();			
 		}
 
+		/// <summary>
+		/// Sets the entity to follow by this camera.
+		/// If already following, switches from the current entity to new <paramref name="entity"/>
+		/// </summary>
+		/// <param name="entity">The entity to follow.</param>
 		public void SetFollowedEntity(IEntity entity)
 		{
 			//Actively following
@@ -142,11 +185,18 @@ namespace MHUrho.CameraMovement
 
 		}
 
+		/// <summary>
+		/// Informs everyone that the camera moved.
+		/// </summary>
 		protected override void SignalCameraMoved()
 		{
 			cameraMoved = true;
 		}
 
+		/// <summary>
+		/// Removes the handlers watching for followed entity movement and rotation from the entity
+		/// and stops following the entity.
+		/// </summary>
 		void ClearFollowed()
 		{
 			if (Followed != null) {
@@ -157,16 +207,29 @@ namespace MHUrho.CameraMovement
 			}
 		}
 
+		/// <summary>
+		/// Counteracts the rotation of the entity, so that the camera remains
+		/// facing the stored direction <see cref="cameraWorldDirection"/>.
+		/// </summary>
+		/// <param name="entity">The followed entity.</param>
 		void OnFollowedRotationChanged(IEntity entity)
 		{
 			CorrectWorldDirection();
 		}
 
+		/// <summary>
+		/// Handles the movement of the followed entity, remembers to signal
+		/// that the camera moved in the game world.
+		/// </summary>
+		/// <param name="entity">The followed entity.</param>
 		void OnFollowedPositionChanged(IEntity entity)
 		{
 			cameraMoved = true;
 		}
 
+		/// <summary>
+		/// Counteracts the rotation of the followed entity so that the camera always faces the <see cref="cameraWorldDirection"/>.
+		/// </summary>
 		void CorrectWorldDirection()
 		{
 			Vector3 localDirection = Vector3.Normalize(CameraHolder.WorldToLocal(CameraHolder.WorldPosition + cameraWorldDirection));
