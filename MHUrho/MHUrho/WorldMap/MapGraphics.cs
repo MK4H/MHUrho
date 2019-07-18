@@ -546,8 +546,7 @@ namespace MHUrho.WorldMap
 					IntPtr ibPointer = LockIndexBufferSafe(ib, numIndicies);
 
 					if (vbPointer == IntPtr.Zero || ibPointer == IntPtr.Zero) {
-						//TODO: Error, could not lock buffers into memory, cannot create map
-						throw new Exception("Could not lock buffer into memory for map model creation");
+						throw new LevelLoadingException("Could not lock buffer into memory for map model creation");
 					}
 
 					unsafe {
@@ -1035,8 +1034,7 @@ namespace MHUrho.WorldMap
 				Image mapImage = new Image();
 
 				if (!mapImage.SetSize(Tile.ImageWidth * tileTypeCount, Tile.ImageHeight, 4)) {
-					//TODO: Error;
-					throw new Exception("Could not set size of the map texture image");
+					throw new LevelLoadingException("Could not set size of the map texture image");
 				}
 
 				int mapImageWidth = Tile.ImageWidth * tileTypeCount;
@@ -1055,8 +1053,7 @@ namespace MHUrho.WorldMap
 					}
 					
 					if (!mapImage.SetSubimage(tileTypeImage, subimageRect)) {
-						//TODO: Error;
-						throw new Exception("Could not copy tileType image to the map texture image");
+						throw new LevelLoadingException("Could not copy tileType image to the map texture image");
 					}
 
 					tileTypeImage.Dispose();

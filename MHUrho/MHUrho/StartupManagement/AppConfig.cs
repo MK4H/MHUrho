@@ -103,7 +103,8 @@ namespace MHUrho.StartupManagement
 
 			var serializer = new DataContractSerializer(typeof(AppConfig));
 			
-			//TODO: Catch
+			//NOTE: There is no point in catching the error, there is no way we can start 
+			// without settings.
 			AppConfig newConfig = (AppConfig)serializer.ReadObject(stream);
 			return newConfig;
 		}

@@ -825,8 +825,7 @@ namespace MHUrho.Logic
 			while (dictionary.ContainsKey(id = rng.Next()) || id == 0) {
 				i++;
 				if (i > MaxTries) {
-					//TODO: Exception
-					throw new Exception("Could not find free ID");
+					throw new FatalRuntimeException("Could not find free ID, probably entity overflow.");
 				}
 			}
 

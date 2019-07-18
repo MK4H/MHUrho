@@ -238,7 +238,6 @@ namespace MHUrho.DefaultComponents
 			return numSolutions;
 		}
 
-		//TODO: THIS IS WRONG, GETS JUST THE LOWVECTOR, split into two metods
 		public static int GetVectorsForMovingTarget(IRangeTarget rangeTarget,
 													Vector3 sourcePosition,
 													float initialProjectileSpeed,

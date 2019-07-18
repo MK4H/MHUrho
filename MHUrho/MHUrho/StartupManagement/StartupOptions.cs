@@ -630,7 +630,6 @@ namespace MHUrho.StartupManagement
 			//if valuesElement is not null, schema should guarantee that there are the value elements
 			string levelName = values.Element(XMLNamespace + "levelName").Value;
 			string description = values.Element(XMLNamespace + "description").Value;
-			//TODO: Maybe correct the paths
 			string thumbnailPath = values.Element(XMLNamespace + "thumbnailPath").Value;
 			string typeName = values.Element(XMLNamespace + "logicTypeName").Value;
 			IntVector2 mapSize = XmlHelpers.GetIntVector2(values.Element(XMLNamespace + "mapSize"));
@@ -774,7 +773,6 @@ namespace MHUrho.StartupManagement
 			XElement humanPlayerElement = values.Element(XMLNamespace + humanPlayerElementName);
 			string humanPlayerLogicName = humanPlayerElement.Attribute(logicNameAttribute).Value;
 			int humanPlayerTeamID = int.Parse(humanPlayerElement.Attribute(teamIDAttribute).Value);
-			//TODO: Maybe correct the paths
 
 			List<Tuple<string, int>> aiPlayers = new List<Tuple<string, int>>();
 

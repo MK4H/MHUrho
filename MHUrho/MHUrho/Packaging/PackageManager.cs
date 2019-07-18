@@ -301,7 +301,6 @@ namespace MHUrho.Packaging
 			string dirEntry = dirEntries[gamePack];
 
 
-			//TODO: Exception
 			//Already validated
 			XDocument document = null;
 			try {
