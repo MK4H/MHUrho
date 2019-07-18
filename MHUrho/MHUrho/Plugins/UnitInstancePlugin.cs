@@ -9,6 +9,9 @@ using MHUrho.DefaultComponents;
 namespace MHUrho.Plugins
 {
 
+	/// <summary>
+	/// Base class for unit instance plugins in packages.
+	/// </summary>
 	public abstract class UnitInstancePlugin : EntityInstancePlugin {
 
 		/// <summary>
@@ -16,6 +19,11 @@ namespace MHUrho.Plugins
 		/// </summary>
 		public IUnit Unit { get; private set; }
 
+		/// <summary>
+		/// Creates a unit instance plugin, stores the controlled unit and the level.
+		/// </summary>
+		/// <param name="level">The level.</param>
+		/// <param name="unit">The controlled unit.</param>
 		protected UnitInstancePlugin(ILevelManager level, IUnit unit) 
 			:base(level, unit)
 		{

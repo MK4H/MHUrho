@@ -9,6 +9,9 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class of all unit type plugins in packages.
+	/// </summary>
 	public abstract class UnitTypePlugin : TypePlugin
 	{
 		/// <summary>

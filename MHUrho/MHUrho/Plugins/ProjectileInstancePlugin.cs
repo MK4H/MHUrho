@@ -8,6 +8,9 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for projectile instance plugins.
+	/// </summary>
 	public abstract class ProjectileInstancePlugin : EntityInstancePlugin
 	{
 		/// <summary>

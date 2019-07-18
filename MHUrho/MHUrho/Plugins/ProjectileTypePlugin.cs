@@ -10,6 +10,9 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for projectile type plugins.
+	/// </summary>
 	public abstract class ProjectileTypePlugin : TypePlugin
 	{
 		/// <summary>

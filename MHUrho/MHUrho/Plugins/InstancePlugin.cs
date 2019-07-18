@@ -8,6 +8,9 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for all instance plugins.
+	/// </summary>
 	public abstract class InstancePlugin : IDisposable
 	{
 		/// <summary>

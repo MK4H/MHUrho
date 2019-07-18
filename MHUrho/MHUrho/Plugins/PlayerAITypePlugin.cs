@@ -6,6 +6,9 @@ using MHUrho.Logic;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for player AI type plugins.
+	/// </summary>
     public abstract class PlayerAITypePlugin : TypePlugin {
 
 		/// <summary>

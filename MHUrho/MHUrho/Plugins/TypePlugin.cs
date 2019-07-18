@@ -10,6 +10,9 @@ using Urho;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for all type plugins.
+	/// </summary>
 	public abstract class TypePlugin : IDisposable {
 
 		/// <summary>

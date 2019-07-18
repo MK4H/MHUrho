@@ -14,14 +14,32 @@ namespace MHUrho.Plugins
 	/// Used so that we can assume that plugin will never be null in player implementation.
 	/// </summary>
 	class PlaceholderPlayerPluginType : PlayerAITypePlugin {
+		/// <summary>
+		/// Name of the placeholder player type plugin should never be used.
+		/// </summary>
 		public override string Name => "";
+		/// <summary>
+		/// Id of the placeholder player type plugin should never be used.
+		/// </summary>
 		public override int ID => 0;
 
+		/// <summary>
+		/// Creates new instance of placeholder instance plugin that does nothing.
+		/// </summary>
+		/// <param name="level">Level.</param>
+		/// <param name="player">The controlled player.</param>
+		/// <returns>Placeholder instance plugin.</returns>
 		public override PlayerAIInstancePlugin CreateNewInstance(ILevelManager level, IPlayer player)
 		{
 			return new PlaceholderPlayerPluginInstance(level, player);
 		}
 
+		/// <summary>
+		/// Creates new instance of placeholder instance plugin that does nothing.
+		/// </summary>
+		/// <param name="level">Level.</param>
+		/// <param name="player">The controlled player.</param>
+		/// <returns>Placeholder instance plugin.</returns>
 		public override PlayerAIInstancePlugin GetInstanceForLoading(ILevelManager level, IPlayer player)
 		{
 			return new PlaceholderPlayerPluginInstance(level, player);

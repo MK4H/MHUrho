@@ -8,6 +8,9 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for player AI instance plugins.
+	/// </summary>
     public abstract class PlayerAIInstancePlugin : InstancePlugin
     {
 		/// <summary>

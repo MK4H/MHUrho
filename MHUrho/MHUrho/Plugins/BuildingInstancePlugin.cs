@@ -47,21 +47,33 @@ namespace MHUrho.Plugins
 		}
 
 		/// <summary>
-		/// Gets the height of the impassable portion of the building.
+		/// Gets the height of the building overriding the height of the terrain at this point.
 		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		/// <returns></returns>
+		/// <param name="x">The X coordinate in th XZ plane.</param>
+		/// <param name="y">The Y coordinate in the XZ plane.</param>
+		/// <returns>Height of the building if we want to override the height of the terrain, null otherwise.</returns>
 		public virtual float? GetHeightAt(float x, float y)
 		{
 			return null;
 		}
 
+		/// <summary>
+		/// Gets a formation controller that can be used to position groups of units around the
+		/// <paramref name="centerPosition"/> on the building.
+		/// </summary>
+		/// <param name="centerPosition">The center position to order the units around.</param>
+		/// <returns>Formation controller if units can be ordered onto the building, null otherwise.</returns>
 		public virtual IFormationController GetFormationController(Vector3 centerPosition)
 		{
 			return null;
 		}
 
+		/// <summary>
+		/// Informs the plugin that the building was hit by the <paramref name="byEntity"/>,
+		///  which added the data <paramref name="userData"/> to the message.
+		/// </summary>
+		/// <param name="byEntity">The entity that hit the building.</param>
+		/// <param name="userData">The user data associated with the hit.</param>
 		public virtual void OnHit(IEntity byEntity, object userData)
 		{
 

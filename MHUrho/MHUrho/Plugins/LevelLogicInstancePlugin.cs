@@ -13,6 +13,9 @@ using Urho.Gui;
 
 namespace MHUrho.Plugins
 {
+	/// <summary>
+	/// Base class for all level logic instance plugins.
+	/// </summary>
     public abstract class LevelLogicInstancePlugin : InstancePlugin {
 
 		protected LevelLogicInstancePlugin(ILevelManager level)
@@ -21,6 +24,9 @@ namespace MHUrho.Plugins
 
 		}
 
+		/// <summary>
+		/// Invoked just before the level stared, after everything is loaded and initialized.
+		/// </summary>
 		public virtual void OnStart()
 		{
 
@@ -32,8 +38,19 @@ namespace MHUrho.Plugins
 		/// </summary>
 		public abstract void Initialize();
 
+		/// <summary>
+		/// Gets the factory for creating the pathFinding algorithm for the level.
+		/// </summary>
+		/// <returns>The factory for creating the pathFinding algorithm.</returns>
 		public abstract IPathFindAlgFactory GetPathFindAlgFactory();
 
+		/// <summary>
+		/// Gets the tool manager which is responsible for managing tools.
+		/// This tool manager decides which tools will be accessible to the user.
+		/// </summary>
+		/// <param name="levelManager">The level.</param>
+		/// <param name="inputType">Input schema.</param>
+		/// <returns>Tool manager for the current level.</returns>
 		public abstract ToolManager GetToolManager(ILevelManager levelManager, InputType inputType);
 	}
 }
