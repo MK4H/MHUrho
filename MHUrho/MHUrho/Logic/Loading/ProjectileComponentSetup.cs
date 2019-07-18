@@ -6,8 +6,13 @@ using Urho.Physics;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Sets up components on the node hierarchy making up the projectile
+	/// to correct values for projectile.
+	/// </summary>
 	class ProjectileComponentSetup : ComponentSetup
 	{
+		/// <inheritdoc />
 		protected override void SetupRigidBody(RigidBody rigidBody, ILevelManager level)
 		{
 			rigidBody.CollisionLayer = (int)CollisionLayer.Projectile;
@@ -17,17 +22,20 @@ namespace MHUrho.Logic
 			rigidBody.UseGravity = false;
 		}
 
+		/// <inheritdoc />
 		protected override void SetupStaticModel(StaticModel staticModel, ILevelManager level)
 		{
 			staticModel.CastShadows = false;
 			staticModel.DrawDistance = level.App.Config.ProjectileDrawDistance;
 		}
 
+		/// <inheritdoc />
 		protected override void SetupAnimatedModel(AnimatedModel animatedModel, ILevelManager level)
 		{
 			SetupStaticModel(animatedModel, level);
 		}
 
+		/// <inheritdoc />
 		protected override void SetupAnimationController(AnimationController animationController, ILevelManager level)
 		{
 			

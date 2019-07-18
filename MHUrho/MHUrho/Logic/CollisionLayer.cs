@@ -4,6 +4,10 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
+
+	/// <summary>
+	/// Which entities will the collider collide with.
+	/// </summary>
 	[Flags]
 	enum CollisionLayer {
 		Unit = 1,

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Thrown when a creation of a new entity fails with unexpected exception.
+	/// </summary>
 	public class CreationException : ApplicationException
 	{
 		public CreationException()

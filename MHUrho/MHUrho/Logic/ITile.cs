@@ -9,7 +9,9 @@ using Urho;
 
 namespace MHUrho.Logic
 {
-
+	/// <summary>
+	/// Tile of the map.
+	/// </summary>
 	public interface ITile {
 
 

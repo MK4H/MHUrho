@@ -14,21 +14,59 @@ using MHUrho.Plugins;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Represents a player in the level.
+	/// </summary>
 	class Player : Component, IPlayer {
 
+		/// <summary>
+		/// Loads player from a saved game.
+		/// </summary>
 		class Loader : IPlayerLoader {
 
+			/// <summary>
+			/// Player that is currently being loaded.
+			/// </summary>
 			public Player Player => loadingPlayer;
 
+			/// <summary>
+			/// Player that is currently being loaded.
+			/// </summary>
 			Player loadingPlayer;
 
-
+			/// <summary>
+			/// The level the player is being loaded into.
+			/// </summary>
 			readonly LevelManager level;
+
+			/// <summary>
+			/// Stored data of the player.
+			/// </summary>
 			readonly StPlayer storedPlayer;
+
+			/// <summary>
+			/// Graphical identifications of the player.
+			/// </summary>
 			readonly PlayerInsignia insignia;
+
+			/// <summary>
+			/// Type of the loaded player.
+			/// </summary>
 			readonly PlayerType type;
+
+			/// <summary>
+			/// The team of the loaded player.
+			/// </summary>
 			readonly int teamID;
 
+			/// <summary>
+			/// Creates a loader that loads one of the <paramref name="storedPlayers"/> that corresponds to the data in
+			/// <paramref name="newInfo"/>.
+			/// </summary>
+			/// <param name="level">The level to load the player into.</param>
+			/// <param name="storedPlayers">The stored data of all players.</param>
+			/// <param name="insigniaGetter">The source of graphical representations of the players.</param>
+			/// <param name="newInfo">Info of the player to load.</param>
 			public Loader(LevelManager level, IList<StPlayer> storedPlayers, InsigniaGetter insigniaGetter, PlayerInfo newInfo)
 			{
 				this.level = level;
@@ -49,6 +87,14 @@ namespace MHUrho.Logic
 				storedPlayer.UserPlugin = new PluginData();
 			}
 
+			/// <summary>
+			/// Creates a loader that loads the given <paramref name="storedPlayer"/> into the <paramref name="level"/>.
+			/// </summary>
+			/// <param name="level">The level to load the player into.</param>
+			/// <param name="storedPlayer">Stored data of the player.</param>
+			/// <param name="insigniaGetter">The source of graphical representations of the players.</param>
+			/// <param name="loadPlaceholder">If the player should be loaded as a placeholder player, or if it should be loaded with it's
+			/// actual type and plugin.</param>
 			public Loader(LevelManager level, StPlayer storedPlayer, InsigniaGetter insigniaGetter, bool loadPlaceholder)
 			{
 				this.level = level;
@@ -72,6 +118,11 @@ namespace MHUrho.Logic
 
 			}
 
+			/// <summary>
+			/// Stores the players state in an instance of <see cref="StPlayer"/> for serialization.
+			/// </summary>
+			/// <param name="player">The player to store.</param>
+			/// <returns>Player data stored in an instance of <see cref="StPlayer"/>.</returns>
 			public static StPlayer Save(Player player)
 			{
 				var storedPlayer = new StPlayer
@@ -109,6 +160,9 @@ namespace MHUrho.Logic
 				return storedPlayer;
 			}
 
+			/// <summary>
+			/// Starts loading of the player.
+			/// </summary>
 			public void StartLoading()
 			{
 
@@ -118,6 +172,9 @@ namespace MHUrho.Logic
 				loadingPlayer = new Player(storedPlayer.Id, teamID, level, insignia, type, newPluginInstance);
 			}
 
+			/// <summary>
+			/// Connects references that were stored with the player.
+			/// </summary>
 			public void ConnectReferences() {
 				foreach (var unitID in storedPlayer.UnitIDs) {
 					loadingPlayer.AddUnitImpl(level.GetUnit(unitID));
@@ -142,33 +199,54 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <summary>
+			/// Cleans up.
+			/// </summary>
 			public void FinishLoading() {
 
 			}
 		}
 
+		/// <inheritdoc />
 		public new int ID { get; }
 
+		/// <inheritdoc />
 		public PlayerInsignia Insignia { get; private set; }
 
+		/// <inheritdoc />
 		public PlayerAIInstancePlugin Plugin { get; private set; }
 
+		/// <inheritdoc />
 		public int TeamID { get; private set; }
 
+		/// <inheritdoc />
 		public ILevelManager Level { get; private set; }
 
+		/// <inheritdoc />
 		public PlayerType PlayerType { get; private set; }
 
+		/// <inheritdoc />
 		public bool IsRemovedFromLevel { get; private set; }
 
+		/// <inheritdoc />
 		public IReadOnlyDictionary<ResourceType, double> Resources => resources;
 
+		/// <inheritdoc />
 		public event Action<IPlayer> OnRemoval;
 
+		/// <summary>
+		/// Units owned by the player, split up by types.
+		/// </summary>
 		readonly Dictionary<UnitType,List<IUnit>> units;
 
+		/// <summary>
+		/// Buildings owned by the player, split up by types.
+		/// </summary>
 		readonly Dictionary<BuildingType, List<IBuilding>> buildings;
 
+		/// <summary>
+		/// Resources owned by the player.
+		/// </summary>
 		readonly Dictionary<ResourceType, double> resources;
 
 		/// <summary>
@@ -312,6 +390,9 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <summary>
+		/// Removes the player from the level with all that it owns.
+		/// </summary>
 		public new void Dispose()
 		{
 			RemoveFromLevel();
@@ -433,37 +514,44 @@ namespace MHUrho.Logic
 			return removed;
 		}
 
+		/// <inheritdoc />
 		public IEnumerable<IUnit> GetAllUnits() {
 			return from unitList in units.Values
 				   from unit in unitList
 				   select unit;
 		}
 
+		/// <inheritdoc />
 		public IReadOnlyList<IUnit> GetUnitsOfType(UnitType unitType) {
 			return units.TryGetValue(unitType, out List<IUnit> unitList) ? unitList : new List<IUnit>();
 		}
 
+		/// <inheritdoc />
 		public IEnumerable<IBuilding> GetAllBuildings() {
 			return from buildingList in buildings.Values
 				   from building in buildingList
 				   select building;
 		}
 
+		/// <inheritdoc />
 		public IReadOnlyList<IBuilding> GetBuildingsOfType(BuildingType buildingType) {
 			return buildings.TryGetValue(buildingType, out var buildingList) ? buildingList : new List<IBuilding>();
 		}
 
+		/// <inheritdoc />
 		public IReadOnlyDictionary<ResourceType, double> GetAllResources()
 		{
 			return Resources;
 		}
 
+		/// <inheritdoc />
 		public double GetResourceAmount(ResourceType resourceType)
 		{
 			resources.TryGetValue(resourceType, out double count);
 			return count;
 		}
 
+		/// <inheritdoc />
 		public IEnumerable<IPlayer> GetEnemyPlayers() {
 			return from player in Level.Players
 				   where IsEnemy(player)
@@ -471,29 +559,31 @@ namespace MHUrho.Logic
 
 		}
 
-
+		/// <inheritdoc />
 		public bool IsFriend(IPlayer player)
 		{
 			return player.TeamID == TeamID;
 		}
 
+		/// <inheritdoc />
 		public bool IsEnemy(IPlayer player)
 		{
 			return !IsFriend(player);
 		}
 
 
-
+		/// <inheritdoc />
 		public override int GetHashCode() {
 			return ID;
 		}
 
+		/// <inheritdoc />
 		public override bool Equals(object obj)
 		{
 			return ReferenceEquals(this, obj);
 		}
 
-
+		/// <inheritdoc />
 		protected override void OnUpdate(float timeStep)
 		{
 			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) return;

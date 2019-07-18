@@ -21,18 +21,31 @@ namespace MHUrho.Logic
 	public class UnitType : IEntityType, IDisposable
 	{
 
+		/// <inheritdoc />
 		public int ID { get; private set; }
 
+		/// <inheritdoc />
 		public string Name { get; private set; }
 
+		/// <inheritdoc />
 		public GamePack Package { get; private set; }
 
+		/// <summary>
+		/// The assets that will be added to every instance of unit of this type.
+		/// </summary>
 		public AssetContainer Assets { get; private set; }
 
+		/// <summary>
+		/// Part of the texture <see cref="GamePack.UnitIconTexture"/> that corresponds to this unit type.
+		/// </summary>
 		public IntRect IconRectangle { get; private set; }
 
+		/// <summary>
+		/// Type plugin of this unit type.
+		/// </summary>
 		public UnitTypePlugin Plugin { get; private set; }
 
+		/// <inheritdoc />
 		TypePlugin IEntityType.Plugin => Plugin;
 
 		/// <summary>
@@ -167,7 +180,12 @@ namespace MHUrho.Logic
 		}
 
 
-
+		/// <summary>
+		/// Gets new instance plugin to control the <paramref name="unit"/> in the <paramref name="level"/>.
+		/// </summary>
+		/// <param name="unit">The unit that will be controlled by the plugin.</param>
+		/// <param name="level">The level the unit is in.</param>
+		/// <returns>Instance plugin that will control the <paramref name="unit"/>.</returns>
 		internal UnitInstancePlugin GetNewInstancePlugin(IUnit unit, ILevelManager level) {
 			try {
 				return Plugin.CreateNewInstance(level, unit);
@@ -180,6 +198,13 @@ namespace MHUrho.Logic
 			
 		}
 
+		/// <summary>
+		/// Creates new instance plugin to control the <paramref name="unit"/> that will load it's state from
+		/// the stored data of the unit.
+		/// </summary>
+		/// <param name="unit">The unit to control.</param>
+		/// <param name="level">The level the unit is in.</param>
+		/// <returns>Instance plugin that expects it will be given the stored data to load.</returns>
 		internal UnitInstancePlugin GetInstancePluginForLoading(IUnit unit, ILevelManager level) {
 			try {
 				return Plugin.GetInstanceForLoading(level, unit);
@@ -192,6 +217,9 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <summary>
+		/// Releases assets.
+		/// </summary>
 		public void Dispose() {
 			//NOTE: Release all disposable resources
 			Assets.Dispose();

@@ -14,6 +14,10 @@ using MHUrho.WorldMap;
 using Urho;
 
 namespace MHUrho.Logic {
+
+	/// <summary>
+	/// Running game level.
+	/// </summary>
 	public interface ILevelManager : IDisposable {
 
 		/// <summary>

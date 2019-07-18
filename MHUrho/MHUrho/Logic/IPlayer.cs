@@ -6,6 +6,10 @@ using MHUrho.Storage;
 using Urho;
 
 namespace MHUrho.Logic {
+
+	/// <summary>
+	/// Player in the current level.
+	/// </summary>
 	public interface IPlayer : IDisposable {
 
 		/// <summary>

@@ -23,15 +23,35 @@ namespace MHUrho.Logic
 	/// Class representing unit, every action you want to do with the unit should go through this class
 	/// </summary>
 	class Unit : Entity, IUnit {
+
+		/// <summary>
+		/// Loads a stored unit.
+		/// </summary>
 		class Loader : IUnitLoader {			
 
+			/// <summary>
+			/// Loading unit.
+			/// </summary>
 			public IUnit Unit => loadingUnit;
 
+			/// <summary>
+			/// Loading unit.
+			/// </summary>
 			Unit loadingUnit;
 
+			/// <summary>
+			/// The loaders of the default components that were stored with the units.
+			/// </summary>
 			List<DefaultComponentLoader> defComponentLoaders;
 
+			/// <summary>
+			/// The level the unit is being loaded into.
+			/// </summary>
 			readonly LevelManager level;
+
+			/// <summary>
+			/// The type of the loading unit.
+			/// </summary>
 			readonly UnitType type;
 			/// <summary>
 			/// Holds the image of this unit between the steps of loading
@@ -108,6 +128,11 @@ namespace MHUrho.Logic
 				}			
 			}
 
+			/// <summary>
+			/// Stores the unit state in an instance of <see cref="StUnit"/> for serialization.
+			/// </summary>
+			/// <param name="unit">The unit to save.</param>
+			/// <returns>Stored state of the unit.</returns>
 			public static StUnit Save(Unit unit) {
 				var storedUnit = new StUnit
 								{
@@ -192,6 +217,9 @@ namespace MHUrho.Logic
 				loadingUnit.UnitPlugin.LoadState(new PluginDataWrapper(storedUnit.UserPlugin, level));
 			}
 
+			/// <summary>
+			/// Cleans up.
+			/// </summary>
 			public void FinishLoading() {
 				foreach (var componentLoader in defComponentLoaders) {
 					componentLoader.FinishLoading();
@@ -200,36 +228,46 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <inheritdoc />
 		public UnitType UnitType { get; private set;}
 
+		/// <inheritdoc />
 		public override IEntityType Type => UnitType;
 
+		/// <inheritdoc />
 		public override Vector3 Position {
 			get => Node.Position;
 			protected set => Node.Position = value;
 		}
 
+		/// <inheritdoc />
 		public override InstancePlugin Plugin => UnitPlugin;
 
-		/// <summary>
-		/// Tile this unit is standing on.
-		/// </summary>
+		/// <inheritdoc />
 		public ITile Tile { get; private set; }
 
+		/// <inheritdoc />
 		public UnitInstancePlugin UnitPlugin { get; private set; }
 
+		/// <inheritdoc />
 		public bool AlwaysVertical { get; set; } = false;
 
+		/// <inheritdoc />
 		public override Vector3 Forward => Node.WorldDirection;
 
+		/// <inheritdoc />
 		public override Vector3 Backward => -Forward;
 
+		/// <inheritdoc />
 		public override Vector3 Right => Node.WorldRight;
 
+		/// <inheritdoc />
 		public override Vector3 Left => -Right;
 
+		/// <inheritdoc />
 		public override Vector3 Up => Node.WorldUp;
 
+		/// <inheritdoc />
 		public override Vector3 Down => -Up;
 
 		/// <summary>
@@ -278,24 +316,29 @@ namespace MHUrho.Logic
 			return Loader.CreateNew(id, type, level, tile, rotation, player);
 		}
 
+		/// <inheritdoc />
 		public StUnit Save() {
 			return Loader.Save(this);
 		}
 
+		/// <inheritdoc />
 		public override void Accept(IEntityVisitor visitor) {
 			visitor.Visit(this);
 		}
 
+		/// <inheritdoc />
 		public override T Accept<T>(IEntityVisitor<T> visitor)
 		{
 			return visitor.Visit(this);
 		}
 
+		/// <inheritdoc />
 		public void SetHeight(float newHeight) {
 			Position = new Vector3(Position.X, newHeight, Position.Z);
 			SignalPositionChanged();
 		}
 
+		/// <inheritdoc />
 		public void TileHeightChanged(ITile tile)
 		{
 			try {
@@ -306,11 +349,7 @@ namespace MHUrho.Logic
 			}
 		}
 
-		/// <summary>
-		/// Notifies the unit that a building was built on the tile it was standing on.
-		/// </summary>
-		/// <param name="building">The new building.</param>
-		/// <param name="tile">The tile this unit is standing on.</param>
+		/// <inheritdoc />
 		public void BuildingBuilt(IBuilding building, ITile tile)
 		{
 			try
@@ -323,11 +362,7 @@ namespace MHUrho.Logic
 			}
 		}
 
-		/// <summary>
-		/// Notifies the unit that a building on the tile it was standing on was destroyed.
-		/// </summary>
-		/// <param name="building">The destroyed building.</param>
-		/// <param name="tile">The tile this unit is standing on.</param>
+		/// <inheritdoc />
 		public void BuildingDestroyed(IBuilding building, ITile tile)
 		{
 			try
@@ -340,17 +375,20 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public void MoveBy(Vector3 moveBy) {
 			var newPosition = Position + moveBy;
 
 			MoveTo(newPosition);
 		}
 
+		/// <inheritdoc />
 		public void MoveBy(Vector2 moveBy) {
 			var newLocation = new Vector2(Position.X + moveBy.X, Position.Z + moveBy.Y);
 			MoveTo(newLocation);
 		}
 
+		/// <inheritdoc />
 		public void MoveTo(Vector3 newPosition) {
 
 			FaceTowards(newPosition);
@@ -366,17 +404,12 @@ namespace MHUrho.Logic
 			SignalPositionChanged();
 		}
 
+		/// <inheritdoc />
 		public void MoveTo(Vector2 newLocation) {
 			MoveTo(new Vector3(newLocation.X, Level.Map.GetTerrainHeightAt(newLocation), newLocation.Y));
 		}
 
-		/// <summary>
-		/// Rotates the unit to face towards the <paramref name="lookPosition"/>, either directly if <see cref="AlwaysVertical"/> is false and
-		/// <paramref name="rotateAroundY"/> is false, or to its projection into current the XZ plane of the Node if either of those two are true
-		/// </summary>
-		/// <param name="lookPosition">position to look towards</param>
-		/// <param name="rotateAroundY">If <see cref="AlwaysVertical"/> is false, controls if the rotation will be only around the Y axis
-		/// if <see cref="AlwaysVertical"/> is true, has no effect</param>
+		/// <inheritdoc />
 		public void FaceTowards(Vector3 lookPosition, bool rotateAroundY = false) {
 			if (AlwaysVertical || rotateAroundY) {
 				//Only rotate around Y
@@ -392,6 +425,7 @@ namespace MHUrho.Logic
 			SignalRotationChanged();
 		}
 
+		/// <inheritdoc />
 		public override void RemoveFromLevel()
 		{
 			if (IsRemovedFromLevel) return;
@@ -416,6 +450,7 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public override void HitBy(IEntity other, object userData)
 		{
 			try {
@@ -427,11 +462,18 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <summary>
+		/// Removes the unit from level.
+		/// </summary>
 		void IDisposable.Dispose()
 		{
 			RemoveFromLevel();
 		}
 
+		/// <summary>
+		/// Handles scene update.
+		/// </summary>
+		/// <param name="timeStep">Time elapsed since the last scene update.</param>
 		protected override void OnUpdate(float timeStep) {
 			//Level.LevelNode.Enabled is here because there seems to be a bug
 			// where child nodes of level still receive updates even though 

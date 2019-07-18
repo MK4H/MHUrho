@@ -17,18 +17,43 @@ namespace MHUrho.Logic
 	class Projectile : Entity, IProjectile {
 		class Loader : IProjectileLoader {
 
+			/// <summary>
+			/// Loading projectile
+			/// </summary>
 			public IProjectile Projectile => loadingProjectile;
 
+			/// <summary>
+			/// Loading projectile
+			/// </summary>
 			Projectile loadingProjectile;
 
-			List<DefaultComponentLoader> componentLoaders;
+			/// <summary>
+			/// Loaders of the default components stored with the projectile.
+			/// </summary>
+			readonly List<DefaultComponentLoader> componentLoaders;
 
+			/// <summary>
+			/// The level the projectile is being loaded into.
+			/// </summary>
 			readonly LevelManager level;
+
+			/// <summary>
+			/// Stored data of the projectile.
+			/// </summary>
 			readonly StProjectile storedProjectile;
+
+			/// <summary>
+			/// Type of the loading projectile.
+			/// </summary>
 			readonly ProjectileType type;
 
 			const string NodeName = "ProjectileNode";
 
+			/// <summary>
+			/// Creates a loader that loads the <paramref name="storedProjectile"/> into the <paramref name="level"/>.
+			/// </summary>
+			/// <param name="level">The level the projectile is being loaded into.</param>
+			/// <param name="storedProjectile">The stored data of the projectile.</param>
 			public Loader(LevelManager level,
 						StProjectile storedProjectile)
 			{
@@ -42,6 +67,16 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <summary>
+			/// Creates new projectile in the level.
+			/// </summary>
+			/// <param name="ID">The id of the new projectile.</param>
+			/// <param name="level">Level the projectile is created in.</param>
+			/// <param name="player">Owner of the new projectile.</param>
+			/// <param name="position">Initial position of the projectile.</param>
+			/// <param name="rotation">Initial rotation of the projectile.</param>
+			/// <param name="type">Type of the projectile.</param>
+			/// <returns>New projectile created in the level.</returns>
 			public static Projectile CreateNew(int ID,
 												ILevelManager level,
 												IPlayer player,
@@ -83,6 +118,11 @@ namespace MHUrho.Logic
 				
 			}
 
+			/// <summary>
+			/// Stores the projectile into an instance of <see cref="StProjectile"/> for serialization.
+			/// </summary>
+			/// <param name="projectile">The projectile to store.</param>
+			/// <returns>Stored projectile in an instance of <see cref="StProjectile"/> for serialization</returns>
 			public static StProjectile Save(Projectile projectile)
 			{
 				var stProjectile = new StProjectile
@@ -118,7 +158,7 @@ namespace MHUrho.Logic
 				return stProjectile;
 			}
 
-
+			/// <inheritdoc />
 			public void StartLoading()
 			{
 				if (type.ID != storedProjectile.TypeID) {
@@ -160,6 +200,7 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <inheritdoc />
 			public void ConnectReferences() {
 				loadingProjectile.Player = level.GetPlayer(storedProjectile.PlayerID);
 
@@ -172,6 +213,7 @@ namespace MHUrho.Logic
 
 			}
 
+			/// <inheritdoc />
 			public void FinishLoading()
 			{
 				foreach (var componentLoader in componentLoaders) {
@@ -180,40 +222,60 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public ProjectileType ProjectileType { get; private set; }
 
+		/// <inheritdoc />
 		public override IEntityType Type => ProjectileType;
 
+		/// <inheritdoc />
 		public override Vector3 Position {
 			get => Node.Position;
 			protected set => Node.Position = value;
 		}
 
+		/// <inheritdoc />
 		public override Vector3 Forward => Node.WorldDirection;
 
+		/// <inheritdoc />
 		public override Vector3 Backward => -Forward;
 
+		/// <inheritdoc />
 		public override Vector3 Right => Node.WorldRight;
 
+		/// <inheritdoc />
 		public override Vector3 Left => -Right;
 
+		/// <inheritdoc />
 		public override Vector3 Up => Node.WorldUp;
 
+		/// <inheritdoc />
 		public override Vector3 Down => -Up;
 
+		/// <inheritdoc />
 		public override InstancePlugin Plugin => ProjectilePlugin;
 
-
+		/// <inheritdoc />
 		public ProjectileInstancePlugin ProjectilePlugin { get; private set; }
-		/// <summary>
-		/// Default true
-		/// </summary>
+
+		/// <inheritdoc />
 		public bool FaceInTheDirectionOfMovement { get; set; }
 
+		/// <inheritdoc />
 		public bool TriggerCollisions { get; set; }
 
+		/// <summary>
+		/// If the projectile is currently stored in a pool, waiting for reinitialization
+		/// </summary>
 		bool isPooled;
 
+		/// <summary>
+		/// Creates a projectile.
+		/// </summary>
+		/// <param name="ID">ID of the new projectile.</param>
+		/// <param name="level">Level the projectile will be in.</param>
+		/// <param name="type">The type of the projectile.</param>
+		/// <param name="player">Owner of the projectile.</param>
 		protected Projectile(int ID, ILevelManager level, ProjectileType type, IPlayer player)
 			:base(ID,level)
 		{
@@ -225,6 +287,12 @@ namespace MHUrho.Logic
 			this.isPooled = false;
 		}
 
+		/// <summary>
+		/// Creates a projectile.
+		/// </summary>
+		/// <param name="ID">ID of the new projectile.</param>
+		/// <param name="level">Level the projectile will be in.</param>
+		/// <param name="type">The type of the projectile.</param>
 		protected Projectile(int ID,
 							 ILevelManager level,
 							 ProjectileType type)
@@ -238,11 +306,27 @@ namespace MHUrho.Logic
 		}
 
 
+		/// <summary>
+		/// Returns loader that will load the <paramref name="storedProjectile"/> into the <paramref name="level"/>.
+		/// </summary>
+		/// <param name="level">The level to load the projectile into.</param>
+		/// <param name="storedProjectile">The stored projectile data.</param>
+		/// <returns>Loader that will load the stored projectile.</returns>
 		public static IProjectileLoader GetLoader(LevelManager level, StProjectile storedProjectile)
 		{
 			return new Loader(level, storedProjectile);
 		}
 
+		/// <summary>
+		/// Creates new projectile in the level.
+		/// </summary>
+		/// <param name="ID">The id of the new projectile.</param>
+		/// <param name="level">Level the projectile is created in.</param>
+		/// <param name="player">Owner of the new projectile.</param>
+		/// <param name="position">Initial position of the projectile.</param>
+		/// <param name="rotation">Initial rotation of the projectile.</param>
+		/// <param name="type">Type of the projectile.</param>
+		/// <returns>New projectile created in the level.</returns>
 		public static Projectile CreateNew(int ID,
 											ILevelManager level,
 											IPlayer player,
@@ -253,6 +337,7 @@ namespace MHUrho.Logic
 			return Loader.CreateNew(ID, level, player, position, rotation, type);
 		}
 
+		/// <inheritdoc />
 		public void ReInitialize(int newID, ILevelManager level, IPlayer player, Vector3 position) {
 			ID = newID;
 			Enabled = true;
@@ -273,14 +358,13 @@ namespace MHUrho.Logic
 			}
 		}
 
-		
-
+		/// <inheritdoc />
 		public StProjectile Save()
 		{
 			return Loader.Save(this);
 		}
 
-
+		/// <inheritdoc />
 		public override void RemoveFromLevel() 
 		{
 			if (IsRemovedFromLevel && isPooled) {
@@ -310,16 +394,21 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public override void Accept(IEntityVisitor visitor)
 		{
 			visitor.Visit(this);
 		}
 
+		/// <inheritdoc />
 		public override T Accept<T>(IEntityVisitor<T> visitor)
 		{
 			return visitor.Visit(this);
 		}
 
+		/// <summary>
+		/// Removes the projectile from the level completely, doesn't just put it into a pool.
+		/// </summary>
 		public void HardRemove()
 		{
 			if (!IsRemovedFromLevel) {
@@ -343,6 +432,7 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public bool Move(Vector3 movement)
 		{
 			
@@ -370,6 +460,7 @@ namespace MHUrho.Logic
 			return true;	
 		}
 
+		/// <inheritdoc />
 		public bool Shoot(IRangeTarget target)
 		{
 			try {
@@ -383,6 +474,7 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public bool Shoot(Vector3 movement)
 		{
 			try
@@ -397,16 +489,22 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <inheritdoc />
 		public override void HitBy(IEntity other, object userData)
 		{
 			throw new InvalidOperationException("Projectiles should not hit each other");
 		}
 
+		/// <inheritdoc />
 		void IDisposable.Dispose()
 		{
 			RemoveFromLevel();
 		}
 
+		/// <summary>
+		/// Handles scene update.
+		/// </summary>
+		/// <param name="timeStep">Time elapsed since the last scene update.</param>
 		protected override void OnUpdate(float timeStep) 
 		{
 
@@ -426,6 +524,10 @@ namespace MHUrho.Logic
 			
 		}
 
+		/// <summary>
+		/// Handles collisions with other entities besides projectiles.
+		/// </summary>
+		/// <param name="args">Data of the collision event.</param>
 		void CollisionHandler(NodeCollisionStartEventArgs args)
 		{
 			if (TriggerCollisions) {

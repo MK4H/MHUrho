@@ -25,9 +25,15 @@ using MHUrho.CameraMovement;
 
 namespace MHUrho.Logic
 {
-
+	/// <summary>
+	/// Encapsulates methods that are invoked on each scene update.
+	/// </summary>
+	/// <param name="timeStep"></param>
 	public delegate void OnUpdateDelegate(float timeStep);
 
+	/// <summary>
+	/// Encapsulates methods that are invoked on level ending.
+	/// </summary>
 	public delegate void OnEndDelegate();
 
 	/// <summary>
@@ -35,6 +41,10 @@ namespace MHUrho.Logic
 	/// </summary>
 	partial class LevelManager : Component, ILevelManager, IDisposable
 	{
+		/// <summary>
+		/// Implementation of visitor that checks if the given entity is of the correct type.
+		/// </summary>
+		/// <typeparam name="T">The type that we are checking against.</typeparam>
 		class TypeCheckVisitor<T> :IEntityVisitor<bool> {
 			public bool Visit(IUnit unit)
 			{
@@ -58,67 +68,137 @@ namespace MHUrho.Logic
 		/// </summary>
 		public static LevelManager CurrentLevel { get; private set; }
 
+		/// <inheritdoc/>
 		public LevelRep LevelRep { get; private set; }
 
+		/// <inheritdoc/>
 		public MHUrhoApp App { get; private set; }
 
+		/// <inheritdoc/>
 		public Node LevelNode { get; private set; }
 
+		/// <inheritdoc/>
 		public IMap Map => map;
 
+		/// <inheritdoc/>
 		public Minimap Minimap { get; private set; }
 
+		/// <summary>
+		/// Factory that provides default component loading.
+		/// </summary>
 		public DefaultComponentFactory DefaultComponentFactory { get; private set; }
 
+		/// <inheritdoc/>
 		public PackageManager PackageManager => App.PackageManager;
 
+		/// <inheritdoc/>
 		public GamePack Package => PackageManager.ActivePackage;
 
+		/// <inheritdoc/>
 		public bool EditorMode { get; private set; }
 
+		/// <inheritdoc/>
 		public IEnumerable<IUnit> Units => units.Values;
 
+		/// <inheritdoc/>
 		public IEnumerable<IPlayer> Players => players.Values;
 
+		/// <inheritdoc/>
 		public IEnumerable<IBuilding> Buildings => buildings.Values;
 
+		/// <inheritdoc/>
 		public IGameController Input { get; private  set; }
 
+		/// <inheritdoc/>
 		public GameUIManager UIManager => Input.UIManager;
 
+		/// <inheritdoc/>
 		public CameraMover Camera { get; private set; }
 
+		/// <inheritdoc/>
 		public ToolManager ToolManager { get; private set; }
 
+		/// <inheritdoc/>
 		public IPlayer NeutralPlayer { get; private set; }
 
+		/// <inheritdoc/>
 		public IPlayer HumanPlayer { get; private set; }
 
+		/// <inheritdoc/>
 		public LevelLogicInstancePlugin Plugin { get; private set; }
 
+		/// <inheritdoc/>
 		public event OnUpdateDelegate Update;
+
+		/// <inheritdoc/>
 		public event OnEndDelegate Ending;
 
+		/// <inheritdoc/>
 		public bool IsEnding { get; private set; }
 
+		/// <summary>
+		/// Controller that translates user input to camera movement.
+		/// </summary>
 		ICameraController cameraController;
 
+		/// <summary>
+		/// Engine component for raycasting.
+		/// </summary>
 		readonly Octree octree;
 
+		/// <summary>
+		/// All units present in the level.
+		/// </summary>
 		readonly Dictionary<int, IUnit> units;
+
+		/// <summary>
+		/// All players present in the level.
+		/// </summary>
 		readonly Dictionary<int, IPlayer> players;
+
+		/// <summary>
+		/// All buildings present in the level.
+		/// </summary>
 		readonly Dictionary<int, IBuilding> buildings;
+
+		/// <summary>
+		/// All projectiles active in the level.
+		/// </summary>
 		readonly Dictionary<int, IProjectile> projectiles;
 
+		/// <summary>
+		/// All entities (units, buildings, projectiles) in the game.
+		/// </summary>
 		readonly Dictionary<int, IEntity> entities;
 
+		/// <summary>
+		/// All range targets in the game.
+		/// </summary>
 		readonly Dictionary<int, IRangeTarget> rangeTargets;
 
+		/// <summary>
+		/// Mapping of game engine nodes to entities.
+		/// </summary>
 		readonly Dictionary<Node, IEntity> nodeToEntity;
 
+		/// <summary>
+		/// Random number generator to be used for generating IDs.
+		/// </summary>
 		readonly Random rng;
+		/// <summary>
+		/// The map of this level.
+		/// </summary>
 		Map map;
 
+		/// <summary>
+		/// Creates level manager that controls a level presented by <paramref name="levelRep"/> to the user,
+		/// represented by <paramref name="levelNode"/> in the game engine.
+		/// </summary>
+		/// <param name="levelNode">The <see cref="Node"/> representing the level in the game engine.</param>
+		/// <param name="levelRep">Presentation of the level for the user.</param>
+		/// <param name="app">Current running application.</param>
+		/// <param name="octree">Engine component used for raycasting.</param>
+		/// <param name="editorMode">If the level is in editor mode or playig mode.</param>
 		protected LevelManager(Node levelNode, LevelRep levelRep, MHUrhoApp app, Octree octree, bool editorMode)
 		{
 			this.LevelNode = levelNode;
@@ -143,6 +223,16 @@ namespace MHUrho.Logic
 			ReceiveSceneUpdates = true;
 		}
 
+		/// <summary>
+		/// Returns loader that can load the level into playing mode.
+		/// </summary>
+		/// <param name="levelRep">Presentation of the level for the user.</param>
+		/// <param name="storedLevel">Stored serialized state of the level.</param>
+		/// <param name="players">Data to initialize the players.</param>
+		/// <param name="customSettings">Data to initialize the level logic instance plugin.</param>
+		/// <param name="parentProgress">Progress watcher for the parent process.</param>
+		/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
+		/// <returns>Loader that can load the level into playing mode.</returns>
 		public static ILevelLoader GetLoaderForPlaying(LevelRep levelRep,
 														StLevel storedLevel,
 														PlayerSpecification players,
@@ -153,6 +243,14 @@ namespace MHUrho.Logic
 			return new SavedLevelPlayingLoader(levelRep, storedLevel, players, customSettings, parentProgress, loadingSubsectionSize);
 		}
 
+		/// <summary>
+		/// Returns loader that can load the level into editing mode, where players are just placeholders.
+		/// </summary>
+		/// <param name="levelRep">Presentation of the level for the user.</param>
+		/// <param name="storedLevel">Stored serialized state of the level.</param>
+		/// <param name="parentProgress">Progress watcher for the parent process.</param>
+		/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
+		/// <returns>Loader that can load the level into editing mode.</returns>
 		public static ILevelLoader GetLoaderForEditing(LevelRep levelRep,
 														StLevel storedLevel,
 														IProgressEventWatcher parentProgress = null,
@@ -161,6 +259,14 @@ namespace MHUrho.Logic
 			return new SavedLevelEditorLoader(levelRep, storedLevel, parentProgress, loadingSubsectionSize);
 		}
 
+		/// <summary>
+		/// Returns loader that can generate new level based on provided data.
+		/// </summary>
+		/// <param name="levelRep">Presentation of the level for the user.</param>
+		/// <param name="mapSize">Size of the map to generate.</param>
+		/// <param name="parentProgress">Progress watcher for the parent process.</param>
+		/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
+		/// <returns>Loader that can generate new level.</returns>
 		public static ILevelLoader GetLoaderForDefaultLevel(LevelRep levelRep,
 															IntVector2 mapSize,
 															IProgressEventWatcher parentProgress = null,
@@ -169,6 +275,10 @@ namespace MHUrho.Logic
 			return new DefaultLevelLoader(levelRep, mapSize, parentProgress, loadingSubsectionSize);
 		}
 
+		/// <summary>
+		/// Saves the level into an instance of <see cref="StLevel"/> for serialization.
+		/// </summary>
+		/// <returns>Level state stored in instance of <see cref="StLevel"/> for serialization.</returns>
 		public StLevel Save() {
 			StLevel level = new StLevel() {
 				LevelName = LevelRep.Name,
@@ -213,6 +323,11 @@ namespace MHUrho.Logic
 			return level;
 		}
 
+		/// <summary>
+		/// Serializes the state of the level to the given <paramref name="stream"/>.
+		/// </summary>
+		/// <param name="stream">The stream to serialize the level into.</param>
+		/// <param name="leaveOpen">If the stream should be left open after the serialization.</param>
 		public void SaveTo(Stream stream, bool leaveOpen = false) {
 			var storedLevel = Save();
 
@@ -223,6 +338,9 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <summary>
+		/// Ends the level and releases all resources held by the level and all it's parts.
+		/// </summary>
 		public new void Dispose()
 		{
 			IsEnding = true;
@@ -269,21 +387,17 @@ namespace MHUrho.Logic
 			GC.Collect();
 		}
 
+		/// <summary>
+		/// Ends the level and releases all resources held by the level and all it's parts.
+		/// </summary>
 		public void End()
 		{
 			Dispose();
 		}
 
-		
 
-		/// <summary>
-		/// Spawns new unit of given <paramref name="unitType"/> into the world map at <paramref name="tile"/>
-		/// </summary>
-		/// <param name="unitType">The unit to be added</param>
-		/// <param name="tile">Tile to spawn the unit at</param>
-		/// <param name="initRotation">Initial rotation of the spawned unit.</param>
-		/// <param name="player">owner of the new unit</param>
-		/// <returns>The new unit if a unit was spawned, or null if no unit was spawned</returns>
+
+		/// <inheritdoc />
 		public IUnit SpawnUnit(UnitType unitType, ITile tile, Quaternion initRotation, IPlayer player) {
 
 			if (!unitType.CanSpawnAt(tile)) {
@@ -311,14 +425,7 @@ namespace MHUrho.Logic
 			return newUnit;
 		}
 
-		/// <summary>
-		/// Creates new building in the world
-		/// </summary>
-		/// <param name="buildingType">Type of the new building</param>
-		/// <param name="topLeft">Coordinates of the top leftmost tile the building will occupy</param>
-		/// <param name="initRotation">Initial rotation of the building when it is created</param>
-		/// <param name="player">Owner of the building</param>
-		/// <returns>The new building if building was built, or null if the building could not be built</returns>
+		/// <inheritdoc />
 		public IBuilding BuildBuilding(BuildingType buildingType, IntVector2 topLeft, Quaternion initRotation, IPlayer player) {
 			if (!buildingType.CanBuild(topLeft, player, this)) {
 				return null;
@@ -344,15 +451,7 @@ namespace MHUrho.Logic
 			return newBuilding;
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="projectileType"></param>
-		/// <param name="position"></param>
-		/// <param name="initRotation"></param>
-		/// <param name="player"></param>
-		/// <param name="target"></param>
-		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
+		/// <inheritdoc />
 		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, IRangeTarget target)
 		{
 
@@ -375,15 +474,8 @@ namespace MHUrho.Logic
 			return newProjectile;
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="projectileType"></param>
-		/// <param name="position"></param>
-		/// <param name="initRotation"></param>
-		/// <param name="player"></param>
-		/// <param name="movement"></param>
-		/// <returns>null if the projectile could not be spawned, the new projectile otherwise</returns>
+
+		/// <inheritdoc />
 		public IProjectile SpawnProjectile(ProjectileType projectileType, Vector3 position, Quaternion initRotation, IPlayer player, Vector3 movement) {
 
 			var newProjectile = projectileType.ShootProjectile(GetNewID(entities), this, player, position, initRotation, movement);
@@ -396,7 +488,7 @@ namespace MHUrho.Logic
 
 		}
 
-
+		/// <inheritdoc />
 		public bool RemoveUnit(IUnit unit)
 		{
 			bool removed = units.Remove(unit.ID) && RemoveEntity(unit);
@@ -408,6 +500,7 @@ namespace MHUrho.Logic
 			return removed;
 		}
 
+		/// <inheritdoc />
 		public bool RemoveBuilding(IBuilding building)
 		{
 			bool removed = buildings.Remove(building.ID) && RemoveEntity(building);
@@ -418,6 +511,7 @@ namespace MHUrho.Logic
 			return removed;
 		}
 
+		/// <inheritdoc />
 		public bool RemoveProjectile(IProjectile projectile)
 		{
 			bool removed = projectiles.Remove(projectile.ID) && RemoveEntity(projectile);
@@ -428,6 +522,7 @@ namespace MHUrho.Logic
 			return removed;
 		}
 
+		/// <inheritdoc />
 		public bool RemovePlayer(IPlayer player)
 		{
 			bool removed = players.Remove(player.ID);
@@ -443,6 +538,7 @@ namespace MHUrho.Logic
 			return removed;
 		}
 
+		/// <inheritdoc />
 		public IUnit GetUnit(int ID) {
 			return TryGetUnit(ID, out IUnit value) ? 
 						value :
@@ -450,6 +546,7 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <inheritdoc />
 		public IUnit GetUnit(Node node)
 		{
 			return TryGetUnit(node, out IUnit value) ?
@@ -457,11 +554,13 @@ namespace MHUrho.Logic
 						throw new ArgumentOutOfRangeException(nameof(node), "Node does not contain any Units");
 		}
 
+		/// <inheritdoc />
 		public bool TryGetUnit(int ID, out IUnit unit)
 		{
 			return units.TryGetValue(ID, out unit);
 		}
 
+		/// <inheritdoc />
 		public bool TryGetUnit(Node node, out IUnit unit)
 		{
 			bool hasEntity = TryGetEntity(node, out IEntity entity);
@@ -469,12 +568,14 @@ namespace MHUrho.Logic
 			return hasEntity && TryGetUnit(entity.ID, out unit);
 		}
 
+		/// <inheritdoc />
 		public IBuilding GetBuilding(int ID) {
 			return TryGetBuilding(ID, out IBuilding value) ?
 						value :
 						throw new ArgumentOutOfRangeException(nameof(ID), "Building with this ID does not exist in the current level");
 		}
 
+		/// <inheritdoc />
 		public IBuilding GetBuilding(Node node)
 		{
 			return TryGetBuilding(node, out IBuilding value) ?
@@ -482,11 +583,13 @@ namespace MHUrho.Logic
 						throw new ArgumentOutOfRangeException(nameof(node), "Node does not contain any Buildings");
 		}
 
+		/// <inheritdoc />
 		public bool TryGetBuilding(int ID, out IBuilding building)
 		{
 			return buildings.TryGetValue(ID, out building);
 		}
 
+		/// <inheritdoc />
 		public bool TryGetBuilding(Node node, out IBuilding building)
 		{
 			bool hasEntity = TryGetEntity(node, out IEntity entity);
@@ -494,23 +597,27 @@ namespace MHUrho.Logic
 			return hasEntity && TryGetBuilding(entity.ID, out building);
 		}
 
+		/// <inheritdoc />
 		public IPlayer GetPlayer(int ID) {
 			return TryGetPlayer(ID, out IPlayer value) ?
 						value :
 						throw new ArgumentOutOfRangeException(nameof(ID), "Player with this ID does not exist in the current level");
 		}
 
+		/// <inheritdoc />
 		public bool TryGetPlayer(int ID, out IPlayer player)
 		{
 			return players.TryGetValue(ID, out player);
 		}
 
+		/// <inheritdoc />
 		public IProjectile GetProjectile(int ID) {
 			return TryGetProjectile(ID, out IProjectile value) ?
 						value :
 						throw new ArgumentOutOfRangeException(nameof(ID), "Projectile with this ID does not exist in the current level");
 		}
 
+		/// <inheritdoc />
 		public IProjectile GetProjectile(Node node)
 		{
 			return TryGetProjectile(node, out IProjectile value) ?
@@ -518,11 +625,13 @@ namespace MHUrho.Logic
 						throw new ArgumentOutOfRangeException(nameof(node), "Node does not contain any Projectiles");
 		}
 
+		/// <inheritdoc />
 		public bool TryGetProjectile(int ID, out IProjectile projectile)
 		{
 			return projectiles.TryGetValue(ID, out projectile);
 		}
 
+		/// <inheritdoc />
 		public bool TryGetProjectile(Node node, out IProjectile projectile)
 		{
 			bool hasEntity = TryGetEntity(node, out IEntity entity);
@@ -530,6 +639,7 @@ namespace MHUrho.Logic
 			return hasEntity && TryGetProjectile(entity.ID, out projectile);
 		}
 
+		/// <inheritdoc />
 		public IEntity GetEntity(int ID) {
 			return TryGetEntity(ID, out IEntity value) ?
 						value :
@@ -537,6 +647,7 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <inheritdoc />
 		public IEntity GetEntity(Node node)
 		{
 			return TryGetEntity(node, out IEntity value)
@@ -544,11 +655,13 @@ namespace MHUrho.Logic
 						: throw new ArgumentOutOfRangeException(nameof(ID), "Node does not contain any entities");
 		}
 
+		/// <inheritdoc />
 		public bool TryGetEntity(int ID, out IEntity entity)
 		{
 			return entities.TryGetValue(ID, out entity);
 		}
 
+		/// <inheritdoc />
 		public bool TryGetEntity(Node node, out IEntity entity)
 		{
 			for (; node != LevelNode && node != null; node = node.Parent) {
@@ -561,6 +674,7 @@ namespace MHUrho.Logic
 			return false;
 		}
 
+		/// <inheritdoc />
 		public IRangeTarget GetRangeTarget(int ID) {
 			if (!rangeTargets.TryGetValue(ID, out IRangeTarget value)) {
 				throw new ArgumentOutOfRangeException(nameof(ID),"RangeTarget with this ID does not exist in the current level");
@@ -568,13 +682,7 @@ namespace MHUrho.Logic
 			return value;
 		}
 
-		/// <summary>
-		/// Registers <paramref name="rangeTarget"/> to rangeTargets, assigns it a new ID and returns this new ID
-		/// 
-		/// Called by rangeTarget constructor
-		/// </summary>
-		/// <param name="rangeTarget">range target to register</param>
-		/// <returns>the new ID</returns>
+		/// <inheritdoc />
 		public int RegisterRangeTarget(IRangeTarget rangeTarget) {
 			int newID = GetNewID(rangeTargets);
 			rangeTarget.InstanceID = newID;
@@ -582,15 +690,21 @@ namespace MHUrho.Logic
 			return newID;
 		}
 
+		/// <summary>
+		/// Loads range target that was stored and already has an ID.
+		/// </summary>
+		/// <param name="rangeTarget">The range target with ID.</param>
 		internal void LoadRangeTarget(IRangeTarget rangeTarget)
 		{
 			rangeTargets.Add(rangeTarget.InstanceID, rangeTarget);
 		}
 
+		/// <inheritdoc />
 		public bool UnRegisterRangeTarget(int ID) {
 			return rangeTargets.Remove(ID);
 		}
 
+		/// <inheritdoc />
 		public bool CanSee(Vector3 source, IEntity target, bool mapBlocks = true, bool buildingsBlock = true, bool unitsBlock = false)
 		{
 			Vector3 diff = target.Position - source;
@@ -640,24 +754,31 @@ namespace MHUrho.Logic
 			return false;
 		}
 
+		/// <inheritdoc />
 		public void Pause()
 		{
 			Scene.UpdateEnabled = false;
 			LevelNode.SetEnabledRecursive(false);
 		}
 
+		/// <inheritdoc />
 		public void UnPause()
 		{
 			Scene.UpdateEnabled = true;
 			LevelNode.SetEnabledRecursive(true);
 		}
 
+		/// <inheritdoc />
 		public void ChangeRep(LevelRep newLevelRep)
 		{
 			LevelRep.DetachFromLevel();
 			LevelRep = newLevelRep;
 		}
 
+		/// <summary>
+		/// Handles scene updates.
+		/// </summary>
+		/// <param name="timeStep">Time elapsed since the last scene update.</param>
 		protected override void OnUpdate(float timeStep) {
 			if (IsDeleted || !EnabledEffective) return;
 
@@ -688,7 +809,17 @@ namespace MHUrho.Logic
 		}
 
 	
+		/// <summary>
+		/// Maximum tries of generating random ID, after which we presume we exhausted the supply of IDs.
+		/// </summary>
 		const int MaxTries = 10000000;
+
+		/// <summary>
+		/// Generates a new random ID that is not already present in the <paramref name="dictionary"/>.
+		/// </summary>
+		/// <typeparam name="T">The value type of the dictionary.</typeparam>
+		/// <param name="dictionary">The dictionary of used IDs.</param>
+		/// <returns>New random ID that is not already in the <paramref name="dictionary"/>.</returns>
 		int GetNewID<T>(IDictionary<int, T> dictionary) {
 			int id, i = 0;
 			while (dictionary.ContainsKey(id = rng.Next()) || id == 0) {
@@ -702,12 +833,21 @@ namespace MHUrho.Logic
 			return id;
 		}
 
+		/// <summary>
+		/// Registers entity to the entity registry and to the node to entity mapping.
+		/// </summary>
+		/// <param name="entity">The entity to register.</param>
 		void RegisterEntity(IEntity entity)
 		{
 			entities.Add(entity.ID, entity);
 			nodeToEntity.Add(entity.Node, entity);
 		}
 
+		/// <summary>
+		/// Removes entity from the level.
+		/// </summary>
+		/// <param name="entity">The entity to remove.</param>
+		/// <returns>True if the entity was removed, false if the entity was not registered in the level.</returns>
 		bool RemoveEntity(IEntity entity)
 		{
 			bool removed = entities.Remove(entity.ID);

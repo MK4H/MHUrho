@@ -4,6 +4,9 @@ using System.Text;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Implementation of the Visitor design patter.
+	/// </summary>
     public interface IEntityVisitor {
 
 		void Visit(IUnit unit);
@@ -13,6 +16,9 @@ namespace MHUrho.Logic
 		void Visit(IProjectile projectile);
 	}
 
+	/// <summary>
+	/// Implementation of the generic Visitor design patter.
+	/// </summary>
 	public interface IEntityVisitor<out T> {
 
 		T Visit(IUnit unit);

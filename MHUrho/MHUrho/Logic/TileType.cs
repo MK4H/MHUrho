@@ -13,22 +13,45 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Represents a tile type loaded from the package.
+	/// </summary>
 	public class TileType : ILoadableType {
 
+		/// <inheritdoc />
 		public int ID { get; private set; }
 
+		/// <inheritdoc />
 		public string Name { get; private set; }
 
+		/// <inheritdoc />
 		public GamePack Package { get; private set; }
 
+		/// <summary>
+		/// Part of the tile texture corresponding to this tile type.
+		/// </summary>
 		public Rect TextureCoords { get; private set; }
 
+		/// <summary>
+		/// Color of this tile type when displayed on the minimap.
+		/// </summary>
 		public Color MinimapColor { get; private set; }
 
+		/// <summary>
+		/// Part of the <see cref="GamePack.TileIconTexture"/> corresponding to this tile type.
+		/// </summary>
 		public IntRect IconRectangle { get; private set; }
 
+		/// <summary>
+		/// Path to the image containing the tile type appearance.
+		/// </summary>
 		string imagePath;
 
+		/// <summary>
+		/// Loads the tile type data from Xml element.
+		/// </summary>
+		/// <param name="xml">The xml element containing the data of this tile type</param>
+		/// <param name="package">The source package of the Xml.</param>
 		public void Load(XElement xml, GamePack package) {
 			Package = package;
 			try {
@@ -76,6 +99,10 @@ namespace MHUrho.Logic
 			TextureCoords = coords;
 		}
 
+		/// <summary>
+		/// Gets the image containing the appearance of this tile type.
+		/// </summary>
+		/// <returns>The image containing the appearance of this tile type.</returns>
 		public Image GetImage() {
 			return Package.PackageManager.GetImage(imagePath, true);
 		}

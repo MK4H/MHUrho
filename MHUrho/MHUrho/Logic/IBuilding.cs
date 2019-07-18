@@ -6,7 +6,9 @@ using Urho;
 
 namespace MHUrho.Logic {
 
-
+	/// <summary>
+	/// Building in the level.
+	/// </summary>
 	public interface IBuilding : IEntity {
 
 		/// <summary>

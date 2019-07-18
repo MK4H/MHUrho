@@ -50,31 +50,33 @@ namespace MHUrho.Logic {
 		/// </summary>
 		Vector2 XZPosition { get; }
 
-
+		/// <summary>
+		/// Vector in world coordinates indicating the upwards direction in reference to current entity orientation.
+		/// </summary>
 		Vector3 Up { get; }
 
 		/// <summary>
-		/// Vector in world coordinates indicating the downwards direction in reference to current unit orientation.
+		/// Vector in world coordinates indicating the downwards direction in reference to current entity orientation.
 		/// </summary>
 		Vector3 Down { get; }
 
 		/// <summary>
-		/// Vector in world coordinates indicating the forward direction in reference to current unit orientation.
+		/// Vector in world coordinates indicating the forward direction in reference to current entity orientation.
 		/// </summary>
 		Vector3 Forward { get; }
 
 		/// <summary>
-		/// Get vector in world coordinates indicating the backwards direction in reference to current unit orientation.
+		/// Get vector in world coordinates indicating the backwards direction in reference to current entity orientation.
 		/// </summary>
 		Vector3 Backward { get; }
 
 		/// <summary>
-		/// Vector in world coordinates indicating the left direction in reference to current unit orientation.
+		/// Vector in world coordinates indicating the left direction in reference to current entity orientation.
 		/// </summary>
 		Vector3 Left { get; }
 
 		/// <summary>
-		/// Vector in world coordinates indicating the right direction in reference to current unit orientation.
+		/// Vector in world coordinates indicating the right direction in reference to current entity orientation.
 		/// </summary>
 		Vector3 Right { get; }
 

@@ -6,6 +6,9 @@ using Urho;
 
 namespace MHUrho.Logic {
 
+	/// <summary>
+	/// Unit in the level.
+	/// </summary>
 	public interface IUnit : IEntity {
 		/// <summary>
 		/// Get or Set value indicating if units Up vector will always be the same as World up vector (Vector3.UnitY) if true

@@ -20,8 +20,12 @@ namespace MHUrho.Logic
 {
 	partial class LevelManager {
 
+		/// <summary>
+		/// Predecessor of all level loaders
+		/// </summary>
 		abstract class BaseLoader : ILevelLoader {
 
+			/// <inheritdoc />
 			public event Action<string> TextUpdate {
 				add {
 					Progress.TextUpdate += value;
@@ -30,6 +34,7 @@ namespace MHUrho.Logic
 					Progress.TextUpdate -= value;
 				}
 			}
+			/// <inheritdoc />
 			public event Action<double> PercentageUpdate {
 				add {
 					Progress.PercentageUpdate += value;
@@ -39,36 +44,77 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <inheritdoc />
 			public event Action<IProgressNotifier> Finished;
+			/// <inheritdoc />
 			public event Action<IProgressNotifier, string> Failed;
 
+			/// <inheritdoc />
 			public string Text => Progress.Text;
+			/// <inheritdoc />
 			public double Percentage => Progress.Percentage;
 
+			/// <inheritdoc />
 			ILevelManager ILevelLoader.Level => Level;
 
+			/// <summary>
+			/// Instance representing the application.
+			/// </summary>
 			protected MHUrhoApp Game => MHUrhoApp.Instance;
 
+			/// <summary>
+			/// If we are loading into editor mode, or play mode.
+			/// </summary>
 			protected readonly bool EditorMode;
 
+			/// <summary>
+			/// Rep of the loading level.
+			/// </summary>
 			protected readonly LevelRep LevelRep;
 
+			/// <summary>
+			/// Progress of the loading.
+			/// </summary>
 			protected readonly  ProgressWatcher Progress;
 
+			/// <summary>
+			/// Loading level.
+			/// </summary>
 			protected LevelManager Level;
 
-			protected readonly TaskFactory TaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None,
+			/// <summary>
+			/// Task factory to post tasks onto the main thread.
+			/// </summary>
+			readonly TaskFactory TaskFactory = new TaskFactory(CancellationToken.None, TaskCreationOptions.None,
 																			TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
-
+			/// <summary>
+			/// Posts the action <paramref name="func"/> onto the main thread.
+			/// </summary>
+			/// <param name="func">The function to invoke on the main thread.</param>
+			/// <returns>The task representing the posted function.</returns>
 			protected Task PostToMainThread(Action func)
 			{
 				return TaskFactory.StartNew(func);
 			}
+
+			/// <summary>
+			/// Posts the action <paramref name="func"/> onto the main thread.
+			/// </summary>
+			/// <param name="func">The function to invoke on the main thread.</param>
+			/// <returns>The task representing the posted function.</returns>
 			protected Task<T> PostToMainThread<T>(Func<T> func)
 			{
 				return TaskFactory.StartNew(func);
 			}
 
+			/// <summary>
+			/// Creates loader to load the level represented by <paramref name="levelRep"/> into the mode specified by <paramref name="editorMode"/>.
+			/// Can be added as part of bigger process with <paramref name="parentProgress"/> and <paramref name="loadingSubsectionSize"/>.
+			/// </summary>
+			/// <param name="levelRep">The rep of the level to load.</param>
+			/// <param name="editorMode">If the level should be loaded into editor mode or playing mode.</param>
+			/// <param name="parentProgress">Progress watcher for the parent process.</param>
+			/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
 			protected BaseLoader(LevelRep levelRep, bool editorMode, IProgressEventWatcher parentProgress, double loadingSubsectionSize)
 			{
 				this.LevelRep = levelRep;
@@ -78,8 +124,16 @@ namespace MHUrho.Logic
 				this.Progress.Failed += LoadingFailed;
 			}
 
+			/// <summary>
+			/// Starts the loading.
+			/// </summary>
+			/// <returns>Task representing the loading process.</returns>
 			public abstract Task<ILevelManager> StartLoading();
 
+			/// <summary>
+			/// Initializes the basic level structure.
+			/// </summary>
+			/// <returns>LevelManager with initialized based level structure.</returns>
 			protected LevelManager InitializeLevel()
 			{
 				//Before level is asociated with screen, the global try/catch will not dispose of the screen
@@ -115,6 +169,11 @@ namespace MHUrho.Logic
 				return CurrentLevel;
 			}
 
+			/// <summary>
+			/// Gets instance plugin of the level logic for the <paramref name="level"/>.
+			/// </summary>
+			/// <param name="level">The level to get the instance plugin for.</param>
+			/// <returns>Instance plugin to control the <paramref name="level"/>.</returns>
 			protected abstract LevelLogicInstancePlugin GetPlugin(LevelManager level);
 
 			/// <summary>
@@ -257,7 +316,13 @@ namespace MHUrho.Logic
 			const double controlLPartSize = 7;
 			//1 for finishloading
 
-
+			/// <summary>
+			/// Creates loader to generate the level represented by <paramref name="levelRep"/>.
+			/// </summary>
+			/// <param name="levelRep">Presentation part of the level.</param>
+			/// <param name="mapSize">Size of the map to generate the level with.</param>
+			/// <param name="parentProgress">Progress watcher for the parent process.</param>
+			/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
 			public DefaultLevelLoader(LevelRep levelRep, 
 									IntVector2 mapSize, 
 									IProgressEventWatcher parentProgress = null, 
@@ -285,13 +350,19 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <summary>
+			/// Size of the map to generate.
+			/// </summary>
 			readonly IntVector2 mapSize;
 
+			/// <summary>
+			/// Starts the loading process.
+			/// </summary>
+			/// <returns>Task representing the loading process.</returns>
 			public override async Task<ILevelManager> StartLoading()
 			{
 				Urho.IO.Log.Write(LogLevel.Debug,
 								$"Loading default level. MapSize: {mapSize}, LevelName: {LevelRep.Name}, GamePack: {LevelRep.GamePack}");
-				LoadingSanityCheck();
 
 				try
 				{
@@ -338,16 +409,23 @@ namespace MHUrho.Logic
 
 			}
 
+			/// <inheritdoc />
 			protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
 			{
 				return LevelRep.LevelLogicType.CreateInstancePluginForBrandNewLevel(level);
 			}
 
+			/// <summary>
+			/// Creates a camera in the generated level.
+			/// </summary>
 			void CreateCamera()
 			{
 				LoadCamera(Level, new Vector2(10, 10));
 			}
 
+			/// <summary>
+			/// Creates placeholder players in the generated level.
+			/// </summary>
 			void CreatePlayers()
 			{
 
@@ -369,12 +447,19 @@ namespace MHUrho.Logic
 				RegisterPlayersToUI();
 			}
 
+			/// <summary>
+			/// Generates the default map.
+			/// </summary>
+			/// <returns>The generated default map.</returns>
 			Map CreateDefaultMap()
 			{
 				Node mapNode = Level.LevelNode.CreateChild("MapNode");
 				return WorldMap.Map.CreateDefaultMap(CurrentLevel, mapNode, Level.octree, Level.Plugin.GetPathFindAlgFactory(), mapSize, new ProgressWatcher(Progress, mapLPartSize));
 			}
 
+			/// <summary>
+			/// Creates camera control and tools.
+			/// </summary>
 			void CreateControl()
 			{
 				Level.cameraController = Game.ControllerFactory.CreateCameraController(Level.Input, Level.Camera);
@@ -382,6 +467,9 @@ namespace MHUrho.Logic
 				Level.ToolManager.LoadTools();
 			}
 
+			/// <summary>
+			/// Starts the level
+			/// </summary>
 			void StartLevel()
 			{
 				Level.Plugin.Initialize();
@@ -390,16 +478,15 @@ namespace MHUrho.Logic
 				Level.Scene.UpdateEnabled = true;
 				Level.LevelNode.Enabled = true;
 			}
-
-			void LoadingSanityCheck()
-			{
-
-			}
 		}
 
+		/// <summary>
+		/// Base class for loaders that load the level from a saved game.
+		/// </summary>
 		abstract class SavedLevelLoader : BaseLoader
 		{
-
+			//Estimates of the duration of parts of the loading process
+			// for sending updates
 			protected const double initLPartSize = 2;
 			protected const double mapLPartSize = 40;
 			protected const double unitsLPartSize = 10;
@@ -409,17 +496,34 @@ namespace MHUrho.Logic
 			protected const double connectingReferencesLPartSize = 5;
 			protected const double finishingLoadingLPartSize = 3;
 
+			/// <summary>
+			/// Creates a loader that loads the level saved in the <paramref name="storedLevel"/> to mode based on <paramref name="editorMode"/>.
+			/// </summary>
+			/// <param name="levelRep">Presentation part of the level.</param>
+			/// <param name="storedLevel">Saved level.</param>
+			/// <param name="editorMode">If the level should be loaded to editor mode or playing mode.</param>
+			/// <param name="parentProgress">Progress watcher for the parent process.</param>
+			/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
 			protected SavedLevelLoader(LevelRep levelRep, StLevel storedLevel, bool editorMode, IProgressEventWatcher parentProgress, double loadingSubsectionSize)
 				: base(levelRep, editorMode, parentProgress, loadingSubsectionSize)
 			{
 				this.StoredLevel = storedLevel;
 			}
 
+			/// <summary>
+			/// Saved level that we are loading.
+			/// </summary>
 			protected readonly StLevel StoredLevel;
-			protected string PackageName => StoredLevel.PackageName;
 
+			/// <summary>
+			/// Loaders of the parts of the loading level.
+			/// </summary>
 			protected List<ILoader> Loaders;
 
+			/// <summary>
+			/// Starts the loading process of the level.
+			/// </summary>
+			/// <returns>Task representing the loading process of the level.</returns>
 			public override async Task<ILevelManager> StartLoading()
 			{
 				Urho.IO.Log.Write(LogLevel.Debug,
@@ -468,6 +572,9 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <summary>
+			/// Loads units saved in the level.
+			/// </summary>
 			protected virtual void LoadUnits()
 			{
 				Progress.SendTextUpdate("Loading units");
@@ -483,6 +590,9 @@ namespace MHUrho.Logic
 				Progress.SendUpdate(unitsLPartSize, "Loaded units");
 			}
 
+			/// <summary>
+			/// Loads buildings that were saved in the level.
+			/// </summary>
 			protected virtual void LoadBuildings()
 			{
 				Progress.SendTextUpdate("Loading buildings");
@@ -497,6 +607,9 @@ namespace MHUrho.Logic
 				Progress.SendUpdate(buildingLPartSize, "Loaded buildings");
 			}
 
+			/// <summary>
+			/// Loads projectiles that were saved in the level.
+			/// </summary>
 			protected virtual void LoadProjectiles()
 			{
 				Progress.SendTextUpdate("Loading projectiles");
@@ -511,8 +624,14 @@ namespace MHUrho.Logic
 				Progress.SendUpdate(projectilesLPartSize, "Loaded projectiles");
 			}
 
+			/// <summary>
+			/// Loads players that were saved in the level.
+			/// </summary>
 			protected abstract void LoadPlayers();
 
+			/// <summary>
+			/// Creates camera controller and loads the tools for user control of the level.
+			/// </summary>
 			protected virtual void LoadToolsAndControllers()
 			{
 				Level.cameraController = Game.ControllerFactory.CreateCameraController(Level.Input, Level.Camera);
@@ -520,11 +639,17 @@ namespace MHUrho.Logic
 				Level.ToolManager.LoadTools();
 			}
 
+			/// <summary>
+			/// Loads instance plugin for the level logic.
+			/// </summary>
 			protected virtual void LoadLevelPlugin()
 			{
 				Level.Plugin.LoadState(new PluginDataWrapper(StoredLevel.Plugin.Data, Level));
 			}
 
+			/// <summary>
+			/// Connects stored references of the all the loaded parts of the level.
+			/// </summary>
 			protected virtual void ConnectReferences()
 			{
 				Progress.SendTextUpdate("Connecting references");
@@ -537,6 +662,9 @@ namespace MHUrho.Logic
 				Progress.SendUpdate(connectingReferencesLPartSize, "Connected references");
 			}
 
+			/// <summary>
+			/// Finishes loading and cleans up.
+			/// </summary>
 			protected virtual void FinishLoading()
 			{
 				Progress.SendTextUpdate("Finishing loading");
@@ -547,6 +675,9 @@ namespace MHUrho.Logic
 				Progress.SendUpdate(finishingLoadingLPartSize, "FinishedLoading");
 			}
 
+			/// <summary>
+			/// Starts the level.
+			/// </summary>
 			protected virtual void StartLevel()
 			{
 				Progress.SendTextUpdate("Starting level");
@@ -558,6 +689,10 @@ namespace MHUrho.Logic
 				Level.LevelNode.Enabled = true;
 			}
 
+			/// <summary>
+			/// Loads a player.
+			/// </summary>
+			/// <param name="playerLoader">The player loader for loading of the player.</param>
 			protected void LoadPlayer(IPlayerLoader playerLoader)
 			{
 				playerLoader.StartLoading();
@@ -567,6 +702,9 @@ namespace MHUrho.Logic
 				Loaders.Add(playerLoader);
 			}
 
+			/// <summary>
+			/// Creates a camera in the loaded level.
+			/// </summary>
 			void CreateCamera()
 			{
 				//ALT:Maybe Save camera position
@@ -596,12 +734,31 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <summary>
+		/// Loads a saved level for playing.
+		/// </summary>
 		class SavedLevelPlayingLoader : SavedLevelLoader
 		{
-
+			/// <summary>
+			/// Data for player initialization.
+			/// </summary>
 			readonly PlayerSpecification players;
+
+			/// <summary>
+			/// Data for level logic plugin initialization.
+			/// </summary>
 			readonly LevelLogicCustomSettings customSettings;
 
+
+			/// <summary>
+			/// Creates a loader that loads saved level into a playing mode.
+			/// </summary>
+			/// <param name="levelRep">Presentation part of the level.</param>
+			/// <param name="storedLevel">Saved level.</param>
+			/// <param name="players">Data for player initialization.</param>
+			/// <param name="customSettings">Data for level logic initialization.</param>
+			/// <param name="parentProgress">Progress watcher for the parent process.</param>
+			/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
 			public SavedLevelPlayingLoader(LevelRep levelRep,
 											StLevel storedLevel,
 											PlayerSpecification players,
@@ -621,6 +778,7 @@ namespace MHUrho.Logic
 				}
 			}
 
+			/// <inheritdoc/>
 			protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
 			{
 				if (customSettings == LevelLogicCustomSettings.LoadFromSavedGame)
@@ -636,6 +794,9 @@ namespace MHUrho.Logic
 
 			}
 
+			/// <summary>
+			/// Loads players and initializes them with the <see cref="players"/> data.
+			/// </summary>
 			protected override void LoadPlayers()
 			{
 				Progress.SendTextUpdate("Loading players");
@@ -693,6 +854,7 @@ namespace MHUrho.Logic
 				Progress.SendUpdate(playersLPartSize, "Loaded players");
 			}
 
+			/// <inheritdoc/>
 			protected override void FinishLoading()
 			{
 				customSettings.Dispose();
@@ -700,18 +862,32 @@ namespace MHUrho.Logic
 			}
 		}
 
+		/// <summary>
+		/// Loads the saved level for editing.
+		/// </summary>
 		class SavedLevelEditorLoader : SavedLevelLoader
 		{
+			/// <summary>
+			/// Creates a loader that loads the saved level for editing.
+			/// </summary>
+			/// <param name="levelRep">Presentation part of the level.</param>
+			/// <param name="storedLevel">Saved level.</param>
+			/// <param name="parentProgress">Progress watcher for the parent process.</param>
+			/// <param name="loadingSubsectionSize">Size of this loading process as a part of the parent process.</param>
 			public SavedLevelEditorLoader(LevelRep levelRep, StLevel storedLevel, IProgressEventWatcher parentProgress = null, double loadingSubsectionSize = 100)
 				: base(levelRep, storedLevel, true, parentProgress, loadingSubsectionSize)
 			{ }
 
+			/// <inheritdoc />
 			protected override LevelLogicInstancePlugin GetPlugin(LevelManager level)
 			{
 				//Loading saved level prototype, so i need to load it
 				return LevelRep.LevelLogicType.CreateInstancePluginForEditorLoading(level);
 			}
 
+			/// <summary>
+			/// Loads players, replacing them with placeholder players for editing.
+			/// </summary>
 			protected override void LoadPlayers()
 			{
 				Progress.SendTextUpdate("Loading players");

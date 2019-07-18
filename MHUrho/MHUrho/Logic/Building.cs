@@ -15,23 +15,52 @@ using Urho.Physics;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Represents a building in the game.
+	/// </summary>
 	class Building : Entity, IBuilding {
+
+		/// <summary>
+		/// Implements storing and loading buildings.
+		/// </summary>
 		class Loader : IBuildingLoader {
 
+			/// <summary>
+			/// The building being loaded
+			/// </summary>
 			public IBuilding Building => loadingBuilding;
 
+			/// <summary>
+			/// The building being loaded.
+			/// </summary>
 			Building loadingBuilding;
 
+			/// <summary>
+			/// The level the building is being loaded into.
+			/// </summary>
 			readonly LevelManager level;
 		
 			/// <summary>
 			/// Used to store the reference to storedBuilding between Load and ConnectReferences calls
 			/// </summary>
 			readonly StBuilding storedBuilding;
+
+			/// <summary>
+			/// The type of the loading building.
+			/// </summary>
 			readonly BuildingType type;
 
+			/// <summary>
+			/// Loaders of the default components saved on the building.
+			/// </summary>
 			List<DefaultComponentLoader> componentLoaders;
 
+			/// <summary>
+			/// Creates a loader for the <paramref name="storedBuilding"/> that loads it into
+			/// the <paramref name="level"/>.
+			/// </summary>
+			/// <param name="level">The level the building is being loaded to.</param>
+			/// <param name="storedBuilding">The saved building to load.</param>
 			public Loader(LevelManager level,
 						StBuilding storedBuilding)
 			{
@@ -46,13 +75,16 @@ namespace MHUrho.Logic
 			}
 
 			/// <summary>
-			/// Builds the building at <paramref name="topLeftCorner"/> if its possible
+			/// Builds the building at <paramref name="topLeftCorner"/> if it is possible.
 			/// </summary>
-			/// <param name="topLeftCorner"></param>
-			/// <param name="type"></param>
-			/// <param name="buildingNode"></param>
-			/// <param name="level"></param>
+			/// <param name="id">The identifier of the new building.</param>
+			/// <param name="topLeftCorner">Position of the top left corner of the building in the game world.</param>
+			/// <param name="rotation">Initial rotation of the building after it is built.</param>
+			/// <param name="type">Type of the building.</param>
+			/// <param name="player">Owner of the building.</param>
+			/// <param name="level">The level the building is being built in.</param>
 			/// <returns>Null if it is not possible to build the building there, new Building if it is possible</returns>
+			/// <exception cref="CreationException">Thrown when there was an exception during building creation, like missing assets or error in the plugin.</exception>
 			public static Building CreateNew(int id,
 											IntVector2 topLeftCorner,
 											Quaternion rotation,
@@ -108,6 +140,11 @@ namespace MHUrho.Logic
 				
 			}
 
+			/// <summary>
+			/// Stores the <paramref name="building"/> in a <see cref="StBuilding"/> instance for serialization.
+			/// </summary>
+			/// <param name="building">The building to store.</param>
+			/// <returns>Building stored in <see cref="StBuilding"/> ready for serialization.</returns>
 			public static StBuilding Save(Building building) {
 				var stBuilding = new StBuilding {
 													Id = building.ID,
@@ -137,6 +174,9 @@ namespace MHUrho.Logic
 				return stBuilding;
 			}
 
+			/// <summary>
+			/// Executes the first step of loading process.
+			/// </summary>
 			public void StartLoading() {
 				if (type.ID != storedBuilding.TypeID) {
 					throw new ArgumentException("Provided type is not the type of the stored building", nameof(type));
@@ -178,7 +218,10 @@ namespace MHUrho.Logic
 				
 			}
 
-
+			/// <summary>
+			/// Executes the second step of loading process, connecting stored references to
+			/// other game entities.
+			/// </summary>
 			public void ConnectReferences() {
 				loadingBuilding.Player = level.GetPlayer(storedBuilding.PlayerID);
 
@@ -189,6 +232,9 @@ namespace MHUrho.Logic
 				loadingBuilding.BuildingPlugin.LoadState(new PluginDataWrapper(storedBuilding.UserPlugin, level));
 			}
 
+			/// <summary>
+			/// Cleans up the data created only for loading.
+			/// </summary>
 			public void FinishLoading() {
 				foreach (var componentLoader in componentLoaders) {
 					componentLoader.FinishLoading();
@@ -197,56 +243,73 @@ namespace MHUrho.Logic
 
 		}
 
+		/// <inheritdoc/>
 		public IntRect Rectangle { get; private set; }
-
+		/// <inheritdoc/>
 		public IntVector2 TopLeft => Rectangle.TopLeft();
-
+		/// <inheritdoc/>
 		public IntVector2 TopRight => Rectangle.TopRight();
-
+		/// <inheritdoc/>
 		public IntVector2 BottomLeft => Rectangle.BottomLeft();
-
+		/// <inheritdoc/>
 		public IntVector2 BottomRight => Rectangle.BottomRight();
 
-
+		/// <inheritdoc/>
 		public override Vector3 Position {
 			get => Node.Position;
 			protected set => Node.Position = value;
 		}
 
+		/// <inheritdoc/>
 		public override InstancePlugin Plugin => BuildingPlugin;
 
+		/// <inheritdoc/>
 		public Vector3 Center => Node.Position;
 
+		/// <inheritdoc/>
 		public BuildingType BuildingType { get; private set; }
 
+		/// <inheritdoc/>
 		public override IEntityType Type => BuildingType;
 
+		/// <inheritdoc/>
 		public IntVector2 Size => new IntVector2(Rectangle.Width(), Rectangle.Height());
 
+		/// <inheritdoc/>
 		public override Vector3 Forward => Node.WorldDirection;
 
+		/// <inheritdoc/>
 		public override Vector3 Backward => -Forward;
 
+		/// <inheritdoc/>
 		public override Vector3 Right => Node.WorldRight;
 
+		/// <inheritdoc/>
 		public override Vector3 Left => -Right;
 
+		/// <inheritdoc/>
 		public override Vector3 Up => Node.WorldUp;
 
+		/// <inheritdoc/>
 		public override Vector3 Down => -Up;
 
+		/// <inheritdoc/>
 		public BuildingInstancePlugin BuildingPlugin { get; private set; }
 
+		/// <inheritdoc/>
 		public IReadOnlyList<ITile> Tiles => tiles;
 
+		/// <summary>
+		/// Tiles that are covered by this building.
+		/// </summary>
 		readonly ITile[] tiles;
 
 		/// <summary>
-		/// Constructor for creating new building during the game.
+		/// Creates new building in the game.
 		/// </summary>
-		/// <param name="id">Identifier.</param>
-		/// <param name="level">Running level.</param>
-		/// <param name="rectangle">Rectangle in the map taken by this building.</param>
+		/// <param name="id">Identifier of the new building.</param>
+		/// <param name="level">The level to create the building in.</param>
+		/// <param name="rectangle">Rectangle of the part of the map taken by this building.</param>
 		/// <param name="type">Type of this building.</param>
 		/// <param name="player">Owner of the new building.</param>
 		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type, IPlayer player) 
@@ -263,9 +326,9 @@ namespace MHUrho.Logic
 		/// <summary>
 		/// Constructor for loading instance.
 		/// </summary>
-		/// <param name="id">Identifier.</param>
-		/// <param name="level">Loading level.</param>
-		/// <param name="rectangle">Rectangle in the map taken by this building.</param>
+		/// <param name="id">Identifier of the loaded building.</param>
+		/// <param name="level">The level the building is loading into.</param>
+		/// <param name="rectangle">Rectangle of the map taken by this building.</param>
 		/// <param name="type">Type of this building.</param>
 		protected Building(int id, ILevelManager level, IntRect rectangle, BuildingType type) 
 			:base(id, level)
@@ -276,12 +339,28 @@ namespace MHUrho.Logic
 			this.tiles = AllocTiles(false);
 		}
 
-
+		/// <summary>
+		/// Creates a loader to load the building stored in <paramref name="storedBuilding"/> to the <paramref name="level"/>.
+		/// </summary>
+		/// <param name="level">The level to load the building into.</param>
+		/// <param name="storedBuilding">The stored building.</param>
+		/// <returns>Loader to load the building.</returns>
 		public static IBuildingLoader GetLoader(LevelManager level, StBuilding storedBuilding)
 		{
 			return new Loader(level, storedBuilding);
 		}
 
+		/// <summary>
+		/// Creates new building in the <paramref name="level"/>.
+		/// </summary>
+		/// <param name="id">The identifier of the new building.</param>
+		/// <param name="topLeftCorner">The position of the top left corner of the building.</param>
+		/// <param name="rotation">Rotation of the building after it is built.</param>
+		/// <param name="type">The type of the building.</param>
+		/// <param name="player">The owner of the building.</param>
+		/// <param name="level">The level to create the building in.</param>
+		/// <returns>New building.</returns>
+		/// <exception cref="CreationException">Thrown when there was an unexpected exception during the creation of the building.</exception>
 		public static Building CreateNew(int id,
 										IntVector2 topLeftCorner,
 										Quaternion rotation,
@@ -292,19 +371,34 @@ namespace MHUrho.Logic
 			return Loader.CreateNew(id, topLeftCorner, rotation, type, player, level);
 		}
 
+		/// <summary>
+		/// Stores the building in a <see cref="StBuilding"/> instance for serialization.
+		/// </summary>
+		/// <returns>Building stored in <see cref="StBuilding"/></returns>
 		public StBuilding Save() {
 			return Loader.Save(this);
 		}
 
+		/// <summary>
+		/// Implementation of the visitor design pattern.
+		/// </summary>
+		/// <param name="visitor">The visiting visitor.</param>
 		public override void Accept(IEntityVisitor visitor) {
 			visitor.Visit(this);
 		}
 
+		/// <summary>
+		/// Implementation of the generic visitor design pattern.
+		/// </summary>
+		/// <param name="visitor">The visiting visitor.</param>
 		public override T Accept<T>(IEntityVisitor<T> visitor)
 		{
 			return visitor.Visit(this);
 		}
 
+		/// <summary>
+		/// Removes the building from the level.
+		/// </summary>
 		public override void RemoveFromLevel() {
 
 			if (IsRemovedFromLevel) return;
@@ -333,6 +427,12 @@ namespace MHUrho.Logic
 		
 		}
 
+		/// <summary>
+		/// Inform the building that it was hit by <paramref name="other"/> entity,
+		/// provide <paramref name="userData"/> for plugin.
+		/// </summary>
+		/// <param name="other">The entity that hit this building.</param>
+		/// <param name="userData">User data for plugin.</param>
 		public override void HitBy(IEntity other, object userData)
 		{
 			try {
@@ -345,6 +445,7 @@ namespace MHUrho.Logic
 			}
 		}
 
+		///<inheritdoc/>
 		public float? GetHeightAt(float x, float y)
 		{
 			try {
@@ -358,6 +459,7 @@ namespace MHUrho.Logic
 
 		}
 
+		///<inheritdoc/>
 		public bool CanChangeTileHeight(int x, int y)
 		{
 			try
@@ -373,10 +475,7 @@ namespace MHUrho.Logic
 			}
 		}
 
-		/// <summary>
-		/// Notifies the building that the height of the tile it occupies has changed.
-		/// </summary>
-		/// <param name="tile">The tile with the changed height.</param>
+		///<inheritdoc/>
 		public void TileHeightChanged(ITile tile)
 		{
 			try
@@ -390,10 +489,7 @@ namespace MHUrho.Logic
 			}
 		}
 
-		/// <summary>
-		/// Changes the height of the building.
-		/// </summary>
-		/// <param name="newHeight">The new height of the building.</param>
+		///<inheritdoc/>
 		public void ChangeHeight(float newHeight)
 		{
 			Node.Position = Node.Position.WithY(newHeight);
@@ -405,6 +501,7 @@ namespace MHUrho.Logic
 			SignalPositionChanged();
 		}
 
+		///<inheritdoc/>
 		public IFormationController GetFormationController(Vector3 centerPosition)
 		{
 			try {
@@ -419,12 +516,18 @@ namespace MHUrho.Logic
 		}
 
 		
-
+		/// <summary>
+		/// Removes the building from level.
+		/// </summary>
 		void IDisposable.Dispose()
 		{
 			RemoveFromLevel();
 		}
 
+		/// <summary>
+		/// Handles the scene update.
+		/// </summary>
+		/// <param name="timeStep">The time elapsed since the last update.</param>
 		protected override void OnUpdate(float timeStep)
 		{
 			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
