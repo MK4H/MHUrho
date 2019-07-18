@@ -212,6 +212,8 @@ namespace MHUrho.Logic
 
 		public bool TriggerCollisions { get; set; }
 
+		bool isPooled;
+
 		protected Projectile(int ID, ILevelManager level, ProjectileType type, IPlayer player)
 			:base(ID,level)
 		{
@@ -220,6 +222,7 @@ namespace MHUrho.Logic
 			this.ProjectileType = type;
 			this.FaceInTheDirectionOfMovement = true;
 			this.TriggerCollisions = true;
+			this.isPooled = false;
 		}
 
 		protected Projectile(int ID,
@@ -231,6 +234,7 @@ namespace MHUrho.Logic
 			this.ProjectileType = type;
 			this.FaceInTheDirectionOfMovement = true;
 			this.TriggerCollisions = true;
+			this.isPooled = false;
 		}
 
 
@@ -254,6 +258,7 @@ namespace MHUrho.Logic
 			Enabled = true;
 			Node.NodeCollisionStart += CollisionHandler;
 			IsRemovedFromLevel = false;
+			isPooled = false;
 			Node.Enabled = true;
 			Node.Position = position;
 			this.Player = player;
@@ -278,18 +283,30 @@ namespace MHUrho.Logic
 
 		public override void RemoveFromLevel() 
 		{
-			Enabled = false;
+			if (IsRemovedFromLevel && isPooled) {
+				HardRemove();
+				isPooled = false;
+				return;
+			}
+
 			if (IsRemovedFromLevel) return;
 			base.RemoveFromLevel();
 
+		
 			Node.NodeCollisionStart -= CollisionHandler;
+
+
 			Level.RemoveProjectile(this);
+
 			if (!ProjectileType.ProjectileDespawn(this)) {
 				//If dispose was called before plugin was loaded, we need dispose to work
+				isPooled = false;
 				HardRemove();
 			}
 			else {
+				Enabled = false;
 				Node.Enabled = false;
+				isPooled = true;
 			}
 		}
 
@@ -322,9 +339,8 @@ namespace MHUrho.Logic
 			if (!IsDeleted)
 			{
 				Node.Remove();
+				base.Dispose();
 			}
-
-			base.Dispose();
 		}
 
 		public bool Move(Vector3 movement)

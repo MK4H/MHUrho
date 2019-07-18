@@ -308,9 +308,8 @@ namespace MHUrho.Logic
 			if (!IsDeleted)
 			{
 				Remove();
+				base.Dispose();
 			}
-
-			base.Dispose();
 		}
 
 		public new void Dispose()

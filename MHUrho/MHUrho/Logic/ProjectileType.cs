@@ -89,7 +89,7 @@ namespace MHUrho.Logic
 		{
 			enablePooling = false;
 			foreach (var projectile in projectilePool) {
-				projectile.Dispose();
+				projectile.RemoveFromLevel();
 			}
 
 			projectilePool.Clear();

@@ -15,6 +15,9 @@ using Urho.Urho2D;
 
 namespace MHUrho.Logic
 {
+	/// <summary>
+	/// Class representing a type of units
+	/// </summary>
 	public class UnitType : IEntityType, IDisposable
 	{
 

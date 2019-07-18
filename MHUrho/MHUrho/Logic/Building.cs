@@ -328,9 +328,9 @@ namespace MHUrho.Logic
 			Player?.RemoveBuilding(this);
 			if (!IsDeleted) {
 				Node.Remove();
+				base.Dispose();
 			}
-			
-			base.Dispose();
+		
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -427,7 +427,6 @@ namespace MHUrho.Logic
 
 		protected override void OnUpdate(float timeStep)
 		{
-			base.OnUpdate(timeStep);
 			if (IsDeleted || !EnabledEffective || !Level.LevelNode.Enabled) {
 				return;
 			}

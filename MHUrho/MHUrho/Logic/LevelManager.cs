@@ -659,8 +659,6 @@ namespace MHUrho.Logic
 		}
 
 		protected override void OnUpdate(float timeStep) {
-			base.OnUpdate(timeStep);
-
 			if (IsDeleted || !EnabledEffective) return;
 
 			Minimap.OnUpdate(timeStep);

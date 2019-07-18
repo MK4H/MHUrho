@@ -412,9 +412,8 @@ namespace MHUrho.Logic
 			if (!IsDeleted)
 			{
 				Node.Remove();
+				base.Dispose();
 			}
-
-			base.Dispose();
 		}
 
 		public override void HitBy(IEntity other, object userData)
@@ -434,7 +433,6 @@ namespace MHUrho.Logic
 		}
 
 		protected override void OnUpdate(float timeStep) {
-			base.OnUpdate(timeStep);
 			//Level.LevelNode.Enabled is here because there seems to be a bug
 			// where child nodes of level still receive updates even though 
 			// the level node is not enabled
