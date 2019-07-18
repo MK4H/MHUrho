@@ -3,13 +3,19 @@
   <description>Package to showcase the abilities of our platform.</description>
   <levels>
     <dataDirPath>Levels</dataDirPath>
-
     <level name="Showcase level with four players">
       <description>This player showcases the four player logic.</description>
       <thumbnail>Assets/grass.png</thumbnail>
       <logicTypeName>FourPlayersFixedResources</logicTypeName>
       <dataPath>Levels/Showcaselevelwithfourplayers</dataPath>
       <mapSize x="200" y="200" />
+    </level>
+    <level name="Smallest map and two players">
+      <description>Smallest map possible with two players fighting each other.</description>
+      <thumbnail>Assets/sand.jpg</thumbnail>
+      <logicTypeName>TwoPlayers</logicTypeName>
+      <dataPath>Levels/Smallestmapandtwoplayers</dataPath>
+      <mapSize x="50" y="50" />
     </level>
   </levels>
   <levelLogicTypes>

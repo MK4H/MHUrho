@@ -18,7 +18,7 @@
   <Multisample>1</Multisample>
   <Monitor>0</Monitor>
   <RefreshRateCap>0</RefreshRateCap>
-  <DebugHUD>true</DebugHUD>
+  <DebugHUD>false</DebugHUD>
   <CameraScrollSensitivity>10</CameraScrollSensitivity>
   <CameraRotationSensitivity>10</CameraRotationSensitivity>
   <MouseRotationSensitivity>0.5</MouseRotationSensitivity>
