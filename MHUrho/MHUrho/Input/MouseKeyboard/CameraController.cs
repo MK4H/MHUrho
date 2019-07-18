@@ -11,10 +11,19 @@ using Urho.Gui;
 
 namespace MHUrho.Input.MouseKeyboard
 {
+	/// <summary>
+	/// Translates user input into camera movement.
+	/// </summary>
     public class CameraController : ICameraController
     {
+		/// <summary>
+		/// Mode of the camera movement.
+		/// </summary>
 		enum CameraMovementType { Fixed, FreeFloat }
 
+		/// <summary>
+		/// Represents current movement of the camera.
+		/// </summary>
 		struct CameraMovements {
 			public bool MoveForward;
 			public bool MoveBackward;
@@ -29,6 +38,9 @@ namespace MHUrho.Input.MouseKeyboard
 			public bool BorderMovementLeft;
 			public bool BorderMovementRight;
 
+			/// <summary>
+			/// Represents that all camera movement was stopped.
+			/// </summary>
 			public void StopAll()
 			{
 				MoveForward = false;
@@ -46,26 +58,62 @@ namespace MHUrho.Input.MouseKeyboard
 			}
 		}
 
+		/// <summary>
+		/// Camera movement sensitivity (speed)
+		/// </summary>
 		public float CameraScrollSensitivity { get; set; }
 
+		/// <summary>
+		/// Camera rotation sensitivity (speed)
+		/// </summary>
 		public float CameraRotationSensitivity { get; set; }
 
+		/// <summary>
+		/// Mouse sensitivity when translating to camera rotation.
+		/// </summary>
 		public float MouseRotationSensitivity { get; set; }
 
+		/// <summary>
+		/// Zoom sensitivity.
+		/// </summary>
 		public float WheelSensitivity { get; set; }
 
+		/// <summary>
+		/// If the camera should be moved when the cursor gets close to the app window border.
+		/// </summary>
 		public bool MouseBorderCameraMovement { get; set; }
 
+		/// <summary>
+		/// Current mode of the camera movement
+		/// </summary>
 		CameraMovementType cameraType;
 		
+		/// <summary>
+		/// Input provider.
+		/// </summary>
 		readonly GameController input;
 
+		/// <summary>
+		/// UI control.
+		/// </summary>
 		readonly GameUI ui;
 
+		/// <summary>
+		/// Component directing camera movement.
+		/// </summary>
 		readonly CameraMover camera;
 
+		/// <summary>
+		/// Current camera movement representation.
+		/// </summary>
 		CameraMovements activeCameraMovement = new CameraMovements();
 
+		/// <summary>
+		/// Creates a translator from user input to camera movement.
+		/// </summary>
+		/// <param name="input">The user input provider.</param>
+		/// <param name="ui">User interface controller.</param>
+		/// <param name="cameraMover">The component directing the camera movement.</param>
 		public CameraController(GameController input, GameUI ui, CameraMover cameraMover)
 		{
 			this.input = input;
@@ -86,6 +134,9 @@ namespace MHUrho.Input.MouseKeyboard
 			RegisterCameraControlKeys();
 		}
 
+		/// <summary>
+		/// Removes all registered handlers for events, releases camera.
+		/// </summary>
 		public void Dispose()
 		{
 			input.MouseMove -= OnMouseMoved;
@@ -95,6 +146,12 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.Dispose();
 		}
 
+		/// <summary>
+		/// Registers handlers for keyboard events.
+		/// </summary>
+		/// <remarks>
+		/// In future could be read from config file.
+		/// </remarks>
 		//FUTURE: Read from config
 		void RegisterCameraControlKeys()
 		{
@@ -119,7 +176,10 @@ namespace MHUrho.Input.MouseKeyboard
 			input.RegisterKeyUpAction(Key.F, StopCameraRotationDown);
 		}
 
-	
+		/// <summary>
+		/// Invoked when the mouse cursor enters area near the game window border.
+		/// </summary>
+		/// <param name="border">Which border area the cursor entered</param>
 		void OnScreenBorderEntered(ScreenBorder border)
 		{
 			if (!MouseBorderCameraMovement) return;
@@ -150,7 +210,10 @@ namespace MHUrho.Input.MouseKeyboard
 			
 		}
 
-
+		/// <summary>
+		/// Invoked when the mouse cursor leaves an area near the game window border.
+		/// </summary>
+		/// <param name="border">The border area the cursor left.</param>
 		void OnScreenBorderLeft(ScreenBorder border)
 		{
 			if (!MouseBorderCameraMovement) {
@@ -214,7 +277,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticHorizontalMovement(horizontalMovement);
 		}
 
-
+		/// <summary>
+		/// Handles when mouse wheel moves.
+		/// </summary>
+		/// <param name="args">The mouse wheel moved event data.</param>
 		void OnMouseWheel(MouseWheelEventArgs args)
 		{
 			if (!ui.UIHovering) {
@@ -222,13 +288,21 @@ namespace MHUrho.Input.MouseKeyboard
 			}
 		}
 
+		/// <summary>
+		/// Handles mouse moved event.
+		/// </summary>
+		/// <param name="args">The mouse moved event data.</param>
 		void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
 			if (cameraType == CameraMovementType.FreeFloat) {
-				camera.AddDecayingRotation(new Vector2(args.DX, args.DY) * MouseRotationSensitivity);
+				camera.AddDecayingRotation(new Vector2(args.DeltaX, args.DeltaY) * MouseRotationSensitivity);
 			}
 		}
 
+		/// <summary>
+		/// Starts camera movement to the left.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraMoveLeft(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
@@ -238,6 +312,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.MoveLeft = true;
 		}
 
+		/// <summary>
+		/// Stops the camera movement to the left.
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraMoveLeft(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
@@ -254,6 +332,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticMovement(movement);
 		}
 
+		/// <summary>
+		/// Starts camera movement to the right.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraMoveRight(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
@@ -263,6 +345,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.MoveRight = true;
 		}
 
+		/// <summary>
+		/// Stops the camera movement to the right. 
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraMoveRight(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
@@ -279,6 +365,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticMovement(movement);
 		}
 
+		/// <summary>
+		/// Starts camera movement to the forward.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraMoveForward(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
@@ -288,6 +378,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.MoveForward = true;
 		}
 
+		/// <summary>
+		/// Stops the camera movement forward.
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraMoveForward(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
@@ -304,6 +398,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticMovement(movement);
 		}
 
+		/// <summary>
+		/// Starts camera movement backward.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraMoveBackward(KeyDownEventArgs args)
 		{
 			var movement = camera.StaticMovement;
@@ -313,6 +411,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.MoveBackward = true;
 		}
 
+		/// <summary>
+		/// Stops the camera movement backwards.
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraMoveBackward(KeyUpEventArgs args)
 		{
 			//If the camera movement was stoped by other means, dont stop it again
@@ -329,6 +431,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticMovement(movement);
 		}
 
+		/// <summary>
+		/// Starts camera rotation to the right.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraRotationRight(KeyDownEventArgs args)
 		{
 			camera.SetStaticYawChange(camera.StaticYaw + CameraRotationSensitivity);
@@ -336,6 +442,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.RotateRight = true;
 		}
 
+		/// <summary>
+		/// Stops the camera rotation to the right. 
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraRotationRight(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateRight) {
@@ -350,6 +460,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticYawChange(yaw);
 		}
 
+		/// <summary>
+		/// Starts camera rotation to the left.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraRotationLeft(KeyDownEventArgs args)
 		{
 			camera.SetStaticYawChange(camera.StaticYaw - CameraRotationSensitivity);
@@ -357,6 +471,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.RotateLeft = true;
 		}
 
+		/// <summary>
+		/// Stops the camera rotation to the left, 
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraRotationLeft(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateLeft) {
@@ -371,6 +489,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticYawChange(yaw);
 		}
 
+		/// <summary>
+		/// Starts camera rotation up.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraRotationUp(KeyDownEventArgs args)
 		{
 			camera.SetStaticPitchChange(camera.StaticPitch + CameraRotationSensitivity);
@@ -378,6 +500,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.RotateUp = true;
 		}
 
+		/// <summary>
+		/// Stops the camera rotation up, 
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraRotationUp(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateUp) {
@@ -392,6 +518,10 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticPitchChange(pitch);
 		}
 
+		/// <summary>
+		/// Starts camera rotation down.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void StartCameraRotationDown(KeyDownEventArgs args)
 		{
 			camera.SetStaticPitchChange(camera.StaticPitch - CameraRotationSensitivity);
@@ -399,6 +529,10 @@ namespace MHUrho.Input.MouseKeyboard
 			activeCameraMovement.RotateDown = true;
 		}
 
+		/// <summary>
+		/// Stops the camera rotation down.
+		/// </summary>
+		/// <param name="args">The key up event data.</param>
 		void StopCameraRotationDown(KeyUpEventArgs args)
 		{
 			if (!activeCameraMovement.RotateDown) {
@@ -413,6 +547,11 @@ namespace MHUrho.Input.MouseKeyboard
 			camera.SetStaticPitchChange(pitch);
 		}
 
+		/// <summary>
+		/// Switches camera mode to/from free float mode,
+		/// based on the current camera mode.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void CameraSwitchMode(KeyDownEventArgs args)
 		{
 			activeCameraMovement.StopAll();
@@ -431,6 +570,10 @@ namespace MHUrho.Input.MouseKeyboard
 			}
 		}
 
+		/// <summary>
+		/// Resets the camera to it's default offset and rotation.
+		/// </summary>
+		/// <param name="args">The key down event data.</param>
 		void ResetCamera(KeyDownEventArgs args)
 		{
 			camera.ResetCamera();

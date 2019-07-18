@@ -65,7 +65,7 @@ namespace MHUrho.EditorTools.MouseKeyboard.TerrainManipulation
 		{
 
 			if (mouseButtonDown) {
-				map.ChangeTileHeight(centerTile, highlight.Size, -args.DY * Sensitivity);
+				map.ChangeTileHeight(centerTile, highlight.Size, -args.DeltaY * Sensitivity);
 			}
 		}
 

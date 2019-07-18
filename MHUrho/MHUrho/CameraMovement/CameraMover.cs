@@ -13,6 +13,11 @@ using MHUrho.WorldMap;
 
 namespace MHUrho.CameraMovement
 {
+
+	/// <summary>
+	/// Encapsulates methods that handle camera movement events.
+	/// </summary>
+	/// <param name="args">The camera movement event data.</param>
 	public delegate void OnCameraMoveDelegate(CameraMovedEventArgs args);
 
 	/// <summary>
@@ -393,8 +398,11 @@ namespace MHUrho.CameraMovement
 		}
 
 		/// <summary>
-		/// Gets a point pointed at by touch or mouse (represented as normalized screen coords) <paramref name="normalizedScreenPos"/> 
-		/// in the vertical plane perpendicular to camera direction in XZ
+		/// Gets a point pointed at by touch or cursor (represented as normalized screen coords <paramref name="normalizedScreenPos"/>)
+		/// in the vertical plane perpendicular to camera direction in the XZ plane placed at the <paramref name="point"/>.
+		/// In other words, we place a plane on the <paramref name="point"/>, rotate it so it is perpendicular to the XZ plane
+		/// and to the direction of the camera projected into the XZ plane, and then we get a point in this plane under the cursor
+		/// from users perspective and the coordinates of this point in the game world.
 		/// </summary>
 		/// <param name="point">World point in the desired plane</param>
 		/// <param name="normalizedScreenPos">Normalized screen position of the input</param>

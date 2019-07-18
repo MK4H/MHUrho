@@ -29,6 +29,9 @@ namespace MHUrho.WorldMap {
 	/// </summary>
 	public interface IMap {
 
+		/// <summary>
+		/// The pathFinding algorithm used in the current level.
+		/// </summary>
 		IPathFindAlg PathFinding { get; }
 
 		/// <summary>
@@ -386,6 +389,12 @@ namespace MHUrho.WorldMap {
 		/// <returns>The four tiles around the given corner.</returns>
 		IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords);
 
+		/// <summary>
+		/// Returns all results where the ray intersects the map.
+		/// </summary>
+		/// <param name="ray">The ray to raycast.</param>
+		/// <param name="maxDistance">Maximum distance of the raycast.</param>
+		/// <returns>All results where the ray intersects the map.</returns>
 		IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000);
 
 		/// <summary>
@@ -395,22 +404,37 @@ namespace MHUrho.WorldMap {
 		/// <returns>Returns whether the <paramref name="rayQueryResult"/> is the Map</returns>
 		bool IsRaycastToMap(RayQueryResult rayQueryResult);
 
+		/// <summary>
+		/// Returns the first tile with corresponding intersection in the <paramref name="rayQueryResults"/>
+		/// or null if none of the intersections are wit ha tile.
+		/// </summary>
+		/// <param name="rayQueryResults">The intersections created by raycast.</param>
+		/// <returns>The first tile with corresponding intersection in the <paramref name="rayQueryResults"/>, or null if none of the
+		/// intersections are with a tile.</returns>
 		ITile RaycastToTile(List<RayQueryResult> rayQueryResults);
 
+		/// <summary>
+		/// Returns the tile the <paramref name="rayQueryResult"/> intersection is with or null if the intersection is not with a tile.
+		/// </summary>
+		/// <param name="rayQueryResult">An intersection with an object.</param>
+		/// <returns>The tile the <paramref name="rayQueryResult"/> intersection is with or null if the intersection is not with a tile.</returns>
 		ITile RaycastToTile(RayQueryResult rayQueryResult);
 
 		/// <summary>
-		/// Gets the world position of the closest vertex (tile corner)
+		/// Gets the world position of the closest vertex (tile corner) to the first intersection with a tile or null if there is no
+		/// intersection with the map.
 		/// </summary>
-		/// <param name="rayQueryResults"></param>
-		/// <returns></returns>
+		/// <param name="rayQueryResults">The intersections of the raycast.</param>
+		/// <returns>The world position of the closest vertex (tile corner) to the first intersection with a tile or null if there
+		/// is no intersection with the map.</returns>
 		Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResults);
 
 		/// <summary>
-		/// Gets the world position of the closest vertex (tile corner)
+		/// Gets the world position of the closest vertex (tile corner) to the intersection <paramref name="rayQueryResult"/>
+		/// if the intersection is with a tile, or null if it is not with a tile.
 		/// </summary>
-		/// <param name="rayQueryResult"></param>
-		/// <returns></returns>
+		/// <param name="rayQueryResult">The intersection result of a raycast.</param>
+		/// <returns>World position of the closest vertex (tile corner) to the intersection or null if the intersection is not with a tile.</returns>
 		Vector3? RaycastToVertexPosition(RayQueryResult rayQueryResult);
 
 		/// <summary>

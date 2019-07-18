@@ -8,8 +8,15 @@ using MHUrho.UserInterface;
 
 namespace MHUrho.Input
 { 
+	/// <summary>
+	/// Represents an input schema type.
+	/// </summary>
 	public enum InputType { MouseAndKeyboard, Touch }
 
+	/// <summary>
+	/// Provides access to the user input during the game.
+	/// Controls the level lifetime.
+	/// </summary>
 	public interface IGameController : IDisposable
 	{
 		GameUIManager UIManager { get; }

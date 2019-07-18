@@ -9,6 +9,10 @@ using Urho.Resources;
 
 namespace MHUrho.Input
 {
+	/// <summary>
+	/// Abstract factory based on the design pattern of the same name which produces
+	/// input handling based on the chosen input schema.
+	/// </summary>
     public interface IControllerFactory {
 		ICameraController CreateCameraController(IGameController gameController, CameraMover cameraMover);
 

@@ -12,8 +12,15 @@ using Urho;
 
 namespace MHUrho.Input
 {
+	/// <summary>
+	/// Signature of handlers invoked when a menu screen is changed.
+	/// </summary>
 	public delegate void OnScreenChangeDelegate();
 
+	/// <summary>
+	/// Provides access to the user input,
+	/// controls the lifetime of menus.
+	/// </summary>
 	public interface IMenuController
 	{
 		InputType InputType { get; }

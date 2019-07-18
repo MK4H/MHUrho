@@ -47,7 +47,7 @@ namespace MHUrho.EditorTools.MouseKeyboard.TerrainManipulation
 		public override void OnMouseMoved(MHUrhoMouseMovedEventArgs args)
 		{
 			if (mouseDown) {
-				map.ChangeHeight(selector.SelectedVerticies, -args.DY * Sensitivity);
+				map.ChangeHeight(selector.SelectedVerticies, -args.DeltaY * Sensitivity);
 				map.HighlightCornerList(selector.SelectedVerticies, Color.Green);
 			}
 		}
