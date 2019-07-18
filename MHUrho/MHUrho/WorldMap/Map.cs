@@ -128,6 +128,11 @@ namespace MHUrho.WorldMap
 
 		}
 
+		/// <summary>
+		/// Tile for representation of the borders of the map.
+		/// Is not visible outside the implementation of the map,
+		///  so user, plugins and the rest of the platform cannot see it.
+		/// </summary>
 		class BorderTile : ITile {
 
 			class Loader : ITileLoader {
@@ -520,71 +525,61 @@ namespace MHUrho.WorldMap
 			this.tiles = new ITile[WidthWithBorders *  LengthWithBorders];
 		}
 
+		/// <inheritdoc />
 		public bool IsInside(int x, int z) 
 		{
 			return Left <= x && x <= Right && Top <= z && z <= Bottom;
 		}
 
+		/// <inheritdoc />
 		public bool IsInside(float x, float z) 
 		{
 			return Left <= x && x < Left + Width && Top <= z && z < Top + Length;
 		}
 
-		/// <summary>
-		/// Checks if the point is inside the playfield, which means it could be used for indexing into the map
-		/// </summary>
-		/// <param name="point">the point to check</param>
-		/// <returns>True if it is inside, False if not</returns>
+		/// <inheritdoc />
 		public bool IsInside(IntVector2 point) 
 		{
 			return IsInside(point.X, point.Y);
 		}
 
-		/// <summary>
-		/// Checks if <paramref name="point"/> is inside the map borders in the XZ plane
-		/// </summary>
-		/// <param name="point">position to check</param>
-		/// <returns>true if inside, false if outside</returns>
+		/// <inheritdoc />
 		public bool IsInside(Vector2 point) 
 		{
 			return IsInside(point.X, point.Y);
 		}
 
-		/// <summary>
-		/// Checks if <paramref name="point"/> is inside the map borders and above terrain
-		/// </summary>
-		/// <param name="point">position to check</param>
-		/// <returns>true if inside, false if outside</returns>
+		/// <inheritdoc />
 		public bool IsInside(Vector3 point) 
 		{
 			return IsInside(point.X, point.Z) && GetTerrainHeightAt(point.X, point.Z) <= point.Y;
 		}
 
+		/// <inheritdoc />
 		public bool IsXInside(int x) 
 		{
 			return Left <= x && x <= Right;
 		}
 
+		/// <inheritdoc />
 		public bool IsXInside(IntVector2 point) 
 		{
 			return IsXInside(point.X);
 		}
 
+		/// <inheritdoc />
 		public bool IsZInside(int z) 
 		{
 			return Top <= z && z <= Bottom;
 		}
 
+		/// <inheritdoc />
 		public bool IsZInside(IntVector2 point) 
 		{
 			return IsZInside(point.Y);
 		}
 
-		/// <summary>
-		/// Compares x with the coords of Left and Right side, returns where the x is
-		/// </summary>
-		/// <param name="x">x coord to copare with the map boundaries</param>
-		/// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
+		/// <inheritdoc />
 		public int WhereIsX(int x) 
 		{
 			if (x < Left) {
@@ -598,22 +593,14 @@ namespace MHUrho.WorldMap
 			return 0;
 		}
 
-		/// <summary>
-		/// Compares x with the coords of Left and Right side, returns where the x is
-		/// </summary>
-		/// <param name="point">compares x coord of this vector</param>
-		/// <returns>-1 if X is to the left, 0 if inside, 1 if to the right of the map rectangle</returns>
+		/// <inheritdoc />
 		public int WhereIsX(IntVector2 point) 
 		{
 			return WhereIsX(point.X);
 		}
 
 
-		/// <summary>
-		/// Compares y with the coords of Top and Bottom side, returns where the y is
-		/// </summary>
-		/// <param name="z">y coord to copare with the map boundaries</param>
-		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
+		/// <inheritdoc />
 		public int WhereIsZ(int z) 
 		{
 			if (z < Top) {
@@ -627,73 +614,73 @@ namespace MHUrho.WorldMap
 			return 0;
 		}
 
-		/// <summary>
-		/// Compares y with the coords of Top and Bottom side, returns where the y is
-		/// </summary>
-		/// <param name="point">compares y of this vector</param>
-		/// <returns>-1 if Y is above, 0 if inside, 1 if below the map rectangle</returns>
+		/// <inheritdoc />
 		public int WhereIsZ(IntVector2 point) 
 		{
 			return WhereIsZ(point.Y);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByMapLocation(int x, int z) 
 		{
 			return GetTileByTopLeftCorner(x, z);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByMapLocation(IntVector2 mapLocation) 
 		{
 			return GetTileByTopLeftCorner(mapLocation);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByTopLeftCorner(int x, int z) 
 		{
 			return IsInside(x, z) ? tiles[GetTileIndex(x, z)] : null;
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByTopLeftCorner(IntVector2 topLeftCorner) 
 		{
 			return GetTileByTopLeftCorner(topLeftCorner.X, topLeftCorner.Y);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByTopRightCorner(int x, int z) 
 		{
 			return GetTileByTopLeftCorner(x - 1, z);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByTopRightCorner(IntVector2 topRightCorner) 
 		{
 			return GetTileByTopRightCorner(topRightCorner.X, topRightCorner.Y);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByBottomLeftCorner(int x, int z) 
 		{
 			return GetTileByTopLeftCorner(x, z - 1);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByBottomLeftCorner(IntVector2 bottomLeftCorner) 
 		{
 			return GetTileByBottomLeftCorner(bottomLeftCorner.X, bottomLeftCorner.Y);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByBottomRightCorner(int x, int z) 
 		{
 			return GetTileByTopLeftCorner(x - 1, z - 1);
 		}
 
+		/// <inheritdoc />
 		public ITile GetTileByBottomRightCorner(IntVector2 bottomRightCorner) 
 		{
 			return GetTileByBottomRightCorner(bottomRightCorner.X, bottomRightCorner.Y);
 		}
 
-		/// <summary>
-		/// Moves the rectangle defined by topLeft and bottomRight corners so that
-		/// the whole rectangle is inside the map
-		/// </summary>
-		/// <param name="topLeft">top left corner of the rectangle</param>
-		/// <param name="bottomRight">bottom right corner of the rectangle</param>
-		/// <returns>True if it is possible to snap to map, false if it is not possible</returns>
+		/// <inheritdoc />
 		public bool SnapToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) 
 		{
 
@@ -737,6 +724,7 @@ namespace MHUrho.WorldMap
 			return fits;
 		}
 
+		/// <inheritdoc />
 		public void SquishToMap(ref IntVector2 topLeft, ref IntVector2 bottomRight) 
 		{
 			if (IsInside(topLeft) && IsInside(bottomRight)) {
@@ -796,11 +784,13 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <inheritdoc />
 		public ITile FindClosestTile(ITile source, Predicate<ITile> predicate)
 		{
 			return FindClosestTile(source, int.MaxValue, predicate);
 		}
 
+		/// <inheritdoc />
 		public ITile FindClosestTile(ITile source, int squareSize, Predicate<ITile> predicate) 
 		{
 			IntVector2 topLeft = source.MapLocation;
@@ -849,6 +839,7 @@ namespace MHUrho.WorldMap
 			return result;
 		}
 
+		/// <inheritdoc />
 		public IEnumerable<ITile> GetTilesInSpiral(ITile center, int cutoff = -1)
 		{
 			var spiralPoint = new Spiral(center.MapLocation).GetSpiralEnumerator();
@@ -871,6 +862,7 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <inheritdoc />
 		public IFormationController GetFormationController(ITile center)
 		{
 			return new MapFormationController(this, center);
@@ -894,22 +886,19 @@ namespace MHUrho.WorldMap
 			return GetTilesInRectangle(rectangle.TopLeft(), rectangle.BottomRight());
 		}
 
+		/// <inheritdoc />
 		public IEnumerable<ITile> GetTilesAroundCorner(int x, int y)
 		{
 			return GetTilesAroundCorner(new IntVector2(x,y));
 		}
 
+		/// <inheritdoc />
 		public IEnumerable<ITile> GetTilesAroundCorner(IntVector2 cornerCoords)
 		{
 			return GetTilesAroundCorner(cornerCoords, false);
 		}
 
-		/// <summary>
-		/// Returns all results where the ray intersects the map
-		/// </summary>
-		/// <param name="ray"></param>
-		/// <param name="maxDistance"></param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public IEnumerable<RayQueryResult> RaycastToMap(Ray ray, float maxDistance = 10000)
 		{
 			var results = octree.Raycast(ray: ray, maxDistance: maxDistance);
@@ -920,41 +909,37 @@ namespace MHUrho.WorldMap
 					select result;
 		}
 
+		/// <inheritdoc />
 		public bool IsRaycastToMap(RayQueryResult rayQueryResult)
 		{
 			return graphics.IsRaycastToMap(rayQueryResult);
 		}
 
+		/// <inheritdoc />
 		public ITile RaycastToTile(List<RayQueryResult> rayQueryResults) 
 		{
 			return graphics.RaycastToTile(rayQueryResults);
 		}
 
+		/// <inheritdoc />
 		public ITile RaycastToTile(RayQueryResult rayQueryResult) 
 		{
 			return graphics.RaycastToTile(rayQueryResult);
 		}
 
-		/// <summary>
-		/// Gets the position of the closest tile corner to the point clicked
-		/// </summary>
-		/// <param name="rayQueryResults">result of raycast to process</param>
-		/// <returns>Position of the closest tile corner to click or null if the clicked thing was not map</returns>
+		/// <inheritdoc />
 		public Vector3? RaycastToVertexPosition(List<RayQueryResult> rayQueryResults) 
 		{
 			return graphics.RaycastToVertex(rayQueryResults);
 		}
 
+		/// <inheritdoc />
 		public Vector3? RaycastToVertexPosition(RayQueryResult rayQueryResult) 
 		{
 			return graphics.RaycastToVertex(rayQueryResult);
 		}
 
-		/// <summary>
-		/// Gets map matrix coords of the tile corner
-		/// </summary>
-		/// <param name="rayQueryResults"></param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public IntVector2? RaycastToVertex(List<RayQueryResult> rayQueryResults) 
 		{
 			var cornerPosition = RaycastToVertexPosition(rayQueryResults);
@@ -966,6 +951,7 @@ namespace MHUrho.WorldMap
 			return new IntVector2((int)cornerPosition.Value.X, (int)cornerPosition.Value.Z);
 		}
 
+		/// <inheritdoc />
 		public IntVector2? RaycastToVertex(RayQueryResult rayQueryResult) 
 		{
 			var cornerPosition = RaycastToVertexPosition(rayQueryResult);
@@ -977,16 +963,19 @@ namespace MHUrho.WorldMap
 			return new IntVector2((int)cornerPosition.Value.X, (int)cornerPosition.Value.Z);
 		}
 
+		/// <inheritdoc />
 		public Vector3? RaycastToWorldPosition(List<RayQueryResult> rayQueryResults)
 		{
 			return graphics.RaycastToWorldPosition(rayQueryResults);
 		}
 
+		/// <inheritdoc />
 		public Vector3? RaycastToWorldPosition(RayQueryResult rayQueryResult)
 		{
 			return graphics.RaycastToWorldPosition(rayQueryResult);
 		}
 
+		/// <inheritdoc />
 		public void ChangeTileType(ITile tile, TileType newType) 
 		{
 			if (tile.Type == newType) {
@@ -997,6 +986,7 @@ namespace MHUrho.WorldMap
 			graphics.ChangeTileType(tile.MapLocation, newType);
 		}
 
+		/// <inheritdoc />
 		public void ChangeTileType(ITile centerTile, IntVector2 rectangleSize, TileType newType) 
 		{
 			IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
@@ -1007,17 +997,13 @@ namespace MHUrho.WorldMap
 			graphics.ChangeTileType(topLeft, bottomRight, newType);
 		}
 
+		/// <inheritdoc />
 		public void ChangeTileHeight(ITile tile, float heightDelta)
 		{
 			ChangeTileHeight(tile, new IntVector2(1, 1), heightDelta);
 		}
 
-		/// <summary>
-		/// For fast relative height changing in response to every mouse movement
-		/// </summary>
-		/// <param name="centerTile">center tile of the rectangle</param>
-		/// <param name="rectangleSize">Size of the rectangle in which the height changes</param>
-		/// <param name="heightDelta">By how much should the height change</param>
+		/// <inheritdoc />
 		public void ChangeTileHeight(ITile centerTile, IntVector2 rectangleSize, float heightDelta) 
 		{
 			IntVector2 topLeft = centerTile.TopLeft - (rectangleSize / 2);
@@ -1050,6 +1036,7 @@ namespace MHUrho.WorldMap
 
 		}
 
+		/// <inheritdoc />
 		public void ChangeTileHeight(ITile centerTile, 
 									 IntVector2 rectangleSize,
 									 GetCornerHeightDelegate newHeightFunction) 
@@ -1089,7 +1076,7 @@ namespace MHUrho.WorldMap
 			graphics.CorrectTileHeight(topLeft, bottomRight);
 		}
 
-
+		/// <inheritdoc />
 		public float GetTerrainHeightAt(int x, int y) 
 		{
 			ITile tile;
@@ -1113,11 +1100,13 @@ namespace MHUrho.WorldMap
 			throw new ArgumentOutOfRangeException($"Point [{x},{y}] is not inside the map, even with borders");
 		}
 
+		/// <inheritdoc />
 		public float GetTerrainHeightAt(IntVector2 position) 
 		{
 			return GetTerrainHeightAt(position.X, position.Y);
 		}
 
+		/// <inheritdoc />
 		public float GetTerrainHeightAt(float x, float y) 
 		{
 
@@ -1177,11 +1166,13 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <inheritdoc />
 		public float GetTerrainHeightAt(Vector2 position) 
 		{
 			return GetTerrainHeightAt(position.X, position.Y);
 		}
 
+		/// <inheritdoc />
 		public float GetHeightAt(float x, float y)
 		{
 			ITile tile = GetContainingTile(x, y);
@@ -1189,16 +1180,19 @@ namespace MHUrho.WorldMap
 			return tile.GetHeightAt(x, y);
 		}
 
+		/// <inheritdoc />
 		public float GetHeightAt(Vector2 position)
 		{
 			return GetHeightAt(position.X, position.Y);
 		}
 
+		/// <inheritdoc />
 		public Vector3 GetUpDirectionAt(float x, float y) 
 		{
 			return GetUpDirectionAt(new Vector2(x, y));
 		}
 
+		/// <inheritdoc />
 		public Vector3 GetUpDirectionAt(Vector2 position) 
 		{
 
@@ -1232,109 +1226,118 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <inheritdoc />
 		public void HighlightCornerList(IEnumerable<IntVector2> corners, Color color)
 		{
 			HighlightCornerList(corners, (_) => color);
 		}
 
+		/// <inheritdoc />
 		public void HighlightCornerList(IEnumerable<IntVector2> corners, Func<IntVector2, Color> getColor)
 		{
 			graphics.HighlightCornerList(corners, getColor);
 		}
 
+		/// <inheritdoc />
 		public void HighlightTileList(IEnumerable<ITile> tiles, Func<ITile, Color> getColor)
 		{
 			graphics.HighlightTileList(tiles, getColor);
 		}
 
+		/// <inheritdoc />
 		public void HighlightTileList(IEnumerable<ITile> tiles, Color color)
 		{
 			HighlightTileList(tiles, (tile) => color);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangle(IntVector2 topLeft, IntVector2 bottomRight, Func<ITile, Color> getColor)
 		{
 			SquishToMap(ref topLeft, ref bottomRight);
 			graphics.HighlightRectangle(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), getColor);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangle(ITile center, IntVector2 size, Func<ITile, Color> getColor) {
 			IntVector2 topLeft = center.TopLeft - (size / 2);
 			IntVector2 bottomRight = topLeft + (size - new IntVector2(1, 1));
 			HighlightRectangle(topLeft, bottomRight, getColor);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangle(IntRect rectangle, Func<ITile, Color> getColor) {
 			HighlightRectangle(rectangle.TopLeft(), rectangle.BottomRight(), getColor);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangle(IntVector2 topLeft, IntVector2 bottomRight, Color color)
 		{
 			HighlightRectangle(topLeft, bottomRight, (tile) => color);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangle(ITile center, IntVector2 size, Color color)
 		{
 			HighlightRectangle(center, size, (tile) => color);
 		}
-		
+
+		/// <inheritdoc />
 		public void HighlightRectangle(IntRect rectangle, Color color)
 		{
 			HighlightRectangle(rectangle, (tile) => color);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangleBorder(IntVector2 topLeft, IntVector2 bottomRight, Color color) {
 			SquishToMap(ref topLeft, ref bottomRight);
 			graphics.HighlightBorder(new IntRect(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y), color);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangleBorder(ITile center, IntVector2 size, Color color) {
 			IntVector2 topLeft = center.TopLeft - (size / 2);
 			IntVector2 bottomRight = topLeft + (size - new IntVector2(1, 1));
 			HighlightRectangleBorder(topLeft, bottomRight, color);
 		}
 
+		/// <inheritdoc />
 		public void HighlightRectangleBorder(IntRect rectangle, Color color)
 		{
 			HighlightRectangleBorder(rectangle.TopLeft(), rectangle.BottomRight(), color);
 		}
 
+		/// <inheritdoc />
 
 		public void DisableHighlight() 
 		{
 			graphics.DisableHighlight();
 		}
 
+		/// <inheritdoc />
 		public void ChangeHeight(IEnumerable<IntVector2> tileCorners, float heightDelta)
 		{
 			ChangeCornerHeights(tileCorners.ToList(), heightDelta, false);
 		}
 
+		/// <inheritdoc />
 		public void ChangeHeightTo(IEnumerable<IntVector2> tileCorners, float newHeight)
 		{
 			ChangeCornerHeights(tileCorners.ToList(), newHeight, true);
 		}
 
-		/// <summary>
-		/// Gets tile containing <paramref name="point"/> projection into the XZ plane
-		/// </summary>
-		/// <param name="point"></param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public ITile GetContainingTile(Vector3 point) 
 		{
 			return GetContainingTile(point.XZ2());
 		}
 
-		/// <summary>
-		/// Gets tile containing <paramref name="point"/> in the XZ plane
-		/// </summary>
-		/// <param name="point">The point in the XZ plane</param>
-		/// <returns>The tile containing <paramref name="point"/></returns>
+		/// <inheritdoc />
 		public ITile GetContainingTile(Vector2 point)
 		{
 			return GetContainingTile(point.X, point.Y);
 		}
 
+		/// <inheritdoc />
 		public ITile GetContainingTile(float x, float z)
 		{
 			int topLeftX = (int)Math.Floor(x);
@@ -1342,6 +1345,7 @@ namespace MHUrho.WorldMap
 			return GetTileByTopLeftCorner(topLeftX, topLeftZ);
 		}
 
+		/// <inheritdoc />
 		public void ForEachInRectangle(IntVector2 topLeft, IntVector2 bottomRight, Action<ITile> action) 
 		{
 			foreach (var tile in GetTilesInRectangle(topLeft, bottomRight)) {
@@ -1349,16 +1353,19 @@ namespace MHUrho.WorldMap
 			}
 		}
 
+		/// <inheritdoc />
 		public void ForEachInRectangle(IntRect rectangle, Action<ITile> action) 
 		{
 			ForEachInRectangle(rectangle.TopLeft(), rectangle.BottomRight(), action);
 		}
 
+		/// <inheritdoc />
 		public void ForEachAroundCorner(IntVector2 cornerCoords, Action<ITile> action)
 		{
 			ForEachAroundCorner(cornerCoords, action, false);
 		}
 
+		/// <inheritdoc />
 		public IRangeTarget GetRangeTarget(Vector3 position) 
 		{
 			if (!mapRangeTargets.TryGetValue(position, out MapRangeTarget mapTarget)) {
@@ -1369,6 +1376,7 @@ namespace MHUrho.WorldMap
 			return mapTarget;
 		}
 
+		/// <inheritdoc />
 		public Vector3 GetBorderBetweenTiles(ITile tile1, ITile tile2)
 		{
 			Vector2 borderPosition = (tile1.Center + tile2.Center) / 2;
@@ -1376,7 +1384,7 @@ namespace MHUrho.WorldMap
 		}
 
 
-
+		/// <inheritdoc />
 
 		internal void RemoveRangeTarget(MapRangeTarget mapRangeTarget) 
 		{
@@ -1384,6 +1392,7 @@ namespace MHUrho.WorldMap
 			Debug.Assert(removed);
 		}
 
+		/// <inheritdoc />
 		public void Dispose() 
 		{
 			((IDisposable) graphics)?.Dispose();
@@ -1392,7 +1401,10 @@ namespace MHUrho.WorldMap
 
 
 
-
+		/// <summary>
+		/// Creates graphical representation of the map.
+		/// </summary>
+		/// <param name="loadingProgress">Progress watcher for the creation process.</param>
 		void BuildGeometry(IProgressEventWatcher loadingProgress)
 		{
 			graphics = MapGraphics.Build(this, 
@@ -1400,22 +1412,43 @@ namespace MHUrho.WorldMap
 										 loadingProgress);
 		}
 
+		/// <summary>
+		/// Returns the index of the tile with top left corner at [<paramref name="x"/>, <paramref name="y"/>].
+		/// </summary>
+		/// <param name="x">The X coordinate of the top left corner of the tile.</param>
+		/// <param name="y">The Z coordinate of the top left corner of the tile.</param>
+		/// <returns>Index in the tile array.</returns>
 		int GetTileIndex(int x, int y) 
 		{
 			return x + y * WidthWithBorders;
 		}
 
+		/// <summary>
+		/// Returns the index of the tile with top left corner at <paramref name="location"/>.
+		/// </summary>
+		/// <param name="location">Location of the top left corner of the tile in the XZ plane.</param>
+		/// <returns>Index in the tile array.</returns>
 		int GetTileIndex(IntVector2 location) 
 		{
 			return GetTileIndex(location.X, location.Y);
 		}
 
+		/// <summary>
+		/// Returns the index of the <paramref name="tile"/>.
+		/// </summary>
+		/// <param name="tile">The tile to get the index of.</param>
+		/// <returns>Index in the tile array.</returns>
 		int GetTileIndex(ITile tile) 
 		{
 			return GetTileIndex(tile.MapLocation);
 		}
 
-	 
+		/// <summary>
+		/// If the [<paramref name="x"/>, <paramref name="y"/>] point in the XZ plane is on the outer edge of the map.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Z coordinate of the point.</param>
+		/// <returns>If the point is on the outer edge of the map.</returns>
 		bool IsOuterBorderPoint(int x, int y) 
 		{
 			return IsLeftOuterBorderPoint(x,y) ||
@@ -1425,11 +1458,22 @@ namespace MHUrho.WorldMap
 
 		}
 
+		/// <summary>
+		/// If the <paramref name="location"/> in the XZ plane is on the outer edge of the map.
+		/// </summary>
+		/// <param name="location">Location.</param>
+		/// <returns>If the point is on the outer edge of the map.</returns>
 		bool IsOuterBorderPoint(IntVector2 location) 
 		{
 			return IsOuterBorderPoint(location.X, location.Y);
 		}
 
+		/// <summary>
+		/// If the given [<paramref name="x"/>, <paramref name="y"/>] point is top left corner of a <see cref="BorderTile"/>.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Z coordinate of the point.</param>
+		/// <returns>True if the point is a top left corner of a <see cref="BorderTile"/>.</returns>
 		bool IsBorderTileMapLocation(int x, int y)
 		{
 			return IsTopOuterBorderPoint(x, y) ||
@@ -1438,16 +1482,32 @@ namespace MHUrho.WorldMap
 					IsRightInnerBorderPoint(x, y);
 		}
 
+		/// <summary>
+		/// If the given <paramref name="point"/> is top left corner of a <see cref="BorderTile"/>.
+		/// </summary>
+		/// <param name="point">Point..</param>
+		/// <returns>True if the point is a top left corner of a <see cref="BorderTile"/>.</returns>
 		bool IsBorderTileMapLocation(IntVector2 point)
 		{
 			return IsBorderTileMapLocation(point.X, point.Y);
 		}
 
+		/// <summary>
+		/// If the given tile is a borderTile.
+		/// </summary>
+		/// <param name="tile">The tile to check.</param>
+		/// <returns>True if the tile is border tile, false otherwise.</returns>
 		bool IsBorderTile(ITile tile) 
 		{
 			return IsBorderTileMapLocation(tile.MapLocation);
 		}
 
+		/// <summary>
+		/// Gets which part of the border the border tile is at, top, bottom, left, right or the corners.
+		/// </summary>
+		/// <param name="tileMapLocationX">The X coordinate of the top left corner of the tile.</param>
+		/// <param name="tileMapLocationY">The Y coordinate of the top left corner of the tile.</param>
+		/// <returns>Which area of the border the border tile is in.</returns>
 		BorderType GetBorderTileType(int tileMapLocationX, int tileMapLocationY) 
 		{
 			/*Top and Left are Outer borders and Bottom and Rigth inner because
@@ -1495,11 +1555,22 @@ namespace MHUrho.WorldMap
 			
 		}
 
+		/// <summary>
+		/// Gets which part of the border the border tile is at, top, bottom, left, right or the corners.
+		/// </summary>
+		/// <param name="tileMapLocation">Top left corner of the tile.</param>
+		/// <returns>Which area of the border the border tile is in.</returns>
 		BorderType GetBorderTileType(IntVector2 tileMapLocation) 
 		{
 			return GetBorderTileType(tileMapLocation.X, tileMapLocation.Y);
 		}
 
+		/// <summary>
+		/// If the point is on the top outer edge of the map.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Y coordinate of the point.</param>
+		/// <returns>True if the point is on the top outer edge of the map.</returns>
 		bool IsTopOuterBorderPoint(int x, int y)
 		{
 			return y == TopWithBorders;
@@ -1510,6 +1581,12 @@ namespace MHUrho.WorldMap
 			return IsTopOuterBorderPoint(location.X, location.Y);
 		}
 
+		/// <summary>
+		/// If the point is on the bottom outer edge of the map.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Y coordinate of the point.</param>
+		/// <returns>True if the point is on the bottom outer edge of the map.</returns>
 		bool IsBottomOuterBorderPoint(int x, int y)
 		{
 			return y == BottomWithBorders;
@@ -1520,6 +1597,12 @@ namespace MHUrho.WorldMap
 			return IsBottomOuterBorderPoint(location.X, location.Y);
 		}
 
+		/// <summary>
+		/// If the point is on the left outer edge of the map.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Y coordinate of the point.</param>
+		/// <returns>True if the point is on the left outer edge of the map.</returns>
 		bool IsLeftOuterBorderPoint(int x, int y)
 		{
 			return x == LeftWithBorders;
@@ -1530,6 +1613,12 @@ namespace MHUrho.WorldMap
 			return IsLeftOuterBorderPoint(location.X, location.Y);
 		}
 
+		/// <summary>
+		/// If the point is on the right outer edge of the map.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Y coordinate of the point.</param>
+		/// <returns>True if the point is on the right outer edge of the map.</returns>
 		bool IsRightOuterBorderPoint(int x, int y)
 		{
 			return x == RightWithBorders;
@@ -1540,6 +1629,12 @@ namespace MHUrho.WorldMap
 			return IsRightOuterBorderPoint(location.X, location.Y);
 		}
 
+		/// <summary>
+		/// If the point is on the top inner edge of the map.
+		/// </summary>
+		/// <param name="x">The X coordinate of the point.</param>
+		/// <param name="y">The Y coordinate of the point.</param>
+		/// <returns>True if the point is on the top inner edge of the map.</returns>
 		bool IsTopInnerBorderPoint(int x, int y)
 		{
 			return y == Top;
